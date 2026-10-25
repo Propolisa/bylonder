@@ -7,6 +7,8 @@ import { nodeId,deleted } from '../objects/identity.js';
 import { address } from '../animation/model.js';
 import { materialPanels } from '../materials/panel.js';
 import { createPreview } from '../materials/preview.js';
+import { bindGraph } from '../graphs/bindings.js';
+import { geometryGraph } from '../graphs/geometry-nodes.js';
 import './style.css';
 export function mountProperties(host,{world,editor,history,storage,systems,properties},areaId='properties',header){
   const key='workbench:properties:'+areaId;let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
@@ -42,7 +44,8 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
       ])]),iconButton('REMOVE','Remove modifier',()=>world.modifiers.remove(node,modifier.id))
     ];
     const content=()=>{
-      if(modifier.type!=='ARRAY')return Object.keys(definition.schema).map(field);
+      if(modifier.type==='NODES'){const rows=bindGraph(world.animation,{id:'modifier:'+nodeId(node)+':'+modifier.id+':graph',title:node.name+' › '+modifier.name,graph:()=>geometryGraph(modifier),kind:'geometry',onChange:()=>{modifier.revision=(modifier.revision||0)+1;world.modifiers.refresh();}}).map(f=>row({...f,default:undefined}));return [...(rows.length?rows:[h('p',{class:'bl-message'},'Add Input blocks to the node group to expose values here.')]),h('button',{type:'button',class:'bl-wide-button',onClick:()=>world.openNodeEditor?.('geometry')},[icon('GEOMETRY_NODES'),'Edit in Geometry Node Editor'])];}
+      if(modifier.type!=='ARRAY')return Object.keys(definition.schema).filter(path=>!definition.schema[path].hidden).map(field);
       const p=values,result=[field('shape')];
       if(['Circle','Curve'].includes(p.shape))result.push(field('countMethod'));
       if(!['Circle','Curve'].includes(p.shape)||p.countMethod==='Count')result.push(field('count'));

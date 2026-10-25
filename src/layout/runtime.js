@@ -1,4 +1,5 @@
 import { mountDock } from './dock.js';
+import { treeTypes } from '../graphs/node-editor.js';
 export function mountRuntimeLayout(){
   const host=document.querySelector('main');host.classList.add('runtime-dock');
   const viewport=document.createElement('section');viewport.id='viewport-section';
@@ -11,8 +12,10 @@ export function mountRuntimeLayout(){
   }
   panel.querySelector('.panel-heading')?.remove();
   const timeline=document.createElement('section');timeline.id='timeline-section';
-  const items=[{id:'viewport',title:'3D Viewport',icon:'view3d',element:viewport},{id:'objects',title:'Outliner',icon:'outliner',element:panel},{id:'properties',title:'Properties',icon:'properties',element:properties},{id:'timeline',title:'Timeline',icon:'time',element:timeline}];
-  const dock = mountDock({host,items,storageKey:'workbench:layout:viewport:v1',tree:{id:'animation',children:[{id:'root',children:[0,{id:'inspector',children:[1,2]}]},3]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?[]:['objects','properties','timeline'],sizes:{animation:[76,24],root:[72,28],inspector:[45,55]},horizontal:{animation:true,root:profile==='portrait',inspector:true}})});
+  const nodes=document.createElement('section');nodes.id='nodes-section';
+  const variants=Object.entries(treeTypes).map(([id,t])=>({label:t.label,icon:t.icon,run:()=>nodes.dispatchEvent(new CustomEvent('node-tree',{detail:id}))}));
+  const items=[{id:'viewport',title:'3D Viewport',icon:'view3d',element:viewport},{id:'objects',title:'Outliner',icon:'outliner',element:panel},{id:'properties',title:'Properties',icon:'properties',element:properties},{id:'timeline',title:'Timeline',icon:'time',element:timeline},{id:'nodes',title:'Node Editor',icon:'nodetree',element:nodes,variants}];
+  const dock = mountDock({host,items,storageKey:'workbench:layout:viewport:v1',tree:{id:'animation',children:[{id:'root',children:[0,{id:'inspector',children:[1,2]}]},3]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['nodes']:['objects','properties','timeline','nodes'],sizes:{animation:[76,24],root:[72,28],inspector:[45,55]},horizontal:{animation:true,root:profile==='portrait',inspector:true}})});
   const menu=document.createElement('details');menu.className='scene-menu';
   const summary=document.createElement('summary');summary.textContent='⋯';summary.setAttribute('aria-label','Scene options');
   const content=document.createElement('div');content.className='scene-menu-content';

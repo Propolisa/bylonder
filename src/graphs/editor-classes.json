@@ -1,0 +1,435 @@
+{
+ "imageSourceDisplayManager": {
+  "image-source-block": [
+   "y3r0uoRbB7Q9cxBRLbat"
+  ]
+ },
+ "common": {
+  "hidden": [
+   "DCCviBxuO92A1Tfci3j7"
+  ],
+  "port": [
+   "vdEKEhXs6SEHqNvzhU8Y"
+  ],
+  "img": [
+   "qGTG6iVaNUW7ka7n1ZmU"
+  ],
+  "selected": [
+   "rNQFVkgchnk5QXFNBiMs"
+  ],
+  "portLine": [
+   "x3rAB8O3DRuHq9a6G43S"
+  ],
+  "port-label": [
+   "bU84U039Du9w8E_kyWU_"
+  ],
+  "inputsContainer": [
+   "N9NaZ5KlHxp1s7I48pjQ"
+  ],
+  "inputsContainerUp": [
+   "EvEilsxNQe_mTsSar6Sa"
+  ],
+  "outputsContainer": [
+   "SbfDvflOnTqdcPV8B2wD"
+  ],
+  "frame-box": [
+   "b27R0gxgM9Br4k07OEU4"
+  ],
+  "texture-block": [
+   "qD9qGeizpAp6tYoPVeow"
+  ],
+  "empty": [
+   "WqEf3hMVhtkiCMOffdh_"
+  ]
+ },
+ "nodeLink": {
+  "link": [
+   "LcAfLURgMF6_xQIp9xW5"
+  ],
+  "selected": [
+   "zf49BMaByhYYIAbbyPJI"
+  ],
+  "target-candidate": [
+   "jrnrI_y4VbpSgvxxjfy2"
+  ],
+  "selection-link": [
+   "eVGcF_1cKpBdhuYPamV_"
+  ]
+ },
+ "textureDisplayManager": {
+  "regular-texture-block": [
+   "hol3vmg6S3RmMX2BDnJQ"
+  ],
+  "smart-filter-texture-block": [
+   "b41rmEhaEJgYzaS0RGy0"
+  ],
+  "reduced-texture-block": [
+   "jI6eo5eT93r0D5eOTjnu"
+  ],
+  "reflection-block": [
+   "pG2BSy_fF3kPC8Kb7oq9"
+  ],
+  "triplanar-texture-block": [
+   "JSNytgcYueYEIEHDn_eh"
+  ],
+  "refraction-texture-block": [
+   "YtzUAOeZNDFTFHo93qGQ"
+  ],
+  "hidden": [
+   "NWXngUFLww_7nkg1Su1P"
+  ],
+  "texture-block": [
+   "rU7djLq7FX9jcwlhtnD7",
+   "R9V_zrI5Ytc_3dJgVDeJ"
+  ],
+  "empty": [
+   "ZQ0dUy3zBeTTNJnyZwSb",
+   "PIwo1WRtHkzrJk5HzaWS"
+  ]
+ },
+ "remapDisplayManager": {
+  "remap-block": [
+   "wHaBVvqGlmk7N9glnG_B"
+  ]
+ },
+ "blockNodeData": {
+  "hidden": [
+   "P2vB7N_AgSkfsRVUkbRm",
+   "ibP06HDAo1W83H0UNxog",
+   "DImlXSKor8hmp7NTHAKu",
+   "yLwKcRXC92dSVqoyvr4C"
+  ]
+ },
+ "elbowDisplayManager": {
+  "elbowBlock": [
+   "dOatr3YZiQ2XwfA9LYJy",
+   "YaM54KQMlX3xs273bLM5",
+   "xB5vPIJoIWKvnlA71PfB",
+   "gq6RNRdT9qkvz9dDtnAz"
+  ],
+  "hidden": [
+   "JUP1lJuVKx_v5omAMXEX",
+   "oL2Sry0AF71wKrGyuJ0Y",
+   "XzMt3EHEZT1uf8cfNiYm",
+   "Rey61wxmesxjmutQt6vA"
+  ],
+  "translatedConnections": [
+   "BCV8x2Q4rQlur4DEIXvx",
+   "oJrJlHqJ2Wdc36Ty8caW",
+   "Dd70KUYJyN1ZmFsPsOSB",
+   "D3diOWDEwxO2oHIsKcoA"
+  ],
+  "roundSelectionBorder": [
+   "X5U0_c13uawZjGdva13x",
+   "YsEdSS1qZLjs719Z6eoS",
+   "Bb6S3K6trmfZVngivGsR",
+   "YhumqcQp4zd0RYX1udjv"
+  ]
+ },
+ "MessageDialog": {
+  "dialog-container": [
+   "np7Y0MkHTIwcSHUGIIMx"
+  ],
+  "dialog": [
+   "EX4YG00dguWCkO8K4BGA"
+  ],
+  "dialog-message": [
+   "CScU0XzmVIJiSJZPuZ0n"
+  ],
+  "dialog-buttons": [
+   "x1oa1806M24Am9GoCmnw"
+  ],
+  "dialog-button-ok": [
+   "DY4D4PjfxnzHWsMdzE9g"
+  ],
+  "error": [
+   "CB6qM9GpeI7TwYdoxBCD"
+  ]
+ },
+ "gradientDisplayManager": {
+  "gradientBlock": [
+   "kKrhofchqBmMAtRFmoQA"
+  ]
+ },
+ "curveDisplayManager": {
+  "curve-block": [
+   "nHwHgDZKs3gKpZ8YoasV"
+  ]
+ },
+ "nodePort": {
+  "selected": [
+   "xp0svdQQ7lHcLyymo9_p"
+  ],
+  "pip": [
+   "mzsVp6_QOFaQygXylaeh"
+  ],
+  "hidden": [
+   "AGhAEUJ1eJ3ZffrDebig"
+  ],
+  "port-icon": [
+   "IT0tpBwBXY8zEbeGQPPk"
+  ],
+  "icon-selected": [
+   "rKcZEGmYSLWPT9jzSKaT"
+  ],
+  "numberContainer": [
+   "H7CK8OcG_4iJRPTQkrhq"
+  ]
+ },
+ "graphCanvas": {
+  "graph-canvas": [
+   "f15KU6GlYM7oVHpbFhIn"
+  ],
+  "graph-container": [
+   "iJdBcuGEcr85ce7seMOQ"
+  ],
+  "frame-container": [
+   "z2gALX67aRzo75j2uyoQ"
+  ],
+  "graph-svg-container": [
+   "QfmhbpA1CyiudWm52O2f"
+  ],
+  "graph-canvas-container": [
+   "zJUCneE7k31yaOjWTBle"
+  ],
+  "selection-container": [
+   "MWjDs2Qen1BNXZ0_N1v6"
+  ],
+  "selection-box": [
+   "uHfT3vSepb1Ka_re9veF"
+  ]
+ },
+ "inputDisplayManager": {
+  "input-block": [
+   "PlUl1ctp4YMSLZwUipsw",
+   "FJ5W4nb6fMu8RZrtq4UG",
+   "qETWBczo3lJyvwkz5e2x",
+   "Qq5jle8FawCDlUO8oquk"
+  ],
+  "small-font": [
+   "UuVLKdmPVTOTWFa33T0G",
+   "zfHimus1T88outoQiSAu",
+   "dPL7NljKcYaRmncMBRC1",
+   "NUMlhPsfxsq08qspyZgn"
+  ],
+  "constant": [
+   "YqQLt4hf6ja9HI_mpe84"
+  ],
+  "inspector": [
+   "WPyD50ELIGQuDwAb5nwn",
+   "csLxTE7JoI3xpo8Ctece",
+   "OoXfaKUy1Mi2KdrE0P0s",
+   "RQnB6KhJWm7kKdgJuvPT"
+  ],
+  "contextual": [
+   "XH8h6UeyPMNTHcTrllAw",
+   "ZicBnZZEnLMg723zgRkR",
+   "xlks4fOhPuaMTOQbuWwN"
+  ],
+  "system": [
+   "WbcEGkkPlqjHWRdS7dbH"
+  ]
+ },
+ "debugDisplayManager": {
+  "debugBlock": [
+   "Z6uVNisThbv4Cl4iKcjA",
+   "FlaOf6IJcF20u6Plp_QV",
+   "KK5U4mLP1fILRi_twk5I"
+  ],
+  "hidden": [
+   "eF7fgTEq0Bs7PbgUBht5",
+   "yTnVTLhIEUUhDGtLN9Mk",
+   "wtX0YlVnlb0TTi3U70ie"
+  ],
+  "translatedConnections": [
+   "xb3QwUzkY_5N0tN6qH4W",
+   "hkj3mZ6tMUTu_Vz6jpfP",
+   "f17YuxVmCQVbZzFfV29s"
+  ],
+  "texture-area": [
+   "kU6pun9_xku4mHm7d5sn"
+  ],
+  "roundSelectionBorder": [
+   "K45TSzT4BuxalY1albgY",
+   "XL9tBu4c6mVtP_ymnaJ6"
+  ],
+  "debugContent": [
+   "yPyBpPprbySwEa4dg8v3",
+   "tn7y9Mca8ZxI7CBUmtKW"
+  ]
+ },
+ "splitContainer": {
+  "split-container": [
+   "r4ahfNLNjd1vdkE_hQl2"
+  ],
+  "splitter": [
+   "gv4Ab2PP_HaGmyz2gB8m"
+  ],
+  "vertical": [
+   "eEEMUXTISbaTT2tPb9l7"
+  ],
+  "horizontal": [
+   "ejkXNkJNa6NmG6WeqSjb"
+  ]
+ },
+ "graphNode": {
+  "visual": [
+   "Bobo_GNuSSK3wj98J_7K"
+  ],
+  "topMost": [
+   "VaVKfF7ZluDOZqCWrTss"
+  ],
+  "highlighted": [
+   "tVnxKGh92qhrNS8ZrLSk"
+  ],
+  "header-container": [
+   "wyuUlbj377MNT1UhvTmA"
+  ],
+  "headerIcon": [
+   "BmhtBDkDfI85nbM4NxMW"
+  ],
+  "headerCollapse": [
+   "OE7iNY9W9C5xaXmb4fJq"
+  ],
+  "collapsed": [
+   "Z9lpI06OUpToOdoscgAP"
+  ],
+  "header": [
+   "f_UcygzCMLv89LeqZSEy"
+  ],
+  "connections": [
+   "kJbPorwpWbIl6Q7awkHo"
+  ],
+  "content": [
+   "RfWrHWBOKiuZXNcSUHZe"
+  ],
+  "comments": [
+   "SgS8_RcQjdLxnu1nPvOp"
+  ],
+  "executionTime": [
+   "Cbl6uixgEd9Qw0tPi9mf"
+  ],
+  "selected": [
+   "wm6PpDz796f_yehTb9kV"
+  ],
+  "optionsContainer": [
+   "GbpJUHoTKcYsbWRTctwV"
+  ],
+  "booleanContainer": [
+   "LLYUI2tB03_XrFiwqTTI"
+  ],
+  "floatContainer": [
+   "ELAsOakhMS22t6DYhtTL"
+  ],
+  "standalone": [
+   "o2zdwcBN_idq2oEvTHSI"
+  ],
+  "listContainer": [
+   "sIwqD3_gaJsyql1dMo6T"
+  ],
+  "select": [
+   "sQ96j8FSxarhbG1A8PUC"
+  ],
+  "selectText": [
+   "ilzwnbRpnSkUQLp_Nvdq"
+  ],
+  "activeNode": [
+   "JTNKfVBFeStDDavIFnzv"
+  ],
+  "selectList": [
+   "fP8a0RIFmOCLEVr5UFij"
+  ],
+  "option": [
+   "iN8VxGmf0YCxoYeMiho9"
+  ],
+  "sliderContainer": [
+   "yWsLj4mFQyCZzcdaHovv"
+  ]
+ },
+ "graphFrame": {
+  "port-container": [
+   "QoJwIsfQyC0kdP7U_VnQ"
+  ],
+  "frame-box-border": [
+   "bzZc2YPOE1DPrzZgVc4L"
+  ],
+  "frame-comments": [
+   "dIcBAKOArBPqC6n4eyH_"
+  ],
+  "frame-comment-span": [
+   "e5mk9Pe6b0OxoWeGo0b5"
+  ],
+  "selected": [
+   "JC61QJRJjq8G0D0QBhax"
+  ],
+  "frame-box-header": [
+   "clP6tuMZfzf3H7Nngqp_"
+  ],
+  "frame-box-header-button": [
+   "ewDwmFa_ErkkADqFP2lg"
+  ],
+  "down": [
+   "w8xt0lDJnPhzq2jLJtgy"
+  ],
+  "frame-box-header-collapse": [
+   "Kk9jMJN5qywSLevvtqz_"
+  ],
+  "frame-box-header-focus": [
+   "HYAx3ANgEbpyz741PkdZ"
+  ],
+  "frame-box-header-close": [
+   "WBWgH3wPXsBF2O91Iaci"
+  ],
+  "frame-box-header-title": [
+   "_69WZBjkiJxdtuFb1pAE"
+  ],
+  "right-handle": [
+   "oZHCuoVA2AakTjNKtUxB"
+  ],
+  "top-right-corner-handle": [
+   "fo2Lv1odIvKW1ilzVuaO"
+  ],
+  "bottom-right-corner-handle": [
+   "Z25mo7mWZgEcsITq7Bcw"
+  ],
+  "left-handle": [
+   "E3f3RYfFpIW_ECBTuVRs"
+  ],
+  "top-left-corner-handle": [
+   "WUrIw7WpKJWt4dcfFUT7"
+  ],
+  "bottom-left-corner-handle": [
+   "ofgQ4CHxlraUl1eYTCjX"
+  ],
+  "top-handle": [
+   "kOtXE8uCgJhCA6O0G3R9"
+  ],
+  "bottom-handle": [
+   "N53X5Lr9NcSoKmY1filg"
+  ],
+  "expanded": [
+   "tYlra2jox7Cj_8QALbbu"
+  ],
+  "collapsed": [
+   "MjKBEwLXfmQhAZUfXxWR"
+  ],
+  "collapsedHeader": [
+   "j4CGcgBxBAJFPsSG4ZFn"
+  ]
+ },
+ "triggerDisplayManager": {
+  "trigger-display": [
+   "cBlJSxSRPUsrzvXrYVbu"
+  ]
+ },
+ "updateDisplayManager": {
+  "update-display": [
+   "CwMSgi0gA7VaRj6VKcAg"
+  ]
+ },
+ "conditionDisplayManager": {
+  "condition-display": [
+   "Sp6VZgMI7LSvbYsV75NJ"
+  ]
+ }
+}
