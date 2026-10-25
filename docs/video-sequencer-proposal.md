@@ -7,7 +7,7 @@ Snapshot as of 2026-10-25. Sources: KubeezCut `main` at commit `3aa8741` (2026-0
 - KubeezCut covers most of Blender's Video Sequencer (strips, channels, preview, transitions, effects, blend modes, markers, meta strips) and a WebCodecs export pipeline. It is a good base for the **Sequencer**, **Preview** and the encoding half of **Render Animation**.
 - It does not cover the Dope Sheet, Graph Editor, NLA or Drivers in a form we can use. Its keyframe editor animates 8 fixed clip properties; ours animates any registered channel. Those editors should be built natively over `src/animation/model.js`, with the sequencer's strip properties registered as ordinary channels so they show up there, as in Blender.
 - A fork is needed. The parts to replace are the ones that define our UX: keyframe store, undo, project storage, keymap, styling and app shell. The rendering, compositing and export core can stay close to upstream.
-- Porting the UI from React to Vue and our Blender component library is moderate. Raw `.tsx` volume is large, but in the core scope only about 7,000 lines are React-specific (JSX and hook wrappers); the rest is plain TypeScript inside components, comments, imports and brackets. Core scope is estimated at 1 to 2 engineer-months, full parity at about 3 to 4. About 96,000 lines of framework-free TypeScript (timeline actions, export engine, GPU libraries, media services) are reused unchanged. The recommended route is a staged port that starts with the cheap panels and ends with the timeline, see [Porting the UI to Vue](#porting-the-ui-to-vue).
+- Porting the UI from React to Vue and our Blender component library is moderate. Raw `.tsx` volume is large, but the core scope is 112 components in 93 files plus 27 hook modules, and only about 9,000 of its lines are React-specific (JSX and hook wrappers); the rest is plain TypeScript inside components, comments, imports and brackets. Core scope is estimated at 1.5 to 2.5 engineer-months, full parity at about 3 to 4. About 96,000 lines of framework-free TypeScript (timeline actions, export engine, GPU libraries, media services) are reused unchanged. The recommended route is a staged port that starts with the cheap panels and ends with the timeline, see [Porting the UI to Vue](#porting-the-ui-to-vue).
 - glTF (GLB) is the interchange format with Blender. Every channel and feature gets a glTF class (native, pointer extension, baked, not exported) so exports can report what is lost; see [glTF interop constraint](#gltf-interop-constraint).
 - Correction to the brief: Bylonder does not use WebCodecs yet. A search of `src/`, `public/` and `scripts/` finds no `VideoEncoder`, `VideoFrame`, muxer or `MediaRecorder` use. Today's only render setting is hardware scaling (`src/workspace/render-settings.js`). WebCodecs would arrive with the fork (through mediabunny).
 
@@ -140,7 +140,8 @@ Measured on commit `3aa8741`, excluding tests:
 | Effects panels | 1,619 tsx, 236 hooks | Port onto property rows | 1,900 |
 | Shared components | 2,316 tsx | Port what the above use | up to 2,300 |
 | Keyframe editors | 7,330 tsx | Dropped, replaced by native Dope Sheet and Graph Editor | 0 |
-| Editor shell, routes, projects, settings, export dialog | about 17,600 tsx | Dropped, replaced by dock, Properties > Output | 0 |
+| Strip sidebar (`editor/components/properties-sidebar`), transitions picker, toolbar, audio meter | 6,896 tsx | Port onto our property rows | 6,900 |
+| Rest of editor shell, routes, projects, settings, export dialog | about 10,700 tsx | Dropped, replaced by dock, Properties > Output | 0 |
 | shadcn/ui, Kubeez, marketing | about 8,600 tsx | Dropped, replaced by our components | 0 |
 | **Total** | **79,958 tsx plus about 11,000 hook lines** | | **45,000 to 55,000** |
 
@@ -164,21 +165,33 @@ Consequences:
 
 - **Preview playback.** `video-preview.tsx` renders `MainComposition` through a Remotion-style `Player`, `Sequence` and DOM video elements, with a canvas renderer (`createCompositionRenderer`, shared with export) used for scrubbing. Driving both playback and scrub through the canvas renderer, fed by the existing `VideoSourcePool`, replaces this file and the composition runtime and player trees (about 12,700 lines) with a much smaller Vue render loop, and makes preview and export the same code path. Risk: playback performance on high bitrate media, which needs measurement first (unverified).
 - **Defer what Blender does not center on.** Masks, source monitor, 2-up and 4-up trim views, bento layouts, captions and scene detection can wait. The keyframe panel is replaced by our editors.
-- **Core scope** is then about 31,500 existing lines (timeline views 14,800, timeline hooks 7,200, remaining preview overlays and gizmos 3,900, Media 3,900, effects panels 1,600) plus a new render loop of about 1,500.
+- **Core scope** is then 93 `.tsx` files (31,806 lines) and 27 timeline hook modules (7,242 lines), plus a new render loop of about 1,500 lines.
 
-What those 31,500 lines are, classified line by line with a heuristic script (multi-line JSX expressions are partly counted as logic, so JSX is a lower bound):
+Components in the core scope, counted per declared component:
+
+| Area | Components | Notes |
+| --- | --- | --- |
+| Timeline (Sequencer view) | 48 | `TimelineItem` alone is 3,613 lines; 19 of its pieces are already split out (trim, fade, stretch handles, drag ghosts, overlays) |
+| Preview overlays, gizmos, playback controls, scopes | 23 | Gizmo, group gizmo, corner pin, snap guides, edit overlays |
+| Strip sidebar, transitions picker, toolbar, audio meter | 22 | Sections for layout, video, audio, text, shape, fill, corner pin, transition, marker, canvas |
+| Media | 13 | Grid, card, compositions, relink and codec dialogs |
+| Effects panels | 6 | Generic panel, curves, color wheels |
+| **Total** | **112 components in 93 files** | Plus 27 hook modules that become composables |
+
+By size: 35 files under 150 lines, 39 between 150 and 499, 19 of 500 or more. Not ported, replaced by our library: KubeezCut's property controls (`NumberInput`, `SliderInput`, `ColorPicker`, `PropertyRow`, `PropertySection`, 1,141 lines) and the 16 shadcn primitives the core uses (button, dropdown menu, context menu, select, dialog, popover, slider and others), which map to `src/properties/` rows and `src/ui/menu.js`.
+
+What those lines are, classified line by line with a heuristic script (multi-line JSX expressions are partly counted as logic, so JSX is a lower bound):
 
 | Kind | Lines | Share | Port work |
 | --- | --- | --- | --- |
-| Blank, comments, imports, type declarations | 7,300 | 23% | None or copy |
-| Closing brackets on their own line | 3,600 | 11% | None |
-| JSX markup | 4,200 | 13% | Rewrite as Vue templates on our components |
-| React API (`useCallback`, `useMemo`, `useEffect`, `memo`, dependency arrays, state setters; 753 effect and memo wrappers) | 2,600 | 8% | Mechanical: `watch`, `computed`, plain functions |
-| Plain TypeScript inside components and hooks (pointer math, hit testing, 412 direct `getState()` store calls) | 13,900 | 44% | Move largely as is |
+| Blank, comments, imports, type declarations | 8,700 | 22% | None or copy |
+| JSX markup | 6,100 | 16% | Rewrite as Vue templates on our components |
+| React API (`useCallback`, `useMemo`, `useEffect`, `memo`, dependency arrays, state setters) | 3,100 | 8% | Mechanical: `watch`, `computed`, plain functions |
+| Plain TypeScript inside components and hooks, including closing brackets (pointer math, hit testing, direct `getState()` store calls) | 21,200 | 54% | Move largely as is |
 
-So the React-specific part of the core is about 7,000 lines. The rest moves with light edits. The cost is dominated by re-verifying interaction behaviour (drag, trim, snapping, ripple), not by the volume of React.
+So the React-specific part of the core is about 9,000 lines. The rest moves with light edits. The cost is dominated by re-verifying interaction behaviour (drag, trim, snapping, ripple), not by the volume of React.
 
-Estimate (assumption, not measured): core scope 1 to 2 engineer-months including parity testing and theming. Full parity with KubeezCut including the deferred features: about 3 to 4 engineer-months. For comparison, restyling KubeezCut as React islands only (CSS variable mapping, icons, keymap) is roughly 3 to 5 engineer-weeks but leaves two component libraries and inconsistent widgets.
+Estimate (assumption, not measured): core scope 1.5 to 2.5 engineer-months including parity testing and theming. Full parity with KubeezCut including the deferred features: about 3 to 4 engineer-months. For comparison, restyling KubeezCut as React islands only (CSS variable mapping, icons, keymap) is roughly 3 to 5 engineer-weeks but leaves two component libraries and inconsistent widgets.
 
 Recommended order, smallest and most visible first: strip sidebar and effects panels (they must use our property rows anyway for keying), Media area, Preview with the canvas renderer, then the Sequencer view. Each step deletes the matching React island. If the port stalls, what remains is a working React island, not a broken editor.
 
