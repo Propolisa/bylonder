@@ -158,7 +158,7 @@ Where the lines are. Markup is a small share; most `.tsx` lines are event handle
 | `preview/components/source-monitor.tsx`, `source-composition.tsx`, `edit-2up-panels.tsx`, `edit-4up-panels.tsx` | 2,365 | | Source monitor and trim comparison views |
 | `timeline/hooks/*` | 7,242 | 0 | Drag, trim, rate stretch, slip and slide. Few React hooks (for example 9 in the 777-line trim hook); mostly imperative code over refs that becomes Vue composables almost line for line |
 
-The edit math itself (placement, collisions, ripple, roll, slip, slide, transitions, compositions) is already in about 19,500 lines of framework-free actions, utils and services under `timeline/`, which are reused.
+The edit math itself (placement, collisions, ripple, roll, slip, slide, transition placement and repair, compositions) is already in about 19,500 lines of framework-free actions, utils and services under `timeline/`, which are reused. Transition rendering is also not React: the WebGPU shaders (`lib/gpu-transitions/`, 1,475 lines) and the transition engine with its Canvas 2D fallback (`domain/timeline/transitions/`, 1,958 lines) are reused unchanged. The React side only feeds them frames, which the canvas render loop takes over.
 
 Consequences:
 
