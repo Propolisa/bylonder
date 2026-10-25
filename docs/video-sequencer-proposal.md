@@ -4,6 +4,8 @@ Snapshot as of 2026-10-25. Sources: KubeezCut `main` at commit `3aa8741` (2026-0
 
 ## Summary
 
+Decision (2026-10-25): KubeezCut views run as React islands with scoped style overrides for now; the Vue port below is kept as analysis for later. The sequencer sits behind a Blender-shaped `sequenceEditor` record and one adapter so it can be replaced. Contracts, scene strips, multiple viewports and deterministic rendering are in the [render architecture proposal](render-architecture-proposal.md), which supersedes the host contract sketched here.
+
 - KubeezCut covers most of Blender's Video Sequencer (strips, channels, preview, transitions, effects, blend modes, markers, meta strips) and a WebCodecs export pipeline. It is a good base for the **Sequencer**, **Preview** and the encoding half of **Render Animation**.
 - It does not cover the Dope Sheet, Graph Editor, NLA or Drivers in a form we can use. Its keyframe editor animates 8 fixed clip properties; ours animates any registered channel. Those editors should be built natively over `src/animation/model.js`, with the sequencer's strip properties registered as ordinary channels so they show up there, as in Blender.
 - A fork is needed. The parts to replace are the ones that define our UX: keyframe store, undo, project storage, keymap, styling and app shell. The rendering, compositing and export core can stay close to upstream.
@@ -53,7 +55,7 @@ The keyframable set is fixed in `src/types/keyframe.ts`: `x, y, width, height, r
 | Video Sequencer: Sequencer view | No | Yes: tracks, trim, split, ripple, roll, slip, slide, snapping, markers, rate stretch, pre-comps | Fork |
 | Video Sequencer: Preview view | No | Yes: canvas preview, transform gizmo, corner pin, masks, scopes, source monitor | Fork |
 | Sequencer strip sidebar | No | Item properties panels | Fork, rebuilt on our property rows so decorators and keying work |
-| Properties > Output | No (fps and range live on the action) | Export dialog, project canvas presets | Ours (UI), fork (encoder) |
+| Properties > Output | Frame Rate and Frame Range on scene time (`main`); no resolution or file output | Export dialog, project canvas presets | Ours (UI), fork (encoder) |
 | Render > Render Animation, Render Result | No | Export dialog with progress | Ours (operator and Render Result area), fork (engine) |
 | Compositor | Yes (Node Render Graph) | Per-clip GPU effects | Keep ours for scene output. Fork effects become strip modifiers |
 
@@ -81,10 +83,10 @@ Embedding KubeezCut unchanged (iframe or package) would give a second keyframe s
 Fork changes, in order of importance:
 
 1. **Animation.** Remove the keyframes store, its editors and the `auto-keyframe`/`animated-transform-resolver` path. Every strip property (transform, crop, opacity, volume, text, color, every effect parameter including those flagged `animatable`) registers a channel `strip:<stripId>` with a path such as `transform.x` or `effects.<id>.amount`. Rendering reads values through a host `sample(ref, frame)`. Keys live in our action at absolute scene frames; moving a strip offsets its keys, as Blender does. KubeezCut's easing presets become key interpolation modes in our model.
-2. **Undo and persistence.** Replace Zundo with our history: the `execute()` wrapper in `timeline/stores/actions/shared.ts` ends with a host `commit(label)`. Tracks, items, transitions, markers and compositions become a `sequencer` document slice, so Remember scene edits, project versions and ZIP export work without new wiring.
+2. **Undo and persistence.** Replace Zundo with our history: the `execute()` wrapper in `timeline/stores/actions/shared.ts` ends with a host `commit(label)`. Tracks, items, transitions, markers and compositions are stored in a `sequenceEditor` document slice (shaped like Blender's, see the [render architecture proposal](render-architecture-proposal.md#interaction-model-swappable-sequencer)), so Remember scene edits, project versions and ZIP export work without new wiring.
 3. **Clock.** Our scene frame is the only playhead. The fork's playback store follows the host frame and requests play, pause and seek through the host.
 4. **Shell.** Drop the router, projects page, settings page and `react-resizable-panels` shell. Editors mount as `(element, host) => {dispose}`, matching `dock.setFactory`: Sequencer, Preview, Media.
-5. **UI.** Rewrite the kept views in Vue on our component library (panels, property rows, number fields, menus, Blender SVG icons), so decorators, keying colors and context menus match. Until a view is ported it runs as a React island with shadcn CSS variables mapped to `src/theme.css` tokens. See [Porting the UI to Vue](#porting-the-ui-to-vue).
+5. **UI.** Current decision: kept views run as React islands with one scoped stylesheet mapping shadcn CSS variables to `src/theme.css` tokens. A later Vue rewrite on our component library is costed in [Porting the UI to Vue](#porting-the-ui-to-vue).
 6. **Keymap.** Use Blender's sequencer keys (G move, K split, Shift K hard split, Shift D duplicate, X delete, Shift A add, Tab meta, Ctrl G make meta) through our shortcut registry. KubeezCut tools (ripple, roll, slip, slide, razor) stay as toolbar tools.
 7. **Media.** Replace IndexedDB projects with a host media store: content-addressed files in OPFS beside project versions, excluded from share links, optional in ZIP export. Keep KubeezCut's proxies and relinking.
 8. **Removal.** Kubeez AI, Supabase, analytics, TTS. Whisper transcription is optional.
@@ -97,7 +99,7 @@ Keep the fork's existing `deps/` contract seams and feature boundaries. Put our 
 
 The fork is a separate repository (`bylonder-sequencer`) built as an ESM library and consumed here as a pinned dependency. Reasons: it is about 27 times our source size, it is TypeScript, and our ChatGPT upstream sync and Download App Source archive should not carry it. The fork exports its framework-free core (stores, actions, render and export engine) and, during the port, React islands for views not yet in Vue. Islands are not new here: the Babylon node editors bundle their own React. The Vue views live in this repository next to the other editors.
 
-Host contract (the only API the fork sees):
+Host contract as first sketched (superseded by the contracts in the [render architecture proposal](render-architecture-proposal.md#interaction-model-swappable-sequencer)):
 
 ```js
 {
@@ -113,7 +115,7 @@ Scene strip: frames come from a hidden **render iframe** that runs the project l
 
 ## Render settings and output
 
-Blender keeps resolution, frame rate, frame range and encoding on the scene (`properties_output.py`). We move fps and range from the action to a scene `output` slice and add Properties > Output:
+Blender keeps resolution, frame rate, frame range and encoding on the scene (`properties_output.py`). On `main`, scene time (`src/scene/time.js`) already holds fps and range and the Output tab edits them. The rest of Properties > Output to add:
 
 | Blender panel and field | Our implementation |
 | --- | --- |
@@ -217,15 +219,15 @@ Consequences for this work:
 
 | Phase | Deliverable | Done when |
 | --- | --- | --- |
-| 0. Model groundwork (here) | Scene `output` slice with fps and range; `sample(ref, frame)`; markers slice; `gltf` field on channels | Tests cover range migration from existing actions and pure sampling |
+| 0. Model groundwork (here) | Scene time off the action (done on `main` in `src/scene/time.js`); `sample(ref, frame)`; markers slice; `gltf` field on channels | Tests cover range migration from existing actions and pure sampling |
 | 1. Render Animation (here plus fork engine) | Properties > Output, render iframe with virtual clock, Render Image and Render Animation of the camera through the compositor, encoded with mediabunny | A keyed example renders to MP4 and WebM with exact frame count and timestamps |
 | 2. Fork setup | Strip AI, accounts and shell; export core and islands; host contract stubs; builds as a library | Fork `npm run verify` passes; bundle loads in a dock area |
-| 3. Sequencer and Preview areas | Host clock, undo, `sequencer` slice, media store, Blender keymap; React islands themed with our tokens | Edit, undo, reload and ZIP round trip keep the edit |
-| 4. Strip channels and sidebar in Vue | All strip and effect parameters registered as channels; keys offset with strips; strip sidebar and effects panels on our property rows | Keys from the strip sidebar show in Timeline and render in export |
-| 5. Scene strip | `scene` item type fed by `renderSceneFrame`; Sequencer post processing in Render Animation | An edit mixing a movie and a scene strip exports frame accurately |
+| 3. Sequencer and Preview areas | Host clock, undo, `sequenceEditor` slice and adapter, media store, Blender keymap; React islands themed with our tokens | Edit, undo, reload and ZIP round trip keep the edit |
+| 4. Strip channels | All strip and effect parameters registered as channels; keys offset with strips; strip sidebar themed as an island | Keys from the strip sidebar show in Timeline and render in export |
+| 5. Scene strip | `scene` item type fed by the host `frameSource`; Sequencer post processing in Render Animation | An edit mixing a movie and a scene strip exports frame accurately |
 | 6. Dope Sheet and Graph Editor (native) | Channel hierarchy, box select, handles, easing; strip channels included | Same channels editable in all three editors |
 | 7. NLA and Drivers (native) | After action slots; glTF classes enforced | Export report lists baked items |
-| 8. Vue port of remaining views | Media area, Preview on the canvas renderer, Sequencer view | No React islands left; playback holds frame rate on the reference media set |
+| 8. Optional: Vue port | Media area, Preview on the canvas renderer, Sequencer view | No React islands left; playback holds frame rate on the reference media set |
 
 Phases 0, 1 and 6 do not depend on the fork and can start now.
 

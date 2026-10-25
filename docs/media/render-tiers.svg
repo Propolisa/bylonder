@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="470" viewBox="0 0 960 470" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9a9a9a"/></marker>
+  </defs>
+  <rect width="960" height="470" fill="#1d1d1d"/>
+
+  <rect x="16" y="16" width="928" height="64" rx="6" fill="#303030" stroke="#5a5a5a"/>
+  <text x="32" y="42" fill="#e6e6e6" font-size="15" font-weight="600">Document (one scene description)</text>
+  <text x="32" y="64" fill="#bdbdbd">code + slices (scene, render, world, collections, materials, compositor, sequenceEditor) + object snapshots + action + scene time</text>
+
+  <rect x="16" y="104" width="440" height="230" rx="6" fill="#262626" stroke="#4a4a4a"/>
+  <text x="32" y="130" fill="#e6e6e6" font-size="15" font-weight="600">Interactive tier (viewport iframe)</text>
+  <text x="32" y="152" fill="#bdbdbd">one engine, live scene, wall clock, redraw on demand</text>
+  <rect x="32" y="166" width="408" height="152" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="44" y="188" fill="#e6e6e6" font-weight="600">EngineView per area</text>
+  <text x="44" y="208" fill="#bdbdbd">3D Viewport A: editor camera, Solid</text>
+  <text x="44" y="226" fill="#bdbdbd">3D Viewport B: scene camera, Rendered + compositor</text>
+  <text x="44" y="244" fill="#bdbdbd">Node Editor backdrop: compositor Viewer</text>
+  <text x="44" y="268" fill="#e0b85a">per-view: camera, shading, overlays, frameGraph</text>
+  <text x="44" y="288" fill="#e0b85a">quality: MSAA, SSR, SSAO2 at viewport settings</text>
+
+  <rect x="504" y="104" width="440" height="230" rx="6" fill="#262626" stroke="#4a4a4a"/>
+  <text x="520" y="130" fill="#e6e6e6" font-size="15" font-weight="600">Offline tier (render iframe)</text>
+  <text x="520" y="152" fill="#bdbdbd">own engine, snapshot of the document, virtual clock</text>
+  <rect x="520" y="166" width="408" height="152" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="532" y="188" fill="#e6e6e6" font-weight="600">renderService.render(job)</text>
+  <text x="532" y="208" fill="#bdbdbd">job: camera, frames, size, shading, samples</text>
+  <text x="532" y="226" fill="#bdbdbd">per frame: set time, evaluate, wait ready,</text>
+  <text x="532" y="244" fill="#bdbdbd">render N subframes, accumulate, VideoFrame</text>
+  <text x="532" y="268" fill="#e0b85a">preview jobs: proxy size, 1 sample, cached</text>
+  <text x="532" y="288" fill="#e0b85a">final jobs: output size, full samples, motion blur</text>
+
+  <rect x="16" y="360" width="290" height="94" rx="6" fill="#262626" stroke="#4a4a4a"/>
+  <text x="32" y="386" fill="#e6e6e6" font-weight="600">Frame cache and proxies</text>
+  <text x="32" y="406" fill="#bdbdbd">memory LRU, OPFS spill</text>
+  <text x="32" y="424" fill="#bdbdbd">baked proxy video in media pool</text>
+  <text x="32" y="442" fill="#bdbdbd">key: strip, frame, size, revision</text>
+
+  <rect x="334" y="360" width="290" height="94" rx="6" fill="#262626" stroke="#4a4a4a"/>
+  <text x="350" y="386" fill="#e6e6e6" font-weight="600">Sequencer engine (KubeezCut island)</text>
+  <text x="350" y="406" fill="#bdbdbd">via sequencer-kubeezcut.js adapter</text>
+  <text x="350" y="424" fill="#bdbdbd">composite(frame), audio(range)</text>
+  <text x="350" y="442" fill="#bdbdbd">scene strips use frameSource</text>
+
+  <rect x="652" y="360" width="292" height="94" rx="6" fill="#262626" stroke="#4a4a4a"/>
+  <text x="668" y="386" fill="#e6e6e6" font-weight="600">Host encoder</text>
+  <text x="668" y="406" fill="#bdbdbd">mediabunny over WebCodecs</text>
+  <text x="668" y="424" fill="#bdbdbd">Output tab settings</text>
+  <text x="668" y="442" fill="#bdbdbd">Render Image, Render Animation</text>
+
+  <line x1="236" y1="80" x2="236" y2="102" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="724" y1="80" x2="724" y2="102" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="600" y1="334" x2="200" y2="358" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="306" y1="407" x2="332" y2="407" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="624" y1="407" x2="650" y2="407" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="840" y1="334" x2="840" y2="358" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#a)"/>
+</svg>
