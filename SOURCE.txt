@@ -1,0 +1,4 @@
+Complete application source for this build.
+Run npm ci, then npm run dev. Production: npm run build.
+Dependencies are pinned in package-lock.json; node_modules and deployment credentials are excluded.
+User OPFS projects are exported separately with Export ZIP.

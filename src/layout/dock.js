@@ -1,0 +1,167 @@
+import { mapArea, removeArea, validAreaTree } from './area-tree.js';
+import { paneIcon } from './icons.js';
+import { createApp, h, reactive, nextTick, watch, Teleport } from 'vue';
+import { Splitpanes, Pane } from 'splitpanes';
+import 'splitpanes/dist/splitpanes.css';
+import './dock.css';
+import { profile, validateLayout, swapSections, focusedSection } from './model.js';
+
+export function mountDock({host, items, tree, defaults, storageKey}) {
+  items=[...items];
+  const baseCount=items.length,factories=new Map(),instances=new Map();
+  const ids=items.map(item=>item.id), panels=new Map(), slots=new Map();
+  const coarse=matchMedia('(pointer:coarse)');
+  const currentProfile=()=>{
+    let width=innerWidth,height=innerHeight;
+    try{width=parent.innerWidth;height=parent.innerHeight;}catch{}
+    if(coarse.matches) return (screen.orientation?.type||'').startsWith('landscape')||(!screen.orientation&&screen.width>screen.height)?'landscape':'portrait';
+    return profile(width,height,false);
+  };
+  let saved={}, menuElement, areaMenu, hovered=null, frameId, disposed=false;
+  try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
+  const state=reactive({profile:currentProfile(),layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(tree),area:null,factoryCount:0});
+  const extras=Array.isArray(saved.extras)?saved.extras.slice(0,20):[];
+  for(const extra of extras)if(typeof extra.id==='string'&&extra.id.startsWith('area:')&&items.slice(0,baseCount).some(item=>item.id===extra.type)){
+    const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,element});ids.push(extra.id);
+  }
+  const load=()=>{
+    const initial=defaults(state.profile);initial.order=[...initial.order,...ids.slice(baseCount)];initial.hidden=[...initial.hidden,...ids.slice(baseCount)];
+    state.layout=validateLayout(saved[state.profile],initial,ids);
+    state.tree=validAreaTree(saved[state.profile]?.tree,ids.length)?saved[state.profile].tree:structuredClone(tree);
+    if(saved[state.profile]?.sizes)for(const [key,pair] of Object.entries(saved[state.profile].sizes))if(Array.isArray(pair)&&pair.length===2&&pair.every(n=>Number.isFinite(n)&&n>0))state.layout.sizes[key]=pair;
+    if(saved[state.profile]?.horizontal)Object.assign(state.layout.horizontal,saved[state.profile].horizontal);
+    state.focus=ids.includes(saved[state.profile]?.focus)?saved[state.profile].focus:null;
+  };
+  load();
+  host.classList.add('dock');
+  for(const item of items){
+    const panel=document.createElement('div');
+    panel.className='dock-content';panel.dataset.section=item.id;panel.hidden=true;
+    panel.append(item.element);host.append(panel);panels.set(item.id,panel);
+  }
+  const root=document.createElement('div');root.className='dock-root';host.prepend(root);
+  const focus=()=>focusedSection(state.layout,state.focus);
+  const visible=slot=>!state.layout.hidden.includes(state.layout.order[slot]);
+  const hasVisible=node=>typeof node==='number'?visible(node):node.children.some(hasVisible);
+  function position(){
+    if(disposed)return;
+    const base=host.getBoundingClientRect(), focused=focus();
+    const space=root.querySelector('.dock-splits');
+    for(let slot=0;slot<ids.length;slot++){
+      const id=state.layout.order[slot],panel=panels.get(id);
+      const show=focused?id===focused:visible(slot);
+      const element=focused?space:slots.get(slot);
+      panel.hidden=!show||!element;
+      if(panel.hidden)continue;
+      const rect=element.getBoundingClientRect();
+      Object.assign(panel.style,{left:rect.left-base.left+'px',top:rect.top-base.top+'px',width:Math.max(0,rect.width)+'px',height:Math.max(0,rect.height)+'px'});
+    }
+  }
+  const schedule=()=>{cancelAnimationFrame(frameId);frameId=requestAnimationFrame(position);};
+  const observer=new ResizeObserver(schedule);observer.observe(host);
+  const persist=()=>{
+    saved[state.profile]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focus,tree:JSON.parse(JSON.stringify(state.tree))};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
+    try{localStorage.setItem(storageKey,JSON.stringify(state.remember?saved:{remember:false}));}catch{}
+    position();nextTick(()=>{position();schedule();});
+  };
+  const ensureArea=slot=>{
+    const contains=node=>typeof node==='number'?node===slot:node.children.some(contains);
+    if(contains(state.tree))return;const id='split:'+crypto.randomUUID();state.tree={id,children:[state.tree,slot]};state.layout.sizes[id]=[70,30];state.layout.horizontal[id]=true;
+  };
+  const show=(id,exclusive=false)=>{ensureArea(state.layout.order.indexOf(id));state.focus=exclusive?id:null;state.layout.hidden=state.layout.hidden.filter(x=>x!==id);persist();};
+  const toggle=id=>{
+    state.focus=null;
+    if(state.layout.hidden.includes(id)){ensureArea(state.layout.order.indexOf(id));state.layout.hidden=state.layout.hidden.filter(x=>x!==id);}
+    else if(state.layout.hidden.length<ids.length-1)state.layout.hidden.push(id);
+    persist();
+  };
+  const closeMenu=()=>menuElement?.close();
+  const openMenu=()=>{if(!menuElement.open)menuElement.showModal();};
+  const reset=()=>{
+    saved={remember:state.remember};state.layout=structuredClone(defaults(state.profile));state.layout.order.push(...ids.slice(baseCount));state.layout.hidden.push(...ids.slice(baseCount));state.tree=structuredClone(tree);state.focus=null;
+    persist();closeMenu();host.dispatchEvent(new CustomEvent('dock-reset',{bubbles:true}));
+  };
+  const button=(label,fn,title,attrs={})=>h('button',{type:'button',onClick:fn,title,...attrs},label);
+  const select=(value,change,options,label)=>h('select',{value,'aria-label':label,onChange:e=>change(e.target.value)},options.map(([id,title])=>h('option',{value:id},title)));
+  function renderNode(node){
+    if(typeof node==='number'){
+      const id=state.layout.order[node];
+      return h('div',{class:'dock-leaf',onPointerenter:()=>hovered=node,onContextmenu:e=>openArea(e,node)},[
+        h('div',{class:'dock-heading'},[
+          select(id,value=>{swapSections(state.layout,node,value);persist();},items.map(item=>[item.id,item.title]),'Editor Type'),
+          button('⛶',()=>{state.focus=id;persist();},'Toggle Maximize Area (Ctrl-Space)'),button('⋮',e=>openArea(e,node),'Area Options'),h('span',{class:'dock-corner',title:'Drag inward to split; drag into another area to join; Ctrl-drag to swap',onPointerdown:e=>corner(e,node)})
+        ]),
+        h('div',{class:'dock-slot',ref:el=>{
+          const old=slots.get(node);if(old&&old!==el)observer.unobserve(old);
+          if(el){slots.set(node,el);observer.observe(el);}else slots.delete(node);
+          schedule();
+        }})
+      ]);
+    }
+    const live=node.children.map(hasVisible),available=live.some(Boolean)?live:[true,true];
+    return h(Splitpanes,{horizontal:state.layout.horizontal[node.id],maximizePanes:false,pushOtherPanes:false,onResize:schedule,onResized:event=>{
+      if(live.every(Boolean)){state.layout.sizes[node.id]=event.panes.map(p=>Math.max(1,p.size));persist();}
+    }},{default:()=>node.children.map((child,i)=>h(Pane,{key:i,size:available[i]?(available[1-i]?state.layout.sizes[node.id][i]:100):0,minSize:available[i]&&available[1-i]?8:0,maxSize:available[i]?100:0,class:{'dock-collapsed':!live[i]}},{default:()=>renderNode(child)}))});
+  }
+  const setFactory=(type,factory)=>{factories.set(type,factory);state.factoryCount=factories.size;for(const item of items)if(item.type===type&&!instances.has(item.id))instances.set(item.id,factory(item.element,item.id));};
+  const split=(slot,horizontal)=>{
+    const original=items.find(item=>item.id===state.layout.order[slot]),type=original.type||original.id;
+    const selected=factories.has(type)?type:factories.has('properties')?'properties':null;
+    if(!selected)return;
+    const id='area:'+crypto.randomUUID(),element=document.createElement('section'),item={id,type:selected,title:items.find(i=>i.id===selected).title,element};
+    const index=ids.length;items.push(item);ids.push(id);state.layout.order.push(id);
+    const panel=document.createElement('div');panel.className='dock-content';panel.dataset.section=id;panel.append(element);host.append(panel);panels.set(id,panel);instances.set(id,factories.get(selected)(element,id));
+    const splitId='split:'+crypto.randomUUID();state.tree=mapArea(state.tree,slot,()=>({id:splitId,children:[slot,index]}));state.layout.horizontal[splitId]=horizontal;state.layout.sizes[splitId]=[50,50];state.focus=null;areaMenu?.close();persist();
+  };
+  const corner=(event,slot)=>{
+    if(event.button!==0)return;event.preventDefault();const el=event.currentTarget,start={x:event.clientX,y:event.clientY};let canceled=false;
+    const escape=e=>{if(e.key==='Escape')canceled=true;};window.addEventListener('keydown',escape);el.setPointerCapture(event.pointerId);
+    el.onpointerup=e=>{window.removeEventListener('keydown',escape);el.releasePointerCapture(e.pointerId);if(canceled)return;
+      const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.dock-content'),other=target?state.layout.order.indexOf(target.dataset.section):-1;
+      if(other>=0&&other!==slot){if(e.ctrlKey){[state.layout.order[slot],state.layout.order[other]]=[state.layout.order[other],state.layout.order[slot]];persist();}else closeArea(other);}
+      else if(Math.hypot(e.clientX-start.x,e.clientY-start.y)>20)split(slot,Math.abs(e.clientY-start.y)>Math.abs(e.clientX-start.x));
+    };el.onpointercancel=()=>window.removeEventListener('keydown',escape);
+  };
+  const closeArea=slot=>{if(typeof state.tree==='number')return;const next=removeArea(state.tree,slot);if(next===null)return;state.tree=next;const id=state.layout.order[slot];if(!state.layout.hidden.includes(id))state.layout.hidden.push(id);state.focus=null;areaMenu?.close();persist();};
+  const openArea=(event,slot)=>{event.preventDefault();event.stopPropagation();state.area=slot;areaMenu?.showModal();};
+  const labels={animation:'Timeline split',root:'Main split',main:'Output split',editors:'Editor split',inspector:'Inspector split'};
+  const app=createApp({setup(){
+    watch(()=>JSON.stringify([state.layout,state.focus]),()=>nextTick(position),{flush:'post'});
+    return ()=>h('div',{class:'dock-shell'},[
+      h('nav',{class:'dock-tabs','aria-label':'Workspace sections'},[
+        ...items.map(item=>button([paneIcon(item.id),h('span',{class:'dock-tab-label'},item.title)],()=>show(item.id,true),item.title+' · Focus pane; use Layout for split view',{'aria-label':item.title,class:{active:focus()?focus()===item.id:!state.layout.hidden.includes(item.id)},'aria-pressed':focus()?focus()===item.id:!state.layout.hidden.includes(item.id)})),
+        button('Layout',openMenu,'Arrange panels',{class:'dock-layout-button'}),
+        h('div',{class:'dock-toolbar'})
+      ]),
+      h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'}):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree'},[renderNode(state.tree)])),
+      h(Teleport,{to:document.body},[h('dialog',{class:'dock-dialog',ref:el=>menuElement=el,onClick:e=>{if(e.target===menuElement)closeMenu();}},[
+        h('div',{class:'dock-dialog-title'},[h('strong','Workspace Layout'),button('×',closeMenu,'Close layout')]),
+        h('label',[h('input',{type:'checkbox',checked:state.remember,onChange:e=>{state.remember=e.target.checked;persist();}}),'Remember on this device']),
+        button('Use split view',()=>{state.focus=null;state.layout.order.forEach((id,slot)=>ensureArea(slot));state.layout.hidden=[];persist();closeMenu();}),
+        h('details',[h('summary','Areas'),h('div',{class:'dock-arrangement'},[
+          ...items.map(item=>h('label',[h('input',{type:'checkbox',checked:!state.layout.hidden.includes(item.id),onChange:()=>toggle(item.id)}),item.title])),
+          ...state.layout.order.map((id,slot)=>h('label',['Area '+(slot+1),select(id,value=>{swapSections(state.layout,slot,value);persist();},items.map(item=>[item.id,item.title]),'Editor Type'),button('⋮',e=>{closeMenu();openArea(e,slot);},'Area Options')])),
+          ...Object.keys(state.layout.horizontal).map(key=>h('label',[labels[key]||key,select(String(state.layout.horizontal[key]),value=>{state.layout.horizontal[key]=value==='true';persist();},[['false','Side by side'],['true','Stacked']],labels[key]||key)]))
+        ])]),
+        button('Reset layout',reset)
+      ]),h('dialog',{class:'dock-dialog dock-area-menu',ref:el=>areaMenu=el},[
+        h('strong','Area Options'),
+        button('Vertical Split',()=>split(state.area,false),'Split area side by side',{disabled:!state.factoryCount}),
+        button('Horizontal Split',()=>split(state.area,true),'Split area vertically',{disabled:!state.factoryCount}),
+        button('Join Area',()=>closeArea(state.area),'Close this area and expand its sibling',{disabled:typeof state.tree==='number'}),
+        button('Toggle Maximize Area',()=>{const id=state.layout.order[state.area];state.focus=state.focus===id?null:id;areaMenu.close();persist();}),
+        button('Cancel',()=>areaMenu.close())
+      ])])
+    ]);
+  }});
+  app.mount(root);nextTick(position);
+  const resize=()=>{const next=currentProfile();if(next!==state.profile){persist();state.profile=next;load();}nextTick(position);};
+  window.addEventListener('resize',resize);coarse.addEventListener('change',resize);
+  const keyboard=event=>{if((event.ctrlKey||event.metaKey)&&event.code==='Space'&&hovered!==null){event.preventDefault();event.stopPropagation();const id=state.layout.order[hovered];state.focus=state.focus===id?null:id;persist();}};
+  host.addEventListener('keydown',keyboard,true);
+  host.addEventListener('pointerover',event=>{const panel=event.target.closest('.dock-content');if(panel)hovered=state.layout.order.indexOf(panel.dataset.section);});
+  const unlock=()=>host.classList.remove('dock-resizing');
+  root.addEventListener('pointerdown',event=>{if(event.target.closest('.splitpanes__splitter'))host.classList.add('dock-resizing');});
+  window.addEventListener('pointerup',unlock);window.addEventListener('pointercancel',unlock);window.addEventListener('blur',unlock);
+  return {show,toggle,reset,openMenu,setFactory,get toolbar(){return root.querySelector('.dock-toolbar');},get profile(){return state.profile;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('resize',resize);coarse.removeEventListener('change',resize);window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
+}

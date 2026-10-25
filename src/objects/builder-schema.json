@@ -1,0 +1,1481 @@
+{
+  "CreateBox": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "size": {
+        "type": "number",
+        "required": false
+      },
+      "width": {
+        "type": "number",
+        "required": false
+      },
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "depth": {
+        "type": "number",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "wrap": {
+        "type": "boolean",
+        "required": false
+      },
+      "topBaseAt": {
+        "type": "number",
+        "required": false
+      },
+      "bottomBaseAt": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateTiledBox": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "pattern": {
+        "type": "number",
+        "required": false
+      },
+      "width": {
+        "type": "number",
+        "required": false
+      },
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "depth": {
+        "type": "number",
+        "required": false
+      },
+      "tileSize": {
+        "type": "number",
+        "required": false
+      },
+      "tileWidth": {
+        "type": "number",
+        "required": false
+      },
+      "tileHeight": {
+        "type": "number",
+        "required": false
+      },
+      "alignHorizontal": {
+        "type": "number",
+        "required": false
+      },
+      "alignVertical": {
+        "type": "number",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateSphere": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "segments": {
+        "type": "number",
+        "required": false
+      },
+      "diameter": {
+        "type": "number",
+        "required": false
+      },
+      "diameterX": {
+        "type": "number",
+        "required": false
+      },
+      "diameterY": {
+        "type": "number",
+        "required": false
+      },
+      "diameterZ": {
+        "type": "number",
+        "required": false
+      },
+      "arc": {
+        "type": "number",
+        "required": false
+      },
+      "slice": {
+        "type": "number",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateDisc": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "radius": {
+        "type": "number",
+        "required": false
+      },
+      "tessellation": {
+        "type": "number",
+        "required": false
+      },
+      "arc": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      }
+    }
+  },
+  "CreateIcoSphere": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "radius": {
+        "type": "number",
+        "required": false
+      },
+      "radiusX": {
+        "type": "number",
+        "required": false
+      },
+      "radiusY": {
+        "type": "number",
+        "required": false
+      },
+      "radiusZ": {
+        "type": "number",
+        "required": false
+      },
+      "flat": {
+        "type": "boolean",
+        "required": false
+      },
+      "subdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateRibbon": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "pathArray": {
+        "type": "Vector3[][]",
+        "required": true
+      },
+      "closeArray": {
+        "type": "boolean",
+        "required": false
+      },
+      "closePath": {
+        "type": "boolean",
+        "required": false
+      },
+      "offset": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "instance": {
+        "type": "Mesh",
+        "required": false
+      },
+      "invertUV": {
+        "type": "boolean",
+        "required": false
+      },
+      "uvs": {
+        "type": "Vector2[]",
+        "required": false
+      },
+      "colors": {
+        "type": "Color4[]",
+        "required": false
+      }
+    }
+  },
+  "CreateCylinder": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "diameterTop": {
+        "type": "number",
+        "required": false
+      },
+      "diameterBottom": {
+        "type": "number",
+        "required": false
+      },
+      "diameter": {
+        "type": "number",
+        "required": false
+      },
+      "tessellation": {
+        "type": "number",
+        "required": false
+      },
+      "subdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "arc": {
+        "type": "number",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "hasRings": {
+        "type": "boolean",
+        "required": false
+      },
+      "enclose": {
+        "type": "boolean",
+        "required": false
+      },
+      "cap": {
+        "type": "number",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      }
+    }
+  },
+  "CreateTorus": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "diameter": {
+        "type": "number",
+        "required": false
+      },
+      "thickness": {
+        "type": "number",
+        "required": false
+      },
+      "tessellation": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      }
+    }
+  },
+  "CreateTorusKnot": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "radius": {
+        "type": "number",
+        "required": false
+      },
+      "tube": {
+        "type": "number",
+        "required": false
+      },
+      "radialSegments": {
+        "type": "number",
+        "required": false
+      },
+      "tubularSegments": {
+        "type": "number",
+        "required": false
+      },
+      "p": {
+        "type": "number",
+        "required": false
+      },
+      "q": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      }
+    }
+  },
+  "CreateLineSystem": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "lines": {
+        "type": "Vector3[][]",
+        "required": true
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "instance": {
+        "type": "LinesMesh",
+        "required": false
+      },
+      "colors": {
+        "type": "Color4[][]",
+        "required": false
+      },
+      "useVertexAlpha": {
+        "type": "boolean",
+        "required": false
+      },
+      "material": {
+        "type": "Material",
+        "required": false
+      }
+    }
+  },
+  "CreateLines": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "points": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "instance": {
+        "type": "LinesMesh",
+        "required": false
+      },
+      "colors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "useVertexAlpha": {
+        "type": "boolean",
+        "required": false
+      },
+      "material": {
+        "type": "Material",
+        "required": false
+      }
+    }
+  },
+  "CreateDashedLines": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "points": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "dashSize": {
+        "type": "number",
+        "required": false
+      },
+      "gapSize": {
+        "type": "number",
+        "required": false
+      },
+      "dashNb": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "instance": {
+        "type": "LinesMesh",
+        "required": false
+      },
+      "useVertexAlpha": {
+        "type": "boolean",
+        "required": false
+      },
+      "material": {
+        "type": "Material",
+        "required": false
+      }
+    }
+  },
+  "ExtrudeShape": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "shape": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "path": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "scale": {
+        "type": "number",
+        "required": false
+      },
+      "rotation": {
+        "type": "number",
+        "required": false
+      },
+      "closeShape": {
+        "type": "boolean",
+        "required": false
+      },
+      "closePath": {
+        "type": "boolean",
+        "required": false
+      },
+      "cap": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "instance": {
+        "type": "Mesh",
+        "required": false
+      },
+      "invertUV": {
+        "type": "boolean",
+        "required": false
+      },
+      "firstNormal": {
+        "type": "Vector3",
+        "required": false
+      },
+      "adjustFrame": {
+        "type": "boolean",
+        "required": false
+      },
+      "capFunction": {
+        "type": "(shapePath: Vector3[]) => Vector3[]",
+        "required": false
+      }
+    }
+  },
+  "ExtrudeShapeCustom": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "shape": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "path": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "scaleFunction": {
+        "type": "(i: number, distance: number) => number",
+        "required": false
+      },
+      "rotationFunction": {
+        "type": "(i: number, distance: number) => number",
+        "required": false
+      },
+      "ribbonCloseArray": {
+        "type": "boolean",
+        "required": false
+      },
+      "ribbonClosePath": {
+        "type": "boolean",
+        "required": false
+      },
+      "closeShape": {
+        "type": "boolean",
+        "required": false
+      },
+      "closePath": {
+        "type": "boolean",
+        "required": false
+      },
+      "cap": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "instance": {
+        "type": "Mesh",
+        "required": false
+      },
+      "invertUV": {
+        "type": "boolean",
+        "required": false
+      },
+      "firstNormal": {
+        "type": "Vector3",
+        "required": false
+      },
+      "adjustFrame": {
+        "type": "boolean",
+        "required": false
+      },
+      "capFunction": {
+        "type": "(shapePath: Vector3[]) => Vector3[]",
+        "required": false
+      }
+    }
+  },
+  "CreateLathe": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "shape": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "radius": {
+        "type": "number",
+        "required": false
+      },
+      "tessellation": {
+        "type": "number",
+        "required": false
+      },
+      "clip": {
+        "type": "number",
+        "required": false
+      },
+      "arc": {
+        "type": "number",
+        "required": false
+      },
+      "closed": {
+        "type": "boolean",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "cap": {
+        "type": "number",
+        "required": false
+      },
+      "invertUV": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateTiledPlane": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "pattern": {
+        "type": "number",
+        "required": false
+      },
+      "tileSize": {
+        "type": "number",
+        "required": false
+      },
+      "tileWidth": {
+        "type": "number",
+        "required": false
+      },
+      "tileHeight": {
+        "type": "number",
+        "required": false
+      },
+      "size": {
+        "type": "number",
+        "required": false
+      },
+      "width": {
+        "type": "number",
+        "required": false
+      },
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "alignHorizontal": {
+        "type": "number",
+        "required": false
+      },
+      "alignVertical": {
+        "type": "number",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreatePlane": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "size": {
+        "type": "number",
+        "required": false
+      },
+      "width": {
+        "type": "number",
+        "required": false
+      },
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sourcePlane": {
+        "type": "Plane",
+        "required": false
+      }
+    }
+  },
+  "CreateGround": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "width": {
+        "type": "number",
+        "required": false
+      },
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "subdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "subdivisionsX": {
+        "type": "number",
+        "required": false
+      },
+      "subdivisionsY": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateTiledGround": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "xmin": {
+        "type": "number",
+        "required": true
+      },
+      "zmin": {
+        "type": "number",
+        "required": true
+      },
+      "xmax": {
+        "type": "number",
+        "required": true
+      },
+      "zmax": {
+        "type": "number",
+        "required": true
+      },
+      "subdivisions": {
+        "type": "{ w: number; h: number; }",
+        "required": false
+      },
+      "precision": {
+        "type": "{ w: number; h: number; }",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateGroundFromHeightMap": {
+    "parameters": [
+      "name",
+      "url",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "width": {
+        "type": "number",
+        "required": false
+      },
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "subdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "minHeight": {
+        "type": "number",
+        "required": false
+      },
+      "maxHeight": {
+        "type": "number",
+        "required": false
+      },
+      "colorFilter": {
+        "type": "Color3",
+        "required": false
+      },
+      "alphaFilter": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "onReady": {
+        "type": "(mesh: GroundMesh, heightBuffer?: Float32Array<ArrayBuffer>) => void",
+        "required": false
+      },
+      "onError": {
+        "type": "(message?: string, exception?: any) => void",
+        "required": false
+      },
+      "passHeightBufferInCallback": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreatePolygon": {
+    "parameters": [
+      "name",
+      "options",
+      "scene",
+      "earcutInjection"
+    ],
+    "fields": {
+      "shape": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "holes": {
+        "type": "Vector3[][]",
+        "required": false
+      },
+      "depth": {
+        "type": "number",
+        "required": false
+      },
+      "smoothingThreshold": {
+        "type": "number",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "wrap": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "ExtrudePolygon": {
+    "parameters": [
+      "name",
+      "options",
+      "scene",
+      "earcutInjection"
+    ],
+    "fields": {
+      "shape": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "holes": {
+        "type": "Vector3[][]",
+        "required": false
+      },
+      "depth": {
+        "type": "number",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "wrap": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateTube": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "path": {
+        "type": "Vector3[]",
+        "required": true
+      },
+      "radius": {
+        "type": "number",
+        "required": false
+      },
+      "tessellation": {
+        "type": "number",
+        "required": false
+      },
+      "radiusFunction": {
+        "type": "(i: number, distance: number) => number",
+        "required": false
+      },
+      "cap": {
+        "type": "number",
+        "required": false
+      },
+      "arc": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "instance": {
+        "type": "Mesh",
+        "required": false
+      },
+      "invertUV": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreatePolyhedron": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "type": {
+        "type": "number",
+        "required": false
+      },
+      "size": {
+        "type": "number",
+        "required": false
+      },
+      "sizeX": {
+        "type": "number",
+        "required": false
+      },
+      "sizeY": {
+        "type": "number",
+        "required": false
+      },
+      "sizeZ": {
+        "type": "number",
+        "required": false
+      },
+      "custom": {
+        "type": "any",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "flat": {
+        "type": "boolean",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      }
+    }
+  },
+  "CreateGeodesic": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "m": {
+        "type": "number",
+        "required": false
+      },
+      "n": {
+        "type": "number",
+        "required": false
+      },
+      "size": {
+        "type": "number",
+        "required": false
+      },
+      "sizeX": {
+        "type": "number",
+        "required": false
+      },
+      "sizeY": {
+        "type": "number",
+        "required": false
+      },
+      "sizeZ": {
+        "type": "number",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "flat": {
+        "type": "boolean",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "frontUVs": {
+        "type": "Vector4",
+        "required": false
+      },
+      "backUVs": {
+        "type": "Vector4",
+        "required": false
+      }
+    }
+  },
+  "CreateGoldberg": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "m": {
+        "type": "number",
+        "required": false
+      },
+      "n": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      },
+      "size": {
+        "type": "number",
+        "required": false
+      },
+      "sizeX": {
+        "type": "number",
+        "required": false
+      },
+      "sizeY": {
+        "type": "number",
+        "required": false
+      },
+      "sizeZ": {
+        "type": "number",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      }
+    }
+  },
+  "CreateDecal": {
+    "parameters": [
+      "name",
+      "sourceMesh",
+      "options"
+    ],
+    "fields": {
+      "position": {
+        "type": "Vector3",
+        "required": false
+      },
+      "normal": {
+        "type": "Vector3",
+        "required": false
+      },
+      "size": {
+        "type": "Vector3",
+        "required": false
+      },
+      "angle": {
+        "type": "number",
+        "required": false
+      },
+      "captureUVS": {
+        "type": "boolean",
+        "required": false
+      },
+      "cullBackFaces": {
+        "type": "boolean",
+        "required": false
+      },
+      "localMode": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateCapsule": {
+    "parameters": [
+      "name",
+      "options",
+      "scene"
+    ],
+    "fields": {
+      "orientation": {
+        "type": "Vector3",
+        "required": false
+      },
+      "subdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "tessellation": {
+        "type": "number",
+        "required": false
+      },
+      "height": {
+        "type": "number",
+        "required": false
+      },
+      "radius": {
+        "type": "number",
+        "required": false
+      },
+      "capSubdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "radiusTop": {
+        "type": "number",
+        "required": false
+      },
+      "radiusBottom": {
+        "type": "number",
+        "required": false
+      },
+      "topCapSubdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "bottomCapSubdivisions": {
+        "type": "number",
+        "required": false
+      },
+      "updatable": {
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "CreateText": {
+    "parameters": [
+      "name",
+      "text",
+      "fontData",
+      "options",
+      "scene",
+      "earcutInjection"
+    ],
+    "fields": {
+      "size": {
+        "type": "number",
+        "required": false
+      },
+      "resolution": {
+        "type": "number",
+        "required": false
+      },
+      "depth": {
+        "type": "number",
+        "required": false
+      },
+      "sideOrientation": {
+        "type": "number",
+        "required": false
+      },
+      "faceUV": {
+        "type": "Vector4[]",
+        "required": false
+      },
+      "faceColors": {
+        "type": "Color4[]",
+        "required": false
+      },
+      "perLetterFaceUV": {
+        "type": "(letterIndex: number) => Vector4[]",
+        "required": false
+      },
+      "perLetterFaceColors": {
+        "type": "(letterIndex: number) => Color4[]",
+        "required": false
+      }
+    }
+  }
+}

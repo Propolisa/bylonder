@@ -1,0 +1,33 @@
+{
+  "name": "babylon-workbench",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "node scripts/type-bundle.mjs && node scripts/mesh-schema.mjs && node scripts/source-archive.mjs && vite build",
+    "test": "node tests/store.test.js && node tests/editor.test.js && node tests/capture.test.js && node tests/repository.test.js && node tests/intelligence.test.js && node tests/object-operations.test.js && node tests/text.test.js && node tests/mobile.test.js && node tests/animation.test.js && node tests/modifiers.test.js"
+  },
+  "dependencies": {
+    "@babylonjs/core": "8.32.0",
+    "@babylonjs/inspector": "8.32.0",
+    "tweakpane": "4.0.5",
+    "@babylonjs/addons": "8.32.0",
+    "@babylonjs/gui": "8.32.0",
+    "@babylonjs/gui-editor": "8.32.0",
+    "@babylonjs/loaders": "8.32.0",
+    "@babylonjs/materials": "8.32.0",
+    "@babylonjs/serializers": "8.32.0",
+    "monaco-editor": "0.52.2",
+    "esbuild-wasm": "0.25.0",
+    "fflate": "0.8.2",
+    "fontkit": "2.0.4",
+    "earcut": "3.0.2",
+    "vue": "3.5.22",
+    "splitpanes": "4.1.2"
+  },
+  "devDependencies": {
+    "vite": "6.1.0",
+    "typescript": "5.7.3"
+  }
+}
