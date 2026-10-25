@@ -29,3 +29,12 @@ body{display:flex;flex-direction:column;height:100dvh}
 .explorer-bottom{border-color:var(--bl-gap)}.explorer-bottom button{background:var(--bl-widget);border:0;border-radius:var(--bl-radius);color:var(--bl-text)}
 #console-content{background:var(--bl-back)}
 @media(pointer:coarse){#appbar{height:40px;overflow-x:auto}#appbar>*{flex-shrink:0}#workspace-tabs{display:none}#appbar .bl-pulldown{height:34px;padding:0 8px}footer.bl-statusbar{display:none}.bl-datablock select{max-width:110px}}
+.bl-splash{width:min(520px,calc(100vw - 24px));padding:0;border:1px solid var(--bl-popup-line);border-radius:6px;background:var(--bl-popup);color:var(--bl-text);font:var(--bl-font);box-shadow:0 10px 40px #000a;overflow:hidden}
+.bl-splash::backdrop{background:#0006}
+.bl-splash-banner{display:flex;align-items:flex-end;gap:10px;height:150px;padding:16px 18px;background:radial-gradient(circle at 75% 30%,#e8873a 0,#a8431f 22%,#2a2f45 60%,#14161f 100%)}
+.bl-splash-banner .bl-icon{width:40px;height:40px;color:#fff}.bl-splash-banner strong{font-size:22px;font-weight:600}.bl-splash-banner span{margin-left:auto;color:#ffffffb0}
+.bl-splash-body{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px 16px}
+.bl-splash h3{margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid #ffffff14;font-size:12px;font-weight:400;color:var(--bl-text-dim)}
+.bl-splash button{display:flex;align-items:center;gap:6px;width:100%;height:22px;padding:0 6px;border:0;border-radius:3px;background:transparent;color:var(--bl-text);font:inherit;text-align:left;cursor:pointer}
+.bl-splash button:hover{background:var(--bl-select);color:#fff}
+@media(max-width:480px){.bl-splash-body{grid-template-columns:1fr}}

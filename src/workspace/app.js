@@ -4,6 +4,7 @@ import { mountWorkspaceLayout } from "./layout.js";
 import "./workspace.css";
 import "../theme.css";
 import { mountTopbar } from "./topbar.js";
+import { examples } from "./examples.js";
 import { monaco, language, setupIntelligence } from "./intelligence";
 import { openOPFS } from "./opfs";
 import { createRepository } from "./repository";
@@ -19,7 +20,7 @@ import { publishRun, removeRun } from "./module-host";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
-const topbar = mountTopbar({ dock, send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
+const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
 let repo,
   project,
   active = "index.js",
@@ -606,6 +607,11 @@ $("new-project").onclick = action(async () => {
   const created = await repo.create(name, defaultFiles());
   await load(created.id);
 });
+const openExample = action(async (example) => {
+  await save();
+  const created = await repo.create(example.title, example.files());
+  await load(created.id);
+});
 $("fork-project").onclick = action(async () => {
   const name = prompt("Fork name", project.name + " copy");
   if (!name) return;
@@ -818,6 +824,7 @@ document.addEventListener("visibilitychange", () => {
     if (!id) id = (await repo.create("Scene project", defaultFiles())).id;
     await load(id, !location.hash.startsWith("#project="));
     await sharing.incoming();
+    if (!projects.length && !location.hash.startsWith("#project=")) topbar.splash();
   } catch (e) {
     failure(e);
     if (!project) {

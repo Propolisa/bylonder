@@ -8,6 +8,7 @@ const contains = (ring, p) => {
   }
   return inside;
 };
+const area = ring => ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length];return sum+p.x*q.y-q.x*p.y;},0)/2;
 export function contours(commands, steps) {
   const rings = [];
   let ring = [], point = [0, 0];
@@ -45,11 +46,12 @@ export function textGeometry(font, options, scene) {
     run.glyphs.forEach((glyph,index) => {
       const pos = run.positions[index];
       const rings = contours(glyph.path.commands, resolution).map(ring => ring.map(p => new Vector2((p.x+pos.xOffset)*scale+x,(p.y+pos.yOffset)*scale-lineIndex*size*lineHeight)));
-      const levels = rings.map((ring,i) => rings.filter((other,j)=>i!==j&&contains(other,ring[0])).length);
-      rings.forEach((ring,i) => {
-        if (levels[i]%2) return;
+      const areas = rings.map(area), outer = Math.sign(areas.reduce((a,b)=>Math.abs(b)>Math.abs(a)?b:a,0));
+      const outers = rings.filter((ring,i)=>Math.sign(areas[i])===outer);
+      const parent = rings.map((ring,i)=>Math.sign(areas[i])===outer?null:outers.filter(o=>contains(o,ring[0])).sort((a,b)=>Math.abs(area(a))-Math.abs(area(b)))[0]);
+      outers.forEach(ring => {
         const builder = new PolygonMeshBuilder('__text',ring,scene,earcut);
-        rings.forEach((hole,j)=>{if(levels[j]===levels[i]+1&&contains(ring,hole[0]))builder.addHole(hole);});
+        rings.forEach((hole,j)=>{if(parent[j]===ring)builder.addHole(hole);});
         const data = builder.buildVertexData(depth);
         const offset = output.positions.length/3;
         for(let k=0;k<data.positions.length;k+=3) {

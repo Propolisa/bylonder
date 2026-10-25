@@ -1,7 +1,7 @@
 import { menuButton } from '../ui/menu.js';
 import { iconEl } from '../ui/icon.js';
 
-export function mountTopbar({ dock, send }) {
+export function mountTopbar({ dock, send, examples, openExample, newProject }) {
   const $ = id => document.getElementById(id);
   const click = id => () => $(id).click();
   const bar = $('appbar');
@@ -17,6 +17,7 @@ export function mountTopbar({ dock, send }) {
   menus.append(
     menuButton('File', [
       { label: 'New Project…', icon: 'file_new', run: click('new-project') },
+      { label: 'New from Example', items: examples.map(example => ({ label: example.title, run: () => openExample(example) })) },
       { label: 'Duplicate Project…', run: click('fork-project') },
       { label: 'Rename Project…', run: click('rename-project') },
       '-',
@@ -49,6 +50,7 @@ export function mountTopbar({ dock, send }) {
       { label: 'Reset Layout', run: () => dock.reset() },
     ]),
     menuButton('Help', [
+      { label: 'Splash Screen', icon: 'blender', run: () => splash() },
       { label: 'Keyboard Shortcuts', icon: 'help', keys: '?', run: () => send('help') },
       '-',
       { label: 'Babylon.js Documentation', run: () => open('https://doc.babylonjs.com/', '_blank', 'noopener') },
@@ -69,9 +71,40 @@ export function mountTopbar({ dock, send }) {
   sync();
   bar.querySelector('.bl-logo').replaceChildren(iconEl('blender'));
 
+  function splash() {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'bl-splash';
+    const item = (label, icon, run) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.append(iconEl(icon), label);
+      b.onclick = () => { dialog.close(); run(); };
+      return b;
+    };
+    const column = (heading, items) => {
+      const c = document.createElement('div');
+      c.append(Object.assign(document.createElement('h3'), { textContent: heading }), ...items);
+      return c;
+    };
+    const banner = document.createElement('div');
+    banner.className = 'bl-splash-banner';
+    banner.append(iconEl('blender'), Object.assign(document.createElement('strong'), { textContent: 'Bylonder' }), Object.assign(document.createElement('span'), { textContent: 'Babylon.js workbench' }));
+    const body = document.createElement('div');
+    body.className = 'bl-splash-body';
+    body.append(
+      column('New File', [item('General', 'file_new', newProject), ...examples.map(example => item(example.title, 'file_new', () => openExample(example)))]),
+      column('Learn', [item('Babylon.js Documentation', 'help', () => open('https://doc.babylonjs.com/', '_blank', 'noopener')), item('Keyboard Shortcuts', 'help', () => send('help')), item('Continue', 'play', () => {})]),
+    );
+    dialog.append(banner, body);
+    dialog.addEventListener('close', () => dialog.remove());
+    dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+    document.body.append(dialog);
+    dialog.showModal();
+  }
   const hints = $('status-hints'), stats = $('scene-stats');
   return {
     sync,
+    splash,
     status({ hints: list = [], stats: text = '' }) {
       hints.replaceChildren(...list.map(([icons, label]) => {
         const span = document.createElement('span');
