@@ -53,6 +53,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject }) {
       { label: 'Splash Screen', icon: 'blender', run: () => splash() },
       { label: 'Keyboard Shortcuts', icon: 'help', keys: '?', run: () => send('help') },
       '-',
+      { label: 'Bylonder Documentation', icon: 'help', run: () => open(import.meta.env.BASE_URL + 'docs.html', '_blank', 'noopener') },
       { label: 'Babylon.js Documentation', run: () => open('https://doc.babylonjs.com/', '_blank', 'noopener') },
       { label: 'Blender Interface Manual', run: () => open('https://docs.blender.org/manual/en/latest/interface/index.html', '_blank', 'noopener') },
     ]),

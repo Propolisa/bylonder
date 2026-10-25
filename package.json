@@ -25,6 +25,7 @@
     "esbuild-wasm": "0.25.0",
     "fflate": "0.8.2",
     "fontkit": "2.0.4",
+    "marked": "15.0.12",
     "monaco-editor": "0.52.2",
     "splitpanes": "4.1.2",
     "tweakpane": "4.0.5",
