@@ -1,5 +1,6 @@
 // The editable document is a set of named slices. A slice owns its data and exposes:
-//   capture()      -> JSON-safe state (diff from code defaults where possible)
+//   capture(options) -> JSON-safe state (diff from code defaults where possible);
+//                     options.save is true when writing saved scene edits rather than undo steps
 //   apply(state)   -> restore from a captured state; undefined means code defaults
 //   subscribe(fn)? -> notify on change, returns unsubscribe
 //   dispose()?
@@ -12,7 +13,7 @@ export function createDocument() {
       slices.set(id, slice);
       return slice;
     },
-    capture: () => Object.fromEntries([...slices].map(([id, slice]) => [id, slice.capture()])),
+    capture: (options = {}) => Object.fromEntries([...slices].map(([id, slice]) => [id, slice.capture(options)])),
     apply(state = {}) { for (const [id, slice] of slices) slice.apply(state[id]); },
     subscribe(fn) {
       const offs = [...slices.values()].map(slice => slice.subscribe?.(fn)).filter(Boolean);

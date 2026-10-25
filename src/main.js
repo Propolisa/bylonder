@@ -207,7 +207,7 @@ const currentOverrides = () => {
         JSON.stringify(row) !==
         JSON.stringify(baseline.find((b) => b.id === row.id)),
     );
-  return { transforms, stores: sdk.values(), ...documentState.capture() };
+  return { transforms, stores: sdk.values(), ...documentState.capture({ save: true }) };
 };
 saveOverrides = () => {
   if (!remember || creator?.pending || animation.evaluating || animation.playing) return;

@@ -140,13 +140,14 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
     },
     markGraphEdited(material) { material.metadata = { ...material.metadata, wbGraphEdited: true }; changed(); },
 
-    capture() {
+    capture({ save = false } = {}) {
       const state = { created: [], names: {}, graphs: {}, slots: {}, fake: [], textures: {}, removed: [] };
       for (const material of scene.materials) {
         if (internal(material)) continue;
         const id = materialId(material);
         if (material.metadata?.wbRemoved) { if (!material.metadata?.wbCreated) state.removed.push(id.replace(/#replaced$/, '')); continue; }
         if (material.metadata?.wbCreated) {
+          if (save && !users(material)) continue;
           state.created.push({ id, json: stripped(material) });
         } else {
           if (baseline.names[id] !== undefined && baseline.names[id] !== material.name) state.names[id] = material.name;

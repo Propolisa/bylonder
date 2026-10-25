@@ -50,8 +50,7 @@ export function createAnimationModel(onChange=()=>{}) {
   const changed=()=>{compiled.clear();onChange(api.serialize());notify();};
   const evaluate=()=>{
     evaluating=true;
-    try{for(const track of action.tracks){const channel=channels.get(address(track.id,track.path));if(channel?.available()&&track.keys.length&&!track.muted){const c=curve(track);const value=c.decode(c.animation.evaluate(action.frame));if(typeof value===typeof channel.get())channel.set(value);}}
-      for(const [ref,channel] of channels)if(channel.available())pose.set(ref,clone(channel.get()));
+    try{for(const track of action.tracks){const ref=address(track.id,track.path),channel=channels.get(ref);if(channel?.available()&&track.keys.length&&!track.muted){const c=curve(track);const value=c.decode(c.animation.evaluate(action.frame));if(typeof value===typeof channel.get())channel.set(value);pose.set(ref,channel.get());}}
     }finally{evaluating=false;}
     notify();
   };
@@ -63,7 +62,7 @@ export function createAnimationModel(onChange=()=>{}) {
     subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     register({id,path,label=path,group=id,get,set,available=()=>true,transform=false,options}){
       const ref=address(id,path);
-      if(channels.has(ref)){Object.assign(channels.get(ref),{label,group});return ref;}
+      if(channels.has(ref)){Object.assign(channels.get(ref),{label,group,get,set,available,transform,options});return ref;}
       if(!scalar(get()))throw Error('Animation channels must be scalar: '+ref);
       channels.set(ref,{id,path,label,group,get,set,available,transform,options});pose.set(ref,clone(get()));notify();return ref;
     },
