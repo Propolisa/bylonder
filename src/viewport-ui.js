@@ -2,6 +2,7 @@ import { Color3, Color4, MeshBuilder, Vector3 } from '@babylonjs/core';
 import { GridMaterial } from '@babylonjs/materials/grid/gridMaterial';
 import { menuButton } from './ui/menu.js';
 import { iconEl, iconButton } from './ui/icon.js';
+import { nodeId } from './objects/identity.js';
 
 const toolIcons = {
   select: 'M5 2v14l3.6-3.4 2.6 5.6 2.2-1-2.6-5.5H16Z',
@@ -78,8 +79,8 @@ export function mountViewportUI({ world, editor, nav, creator, registry, dock, s
     '-',
     ...['duplicate', 'rename', 'delete'].map(action),
     '-',
-    { label: 'Parent', items: ['parent', 'unparent'].map(action) },
-    { label: 'Collection', items: ['group', 'ungroup'].map(action) },
+    { label: 'Parent', items: ['parent', 'unparent', 'group', 'ungroup'].map(action) },
+    { label: 'Collection', items: ['move-to-collection', 'link-to-collection', 'new-collection', 'remove-from-collection'].map(action) },
     { label: 'Show/Hide', items: ['hide', 'hide-others', 'show-all', 'isolate'].map(action) },
     '-',
     ...['add-array', 'creation', 'edit-text'].map(action),
@@ -98,8 +99,7 @@ export function mountViewportUI({ world, editor, nav, creator, registry, dock, s
   const setShading = id => { state.shading = id; sync(); };
   const sync = () => {
     scene.forceWireframe = state.shading === 'wire';
-    world.compositor?.setViewportActive(state.shading === 'rendered' || isCameraView());
-    world.worlds?.setViewportActive(state.shading === 'rendered' || isCameraView());
+    world.setViewportRendered?.(state.shading === 'rendered' || isCameraView());
     const showOverlays = state.overlays && state.shading !== 'rendered' && !isCameraView();
     overlays.forEach(mesh => mesh.setEnabled(showOverlays));
     section.classList.toggle('overlays-off', !state.overlays || isCameraView());
@@ -163,14 +163,17 @@ export function mountViewportUI({ world, editor, nav, creator, registry, dock, s
   let last = '', lastStatus = 0;
   const status = () => {
     const active = editor.selection.nodes.at(-1);
-    const visible = world.objects.filter(n => n.isEnabled() && !n.isDisposed() && n.getTotalVertices);
+    // Blender shows the active object's collection (or the active collection) before the object name.
+    const cols = world.collections, home = active && world.objects.includes(active) ? cols?.memberships(nodeId(active))[0] : cols?.active;
+    const collection = !cols || !home || home === cols.MASTER ? 'Scene Collection' : cols.byId(home).name;
+    const visible = world.objects.filter(n => n.isEnabled() && n.isVisible !== false && !n.isDisposed() && n.getTotalVertices);
     const verts = visible.reduce((s, n) => s + n.getTotalVertices(), 0);
     const tris = visible.reduce((s, n) => s + (n.getTotalIndices() || n.getTotalVertices()) / 3, 0);
-    detail.textContent = `(${Math.round(world.animation.action.frame)}) Scene Collection${active ? ' | ' + active.name : ''}`;
+    detail.textContent = `(${Math.round(world.animation.time.frame)}) ${collection}${active ? ' | ' + active.name : ''}`;
     const hints = editor.modal
       ? [[['mouse_lmb'], 'Confirm'], [['mouse_rmb'], 'Cancel'], [['X', 'Y', 'Z'], 'Axis'], [['Shift'], 'Precision'], [['Ctrl'], 'Snap']]
       : [[['mouse_lmb'], 'Select'], [['mouse_mmb'], 'Rotate View'], [['mouse_rmb'], 'Object Context Menu']];
-    const stats = `Scene Collection${active ? ' | ' + active.name : ''} | Verts:${verts.toLocaleString()} | Tris:${Math.round(tris).toLocaleString()} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${Math.round(world.engine.getFps())} FPS`;
+    const stats = `${collection}${active ? ' | ' + active.name : ''} | Verts:${verts.toLocaleString()} | Tris:${Math.round(tris).toLocaleString()} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${Math.round(world.engine.getFps())} FPS`;
     const next = JSON.stringify([hints, stats]);
     if (next !== last) { last = next; send('status', { hints, stats }); }
   };

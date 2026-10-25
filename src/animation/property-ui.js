@@ -9,10 +9,10 @@ export function decorateProperty(binding, animation, references, {label,commit=(
     const state=states.includes('changed')?'changed':states.includes('keyed')?'keyed':states.includes('animated')?'animated':'none';
     element.dataset.animation=state;button.textContent=state==='keyed'?'◆':'◇';button.disabled=!list.length||states.every(s=>s==='unavailable');
     const detail=list.map(ref=>{const ch=animation.channels.get(ref);return ch?`${ch.label}: ${JSON.stringify(ch.get())}\n${ch.id} → ${ch.path}`:ref;}).join('\n');
-    element.title=`${label||''}\n${detail}\n${state} at frame ${Math.round(animation.action.frame)}. I: insert; Alt-I: delete key. Right-click for animation options.`;
+    element.title=`${label||''}\n${detail}\n${state} at frame ${Math.round(animation.time.frame)}. I: insert; Alt-I: delete key. Right-click for animation options.`;
     button.title=`${state==='keyed'?'Delete':'Insert'} keyframe · ${label||''}\n${detail}`;button.setAttribute('aria-label',button.title);
   };
-  const remove=()=>animation.deleteKeys(refs().map(ref=>({ref,frame:Math.round(animation.action.frame)})));
+  const remove=()=>animation.deleteKeys(refs().map(ref=>({ref,frame:Math.round(animation.time.frame)})));
   button.onclick=e=>{e.stopPropagation();animation.state(refs()[0])==='keyed'?remove():animation.insert(refs());};
   let hover=false;
   const key=e=>{if(e.target.closest('input,textarea,select,[contenteditable=true]')||!hover||e.key.toLowerCase()!=='i'||e.ctrlKey||e.metaKey)return;e.preventDefault();e.stopImmediatePropagation();e.altKey?remove():animation.insert(refs());};

@@ -47,3 +47,8 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #objects .tree-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #objects .tree-data{width:14px;height:14px;margin-left:6px}
 @media(pointer:coarse){#panel>.section-label,#panel>.tree-tools{display:flex}#objects .object-row{height:auto}}
+#objects .collection-row .tree-exclude{min-width:18px}
+#objects .collection-row .tree-exclude .bl-icon{width:13px;height:13px}
+#objects .object-row.active-collection,#tree-root.active-collection{background:#ffffff14}
+#objects .object-row.active-collection .tree-label,#tree-root.active-collection span{color:#fff}
+#tree-root{cursor:default}

@@ -1,4 +1,4 @@
-import { validateAction } from '../animation/model.js';
+import { normalizeAnimation } from '../animation/model.js';
 import { gzipSync, Gunzip, strToU8, strFromU8 } from 'fflate';
 import { validateFiles, normalizePath } from './project-model.js';
 const MAX_BYTES=8*1024*1024, MAX_HASH=128*1024;
@@ -11,7 +11,7 @@ function validate(payload){
   if(!payload.settings||typeof payload.settings!=='object'||Array.isArray(payload.settings))throw Error('Invalid project settings.');
   payload.settings={...payload.settings,remember:!!payload.settings.remember};
   if(!payload.overrides||typeof payload.overrides!=='object'||Array.isArray(payload.overrides))throw Error('Invalid scene overrides.');
-  if(payload.animation) payload.animation=validateAction(payload.animation);
+  if(payload.animation) payload.animation=normalizeAnimation(payload.animation);
   return payload;
 }
 export function encodeProject(project,{includeOverrides=true,overrides=project.overrides}={}){

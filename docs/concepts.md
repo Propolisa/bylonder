@@ -29,8 +29,8 @@ Most useful files: `scripts/startup/bl_ui/properties_*.py` (exact panel layout a
 |---|---|---|
 | Datablock (ID), users, fake user, link/append | Plain objects in `Scene`; `AssetContainer` for add/remove sets | IDs by `wbId` or name; users counted for materials and worlds |
 | Scene | `Scene` | One scene per run; Properties > Scene (name, camera, units, gravity) |
-| Scene collection, collections (nested, objects in many) | No equivalent. Parenting via `TransformNode`; `AssetContainer` groups assets | Groups are `TransformNode` parents (one parent only) |
-| View layer (per-scene include/exclude, holdout, passes) | `layerMask` on meshes and cameras; rendering groups | None |
+| Scene collection, collections (nested, objects in many) | No equivalent. Parenting via `TransformNode`; `AssetContainer` groups assets | Collections as data, mapped to per-mesh `isVisible`; parenting separate |
+| View layer (per-scene include/exclude, holdout, passes) | `layerMask` on meshes and cameras; rendering groups | View layers with exclude and hide per collection |
 | Object vs object data (mesh, camera, light shared by many objects) | Mesh holds geometry; `InstancedMesh`, `clone`, thin instances share geometry | Not modelled |
 | Object restriction toggles (hide viewport, disable viewport/render, selectable) | `setEnabled`, `isVisible`, `isPickable` | Eye and selectable toggles |
 | Modifiers stack | No stack; Node Geometry, thin instances | Own stack (Array, Geometry Nodes) |
@@ -42,9 +42,9 @@ Most useful files: `scripts/startup/bl_ui/properties_*.py` (exact panel layout a
 | Camera data (lens, clipping, DOF, sensor) | `Camera` (fov, minZ/maxZ), pipeline DOF | Authored camera via Scene mode |
 | Lights (point, sun, spot, area) | Point, Directional, Spot, Hemispheric, `RectAreaLight` | Shown in Outliner only |
 | Render engine (EEVEE, Cycles, Workbench) | One rasterizer; quality via pipelines and settings | Viewport shading modes |
-| Color management (view transform, look, exposure, gamma) | `ImageProcessingConfiguration` | None |
-| Render settings (sampling, motion blur, DOF, raytracing, volumes) | Default rendering pipeline, SSAO, SSR, motion blur, IBL shadows | None |
-| Output (resolution, fps, frame range, format) | Engine size, hardware scaling; `VideoRecorder` | Hardware scaling, action fps and range |
+| Color management (view transform, look, exposure, gamma) | `ImageProcessingConfiguration` | Render > Color Management (no gamma) |
+| Render settings (sampling, motion blur, DOF, raytracing, volumes) | Default rendering pipeline, SSAO, SSR, motion blur, IBL shadows | Render tab: samples, raytracing, motion blur |
+| Output (resolution, fps, frame range, format) | Engine size, hardware scaling; `VideoRecorder` | Output tab: frame rate, frame range; hardware scaling as a device setting |
 | Compositor | Frame graph / Node Render Graph | Compositor (Use Nodes) |
 | Actions, slots, F-Curves | `Animation`, `AnimationGroup` | One action, tracks by address |
 | NLA (tracks, strips, blend, influence) | `AnimationGroup` weight, `isAdditive`, masks, blending | None |
@@ -77,7 +77,7 @@ Blender: objects live in the file and are referenced by collections; every scene
 
 Babylon: no collections or view layers. Closest tools: `layerMask` bitmasks on meshes vs cameras (camera renders meshes whose mask overlaps), `renderingGroupId` for draw ordering, `setEnabled`/`isVisible`/`isPickable` per node, `AssetContainer` for adding and removing sets, multiple cameras. Render passes correspond to frame graph tasks (depth, normals, geometry buffers).
 
-Ours: none of this exists yet. Outliner shows a single "Scene Collection" root over object parenting.
+Ours: collections (nested, objects linked to several), the Scene Collection, and view layers with Exclude and Hide in Viewport per collection, plus collection Disable Selection and Disable in Viewports. Outliner in View Layer mode with drag to move (Ctrl to link), collection context menu, active collection; Properties > View Layer (selector) and Collection (Restrictions); Object > Collections panel; M, Shift+M, Ctrl+G, Ctrl+Alt+G. Babylon: `isVisible` per mesh. Not yet: holdout, indirect only, disable in renders, instancing, lights and cameras in collections.
 
 ## Render settings
 
@@ -87,7 +87,7 @@ Babylon: one rasterizer. Quality and effects come from `DefaultRenderingPipeline
 
 Mapping notes: Blender view transforms Standard, ACES and Khronos PBR Neutral have direct Babylon tone mapping counterparts; AgX and Filmic do not (would need a LUT or custom post process, unverified). Film transparent maps to clear color alpha. Engine selection could map to presets of these pipelines rather than to separate renderers.
 
-Ours: Render menu offers hardware scaling only; the compositor exists separately.
+Ours: Properties > Render with Render Engine (Babylon), Sampling > Viewport Samples (MSAA), Raytracing (Screen-Trace = SSR, Fast GI Ambient Occlusion = SSAO2), Motion Blur (shutter), Color Management (sRGB, view transform, look, exposure). Applies in Rendered shading and camera view. Bloom stays in the Compositor. The Render menu's hardware scaling is a device setting, like Blender's Preferences resolution scale.
 
 ## Output settings
 
@@ -95,7 +95,7 @@ Blender (Properties > Output, `properties_output.py`): Format (resolution X/Y, p
 
 Babylon: canvas size and `engine.setHardwareScalingLevel`; screenshots via `CreateScreenshotUsingRenderTarget`; video via `VideoRecorder` (WebM in browsers); no frame range concept outside animations.
 
-Ours: frame range and fps live on the single action (Timeline > Playback), not on the scene. Blender keeps fps and frame range on the scene, with an optional preview range (`psfra`, `pefra`).
+Ours: scene time (`src/scene/time.js`) holds frame current/start/end/step, fps, preview range and auto keying, as on Blender's Scene. Properties > Output has Format > Frame Rate (Blender presets plus Custom) and Frame Range. The Timeline has the preview range toggle; Start/End edit the preview range while it is on. No resolution or file output.
 
 ## World
 
@@ -128,4 +128,4 @@ Babylon: `Animation` (one property path, keys with optional in/out tangents and 
 
 Mapping notes: our tracks compile to Babylon `Animation` already. A Blender action with slots maps naturally onto an `AnimationGroup` whose targeted animations come from the slot assigned to each target. NLA strips map to groups with `weight` (influence), `isAdditive` (add/combine), `from`/`to` (action range) and `speedRatio` (scale); replace blending on Babylon blends by weight, so Blender's exact stack math needs checking (unverified). Easing families map to Babylon easing functions. Drivers and keying sets have no Babylon counterpart and stay ours.
 
-Ours: one action per project with tracks keyed by `[id, path]` (component in the path), Bezier/Linear/Constant, whole-frame keys, fps and range on the action, auto key for transforms, Timeline with summary row and channel region, keyed state colors. No slots, NLA, drivers, keying sets, markers, F-Curve modifiers, easing or handle editing.
+Ours: one action per project with tracks keyed by `[id, path]` (component in the path), Bezier/Linear/Constant, whole-frame keys, fps and range on the scene (scene time), auto key for transforms, Timeline with summary row and channel region, keyed state colors. No slots, NLA, drivers, keying sets, markers, F-Curve modifiers, easing or handle editing.

@@ -26,7 +26,7 @@ export const PropertyRow=defineComponent({props:['field','animation','commit'],s
   const pointerUp=e=>{if(!drag)return;const moved=drag.moved;drag=null;e.currentTarget.releasePointerCapture(e.pointerId);if(moved){props.field.set(value(),true);props.commit?.();}else edit();};
   const refs=()=>props.field.refs?.()||[];
   const keyframe=()=>props.animation?.insert(refs());
-  const deleteKey=()=>props.animation?.deleteKeys(refs().map(ref=>({ref,frame:Math.round(props.animation.action.frame)})));
+  const deleteKey=()=>props.animation?.deleteKeys(refs().map(ref=>({ref,frame:Math.round(props.animation.time.frame)})));
   const cancelDrag=()=>{if(drag){set(drag.value,false);drag=null;}};
   const escape=e=>{if(e.key==='Escape'&&drag){e.preventDefault();cancelDrag();}};window.addEventListener('keydown',escape);onBeforeUnmount(()=>window.removeEventListener('keydown',escape));
   const context=e=>{e.preventDefault();cancelDrag();const menu=document.createElement('dialog');menu.className='bl-context-menu';

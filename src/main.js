@@ -31,6 +31,8 @@ import { mountViewportUI } from "./viewport-ui.js";
 import { createMaterialLibrary } from "./materials/library.js";
 import { createSceneSettings } from "./scene/settings.js";
 import { createWorlds } from "./scene/world.js";
+import { createRenderSettings } from "./scene/render.js";
+import { createCollections } from "./scene/collections.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createNavigation } from "./navigation";
@@ -159,6 +161,7 @@ try {
 }
 let authoredCamera = scene.activeCamera;
 let editMode = true;
+let viewportUI;
 authoredCamera?.detachControl();
 const camera = new BABYLON.ArcRotateCamera(
   "__editorCamera",
@@ -270,9 +273,14 @@ world.sceneSettings = documentState.register("scene", createSceneSettings(world,
     if (!editMode) { authoredCamera?.detachControl(); scene.activeCamera = next; next.attachControl(canvas, true); }
     authoredCamera = next;
     world.compositor?.syncCamera();
+    viewportUI?.sync();
   },
 } }));
 world.worlds = documentState.register("worlds", createWorlds(world, { commit, asset: (path) => sdk.asset(path) }));
+world.renderSettings = documentState.register("render", createRenderSettings(world, { commit }));
+world.collections = documentState.register("collections", createCollections(world, { commit }));
+// Rendered shading or camera view: world background/volume, render-engine effects and the compositor apply.
+world.setViewportRendered = (value) => [world.worlds, world.renderSettings, world.compositor].forEach((m) => m?.setViewportActive(value));
 world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));
 world.logic = documentState.register("logic", createLogic(world, { commit, notify }));
 documentState.register("channels", channelSlice(animation, (channel) => /^(store|modifier|world):/.test(channel.id) || channel.id === "scene"));
@@ -298,7 +306,7 @@ history = createHistory(world.objects, () => {
   for(const [ref,value] of Object.entries(data?.properties||{}))animation.channels.get(ref)?.set(value);
   world.modifiers.refresh();
   animation.load(data?.animation,{apply:false});
-},beforeCommit:()=>animation.captureEdits()});
+},beforeCommit:()=>{world.collections.adopt();animation.captureEdits();}});
 animation.setCommit(()=>history.commit());
 const capture = createMouseCapture(canvas, notify);
 const editor = createEditor(
@@ -334,7 +342,6 @@ const toggleCameraView = () => {
   world.compositor.syncCamera();
 };
 document.querySelector("#scene-mode").onclick = toggleCameraView;
-let viewportUI;
 const commands = createObjectCommands(world, editor, history, () =>
   ui?.refresh(),
 );
@@ -360,6 +367,11 @@ world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, nav, canvas, creator);
+// Like Blender, objects hidden or excluded through their collections drop out of the selection.
+world.collections.subscribe(() => {
+  const keep = editor.selection.nodes.filter((n) => world.collections.status(n).visible);
+  if (keep.length !== editor.selection.size) { editor.selection.replace(keep); editor.reconcile(); }
+});
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
 ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || []);
@@ -472,14 +484,9 @@ const key = (e) => {
     creator.finish();
     return;
   }
-  if (!mod && k === 'i') { e.preventDefault(); e.altKey ? animation.deleteKeys(objectRefs(editor.selection.roots).map(ref=>({ref,frame:Math.round(animation.action.frame)}))) : insertKeys(); return; }
+  if (!mod && k === 'i') { e.preventDefault(); e.altKey ? animation.deleteKeys(objectRefs(editor.selection.roots).map(ref=>({ref,frame:Math.round(animation.time.frame)}))) : insertKeys(); return; }
   if (e.code === 'Space') {e.preventDefault();animation.play();return;}
   if (world.objectActions.key(e)) return;
-  if (mod && k === "g") {
-    e.preventDefault();
-    e.altKey ? editor.ungroup() : editor.group();
-    return;
-  }
   if (mod && !["1", "3", "7"].includes(k)) return;
   if (["g", "r", "s"].includes(k)) {
     e.preventDefault();

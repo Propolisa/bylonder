@@ -10,20 +10,24 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
   const allKeys=()=>animation.action.tracks.flatMap(t=>t.keys.map(k=>({ref:address(t.id,t.path),frame:k.frame})));
   const remove=()=>{animation.deleteKeys(state.selected);state.selected=[];};
   const move=(delta,duplicate=false)=>{if(!state.selected.length||!delta)return;animation.editKeys(state.selected,{offset:delta,duplicate});state.selected=state.selected.map(s=>({...s,frame:s.frame+delta}));};
-  const jump=direction=>{const frames=[...new Set(animation.action.tracks.flatMap(t=>t.keys.map(k=>k.frame)))].sort((a,b)=>a-b);animation.seek(direction<0?frames.filter(f=>f<animation.action.frame).at(-1)??animation.action.start:frames.find(f=>f>animation.action.frame)??animation.action.end);};
+  const time=animation.time;
+  const jump=direction=>{const frames=[...new Set(animation.action.tracks.flatMap(t=>t.keys.map(k=>k.frame)))].sort((a,b)=>a-b),[first,last]=time.range();animation.seek(direction<0?frames.filter(f=>f<time.frame).at(-1)??first:frames.find(f=>f>time.frame)??last);};
+  // Start/End edit the preview range while it is enabled, as in Blender's Timeline header.
+  const rangeKeys=()=>time.state.usePreviewRange?['framePreviewStart','framePreviewEnd']:['frameStart','frameEnd'];
+  const setRange=(i,n)=>{const keys=rangeKeys(),[a,b]=time.range();if(n!==null&&(i?n>a:n<b))time.configure({[keys[i]]:n});};
   const ask=(label,value)=>{const n=Number(prompt(label,value));return Number.isFinite(n)?Math.round(n):null;};
   const label=(track,ch)=>({group:ch?.group||names(track.id)||track.id,name:ch?.label||track.path});
   const bar=header||null;
   const menus=[
     menuButton('Playback',()=>[
-      {label:'Loop Playback',checked:()=>animation.action.loop,run:()=>animation.configure({loop:!animation.action.loop})},
-      {label:'Frame Rate',items:[12,24,25,30,48,60,120].map(fps=>({label:fps+' fps',checked:()=>animation.action.fps===fps,run:()=>animation.configure({fps})}))},
+      {label:'Loop Playback',checked:()=>time.state.loop,run:()=>time.configure({loop:!time.state.loop})},
       '-',
-      {label:'Set Start Frame…',run:()=>{const n=ask('Start frame',animation.action.start);if(n!==null&&n<animation.action.end)animation.configure({start:n});}},
-      {label:'Set End Frame…',run:()=>{const n=ask('End frame',animation.action.end);if(n!==null&&n>animation.action.start)animation.configure({end:n});}},
+      {label:'Set Start Frame…',run:()=>setRange(0,ask('Start frame',time.range()[0]))},
+      {label:'Set End Frame…',run:()=>setRange(1,ask('End frame',time.range()[1]))},
+      {label:'Use Preview Range',checked:()=>time.state.usePreviewRange,run:()=>time.configure({usePreviewRange:!time.state.usePreviewRange})},
     ]),
     menuButton('Keying',()=>[
-      {label:'Auto Keying',checked:()=>animation.action.autoKey,run:()=>animation.configure({autoKey:!animation.action.autoKey})},
+      {label:'Auto Keying',checked:()=>time.state.autoKey,run:()=>time.configure({autoKey:!time.state.autoKey})},
       '-',
       {label:'Insert Keyframe',icon:'keyframe',keys:'I',run:insert},
       {label:'Delete Keyframes',keys:'Alt I',enabled:()=>state.selected.length>0,run:remove},
@@ -59,7 +63,7 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
     else if(k==='i'){e.preventDefault();e.altKey?remove():insert();}
     else if(k==='a'&&!mod){e.preventDefault();state.selected=e.altKey?[]:allKeys();}
     else if(k==='d'&&e.shiftKey){e.preventDefault();move(ask('Duplicate selected keys, offset in frames',10),true);}
-    else if(k==='arrowleft'||k==='arrowright'){e.preventDefault();const dir=k==='arrowleft'?-1:1;e.shiftKey?animation.seek(dir<0?animation.action.start:animation.action.end):animation.seek(Math.round(animation.action.frame)+dir);}
+    else if(k==='arrowleft'||k==='arrowright'){e.preventDefault();const dir=k==='arrowleft'?-1:1;e.shiftKey?animation.seek(time.range()[dir<0?0:1]):animation.seek(Math.round(time.frame)+dir);}
     else if(k==='arrowup'||k==='arrowdown'){e.preventDefault();jump(k==='arrowup'?1:-1);}
     else if(k==='home'){e.preventDefault();state.zoom=1;state.offset=0;}
     else if(mod&&(k==='+'||k==='=')){e.preventDefault();state.zoom=Math.min(64,state.zoom*2);}
@@ -69,7 +73,7 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
   };
   const app=createApp({setup(){return()=>{
     state.revision;
-    const action=animation.action,pad=Math.max(2,(action.end-action.start)*0.04),start=action.start-pad/state.zoom+state.offset,span=(action.end-action.start+2*pad)/state.zoom;
+    const action=animation.action,t=time.state,[first,last]=time.range(),preview=t.usePreviewRange,pad=Math.max(2,(t.frameEnd-t.frameStart)*0.04),start=t.frameStart-pad/state.zoom+state.offset,span=(t.frameEnd-t.frameStart+2*pad)/state.zoom;
     const x=frame=>100*(frame-start)/span;
     const tracks=action.tracks.filter(t=>{const ch=animation.channels.get(address(t.id,t.path)),l=label(t,ch);return `${l.group} ${l.name}`.toLowerCase().includes(state.filter.toLowerCase());});
     const step=[1,2,5,10,20,25,50,100,200,250,500,1000].find(s=>span/s<=12)||1000,ticks=[];
@@ -89,28 +93,29 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
     };
     const diamond=(entries,frame,title)=>h('button',{class:['timeline-key',{selected:entries.every(s=>selected(s.ref,s.frame))}],style:{left:x(frame)+'%'},title,'aria-label':`Key at frame ${frame}`,onPointerdown:e=>keyPointer(e,entries,frame)});
     const lane=(children,attrs={})=>h('div',{class:'timeline-lane',onPointerdown:drag,onWheel:wheel,...attrs},[
-      h('i',{class:'timeline-range',style:{left:0,width:Math.max(0,x(action.start))+'%'}}),h('i',{class:'timeline-range',style:{left:Math.min(100,x(action.end))+'%',right:0}}),
+      h('i',{class:['timeline-range',{preview}],style:{left:0,width:Math.max(0,x(first))+'%'}}),h('i',{class:['timeline-range',{preview}],style:{left:Math.min(100,x(last))+'%',right:0}}),
       ...ticks.map(f=>h('i',{class:'timeline-grid',style:{left:x(f)+'%'}})),...children]);
     const summary=new Map();for(const t of tracks)for(const k of t.keys){if(x(k.frame)<0||x(k.frame)>100)continue;if(!summary.has(k.frame))summary.set(k.frame,[]);summary.get(k.frame).push({ref:address(t.id,t.path),frame:k.frame});}
     const controls=h('div',{class:'timeline-controls'},[
-      button(action.autoKey?'rec':'rec','Auto Keying',()=>animation.configure({autoKey:!action.autoKey}),{class:['bl-icon-button','timeline-record',{enabled:action.autoKey}],'aria-pressed':action.autoKey}),
+      button('rec','Auto Keying',()=>time.configure({autoKey:!t.autoKey}),{class:['bl-icon-button','timeline-record',{enabled:t.autoKey}],'aria-pressed':t.autoKey}),
       h('span',{class:'bl-sep'}),
       h('span',{class:'bl-group'},[
-        button('rew','Jump to Endpoint (Shift Left)',()=>animation.seek(action.start)),button('prev_keyframe','Jump to Keyframe (Down)',()=>jump(-1)),
+        button('rew','Jump to Endpoint (Shift Left)',()=>animation.seek(first)),button('prev_keyframe','Jump to Keyframe (Down)',()=>jump(-1)),
         button(animation.playing?'pause':'play','Play Animation (Space)',()=>animation.play(),{'aria-pressed':animation.playing}),
-        button('next_keyframe','Jump to Keyframe (Up)',()=>jump(1)),button('ff','Jump to Endpoint (Shift Right)',()=>animation.seek(action.end))]),
+        button('next_keyframe','Jump to Keyframe (Up)',()=>jump(1)),button('ff','Jump to Endpoint (Shift Right)',()=>animation.seek(last))]),
       h('span',{class:'bl-sep'}),
-      numeric('Current Frame',Math.round(action.frame),n=>animation.seek(n)),
+      numeric('Current Frame',Math.round(time.frame),n=>animation.seek(n)),
       h('span',{class:'bl-sep'}),
-      h('span',{class:'bl-group timeline-range-fields'},[numeric('Start Frame',action.start,n=>{if(n<action.end)animation.configure({start:n});},'Start'),numeric('End Frame',action.end,n=>{if(n>action.start)animation.configure({end:n});},'End')])
+      button('preview_range','Use Preview Range',()=>time.configure({usePreviewRange:!preview}),{'aria-pressed':preview}),
+      h('span',{class:['bl-group timeline-range-fields',{preview}]},[numeric(preview?'Preview Start Frame':'Start Frame',first,n=>setRange(0,n),'Start'),numeric(preview?'Preview End Frame':'End Frame',last,n=>setRange(1,n),'End')])
     ]);
-    const frame=Math.round(action.frame);
+    const frame=Math.round(time.frame);
     return h('section',{class:['timeline',{'show-channels':state.channels}],tabindex:0,onKeydown:keydown},[
       bar?h(Teleport,{to:transport},[controls]):h('header',{class:'timeline-header'},[h('div',{class:'timeline-menus',ref:el=>{if(el&&!el.childElementCount)el.append(...menus);}}),controls]),
       h('div',{class:'timeline-body'},[
         h('div',{class:'timeline-row timeline-ruler'},[
           h('div',{class:'timeline-channel'},[h('label',{class:'bl-search'},[icon('VIEWZOOM'),h('input',{value:state.filter,title:'Filter channels',onInput:e=>state.filter=e.target.value})])]),
-          lane([...ticks.map(f=>h('span',{class:'timeline-tick',style:{left:x(f)+'%'}},String(f))),h('b',{class:'timeline-frame',style:{left:x(action.frame)+'%'}},String(frame))])
+          lane([...ticks.map(f=>h('span',{class:'timeline-tick',style:{left:x(f)+'%'}},String(f))),h('b',{class:'timeline-frame',style:{left:x(time.frame)+'%'}},String(frame))])
         ]),
         h('div',{class:'timeline-row timeline-summary'},[h('div',{class:'timeline-channel'},[h('span','Summary')]),lane([...summary].map(([f,entries])=>diamond(entries,f,`Frame ${f} · ${entries.length} keys`)))]),
         ...(state.channels?tracks:[]).map(track=>{const ref=address(track.id,track.path),ch=animation.channels.get(ref),missing=!ch?.available(),l=label(track,ch);return h('div',{class:['timeline-row',{missing}]},[
@@ -119,7 +124,7 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
           lane(track.keys.filter(k=>x(k.frame)>=0&&x(k.frame)<=100).map(k=>diamond([{ref,frame:k.frame}],k.frame,`${l.name}\nFrame ${k.frame} · ${JSON.stringify(k.value)}\n${k.interpolation} · Drag to move; Alt-drag to duplicate; Shift to select`)))
         ]);}),
         h('div',{class:'timeline-row timeline-fill'},[h('div',{class:'timeline-channel'}),lane([])]),
-        h('i',{class:'timeline-playhead',style:{left:`calc(var(--channels) + (100% - var(--channels)) * ${x(action.frame)/100})`}})
+        h('i',{class:'timeline-playhead',style:{left:`calc(var(--channels) + (100% - var(--channels)) * ${x(time.frame)/100})`}})
       ])
     ]);
   };}});

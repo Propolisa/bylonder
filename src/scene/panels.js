@@ -91,3 +91,25 @@ export function worldPanels({ world, row, panel, files = [] }) {
     ], { defaultClosed: true }),
   ];
 }
+
+// Blender's Frame Rate presets (fps / fps_base collapsed into one number).
+let customFps = false; // UI only: Custom chosen in the preset menu
+const frameRates = { '23.98': 24 / 1.001, '24': 24, '25': 25, '29.97': 30 / 1.001, '30': 30, '50': 50, '59.94': 60 / 1.001, '60': 60, '120': 120, '240': 240 };
+export function outputPanels({ world, row, panel }) {
+  const time = world.animation.time, t = time.state;
+  const preset = (!customFps && Object.entries(frameRates).find(([, v]) => Math.abs(v - t.fps) < 1e-6)?.[0]) || 'CUSTOM';
+  const field = (key, label, extra = {}) => row({ id: 'output.' + key, label, integer: true, step: 1, default: undefined, get: () => time.state[key], set: (v, finish) => time.configure({ [key]: v }, { record: finish !== false }), ...extra });
+  return [
+    panel('output.format', 'Format', () => [
+      row({ id: 'output.fpsPreset', label: 'Frame Rate', default: '24', options: { ...Object.fromEntries(Object.keys(frameRates).map(k => [k, k])), Custom: 'CUSTOM' }, get: () => preset,
+        set: v => { customFps = v === 'CUSTOM'; if (!customFps) time.configure({ fps: frameRates[v] }); else world.animation.changed(); } }),
+      ...(preset === 'CUSTOM' ? [row({ id: 'output.fps', label: 'FPS', default: 24, min: 1, max: 240, step: 1, get: () => time.state.fps, set: (v, finish) => time.configure({ fps: v }, { record: finish !== false }) })] : []),
+      h('p', { class: 'bl-message' }, 'Resolution and file output are not available: scenes run live in the viewport.'),
+    ]),
+    panel('output.frameRange', 'Frame Range', () => [
+      field('frameStart', 'Frame Start', { min: -1e6, max: t.frameEnd - 1 }),
+      field('frameEnd', 'End', { min: t.frameStart + 1, max: 1e6 }),
+      field('frameStep', 'Step', { min: 1, max: 1000 }),
+    ]),
+  ];
+}
