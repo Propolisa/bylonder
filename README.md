@@ -32,9 +32,9 @@ The Node Editor area (pick it from any area's editor-type menu) hosts Babylon's 
 
 ## Examples and deployment
 
-File → New from Example (or the splash screen shown on first visit) creates a project from one of the bundled demos in `src/workspace/examples.js`.
+File > New from Example (or the splash screen shown on first visit) creates a project from one of the bundled demos in `src/workspace/examples.js`.
 
-`.github/workflows/pages.yml` tests, builds with a relative base (`BASE_PATH=./`) and deploys `dist/` to GitHub Pages on every push to `main`. Enable it under Settings → Pages → Source: GitHub Actions. Any sub-path works; the service worker scope follows the deployed directory.
+`.github/workflows/pages.yml` tests, builds with a relative base (`BASE_PATH=./`) and deploys `dist/` to GitHub Pages on every push to `main`. Enable it under Settings > Pages > Source: GitHub Actions. Any sub-path works; the service worker scope follows the deployed directory.
 
 ## Controls
 
@@ -142,7 +142,7 @@ Stable IDs separate object identity from display names. History and project over
 
 ## Text
 
-Shift+A → Text creates real extruded glyph outlines. Tab or the shared right-click **Edit Text** command edits the selected text. The font field searches the Google Fonts catalogue and accepts any family name; the preview uses the same downloaded font as the geometry. Weight, italic, size, depth, spacing, line height, alignment and curve resolution share `textSchema`. Unsupported styles report an error. Color-only glyphs cannot be extruded; outline fonts render as monochrome meshes. Text is capped at 2,000 characters per object.
+Shift+A > Text creates real extruded glyph outlines. Tab or the shared right-click **Edit Text** command edits the selected text. The font field searches the Google Fonts catalogue and accepts any family name; the preview uses the same downloaded font as the geometry. Weight, italic, size, depth, spacing, line height, alignment and curve resolution share `textSchema`. Unsupported styles report an error. Color-only glyphs cannot be extruded; outline fonts render as monochrome meshes. Text is capped at 2,000 characters per object.
 
 Apply commits one undo step; Cancel restores the previous geometry. Saved overrides include baked geometry and text settings, so restoration does not need the font network request. Font requests use Google Fonts CSS2 and CacheStorage; the searchable catalogue comes from Fontsource. First use requires network access. Font loading uses Fontkit (WOFF2, TrueType and OpenType); Babylon PolygonMeshBuilder and Earcut preserve glyph holes.
 
@@ -160,7 +160,7 @@ controls({id: 'label', schema: textSchema, connect(store) {
 
 ## Application source
 
-**↓ App source** at the top right downloads the complete unminified application source for the deployed build, including its lockfile, tests and build scripts. Run `npm ci` then `npm run dev`; `npm run build` regenerates the ZIP from tracked and nonignored source files. Dependencies, Git metadata and hosting credentials are excluded. **Export ZIP** separately exports the current in-browser scene project.
+**File > Download App Source** downloads the complete unminified application source for the deployed build, including its lockfile, tests and build scripts. Run `npm ci` then `npm run dev`; `npm run build` regenerates the ZIP from tracked and nonignored source files. Dependencies, Git metadata and hosting credentials are excluded. **Export ZIP** separately exports the current in-browser scene project.
 
 ## Layout and mobile input
 
@@ -183,7 +183,7 @@ Touch viewport controls:
 
 **Share** encodes the current project files/assets into a compressed URL fragment. Current transforms, created objects and control-store values are included by default, even when Remember scene edits is off; uncheck the option to share source only. Finish pending creation/transform operations before sharing. Links contain a snapshot, not history. Opening one offers a new local copy and does not automatically run the sender's JavaScript. The fragment is not uploaded as a project by this app; anyone possessing the link can read its contents. Links are limited to 128 KB and decoded projects to 8 MB; for larger projects or messaging apps that truncate URLs, use project ZIP export/import.
 
-**⋯ → Render resolution** controls Babylon's hardware scaling ratio for all projects on this device. Native resolution (`1 / devicePixelRatio`) is the default. Custom ratios range from 0.25 to 4: lower is sharper and more expensive, 1 is CSS-pixel resolution, 2 is half resolution. Render settings and layouts are device preferences and are not included in share links.
+**Render > Render Resolution** controls Babylon's hardware scaling ratio for all projects on this device. Native resolution (`1 / devicePixelRatio`) is the default. Custom ratios range from 0.25 to 4: lower is sharper and more expensive, 1 is CSS-pixel resolution, 2 is half resolution. Render settings and layouts are device preferences and are not included in share links.
 
 ## Animation
 
@@ -222,7 +222,7 @@ Animation actions are project data: autosaved, versioned, undoable, forked, zipp
 
 ## Properties and modifiers
 
-Properties follows Blender's Object / Modifiers / Scene context structure. Add an array from **Modifiers → Add Modifier → Generate → Array**, or the object context menu. The modifier stack is independent of the original mesh, animatable, undoable, and retained with **Remember Scene Edits**. `Apply` writes evaluated geometry to the source; removing a modifier restores the input geometry.
+Properties follows Blender's Object / Modifiers / Scene context structure. Add an array from **Modifiers > Add Modifier > Generate > Array**, or the object context menu. The modifier stack is independent of the original mesh, animatable, undoable, and retained with **Remember Scene Edits**. `Apply` writes evaluated geometry to the source; removing a modifier restores the input geometry.
 
 ```js
 workbench.addModifier(sphere, 'ARRAY', {

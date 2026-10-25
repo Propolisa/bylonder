@@ -14,9 +14,9 @@ Babylon owns runtime, data and evaluation. Blender owns UX: names, layout, icons
 | Viewport shading | Scene `clearColor` | Theme background in Solid | Solid/Wireframe use the theme background; Rendered shows the scene as authored |
 | Editable values | Object properties | RNA paths | Channel registry: `[id, path]` with `get`/`set`, components in the path (`position.x`); re-registering replaces the binding |
 | Animation | `Animation` evaluates curves | Actions, slots, F-Curves, NLA, drivers | One action per project; tracks keyed by `[id, path]`; Bézier/Linear/Constant; evaluation writes live objects (no evaluated copy) |
-| Document / undo | — | ID database, memfile undo | Named document slices (`capture`/`apply`) plus object snapshots; undo stores whole-state snapshots, 100 steps |
+| Document / undo | None | ID database, memfile undo | Named document slices (`capture`/`apply`) plus object snapshots; undo stores whole-state snapshots, 100 steps |
 | Materials | Standard, PBR, Node materials | Material datablocks, slots | Blender datablock UX over Babylon types; slots via `MultiMaterial`; Principled = `PBRMaterial`; Surface type converts in place |
-| Users / orphans | — | User count, fake user, orphans dropped on save | Counted from slots on demand; saved edits drop zero-user created materials unless fake user; undo keeps them |
+| Users / orphans | None | User count, fake user, orphans dropped on save | Counted from slots on demand; saved edits drop zero-user created materials unless fake user; undo keeps them |
 | Node editors | NME, NGE, NRGE, NPE (React) | One Node Editor with tree types | Babylon editors embedded unchanged, Blender skin via generated CSS-module map; context follows Blender (active material, modifier, scene, emitter) |
 | Compositor | Frame graph (alpha) | Compositor, viewport compositor | `NodeRenderGraph` behind Use Nodes; applied only in Rendered shading and camera view |
 | Geometry nodes | `NodeGeometry` | Geometry Nodes modifier | Modifier type in our stack; group stored as JSON on the modifier |
