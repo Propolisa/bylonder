@@ -85,6 +85,7 @@ export function createLogic(world, { commit = () => {}, notify = console.warn } 
     capture: () => ({ blocks: blocks.map(serializeBlock), positions: Object.fromEntries(blocks.map(b => [b.uniqueId, positions.get(b)])), running }),
     async apply(state = {}) {
       const list = state.blocks || [];
+      if (JSON.stringify(list) === JSON.stringify(blocks.map(serializeBlock)) && (state.running ?? true) === running) return;
       const parsed = [];
       for (const json of list) {
         try { parsed.push(await ParseBlockAsync(json, { scene, assetsContainer: scene, valueParseFunction: undefined })); } catch (error) { notify('Logic: ' + error.message); }
@@ -98,7 +99,6 @@ export function createLogic(world, { commit = () => {}, notify = console.warn } 
       running = state.running ?? true;
       restart(); emit();
     },
-    context: () => ({ key: 'logic', title: 'Logic', graph: api, mount: host => world.mountLogicEditor?.(host) }),
     dispose() { coordinator?.dispose(); listeners.clear(); },
   };
   return api;

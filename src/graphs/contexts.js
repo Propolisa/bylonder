@@ -2,6 +2,7 @@ import { NodeMaterial } from '@babylonjs/core';
 import { iconButton } from '../ui/icon.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { geometryGraph, isEvaluating, storeGeometryGraph } from './geometry-nodes.js';
+import { mountLogicEditor } from './logic-editor.js';
 
 const debounce = (fn, ms = 400) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
 const observed = new WeakSet();
@@ -56,8 +57,9 @@ export function createNodeContexts({ world, editor }) {
     logic() {
       const logic = world.logic;
       if (!logic) return { key: 'none', message: 'Logic Editor is not available.' };
-      const add = Object.assign(document.createElement('button'), { type: 'button', className: 'bl-pulldown', textContent: 'Add', onclick: () => world.logicEditor?.addMenu() });
-      return { ...logic.context(), actions: [add, toggle('Run', logic.running, value => logic.setRunning(value))] };
+      let editor = null;
+      const add = Object.assign(document.createElement('button'), { type: 'button', className: 'bl-pulldown', textContent: 'Add', onclick: () => editor?.addMenu() });
+      return { key: 'logic', title: 'Logic', graph: logic, mount: host => (editor = mountLogicEditor(host, logic)), actions: [add, toggle('Run', logic.running, value => logic.setRunning(value))] };
     },
   };
 }

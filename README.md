@@ -6,6 +6,14 @@ Full-viewport Babylon.js workspace with modular reactive systems, generated Twea
 
 Node 20+: `npm ci`, `npm run dev`, `npm test`, `npm run build`. Serve `dist/` on any static host. No backend, remote fonts or credentials are needed at runtime. To fork, copy source, remove `.openai/hosting.json` (the original Site identity), rename the package and register a new Site if using Sites hosting.
 
+## Data model
+
+Three layers, each with one contract and no knowledge of the others' internals:
+
+1. **Channels** (`src/animation/model.js`): every editable scalar is registered once as `{id, path, label, get, set, available}`. Property rows, keyframes, the Timeline and context menus only see channels. Producers: generated controls, objects, materials, modifiers and graph bindings (`src/graphs/bindings.js`).
+2. **Document slices** (`src/state/document.js`): each subsystem that owns state beyond its channels registers a slice with `capture()`, `apply(state)` (undefined means code defaults), and optional `subscribe`/`dispose`. Current slices: `materials`, `compositor`, `logic`, and `channels`, which persists edits to channels no other slice owns as a diff from code values. Object-level data (transforms, modifiers, particle systems) lives on objects and is captured by `src/storage.js`.
+3. **Consumers**: undo history and Remember scene edits call only `document.capture()` / `document.apply()`; editors call subsystem APIs. Adding a subsystem means one `register(...)` call, with no changes to history, persistence or UI wiring.
+
 ## Materials and node editors
 
 Properties > Material follows Blender: a slot list (+, -, specials, reorder), the material datablock row (browse and link any scene material, rename, user count with make-single-user, fake user, duplicate, unlink, New), a preview sphere, and schema-driven Surface/Settings panels for Principled (PBR), Standard and Node materials. Changing the Surface type converts the material in place and keeps its users and common settings. Texture fields pick project images. Every material property and every uniform input of a Node Material is an animation channel, so the same keyframe, undo and context-menu behaviour as generated controls applies. Structural edits (slots, links, new/duplicated/converted materials, textures, edited node graphs) are undoable and persist with Remember scene edits.
