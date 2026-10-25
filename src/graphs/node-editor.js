@@ -35,8 +35,8 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
   const stage = Object.assign(document.createElement('div'), { className: 'node-editor-stage' });
   const empty = Object.assign(document.createElement('div'), { className: 'node-editor-empty' });
   host.append(stage, empty);
-  let shown = null, token = 0, lastKey = null, current = null;
-  const frameAll = () => current?.onZoomToFitRequiredObservable?.notifyObservers();
+  let shown = null, token = 0, lastKey = null, current = null, mounted = null;
+  const frameAll = () => (mounted?.frameAll ? mounted.frameAll() : current?.onZoomToFitRequiredObservable?.notifyObservers());
 
   const typeButton = menuButton('', () => Object.entries(treeTypes).map(([id, t]) => ({ label: t.label, icon: t.icon, checked: () => id === type, run: () => api.setType(id) })), { className: 'bl-dropdown', title: 'Node Tree Type' });
   const title = Object.assign(document.createElement('span'), { className: 'node-editor-title' });
@@ -69,6 +69,8 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
     actions.replaceChildren(...(ctx.actions || []));
     if (!ctx.graph) {
       shown = null;
+      mounted?.dispose?.();
+      mounted = null;
       stage.replaceChildren();
       return message(ctx.message || 'Nothing to edit here.', ctx.buttons || []);
     }
@@ -78,8 +80,10 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
     empty.hidden = true;
     stage.hidden = false;
     const container = Object.assign(document.createElement('div'), { className: 'node-editor-root' });
+    mounted?.dispose?.();
+    mounted = null;
     stage.replaceChildren(container);
-    if (ctx.mount) return ctx.mount(container);
+    if (ctx.mount) { mounted = ctx.mount(container); return; }
     try {
       const Editor = await tree.load();
       if (mine !== token) return;
@@ -114,7 +118,7 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
       render(true);
     },
     refresh: () => render(),
-    dispose() { token++; untheme(); stage.replaceChildren(); },
+    dispose() { token++; untheme(); mounted?.dispose?.(); stage.replaceChildren(); },
   };
   render();
   return api;

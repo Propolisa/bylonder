@@ -4,6 +4,8 @@ import { createCompositor } from './graphs/compositor.js';
 import { createParticles } from './graphs/particles.js';
 import { mountNodeEditor } from './graphs/node-editor.js';
 import { createNodeContexts } from './graphs/contexts.js';
+import { createLogic } from './graphs/logic.js';
+import { mountLogicEditor } from './graphs/logic-editor.js';
 registerModifier(geometryNodesDefinition);
 import { registerObjects, objectRefs } from './animation/bindings.js';
 import { mountTimeline } from './animation/timeline.js';
@@ -64,6 +66,10 @@ for (const level of ["log", "warn", "error"]) {
     });
   };
 }
+BABYLON.Logger.OnNewCacheEntry = (entry) => {
+  const text = entry.replace(/<br>/g, "\n").replace(/<[^>]+>/g, "").trim();
+  if (text) send("console", { level: /color:\s*red/i.test(entry) ? "error" : /color:\s*(orange|yellow)/i.test(entry) ? "warn" : "log", text });
+};
 window.addEventListener("error", (e) =>
   send("console", {
     level: "error",
@@ -201,7 +207,7 @@ const currentOverrides = () => {
         JSON.stringify(row) !==
         JSON.stringify(baseline.find((b) => b.id === row.id)),
     );
-  return { transforms, stores: sdk.values(), materials: world.materials?.capture(), compositor: world.compositor?.capture(), channels: changedChannels() };
+  return { transforms, stores: sdk.values(), materials: world.materials?.capture(), compositor: world.compositor?.capture(), logic: world.logic?.capture(), channels: changedChannels() };
 };
 saveOverrides = () => {
   if (!remember || creator?.pending || animation.evaluating || animation.playing) return;
@@ -253,6 +259,8 @@ let history;
 world.materials = createMaterialLibrary(world, { commit: () => history?.commit(), asset: path => sdk.asset(path), files: input.files || [] });
 world.compositor = createCompositor(world, { commit: () => history?.commit(), notify });
 world.particles = createParticles(world, { commit: () => history?.commit(), notify });
+world.logic = createLogic(world, { commit: () => history?.commit(), notify });
+world.mountLogicEditor = (host) => (world.logicEditor = mountLogicEditor(host, world.logic));
 world.particles.refresh();
 const persistable = ([ref, ch]) => !ch.transform && !ref.startsWith("store:") && !ref.startsWith("modifier:") && ch.available();
 const channelValues = () => Object.fromEntries([...animation.channels].filter(persistable).map(([ref, ch]) => [ref, ch.get()]));
@@ -262,6 +270,7 @@ function changedChannels() {
 }
 if (input.remember && input.overrides?.materials) world.materials.apply(input.overrides.materials);
 if (input.remember && input.overrides?.compositor) world.compositor.apply(input.overrides.compositor);
+if (input.remember && input.overrides?.logic) world.logic.apply(input.overrides.logic);
 if (input.remember) for (const [ref, value] of Object.entries(input.overrides?.channels || {})) animation.channels.get(ref)?.set(value);
 world.modifiers=createModifierSystem(world,{commit:()=>history?.commit(),notify});
 world.modifiers.refresh();
@@ -274,11 +283,12 @@ history = createHistory(world.objects, () => {
   world.modifiers.refresh();
   animation.changed();
   ui?.refresh();
-}, {capture:()=>({animation:animation.serialize(),stores:sdk.values(),materials:world.materials.capture(),compositor:world.compositor.capture(),properties:Object.fromEntries([...animation.channels].filter(([,ch])=>!ch.transform&&ch.available()).map(([ref,ch])=>[ref,ch.get()]))}),restore:data=>{
+}, {capture:()=>({animation:animation.serialize(),stores:sdk.values(),materials:world.materials.capture(),compositor:world.compositor.capture(),logic:world.logic.capture(),properties:Object.fromEntries([...animation.channels].filter(([,ch])=>!ch.transform&&ch.available()).map(([ref,ch])=>[ref,ch.get()]))}),restore:data=>{
   registerObjects(animation, objects);
   for(const system of systems)for(const [key,value] of Object.entries(data?.stores?.[system.id]||{}))system.store.set(key,value);
   world.materials.apply(data?.materials);
   world.compositor.apply(data?.compositor);
+  if (JSON.stringify(data?.logic?.blocks || []) !== JSON.stringify(world.logic.capture().blocks)) world.logic.apply(data?.logic);
   for(const [ref,value] of Object.entries(data?.properties||{}))animation.channels.get(ref)?.set(value);
   world.modifiers.refresh();
   animation.load(data?.animation,{apply:false});
@@ -352,7 +362,7 @@ const nodeSection = document.querySelector("#nodes-section");
 const nodeEditor = mountNodeEditor({ world, host: nodeSection, header: viewportDock.header("nodes"), contexts: createNodeContexts({ world, editor }) });
 nodeSection.addEventListener("node-tree", (e) => nodeEditor.setType(e.detail));
 world.openNodeEditor = (type) => { nodeEditor.setType(type); viewportDock.show("nodes"); };
-for (const source of [world.materials, world.compositor, world.particles, world.modifiers]) source.subscribe(() => nodeEditor.refresh());
+for (const source of [world.materials, world.compositor, world.particles, world.modifiers, world.logic]) source.subscribe(() => nodeEditor.refresh());
 viewportDock.setFactory('properties',(host,id)=>ui.create(host,id));
 const insertKeys = () => {registerObjects(animation, objects);animation.insert(objectRefs(editor.selection.roots));};
 const timelineOptions = id => ({insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();},header:viewportDock.header(id),names:ref=>world.objects.find(n=>'object:'+nodeId(n)===ref)?.name});
@@ -524,6 +534,7 @@ function dispose() {
   nodeEditor.dispose();
   world.compositor.dispose();
   world.particles.dispose();
+  world.logic.dispose();
   ui.dispose();
   touch.dispose();
   viewportDock.dispose();

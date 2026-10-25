@@ -9,3 +9,20 @@
 .node-editor-actions{display:flex;gap:4px;align-items:center}
 .bl-toggle{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 6px;color:var(--bl-text);font:var(--bl-font);white-space:nowrap;cursor:pointer}
 .bl-toggle input{width:14px;height:14px;margin:0;accent-color:var(--bl-select)}
+.logic-editor{position:absolute;inset:0;overflow:hidden;outline:none;background:#1d1d1d radial-gradient(#ffffff14 1px,transparent 1.2px) 0 0/24px 24px;cursor:default;touch-action:none}
+.logic-stage{position:absolute;left:0;top:0;transform-origin:0 0}
+.logic-links{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+.logic-link{fill:none;stroke-width:2.2;opacity:.9}.logic-link.signal{stroke-width:2.6}.logic-link.pending{stroke-dasharray:5 4}
+.logic-node{position:absolute;min-width:160px;background:#303030f2;border-radius:6px;box-shadow:0 2px 6px #0009,inset 0 0 0 1px #00000080;color:#e6e6e6;font:var(--bl-font);user-select:none}
+.logic-node.selected{box-shadow:0 0 0 1.5px #ffa733,0 2px 8px #000a}
+.logic-header{height:22px;line-height:22px;padding:0 8px;border-radius:6px 6px 0 0;background:var(--cat,#246283);color:#fff;text-shadow:0 1px 1px #0008;cursor:move;white-space:nowrap}
+.logic-node[data-bl-category=input]{--cat:#83314a}.logic-node[data-bl-category=output]{--cat:#6b2433}.logic-node[data-bl-category=texture]{--cat:#79461d}.logic-node[data-bl-category=vector]{--cat:#3c3c83}.logic-node[data-bl-category=layout]{--cat:#3b3b3b}
+.logic-row{position:relative;display:flex;align-items:center;gap:6px;height:22px;padding:0 12px}
+.logic-row:last-child{margin-bottom:4px}
+.logic-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.logic-label.right{text-align:right}
+.logic-socket{position:absolute;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px #000;cursor:crosshair}
+.logic-socket.in{left:-5px}.logic-socket.out{right:-5px}
+.logic-socket.signal{width:9px;height:9px;border-radius:1px;background:#e6e6e6;transform:rotate(45deg)}
+.logic-socket:hover{filter:brightness(1.5)}
+.logic-value{width:62px;height:18px;padding:0 4px;border:0;border-radius:4px;background:#545454;color:#e6e6e6;font:var(--bl-font);text-align:right}
+.logic-hint{position:absolute;left:10px;bottom:8px;color:#a6a6a6a0;font:var(--bl-font);font-size:11px;pointer-events:none}

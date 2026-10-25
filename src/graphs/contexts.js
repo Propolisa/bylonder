@@ -53,6 +53,11 @@ export function createNodeContexts({ world, editor }) {
       if (!graph) return { key: 'wait:' + entry.id, title: entry.name, message: 'Building particle system…' };
       return { key: 'set:' + entry.id + ':' + graph.uniqueId, title: mesh.name + ' › ' + entry.name, graph, actions: [iconButton('restrict_view_off', 'Show in viewport', () => world.particles.update(mesh, entry.id, { enabled: !entry.enabled }), entry.enabled ? 'active' : '')] };
     },
-    logic: () => world.logic?.context() || { key: 'none', message: 'Logic Editor is not available.' },
+    logic() {
+      const logic = world.logic;
+      if (!logic) return { key: 'none', message: 'Logic Editor is not available.' };
+      const add = Object.assign(document.createElement('button'), { type: 'button', className: 'bl-pulldown', textContent: 'Add', onclick: () => world.logicEditor?.addMenu() });
+      return { ...logic.context(), actions: [add, toggle('Run', logic.running, value => logic.setRunning(value))] };
+    },
   };
 }
