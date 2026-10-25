@@ -27,7 +27,6 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const renderer = createWorldRenderer(scene, { asset });
-  let rendered = false;
   const authored = { id: 'world', name: 'World', ...readAuthoredWorld(scene, worldDefaults) };
   const baseline = { worlds: [authored], active: 'world' };
   let state = clone(baseline);
@@ -41,7 +40,7 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
     const stem = name.replace(/\.\d{3}$/, '');
     for (let i = 1; ; i++) { const next = stem + '.' + String(i).padStart(3, '0'); if (!taken.has(next)) return next; }
   };
-  const render = () => renderer.render(active(), { rendered });
+  const render = () => renderer.render(active());
   const registered = new Set();
   const sync = () => {
     for (const id of registered) if (!byId(id)) { animation.removeTarget('world:' + id); registered.delete(id); }
@@ -62,7 +61,8 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
     all: () => state.worlds, active, byId, users,
     images: files => [...(renderer.hasAuthoredTexture ? [['scene', 'Scene (code)']] : []), [STUDIO, 'Studio'], ...files.filter(f => environmentFile.test(f)).map(f => [f, f])],
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
-    setViewportActive(value) { if (rendered !== value) { rendered = value; render(); } },
+    // Per view: rendered shading or camera view shows the world background and volume. Cheap.
+    setViewportActive(value) { renderer.setRendered(value); },
     link(entry) { state.active = entry?.id ?? null; changed(); },
     unlink() { state.active = null; changed(); },
     // Blender's world.new copies the current world when there is one.

@@ -7,7 +7,10 @@ Snapshot as of 2026-10-25, on top of `main` at `3c760aa` (scene time, Render and
 - **Implemented (steps 1 to 3):** render context, virtual clock, Render Image, Render Animation, Render Result, Output tab resolution and file output, render samples with jitter and sub-frame motion blur. Checked in Chromium: the Solar System example (which advances by `getDeltaTime()`) renders identical pixels for the same frame twice and different pixels for the next frame; a 24-frame Render Animation produced WebM (VP9) and MPEG-4 (H.264) files with exactly 24 frames and 1.000 s duration. See the Offline render row in [babylon-blender.md](babylon-blender.md).
 - **Findings from the sanity probe:** `getDeltaTime()` only follows the virtual clock when each render is bracketed by `engine.beginFrame()`/`endFrame()`; `scene.render()` alone leaves it at 0. Engine views render only through registered render loops. Per-view `scene.frameGraph` switching works. Differently sized views call `setSize` on every view render, as expected.
 - **Encoder:** mediabunny 1.61.4, used unmodified (MPL-2.0 is file-level, so this is fine as a dependency).
-- **Next:** steps 4 and 5 (multiple viewports, compositor previews), then the sequencer steps.
+- **Step 4 implemented:** multiple 3D Viewports as engine views of one hidden working canvas, sized to an anchor view (the compositor view, else the largest) so it only resizes when the layout changes; other views render into its top-left corner through `camera.viewport`. Checked in Chromium: two side-by-side viewports (Solid and Rendered, perspective and top orthographic), selection and modal moves exact in both (a 60 px gesture moves the object 60 px on screen in each), zero engine resizes during interaction, zero view renders while idle, split areas restored after reload, Render Image unaffected.
+- **Findings:** post-process pipelines (MSAA, bloom, custom post processes) respect a camera viewport sub-rectangle; the compositor's frame graph does not (its output lands misaligned), hence the anchor rule and one compositor view at a time. Babylon's view observables are module-level, shared by every engine in a page.
+- **Step 5 partly:** the compositor shows in the last clicked rendered viewport. A backdrop in the Node Editor is not done yet.
+- **Next:** the Node Editor compositor backdrop, then the sequencer steps.
 
 ## Summary
 

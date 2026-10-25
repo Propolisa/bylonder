@@ -25,8 +25,8 @@ async function open(input, { width, height }) {
   if (!camera) throw Error('No camera found in scene. Add a camera in code or pick one in Properties > Scene.');
   engine.setSize(width, height);
   scene.activeCamera = camera;
-  world.setViewportRendered(true);
-  world.compositor.syncCamera();
+  world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
+  world.beforeViewRender({ rendered: true, compositor: true });
   if (input.overrides?.compositor) await world.compositor.apply(input.overrides.compositor);
   await scene.whenReadyAsync();
   return { camera: camera.name, warnings };

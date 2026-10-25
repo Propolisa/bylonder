@@ -4,6 +4,7 @@ import { bindGraph } from './bindings.js';
 export function createCompositor(world, { commit = () => {}, notify = console.warn } = {}) {
   const { scene, animation } = world;
   let graph = null, enabled = false, edited = false, building = false, camera = null, viewport = false;
+  // camera: the camera the composite is rendered from; applied to the graph's camera inputs on every build.
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const cameraBlocks = () => (graph?.attachedBlocks || []).filter(b => b.getClassName() === 'NodeRenderGraphInputBlock' && b.isCamera?.());
@@ -17,13 +18,17 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   const bind = () => graph && bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' });
   const build = async () => {
     building = true;
-    try { graph.build(); await graph.whenReadyAsync(); } finally { building = false; }
+    try {
+      if (camera) for (const block of cameraBlocks()) block.value = camera;
+      graph.build(); await graph.whenReadyAsync();
+    } finally { building = false; }
     scene.frameGraph = enabled && viewport ? graph.frameGraph : null;
   };
   const api = {
     get graph() { return graph; },
     get enabled() { return enabled; },
-    setViewportActive(value) { viewport = value; if (graph && enabled) scene.frameGraph = value ? graph.frameGraph : null; },
+    // Per view, before it renders: whether this view shows the composite. Cheap (swaps the scene's render function).
+    setViewportActive(value) { viewport = value; const next = graph && enabled && value ? graph.frameGraph : null; if (scene.frameGraph !== next) scene.frameGraph = next; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     fields: () => (graph ? bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' }) : []),
     async setEnabled(value, { record = true } = {}) {
@@ -35,13 +40,14 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
       if (record) commit();
       emit();
     },
-    syncCamera() {
-      const active = scene.activeCamera;
-      if (!graph || !enabled || active === camera) return;
-      camera = active;
-      for (const block of cameraBlocks()) block.value = active;
-      build().catch(error => notify('Compositor: ' + error.message));
+    // The camera the composite is rendered from (one view at a time shows the compositor). Rebuilds on change.
+    bindCamera(next) {
+      if (!next || next === camera) return;
+      camera = next;
+      if (graph && enabled) build().catch(error => notify('Compositor: ' + error.message));
     },
+    get camera() { return camera; },
+    syncCamera() { api.bindCamera(scene.activeCamera); },
     capture: () => ({ enabled, graph: graph && (edited || enabled) ? graph.serialize() : null }),
     async apply(state = {}) {
       if (state.graph) {

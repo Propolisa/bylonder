@@ -3,8 +3,10 @@ import { GizmoManager, Matrix, Quaternion, Vector3 } from "@babylonjs/core";
 import { snapshot, apply } from "./storage";
 import { radialRatio, angleDelta, snap, wrap } from "./gesture-math";
 
-export function createEditor(world, canvas, history, changed, notify, capture) {
-  const { scene, objects, camera, engine } = world;
+// Object-mode editing shared by every 3D Viewport: one selection, one tool mode, one gizmo set (drawn in every
+// view). Picking, projection and modal transforms use the view the gesture happens in (views.input).
+export function createEditor(world, views, history, changed, notify, capture) {
+  const { scene, objects } = world;
   const gizmos = new GizmoManager(scene),
     bound = new WeakSet();
   gizmos.usePointerToAttachGizmos = false;
@@ -17,27 +19,23 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
   let mode = "select",
     modal = null;
   let suppressContext = false;
-  let last = { x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 };
+  let last = { x: 0, y: 0 };
+  const attached = new Map(); // view -> detach()
   const cursor = document.querySelector("#gesture-cursor");
   const guide = document.querySelector("#gesture-guide");
-  const project = (point) => {
-    const rect = canvas.getBoundingClientRect();
-    const p = Vector3.Project(
-      point,
-      Matrix.Identity(),
-      scene.getTransformMatrix(),
-      camera.viewport.toGlobal(
-        engine.getRenderWidth(),
-        engine.getRenderHeight(),
-      ),
-    );
-    return {
-      x: rect.left + (p.x * rect.width) / engine.getRenderWidth(),
-      y: rect.top + (p.y * rect.height) / engine.getRenderHeight(),
-    };
+  // World point to client coordinates in a view.
+  const project = (point, view = modal?.view || views.input) => {
+    const rect = view.canvas.getBoundingClientRect(), width = view.canvas.width, height = view.canvas.height;
+    const p = Vector3.Project(point, Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
+    return { x: rect.left + (p.x * rect.width) / width, y: rect.top + (p.y * rect.height) / height };
+  };
+  // Client coordinates to the topmost selectable object in a view.
+  const pickIn = (view, clientX, clientY, predicate = selectable) => {
+    const p = views.pickPoint(view, clientX, clientY);
+    return scene.pick(p.x, p.y, predicate, false, view.camera);
   };
   const showCursor = () => {
-    const rect = canvas.getBoundingClientRect();
+    const rect = modal.view.canvas.getBoundingClientRect();
     // Only the visual cursor wraps; relative coordinates and transforms are unbounded.
     cursor.style.left = wrap(modal.point.x, rect.left, rect.width) + "px";
     cursor.style.top = wrap(modal.point.y, rect.top, rect.height) + "px";
@@ -119,7 +117,7 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     if (event.altKey) {
       // Clutch: move the virtual cursor without changing the object. Start a new
       // sweep on release, preserving the original snapshot for one-step cancel.
-      const r = canvas.getBoundingClientRect();
+      const r = modal.view.canvas.getBoundingClientRect();
       modal.point.x = wrap(modal.point.x, r.left, r.width);
       modal.point.y = wrap(modal.point.y, r.top, r.height);
       rebase();
@@ -137,7 +135,7 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     const axis = modal.axis;
     if (modal.type === "move") {
       const scale =
-        (2 * modal.depth * Math.tan(camera.fov / 2)) / canvas.clientHeight;
+        (2 * modal.depth * Math.tan(modal.view.camera.fov / 2)) / modal.view.canvas.clientHeight;
       if (axis) {
         const direction =
           Vector3[axis === "x" ? "Right" : axis === "y" ? "Up" : "Forward"]();
@@ -196,16 +194,20 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     if (!selection.size) return;
     if (capture.active && !modal) return;
     if (modal) finish(false);
-    canvas.focus();
+    const view = options.view || views.input;
+    if (!view) return;
+    const camera = view.camera;
+    view.canvas.focus();
     selected.computeWorldMatrix(true);
     setMode(type);
-    const center = project(selected.getAbsolutePosition());
+    const center = project(selected.getAbsolutePosition(), view);
     // Avoid singular radial gestures when invoked exactly at the pivot.
     const point =
       Math.hypot(last.x - center.x, last.y - center.y) < 12 && type !== "move"
         ? { x: center.x + 60, y: center.y }
         : { ...last };
     modal = {
+      view,
       type,
       before: snapshot(objects),
       base: snapshot(objects),
@@ -216,7 +218,7 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
       total: { x: 0, y: 0 },
       angle: 0,
       depth:
-        camera.mode === 1
+        camera.mode === 1 && camera.radius
           ? camera.radius
           : Math.max(
               0.1,
@@ -236,7 +238,7 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     };
     selection.begin();
     gizmos.attachToNode(null);
-    if (!external) capture.begin(last, update, () => finish(false));
+    if (!external) capture.begin(last, update, () => finish(false), view.canvas);
     showCursor();
     emitState();
     notify(
@@ -246,9 +248,9 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
   const track = (e) => {
     if (!modal && !capture.active) last = { x: e.clientX, y: e.clientY };
   };
-  const down = (e) => {
-    if (e.pointerType === "touch" || document.body.classList.contains("scene-mode")) return;
-    canvas.focus();
+  const down = (view, e) => {
+    if (e.pointerType === "touch" || view.state.cameraView) return;
+    view.canvas.focus();
     if (modal) {
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -257,20 +259,13 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
       return;
     }
     if (e.button === 0) {
-      const rect = canvas.getBoundingClientRect();
       // Let the utility-layer gizmo consume its own click before scene selection.
       if (mode !== "select" && selection.size) {
-        const hit = gizmos.utilityLayer.utilityLayerScene.pick(
-          e.clientX - rect.left,
-          e.clientY - rect.top,
-        );
+        const p = views.pickPoint(view, e.clientX, e.clientY);
+        const hit = gizmos.utilityLayer.utilityLayerScene.pick(p.x, p.y, undefined, false, view.camera);
         if (hit?.hit) return;
       }
-      const pick = scene.pick(
-        e.clientX - rect.left,
-        e.clientY - rect.top,
-        selectable,
-      );
+      const pick = pickIn(view, e.clientX, e.clientY);
       if (pick?.hit) {
         let target = pick.pickedMesh;
         while (
@@ -282,25 +277,18 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
       } else select(null, e.shiftKey);
     }
   };
-  const context = (e) => {
+  const context = (view, e) => {
     e.preventDefault();
     if (suppressContext) {
       suppressContext = false;
       return;
     }
-    if (document.body.classList.contains("scene-mode")) return;
-    const rect = canvas.getBoundingClientRect();
-    const pick = scene.pick(
-      e.clientX - rect.left,
-      e.clientY - rect.top,
-      selectable,
-    );
+    if (view.state.cameraView) return;
+    const pick = pickIn(view, e.clientX, e.clientY);
     let target = pick?.pickedMesh;
     while (target?.parent?.metadata?.group) target = target.parent;
     world.contextMenu?.open(e, target);
   };
-  canvas.addEventListener("contextmenu", context);
-  canvas.addEventListener("pointerdown", down, true);
   window.addEventListener("mousemove", track);
   setMode("select");
   return {
@@ -314,10 +302,17 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     select,
     get mode() { return mode; },
     updateGesture: update,
-    pick(x,y) {
-      const rect=canvas.getBoundingClientRect();
-      const hit=scene.pick(x-rect.left,y-rect.top,selectable);
+    pick(x,y,view=views.input) {
+      const hit=pickIn(view,x,y);
       let node=hit?.pickedMesh;while(node?.parent?.metadata?.group&&!node.parent.metadata.wbDeleted)node=node.parent;return node;
+    },
+    // Listens for selection clicks and the context menu on a view's canvas.
+    attach(view) {
+      const onDown = (e) => down(view, e), onContext = (e) => context(view, e);
+      view.canvas.addEventListener("pointerdown", onDown, true);
+      view.canvas.addEventListener("contextmenu", onContext);
+      attached.set(view, () => { view.canvas.removeEventListener("pointerdown", onDown, true); view.canvas.removeEventListener("contextmenu", onContext); });
+      return () => { attached.get(view)?.(); attached.delete(view); if (modal?.view === view) finish(false); };
     },
     setMode,
     start,
@@ -358,8 +353,8 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     dispose() {
       finish(false);
       window.removeEventListener("mousemove", track);
-      canvas.removeEventListener("pointerdown", down, true);
-      canvas.removeEventListener("contextmenu", context);
+      for (const detach of attached.values()) detach();
+      attached.clear();
       gizmos.dispose();
       selection.dispose();
     },

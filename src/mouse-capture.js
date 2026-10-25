@@ -1,9 +1,11 @@
-/** One owner for relative mouse input. Pointer lock is optional, never assumed. */
-export function createMouseCapture(canvas, notify) {
-  let session = null;
+/** One owner for relative mouse input. Pointer lock is optional, never assumed.
+ *  Each session locks the element it started on (the 3D Viewport being dragged). */
+export function createMouseCapture(notify) {
+  let session = null, requested = null; // requested: the element we last asked to lock
   const release = () => {
+    const element = session?.element;
     session = null;
-    if (document.pointerLockElement === canvas) document.exitPointerLock();
+    if (element && document.pointerLockElement === element) document.exitPointerLock();
   };
   const failed = () => {
     if (session && !session.warned) {
@@ -12,8 +14,9 @@ export function createMouseCapture(canvas, notify) {
     }
   };
   const lockChanged = () => {
-    if (document.pointerLockElement === canvas) {
-      if (!session) document.exitPointerLock();
+    const locked = document.pointerLockElement;
+    if (locked && locked === requested) {
+      if (!session) document.exitPointerLock(); // the session ended before the lock arrived
       else session.locked = true;
     } else if (session?.locked) {
       const lost = session.onLost;
@@ -23,7 +26,7 @@ export function createMouseCapture(canvas, notify) {
   };
   const move = (event) => {
     if (!session) return;
-    const locked = document.pointerLockElement === canvas;
+    const locked = document.pointerLockElement === session.element;
     const dx = locked ? event.movementX : event.clientX - session.x;
     const dy = locked ? event.movementY : event.clientY - session.y;
     session.x = event.clientX;
@@ -45,9 +48,11 @@ export function createMouseCapture(canvas, notify) {
     get active() {
       return !!session;
     },
-    begin(point, onMove, onLost) {
+    begin(point, onMove, onLost, element) {
       if (session) return false;
+      requested = element;
       session = {
+        element,
         x: point.x,
         y: point.y,
         onMove,
@@ -56,9 +61,9 @@ export function createMouseCapture(canvas, notify) {
         warned: false,
       };
       try {
-        if (!canvas.requestPointerLock) failed();
+        if (!element?.requestPointerLock) failed();
         else {
-          const result = canvas.requestPointerLock();
+          const result = element.requestPointerLock();
           result?.catch(failed);
         }
       } catch {

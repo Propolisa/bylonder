@@ -28,17 +28,17 @@ export function createRenderSettings(world, { commit = () => {} } = {}) {
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const engine = createRenderEngine(scene);
-  let rendered = false;
+  let cameras = new Set();
   const baseline = { ...clone(renderDefaults), viewSettings: { ...renderDefaults.viewSettings, ...readAuthoredRender(scene) } };
   let state = clone(baseline);
-  const render = () => engine.render(state, { rendered });
+  const render = () => engine.render(state, { cameras });
   for (const [path, label] of renderChannels) animation.register({ id: 'scene', path, label, group: 'Scene', get: () => getRenderPath(state, path), set: v => { const { owner, key } = resolve(state, path); owner[key] = v; render(); } });
   render();
   return {
     get state() { return state; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
-    // Called when shading or the active camera changes.
-    setViewportActive(value) { rendered = value; render(); },
+    // Cameras of the views in Rendered shading or camera view; render effects attach to these only.
+    setRenderedCameras(list) { const next = new Set(list); if (next.size === cameras.size && [...next].every(c => cameras.has(c))) return; cameras = next; render(); },
     set(path, value, finish = true) {
       const { owner, key } = resolve(state, path);
       owner[key] = value; render();

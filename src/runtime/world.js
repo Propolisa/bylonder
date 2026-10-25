@@ -107,8 +107,18 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   world.worlds = documentState.register("worlds", createWorlds(world, { commit, asset: (path) => sdk.asset(path) }));
   world.renderSettings = documentState.register("render", createRenderSettings(world, { commit }));
   world.collections = documentState.register("collections", createCollections(world, { commit }));
-  // Rendered shading or camera view: world background/volume, render-engine effects and the compositor apply.
-  world.setViewportRendered = (value) => [world.worlds, world.renderSettings, world.compositor].forEach((m) => m?.setViewportActive(value));
+  // Views in Rendered shading or camera view show the world background and volume, render-engine effects and
+  // (in one view at a time) the compositor. setViewShading runs when view shading or cameras change: it attaches
+  // effects to the rendered cameras and binds the compositor camera. beforeViewRender runs per view, per frame,
+  // and only flips switches.
+  world.setViewShading = ({ renderedCameras = [], compositorCamera = null }) => {
+    world.renderSettings.setRenderedCameras(renderedCameras);
+    world.compositor?.bindCamera(compositorCamera);
+  };
+  world.beforeViewRender = ({ rendered, compositor }) => {
+    world.worlds.setViewportActive(rendered);
+    world.compositor?.setViewportActive(compositor);
+  };
   world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));
   world.logic = documentState.register("logic", createLogic(world, { commit, notify }));
   documentState.register("channels", channelSlice(animation, (channel) => /^(store|modifier|world):/.test(channel.id) || channel.id === "scene"));

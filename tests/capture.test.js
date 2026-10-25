@@ -18,7 +18,7 @@ doc.exitPointerLock = () => {
 let x = 0,
   y = 0,
   lost = 0;
-const capture = createMouseCapture(canvas, () => {});
+const capture = createMouseCapture(() => {});
 const send = (type, values) => {
   const e = new Event(type);
   Object.assign(e, values);
@@ -31,6 +31,7 @@ capture.begin(
     y += dy;
   },
   () => lost++,
+  canvas,
 );
 for (let i = 0; i < 10; i++)
   send("mousemove", {
@@ -48,6 +49,7 @@ capture.begin(
   { x: 0, y: 0 },
   () => {},
   () => lost++,
+  canvas,
 );
 doc.exitPointerLock();
 assert.equal(lost, 1);
@@ -60,6 +62,7 @@ capture.begin(
     y = dy;
   },
   () => lost++,
+  canvas,
 );
 await Promise.resolve();
 send("mousemove", { clientX: 30, clientY: 25, movementX: 0, movementY: 0 });

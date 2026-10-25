@@ -21,7 +21,7 @@ export function createWorldRenderer(scene, { asset = path => path } = {}) {
   const authoredTexture = scene.environmentTexture;
   const authoredSkyboxes = scene.meshes.filter(m => m.infiniteDistance && !m.name.startsWith('__'));
   const textures = new Map(authoredTexture ? [['scene', authoredTexture]] : []);
-  let skybox = null, skyboxKey = '';
+  let skybox = null, skyboxKey = '', rendered = false, useAuthored = false;
   const texture = key => {
     if (!key) return null;
     if (!textures.has(key)) {
@@ -32,9 +32,16 @@ export function createWorldRenderer(scene, { asset = path => path } = {}) {
     }
     return textures.get(key);
   };
+  // The world's background and volume show only where a view is rendered. Content (skybox, fog settings) is
+  // built once per world change; gate() only flips visibility, so views with different shading can alternate
+  // every frame at no cost.
+  const gate = () => {
+    authoredSkyboxes.forEach(mesh => mesh.setEnabled(useAuthored && rendered));
+    skybox?.setEnabled(rendered);
+    scene.fogEnabled = rendered;
+  };
   const setSkybox = (key, tex, background) => {
-    const useAuthored = !!tex && key === 'scene' && authoredSkyboxes.length > 0;
-    authoredSkyboxes.forEach(mesh => mesh.setEnabled(useAuthored));
+    useAuthored = !!tex && key === 'scene' && authoredSkyboxes.length > 0;
     if (!tex || useAuthored || skyboxKey !== key) { skybox?.dispose(false, true); skybox = null; skyboxKey = ''; }
     if (!tex || useAuthored) return;
     if (!skybox) {
@@ -47,8 +54,8 @@ export function createWorldRenderer(scene, { asset = path => path } = {}) {
   };
   return {
     hasAuthoredTexture: !!authoredTexture,
-    // rendered: Rendered shading or camera view. Solid and Wireframe show no world background or volume, as in Blender.
-    render(world, { rendered }) {
+    // Rebuilds the world's Babylon state. Solid and Wireframe views show no world background or volume, as in Blender.
+    render(world) {
       const background = world?.background, volume = world?.volume;
       const env = background?.input === 'ENVIRONMENT' ? texture(background.image) : null;
       if (env) env.rotationY = background.rotation;
@@ -56,11 +63,13 @@ export function createWorldRenderer(scene, { asset = path => path } = {}) {
       scene.environmentIntensity = env ? background.strength : 1;
       const color = background ? background.color.map(v => v * (env ? 1 : background.strength)) : [0, 0, 0];
       scene.clearColor = new Color4(...color.map(v => Math.min(1, v)), 1);
-      setSkybox(background?.image, rendered && env && world.visibility.camera ? env : null, background);
+      setSkybox(background?.image, env && world.visibility.camera ? env : null, background);
       scene.fogMode = volume ? fogModes[volume.type] : Scene.FOGMODE_NONE;
-      scene.fogEnabled = rendered;
       if (volume) Object.assign(scene, { fogColor: Color3.FromArray(volume.color), fogDensity: volume.density, fogStart: volume.start, fogEnd: volume.end });
+      gate();
     },
+    // Rendered shading or camera view for the view about to render. Cheap; called per view.
+    setRendered(value) { if (rendered !== value) { rendered = value; gate(); } },
     dispose() {
       skybox?.dispose(false, true);
       for (const [key, tex] of textures) if (key !== 'scene') tex.dispose();

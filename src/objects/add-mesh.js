@@ -19,7 +19,7 @@ export function createAddMesh(
   let pane, pending, lastOperation;
   const close = () => {
     menu.close();
-    world.engine.getRenderingCanvas()?.focus();
+    world.focusViewport?.();
   };
   const finish = (commit = true) => {
     if (textEditor.pending) textEditor.finish(commit);

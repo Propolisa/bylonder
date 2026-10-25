@@ -1,5 +1,7 @@
 import { Camera, Vector3 } from "@babylonjs/core";
-export function createNavigation({ camera, engine }, canvas, capture) {
+// Editor-camera navigation for one 3D Viewport: MMB orbit, Shift MMB pan, wheel zoom, numpad views.
+// enabled(): false while the view looks through the scene camera. onSync(): the view's label needs updating.
+export function createNavigation({ camera, engine, canvas, capture, enabled = () => true, onSync = () => {} }) {
   camera.attachControl(canvas, true);
   camera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
   camera.inputs.removeByType("ArcRotateCameraMouseWheelInput");
@@ -18,19 +20,16 @@ export function createNavigation({ camera, engine }, canvas, capture) {
   let viewName = "User";
   const sync = () => {
     updateBounds();
-    document.querySelector("#view-name").textContent =
-      viewName + (camera.mode === 0 ? " Perspective" : " Orthographic");
-    document.querySelector("#projection").innerHTML =
-      (camera.mode === 0 ? "Perspective" : "Orthographic") + " <kbd>5</kbd>";
+    onSync();
   };
   const down = (e) => {
-    if(document.body.classList.contains("scene-mode"))return;
+    if (!enabled()) return;
     if (e.pointerType === "touch") return;
     if (e.button === 1 && !capture.active) {
       e.preventDefault();
 
       drag = true;
-      capture.begin({ x: e.clientX, y: e.clientY }, move, up);
+      capture.begin({ x: e.clientX, y: e.clientY }, move, up, canvas);
     }
   };
   const pan = (dx,dy) => {
@@ -47,7 +46,7 @@ export function createNavigation({ camera, engine }, canvas, capture) {
     }
   };
   const wheel = (e) => {
-    if(document.body.classList.contains("scene-mode"))return;
+    if (!enabled()) return;
     e.preventDefault();
     if (capture.active) return;
     camera.radius = Math.max(
@@ -61,15 +60,17 @@ export function createNavigation({ camera, engine }, canvas, capture) {
   const mouseUp = (e) => {
     if (e.button === 1) up();
   };
+  const context = (e) => e.preventDefault();
   window.addEventListener("mouseup", mouseUp);
   canvas.addEventListener("pointerup", up);
   canvas.addEventListener("pointercancel", up);
   canvas.addEventListener("wheel", wheel, { passive: false });
-  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("contextmenu", context);
   return {
     sync,
     pan, orbit, zoom,
     updateBounds,
+    get viewName() { return viewName; },
     opposite() { camera.alpha += Math.PI; camera.beta = Math.PI - camera.beta; viewName = "User"; sync(); },
     toggle() {
       camera.mode = camera.mode === 0 ? 1 : 0;
@@ -110,6 +111,7 @@ export function createNavigation({ camera, engine }, canvas, capture) {
       canvas.removeEventListener("pointerup", up);
       canvas.removeEventListener("pointercancel", up);
       canvas.removeEventListener("wheel", wheel);
+      canvas.removeEventListener("contextmenu", context);
     },
   };
 }

@@ -23,7 +23,7 @@ export function createTextEditor(world, editor, history, commands) {
     pane?.dispose();
     dialog.close();
     editor.reconcile();
-    world.engine.getRenderingCanvas()?.focus();
+    world.focusViewport?.();
   };
   const update = () => {
     clearTimeout(timer);

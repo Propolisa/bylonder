@@ -166,6 +166,8 @@ controls({id: 'label', schema: textSchema, connect(store) {
 
 Vue 3 and [Splitpanes](https://antoniandre.github.io/splitpanes/) own the workspace and viewport layouts. Drag splitters to resize; each section selector swaps its contents with another section. Collapse, maximize, restore, change split directions, or reset from **Layout**. On touch screens the Layout menu exposes those same controls without using space for a second title bar. Layout profiles are saved by default in localStorage, independently of projects, for desktop, portrait and landscape. Disable **Remember layout** to stop persistence. Resetting the outer workspace also resets the inner viewport layout.
 
+Split a 3D Viewport (right-click its header, Vertical or Horizontal Split, or drag an area corner) to add another 3D Viewport. Each has its own view, navigation, shading (Wireframe, Solid, Rendered), overlays and camera view (Numpad 0); selection, tools and gizmos are shared, and keys act on the viewport under the pointer. Viewports redraw only while something changes (input, playback, animated or loading content), so an idle scene costs no GPU time. With Compositing on, the last clicked rendered viewport shows the composite.
+
 Portrait defaults to the scene with section tabs; landscape shows code beside the scene. The viewport has separate Objects and Properties sections. Pane contents remain in stable DOM hosts, so swaps and layout changes do not reload the iframe, scene or Monaco models. Splitpanes handles mouse, touch and keyboard resizing.
 
 Touch viewport controls:

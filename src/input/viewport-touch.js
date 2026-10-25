@@ -1,12 +1,14 @@
 import { reactive, createApp, h, Teleport } from 'vue';
 import { bindTouch, bindLongPress } from './touch-session.js';
-export function createViewportTouch(world, editor, nav, canvas, creator){
+// Touch gestures for every 3D Viewport (attach(view) per view) and the touch controls, mounted once.
+export function createViewportTouch(world, editor, creator, views){
   const state=reactive({multi:false,snap:false,fine:false,axis:null,mode:editor.mode,count:editor.selection.size,modal:!!editor.modal});
   world.onEditorState=value=>Object.assign(state,value);
   const eventAt=point=>({clientX:point.x,clientY:point.y,preventDefault(){}});
-  const picked=point=>editor.pick(point.x,point.y);
+  const attach=view=>{
+  const nav=view.nav,picked=point=>editor.pick(point.x,point.y,view);
   let operation=null;
-  const unbind=bindTouch(canvas,{
+  return bindTouch(view.canvas,{
     tap(point,double){
       if(editor.modal){editor.finish(true);return;}
       const node=picked(point);
@@ -15,11 +17,12 @@ export function createViewportTouch(world, editor, nav, canvas, creator){
     },
     hold(point){world.contextMenu.open(eventAt(point),picked(point));},
     start(point){
+      views.setInput(view);
       creator.finish();
       if(point.count>1){editor.finish(true);operation='camera';return;}
       const type=editor.modal?.type||editor.mode;
       if(type!=='select'&&editor.selection.size){
-        operation='transform';editor.start(type,{point,external:true});
+        operation='transform';editor.start(type,{point,external:true,view});
         if(state.axis)editor.axis(state.axis);
       }else operation='orbit';
     },
@@ -29,7 +32,8 @@ export function createViewportTouch(world, editor, nav, canvas, creator){
       else nav.orbit(sample.dx,sample.dy);
     },
     end(cancel){if(operation==='transform')editor.finish(!cancel);operation=null;}
-  },{enabled:()=>!document.body.classList.contains('scene-mode')});
+  },{enabled:()=>!view.state.cameraView});
+  };
   const graph=document.querySelector('#objects');
   const unbindGraph=bindLongPress(graph,event=>{
     const row=event.target.closest('[data-id]');
@@ -56,5 +60,5 @@ export function createViewportTouch(world, editor, nav, canvas, creator){
       button('↶',()=>world.objectActions.invoke('undo'),false,'Undo'),button('↷',()=>world.objectActions.invoke('redo'),false,'Redo')
     ])
   ]});app.mount(host);
-  return {dispose(){unbind();unbindGraph();world.onEditorState=null;app.unmount();host.remove();graphControls.remove();}};
+  return {attach,dispose(){unbindGraph();world.onEditorState=null;app.unmount();host.remove();graphControls.remove();}};
 }

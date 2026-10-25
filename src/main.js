@@ -18,10 +18,11 @@ import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
 import "./viewport.css";
-import { mountViewportUI } from "./viewport-ui.js";
+import { createViewportOverlays, createViewportStatus } from "./viewport-ui.js";
+import { createViews } from "./viewport/views.js";
+import { createView3D } from "./viewport/view3d.js";
 import "@babylonjs/core/Debug/debugLayer";
 
-import { createNavigation } from "./navigation";
 import { createEditor } from "./editor";
 import { createHistory, snapshot } from "./storage";
 import { createWorld } from "./runtime/world.js";
@@ -88,13 +89,17 @@ const input = await new Promise((resolve) => {
   });
   send("ready", {});
 });
-const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+// The engine renders into a hidden working canvas; every 3D Viewport is an engine view (src/viewport/views.js).
+// User code gets the primary viewport's canvas, for camera.attachControl and input.
+const workCanvas = Object.assign(document.createElement("canvas"), { className: "engine-working-canvas" });
+workCanvas.setAttribute("aria-hidden", "true");
+document.body.append(workCanvas);
+const engine = new BABYLON.Engine(workCanvas, true, { stencil: true });
 applyRenderSettings(engine);
 let saveOverrides = () => {};
 let history;
 const commit = () => history?.commit();
-let editMode = true;
-let viewportUI;
+let views;
 let built;
 try {
   built = await createWorld({ input, engine, canvas, hooks: {
@@ -102,11 +107,9 @@ try {
     saveOverrides: () => saveOverrides(),
     onAnimation: (data) => send("animation", data),
     notify,
-    // Scene camera changed (Properties > Scene > Camera): in camera view, look through the new camera.
+    // Scene camera changed (Properties > Scene > Camera): views in camera view look through the new camera.
     setCamera(next, previous) {
-      if (!editMode) { previous?.detachControl(); scene.activeCamera = next; next.attachControl(canvas, true); }
-      world.compositor?.syncCamera();
-      viewportUI?.sync();
+      for (const view of views?.all || []) view.sceneCameraChanged(next, previous);
     },
   } });
 } catch (error) {
@@ -116,25 +119,20 @@ try {
 }
 const { world, sdk, animation, scene, objects, baseline, documentState } = built;
 const authored = () => built.authoredCamera;
-const camera = new BABYLON.ArcRotateCamera(
-  "__editorCamera",
-  -Math.PI / 2,
-  Math.PI / 3,
-  12,
-  new BABYLON.Vector3(0, 1, 0),
-  scene,
-);
-if (authored()) {
-  camera.setPosition(authored().position.clone());
-  camera.setTarget(authored().getTarget?.() || BABYLON.Vector3.Zero());
-}
-camera.minZ = 0.01;
-camera.lowerRadiusLimit = 0.1;
-camera.upperRadiusLimit = 10000;
-camera.inertia = 0;
-scene.activeCamera = camera;
-world.camera = camera;
-world.compositor.syncCamera();
+const overlays = createViewportOverlays(scene);
+// Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
+// particles, video; otherwise they stop until the next input or change.
+const observerCount = () => scene.onBeforeRenderObservable.observers.length + scene.onAfterRenderObservable.observers.length;
+const userObservers = observerCount();
+let ownObservers = 0;
+const live = () =>
+  animation.playing || !!editor?.modal || userObservers > 0 ||
+  observerCount() > userObservers + ownObservers || engine._activeRenderLoops.length > 1 ||
+  scene.animatables.length > 0 || scene.particleSystems.some((p) => p.isStarted?.() && p.isAlive?.()) ||
+  scene.textures.some((t) => t.video && !t.video.paused);
+views = createViews({ engine, scene, live });
+world.views = views;
+world.focusViewport = () => views.input?.canvas.focus();
 let creator;
 const systems = sdk.systems;
 // Offline renders run from a snapshot of the current document, whether or not scene edits are remembered.
@@ -144,7 +142,7 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Development handle for debugging and browser tests; not present in production builds.
-if (import.meta.env.DEV) window.__bylonder = { world, renderHost };
+if (import.meta.env.DEV) window.__bylonder = { world, renderHost, get editor() { return editor; }, get views() { return views; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
@@ -220,40 +218,18 @@ history = createHistory(world.objects, () => {
   animation.load(data?.animation,{apply:false});
 },beforeCommit:()=>{world.collections.adopt();animation.captureEdits();}});
 animation.setCommit(()=>history.commit());
-const capture = createMouseCapture(canvas, notify);
+const capture = createMouseCapture(notify);
 const editor = createEditor(
   world,
-  canvas,
+  views,
   history,
-  () => ui?.refresh(),
+  () => { ui?.refresh(); views.wake(); },
   notify,
   capture,
 );
-const nav = createNavigation(world, canvas, capture);
-const toggleCameraView = () => {
-  creator.finish();
-  editor.finish(false);
-  capture.release();
-  editMode = !editMode;
-  if (editMode) {
-    authored()?.detachControl();
-    scene.activeCamera = camera;
-    camera.attachControl(canvas, true);
-  } else {
-    camera.detachControl();
-    if (authored()) {
-      scene.activeCamera = authored();
-      authored().attachControl(canvas, true);
-    }
-  }
-  document.body.classList.toggle("scene-mode", !editMode);
-  document.querySelector("#scene-mode").textContent = editMode
-    ? "Edit mode"
-    : "Scene mode";
-  viewportUI?.sync();
-  world.compositor.syncCamera();
-};
-document.querySelector("#scene-mode").onclick = toggleCameraView;
+const activeView = () => views.input;
+// Object actions and menus act on the 3D Viewport under the pointer, as in Blender.
+const nav = { frame: (node) => activeView()?.nav.frame(node) };
 const commands = createObjectCommands(world, editor, history, () =>
   ui?.refresh(),
 );
@@ -278,7 +254,7 @@ world.objectActions = createObjectActions({
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
-const touch = createViewportTouch(world, editor, nav, canvas, creator);
+const touch = createViewportTouch(world, editor, creator, views);
 // Like Blender, objects hidden or excluded through their collections drop out of the selection.
 world.collections.subscribe(() => {
   const keep = editor.selection.nodes.filter((n) => world.collections.status(n).visible);
@@ -319,31 +295,62 @@ async function inspector() {
     notify("Inspector could not load. Please retry.");
   } finally {
     inspectorBusy = false;
-    world.engine.resize();
+    views.relayout();
   }
 }
 const help = document.querySelector("#shortcuts");
 document.querySelector("#help").onclick = () => help.showModal();
 document.querySelector("#close-help").onclick = () => help.close();
-viewportUI = mountViewportUI({ world, editor, nav, creator, registry: world.objectActions, dock: viewportDock, send, inspector, help, toggleCameraView, isCameraView: () => !editMode });
+// 3D Viewports: the primary area and any added by splitting it (dock factory 'viewport').
+const viewportCtx = {
+  world, views, editor, registry: world.objectActions, creator, dock: viewportDock, capture, inspector, help, overlays,
+  sceneCamera: authored,
+  // Shading or camera view changed somewhere: effects attach to rendered views' cameras and one rendered view
+  // (the last one clicked, else the first) shows the compositor.
+  shadingChanged() {
+    const all = views.all, rendered = all.filter((v) => v.rendered);
+    const compositorView = world.compositor.enabled ? (rendered.includes(views.focused) ? views.focused : rendered[0]) || null : null;
+    for (const v of all) v.wantsCompositor = v === compositorView;
+    world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera });
+    const cameraView = !!views.input?.state.cameraView;
+    document.body.classList.toggle("scene-mode", cameraView);
+    document.querySelector("#scene-mode").textContent = cameraView ? "Scene mode" : "Edit mode";
+    views.relayout();
+  },
+};
+const mountView = (options) => {
+  const view = createView3D(viewportCtx, options);
+  const detachEditor = editor.attach(view), detachTouch = touch.attach(view);
+  const dispose = view.dispose;
+  view.dispose = () => { detachEditor(); detachTouch(); dispose(); };
+  views.add(view);
+  viewportCtx.shadingChanged();
+  return view;
+};
+const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
+if (authored()) {
+  primary.editorCamera.setPosition(authored().position.clone());
+  primary.editorCamera.setTarget(authored().getTarget?.() || BABYLON.Vector3.Zero());
+}
+viewportDock.setFactory("viewport", (host, id) => mountView({ section: host, headerId: id, from: activeView()?.editorCamera || primary.editorCamera }));
+views.setInput(primary);
+views.onFocus = () => viewportCtx.shadingChanged();
+world.compositor.subscribe(() => viewportCtx.shadingChanged());
+const status = createViewportStatus({ world, editor, views, send });
+for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
+for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());
+ownObservers = observerCount() - userObservers;
 document.querySelector("#inspector").onclick = inspector;
-document.querySelector("#opposite-view").onclick = () => nav.opposite();
-document.querySelector("#projection").onclick = () => nav.toggle();
+document.querySelector("#scene-mode").onclick = () => activeView()?.toggleCameraView();
+document.querySelector("#opposite-view").onclick = () => activeView().nav.opposite();
+document.querySelector("#projection").onclick = () => activeView().nav.toggle();
 document.querySelector("#frame").onclick = () => nav.frame(editor.selected);
 document.querySelector("#group").onclick = () => world.objectActions.invoke("group");
 document.querySelector("#ungroup").onclick = () => world.objectActions.invoke("ungroup");
 document.querySelector("#panel-toggle").onclick = () => viewportDock.show("properties", viewportDock.profile !== "desktop");
 document
   .querySelectorAll("[data-view]")
-  .forEach((b) => (b.onclick = () => nav.view(b.dataset.view)));
-document.querySelectorAll("[data-tool]").forEach(
-  (b) =>
-    (b.onclick = () => {
-      creator.finish();
-      editor.finish(false);
-      editor.setMode(b.dataset.tool);
-    }),
-);
+  .forEach((b) => (b.onclick = () => activeView().nav.view(b.dataset.view)));
 const key = (e) => {
   if (
     e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host') ||
@@ -351,11 +358,11 @@ const key = (e) => {
     creator.open
   )
     return;
-  if (e.code === "Numpad0" && !e.repeat) { e.preventDefault(); toggleCameraView(); return; }
+  if (e.code === "Numpad0" && !e.repeat) { e.preventDefault(); activeView()?.toggleCameraView(); return; }
   if (e.key === "F12" && !e.repeat) { e.preventDefault(); (e.ctrlKey || e.metaKey ? renderHost.renderAnimation : renderHost.renderImage)(); return; }
   if (e.key === "F11" && !e.repeat) { e.preventDefault(); renderHost.viewRender(); return; }
   if (e.key === "Escape" && !editor.modal && !creator.pending && renderHost.escape()) { e.preventDefault(); return; }
-  if (e.target.closest(".timeline") || e.repeat || !editMode) return;
+  if (e.target.closest(".timeline") || e.repeat || !activeView() || activeView().state.cameraView) return;
   const k = e.key.toLowerCase(),
     mod = e.ctrlKey || e.metaKey;
   if (mod && e.shiftKey && k === "i") {
@@ -410,48 +417,41 @@ const key = (e) => {
   } else if (k === "escape") editor.setMode("select");
   else if (k === "5") {
     e.preventDefault();
-    nav.toggle();
+    activeView().nav.toggle();
   } else if (["1", "3", "7"].includes(k)) {
     e.preventDefault();
-    nav.view({ 1: "front", 3: "right", 7: "top" }[k], mod);
+    activeView().nav.view({ 1: "front", 3: "right", 7: "top" }[k], mod);
   } else if (k === "f" || e.code === "NumpadDecimal") {
     e.preventDefault();
     nav.frame(editor.selected);
   } else if (k === "?") help.showModal();
 };
 window.addEventListener("keydown", key);
-const resize = () => {
-  if (!canvas.clientWidth || !canvas.clientHeight) return;
-  world.engine.resize();
-  nav.sync();
-};
-window.addEventListener("resize", resize);
-const resizeObserver = new ResizeObserver(resize);
-resizeObserver.observe(canvas);
 let last = 0;
-world.engine.runRenderLoop(() => {
+// Once per animation frame, before views decide whether to render.
+const perFrame = engine.onBeginFrameObservable.add(() => {
   animation.tick(performance.now());
   world.modifiers.refresh();
-  if (editMode) nav.updateBounds();
-  if (canvas.clientWidth && canvas.clientHeight) world.scene.render();
-  viewportUI.tick();
+  for (const view of views.all) if (!view.state.cameraView) view.nav.updateBounds();
+  status.tick();
   if (performance.now() - last > 500) {
-    document.querySelector("#fps").textContent =
-      Math.round(world.engine.getFps()) + " FPS";
-    document.querySelector("#status").textContent = editor.modal
-      ? "Transforming " + editor.selection.size + " selected"
-      : editor.selection.size + " selected";
     world.outliner.refresh();
     nodeEditor.refresh();
     saveOverrides();
     last = performance.now();
   }
-});
+}, undefined, true);
+// Runs once per visible view per frame (engine views); the view manager applies per-view state around it.
+const renderScene = () => scene.render();
+engine.runRenderLoop(renderScene);
 
 function dispose() {
   storage.save();
   timeline.dispose();
-  viewportUI.dispose();
+  engine.onBeginFrameObservable.remove(perFrame);
+  for (const view of views.all) view.dispose();
+  views.dispose();
+  overlays.dispose();
   renderHost.dispose();
   unsubscribeAnimation();
   world.modifiers.dispose();
@@ -466,13 +466,10 @@ function dispose() {
   touch.dispose();
   viewportDock.dispose();
   editor.dispose();
-  nav.dispose();
   capture.dispose();
   world.scene.dispose();
   world.engine.dispose();
   window.removeEventListener("keydown", key);
-  window.removeEventListener("resize", resize);
-  resizeObserver.disconnect();
   clearTimeout(toastTimer);
 }
 send("running", {});
