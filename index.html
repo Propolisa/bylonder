@@ -7,16 +7,19 @@
   </head>
   <body>
     <header id="appbar">
-      <select id="project" aria-label="Project"></select>
-      <button id="run" class="primary" title="Run (Ctrl Enter)">▶ Run</button>
-      <details id="app-more"><summary aria-label="Project actions">⋯</summary><div>
+      <span class="bl-logo"></span><nav id="topbar-menus" aria-label="Main menu"></nav>
+      <nav id="workspace-tabs" aria-label="Workspaces"></nav>
+      <span class="spacer"></span>
+      <label class="bl-datablock" title="Project"><span class="bl-icon" style="mask-image:url(icons/blender/scene_data.svg);-webkit-mask-image:url(icons/blender/scene_data.svg)"></span><select id="project" aria-label="Project"></select></label>
+      <button id="run" class="primary" title="Run (Ctrl Enter)">Run</button>
+      <details id="app-more" hidden><summary aria-label="Project actions">⋯</summary><div>
         <button id="share-project">Share project</button><button id="stop">Stop scene</button>
         <button id="new-project">New project</button><button id="fork-project">Fork project</button><button id="rename-project">Rename project</button>
         <button id="checkpoint">Checkpoint</button><button id="export">Export project ZIP</button><button id="import">Import project ZIP</button>
         <button id="toggle-remember">Remember scene edits: off</button><button id="clear-scene-edits">Clear scene edits</button><button id="layout">Arrange panels</button><button id="render-settings">Render resolution</button>
         <label><input type="checkbox" id="auto-run">Auto-run</label>
+        <a id="app-source" href="app-source.zip" download="babylon-workbench-source.zip">Source</a>
       </div></details>
-      <a id="app-source" href="/app-source.zip" download="babylon-workbench-source.zip" title="Download the complete unminified application source" aria-label="Download app source">↓ <span>Source</span></a>
     </header>
     <div id="workspace">
       <aside id="explorer">
@@ -53,9 +56,8 @@
         tabindex="0"
       ></div>
       <section id="preview-pane">
-        <div id="preview-toolbar">
-          <span id="run-status">Starting…</span><span class="spacer"></span
-          ><label
+        <div id="preview-toolbar" hidden>
+          <label
             title="Persist interactive transforms, groups and all generated control values"
             ><input type="checkbox" id="remember" />Remember scene edits</label
           ><button id="clear-overrides">Clear overrides</button>
@@ -75,11 +77,9 @@
       <div id="problems-content" hidden></div>
       <pre id="types-content" hidden></pre>
     </section>
-    <footer>
-      <span id="save-status" role="status">Opening OPFS…</span
-      ><span id="active-file">index.js</span
-      ><span id="type-status">Loading IntelliSense…</span
-      ><span id="storage-status">Local workspace</span>
+    <footer class="bl-statusbar">
+      <span id="status-hints"></span>
+      <span class="bl-status-right"><span id="scene-stats"></span><span id="run-status">Starting…</span><span id="save-status" role="status">Opening OPFS…</span><span id="active-file">index.js</span><span id="type-status">Loading IntelliSense…</span><span id="storage-status">Local workspace</span></span>
     </footer>
     <input type="file" id="import-input" accept=".zip" hidden /><input
       type="file"

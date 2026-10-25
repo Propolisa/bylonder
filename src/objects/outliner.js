@@ -1,4 +1,7 @@
 import { nodeId, deleted } from "./identity.js";
+import { iconEl } from "../ui/icon.js";
+import { menuButton } from "../ui/menu.js";
+const kindIcons = { Collection: ["outliner_collection", ""], Mesh: ["outliner_ob_mesh", "obj", "mesh_data"], Transform: ["outliner_ob_empty", "obj"], Camera: ["outliner_ob_camera", "obj", "camera_data"], Light: ["outliner_ob_light", "obj", "light_data"] };
 export function createOutliner(world, editor, commands) {
   const root = document.querySelector("#objects"),
     search = document.querySelector("#tree-search"),
@@ -32,7 +35,7 @@ export function createOutliner(world, editor, commands) {
   };
   const button = (text, title, fn) => {
     const b = document.createElement("button");
-    b.textContent = text;
+    b.append(...[text].flat());
     b.title = title;
     b.onclick = (e) => {
       e.stopPropagation();
@@ -83,7 +86,7 @@ export function createOutliner(world, editor, commands) {
       row.setAttribute("aria-selected", String(editor.selection.has(node)));
       row.tabIndex = 0;
       const toggle = button(
-        children.length ? (collapsed.has(id) ? "▸" : "▾") : "·",
+        children.length ? iconEl(collapsed.has(id) ? "disclosure_tri_right" : "disclosure_tri_down") : "",
         "Expand/collapse",
         () => {
           collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id);
@@ -92,12 +95,9 @@ export function createOutliner(world, editor, commands) {
       );
       toggle.className = "tree-toggle";
       row.append(toggle);
+      const [typeIcon, tint, dataIcon] = kindIcons[kind(node)];
       const name = button(
-        { Collection: "▣", Mesh: "◇", Transform: "⊹", Camera: "▰", Light: "☼" }[
-          kind(node)
-        ] +
-          " " +
-          node.name,
+        [iconEl(typeIcon, tint), Object.assign(document.createElement("span"), { className: "tree-label", textContent: node.name }), dataIcon ? iconEl(dataIcon, "data tree-data") : ""],
         kind(node),
         (e) => {
           if (!editable(node)) {
@@ -138,7 +138,7 @@ export function createOutliner(world, editor, commands) {
       };
       row.append(name);
       row.append(
-        button(node.isEnabled(false) ? "◉" : "○", "Toggle visibility", () => {
+        button(iconEl(node.isEnabled(false) ? "hide_off" : "hide_on"), "Hide in Viewport", () => {
           if (editable(node)) commands.visibility(node);
           else {
             node.setEnabled(!node.isEnabled(false));
@@ -149,8 +149,8 @@ export function createOutliner(world, editor, commands) {
       if (editable(node))
         row.append(
           button(
-            node.metadata?.wbLocked ? "▧" : "□",
-            "Toggle selection lock",
+            iconEl(node.metadata?.wbLocked ? "restrict_select_on" : "restrict_select_off"),
+            "Disable Selection",
             () => commands.lock(node),
           ),
         );
@@ -189,6 +189,22 @@ export function createOutliner(world, editor, commands) {
     };
     all.filter((n) => !all.includes(n.parent)).forEach((n) => render(n, 0));
     document.querySelector("#tree-count").textContent = all.length + " objects";
+  }
+  const header = world.dock?.header("objects");
+  if (header) {
+    const field = Object.assign(document.createElement("label"), { className: "bl-search", title: "Filter by name" });
+    search.placeholder = "";
+    field.append(iconEl("viewzoom"), search);
+    const types = () => [["", "All"], ...[...filter.options].slice(1).map((o) => [o.value, o.textContent])].map(([value, label]) => ({ label, checked: () => filter.value === value, run: () => { filter.value = value; refresh(); } }));
+    header.append(
+      menuButton("", [{ label: "View Layer", icon: "outliner", checked: () => true }], { icon: "outliner", className: "bl-dropdown", title: "Display Mode" }),
+      field,
+      menuButton("", types, { icon: "filter", className: "bl-dropdown", title: "Filter" }),
+      Object.assign(document.createElement("button"), { className: "bl-icon-button", title: "New Collection from selection (Ctrl G)", onclick: () => world.objectActions?.invoke("group") }),
+    );
+    header.lastChild.append(iconEl("collection_new"));
+    const rootRow = document.querySelector("#tree-root");
+    rootRow.replaceChildren(iconEl("outliner_collection"), Object.assign(document.createElement("span"), { textContent: "Scene Collection" }));
   }
   search.oninput = () => refresh();
   filter.onchange = () => refresh();

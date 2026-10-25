@@ -17,6 +17,9 @@ import * as BABYLON from "@babylonjs/core";
 import { createSDK } from "./runtime-sdk";
 import { RUN_CACHE } from "./workspace/module-host";
 import "./style.css";
+import "./theme.css";
+import "./viewport.css";
+import { mountViewportUI } from "./viewport-ui.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createNavigation } from "./navigation";
@@ -225,6 +228,8 @@ window.addEventListener("message", (e) => {
   )
     return;
   if (e.data.type === "reset-layout") viewportDock.reset();
+  if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
+  if (e.data.type === "help") help.showModal();
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "snapshot") {
     const requestId = e.data.payload.requestId;
@@ -267,7 +272,7 @@ const editor = createEditor(
 );
 const nav = createNavigation(world, canvas, capture);
 let editMode = true;
-document.querySelector("#scene-mode").onclick = () => {
+const toggleCameraView = () => {
   creator.finish();
   editor.finish(false);
   capture.release();
@@ -287,7 +292,10 @@ document.querySelector("#scene-mode").onclick = () => {
   document.querySelector("#scene-mode").textContent = editMode
     ? "Edit mode"
     : "Scene mode";
+  viewportUI?.sync();
 };
+document.querySelector("#scene-mode").onclick = toggleCameraView;
+let viewportUI;
 const commands = createObjectCommands(world, editor, history, () =>
   ui?.refresh(),
 );
@@ -310,6 +318,7 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
+world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, nav, canvas, creator);
 const beginSelection = editor.selection.begin;
@@ -317,8 +326,9 @@ editor.selection.begin = () => { animation.pause(); beginSelection(); };
 ui = createUI(world, editor, storage, history, systems, sdk.properties);
 viewportDock.setFactory('properties',(host,id)=>ui.create(host,id));
 const insertKeys = () => {registerObjects(animation, objects);animation.insert(objectRefs(editor.selection.roots));};
-const timeline = mountTimeline(document.querySelector('#timeline-section'), animation, {insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();}});
-viewportDock.setFactory('timeline',(host)=>mountTimeline(host,animation,{insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();}}));
+const timelineOptions = id => ({insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();},header:viewportDock.header(id),names:ref=>world.objects.find(n=>'object:'+nodeId(n)===ref)?.name});
+const timeline = mountTimeline(document.querySelector('#timeline-section'), animation, timelineOptions('timeline'));
+viewportDock.setFactory('timeline',(host,id)=>mountTimeline(host,animation,timelineOptions(id)));
 const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();ui?.refresh();} });
 document.querySelector("#add-mesh").onclick = () => creator.show();
 document.querySelector("#delete-objects").onclick = () => commands.remove();
@@ -347,6 +357,7 @@ async function inspector() {
 const help = document.querySelector("#shortcuts");
 document.querySelector("#help").onclick = () => help.showModal();
 document.querySelector("#close-help").onclick = () => help.close();
+viewportUI = mountViewportUI({ world, editor, nav, creator, registry: world.objectActions, dock: viewportDock, send, inspector, help, toggleCameraView, isCameraView: () => !editMode });
 document.querySelector("#inspector").onclick = inspector;
 document.querySelector("#opposite-view").onclick = () => nav.opposite();
 document.querySelector("#projection").onclick = () => nav.toggle();
@@ -372,6 +383,7 @@ const key = (e) => {
     creator.open
   )
     return;
+  if (e.code === "Numpad0" && !e.repeat) { e.preventDefault(); toggleCameraView(); return; }
   if (e.target.closest(".timeline") || e.repeat || !editMode) return;
   const k = e.key.toLowerCase(),
     mod = e.ctrlKey || e.metaKey;
@@ -456,6 +468,7 @@ world.engine.runRenderLoop(() => {
   world.modifiers.refresh();
   if (editMode) nav.updateBounds();
   if (canvas.clientWidth && canvas.clientHeight) world.scene.render();
+  viewportUI.tick();
   if (performance.now() - last > 500) {
     document.querySelector("#fps").textContent =
       Math.round(world.engine.getFps()) + " FPS";
@@ -471,6 +484,7 @@ world.engine.runRenderLoop(() => {
 function dispose() {
   storage.save();
   timeline.dispose();
+  viewportUI.dispose();
   unsubscribeAnimation();
   world.modifiers.dispose();
   sdk.dispose();

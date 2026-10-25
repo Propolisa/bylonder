@@ -1,13 +1,17 @@
 import { mapArea, removeArea, validAreaTree } from './area-tree.js';
 import { paneIcon } from './icons.js';
+import { icon } from '../properties/icons.js';
+import { openMenu } from '../ui/menu.js';
 import { createApp, h, reactive, nextTick, watch, Teleport } from 'vue';
 import { Splitpanes, Pane } from 'splitpanes';
 import 'splitpanes/dist/splitpanes.css';
 import './dock.css';
 import { profile, validateLayout, swapSections, focusedSection } from './model.js';
 
-export function mountDock({host, items, tree, defaults, storageKey}) {
+export function mountDock({host, items, tree, defaults, storageKey, bareFocus=false}) {
   items=[...items];
+  const headers=new Map();
+  const header=id=>{if(!headers.has(id))headers.set(id,Object.assign(document.createElement('div'),{className:'dock-header-content'}));return headers.get(id);};
   const baseCount=items.length,factories=new Map(),instances=new Map();
   const ids=items.map(item=>item.id), panels=new Map(), slots=new Map();
   const coarse=matchMedia('(pointer:coarse)');
@@ -17,7 +21,7 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
     if(coarse.matches) return (screen.orientation?.type||'').startsWith('landscape')||(!screen.orientation&&screen.width>screen.height)?'landscape':'portrait';
     return profile(width,height,false);
   };
-  let saved={}, menuElement, areaMenu, hovered=null, frameId, disposed=false;
+  let saved={}, menuElement, hovered=null, frameId, disposed=false;
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
   const state=reactive({profile:currentProfile(),layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(tree),area:null,factoryCount:0});
   const extras=Array.isArray(saved.extras)?saved.extras.slice(0,20):[];
@@ -50,7 +54,7 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
     for(let slot=0;slot<ids.length;slot++){
       const id=state.layout.order[slot],panel=panels.get(id);
       const show=focused?id===focused:visible(slot);
-      const element=focused?space:slots.get(slot);
+      const element=focused&&bareFocus?space:slots.get(slot);
       panel.hidden=!show||!element;
       if(panel.hidden)continue;
       const rect=element.getBoundingClientRect();
@@ -86,10 +90,11 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
   function renderNode(node){
     if(typeof node==='number'){
       const id=state.layout.order[node];
-      return h('div',{class:'dock-leaf',onPointerenter:()=>hovered=node,onContextmenu:e=>openArea(e,node)},[
-        h('div',{class:'dock-heading'},[
-          select(id,value=>{swapSections(state.layout,node,value);persist();},items.map(item=>[item.id,item.title]),'Editor Type'),
-          button('⛶',()=>{state.focus=id;persist();},'Toggle Maximize Area (Ctrl-Space)'),button('⋮',e=>openArea(e,node),'Area Options'),h('span',{class:'dock-corner',title:'Drag inward to split; drag into another area to join; Ctrl-drag to swap',onPointerdown:e=>corner(e,node)})
+      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare}],onPointerenter:()=>hovered=node,onContextmenu:e=>openArea(e,node)},[
+        h('div',{class:'dock-heading',onContextmenu:e=>openArea(e,node)},[
+          h('button',{type:'button',class:'dock-editor-type',title:'Editor Type · '+(items.find(item=>item.id===id)?.title||''),'aria-label':'Editor Type',onClick:e=>editorMenu(e.currentTarget,node)},[icon((items.find(item=>item.id===(items.find(i=>i.id===id)?.type||id))||{}).icon||'properties')]),
+          h('div',{class:'dock-header-host',ref:el=>{const content=header(id);if(el&&content.parentElement!==el)el.replaceChildren(content);}}),
+          h('span',{class:'dock-corner',title:'Drag inward to split; drag into another area to join; Ctrl-drag to swap',onPointerdown:e=>corner(e,node)})
         ]),
         h('div',{class:'dock-slot',ref:el=>{
           const old=slots.get(node);if(old&&old!==el)observer.unobserve(old);
@@ -111,7 +116,7 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
     const id='area:'+crypto.randomUUID(),element=document.createElement('section'),item={id,type:selected,title:items.find(i=>i.id===selected).title,element};
     const index=ids.length;items.push(item);ids.push(id);state.layout.order.push(id);
     const panel=document.createElement('div');panel.className='dock-content';panel.dataset.section=id;panel.append(element);host.append(panel);panels.set(id,panel);instances.set(id,factories.get(selected)(element,id));
-    const splitId='split:'+crypto.randomUUID();state.tree=mapArea(state.tree,slot,()=>({id:splitId,children:[slot,index]}));state.layout.horizontal[splitId]=horizontal;state.layout.sizes[splitId]=[50,50];state.focus=null;areaMenu?.close();persist();
+    const splitId='split:'+crypto.randomUUID();state.tree=mapArea(state.tree,slot,()=>({id:splitId,children:[slot,index]}));state.layout.horizontal[splitId]=horizontal;state.layout.sizes[splitId]=[50,50];state.focus=null;persist();
   };
   const corner=(event,slot)=>{
     if(event.button!==0)return;event.preventDefault();const el=event.currentTarget,start={x:event.clientX,y:event.clientY};let canceled=false;
@@ -122,8 +127,9 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
       else if(Math.hypot(e.clientX-start.x,e.clientY-start.y)>20)split(slot,Math.abs(e.clientY-start.y)>Math.abs(e.clientX-start.x));
     };el.onpointercancel=()=>window.removeEventListener('keydown',escape);
   };
-  const closeArea=slot=>{if(typeof state.tree==='number')return;const next=removeArea(state.tree,slot);if(next===null)return;state.tree=next;const id=state.layout.order[slot];if(!state.layout.hidden.includes(id))state.layout.hidden.push(id);state.focus=null;areaMenu?.close();persist();};
-  const openArea=(event,slot)=>{event.preventDefault();event.stopPropagation();state.area=slot;areaMenu?.showModal();};
+  const editorMenu=(button,slot)=>openMenu(items.slice(0,baseCount).map(item=>({label:item.title,icon:item.icon,run:()=>{swapSections(state.layout,slot,item.id);persist();}})),button,'Editor Type');
+  const closeArea=slot=>{if(typeof state.tree==='number')return;const next=removeArea(state.tree,slot);if(next===null)return;state.tree=next;const id=state.layout.order[slot];if(!state.layout.hidden.includes(id))state.layout.hidden.push(id);state.focus=null;persist();};
+  const openArea=(event,slot)=>{event.preventDefault();event.stopPropagation();state.area=slot;const id=state.layout.order[slot];openMenu([{label:'Vertical Split',icon:'area_swap',enabled:()=>!!state.factoryCount,run:()=>split(slot,false)},{label:'Horizontal Split',enabled:()=>!!state.factoryCount,run:()=>split(slot,true)},'-',{label:state.focus===id?'Back to Previous':'Toggle Maximize Area',icon:'fullscreen_enter',keys:'Ctrl Space',run:()=>{state.focus=state.focus===id?null:id;persist();}},'-',{label:'Close Area',icon:'area_join',enabled:()=>typeof state.tree!=='number',run:()=>closeArea(slot)}],{x:event.clientX,y:event.clientY},'Area');};
   const labels={animation:'Timeline split',root:'Main split',main:'Output split',editors:'Editor split',inspector:'Inspector split'};
   const app=createApp({setup(){
     watch(()=>JSON.stringify([state.layout,state.focus]),()=>nextTick(position),{flush:'post'});
@@ -133,7 +139,7 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
         button('Layout',openMenu,'Arrange panels',{class:'dock-layout-button'}),
         h('div',{class:'dock-toolbar'})
       ]),
-      h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'}):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree'},[renderNode(state.tree)])),
+      h('div',{class:'dock-splits'},focus()?h('div',{class:'dock-focus-space'},bareFocus?[]:[renderNode(state.layout.order.indexOf(focus()))]):h('div',{key:JSON.stringify([state.layout.hidden,state.layout.order]),class:'dock-split-tree'},[renderNode(state.tree)])),
       h(Teleport,{to:document.body},[h('dialog',{class:'dock-dialog',ref:el=>menuElement=el,onClick:e=>{if(e.target===menuElement)closeMenu();}},[
         h('div',{class:'dock-dialog-title'},[h('strong','Workspace Layout'),button('×',closeMenu,'Close layout')]),
         h('label',[h('input',{type:'checkbox',checked:state.remember,onChange:e=>{state.remember=e.target.checked;persist();}}),'Remember on this device']),
@@ -144,13 +150,6 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
           ...Object.keys(state.layout.horizontal).map(key=>h('label',[labels[key]||key,select(String(state.layout.horizontal[key]),value=>{state.layout.horizontal[key]=value==='true';persist();},[['false','Side by side'],['true','Stacked']],labels[key]||key)]))
         ])]),
         button('Reset layout',reset)
-      ]),h('dialog',{class:'dock-dialog dock-area-menu',ref:el=>areaMenu=el},[
-        h('strong','Area Options'),
-        button('Vertical Split',()=>split(state.area,false),'Split area side by side',{disabled:!state.factoryCount}),
-        button('Horizontal Split',()=>split(state.area,true),'Split area vertically',{disabled:!state.factoryCount}),
-        button('Join Area',()=>closeArea(state.area),'Close this area and expand its sibling',{disabled:typeof state.tree==='number'}),
-        button('Toggle Maximize Area',()=>{const id=state.layout.order[state.area];state.focus=state.focus===id?null:id;areaMenu.close();persist();}),
-        button('Cancel',()=>areaMenu.close())
       ])])
     ]);
   }});
@@ -163,5 +162,5 @@ export function mountDock({host, items, tree, defaults, storageKey}) {
   const unlock=()=>host.classList.remove('dock-resizing');
   root.addEventListener('pointerdown',event=>{if(event.target.closest('.splitpanes__splitter'))host.classList.add('dock-resizing');});
   window.addEventListener('pointerup',unlock);window.addEventListener('pointercancel',unlock);window.addEventListener('blur',unlock);
-  return {show,toggle,reset,openMenu,setFactory,get toolbar(){return root.querySelector('.dock-toolbar');},get profile(){return state.profile;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('resize',resize);coarse.removeEventListener('change',resize);window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
+  return {show,toggle,reset,openMenu,setFactory,header,get toolbar(){return root.querySelector('.dock-toolbar');},get profile(){return state.profile;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('resize',resize);coarse.removeEventListener('change',resize);window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
 }

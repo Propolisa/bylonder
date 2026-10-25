@@ -2,6 +2,8 @@ import { renderSettings, setupRenderSettings } from "./render-settings.js";
 import { setupSharing } from "./share-ui.js";
 import { mountWorkspaceLayout } from "./layout.js";
 import "./workspace.css";
+import "../theme.css";
+import { mountTopbar } from "./topbar.js";
 import { monaco, language, setupIntelligence } from "./intelligence";
 import { openOPFS } from "./opfs";
 import { createRepository } from "./repository";
@@ -17,6 +19,7 @@ import { publishRun, removeRun } from "./module-host";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
+const topbar = mountTopbar({ dock, send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
 let repo,
   project,
   active = "index.js",
@@ -398,6 +401,7 @@ window.addEventListener("message", (e) => {
     markDirty(false);
   }
   if (type === "remember") setRemember(payload, false);
+  if (type === "status") topbar.status(payload);
 });
 function setRemember(enabled, notifyFrame = true) {
   project.settings.remember = enabled;

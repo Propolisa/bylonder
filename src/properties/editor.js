@@ -1,4 +1,4 @@
-import { createApp,h,reactive,watch } from 'vue';
+import { createApp,h,reactive,watch,Teleport } from 'vue';
 import { Panel,PropertyRow } from './primitives.js';
 import { icon,iconButton } from './icons.js';
 import { propertyContexts,propertyPanels } from './registry.js';
@@ -6,7 +6,7 @@ import { arrayFields } from '../modifiers/array.js';
 import { nodeId,deleted } from '../objects/identity.js';
 import { address } from '../animation/model.js';
 import './style.css';
-export function mountProperties(host,{world,editor,history,storage,systems,properties},areaId='properties'){
+export function mountProperties(host,{world,editor,history,storage,systems,properties},areaId='properties',header){
   const key='workbench:properties:'+areaId;let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
   const state=reactive({context:saved.context||'object',closed:saved.closed||[],panels:[],pinned:null,revision:0,add:false,search:'',activeModifier:null});
   watch(()=>[state.context,state.closed],()=>{try{localStorage.setItem(key,JSON.stringify({context:state.context,closed:state.closed}));}catch{}},{deep:true});
@@ -70,7 +70,7 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
     panel('local','Local State',()=>[row({label:'Remember Scene Edits',default:false,get:()=>storage.enabled,set:value=>storage.set(value)}),h('button',{onClick:()=>storage.clear()},'Forget Saved Scene Edits')])
   ];
   const app=createApp({setup(){return()=>{state.revision;const node=active();return h('section',{class:'bl-properties',onKeydown:e=>{if(e.target.closest('input,textarea,select'))return;if(e.shiftKey&&e.key.toLowerCase()==='a'&&state.context==='modifiers'){e.preventDefault();e.stopPropagation();state.add=true;}else if(e.ctrlKey&&e.key==='Tab'){e.preventDefault();e.stopPropagation();const ids=[...propertyContexts.keys()],i=ids.indexOf(state.context);state.context=ids[(i+(e.shiftKey?-1:1)+ids.length)%ids.length];}}},[
-      h('div',{class:'bl-header'},[icon('PROPERTIES'),h('span',{class:'bl-context-name',title:node?.name||'Scene'},node?.name||'Scene'),iconButton(state.pinned?'PINNED':'UNPINNED',state.pinned?'Unpin Properties context':'Pin Properties context',()=>state.pinned=state.pinned?null:node?nodeId(node):null,{'aria-pressed':!!state.pinned})]),
+      (header?(c=>h(Teleport,{to:header},[c])):(c=>c))(h('div',{class:'bl-header'},[icon(node?'OBJECT_DATA':'SCENE_DATA',{class:node?'bl-icon bl-object-color':'bl-icon'}),h('span',{class:'bl-context-name',title:node?.name||'Scene'},node?.name||'Scene'),iconButton(state.pinned?'PINNED':'UNPINNED',state.pinned?'Unpin Properties context':'Pin Properties context',()=>state.pinned=state.pinned?null:node?nodeId(node):null,{'aria-pressed':!!state.pinned})])),
       h('div',{class:'bl-body'},[
         h('nav',{class:'bl-tabs',role:'tablist','aria-label':'Properties context'},[...propertyContexts.values()].map(context=>iconButton(context.icon,context.title,()=>state.context=context.id,{role:'tab','aria-selected':state.context===context.id,style:{color:context.color}}))),
         h('div',{class:'bl-region'},[

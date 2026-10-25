@@ -15,10 +15,11 @@ export function createNavigation({ camera, engine }, canvas, capture) {
       camera.orthoRight = h * a;
     }
   };
+  let viewName = "User";
   const sync = () => {
     updateBounds();
     document.querySelector("#view-name").textContent =
-      camera.mode === 0 ? "User perspective" : "User orthographic";
+      viewName + (camera.mode === 0 ? " Perspective" : " Orthographic");
     document.querySelector("#projection").innerHTML =
       (camera.mode === 0 ? "Perspective" : "Orthographic") + " <kbd>5</kbd>";
   };
@@ -36,7 +37,7 @@ export function createNavigation({ camera, engine }, canvas, capture) {
     const scale=(2*camera.radius*Math.tan(camera.fov/2))/canvas.clientHeight;
     camera.target.addInPlace(camera.getDirection(Vector3.Right()).scale(-dx*scale)).addInPlace(camera.getDirection(Vector3.Up()).scale(dy*scale));
   };
-  const orbit = (dx,dy) => {camera.alpha-=dx*0.006;camera.beta=Math.max(0.001,Math.min(Math.PI-0.001,camera.beta-dy*0.006));};
+  const orbit = (dx,dy) => {if(viewName!=="User"){viewName="User";sync();}camera.alpha-=dx*0.006;camera.beta=Math.max(0.001,Math.min(Math.PI-0.001,camera.beta-dy*0.006));};
   const zoom = factor => {camera.radius=Math.max(0.4,Math.min(200,camera.radius*factor));sync();};
   const move = (dx,dy,event) => {if(drag)(event.shiftKey?pan:orbit)(dx,dy);};
   const up = () => {
@@ -69,7 +70,7 @@ export function createNavigation({ camera, engine }, canvas, capture) {
     sync,
     pan, orbit, zoom,
     updateBounds,
-    opposite() { camera.alpha += Math.PI; camera.beta = Math.PI - camera.beta; sync(); },
+    opposite() { camera.alpha += Math.PI; camera.beta = Math.PI - camera.beta; viewName = "User"; sync(); },
     toggle() {
       camera.mode = camera.mode === 0 ? 1 : 0;
       sync();
@@ -88,9 +89,8 @@ export function createNavigation({ camera, engine }, canvas, capture) {
         camera.alpha = -Math.PI / 2;
         camera.beta = opposite ? Math.PI - 0.001 : 0.001;
       }
+      viewName = { front: ["Front", "Back"], right: ["Right", "Left"], top: ["Top", "Bottom"] }[name][opposite ? 1 : 0];
       sync();
-      document.querySelector("#view-name").textContent =
-        (opposite ? "Opposite " : name + " ") + "orthographic";
     },
     frame(mesh) {
       if (!mesh) return;

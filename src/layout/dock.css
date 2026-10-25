@@ -1,10 +1,60 @@
-.dock{position:relative;min-width:0;min-height:0;overflow:hidden}.dock-root,.dock-shell{width:100%;height:100%;min-height:0}.dock-shell{display:flex;flex-direction:column}.dock-tabs{height:30px;min-height:30px;display:flex;gap:4px;align-items:center;padding:2px 4px;overflow-x:auto;background:#242528;border-bottom:1px solid #3b3d42}.dock-tabs>button{flex-shrink:0}.dock-tabs>button:last-child{margin-left:auto}.dock-options{position:absolute;right:5px;top:32px;z-index:40;background:#292c32;border:1px solid #555;padding:12px;display:grid;gap:10px;box-shadow:0 8px 24px #0007}.dock-options label{display:flex;justify-content:space-between;gap:12px;align-items:center}.dock-splits{flex:1;min-height:0}.dock-leaf{display:flex;flex-direction:column;width:100%;height:100%;min-height:0}.dock-heading{height:28px;flex-shrink:0;display:flex;gap:2px;padding:2px 3px;background:#28292c;border-bottom:1px solid #3a3b40}.dock-heading select{min-width:0;flex:1;background:#28292c;color:inherit;border:0;font:inherit}.dock-heading button{border:0;padding:0 7px}.dock-slot{flex:1;min-height:0;min-width:0;pointer-events:none}.dock-content{position:absolute;z-index:2;overflow:hidden;min-width:0;min-height:0;background:#202020}.dock-content>*{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;position:relative!important;inset:auto!important}.dock .splitpanes__pane{background:#202020;transition:none!important;overflow:hidden}.dock .splitpanes__splitter{background:#121315;position:relative;z-index:8;touch-action:none}.dock .splitpanes--vertical>.splitpanes__splitter{width:5px;min-width:5px}.dock .splitpanes--horizontal>.splitpanes__splitter{height:5px;min-height:5px}.dock .splitpanes__splitter:hover,.dock .splitpanes__splitter:focus-visible{background:#4987a9}.dock .splitpanes__splitter::before{content:'';position:absolute;inset:-4px;z-index:1}.dock .dock-collapsed{visibility:hidden}.dock .dock-collapsed+.splitpanes__splitter,.dock .splitpanes__splitter:has(+.dock-collapsed){display:none}.dock-resizing .dock-content{pointer-events:none}.dock-content[hidden]{display:none!important}
-@media(pointer:coarse){.dock-tabs{height:44px;min-height:44px}.dock-tabs button{min-height:38px;padding:5px 10px}.dock-heading{height:38px}.dock-heading button{min-width:38px;font-size:18px}.dock-heading select{font-size:14px}.dock .splitpanes--vertical>.splitpanes__splitter{width:10px;min-width:10px}.dock .splitpanes--horizontal>.splitpanes__splitter{height:10px;min-height:10px}.dock-options input,.dock-options select,.dock-options button{min-height:38px;font-size:16px}.dock .splitpanes__splitter::before{inset:-6px}}
-@media(pointer:coarse){.dock-heading{display:none}.dock-tabs{height:38px;min-height:38px}.dock-tabs button{min-height:34px}.dock-options{max-height:calc(100dvh - 100px);overflow:auto}.dock-options label{min-height:38px}}
-.dock-split-tree,.dock-focus-space{width:100%;height:100%;min-height:0}.dock-dialog{width:min(380px,calc(100vw - 24px));max-height:80dvh;overflow:auto;background:#26282d;color:#ddd;border:1px solid #555;border-radius:8px;padding:14px;font:13px system-ui}.dock-dialog::backdrop{background:#0007}.dock-dialog-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.dock-dialog-title button{font-size:20px;min-width:36px}.dock-dialog>label,.dock-arrangement>label{display:flex;align-items:center;gap:10px;margin:10px 0;min-height:32px}.dock-dialog>button{display:block;width:100%;margin:10px 0}.dock-dialog input[type=checkbox]{width:18px;height:18px;min-height:0!important}.dock-dialog select{margin-left:auto;max-width:65%;padding:6px;background:#1e2024;color:inherit;border:1px solid #555}.dock-dialog summary{padding:12px 0;cursor:pointer}.dock-dialog details{border-top:1px solid #444;border-bottom:1px solid #444;margin:12px 0}.dock-dialog button{min-height:36px}.dock-tabs>button{border:0;background:transparent;border-radius:0}.dock-tabs>button.active{background:#34363c;color:#fff;box-shadow:inset 0 -2px #7ca4be}
-@media(pointer:coarse){.dock-tabs{height:40px;min-height:40px;padding:0;gap:0}.dock-tabs>button{min-height:40px;padding:5px 12px;font-size:13px}.dock-dialog{position:fixed;inset:auto 0 0;width:100%;max-width:100%;max-height:80dvh;margin:0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:12px 12px 0 0}.dock-dialog label{font-size:14px}.dock-dialog button,.dock-dialog select{min-height:40px;font-size:14px}.dock-dialog .dock-dialog-title button{min-width:40px}.dock-tabs>.dock-layout-button{display:none}}
-.dock-toolbar{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0}.dock-tabs>.dock-layout-button{margin-left:auto}.dock-toolbar:empty{display:none}.dock-tabs{overflow:visible}.dock-toolbar button{white-space:nowrap}.dock-tabs button{white-space:nowrap}
-@media(pointer:coarse){.dock-tabs{gap:0}.dock-tabs>button{padding:4px 10px;font-size:13px}.dock-toolbar{gap:1px;padding-right:3px}.dock-toolbar>button{min-height:36px;padding:4px 9px;font-size:13px}.dock-toolbar kbd{display:none}.runtime-dock .dock-tabs>button{padding:4px 9px;font-size:12px}}
-.dock-tabs>button{display:flex;align-items:center;gap:5px}.dock-tabs svg{flex-shrink:0}@media(pointer:coarse){.runtime-dock .dock-tabs>button:has(svg){min-width:36px;justify-content:center;padding:4px 7px}.runtime-dock .dock-tabs>button:not(.active):has(svg) .dock-tab-label{display:none}.runtime-dock .dock-tabs svg{width:18px;height:18px}}
-.dock-heading{background:#303030;border-bottom:1px solid #181818;border-radius:4px 4px 0 0}.dock-heading select{background:#303030}.dock-content{border-radius:0 0 4px 4px}.dock .splitpanes__splitter{background:#191919}.dock-area-menu>strong{display:block;margin:3px 5px 10px}.dock-area-menu>button{margin:1px 0;text-align:left;background:transparent;border:0;border-radius:3px}.dock-area-menu>button:hover{background:#4772b3}.dock-dialog{background:#303030;border-color:#1b1b1b;border-radius:5px}.runtime-dock .dock-tabs{background:#272727}.runtime-dock .dock-tabs>button.active{box-shadow:none;background:#424242;color:#ddd}
-.dock-corner{width:10px;height:10px;cursor:crosshair;align-self:flex-start;background:linear-gradient(135deg,#7773 0 50%,transparent 50%);touch-action:none}.dock-corner:hover{background:#a0a0a0}.dock-area-menu{width:240px}
+.dock{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--bl-gap)}
+.dock-root,.dock-shell,.dock-split-tree,.dock-focus-space{width:100%;height:100%;min-height:0}
+.dock-shell{display:flex;flex-direction:column}
+.dock-splits{flex:1;min-height:0;padding:2px}
+.dock-tabs{display:none}
+.dock-leaf{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;border-radius:var(--bl-radius);overflow:hidden}
+.dock-heading{position:relative;display:flex;align-items:center;gap:2px;height:var(--bl-header-h);flex-shrink:0;padding:0 4px;background:var(--bl-header);overflow:hidden}
+.dock-editor-type{display:inline-flex;align-items:center;gap:1px;height:20px;padding:0 3px 0 4px;border:0;border-radius:var(--bl-radius);background:transparent;color:var(--bl-text);cursor:pointer;flex-shrink:0}
+.dock-editor-type::after{content:'';border:3px solid transparent;border-top:3.5px solid currentColor;transform:translateY(2px);opacity:.6;margin-left:1px}
+.dock-editor-type:hover{background:var(--bl-hover)}
+.dock-header-host{flex:1;min-width:0;height:100%;display:flex}
+.dock-header-content{flex:1;min-width:0;display:flex;align-items:center;gap:2px;overflow:hidden}
+.dock-header-content>.spacer{flex:1}
+.dock-header-content .bl-sep{width:8px;flex-shrink:0}
+.dock-corner{position:absolute;right:0;top:0;width:12px;height:12px;cursor:crosshair;touch-action:none;background:linear-gradient(225deg,#ffffff18 0 30%,transparent 30%)}
+.dock-corner:hover{background:linear-gradient(225deg,#ffffff50 0 40%,transparent 40%)}
+.dock-slot{flex:1;min-height:0;min-width:0;pointer-events:none}
+.dock-content{position:absolute;z-index:2;overflow:hidden;min-width:0;min-height:0;background:var(--bl-region);border-radius:0 0 var(--bl-radius) var(--bl-radius)}
+.dock-content>*{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;position:relative!important;inset:auto!important}
+.dock .splitpanes__pane{background:transparent;transition:none!important;overflow:hidden}
+.dock .splitpanes__splitter{background:var(--bl-gap);position:relative;z-index:8;touch-action:none}
+.dock .splitpanes--vertical>.splitpanes__splitter{width:2px;min-width:2px;cursor:ew-resize}
+.dock .splitpanes--horizontal>.splitpanes__splitter{height:2px;min-height:2px;cursor:ns-resize}
+.dock .splitpanes__splitter::before{content:'';position:absolute;inset:-3px;z-index:1}
+.dock .dock-collapsed{visibility:hidden}
+.dock .dock-collapsed+.splitpanes__splitter,.dock .splitpanes__splitter:has(+.dock-collapsed){display:none}
+.dock-resizing .dock-content{pointer-events:none}
+.dock-content[hidden]{display:none!important}
+.dock-toolbar{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0}.dock-toolbar:empty{display:none}.dock-toolbar button{white-space:nowrap}
+.dock-dialog{width:min(380px,calc(100vw - 24px));max-height:80dvh;overflow:auto;background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;padding:14px;font:var(--bl-font)}
+.dock-dialog::backdrop{background:#0007}
+.dock-dialog-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dock-dialog-title button{font-size:18px;min-width:30px}
+.dock-dialog>label,.dock-arrangement>label{display:flex;align-items:center;gap:10px;margin:8px 0;min-height:24px}
+.dock-dialog>button{display:block;width:100%;margin:8px 0}
+.dock-dialog button{min-height:24px;background:var(--bl-widget);color:var(--bl-text);border:0;border-radius:var(--bl-radius);font:inherit}
+.dock-dialog button:hover{background:var(--bl-widget-hi)}
+.dock-dialog input[type=checkbox]{width:14px;height:14px;accent-color:var(--bl-select)}
+.dock-dialog select{margin-left:auto;max-width:65%;padding:3px;background:var(--bl-menu);color:inherit;border:1px solid var(--bl-widget-line);border-radius:var(--bl-radius)}
+.dock-dialog summary{padding:8px 0;cursor:pointer}
+.dock-dialog details{border-top:1px solid #ffffff14;border-bottom:1px solid #ffffff14;margin:10px 0}
+@media(pointer:coarse){
+  .dock-splits{padding:0}
+  .dock-editor-type,.dock-corner{display:none}
+  .dock-leaf,.dock-content{border-radius:0}
+  .dock-tabs{display:flex;height:40px;min-height:40px;gap:0;align-items:center;padding:0;overflow-x:auto;background:var(--bl-topbar);border-bottom:1px solid var(--bl-gap)}
+  .dock-tabs>button{display:flex;align-items:center;gap:5px;flex-shrink:0;min-height:40px;padding:4px 10px;border:0;border-radius:0;background:transparent;color:var(--bl-text-dim);font:var(--bl-font);font-size:13px;white-space:nowrap}
+  .dock-tabs>button.active{background:var(--bl-header);color:var(--bl-text)}
+  .dock-tabs svg{flex-shrink:0}
+  .dock-tabs>.dock-layout-button{display:none}
+  .dock-toolbar{gap:1px;padding-right:3px}.dock-toolbar>button{min-height:36px;padding:4px 9px;font-size:13px}.dock-toolbar kbd{display:none}
+  .runtime-dock .dock-tabs>button:has(svg){min-width:36px;justify-content:center;padding:4px 7px}
+  .runtime-dock .dock-tabs>button:not(.active):has(svg) .dock-tab-label{display:none}
+  .runtime-dock .dock-tabs svg{width:18px;height:18px}
+  .dock .splitpanes--vertical>.splitpanes__splitter{width:8px;min-width:8px}
+  .dock .splitpanes--horizontal>.splitpanes__splitter{height:8px;min-height:8px}
+  .dock-dialog{position:fixed;inset:auto 0 0;width:100%;max-width:100%;max-height:80dvh;margin:0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:12px 12px 0 0}
+  .dock-dialog label{font-size:14px}.dock-dialog button,.dock-dialog select{min-height:40px;font-size:14px}
+}
+.dock-leaf.bare>.dock-heading{display:none}

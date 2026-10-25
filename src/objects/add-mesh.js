@@ -122,6 +122,11 @@ export function createAddMesh(
   };
   document.querySelector("#add-close").onclick = close;
   return {
+    catalog,
+    add(preset) {
+      finish();
+      add(preset);
+    },
     get pending() {
       return pending || textEditor.pending;
     },
