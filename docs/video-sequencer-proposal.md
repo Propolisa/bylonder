@@ -7,7 +7,7 @@ Snapshot as of 2026-10-25. Sources: KubeezCut `main` at commit `3aa8741` (2026-0
 - KubeezCut covers most of Blender's Video Sequencer (strips, channels, preview, transitions, effects, blend modes, markers, meta strips) and a WebCodecs export pipeline. It is a good base for the **Sequencer**, **Preview** and the encoding half of **Render Animation**.
 - It does not cover the Dope Sheet, Graph Editor, NLA or Drivers in a form we can use. Its keyframe editor animates 8 fixed clip properties; ours animates any registered channel. Those editors should be built natively over `src/animation/model.js`, with the sequencer's strip properties registered as ordinary channels so they show up there, as in Blender.
 - A fork is needed. The parts to replace are the ones that define our UX: keyframe store, undo, project storage, keymap, styling and app shell. The rendering, compositing and export core can stay close to upstream.
-- Porting the UI from React to Vue and our Blender component library is a large job, not a small one: about 45,000 to 55,000 lines of React code, estimated at 4 to 6 engineer-months including parity testing. About 96,000 lines of framework-free TypeScript (timeline actions, export engine, GPU libraries, media services) are reused unchanged. The recommended route is a staged port that starts with the cheap panels and ends with the timeline, see [Porting the UI to Vue](#porting-the-ui-to-vue).
+- Porting the UI from React to Vue and our Blender component library is moderate to large. Raw React volume is 45,000 to 55,000 lines, but markup is a small share: the bulk is interaction handlers, the preview render loop, and features we can defer. A core scope of about 33,000 lines is estimated at 2 to 3 engineer-months; full parity at 4 to 6. About 96,000 lines of framework-free TypeScript (timeline actions, export engine, GPU libraries, media services) are reused unchanged. The recommended route is a staged port that starts with the cheap panels and ends with the timeline, see [Porting the UI to Vue](#porting-the-ui-to-vue).
 - glTF (GLB) is the interchange format with Blender. Every channel and feature gets a glTF class (native, pointer extension, baked, not exported) so exports can report what is lost; see [glTF interop constraint](#gltf-interop-constraint).
 - Correction to the brief: Bylonder does not use WebCodecs yet. A search of `src/`, `public/` and `scripts/` finds no `VideoEncoder`, `VideoFrame`, muxer or `MediaRecorder` use. Today's only render setting is hardware scaling (`src/workspace/render-settings.js`). WebCodecs would arrive with the fork (through mediabunny).
 
@@ -146,12 +146,27 @@ Measured on commit `3aa8741`, excluding tests:
 
 Reused unchanged: about 96,000 lines of `.ts` that do not import React (timeline actions and services, export and render engine, GPU effects, transitions, compositor, scopes, media services, migrations). Zustand stores work outside React through `getState()` and `subscribe()`; a small adapter exposes them to Vue as reactive refs.
 
-Two findings shape the cost:
+Where the lines are. Markup is a small share; most `.tsx` lines are event handlers, imperative render loops and features we may not need:
 
-- **Preview playback is a React tree.** `video-preview.tsx` renders `MainComposition` through a Remotion-style `Player`, `Sequence` and DOM video elements, with a canvas renderer (`createCompositionRenderer`, shared with export) used for scrubbing. Porting the React tree is the most fragile part (memo whitelists, transition holds, render loop mutexes listed in KubeezCut's CLAUDE.md). Driving both playback and scrub through the framework-free canvas renderer, fed by the existing `VideoSourcePool`, removes about 7,300 lines instead of porting them and makes preview and export the same code path. Risk: playback performance on high bitrate media, which needs measurement before committing (unverified).
-- **The timeline is the bulk.** 24,000 lines of DOM-based React with many overlays. A rewrite in Vue against the reused action modules, using KubeezCut's behavior as the specification, is likely smaller than a line-by-line port. Drawing strips on a canvas, as our Timeline and Blender do, would shrink it further.
+| File | Lines | JSX lines (approx.) | What fills it |
+| --- | --- | --- | --- |
+| `preview/components/video-preview.tsx` | 5,445 | about 110 | Playback and scrub render loop, prewarm, transition holds, DOM video sync; 603 `ref.current` uses |
+| `timeline/components/timeline-item/index.tsx` | 3,613 | about 250 | About 45 handlers: click, drag, trim, fade and volume handles, transition drop zones, context menu actions (captions, scene detection, AI audio, pre-comps) |
+| `preview/components/mask-editor-overlay.tsx` | 2,139 | about 15 | Mask path editing |
+| `timeline/components/keyframe-graph-panel.tsx` | 1,615 | | Keyframe editor docked under the timeline |
+| `timeline/components/timeline-content.tsx` | 1,315 | about 60 | Scroll, zoom, marquee, virtualization |
+| `preview/components/source-monitor.tsx`, `source-composition.tsx`, `edit-2up-panels.tsx`, `edit-4up-panels.tsx` | 2,365 | | Source monitor and trim comparison views |
+| `timeline/hooks/*` | 7,242 | 0 | Drag, trim, rate stretch, slip and slide. Few React hooks (for example 9 in the 777-line trim hook); mostly imperative code over refs that becomes Vue composables almost line for line |
 
-Estimate (assumption, not measured): 500 to 1,000 ported and verified lines per engineer-day gives 10 to 21 engineer-weeks of porting. With interaction parity testing, rewriting the React Testing Library tests for the ported views, and theming, the total is 4 to 6 engineer-months. For comparison, restyling KubeezCut as React islands only (CSS variable mapping, icons, keymap) is roughly 3 to 5 engineer-weeks but leaves two component libraries and inconsistent widgets.
+The edit math itself (placement, collisions, ripple, roll, slip, slide, transitions, compositions) is already in about 19,500 lines of framework-free actions, utils and services under `timeline/`, which are reused.
+
+Consequences:
+
+- **Preview playback.** `video-preview.tsx` renders `MainComposition` through a Remotion-style `Player`, `Sequence` and DOM video elements, with a canvas renderer (`createCompositionRenderer`, shared with export) used for scrubbing. Driving both playback and scrub through the canvas renderer, fed by the existing `VideoSourcePool`, replaces this file and the composition runtime and player trees (about 12,700 lines) with a much smaller Vue render loop, and makes preview and export the same code path. Risk: playback performance on high bitrate media, which needs measurement first (unverified).
+- **Defer what Blender does not center on.** Masks, source monitor, 2-up and 4-up trim views, bento layouts, captions and scene detection can wait. The keyframe panel is replaced by our editors.
+- **Core scope** is then about 33,000 lines: timeline views 14,800, timeline hooks 7,200 (near mechanical), remaining preview overlays and gizmos 4,000, a new render loop of about 1,500, Media 3,900, effects panels 1,900. A Vue Sequencer written against the reused actions, drawing strips on a canvas as our Timeline does, is likely smaller still.
+
+Estimate (assumption, not measured), at 500 to 1,000 ported and verified lines per engineer-day: core scope 7 to 13 engineer-weeks, about 2 to 3 engineer-months with parity testing and theming. Full parity with KubeezCut including the deferred features: 4 to 6 engineer-months. For comparison, restyling KubeezCut as React islands only (CSS variable mapping, icons, keymap) is roughly 3 to 5 engineer-weeks but leaves two component libraries and inconsistent widgets.
 
 Recommended order, smallest and most visible first: strip sidebar and effects panels (they must use our property rows anyway for keying), Media area, Preview with the canvas renderer, then the Sequencer view. Each step deletes the matching React island. If the port stalls, what remains is a working React island, not a broken editor.
 
