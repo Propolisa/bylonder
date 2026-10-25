@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#9a9a9a"/>
+    </marker>
+  </defs>
+  <rect width="960" height="560" fill="#1d1d1d"/>
+
+  <!-- Bylonder host -->
+  <rect x="16" y="16" width="440" height="528" rx="6" fill="#262626" stroke="#4a4a4a"/>
+  <text x="32" y="42" fill="#e6e6e6" font-size="15" font-weight="600">Bylonder (host, Vue, plain JS)</text>
+
+  <rect x="32" y="60" width="408" height="92" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="44" y="82" fill="#e6e6e6" font-weight="600">Animation model (src/animation/model.js)</text>
+  <text x="44" y="102" fill="#bdbdbd">channels [id, path] with get / set</text>
+  <text x="44" y="120" fill="#bdbdbd">one action, scene frame, fps, range</text>
+  <text x="44" y="138" fill="#e0b85a">new: sample(ref, frame) pure, offset keys on strip move</text>
+
+  <rect x="32" y="166" width="408" height="74" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="44" y="188" fill="#e6e6e6" font-weight="600">Document slices (src/state/document.js)</text>
+  <text x="44" y="208" fill="#bdbdbd">materials, compositor, logic, channels</text>
+  <text x="44" y="226" fill="#e0b85a">new: sequencer, markers, output</text>
+
+  <rect x="32" y="254" width="196" height="122" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="44" y="276" fill="#e6e6e6" font-weight="600">Native editors (Vue)</text>
+  <text x="44" y="296" fill="#bdbdbd">Timeline (exists)</text>
+  <text x="44" y="314" fill="#e0b85a">Dope Sheet</text>
+  <text x="44" y="332" fill="#e0b85a">Graph Editor</text>
+  <text x="44" y="350" fill="#e0b85a">NLA, Drivers (later)</text>
+  <text x="44" y="368" fill="#e0b85a">Properties &gt; Output</text>
+
+  <rect x="244" y="254" width="196" height="122" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="256" y="276" fill="#e6e6e6" font-weight="600">Babylon scene</text>
+  <text x="256" y="296" fill="#bdbdbd">viewport iframe (WebGL2)</text>
+  <text x="256" y="314" fill="#e0b85a">render iframe: virtual</text>
+  <text x="256" y="332" fill="#e0b85a">clock, fixed size, one</text>
+  <text x="256" y="350" fill="#e0b85a">frame per request</text>
+
+  <rect x="32" y="390" width="408" height="58" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="44" y="412" fill="#e6e6e6" font-weight="600">Workspace storage (OPFS, history, ZIP)</text>
+  <text x="44" y="432" fill="#e0b85a">new: media pool (content addressed, not in share links)</text>
+
+  <rect x="32" y="462" width="408" height="66" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="44" y="484" fill="#e6e6e6" font-weight="600">Dock areas</text>
+  <text x="44" y="504" fill="#bdbdbd">editor type menu, Video Editing workspace</text>
+  <text x="44" y="520" fill="#e0b85a">new: Sequencer, Preview, Render Result</text>
+
+  <!-- Fork -->
+  <rect x="504" y="16" width="440" height="528" rx="6" fill="#262626" stroke="#4a4a4a"/>
+  <text x="520" y="42" fill="#e6e6e6" font-size="15" font-weight="600">bylonder-sequencer (KubeezCut fork, TS core)</text>
+
+  <rect x="520" y="60" width="408" height="92" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="532" y="82" fill="#e6e6e6" font-weight="600">Host contract (replaces deps/ seams)</text>
+  <text x="532" y="102" fill="#bdbdbd">frame + transport, sample(ref, frame),</text>
+  <text x="532" y="120" fill="#bdbdbd">registerChannel, commit(label), media store,</text>
+  <text x="532" y="138" fill="#bdbdbd">renderSceneFrame(camera, frame, w, h)</text>
+
+  <rect x="520" y="166" width="196" height="122" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="532" y="188" fill="#e6e6e6" font-weight="600">Views (staged Vue port)</text>
+  <text x="532" y="208" fill="#bdbdbd">Sequencer, Preview, gizmo,</text>
+  <text x="532" y="226" fill="#bdbdbd">strip sidebar, Media</text>
+  <text x="532" y="244" fill="#bdbdbd">move to Bylonder in Vue;</text>
+  <text x="532" y="262" fill="#bdbdbd">React islands until then</text>
+
+  <rect x="732" y="166" width="196" height="122" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="744" y="188" fill="#e6e6e6" font-weight="600">Kept, headless</text>
+  <text x="744" y="208" fill="#bdbdbd">canvas renderer, actions</text>
+  <text x="744" y="226" fill="#bdbdbd">GPU effects, transitions,</text>
+  <text x="744" y="244" fill="#bdbdbd">blend compositor</text>
+  <text x="744" y="262" fill="#bdbdbd">export (mediabunny)</text>
+
+  <rect x="520" y="302" width="408" height="74" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="532" y="324" fill="#e6e6e6" font-weight="600">Replaced by host</text>
+  <text x="532" y="344" fill="#bdbdbd">keyframes store and editors, Zundo undo, router,</text>
+  <text x="532" y="362" fill="#bdbdbd">projects page, IndexedDB project store, hotkeys</text>
+
+  <rect x="520" y="390" width="408" height="58" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="532" y="412" fill="#e6e6e6" font-weight="600">Removed</text>
+  <text x="532" y="432" fill="#bdbdbd">Kubeez AI, Supabase, analytics, shell, shadcn/ui</text>
+
+  <rect x="520" y="462" width="408" height="66" rx="4" fill="#303030" stroke="#5a5a5a"/>
+  <text x="532" y="484" fill="#e6e6e6" font-weight="600">New strip type: scene</text>
+  <text x="532" y="504" fill="#bdbdbd">camera, frame offset; frames come from the</text>
+  <text x="532" y="520" fill="#bdbdbd">host render iframe as VideoFrame / ImageBitmap</text>
+
+  <!-- links -->
+  <line x1="440" y1="106" x2="516" y2="106" stroke="#9a9a9a" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="440" y1="315" x2="516" y2="495" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="440" y1="203" x2="516" y2="203" stroke="#9a9a9a" stroke-width="1.5" marker-start="url(#a)"/>
+  <line x1="440" y1="495" x2="516" y2="230" stroke="#9a9a9a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="16" y="556" fill="#8a8a8a" font-size="11">Yellow text: new work in Bylonder. Solid lines: data flow. Dashed: mounting.</text>
+</svg>
