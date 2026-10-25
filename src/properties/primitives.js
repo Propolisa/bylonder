@@ -1,4 +1,4 @@
-import { parseNumber } from './numeric.js';
+import { format, parse, editText } from './units.js';
 import { h,defineComponent,ref,computed,onBeforeUnmount } from 'vue';
 import { Color3 } from '@babylonjs/core';
 import { icon,iconButton } from './icons.js';
@@ -13,10 +13,10 @@ export const Panel=defineComponent({props:['title','panelId','state','subpanel',
 export const PropertyRow=defineComponent({props:['field','animation','commit'],setup(props){
   const editing=ref(false),draft=ref(''),input=ref(null);let drag=null;
   const value=()=>props.field.get();
-  const display=()=>{const v=value(),unit=props.field.unit;if(v?.toHexString)return v.toHexString();if(typeof v!=='number')return String(v);const n=unit==='angle'?v*180/Math.PI:v;return (props.field.integer?Math.round(n):Number(n.toFixed(3)))+(unit==='angle'?'°':unit==='length'?' m':'');};
+  const display=()=>{const v=value(),unit=props.field.unit;if(v?.toHexString)return v.toHexString();if(typeof v!=='number')return String(v);return props.field.integer?String(Math.round(v)):format(v,unit);};
   const set=(v,finish=true)=>{const field=props.field;if(field.disabled?.())return;if(typeof field.default==='number'){if(!Number.isFinite(v))return;v=Math.max(field.min??-1e9,Math.min(field.max??1e9,v));if(field.integer)v=Math.round(v);}props.animation?.pause();field.set(v,finish);if(finish)props.commit?.();};
-  const edit=()=>{editing.value=true;draft.value=String(props.field.unit==='angle'?value()*180/Math.PI:value());queueMicrotask(()=>{input.value?.focus();input.value?.select();});};
-  const accept=()=>{if(!editing.value)return;try{const v=typeof value()==='number'?parseNumber(draft.value,props.field.unit):draft.value;editing.value=false;set(v);}catch(error){input.value?.setCustomValidity(error.message);input.value?.reportValidity();}};
+  const edit=()=>{editing.value=true;draft.value=editText(value(),props.field.unit);queueMicrotask(()=>{input.value?.focus();input.value?.select();});};
+  const accept=()=>{if(!editing.value)return;try{const v=typeof value()==='number'?parse(draft.value,props.field.unit):draft.value;editing.value=false;set(v);}catch(error){input.value?.setCustomValidity(error.message);input.value?.reportValidity();}};
   const cancel=()=>{editing.value=false;};
   const pointerDown=e=>{
     if(e.button!==0||typeof value()!=='number'||props.field.disabled?.())return;
@@ -26,7 +26,7 @@ export const PropertyRow=defineComponent({props:['field','animation','commit'],s
   const pointerUp=e=>{if(!drag)return;const moved=drag.moved;drag=null;e.currentTarget.releasePointerCapture(e.pointerId);if(moved){props.field.set(value(),true);props.commit?.();}else edit();};
   const refs=()=>props.field.refs?.()||[];
   const keyframe=()=>props.animation?.insert(refs());
-  const deleteKey=()=>props.animation?.deleteKeys(refs().map(ref=>({ref,frame:Math.round(props.animation.action.frame)})));
+  const deleteKey=()=>props.animation?.deleteKeys(refs().map(ref=>({ref,frame:Math.round(props.animation.time.frame)})));
   const cancelDrag=()=>{if(drag){set(drag.value,false);drag=null;}};
   const escape=e=>{if(e.key==='Escape'&&drag){e.preventDefault();cancelDrag();}};window.addEventListener('keydown',escape);onBeforeUnmount(()=>window.removeEventListener('keydown',escape));
   const context=e=>{e.preventDefault();cancelDrag();const menu=document.createElement('dialog');menu.className='bl-context-menu';

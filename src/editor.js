@@ -9,6 +9,10 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     bound = new WeakSet();
   gizmos.usePointerToAttachGizmos = false;
   const selection = createSelection(scene, objects);
+  // One rule for what a click can select: live, unlocked, visible, and selectable through its collections.
+  const selectable = (m) =>
+    objects.includes(m) && !m.metadata?.wbDeleted && !m.metadata?.wbLocked &&
+    m.isEnabled() && m.isVisible && (world.collections?.selectable(m) ?? true);
   const selected = selection.pivot;
   let mode = "select",
     modal = null;
@@ -265,10 +269,7 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
       const pick = scene.pick(
         e.clientX - rect.left,
         e.clientY - rect.top,
-        (m) =>
-          objects.includes(m) &&
-          !m.metadata?.wbDeleted &&
-          !m.metadata?.wbLocked,
+        selectable,
       );
       if (pick?.hit) {
         let target = pick.pickedMesh;
@@ -292,8 +293,7 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     const pick = scene.pick(
       e.clientX - rect.left,
       e.clientY - rect.top,
-      (m) =>
-        objects.includes(m) && !m.metadata?.wbDeleted && !m.metadata?.wbLocked,
+      selectable,
     );
     let target = pick?.pickedMesh;
     while (target?.parent?.metadata?.group) target = target.parent;
@@ -316,7 +316,7 @@ export function createEditor(world, canvas, history, changed, notify, capture) {
     updateGesture: update,
     pick(x,y) {
       const rect=canvas.getBoundingClientRect();
-      const hit=scene.pick(x-rect.left,y-rect.top,m=>objects.includes(m)&&!m.metadata?.wbDeleted&&!m.metadata?.wbLocked);
+      const hit=scene.pick(x-rect.left,y-rect.top,selectable);
       let node=hit?.pickedMesh;while(node?.parent?.metadata?.group&&!node.parent.metadata.wbDeleted)node=node.parent;return node;
     },
     setMode,

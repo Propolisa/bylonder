@@ -2,7 +2,7 @@ import { encodeProject,decodeProject } from '../src/workspace/share-codec.js';
 import assert from 'node:assert/strict';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine.js';
 import { Scene } from '@babylonjs/core/scene.js';
-import { createAnimationModel, address, validateAction } from '../src/animation/model.js';
+import { createAnimationModel, address, normalizeAnimation } from '../src/animation/model.js';
 import { createStore } from '../src/store.js';
 import { registerStore } from '../src/animation/bindings.js';
 const animation=createAnimationModel();let x=0,enabled=false;
@@ -23,6 +23,8 @@ const shared=decodeProject(encodeProject({name:"Animated",animation:serialized,f
 animation.clear(ref);animation.load(serialized);animation.seek(7);assert.equal(x,9*6/19);
 animation.editKeys([{ref,frame:25}],{offset:10,duplicate:true});assert.ok(animation.track(ref).keys.some(k=>k.frame===35));assert.ok(animation.track(ref).keys.some(k=>k.frame===25));
 animation.deleteKeys([{ref,frame:35}]);assert.ok(!animation.track(ref).keys.some(k=>k.frame===35));
-assert.throws(()=>validateAction({...serialized,fps:0}));assert.throws(()=>animation.insert(ref,NaN));
+assert.throws(()=>normalizeAnimation({...serialized,time:{...serialized.time,fps:0}}));
+assert.deepEqual(normalizeAnimation({version:1,name:'A',start:5,end:50,fps:30,frame:7,loop:false,autoKey:true,tracks:[]}).time,{frameCurrent:7,frameStart:5,frameEnd:50,frameStep:1,fps:30,usePreviewRange:false,framePreviewStart:5,framePreviewEnd:50,autoKey:true,loop:false},'v1 payloads migrate range and fps to scene time');
+animation.configure({start:10,end:20});assert.equal(animation.time.state.frameStart,10);assert.equal(animation.action.start,10,'legacy aliases read scene time');animation.configure({start:1,end:250});assert.throws(()=>animation.insert(ref,NaN));
 const engine=new NullEngine(),scene=new Scene(engine),group=animation.toAnimationGroup(scene);assert.equal(group.targetedAnimations.length,3);group.start(false);group.pause();group.goToFrame(1);assert.equal(x,0);group.dispose();scene.dispose();engine.dispose();
 store.dispose();animation.dispose();console.log('Animation interpolation, discrete channels, auto key, store effects, edits, restore and native group passed');

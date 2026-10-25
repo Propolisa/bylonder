@@ -1,3 +1,5 @@
+import { nodeId } from "./identity.js";
+import { openMenu } from "../ui/menu.js";
 export function createObjectActions({
   world,
   editor,
@@ -7,7 +9,18 @@ export function createObjectActions({
   history,
   nav,
 }) {
-  let target = null;
+  let target = null,
+    pointer = { x: innerWidth / 2, y: innerHeight / 2 };
+  addEventListener("pointermove", (e) => (pointer = { x: e.clientX, y: e.clientY }));
+  const ids = () => editor.selection.nodes.filter((n) => world.objects.includes(n)).map(nodeId);
+  // Popup listing the Scene Collection and its collections as an indented tree, plus New Collection.
+  const collectionMenu = (title, run) => {
+    const cols = world.collections, items = [{ heading: title }, { label: "Scene Collection", icon: "outliner_collection", run: () => run(ids(), cols.MASTER) }];
+    const walk = (id, depth, seen) => { for (const child of cols.byId(id).children) if (cols.byId(child) && !seen.has(child)) { items.push({ label: "\u2003".repeat(depth) + cols.byId(child).name, icon: "outliner_collection", run: () => run(ids(), child) }); walk(child, depth + 1, new Set([...seen, child])); } };
+    walk(cols.MASTER, 1, new Set());
+    items.push("-", { label: "New Collection", icon: "collection_new", run: () => { const name = prompt("Name", "Collection"); if (name !== null) run(ids(), cols.create({ name: name || "Collection" }).id); } });
+    openMenu(items, pointer);
+  };
   const active = () => editor.selection.nodes.at(-1),
     has = () => editor.selection.size > 0;
   const rename = () => {
@@ -158,10 +171,16 @@ export function createObjectActions({
       enabled: has,
       run: () => commands.isolate(),
     },
+    // Blender's collection operators. Ctrl+G creates the collection inside the active collection (Blender leaves
+    // it unlinked from the scene) and moves the selection into it.
+    {id:"move-to-collection",label:"Move to Collection",keys:["M"],section:"Collection",enabled:has,run:()=>collectionMenu("Move to Collection",(ids,id)=>world.collections.move(ids,id))},
+    {id:"link-to-collection",label:"Link to Collection",keys:["Shift+M"],section:"Collection",enabled:has,run:()=>collectionMenu("Link to Collection",(ids,id)=>world.collections.link(ids,id))},
+    {id:"new-collection",label:"Create New Collection",keys:["Ctrl+G"],section:"Collection",enabled:has,run:()=>{creator.finish();world.collections.create({objects:ids(),move:true});}},
+    {id:"remove-from-collection",label:"Remove from Collection",keys:["Ctrl+Alt+G"],section:"Collection",enabled:has,run:()=>openMenu([{heading:"Remove from Collection"},...[...new Set(ids().flatMap(id=>world.collections.memberships(id)))].map(id=>({label:id===world.collections.MASTER?"Scene Collection":world.collections.byId(id).name,icon:"outliner_collection",run:()=>world.collections.unlink(ids(),id)}))],pointer)},
     {
       id: "group",
-      label: "Group Selection",
-      keys: ["Ctrl+G"],
+      label: "Parent to New Empty",
+      keys: [],
       section: "Hierarchy",
       enabled: () => editor.selection.size > 1,
       run: () => {
@@ -171,8 +190,8 @@ export function createObjectActions({
     },
     {
       id: "ungroup",
-      label: "Ungroup",
-      keys: ["Ctrl+Alt+G"],
+      label: "Clear Empty Parent",
+      keys: [],
       section: "Hierarchy",
       enabled: () => editor.selection.roots.some((n) => n.metadata?.group),
       run: () => {

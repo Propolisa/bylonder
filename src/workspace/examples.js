@@ -166,9 +166,9 @@ export const createScene = function () {
     });
     [[19, 1], [20, 0.7], [22, 1], [59, 1], [60, 0.7], [62, 1]].forEach(([f, s]) => key(ballTrack.ref('scaling.y'), f, s));
     [[1, [0.9, 0.3, 0.2]], [40, [0.2, 0.6, 0.95]], [80, [0.95, 0.8, 0.2]]].forEach(([f, c]) => ['r', 'g', 'b'].forEach((k, i) => key(paintTrack.ref('diffuseColor.' + k), f, c[i])));
-    animation.configure({ start: 1, end: 80, loop: true });
+    animation.time.configure({ frameStart: 1, frameEnd: 80, loop: true });
   }
-  animation.seek(animation.action.start);
+  animation.seek(animation.time.state.frameStart);
   return scene;
 };
 `,
