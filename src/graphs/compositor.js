@@ -3,7 +3,7 @@ import { bindGraph } from './bindings.js';
 
 export function createCompositor(world, { commit = () => {}, notify = console.warn } = {}) {
   const { scene, animation } = world;
-  let graph = null, enabled = false, edited = false, building = null, camera = null;
+  let graph = null, enabled = false, edited = false, building = false, camera = null, viewport = false;
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const cameraBlocks = () => (graph?.attachedBlocks || []).filter(b => b.getClassName() === 'NodeRenderGraphInputBlock' && b.isCamera?.());
@@ -16,13 +16,14 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
   };
   const bind = () => graph && bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' });
   const build = async () => {
-    building = graph.buildAsync();
-    try { await building; } finally { building = null; }
-    scene.frameGraph = enabled ? graph.frameGraph : null;
+    building = true;
+    try { graph.build(); await graph.whenReadyAsync(); } finally { building = false; }
+    scene.frameGraph = enabled && viewport ? graph.frameGraph : null;
   };
   const api = {
     get graph() { return graph; },
     get enabled() { return enabled; },
+    setViewportActive(value) { viewport = value; if (graph && enabled) scene.frameGraph = value ? graph.frameGraph : null; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     fields: () => (graph ? bindGraph(animation, { id: 'compositor', title: 'Compositing', graph: () => graph, kind: 'render' }) : []),
     async setEnabled(value, { record = true } = {}) {

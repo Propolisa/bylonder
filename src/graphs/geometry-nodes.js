@@ -9,6 +9,7 @@ export function defaultGeometryGraph() {
   const output = new GeometryOutputBlock('Group Output');
   input.geometry.connectTo(output.geometry);
   graph.outputBlock = output;
+  graph.attachedBlocks.push(input, output);
   return JSON.stringify(graph.serialize());
 }
 export function geometryGraph(modifier) {

@@ -1,7 +1,7 @@
 import { mapArea, removeArea, validAreaTree } from './area-tree.js';
 import { paneIcon } from './icons.js';
 import { icon } from '../properties/icons.js';
-import { openMenu } from '../ui/menu.js';
+import { openMenu as openPopup } from '../ui/menu.js';
 import { createApp, h, reactive, nextTick, watch, Teleport } from 'vue';
 import { Splitpanes, Pane } from 'splitpanes';
 import 'splitpanes/dist/splitpanes.css';
@@ -128,9 +128,9 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
     };el.onpointercancel=()=>window.removeEventListener('keydown',escape);
   };
   const chooseEditor=(slot,id)=>{const old=state.layout.order[slot];if(old===id)return;swapSections(state.layout,slot,id);if(state.layout.hidden.includes(id))state.layout.hidden=[...state.layout.hidden.filter(x=>x!==id),old];persist();};
-  const editorMenu=(button,slot)=>openMenu(items.slice(0,baseCount).flatMap(item=>item.variants?item.variants.map(v=>({label:v.label,icon:v.icon,run:()=>{chooseEditor(slot,item.id);v.run();}})):[{label:item.title,icon:item.icon,run:()=>chooseEditor(slot,item.id)}]),button,'Editor Type');
+  const editorMenu=(button,slot)=>openPopup(items.slice(0,baseCount).flatMap(item=>item.variants?item.variants.map(v=>({label:v.label,icon:v.icon,run:()=>{chooseEditor(slot,item.id);v.run();}})):[{label:item.title,icon:item.icon,run:()=>chooseEditor(slot,item.id)}]),button,'Editor Type');
   const closeArea=slot=>{if(typeof state.tree==='number')return;const next=removeArea(state.tree,slot);if(next===null)return;state.tree=next;const id=state.layout.order[slot];if(!state.layout.hidden.includes(id))state.layout.hidden.push(id);state.focus=null;persist();};
-  const openArea=(event,slot)=>{event.preventDefault();event.stopPropagation();state.area=slot;const id=state.layout.order[slot];openMenu([{label:'Vertical Split',icon:'area_swap',enabled:()=>!!state.factoryCount,run:()=>split(slot,false)},{label:'Horizontal Split',enabled:()=>!!state.factoryCount,run:()=>split(slot,true)},'-',{label:state.focus===id?'Back to Previous':'Toggle Maximize Area',icon:'fullscreen_enter',keys:'Ctrl Space',run:()=>{state.focus=state.focus===id?null:id;persist();}},'-',{label:'Close Area',icon:'area_join',enabled:()=>typeof state.tree!=='number',run:()=>closeArea(slot)}],{x:event.clientX,y:event.clientY},'Area');};
+  const openArea=(event,slot)=>{event.preventDefault();event.stopPropagation();state.area=slot;const id=state.layout.order[slot];openPopup([{label:'Vertical Split',icon:'area_swap',enabled:()=>!!state.factoryCount,run:()=>split(slot,false)},{label:'Horizontal Split',enabled:()=>!!state.factoryCount,run:()=>split(slot,true)},'-',{label:state.focus===id?'Back to Previous':'Toggle Maximize Area',icon:'fullscreen_enter',keys:'Ctrl Space',run:()=>{state.focus=state.focus===id?null:id;persist();}},'-',{label:'Close Area',icon:'area_join',enabled:()=>typeof state.tree!=='number',run:()=>closeArea(slot)}],{x:event.clientX,y:event.clientY},'Area');};
   const labels={animation:'Timeline split',root:'Main split',main:'Output split',editors:'Editor split',inspector:'Inspector split'};
   const app=createApp({setup(){
     watch(()=>JSON.stringify([state.layout,state.focus]),()=>nextTick(position),{flush:'post'});

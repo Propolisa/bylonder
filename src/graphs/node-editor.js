@@ -65,6 +65,7 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
     lastKey = key;
     typeButton.replaceChildren(iconEl(tree.icon));
     title.textContent = ctx.title || tree.label;
+    title.title = ctx.hint || '';
     actions.replaceChildren(...(ctx.actions || []));
     if (!ctx.graph) {
       shown = null;

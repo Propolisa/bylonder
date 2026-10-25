@@ -9,7 +9,20 @@ export function createParticles(world, { commit = () => {}, notify = console.war
   const emit = () => listeners.forEach(fn => fn());
   const systems = node => node?.metadata?.wbParticles || [];
   const owner = id => world.objects.find(n => systems(n).some(s => s.id === id));
-  const defaultGraph = () => { const set = new NodeParticleSystemSet('Particles'); set.setToDefault(); const json = set.serialize(); set.dispose(); return json; };
+  const gather = (block, found = new Set()) => {
+    if (!block || found.has(block)) return found;
+    found.add(block);
+    for (const input of block.inputs) gather(input.connectedPoint?.ownerBlock, found);
+    return found;
+  };
+  const defaultGraph = () => {
+    const set = new NodeParticleSystemSet('Particles');
+    set.setToDefault();
+    set.attachedBlocks.push(...set.systemBlocks.reduce((found, root) => gather(root, found), new Set()));
+    const json = set.serialize();
+    set.dispose();
+    return json;
+  };
 
   const realize = async (node, entry) => {
     let item = live.get(entry.id);
