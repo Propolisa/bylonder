@@ -16,7 +16,7 @@ import {
   renamePath,
   removePath,
 } from "./project-model";
-import { publishRun, removeRun } from "./module-host";
+import { publishRun, removeRun, APP_BASE } from "./module-host";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
@@ -358,7 +358,7 @@ async function run() {
   frame = document.createElement("iframe");
   frame.title = "Babylon scene";
   frame.allow = "fullscreen; clipboard-write; web-share";
-  frame.src = "/viewport.html?channel=" + encodeURIComponent(channel);
+  frame.src = APP_BASE + "viewport.html?channel=" + encodeURIComponent(channel);
   $("frame-host").replaceChildren(frame);
   $("run-status").textContent = "Running createScene…";
   if (old) removeRun(old.base).catch(console.warn);

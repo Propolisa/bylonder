@@ -6,6 +6,12 @@ Full-viewport Babylon.js workspace with modular reactive systems, generated Twea
 
 Node 20+: `npm ci`, `npm run dev`, `npm test`, `npm run build`. Serve `dist/` on any static host. No backend, remote fonts or credentials are needed at runtime. To fork, copy source, remove `.openai/hosting.json` (the original Site identity), rename the package and register a new Site if using Sites hosting.
 
+## Examples and deployment
+
+File → New from Example (or the splash screen shown on first visit) creates a project from one of the bundled demos in `src/workspace/examples.js`.
+
+`.github/workflows/pages.yml` tests, builds with a relative base (`BASE_PATH=./`) and deploys `dist/` to GitHub Pages on every push to `main`. Enable it under Settings → Pages → Source: GitHub Actions. Any sub-path works; the service worker scope follows the deployed directory.
+
 ## Controls
 
 | Action                             | Input                                                  |

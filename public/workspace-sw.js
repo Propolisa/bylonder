@@ -9,7 +9,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (
     url.origin !== self.location.origin ||
-    !url.pathname.startsWith("/__workspace_run/")
+    !url.pathname.startsWith(new URL("__workspace_run/", self.registration.scope).pathname)
   )
     return;
   event.respondWith(

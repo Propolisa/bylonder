@@ -1,10 +1,11 @@
 export const RUN_CACHE = "babylon-workspace-runs-v1";
+export const APP_BASE = new URL(import.meta.env.BASE_URL, location.href).pathname;
 export async function ensureModuleHost() {
   if (!("serviceWorker" in navigator))
     throw Error(
       "Service workers are required to run native multi-file projects.",
     );
-  await navigator.serviceWorker.register("/workspace-sw.js", { scope: "/" });
+  await navigator.serviceWorker.register(APP_BASE + "workspace-sw.js", { scope: APP_BASE });
   await navigator.serviceWorker.ready;
   if (!navigator.serviceWorker.controller)
     await new Promise((resolve, reject) => {
@@ -70,7 +71,7 @@ async function transform(content, path) {
 export async function publishRun(project) {
   await ensureModuleHost();
   const run = crypto.randomUUID(),
-    base = "/__workspace_run/" + run + "/";
+    base = APP_BASE + "__workspace_run/" + run + "/";
   const cache = await caches.open(RUN_CACHE);
   for (const [path, file] of Object.entries(project.files)) {
     const body =

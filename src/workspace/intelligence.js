@@ -77,7 +77,7 @@ export function importSpecifiers(source) {
 }
 export async function setupIntelligence(onStatus) {
   onStatus("Loading Babylon declarations…");
-  const response = await fetch("/babylon-types.json");
+  const response = await fetch(import.meta.env.BASE_URL + "babylon-types.json");
   if (!response.ok) throw Error("Babylon type bundle unavailable");
   const bundle = await response.json();
   for (const [uri, content] of Object.entries(bundle)) extra(content, uri);
