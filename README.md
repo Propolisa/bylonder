@@ -6,6 +6,22 @@ Full-viewport Babylon.js workspace with modular reactive systems, generated Twea
 
 Node 20+: `npm ci`, `npm run dev`, `npm test`, `npm run build`. Serve `dist/` on any static host. No backend, remote fonts or credentials are needed at runtime. To fork, copy source, remove `.openai/hosting.json` (the original Site identity), rename the package and register a new Site if using Sites hosting.
 
+## Materials and node editors
+
+Properties > Material follows Blender: a slot list (+, -, specials, reorder), the material datablock row (browse and link any scene material, rename, user count with make-single-user, fake user, duplicate, unlink, New), a preview sphere, and schema-driven Surface/Settings panels for Principled (PBR), Standard and Node materials. Changing the Surface type converts the material in place and keeps its users and common settings. Texture fields pick project images. Every material property and every uniform input of a Node Material is an animation channel, so the same keyframe, undo and context-menu behaviour as generated controls applies. Structural edits (slots, links, new/duplicated/converted materials, textures, edited node graphs) are undoable and persist with Remember scene edits.
+
+The Node Editor area (pick it from any area's editor-type menu) hosts Babylon's editors with a Blender skin generated from their CSS-module class map (`scripts/graph-editor-classes.mjs`):
+
+| Editor | Babylon system | Context, as in Blender |
+| --- | --- | --- |
+| Shader Editor | Node Material Editor | Active object's active material slot; Use Nodes converts |
+| Geometry Node Editor | Node Geometry Editor | Active object's Geometry Nodes modifier (modifier stack) |
+| Compositor | Node Render Graph Editor over the frame graph | Scene; Use Nodes; shown in Rendered shading and camera view |
+| Particle Node Editor | Node Particle Editor | Active object's particle system (Properties > Particles) |
+| Logic Editor | FlowGraph (own editor; Babylon ships none) | Scene logic; Shift A, drag sockets, Run |
+
+`src/graphs/bindings.js` reflects live graph inputs (uniform Input blocks, geometry and particle inputs, render-graph block settings declared with `editableInPropertyPage`) into animation channels and property rows, resolved by stable block names so they survive editor rebuilds.
+
 ## Examples and deployment
 
 File → New from Example (or the splash screen shown on first visit) creates a project from one of the bundled demos in `src/workspace/examples.js`.
