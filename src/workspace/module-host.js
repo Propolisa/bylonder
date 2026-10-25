@@ -97,6 +97,7 @@ export async function publishRun(project) {
     remember: !!project.settings.remember,
     overrides: project.settings.remember ? project.overrides : {},
     projectId: project.id,
+    files: Object.keys(project.files),
   };
 }
 export async function removeRun(base) {

@@ -1,9 +1,10 @@
 import { parseNumber } from './numeric.js';
 import { h,defineComponent,ref,computed,onBeforeUnmount } from 'vue';
+import { Color3 } from '@babylonjs/core';
 import { icon,iconButton } from './icons.js';
-export const Panel=defineComponent({props:['title','panelId','state','subpanel','actions'],setup(props,{slots}){
-  const closed=computed(()=>props.state.closed?.includes(props.panelId));
-  const toggle=event=>{if(event?.ctrlKey){props.state.closed=closed.value?props.state.panels.filter(id=>id!==props.panelId):props.state.panels.filter(id=>id.startsWith(props.panelId+'.'));}else props.state.closed=closed.value?props.state.closed.filter(id=>id!==props.panelId):[...(props.state.closed||[]),props.panelId];};
+export const Panel=defineComponent({props:['title','panelId','state','subpanel','actions','defaultClosed'],setup(props,{slots}){
+  const closed=computed(()=>props.defaultClosed?!props.state.opened?.includes(props.panelId):props.state.closed?.includes(props.panelId));
+  const toggle=event=>{if(props.defaultClosed&&!event?.ctrlKey){props.state.opened=closed.value?[...(props.state.opened||[]),props.panelId]:props.state.opened.filter(id=>id!==props.panelId);return;}if(event?.ctrlKey){props.state.closed=closed.value?props.state.panels.filter(id=>id!==props.panelId):props.state.panels.filter(id=>id.startsWith(props.panelId+'.'));}else props.state.closed=closed.value?props.state.closed.filter(id=>id!==props.panelId):[...(props.state.closed||[]),props.panelId];};
   return()=>h('section',{class:['bl-panel',{'bl-subpanel':props.subpanel}],tabindex:-1,onKeydown:event=>{if(event.key.toLowerCase()==='a'&&!event.target.closest('input,select')){event.preventDefault();event.stopPropagation();toggle(event);}}},[
     h('div',{class:'bl-panel-header',onClick:toggle,title:`${props.title} · Click to collapse; Ctrl-click to isolate`},[h('span',{class:'bl-disclosure'},closed.value?'▸':'▾'),h('span',props.title),h('span',{class:'bl-panel-actions',onClick:e=>e.stopPropagation()},props.actions?.()),icon('GRIP')]),
     !closed.value?h('div',{class:'bl-panel-content'},slots.default?.()):null
@@ -12,7 +13,7 @@ export const Panel=defineComponent({props:['title','panelId','state','subpanel',
 export const PropertyRow=defineComponent({props:['field','animation','commit'],setup(props){
   const editing=ref(false),draft=ref(''),input=ref(null);let drag=null;
   const value=()=>props.field.get();
-  const display=()=>{const v=value(),unit=props.field.unit;if(typeof v!=='number')return String(v);const n=unit==='angle'?v*180/Math.PI:v;return (props.field.integer?Math.round(n):Number(n.toFixed(3)))+(unit==='angle'?'°':unit==='length'?' m':'');};
+  const display=()=>{const v=value(),unit=props.field.unit;if(v?.toHexString)return v.toHexString();if(typeof v!=='number')return String(v);const n=unit==='angle'?v*180/Math.PI:v;return (props.field.integer?Math.round(n):Number(n.toFixed(3)))+(unit==='angle'?'°':unit==='length'?' m':'');};
   const set=(v,finish=true)=>{const field=props.field;if(field.disabled?.())return;if(typeof field.default==='number'){if(!Number.isFinite(v))return;v=Math.max(field.min??-1e9,Math.min(field.max??1e9,v));if(field.integer)v=Math.round(v);}props.animation?.pause();field.set(v,finish);if(finish)props.commit?.();};
   const edit=()=>{editing.value=true;draft.value=String(props.field.unit==='angle'?value()*180/Math.PI:value());queueMicrotask(()=>{input.value?.focus();input.value?.select();});};
   const accept=()=>{if(!editing.value)return;try{const v=typeof value()==='number'?parseNumber(draft.value,props.field.unit):draft.value;editing.value=false;set(v);}catch(error){input.value?.setCustomValidity(error.message);input.value?.reportValidity();}};
@@ -35,7 +36,8 @@ export const PropertyRow=defineComponent({props:['field','animation','commit'],s
     const field=props.field,current=value(),list=refs(),status=list.length?props.animation.state(list[0]):'none',title=`${field.label}: ${display()}${field.description?'\n'+field.description:''}${list.length?'\n'+list.join('\n'):''}`;
     const number=typeof current==='number',disabled=field.disabled?.();
     let control;
-    if(field.reference)control=h('select',{value:current,title,disabled,onChange:e=>set(e.target.value)},[h('option',{value:''},''),...field.choices().map(([id,name])=>h('option',{value:id},name))]);
+    if(field.color)control=h('label',{class:'bl-color',title,style:{background:current?.toHexString?.()||'#000'}},[h('input',{type:'color',value:current?.toHexString?.()||'#000000',disabled,'aria-label':field.label,onInput:e=>set(Color3.FromHexString(e.target.value),false),onChange:e=>{field.set(Color3.FromHexString(e.target.value),true);props.commit?.();}})]);
+    else if(field.reference)control=h('select',{value:current,title,disabled,onChange:e=>set(e.target.value)},[h('option',{value:''},''),...field.choices().map(([id,name])=>h('option',{value:id},name))]);
     else if(field.options)control=h('select',{value:current,disabled,title,onChange:e=>set(Object.values(field.options).find(v=>String(v)===e.target.value))},Object.entries(field.options).map(([label,v])=>h('option',{value:v},label)));
     else if(typeof current==='boolean')control=h('input',{type:'checkbox',checked:current,disabled,title,'aria-label':field.label,onChange:e=>set(e.target.checked)});
     else if(editing.value||!number)control=h('input',{ref:input,value:editing.value?draft.value:current,title,disabled,'aria-label':field.label,onInput:e=>{if(editing.value){draft.value=e.target.value;e.target.setCustomValidity('');}},onChange:e=>{if(!number)set(e.target.value);},onBlur:accept,onKeydown:e=>{if(e.key==='Enter'){e.preventDefault();accept();}if(e.key==='Escape'){e.preventDefault();cancel();}}});

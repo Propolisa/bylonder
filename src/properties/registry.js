@@ -1,6 +1,7 @@
 export const propertyContexts=new Map([
   ['object',{id:'object',title:'Object',icon:'OBJECT_DATA',color:'#e19650'}],
   ['modifiers',{id:'modifiers',title:'Modifiers',icon:'MODIFIER',color:'#77a4df'}],
+  ['material',{id:'material',title:'Material',icon:'MATERIAL',color:'#ea7581'}],
   ['scene',{id:'scene',title:'Scene',icon:'SCENE_DATA',color:'#b8b8b8'}]
 ]);
 export const propertyPanels=new Map();

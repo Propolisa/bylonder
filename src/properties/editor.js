@@ -5,15 +5,18 @@ import { propertyContexts,propertyPanels } from './registry.js';
 import { arrayFields } from '../modifiers/array.js';
 import { nodeId,deleted } from '../objects/identity.js';
 import { address } from '../animation/model.js';
+import { materialPanels } from '../materials/panel.js';
+import { createPreview } from '../materials/preview.js';
 import './style.css';
 export function mountProperties(host,{world,editor,history,storage,systems,properties},areaId='properties',header){
   const key='workbench:properties:'+areaId;let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
-  const state=reactive({context:saved.context||'object',closed:saved.closed||[],panels:[],pinned:null,revision:0,add:false,search:'',activeModifier:null});
-  watch(()=>[state.context,state.closed],()=>{try{localStorage.setItem(key,JSON.stringify({context:state.context,closed:state.closed}));}catch{}},{deep:true});
+  const preview=createPreview();
+  const state=reactive({context:saved.context||'object',closed:saved.closed||[],opened:saved.opened||[],panels:[],pinned:null,revision:0,add:false,search:'',activeModifier:null,previewUrl:'',previewFor:null});
+  watch(()=>[state.context,state.closed,state.opened],()=>{try{localStorage.setItem(key,JSON.stringify({context:state.context,closed:state.closed,opened:state.opened}));}catch{}},{deep:true});
   const active=()=>state.pinned?world.objects.find(n=>nodeId(n)===state.pinned&&!deleted(n)):editor.selection.nodes.at(-1);
   const commit=()=>{history.commit();editor.selection.sync();state.revision++;};
   const row=field=>h(PropertyRow,{key:field.id||field.label,field,animation:world.animation,commit});
-  const panel=(id,title,content,{subpanel=false,actions}={})=>{if(!state.panels.includes(id))state.panels.push(id);return h(Panel,{key:id,panelId:id,title,state,subpanel,actions},{default:content});};
+  const panel=(id,title,content,{subpanel=false,actions,defaultClosed=false}={})=>{if(!state.panels.includes(id))state.panels.push(id);return h(Panel,{key:id,panelId:id,title,state,subpanel,actions,defaultClosed},{default:content});};
   const transform=()=>{
     const node=active();if(!node)return h('p',{class:'bl-message'},'No active object.');
     return panel('transform','Transform',()=>[
@@ -75,12 +78,12 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
         h('nav',{class:'bl-tabs',role:'tablist','aria-label':'Properties context'},[...propertyContexts.values()].map(context=>iconButton(context.icon,context.title,()=>state.context=context.id,{role:'tab','aria-selected':state.context===context.id,style:{color:context.color}}))),
         h('div',{class:'bl-region'},[
           node?h('div',{class:'bl-datablock'},[icon('OBJECT_DATA',{class:'bl-icon bl-object-color'}),h('input',{value:node.name,title:'Object name',onChange:e=>{node.name=e.target.value||node.name;commit();}})]):null,
-          state.context==='object'?transform():state.context==='modifiers'?modifiers():state.context==='scene'?scene():null,
+          state.context==='object'?transform():state.context==='modifiers'?modifiers():state.context==='scene'?scene():state.context==='material'&&world.materials?materialPanels({world,editor,node,row,panel,state,preview}):null,
           ...[...propertyPanels.values()].filter(p=>p.context===state.context&&(!p.poll||p.poll({world,node}))).map(p=>panel(p.id,p.title,()=>p.render({world,node,row,panel,commit})))
         ])
       ])
     ]);};}});
   app.mount(host);
-  const unsubscribers=[world.modifiers.subscribe(()=>state.revision++),...systems.map(s=>s.store.subscribe(()=>state.revision++))];
-  return {refresh(){state.revision++;},context(id){state.context=id;},dispose(){unsubscribers.forEach(fn=>fn());app.unmount();}};
+  const unsubscribers=[world.modifiers.subscribe(()=>state.revision++),...(world.materials?[world.materials.subscribe(()=>state.revision++)]:[]),...systems.map(s=>s.store.subscribe(()=>state.revision++))];
+  return {refresh(){state.revision++;},context(id){state.context=id;},dispose(){unsubscribers.forEach(fn=>fn());preview.dispose();app.unmount();}};
 }

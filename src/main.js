@@ -20,6 +20,7 @@ import "./style.css";
 import "./theme.css";
 import "./viewport.css";
 import { mountViewportUI } from "./viewport-ui.js";
+import { createMaterialLibrary } from "./materials/library.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createNavigation } from "./navigation";
@@ -194,7 +195,7 @@ const currentOverrides = () => {
         JSON.stringify(row) !==
         JSON.stringify(baseline.find((b) => b.id === row.id)),
     );
-  return { transforms, stores: sdk.values() };
+  return { transforms, stores: sdk.values(), materials: world.materials?.capture(), channels: changedChannels() };
 };
 saveOverrides = () => {
   if (!remember || creator?.pending || animation.evaluating || animation.playing) return;
@@ -243,6 +244,15 @@ window.addEventListener("message", (e) => {
 });
 registerObjects(animation, objects);
 let history;
+world.materials = createMaterialLibrary(world, { commit: () => history?.commit(), asset: path => sdk.asset(path), files: input.files || [] });
+const persistable = ([ref, ch]) => !ch.transform && !ref.startsWith("store:") && !ref.startsWith("modifier:") && ch.available();
+const channelValues = () => Object.fromEntries([...animation.channels].filter(persistable).map(([ref, ch]) => [ref, ch.get()]));
+const baselineChannels = channelValues();
+function changedChannels() {
+  return Object.fromEntries(Object.entries(channelValues()).filter(([ref, value]) => JSON.stringify(value) !== JSON.stringify(baselineChannels[ref])));
+}
+if (input.remember && input.overrides?.materials) world.materials.apply(input.overrides.materials);
+if (input.remember) for (const [ref, value] of Object.entries(input.overrides?.channels || {})) animation.channels.get(ref)?.set(value);
 world.modifiers=createModifierSystem(world,{commit:()=>history?.commit(),notify});
 world.modifiers.refresh();
 if (input.animation) animation.load(input.animation);
@@ -253,9 +263,10 @@ history = createHistory(world.objects, () => {
   world.modifiers.refresh();
   animation.changed();
   ui?.refresh();
-}, {capture:()=>({animation:animation.serialize(),stores:sdk.values(),properties:Object.fromEntries([...animation.channels].filter(([,ch])=>!ch.transform&&ch.available()).map(([ref,ch])=>[ref,ch.get()]))}),restore:data=>{
+}, {capture:()=>({animation:animation.serialize(),stores:sdk.values(),materials:world.materials.capture(),properties:Object.fromEntries([...animation.channels].filter(([,ch])=>!ch.transform&&ch.available()).map(([ref,ch])=>[ref,ch.get()]))}),restore:data=>{
   registerObjects(animation, objects);
   for(const system of systems)for(const [key,value] of Object.entries(data?.stores?.[system.id]||{}))system.store.set(key,value);
+  world.materials.apply(data?.materials);
   for(const [ref,value] of Object.entries(data?.properties||{}))animation.channels.get(ref)?.set(value);
   world.modifiers.refresh();
   animation.load(data?.animation,{apply:false});
