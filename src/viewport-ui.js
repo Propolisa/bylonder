@@ -99,6 +99,7 @@ export function mountViewportUI({ world, editor, nav, creator, registry, dock, s
   const sync = () => {
     scene.forceWireframe = state.shading === 'wire';
     world.compositor?.setViewportActive(state.shading === 'rendered' || isCameraView());
+    world.worlds?.setViewportActive(state.shading === 'rendered' || isCameraView());
     const showOverlays = state.overlays && state.shading !== 'rendered' && !isCameraView();
     overlays.forEach(mesh => mesh.setEnabled(showOverlays));
     section.classList.toggle('overlays-off', !state.overlays || isCameraView());

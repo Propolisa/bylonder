@@ -10,8 +10,9 @@ import { createPreview } from '../materials/preview.js';
 import { bindGraph } from '../graphs/bindings.js';
 import { geometryGraph } from '../graphs/geometry-nodes.js';
 import { particlePanels, compositingPanel } from '../graphs/panels.js';
+import { scenePanels, worldPanels } from '../scene/panels.js';
 import './style.css';
-export function mountProperties(host,{world,editor,history,storage,systems,properties},areaId='properties',header){
+export function mountProperties(host,{world,editor,history,storage,systems,properties,files=[]},areaId='properties',header){
   const key='workbench:properties:'+areaId;let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
   const preview=createPreview();
   const state=reactive({context:saved.context||'object',closed:saved.closed||[],opened:saved.opened||[],panels:[],pinned:null,revision:0,add:false,search:'',activeModifier:null,previewUrl:'',previewFor:null});
@@ -72,23 +73,31 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
     ]):null,...world.modifiers.stack(node).map((m,i)=>modifierPanel(node,m,i)),world.modifiers.errors.get(nodeId(node))?h('p',{class:'bl-message bl-error'},world.modifiers.errors.get(nodeId(node))):null];
   };
   const scene=()=>[
+    ...(world.sceneSettings?scenePanels({world,row,panel}):[]),
     ...(world.compositor?[compositingPanel({world,row,panel})]:[]),
     ...systems.map(system=>panel('store.'+system.id,system.title,()=>Object.entries(system.store.schema).map(([path,def])=>row({...def,id:'store.'+system.id+'.'+path,label:def.label||path,get:()=>system.store.values[path],set:value=>system.store.set(path,value),refs:()=>def.animatable===false?[]:[address('store:'+system.id,path)]})))),
     ...properties.map(definition=>panel('data.'+definition.id,definition.title,()=>Object.entries(definition.schema).map(([path,def])=>{const parts=path.split('.'),owner=()=>parts.slice(0,-1).reduce((o,k)=>o[k],definition.target),key=parts.at(-1);return row({...def,id:definition.id+'.'+path,label:def.label||path,get:()=>owner()[key],set:value=>owner()[key]=value,refs:()=>def.animatable===false?[]:[address(definition.id,path)]});}))),
     panel('local','Local State',()=>[row({label:'Remember Scene Edits',default:false,get:()=>storage.enabled,set:value=>storage.set(value)}),h('button',{onClick:()=>storage.clear()},'Forget Saved Scene Edits')])
   ];
+  const sceneLevel=()=>state.context==='scene'||state.context==='world';
+  const breadcrumb=node=>{
+    const sceneName=world.sceneSettings?.state.name||'Scene',w=world.worlds?.active();
+    if(state.context==='world')return [icon('SCENE_DATA'),h('span',{class:'bl-crumb'},sceneName),icon('RIGHTARROW_THIN',{class:'bl-icon bl-crumb-sep'}),icon('WORLD'),h('span',{class:'bl-context-name'},w?.name||'')];
+    if(sceneLevel()||!node)return [icon('SCENE_DATA'),h('span',{class:'bl-context-name',title:sceneName},sceneName)];
+    return [icon('OBJECT_DATA',{class:'bl-icon bl-object-color'}),h('span',{class:'bl-context-name',title:node.name},node.name)];
+  };
   const app=createApp({setup(){return()=>{state.revision;const node=active();return h('section',{class:'bl-properties',onKeydown:e=>{if(e.target.closest('input,textarea,select'))return;if(e.shiftKey&&e.key.toLowerCase()==='a'&&state.context==='modifiers'){e.preventDefault();e.stopPropagation();state.add=true;}else if(e.ctrlKey&&e.key==='Tab'){e.preventDefault();e.stopPropagation();const ids=[...propertyContexts.keys()],i=ids.indexOf(state.context);state.context=ids[(i+(e.shiftKey?-1:1)+ids.length)%ids.length];}}},[
-      (header?(c=>h(Teleport,{to:header},[c])):(c=>c))(h('div',{class:'bl-header'},[icon(node?'OBJECT_DATA':'SCENE_DATA',{class:node?'bl-icon bl-object-color':'bl-icon'}),h('span',{class:'bl-context-name',title:node?.name||'Scene'},node?.name||'Scene'),iconButton(state.pinned?'PINNED':'UNPINNED',state.pinned?'Unpin Properties context':'Pin Properties context',()=>state.pinned=state.pinned?null:node?nodeId(node):null,{'aria-pressed':!!state.pinned})])),
+      (header?(c=>h(Teleport,{to:header},[c])):(c=>c))(h('div',{class:'bl-header'},[...breadcrumb(node),iconButton(state.pinned?'PINNED':'UNPINNED',state.pinned?'Unpin Properties context':'Pin Properties context',()=>state.pinned=state.pinned?null:node?nodeId(node):null,{'aria-pressed':!!state.pinned})])),
       h('div',{class:'bl-body'},[
         h('nav',{class:'bl-tabs',role:'tablist','aria-label':'Properties context'},[...propertyContexts.values()].map(context=>iconButton(context.icon,context.title,()=>state.context=context.id,{role:'tab','aria-selected':state.context===context.id,style:{color:context.color}}))),
         h('div',{class:'bl-region'},[
-          node?h('div',{class:'bl-datablock'},[icon('OBJECT_DATA',{class:'bl-icon bl-object-color'}),h('input',{value:node.name,title:'Object name',onChange:e=>{node.name=e.target.value||node.name;commit();}})]):null,
-          state.context==='object'?transform():state.context==='modifiers'?modifiers():state.context==='scene'?scene():state.context==='material'&&world.materials?materialPanels({world,editor,node,row,panel,state,preview}):state.context==='particles'&&world.particles?particlePanels({world,node,row,panel}):null,
+          node&&!sceneLevel()?h('div',{class:'bl-datablock'},[icon('OBJECT_DATA',{class:'bl-icon bl-object-color'}),h('input',{value:node.name,title:'Object name',onChange:e=>{node.name=e.target.value||node.name;commit();}})]):null,
+          state.context==='object'?transform():state.context==='modifiers'?modifiers():state.context==='scene'?scene():state.context==='world'&&world.worlds?worldPanels({world,row,panel,files}):state.context==='material'&&world.materials?materialPanels({world,editor,node,row,panel,state,preview}):state.context==='particles'&&world.particles?particlePanels({world,node,row,panel}):null,
           ...[...propertyPanels.values()].filter(p=>p.context===state.context&&(!p.poll||p.poll({world,node}))).map(p=>panel(p.id,p.title,()=>p.render({world,node,row,panel,commit})))
         ])
       ])
     ]);};}});
   app.mount(host);
-  const unsubscribers=[world.modifiers.subscribe(()=>state.revision++),...[world.materials,world.particles,world.compositor].filter(Boolean).map(source=>source.subscribe(()=>state.revision++)),...systems.map(s=>s.store.subscribe(()=>state.revision++))];
+  const unsubscribers=[world.modifiers.subscribe(()=>state.revision++),...[world.materials,world.particles,world.compositor,world.sceneSettings,world.worlds].filter(Boolean).map(source=>source.subscribe(()=>state.revision++)),...systems.map(s=>s.store.subscribe(()=>state.revision++))];
   return {refresh(){state.revision++;},context(id){state.context=id;},dispose(){unsubscribers.forEach(fn=>fn());preview.dispose();app.unmount();}};
 }

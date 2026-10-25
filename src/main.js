@@ -29,6 +29,8 @@ import "./theme.css";
 import "./viewport.css";
 import { mountViewportUI } from "./viewport-ui.js";
 import { createMaterialLibrary } from "./materials/library.js";
+import { createSceneSettings } from "./scene/settings.js";
+import { createWorlds } from "./scene/world.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createNavigation } from "./navigation";
@@ -155,7 +157,8 @@ try {
   send("run-error", { message: String(error.stack || error) });
   throw error;
 }
-const authoredCamera = scene.activeCamera;
+let authoredCamera = scene.activeCamera;
+let editMode = true;
 authoredCamera?.detachControl();
 const camera = new BABYLON.ArcRotateCamera(
   "__editorCamera",
@@ -259,9 +262,20 @@ let history;
 const commit = () => history?.commit();
 const documentState = createDocument();
 world.materials = documentState.register("materials", createMaterialLibrary(world, { commit, asset: (path) => sdk.asset(path), files: input.files || [] }));
+world.sceneSettings = documentState.register("scene", createSceneSettings(world, { commit, cameras: {
+  list: () => scene.cameras.filter((c) => c !== camera),
+  get: () => authoredCamera,
+  set(next) {
+    if (next === authoredCamera) return;
+    if (!editMode) { authoredCamera?.detachControl(); scene.activeCamera = next; next.attachControl(canvas, true); }
+    authoredCamera = next;
+    world.compositor?.syncCamera();
+  },
+} }));
+world.worlds = documentState.register("worlds", createWorlds(world, { commit, asset: (path) => sdk.asset(path) }));
 world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));
 world.logic = documentState.register("logic", createLogic(world, { commit, notify }));
-documentState.register("channels", channelSlice(animation, (channel) => /^(store|modifier):/.test(channel.id)));
+documentState.register("channels", channelSlice(animation, (channel) => /^(store|modifier|world):/.test(channel.id) || channel.id === "scene"));
 world.particles = createParticles(world, { commit, notify });
 world.particles.refresh();
 if (input.remember) documentState.apply(input.overrides);
@@ -296,7 +310,6 @@ const editor = createEditor(
   capture,
 );
 const nav = createNavigation(world, canvas, capture);
-let editMode = true;
 const toggleCameraView = () => {
   creator.finish();
   editor.finish(false);
@@ -349,7 +362,7 @@ world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, nav, canvas, creator);
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
-ui = createUI(world, editor, storage, history, systems, sdk.properties);
+ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || []);
 const nodeSection = document.querySelector("#nodes-section");
 const nodeEditor = mountNodeEditor({ world, host: nodeSection, header: viewportDock.header("nodes"), contexts: createNodeContexts({ world, editor }) });
 nodeSection.addEventListener("node-tree", (e) => nodeEditor.setType(e.detail));

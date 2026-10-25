@@ -27,8 +27,8 @@ Most useful files: `scripts/startup/bl_ui/properties_*.py` (exact panel layout a
 
 | Blender | Babylon | Ours |
 |---|---|---|
-| Datablock (ID), users, fake user, link/append | Plain objects in `Scene`; `AssetContainer` for add/remove sets | IDs by `wbId` or name; users counted for materials only |
-| Scene | `Scene` | One scene per run |
+| Datablock (ID), users, fake user, link/append | Plain objects in `Scene`; `AssetContainer` for add/remove sets | IDs by `wbId` or name; users counted for materials and worlds |
+| Scene | `Scene` | One scene per run; Properties > Scene (name, camera, units, gravity) |
 | Scene collection, collections (nested, objects in many) | No equivalent. Parenting via `TransformNode`; `AssetContainer` groups assets | Groups are `TransformNode` parents (one parent only) |
 | View layer (per-scene include/exclude, holdout, passes) | `layerMask` on meshes and cameras; rendering groups | None |
 | Object vs object data (mesh, camera, light shared by many objects) | Mesh holds geometry; `InstancedMesh`, `clone`, thin instances share geometry | Not modelled |
@@ -38,7 +38,7 @@ Most useful files: `scripts/startup/bl_ui/properties_*.py` (exact panel layout a
 | Armature, bones, poses | `Skeleton`, `Bone`, glTF skins | None |
 | Shape keys | `MorphTargetManager` | None |
 | Materials, node shaders | Standard, PBR, Node Material | Material tab, Shader Editor |
-| World (environment shader, volume, mist) | `clearColor`, `environmentTexture`, skybox, fog | Viewport background only |
+| World (environment shader, volume, mist) | `clearColor`, `environmentTexture`, skybox, fog | World datablocks with Properties > World (Background, Volume, Ray Visibility) |
 | Camera data (lens, clipping, DOF, sensor) | `Camera` (fov, minZ/maxZ), pipeline DOF | Authored camera via Scene mode |
 | Lights (point, sun, spot, area) | Point, Directional, Spot, Hemispheric, `RectAreaLight` | Shown in Outliner only |
 | Render engine (EEVEE, Cycles, Workbench) | One rasterizer; quality via pipelines and settings | Viewport shading modes |
@@ -56,7 +56,7 @@ Most useful files: `scripts/startup/bl_ui/properties_*.py` (exact panel layout a
 | Grease Pencil | None | None |
 | Audio, speakers | Audio engine v2, spatial sound | None |
 | Light probes | `ReflectionProbe`, IBL | None |
-| Units | Unitless world units | Lengths shown in m |
+| Units | Unitless world units | Scene > Units: system, scale, separate, rotation, length; 1 Babylon unit = 1 m |
 | Workspaces, areas, editors | None (UI is ours) | Layout, Scripting; dock areas |
 | Undo (global memfile, per mode) | None | Document snapshots |
 | Axes Z-up, right-handed | Y-up, left-handed (`useRightHandedSystem` optional) | Babylon axes |
@@ -68,6 +68,8 @@ Blender (`Scene`, Properties > Scene): active camera, background scene (`set`, r
 Babylon: `Scene` holds clear color, ambient color, environment texture and intensity, fog (`fogMode` NONE/EXP/EXP2/LINEAR, density, start, end, color), `imageProcessingConfiguration`, `gravity`, `animationTimeScale`, `activeCamera`/`activeCameras`, toggles such as `shadowsEnabled`, `postProcessesEnabled`, `skeletonsEnabled`, and `useRightHandedSystem`.
 
 Mapping notes: active camera maps to `scene.activeCamera` (ours already switches between editor and authored camera). Units are presentation only on both sides. Background scene has no Babylon equivalent other than rendering several scenes into one canvas (`autoClear` off).
+
+Ours: Properties > Scene has the scene ID row (rename only, one scene), Scene (Camera), Units (system, scale, separate units, rotation, length; no mass, time or temperature since nothing uses them) and Gravity (header toggle, vector in Babylon Y-up axes, animatable; drives `scene.gravity` and the physics engine). Not yet: Background Scene, Active Clip, Keying Sets, Audio, Simulation, Rigid Body World, Light Probes.
 
 ## View layers and collections
 
@@ -103,7 +105,7 @@ Babylon: no world datablock. Equivalents spread across the scene: `clearColor`, 
 
 Mapping notes: a world slice can own background color, environment texture, intensity, skybox visibility and fog, applied to the scene, with Node Material backgrounds possible later. Solid shading already uses a theme background; Blender also lets Solid use the world viewport color.
 
-Ours: not implemented. Rendered shading shows whatever user code set.
+Ours: World datablocks (browse, rename, fake user, New copies the active world, unlink). The code-built scene becomes the world "World". Surface shows the Background node: Color input as a color or an Environment Texture (Image, Rotation), plus Strength. Volume: None, Volume Scatter (Babylon exponential fog, which matches homogeneous volume absorption), or the Babylon-only Exponential Squared and Linear fog. Settings > Ray Visibility > Camera turns the skybox off and shows the Color as background. Not yet: Mist Pass (no render passes), Light Probe and Sun settings, Viewport Display color, world node trees.
 
 ## Animation
 

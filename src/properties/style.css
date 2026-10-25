@@ -49,3 +49,8 @@
 .bl-wide-button:hover{background:var(--bl-widget-hi)}
 .bl-list-empty{height:20px}
 .bl-list-flag{margin-left:auto;display:inline-flex;opacity:.7}
+.bl-header .bl-crumb{white-space:nowrap}.bl-header .bl-crumb-sep{width:10px;height:10px;opacity:.6}
+.bl-panel-check{accent-color:#4772b3;width:14px;height:14px;margin:0 4px 0 0}
+.bl-node-link{display:flex;align-items:center;height:20px;padding:0 8px;border-radius:3px;background:#282828;color:var(--bl-text)}
+.bl-node-link::before{content:'';width:7px;height:7px;margin-right:6px;border-radius:50%;background:#63c763}
+.bl-node-inputs{margin:0 0 4px 12px;padding-left:2px;border-left:1px solid #ffffff10}

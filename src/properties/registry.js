@@ -1,9 +1,11 @@
+// Blender's tab order: Scene, World, then object-level tabs.
 export const propertyContexts=new Map([
+  ['scene',{id:'scene',title:'Scene',icon:'SCENE_DATA',color:'#b8b8b8'}],
+  ['world',{id:'world',title:'World',icon:'WORLD',color:'#ea7581'}],
   ['object',{id:'object',title:'Object',icon:'OBJECT_DATA',color:'#e19650'}],
   ['modifiers',{id:'modifiers',title:'Modifiers',icon:'MODIFIER',color:'#77a4df'}],
-  ['material',{id:'material',title:'Material',icon:'MATERIAL',color:'#ea7581'}],
   ['particles',{id:'particles',title:'Particles',icon:'PARTICLES',color:'#e6e6e6'}],
-  ['scene',{id:'scene',title:'Scene',icon:'SCENE_DATA',color:'#b8b8b8'}]
+  ['material',{id:'material',title:'Material',icon:'MATERIAL',color:'#ea7581'}]
 ]);
 export const propertyPanels=new Map();
 export function registerPropertiesContext(definition){propertyContexts.set(definition.id,definition);}
