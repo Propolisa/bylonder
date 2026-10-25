@@ -5,6 +5,8 @@ import { openMenu } from '../ui/menu.js';
 import { address } from '../animation/model.js';
 import { lengthUnitOptions, unitDefaults } from '../properties/units.js';
 import { getPath } from './world.js';
+import { getRenderPath, renderDefaults, outputSize } from './render.js';
+import { fileFormats, containers, videoCodecs, qualities } from '../render/formats.js';
 
 const vector = (row, label, axes) => h('div', { class: 'bl-vector' }, axes.map((field, i) => row({ ...field, label: (i === 0 ? label + ' ' : '') + 'XYZ'[i] })));
 const headerToggle = (checked, title, onChange) => () => [h('input', { type: 'checkbox', class: 'bl-panel-check', checked, title, 'aria-label': title, onChange: e => onChange(e.target.checked) })];
@@ -99,17 +101,41 @@ export function outputPanels({ world, row, panel }) {
   const time = world.animation.time, t = time.state;
   const preset = (!customFps && Object.entries(frameRates).find(([, v]) => Math.abs(v - t.fps) < 1e-6)?.[0]) || 'CUSTOM';
   const field = (key, label, extra = {}) => row({ id: 'output.' + key, label, integer: true, step: 1, default: undefined, get: () => time.state[key], set: (v, finish) => time.configure({ [key]: v }, { record: finish !== false }), ...extra });
+  const settings = world.renderSettings, r = settings.state.render;
+  const out = (path, label, extra = {}) => row({ id: 'output.' + path, label, default: getRenderPath(renderDefaults, path), get: () => getRenderPath(settings.state, path), set: (v, finish) => settings.set(path, v, finish !== false), ...extra });
+  const options = (table, keys = Object.keys(table)) => Object.fromEntries(keys.map(k => [table[k].label, k]));
+  const size = outputSize(r), video = fileFormats[r.imageSettings.fileFormat]?.video;
   return [
     panel('output.format', 'Format', () => [
+      out('render.resolutionX', 'Resolution X', { integer: true, min: 4, max: 16384, step: 1 }),
+      out('render.resolutionY', 'Y', { integer: true, min: 4, max: 16384, step: 1 }),
+      out('render.resolutionPercentage', '%', { integer: true, min: 1, max: 100, step: 1 }),
       row({ id: 'output.fpsPreset', label: 'Frame Rate', default: '24', options: { ...Object.fromEntries(Object.keys(frameRates).map(k => [k, k])), Custom: 'CUSTOM' }, get: () => preset,
         set: v => { customFps = v === 'CUSTOM'; if (!customFps) time.configure({ fps: frameRates[v] }); else world.animation.changed(); } }),
       ...(preset === 'CUSTOM' ? [row({ id: 'output.fps', label: 'FPS', default: 24, min: 1, max: 240, step: 1, get: () => time.state.fps, set: (v, finish) => time.configure({ fps: v }, { record: finish !== false }) })] : []),
-      h('p', { class: 'bl-message' }, 'Resolution and file output are not available: scenes run live in the viewport.'),
+      h('p', { class: 'bl-message' }, `Renders at ${size.width} x ${size.height} px. Render > Render Image (F12) or Render Animation (Ctrl F12).`),
     ]),
     panel('output.frameRange', 'Frame Range', () => [
       field('frameStart', 'Frame Start', { min: -1e6, max: t.frameEnd - 1 }),
       field('frameEnd', 'End', { min: t.frameStart + 1, max: 1e6 }),
       field('frameStep', 'Step', { min: 1, max: 1000 }),
     ]),
+    panel('output.output', 'Output', () => [
+      out('render.imageSettings.fileFormat', 'File Format', { options: options(fileFormats) }),
+      ...(fileFormats[r.imageSettings.fileFormat]?.quality ? [out('render.imageSettings.quality', 'Quality', { integer: true, min: 0, max: 100, step: 1 })] : []),
+      h('p', { class: 'bl-message' }, video ? 'Render Animation writes one video file.' : 'Render Animation writes one image per frame, downloaded as a ZIP.'),
+    ]),
+    ...(video ? [panel('output.encoding', 'Encoding', () => [
+      out('render.ffmpeg.format', 'Container', { options: options(containers), set: (v, finish) => {
+        if (!containers[v].codecs.includes(settings.state.render.ffmpeg.codec)) settings.set('render.ffmpeg.codec', containers[v].codecs[0], false);
+        settings.set('render.ffmpeg.format', v, finish !== false);
+      } }),
+      panel('output.encoding.video', 'Video', () => [
+        out('render.ffmpeg.codec', 'Video Codec', { options: options(videoCodecs, containers[r.ffmpeg.format].codecs) }),
+        out('render.ffmpeg.constantRateFactor', 'Output Quality', { options: options(qualities) }),
+        out('render.ffmpeg.gopsize', 'Keyframe Interval', { integer: true, min: 1, max: 1000, step: 1 }),
+      ], { subpanel: true }),
+      h('p', { class: 'bl-message' }, 'Encoded in the browser with WebCodecs. Codecs the browser cannot encode report an error when rendering. No audio track yet.'),
+    ])] : []),
   ];
 }

@@ -1,0 +1,81 @@
+import assert from 'node:assert/strict';
+import { NullEngine, Scene, Matrix, Vector3 } from '@babylonjs/core';
+import { createAnimationModel } from '../src/animation/model.js';
+import { createRenderSettings, outputSize } from '../src/scene/render.js';
+import { outputSpec, encodeSize, containers } from '../src/render/formats.js';
+import { installVirtualClock, seededRandom } from '../src/render/clock.js';
+import { halton, jitter, sampleTimes, jitterProjection, createAccumulator } from '../src/render/sampling.js';
+
+// Output settings live in the render slice, shaped like Blender's scene.render.
+const engine = new NullEngine(), scene = new Scene(engine);
+const settings = createRenderSettings({ scene, animation: createAnimationModel() });
+assert.equal(settings.capture(), undefined, 'defaults save nothing');
+assert.deepEqual(outputSize(settings.state.render), { width: 1920, height: 1080 });
+settings.set('render.resolutionPercentage', 50);
+settings.set('render.imageSettings.fileFormat', 'FFMPEG');
+assert.deepEqual(outputSize(settings.state.render), { width: 960, height: 540 });
+const saved = settings.capture();
+assert.equal(saved.render.resolutionPercentage, 50);
+assert.equal(saved.render.imageSettings.fileFormat, 'FFMPEG');
+settings.apply(undefined);
+assert.equal(settings.state.render.imageSettings.fileFormat, 'PNG', 'apply(undefined) restores defaults');
+settings.apply(saved);
+assert.equal(settings.state.render.resolutionPercentage, 50);
+
+// Formats: Blender names map to browser outputs; impossible pairs are rejected.
+assert.deepEqual(outputSpec(settings.state.render), { kind: 'video', container: 'MPEG4', mime: 'video/mp4', ext: 'mp4', codec: 'avc', quality: 'QUALITY_HIGH', gopsize: 18 });
+assert.throws(() => outputSpec({ ...settings.state.render, ffmpeg: { ...settings.state.render.ffmpeg, format: 'WEBM', codec: 'H264' } }), /WebM cannot hold H.264/);
+assert.equal(outputSpec({ ...settings.state.render, imageSettings: { fileFormat: 'JPEG', quality: 80 } }).quality, 0.8);
+for (const c of Object.values(containers)) assert.ok(c.codecs.length > 0);
+assert.deepEqual(encodeSize({ width: 961, height: 541 }, true), { width: 962, height: 542 }, 'video sizes are even');
+assert.deepEqual(encodeSize({ width: 961, height: 541 }, false), { width: 961, height: 541 });
+
+// Virtual clock: time sources follow the job, randomness is repeatable, and uninstall restores them.
+const target = { performance: { now: () => 123 }, Date, Math: Object.create(Math), requestAnimationFrame: () => 7, cancelAnimationFrame() {} };
+const realDateNow = Date.now;
+const clock = installVirtualClock(target, { seed: 5 });
+clock.set(41.5);
+assert.equal(target.performance.now(), 41.5);
+assert.equal(target.Date.now(), Date.UTC(2000, 0, 1) + 41.5);
+assert.equal(target.requestAnimationFrame(() => assert.fail('render loops never tick')), 0);
+const first = [target.Math.random(), target.Math.random()];
+clock.reseed(5);
+assert.deepEqual([target.Math.random(), target.Math.random()], first, 'same seed, same sequence');
+assert.ok(first.every(v => v >= 0 && v < 1));
+clock.uninstall();
+assert.equal(target.performance.now(), 123);
+assert.equal(Date.now, realDateNow);
+assert.equal(target.requestAnimationFrame(), 7);
+assert.notDeepEqual([seededRandom(1)(), seededRandom(2)()][0], seededRandom(2)());
+
+// Sampling: Halton jitter inside the pixel, shutter times centered on the frame and never past one frame.
+assert.equal(halton(1, 2), 0.5);
+assert.equal(halton(2, 3), 2 / 3);
+assert.deepEqual(jitter(0, 1), [0, 0], 'one sample is not jittered');
+for (let i = 0; i < 16; i++) jitter(i, 16).forEach(v => assert.ok(Math.abs(v) <= 0.5));
+assert.deepEqual(sampleTimes(10, 3), [10, 10, 10]);
+assert.deepEqual(sampleTimes(10, 2, { motionBlur: true, shutter: 0.5 }), [9.875, 10.125]);
+const wide = sampleTimes(10, 4, { motionBlur: true, shutter: 2 });
+assert.ok(Math.min(...wide) >= 9.5 && Math.max(...wide) <= 10.5, 'shutter is limited to one frame');
+
+// Jitter moves projected points by the requested pixel offset, for left- and right-handed perspective.
+for (const rh of [false, true]) {
+  const projection = (rh ? Matrix.PerspectiveFovRH : Matrix.PerspectiveFovLH)(0.8, 2, 0.1, 100);
+  const point = new Vector3(0.3, -0.2, rh ? -5 : 5);
+  const ndc = m => Vector3.TransformCoordinates(point, m);
+  const jittered = Matrix.FromArray(jitterProjection(Array.from(projection.m), [0.5, -0.25], 200, 100));
+  assert.ok(Math.abs(ndc(jittered).x - ndc(projection).x - 0.005) < 1e-6, 'x shift is 0.5 px of 200');
+  assert.ok(Math.abs(ndc(jittered).y - ndc(projection).y + 0.005) < 1e-6, 'y shift is -0.25 px of 100');
+}
+const ortho = Matrix.OrthoLH(4, 2, 0.1, 100);
+const jo = Matrix.FromArray(jitterProjection(Array.from(ortho.m), [1, 0], 100, 50, true));
+assert.ok(Math.abs(Vector3.TransformCoordinates(Vector3.Zero(), jo).x - 0.02) < 1e-6);
+
+// Accumulator averages in floating point.
+const acc = createAccumulator(1, 1);
+acc.add([0, 10, 255, 255]); acc.add([1, 11, 0, 255]);
+assert.deepEqual([...acc.result()], [1, 11, 128, 255]);
+acc.reset(); assert.equal(acc.count, 0);
+
+settings.dispose(); scene.dispose(); engine.dispose();
+console.log('Render: output settings, formats, virtual clock and sampling passed');

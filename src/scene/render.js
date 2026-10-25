@@ -4,8 +4,14 @@ import { createRenderEngine, readAuthoredRender } from './render-babylon.js';
 // scene.display_settings. Document slice "render"; saved as a diff from the code-built scene.
 // Post effects Blender does in the compositor (bloom/glare, vignette, grain) belong to the Compositor, not here.
 export const renderDefaults = {
-  render: { engine: 'BABYLON', useMotionBlur: false, motionBlurShutter: 0.5 },
-  eevee: { taaSamples: 1, useRaytracing: false, rayTracingMethod: 'SCREEN', screenTraceQuality: 0.25, screenTraceThickness: 0.5, fastGiMethod: 'AMBIENT_OCCLUSION', fastGiDistance: 2 },
+  render: {
+    engine: 'BABYLON', useMotionBlur: false, motionBlurShutter: 0.5,
+    // Output properties (Blender: Properties > Output, scene.render.*)
+    resolutionX: 1920, resolutionY: 1080, resolutionPercentage: 100,
+    imageSettings: { fileFormat: 'PNG', quality: 90 },
+    ffmpeg: { format: 'MPEG4', codec: 'H264', constantRateFactor: 'MEDIUM', gopsize: 18 },
+  },
+  eevee: { taaSamples: 1, taaRenderSamples: 16, useRaytracing: false, rayTracingMethod: 'SCREEN', screenTraceQuality: 0.25, screenTraceThickness: 0.5, fastGiMethod: 'AMBIENT_OCCLUSION', fastGiDistance: 2 },
   viewSettings: { viewTransform: 'STANDARD', look: 'NONE', exposure: 0 },
   displaySettings: { displayDevice: 'sRGB' },
 };
@@ -14,6 +20,8 @@ export const renderChannels = [['viewSettings.exposure', 'Exposure'], ['render.m
 const clone = value => JSON.parse(JSON.stringify(value));
 const resolve = (state, path) => { const keys = path.split('.'), key = keys.pop(); return { owner: keys.reduce((o, k) => o?.[k], state), key }; };
 export const getRenderPath = (state, path) => { const { owner, key } = resolve(state, path); return owner?.[key]; };
+// Output size in pixels: resolution times percentage, like Blender's render size.
+export const outputSize = render => ({ width: Math.max(4, Math.round(render.resolutionX * render.resolutionPercentage / 100)), height: Math.max(4, Math.round(render.resolutionY * render.resolutionPercentage / 100)) });
 
 export function createRenderSettings(world, { commit = () => {} } = {}) {
   const { scene, animation } = world;

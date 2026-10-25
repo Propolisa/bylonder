@@ -41,7 +41,11 @@ export function mountTopbar({ dock, send, examples, openExample, newProject }) {
       { label: 'Stop Scene', icon: 'pause', run: click('stop') },
       { label: 'Auto-run', checked: () => autoRun.checked, run: () => { autoRun.checked = !autoRun.checked; autoRun.dispatchEvent(new Event('change')); } },
       '-',
-      { label: 'Render Resolution…', icon: 'preferences', run: click('render-settings') },
+      { label: 'Render Image', icon: 'render_result', keys: 'F12', run: () => send('render', 'image') },
+      { label: 'Render Animation', keys: 'Ctrl F12', run: () => send('render', 'animation') },
+      { label: 'View Render', keys: 'F11', run: () => send('render', 'view') },
+      '-',
+      { label: 'Viewport Resolution…', icon: 'preferences', run: click('render-settings') },
     ]),
     menuButton('Window', () => [
       ...Object.entries(workspaces).map(([id, label]) => ({ label: label + ' Workspace', checked: () => current() === id, run: () => setWorkspace(id) })),

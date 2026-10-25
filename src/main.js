@@ -1,12 +1,5 @@
-import { createModifierSystem, registerModifier } from './modifiers/stack.js';
-import { geometryNodesDefinition } from './graphs/geometry-nodes.js';
-import { createCompositor } from './graphs/compositor.js';
-import { createParticles } from './graphs/particles.js';
 import { mountNodeEditor } from './graphs/node-editor.js';
 import { createNodeContexts } from './graphs/contexts.js';
-import { createLogic } from './graphs/logic.js';
-import { createDocument, channelSlice } from './state/document.js';
-registerModifier(geometryNodesDefinition);
 import { registerObjects, objectRefs } from './animation/bindings.js';
 import { mountTimeline } from './animation/timeline.js';
 import { mountRuntimeLayout } from "./layout/runtime.js";
@@ -19,25 +12,20 @@ import {
 import { createObjectCommands } from "./objects/commands";
 import { createAddMesh } from "./objects/add-mesh";
 import { createOutliner } from "./objects/outliner";
-import { identify, nodeId, deleted } from "./objects/identity";
+import { nodeId } from "./objects/identity";
 import { createMouseCapture } from "./mouse-capture";
 import * as BABYLON from "@babylonjs/core";
-import { createSDK } from "./runtime-sdk";
-import { RUN_CACHE } from "./workspace/module-host";
 import "./style.css";
 import "./theme.css";
 import "./viewport.css";
 import { mountViewportUI } from "./viewport-ui.js";
-import { createMaterialLibrary } from "./materials/library.js";
-import { createSceneSettings } from "./scene/settings.js";
-import { createWorlds } from "./scene/world.js";
-import { createRenderSettings } from "./scene/render.js";
-import { createCollections } from "./scene/collections.js";
 import "@babylonjs/core/Debug/debugLayer";
 
 import { createNavigation } from "./navigation";
 import { createEditor } from "./editor";
-import { createHistory, snapshot, apply } from "./storage";
+import { createHistory, snapshot } from "./storage";
+import { createWorld } from "./runtime/world.js";
+import { createRenderHost } from "./render/host.js";
 import { createUI } from "./ui";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
@@ -103,66 +91,31 @@ const input = await new Promise((resolve) => {
 const engine = new BABYLON.Engine(canvas, true, { stencil: true });
 applyRenderSettings(engine);
 let saveOverrides = () => {};
-const sdk = createSDK(input.base, input.overrides, () => saveOverrides(), data => send("animation", data));
-const animation = sdk.animation;
-Object.assign(globalThis, { BABYLON: { ...BABYLON }, engine, canvas, workbench: sdk });
-const root = location.origin + input.base;
-const cache = await caches.open(RUN_CACHE);
-await cache.put(
-  root + "__wb_babylon.js",
-  new Response(
-    Object.keys(BABYLON)
-      .filter((k) => /^[A-Za-z_$][\w$]*$/.test(k))
-      .map((k) => "export const " + k + "=globalThis.BABYLON." + k + ";")
-      .join("\n"),
-    { headers: { "Content-Type": "text/javascript" } },
-  ),
-);
-await cache.put(
-  root + "__wb_sdk.js",
-  new Response(
-    "export const BABYLON=globalThis.BABYLON,engine=globalThis.engine,canvas=globalThis.canvas,workbench=globalThis.workbench;export const controls=workbench.controls.bind(workbench),editable=workbench.editable.bind(workbench),asset=workbench.asset.bind(workbench),onDispose=workbench.onDispose.bind(workbench),meshTools=workbench.meshTools.bind(workbench),createText=workbench.createText,updateText=workbench.updateText,textSchema=workbench.textSchema,animate=workbench.animate.bind(workbench),animation=workbench.animation,addModifier=workbench.addModifier,curve=workbench.curve,registerModifier=workbench.registerModifier,registerPropertiesContext=workbench.registerPropertiesContext,registerPropertiesPanel=workbench.registerPropertiesPanel;",
-    { headers: { "Content-Type": "text/javascript" } },
-  ),
-);
-const userMap = JSON.parse(input.importmap);
-const imports = {};
-for (const [key, value] of Object.entries(userMap.imports || {}))
-  imports[key] = new URL(value, root).href;
-Object.assign(imports, {
-  "@babylonjs/core": root + "__wb_babylon.js",
-  babylonjs: root + "__wb_babylon.js",
-  "@workbench/sdk": root + "__wb_sdk.js",
-});
-const scopes = {};
-for (const [scope, map] of Object.entries(userMap.scopes || {})) {
-  scopes[new URL(scope, root).href] = {};
-  for (const [key, value] of Object.entries(map))
-    scopes[new URL(scope, root).href][key] = new URL(value, root).href;
-}
-const importmap = document.createElement("script");
-importmap.type = "importmap";
-importmap.textContent = JSON.stringify({ imports, scopes });
-document.head.append(importmap);
-let scene;
+let history;
+const commit = () => history?.commit();
+let editMode = true;
+let viewportUI;
+let built;
 try {
-  const module = await import(/* @vite-ignore */ root + "index.js");
-  if (typeof module.createScene !== "function")
-    throw Error("index.js must export createScene()");
-  scene = await module.createScene({ BABYLON, engine, canvas, workbench: sdk });
-  if (!(scene instanceof BABYLON.Scene))
-    throw Error(
-      "createScene() must return a Babylon Scene from the supplied engine.",
-    );
+  built = await createWorld({ input, engine, canvas, hooks: {
+    commit,
+    saveOverrides: () => saveOverrides(),
+    onAnimation: (data) => send("animation", data),
+    notify,
+    // Scene camera changed (Properties > Scene > Camera): in camera view, look through the new camera.
+    setCamera(next, previous) {
+      if (!editMode) { previous?.detachControl(); scene.activeCamera = next; next.attachControl(canvas, true); }
+      world.compositor?.syncCamera();
+      viewportUI?.sync();
+    },
+  } });
 } catch (error) {
   console.error(error);
   send("run-error", { message: String(error.stack || error) });
   throw error;
 }
-let authoredCamera = scene.activeCamera;
-let editMode = true;
-let viewportUI;
-authoredCamera?.detachControl();
+const { world, sdk, animation, scene, objects, baseline, documentState } = built;
+const authored = () => built.authoredCamera;
 const camera = new BABYLON.ArcRotateCamera(
   "__editorCamera",
   -Math.PI / 2,
@@ -171,38 +124,27 @@ const camera = new BABYLON.ArcRotateCamera(
   new BABYLON.Vector3(0, 1, 0),
   scene,
 );
-if (authoredCamera) {
-  camera.setPosition(authoredCamera.position.clone());
-  camera.setTarget(authoredCamera.getTarget?.() || BABYLON.Vector3.Zero());
+if (authored()) {
+  camera.setPosition(authored().position.clone());
+  camera.setTarget(authored().getTarget?.() || BABYLON.Vector3.Zero());
 }
 camera.minZ = 0.01;
 camera.lowerRadiusLimit = 0.1;
 camera.upperRadiusLimit = 10000;
 camera.inertia = 0;
 scene.activeCamera = camera;
-const objects = [
-  ...scene.meshes.filter(
-    (m) => m.getTotalVertices() > 0 && m.metadata?.editable !== false,
-  ),
-  ...scene.transformNodes.filter(
-    (n) => !n.name.startsWith("__") && n.metadata?.editable !== false,
-  ),
-];
-const names = new Set();
-for (const node of objects) {
-  const base = node.name || "Object";
-  let i = 2;
-  while (names.has(node.name)) node.name = base + "." + i++;
-  names.add(node.name);
-  identify(node);
-}
-objects.scene = scene;
-const world = { engine, scene, camera, objects, animation, notify };
+world.camera = camera;
+world.compositor.syncCamera();
 let creator;
-const baseline = snapshot(objects);
-if (input.remember && input.overrides?.transforms)
-  apply(objects, input.overrides.transforms, { partial: true });
 const systems = sdk.systems;
+// Offline renders run from a snapshot of the current document, whether or not scene edits are remembered.
+const renderHost = createRenderHost({
+  world,
+  snapshot: () => ({ ...input, remember: true, overrides: currentOverrides(), animation: animation.serialize() }),
+  name: () => world.sceneSettings.state.name || "render",
+});
+// Development handle for debugging and browser tests; not present in production builds.
+if (import.meta.env.DEV) window.__bylonder = { world, renderHost };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
@@ -250,6 +192,7 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
   if (e.data.type === "help") help.showModal();
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
+  if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
     const requestId = e.data.payload.requestId;
     if (creator?.pending || editor.modal) send("snapshot-result",{requestId,error:"Finish or cancel the active edit before sharing."});
@@ -260,37 +203,6 @@ window.addEventListener("message", (e) => {
     if (remember) saveOverrides();
   }
 });
-registerObjects(animation, objects);
-let history;
-const commit = () => history?.commit();
-const documentState = createDocument();
-world.materials = documentState.register("materials", createMaterialLibrary(world, { commit, asset: (path) => sdk.asset(path), files: input.files || [] }));
-world.sceneSettings = documentState.register("scene", createSceneSettings(world, { commit, cameras: {
-  list: () => scene.cameras.filter((c) => c !== camera),
-  get: () => authoredCamera,
-  set(next) {
-    if (next === authoredCamera) return;
-    if (!editMode) { authoredCamera?.detachControl(); scene.activeCamera = next; next.attachControl(canvas, true); }
-    authoredCamera = next;
-    world.compositor?.syncCamera();
-    viewportUI?.sync();
-  },
-} }));
-world.worlds = documentState.register("worlds", createWorlds(world, { commit, asset: (path) => sdk.asset(path) }));
-world.renderSettings = documentState.register("render", createRenderSettings(world, { commit }));
-world.collections = documentState.register("collections", createCollections(world, { commit }));
-// Rendered shading or camera view: world background/volume, render-engine effects and the compositor apply.
-world.setViewportRendered = (value) => [world.worlds, world.renderSettings, world.compositor].forEach((m) => m?.setViewportActive(value));
-world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));
-world.logic = documentState.register("logic", createLogic(world, { commit, notify }));
-documentState.register("channels", channelSlice(animation, (channel) => /^(store|modifier|world):/.test(channel.id) || channel.id === "scene"));
-world.particles = createParticles(world, { commit, notify });
-world.particles.refresh();
-if (input.remember) documentState.apply(input.overrides);
-if (input.remember) for (const [ref, value] of Object.entries(input.overrides?.channels || {})) animation.channels.get(ref)?.set(value);
-world.modifiers=createModifierSystem(world,{commit:()=>history?.commit(),notify});
-world.modifiers.refresh();
-if (input.animation) animation.load(input.animation);
 let ui;
 history = createHistory(world.objects, () => {
   storage.save();
@@ -324,14 +236,14 @@ const toggleCameraView = () => {
   capture.release();
   editMode = !editMode;
   if (editMode) {
-    authoredCamera?.detachControl();
+    authored()?.detachControl();
     scene.activeCamera = camera;
     camera.attachControl(canvas, true);
   } else {
     camera.detachControl();
-    if (authoredCamera) {
-      scene.activeCamera = authoredCamera;
-      authoredCamera.attachControl(canvas, true);
+    if (authored()) {
+      scene.activeCamera = authored();
+      authored().attachControl(canvas, true);
     }
   }
   document.body.classList.toggle("scene-mode", !editMode);
@@ -440,6 +352,9 @@ const key = (e) => {
   )
     return;
   if (e.code === "Numpad0" && !e.repeat) { e.preventDefault(); toggleCameraView(); return; }
+  if (e.key === "F12" && !e.repeat) { e.preventDefault(); (e.ctrlKey || e.metaKey ? renderHost.renderAnimation : renderHost.renderImage)(); return; }
+  if (e.key === "F11" && !e.repeat) { e.preventDefault(); renderHost.viewRender(); return; }
+  if (e.key === "Escape" && !editor.modal && !creator.pending && renderHost.escape()) { e.preventDefault(); return; }
   if (e.target.closest(".timeline") || e.repeat || !editMode) return;
   const k = e.key.toLowerCase(),
     mod = e.ctrlKey || e.metaKey;
@@ -537,6 +452,7 @@ function dispose() {
   storage.save();
   timeline.dispose();
   viewportUI.dispose();
+  renderHost.dispose();
   unsubscribeAnimation();
   world.modifiers.dispose();
   sdk.dispose();

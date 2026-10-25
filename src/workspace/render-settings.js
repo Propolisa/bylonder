@@ -9,7 +9,7 @@ export function applyRenderSettings(engine, settings=renderSettings()){
 }
 export function setupRenderSettings(onChange){
   const dialog=document.createElement('dialog');dialog.className='workbench-dialog';
-  dialog.innerHTML='<h2>Render resolution</h2><label><input data-native type="checkbox">Native screen resolution</label><label>Hardware scaling ratio <input data-ratio type="number" min="0.25" max="4" step="0.05"></label><p>1 = one render pixel per CSS pixel. 0.5 = twice the resolution; 2 = half. Lower ratios look sharper and use more GPU power.</p><p data-resolution></p><div class="dialog-actions"><button data-close>Close</button></div>';
+  dialog.innerHTML='<h2>Viewport resolution</h2><label><input data-native type="checkbox">Native screen resolution</label><label>Hardware scaling ratio <input data-ratio type="number" min="0.25" max="4" step="0.05"></label><p>1 = one render pixel per CSS pixel. 0.5 = twice the resolution; 2 = half. Lower ratios look sharper and use more GPU power.</p><p data-resolution></p><div class="dialog-actions"><button data-close>Close</button></div>';
   document.body.append(dialog);
   const native=dialog.querySelector('[data-native]'),ratio=dialog.querySelector('[data-ratio]');
   const refresh=()=>{const value=renderSettings();native.checked=value.mode==='native';ratio.disabled=native.checked;ratio.value=native.checked?(1/(devicePixelRatio||1)).toFixed(3):value.ratio;dialog.querySelector('[data-resolution]').textContent=`Screen pixel ratio: ${(devicePixelRatio||1).toFixed(2)}. Saved for all projects on this device.`;};

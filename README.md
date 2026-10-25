@@ -185,6 +185,14 @@ Touch viewport controls:
 
 **Render > Render Resolution** controls Babylon's hardware scaling ratio for all projects on this device. Native resolution (`1 / devicePixelRatio`) is the default. Custom ratios range from 0.25 to 4: lower is sharper and more expensive, 1 is CSS-pixel resolution, 2 is half resolution. Render settings and layouts are device preferences and are not included in share links.
 
+## Rendering
+
+Properties > Output sets the render size (Resolution X, Y and %), frame rate, frame range and the file format: PNG, JPEG, WebP or FFmpeg Video with a container (MPEG-4, QuickTime, Matroska, WebM), codec (H.264, H.265, AV1, VP9, VP8), output quality and keyframe interval. Properties > Render > Sampling > Render sets how many samples each frame averages.
+
+**Render > Render Image** (F12) renders the current frame from the scene camera; **Render Animation** (Ctrl F12) renders the frame range and downloads the video, or a ZIP of images for image formats; **View Render** (F11) shows the Render Result window. Escape cancels a running render. Renders run in a hidden copy of the project built from the current scene edits, so the viewport keeps working and nothing needs to be saved first.
+
+Renders are deterministic: time, `engine.getDeltaTime()`, `Date.now()` and `Math.random()` follow a virtual clock, and frames are pre-rolled from Frame Start, so code that integrates time reaches the same state on every machine. Each sample shifts the camera by a sub-pixel offset; with Motion Blur on, samples also spread across the shutter for true sub-frame blur. Video is encoded in the browser with WebCodecs; codecs the browser cannot encode report an error. Audio, file paths and saving directly to disk are not implemented yet.
+
 ## Animation
 
 Timeline is a dockable pane. Select objects and press **I** to key Location / Rotation / Scale. Each property also has a diamond; hover and press **I** to insert or **Alt-I** to delete. Right-click a property for keying and its stable data path. Yellow means keyed here, green animated elsewhere, orange modified from the evaluated curve. Axes use red / green / blue. The red record toggle auto-keys changed transforms; other properties are keyed explicitly, as in Blender.

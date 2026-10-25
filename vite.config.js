@@ -4,7 +4,7 @@ export default defineConfig({
   build: {
     target: "esnext",
     rollupOptions: {
-      input: { workspace: "index.html", viewport: "viewport.html", docs: "docs.html" },
+      input: { workspace: "index.html", viewport: "viewport.html", render: "render.html", docs: "docs.html" },
     },
     chunkSizeWarningLimit: 7000,
   },

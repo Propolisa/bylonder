@@ -2,6 +2,13 @@
 
 Snapshot as of 2026-10-25, on top of `main` at `3c760aa` (scene time, Render and Output tabs, collections). Sources: Babylon 8.32 in `node_modules/@babylonjs/core`, Blender `main` (`space_sequencer.py`, `properties_output.py`), this repository. Items marked "unverified" were not checked against source or a running build. Companion to the [video sequencer proposal](video-sequencer-proposal.md).
 
+## Status
+
+- **Implemented (steps 1 to 3):** render context, virtual clock, Render Image, Render Animation, Render Result, Output tab resolution and file output, render samples with jitter and sub-frame motion blur. Checked in Chromium: the Solar System example (which advances by `getDeltaTime()`) renders identical pixels for the same frame twice and different pixels for the next frame; a 24-frame Render Animation produced WebM (VP9) and MPEG-4 (H.264) files with exactly 24 frames and 1.000 s duration. See the Offline render row in [babylon-blender.md](babylon-blender.md).
+- **Findings from the sanity probe:** `getDeltaTime()` only follows the virtual clock when each render is bracketed by `engine.beginFrame()`/`endFrame()`; `scene.render()` alone leaves it at 0. Engine views render only through registered render loops. Per-view `scene.frameGraph` switching works. Differently sized views call `setSize` on every view render, as expected.
+- **Encoder:** mediabunny 1.61.4, used unmodified (MPL-2.0 is file-level, so this is fine as a dependency).
+- **Next:** steps 4 and 5 (multiple viewports, compositor previews), then the sequencer steps.
+
 ## Summary
 
 Babylon is a realtime engine, but nothing in it forces realtime. What makes Bylonder realtime today is how we drive it: one canvas, one camera, one evaluated state, wall-clock time, and a quality budget set by frame rate. The proposal splits rendering into two tiers that share one scene description:
@@ -63,16 +70,16 @@ Interactive previews run at viewport quality. A full-quality still of the compos
 | Source of nondeterminism | Fix |
 | --- | --- |
 | `performance.now`, `Date.now` (Babylon's `PrecisionDate.Now` reads `performance.now`) | Return job time: `frame / fps` plus sub-frame offset |
-| `requestAnimationFrame`, `runRenderLoop` | Not used; the job calls `scene.render()` once per (sub)frame |
+| `requestAnimationFrame`, `runRenderLoop` | Never tick; the job calls `scene.render()` once per sample |
 | `engine.getDeltaTime()` | Constant `1000 / fps` per frame (divided by subframes when accumulating) |
-| Babylon animations | `scene.useConstantAnimationDeltaTime = true`, plus our action evaluated at the job frame |
+| Babylon animations | Advance by `getDeltaTime()`, which follows the clock; our action is evaluated at the job frame |
 | Physics | Fixed step per frame (`deterministicLockstep` engine option or the plugin's fixed time step) |
 | `Math.random` | Seeded per job and frame |
 | Async loading (textures, fonts, node materials) | Wait for `scene.whenReadyAsync()` before each frame |
 
 Same project, same machine, same browser: identical frames. Bit-identical results across GPUs or drivers are not promised, the same as Blender's GPU renderers.
 
-**Per-frame procedure.** Set time and frame, evaluate the action, wait until ready, render N subframes, accumulate, emit one `VideoFrame` with a timestamp of `frame / fps`. The frame is captured right after `scene.render()` in the same task, so `preserveDrawingBuffer` is not needed.
+**Per-frame procedure.** Set time and frame, evaluate the action, render N samples (each bracketed by `engine.beginFrame()`/`endFrame()`), accumulate, emit one frame with a timestamp of `index / fps`. Frames are pre-rolled from Frame Start so code that integrates time reaches the same state. The canvas is read right after `scene.render()` in the same task, so `preserveDrawingBuffer` is not needed.
 
 **Samples mean something offline.** Blender separates viewport samples from render samples. We do the same:
 
