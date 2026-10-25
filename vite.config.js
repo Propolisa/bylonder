@@ -9,4 +9,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 7000,
   },
   worker: { format: "es" },
+  // The KubeezCut embed is prebuilt and loads its workers and chunks relative to its own files.
+  optimizeDeps: { exclude: ["kubeezcut-embed"] },
 });

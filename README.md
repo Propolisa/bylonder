@@ -195,6 +195,10 @@ Properties > Output sets the render size (Resolution X, Y and %), frame rate, fr
 
 Renders are deterministic: time, `engine.getDeltaTime()`, `Date.now()` and `Math.random()` follow a virtual clock, and frames are pre-rolled from Frame Start, so code that integrates time reaches the same state on every machine. Each sample shifts the camera by a sub-pixel offset; with Motion Blur on, samples also spread across the shutter for true sub-frame blur. Video is encoded in the browser with WebCodecs; codecs the browser cannot encode report an error. Audio, file paths and saving directly to disk are not implemented yet.
 
+## Video Sequencer
+
+Pick **Video Sequencer** or **File Browser** from any area's editor type menu. The Video Sequencer has Blender's view types (Sequencer, Preview, Sequencer & Preview) and a sidebar (N) with the active strip's properties; the File Browser imports footage, audio and images into the project's media pool. Both are KubeezCut editors ([Propolisa/KubeezCut](https://github.com/Propolisa/KubeezCut), MIT) running as embedded islands in Bylonder's theme, loaded on first use. The video uses the scene's output resolution and frame rate. Media is referenced, not copied, and the edit is stored in the browser per project. Requires a Chromium-based browser (File System Access, WebCodecs).
+
 ## Animation
 
 Timeline is a dockable pane. Select objects and press **I** to key Location / Rotation / Scale. Each property also has a diamond; hover and press **I** to insert or **Alt-I** to delete. Right-click a property for keying and its stable data path. Yellow means keyed here, green animated elsewhere, orange modified from the evaluated curve. Axes use red / green / blue. The red record toggle auto-keys changed transforms; other properties are keyed explicitly, as in Blender.

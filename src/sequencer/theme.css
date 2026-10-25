@@ -1,0 +1,41 @@
+/* Bylonder theme for the embedded KubeezCut islands. The embed stylesheet scopes its tokens to .kc-embed;
+   doubling the class wins over them regardless of load order. Strip colors are Blender's default sequencer
+   theme (release/datafiles/userdef/userdef_default_theme.c, space_sequencer). */
+.kc-embed.kc-embed {
+  --background: var(--bl-back);
+  --foreground: var(--bl-text);
+  --card: var(--bl-region);
+  --card-foreground: var(--bl-text);
+  --popover: var(--bl-menu);
+  --popover-foreground: var(--bl-text);
+  --primary: var(--bl-select);
+  --primary-foreground: #fff;
+  --secondary: var(--bl-widget);
+  --secondary-foreground: var(--bl-text);
+  --muted: var(--bl-region);
+  --muted-foreground: var(--bl-text-dim);
+  --accent: var(--bl-widget-hi);
+  --accent-foreground: var(--bl-text);
+  --border: var(--bl-gap);
+  --input: var(--bl-widget-line);
+  --ring: var(--bl-select);
+  --radius: 4px;
+  --panel-bg: var(--bl-region);
+  --panel-header: var(--bl-header);
+  --timeline-bg: #181818;
+  --sidebar: var(--bl-region);
+  --sidebar-foreground: var(--bl-text);
+  --sidebar-primary: var(--bl-select);
+  --sidebar-accent: var(--bl-widget);
+  --sidebar-border: var(--bl-gap);
+  --color-timeline-video: #6282a3;
+  --color-timeline-audio: #568f6d;
+  --color-timeline-image: #8c548c;
+  --color-timeline-text: #9f926f;
+  --color-timeline-shape: #99995c;
+  --color-timeline-playhead: var(--bl-playhead);
+  --color-video-preview-background: #727272;
+  font-family: "Inter", "DejaVu Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--bl-text);
+  background: var(--bl-back);
+}

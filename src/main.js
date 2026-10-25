@@ -27,6 +27,9 @@ import { createEditor } from "./editor";
 import { createHistory, snapshot } from "./storage";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./render/host.js";
+import { outputSize } from "./scene/render.js";
+import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
+import { mountSequencerEditor, mountFileBrowser } from "./sequencer/editor.js";
 import { createUI } from "./ui";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
@@ -142,7 +145,7 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Development handle for debugging and browser tests; not present in production builds.
-if (import.meta.env.DEV) window.__bylonder = { world, renderHost, get editor() { return editor; }, get views() { return views; } };
+if (import.meta.env.DEV) window.__bylonder = { world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
@@ -337,6 +340,18 @@ views.setInput(primary);
 views.onFocus = () => viewportCtx.shadingChanged();
 world.compositor.subscribe(() => viewportCtx.shadingChanged());
 const status = createViewportStatus({ world, editor, views, send });
+// Video Sequencer and File Browser (KubeezCut islands, loaded on first use). The project's video uses the scene's
+// output size and frame rate.
+const sequencerAdapter = createSequencerAdapter({
+  project: () => {
+    const { width, height } = outputSize(world.renderSettings.state.render);
+    return { id: "bylonder:" + (input.projectId || "default"), name: world.sceneSettings.state.name || "Scene", width, height, fps: animation.time.state.fps };
+  },
+  notify,
+  commit: () => views.wake(),
+});
+const sequencerEditor = mountSequencerEditor(document.querySelector("#sequencer-section"), { adapter: sequencerAdapter, header: viewportDock.header("sequencer"), notify });
+const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), { adapter: sequencerAdapter, notify });
 for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
 for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());
 ownObservers = observerCount() - userObservers;
@@ -453,6 +468,9 @@ function dispose() {
   views.dispose();
   overlays.dispose();
   renderHost.dispose();
+  sequencerEditor.dispose();
+  fileBrowser.dispose();
+  sequencerAdapter.dispose();
   unsubscribeAnimation();
   world.modifiers.dispose();
   sdk.dispose();

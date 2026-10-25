@@ -1,0 +1,12 @@
+/* Video Sequencer and File Browser areas hosting KubeezCut islands. */
+.vse-area{position:relative;display:flex;height:100%;min-height:0;background:var(--bl-back);overflow:hidden}
+.vse-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.vse-slot{position:relative;min-height:0;min-width:0;overflow:hidden}
+.vse-main>.vse-slot{flex:1}
+.vse-area[data-view=SEQUENCER] .vse-preview,.vse-area[data-view=PREVIEW] .vse-sequencer{display:none}
+.vse-area[data-view=SEQUENCER_PREVIEW] .vse-preview{flex:0 0 55%;border-bottom:1px solid var(--bl-gap)}
+.vse-sidebar{display:none;flex:0 0 300px;border-left:1px solid var(--bl-gap)}
+.vse-with-sidebar .vse-sidebar{display:block}
+.vse-file-browser .vse-media{flex:1}
+.vse-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--bl-text-dim);font:var(--bl-font);pointer-events:none}
+.vse-loading[hidden]{display:none}
