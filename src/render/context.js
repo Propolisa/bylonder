@@ -5,7 +5,6 @@
 import { Engine, Matrix, Camera } from '@babylonjs/core';
 import { installVirtualClock } from './clock.js';
 import { createWorld } from '../runtime/world.js';
-import { createWriter } from './output.js';
 import { jitter, jitterProjection, sampleTimes, createAccumulator } from './sampling.js';
 
 const clock = installVirtualClock(window);
@@ -14,22 +13,84 @@ const warnings = [];
 let built = null, engine = null;
 const frameMs = (frame, start, fps) => (frame - start + 1) * 1000 / fps;
 
-async function open(input, { width, height }) {
+function resize(width, height) {
+  if (canvas.width === width && canvas.height === height) return;
   canvas.width = width; canvas.height = height;
   canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+  engine?.setSize(width, height);
+}
+
+function useCamera(name) {
+  const { world, scene } = built;
+  const camera = name ? scene.cameras.find((c) => c.name === name) : built.authoredCamera;
+  if (!camera) throw Error(name ? `No camera named ${name}` : 'No camera found in scene. Add a camera in code or pick one in Properties > Scene.');
+  if (scene.activeCamera === camera) return camera;
+  scene.activeCamera = camera;
+  world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
+  return camera;
+}
+
+async function open(input, { width, height }, { camera: cameraName } = {}) {
+  resize(width, height);
   engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false });
   engine.setHardwareScalingLevel(1);
   built = await createWorld({ input, engine, canvas, hooks: { notify: text => warnings.push(String(text)) } });
   const { world, scene } = built;
-  const camera = built.authoredCamera;
-  if (!camera) throw Error('No camera found in scene. Add a camera in code or pick one in Properties > Scene.');
   engine.setSize(width, height);
-  scene.activeCamera = camera;
-  world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
+  const camera = useCamera(cameraName);
   world.beforeViewRender({ rendered: true, compositor: true });
   if (input.overrides?.compositor) await world.compositor.apply(input.overrides.compositor);
   await scene.whenReadyAsync();
   return { camera: camera.name, warnings };
+}
+
+// The scene's own render settings: final frames use its samples and motion blur.
+function quality() {
+  const { frameStart: start, fps } = built.animation.time.state;
+  const { render, eevee } = built.world.renderSettings.state;
+  return { start, fps, samples: Math.max(1, Math.round(eevee.taaRenderSamples)), motionBlur: render.useMotionBlur, shutter: render.motionBlurShutter };
+}
+
+let surface = null;
+function surfaceFor(width, height, samples) {
+  if (surface?.width !== width || surface.height !== height || surface.samples !== samples) {
+    const out = new OffscreenCanvas(width, height);
+    surface = { width, height, samples, out, ctx: out.getContext('2d', { willReadFrequently: samples > 1 }), accumulator: samples > 1 ? createAccumulator(width, height) : null };
+  }
+  return surface;
+}
+
+// Frame the scene state was last advanced to, so sequential final frames pre-roll only once.
+let simulated = null;
+
+function drawFinalFrame(frame, width, height, aborted = () => {}) {
+  const q = quality(), job = { ...q, width, height };
+  const { out, ctx, accumulator } = surfaceFor(width, height, q.samples);
+  // Pre-roll from the start frame so code that integrates time (physics, deltaTime) reaches the same state a
+  // full animation render would.
+  for (let f = simulated !== null && simulated < frame ? simulated + 1 : q.start; f < frame; f++) { aborted(); renderSample(f, [0, 0], job); }
+  const times = sampleTimes(frame, q.samples, q);
+  accumulator?.reset();
+  for (let s = 0; s < q.samples; s++) {
+    aborted();
+    renderSample(times[s], jitter(s, q.samples), job);
+    ctx.drawImage(canvas, 0, 0);
+    accumulator?.add(ctx.getImageData(0, 0, width, height).data);
+  }
+  if (accumulator) ctx.putImageData(new ImageData(accumulator.result(), width, height), 0, 0);
+  simulated = frame;
+  return out;
+}
+
+// One frame for a scene strip: a single sample for previews, full quality for final renders.
+async function renderFrame({ frame, width, height, camera, quality: kind = 'preview' }) {
+  resize(width, height);
+  useCamera(camera);
+  if (kind === 'final') return createImageBitmap(drawFinalFrame(frame, width, height));
+  simulated = null;
+  const { start, fps } = quality();
+  renderSample(frame, [0, 0], { start, fps, width, height });
+  return createImageBitmap(canvas);
 }
 
 // Renders one sample at scene frame t (may be fractional) with a sub-pixel jitter.
@@ -49,39 +110,5 @@ function renderSample(t, offset, { start, fps, width, height }) {
   engine.endFrame();
 }
 
-// job: { frames: [scene frames], start, fps, width, height, samples, motionBlur, shutter, spec, name }
-// onFrame(bitmap, { frame, index, count }) previews each finished frame. Resolves to { blob, filename }.
-async function render(job, { onFrame = () => {}, signal } = {}) {
-  const { width, height, samples } = job;
-  const out = new OffscreenCanvas(width, height), ctx = out.getContext('2d', { willReadFrequently: samples > 1 });
-  const accumulator = samples > 1 ? createAccumulator(width, height) : null;
-  const writer = await createWriter(job.spec, { width, height, fps: job.fps, name: job.name, frames: job.frames.length });
-  const aborted = () => { if (signal?.aborted) throw new DOMException('Render cancelled', 'AbortError'); };
-  try {
-    // Pre-roll from the start frame so code that integrates time (physics, deltaTime) reaches the same state
-    // a full animation render would.
-    for (let f = job.start; f < job.frames[0]; f++) { aborted(); renderSample(f, [0, 0], job); }
-    for (let index = 0; index < job.frames.length; index++) {
-      const frame = job.frames[index];
-      const times = sampleTimes(frame, samples, { motionBlur: job.motionBlur, shutter: job.shutter });
-      accumulator?.reset();
-      for (let s = 0; s < samples; s++) {
-        aborted();
-        renderSample(times[s], jitter(s, samples), job);
-        if (accumulator) { ctx.drawImage(canvas, 0, 0); accumulator.add(ctx.getImageData(0, 0, width, height).data); }
-        else ctx.drawImage(canvas, 0, 0);
-      }
-      if (accumulator) ctx.putImageData(new ImageData(accumulator.result(), width, height), 0, 0);
-      onFrame(await createImageBitmap(out), { frame, index, count: job.frames.length });
-      if (job.spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / job.fps) }));
-      else await writer.add(out, frame);
-    }
-    built.scene.activeCamera?.unfreezeProjectionMatrix();
-    return await writer.finish();
-  } catch (error) {
-    await writer.cancel();
-    throw error;
-  }
-}
 
-window.bylonderRender = { open, render, warnings, get clock() { return clock.ms; } };
+window.bylonderRender = { open, renderFrame, warnings, get clock() { return clock.ms; } };

@@ -14,6 +14,7 @@ import { createSceneSettings } from "../scene/settings.js";
 import { createWorlds } from "../scene/world.js";
 import { createRenderSettings } from "../scene/render.js";
 import { createCollections } from "../scene/collections.js";
+import { createSequenceEditor } from "../sequencer/sequence-editor.js";
 import { snapshot, apply } from "../storage.js";
 registerModifier(geometryNodesDefinition);
 
@@ -114,6 +115,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   world.worlds = documentState.register("worlds", createWorlds(world, { commit, asset: (path) => sdk.asset(path) }));
   world.renderSettings = documentState.register("render", createRenderSettings(world, { commit }));
   world.collections = documentState.register("collections", createCollections(world, { commit }));
+  world.sequenceEditor = documentState.register("sequenceEditor", createSequenceEditor({ commit }));
   // Views in Rendered shading or camera view show the world background and volume, render-engine effects and
   // (in one view at a time) the compositor. setViewShading runs when view shading or cameras change: it attaches
   // effects to the rendered cameras and binds the compositor camera. beforeViewRender runs per view, per frame,

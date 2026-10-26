@@ -27,7 +27,10 @@ import { createEditor } from "./editor";
 import { createHistory, snapshot } from "./storage";
 import { createWorld } from "./runtime/world.js";
 import { createRenderHost } from "./render/host.js";
-import { outputSize } from "./scene/render.js";
+import { outputSize, renderDefaults } from "./scene/render.js";
+import { timeDefaults } from "./scene/time.js";
+import { createSceneFrames } from "./sequencer/scene-frames.js";
+import { strips } from "./sequencer/sequence-editor.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
 import { mountSequencerEditor, mountFileBrowser } from "./sequencer/editor.js";
 import { createUI } from "./ui";
@@ -141,9 +144,12 @@ world.focusViewport = () => views.input?.canvas.focus();
 let creator;
 const systems = sdk.systems;
 // Offline renders run from a snapshot of the current document, whether or not scene edits are remembered.
+// Render jobs and scene strips render from a snapshot of the scene, whether or not scene edits are remembered.
+const liveSnapshot = () => ({ ...input, remember: true, overrides: currentOverrides(), animation: animation.serialize() });
 const renderHost = createRenderHost({
   world,
-  snapshot: () => ({ ...input, remember: true, overrides: currentOverrides(), animation: animation.serialize() }),
+  snapshot: liveSnapshot,
+  sequencer: { hasStrips: () => strips(world.sequenceEditor.state).length > 0, openCompositor: (range) => sequencerAdapter.openCompositor(range) },
   name: () => world.sceneSettings.state.name || "render",
 });
 // Development handle for debugging and browser tests; not present in production builds.
@@ -211,8 +217,10 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "scene-name") world.sceneSettings.renamed(e.data.payload);
 });
 let ui;
+let sceneChanged = () => {};
 history = createHistory(world.objects, () => {
   storage.save();
+  sceneChanged();
   world.particles.refresh();
   registerObjects(animation, objects);
   world.modifiers.refresh();
@@ -348,14 +356,47 @@ world.compositor.subscribe(() => viewportCtx.shadingChanged());
 const status = createViewportStatus({ world, editor, views, send });
 // Video Sequencer and File Browser (KubeezCut islands, loaded on first use). The project's video uses the scene's
 // output size and frame rate.
-const sequencerAdapter = createSequencerAdapter({
-  project: () => {
-    const { width, height } = outputSize(world.renderSettings.state.render);
-    return { id: "bylonder:" + (input.projectId || "default"), name: world.sceneSettings.state.name || "Scene", width, height, fps: animation.time.state.fps };
-  },
-  notify,
-  commit: () => views.wake(),
+const activeSceneId = input.scene?.id;
+const sceneRecords = () => input.scenes || [];
+const scenePayload = (id) => {
+  if (id === activeSceneId) return liveSnapshot();
+  const { overrides, animation: action, ...scene } = sceneRecords().find((s) => s.id === id);
+  return { ...input, scene, remember: true, overrides, animation: action };
+};
+const hostScenes = () => sceneRecords().map((record) => {
+  const live = record.id === activeSceneId;
+  const time = live ? animation.time.state : { ...timeDefaults, ...record.animation?.time };
+  const render = live ? world.renderSettings.state.render : { ...renderDefaults.render, ...record.overrides?.render?.render };
+  return { id: record.id, name: live ? world.sceneSettings.state.name : record.name, frameStart: time.frameStart, frameEnd: time.frameEnd, ...outputSize(render) };
 });
+// Scene strips of the active scene re-render when its saved state changes, not on sequencer edits or seeks.
+let liveRevision = 0;
+const liveKey = () => {
+  const { sequenceEditor, ...overrides } = currentOverrides();
+  const { time, ...action } = animation.serialize();
+  return JSON.stringify([overrides, action, { ...time, frameCurrent: 0 }]);
+};
+let lastLiveKey = liveKey();
+const sceneFrames = createSceneFrames({ payload: scenePayload, revision: (id) => (id === activeSceneId ? liveRevision : 0) });
+sceneChanged = () => {
+  const key = liveKey();
+  if (key === lastLiveKey) return;
+  lastLiveKey = key;
+  liveRevision++;
+  sceneFrames.changed();
+};
+const sequencerFormat = () => ({ ...outputSize(world.renderSettings.state.render), fps: animation.time.state.fps });
+const sequencerAdapter = createSequencerAdapter({
+  project: () => ({ id: "bylonder:" + (input.projectId || "default"), name: world.sceneSettings.state.name, ...sequencerFormat() }),
+  sequenceEditor: world.sequenceEditor,
+  time: animation.time,
+  history: { undo: () => undoRedo(false), redo: () => undoRedo(true) },
+  frames: sceneFrames,
+  scenes: hostScenes,
+  notify,
+});
+world.renderSettings.subscribe(() => sequencerAdapter.setFormat(sequencerFormat()));
+animation.time.subscribe((kind) => { if (kind === "settings" || kind === "load") sequencerAdapter.setFormat(sequencerFormat()); });
 const sequencerEditor = mountSequencerEditor(document.querySelector("#sequencer-section"), { adapter: sequencerAdapter, header: viewportDock.header("sequencer"), notify });
 const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), { adapter: sequencerAdapter, notify });
 for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
@@ -372,6 +413,12 @@ document.querySelector("#panel-toggle").onclick = () => viewportDock.show("prope
 document
   .querySelectorAll("[data-view]")
   .forEach((b) => (b.onclick = () => activeView().nav.view(b.dataset.view)));
+function undoRedo(redo) {
+  creator.finish();
+  editor.finish(false);
+  redo ? history.redo() : history.undo();
+  editor.reconcile();
+}
 const key = (e) => {
   // Keys over the Video Sequencer (and its menu commands, which run as synthetic key events) belong to it.
   if (!e.isTrusted || (e.key !== "F12" && document.querySelector(".vse-area:hover"))) return;
@@ -407,10 +454,7 @@ const key = (e) => {
   }
   if (mod && k === "z") {
     e.preventDefault();
-    creator.finish();
-    editor.finish(false);
-    e.shiftKey ? history.redo() : history.undo();
-    editor.reconcile();
+    undoRedo(e.shiftKey);
     return;
   }
   if (world.contextMenu.isOpen) return;

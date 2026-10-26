@@ -4,7 +4,8 @@ import { zipSync } from 'fflate';
 // unmodified as a dependency); images through canvas encoding. An animation in an image format becomes a ZIP
 // of numbered frames, as Blender writes one file per frame.
 //   spec: outputSpec(render) from formats.js; size: even dimensions for video
-export async function createWriter(spec, { width, height, fps, name, frames = 1 }) {
+//   audio: { samples: Float32Array[] per channel, sampleRate } mixed by the sequencer, for video formats
+export async function createWriter(spec, { width, height, fps, name, frames = 1, audio = null }) {
   if (spec.kind === 'image') {
     const files = {};
     const encode = async (canvas) => new Uint8Array(await (await canvas.convertToBlob({ type: spec.mime, quality: spec.quality })).arrayBuffer());
@@ -26,7 +27,9 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1 
   const output = new mb.Output({ format, target });
   const source = new mb.VideoSampleSource({ codec: spec.codec, bitrate, keyFrameInterval: Math.max(1, spec.gopsize) / fps, sizeChangeBehavior: 'deny' });
   output.addVideoTrack(source, { frameRate: fps });
+  const sound = audio && await audioTrack(mb, output, spec, audio);
   await output.start();
+  await sound?.();
   let index = 0;
   return {
     // The frame is consumed: callers must not use it afterwards.
@@ -41,4 +44,15 @@ export async function createWriter(spec, { width, height, fps, name, frames = 1 
     },
     async cancel() { await output.cancel().catch(() => {}); },
   };
+}
+
+// Adds the sequencer's mixed audio; skipped when the browser cannot encode the container's audio codec.
+async function audioTrack(mb, output, spec, { samples, sampleRate }) {
+  const codec = spec.container === 'WEBM' ? 'opus' : 'aac';
+  if (!samples.length || !(await mb.canEncodeAudio(codec, { numberOfChannels: samples.length, sampleRate }))) return null;
+  const source = new mb.AudioBufferSource({ codec, bitrate: mb.QUALITY_HIGH });
+  output.addAudioTrack(source);
+  const buffer = new AudioBuffer({ length: samples[0].length, numberOfChannels: samples.length, sampleRate });
+  samples.forEach((channel, i) => buffer.copyToChannel(channel, i));
+  return () => source.add(buffer);
 }

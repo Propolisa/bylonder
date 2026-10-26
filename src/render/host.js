@@ -1,4 +1,5 @@
-import { APP_BASE } from '../workspace/module-host.js';
+import { openRenderContext } from './render-context.js';
+import { createWriter } from './output.js';
 import { outputSpec, encodeSize, fileFormats } from './formats.js';
 import { outputSize } from '../scene/render.js';
 import './result.css';
@@ -7,7 +8,8 @@ import './result.css';
 // render context (render.html) built from a snapshot of the current document, and shows progress and the
 // result in a Render Result window, like Blender's render window.
 //   snapshot() -> run payload with the current scene edits and animation, independent of Remember Scene Edits
-export function createRenderHost({ world, snapshot, name = () => 'render' }) {
+//   sequencer: { hasStrips(), openCompositor({ frameStart, frameEnd, width, height }) } for Post Processing > Sequencer
+export function createRenderHost({ world, snapshot, sequencer, name = () => 'render' }) {
   let job = null, last = null;
   const win = document.createElement('section');
   win.className = 'render-result';
@@ -39,42 +41,46 @@ export function createRenderHost({ world, snapshot, name = () => 'render' }) {
     const frames = [];
     if (kind === 'image') frames.push(Math.round(world.animation.time.frame));
     else for (let f = time.frameStart; f <= time.frameEnd; f += time.frameStep) frames.push(f);
-    const controller = new AbortController();
+    const controller = new AbortController(), signal = controller.signal;
     const started = performance.now();
     job = { controller, kind };
     last = null; sync(); show();
     setStatus('Preparing render…');
-    const frame = document.createElement('iframe');
-    frame.className = 'render-context';
-    frame.setAttribute('aria-hidden', 'true');
-    frame.src = APP_BASE + 'render.html';
-    document.body.append(frame);
+    let source = null, writer = null;
     try {
-      await new Promise((resolve, reject) => { frame.onload = resolve; frame.onerror = () => reject(Error('Render context failed to load')); });
-      const context = frame.contentWindow.bylonderRender;
-      if (!context) throw Error('Render context did not start');
-      const opened = await context.open(snapshot(), size);
-      const samples = Math.max(1, Math.round(settings.eevee.taaRenderSamples));
-      const result = await context.render({
-        frames, start: time.frameStart, fps: time.fps, width: size.width, height: size.height, samples,
-        motionBlur: settings.render.useMotionBlur, shutter: settings.render.motionBlurShutter, spec, name: name(),
-      }, {
-        signal: controller.signal,
-        onFrame(bitmap, info) {
-          draw(bitmap);
-          setStatus(`Frame ${info.frame} | ${info.index + 1} / ${info.count} | ${samples} samples | ${size.width} x ${size.height} | Camera ${opened.camera} | ${clock(started)}`);
-        },
-      });
-      last = result;
-      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${result.filename}${opened.warnings.length ? ' | ' + opened.warnings[0] : ''}`);
-      if (kind === 'animation') download(result);
+      const edit = settings.render.useSequencer && sequencer?.hasStrips();
+      source = edit ? await sequencer.openCompositor({ frameStart: frames[0], frameEnd: frames.at(-1), ...size }) : await cameraSource(size);
+      const audio = spec.kind === 'video' ? await source.audio?.(signal) : null;
+      writer = await createWriter(spec, { ...size, fps: time.fps, name: name(), frames: frames.length, audio });
+      const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
+      for (let index = 0; index < frames.length; index++) {
+        if (signal.aborted) throw new DOMException('Render cancelled', 'AbortError');
+        const image = await source.renderFrame(frames[index]);
+        ctx.drawImage(image, 0, 0, size.width, size.height);
+        image.close?.();
+        draw(await createImageBitmap(out));
+        if (spec.kind === 'video') await writer.add(new VideoFrame(out, { timestamp: Math.round(index * 1e6 / time.fps) }));
+        else await writer.add(out, frames[index]);
+        setStatus(`Frame ${frames[index]} | ${index + 1} / ${frames.length} | ${size.width} x ${size.height} | ${source.label} | ${clock(started)}`);
+      }
+      last = await writer.finish();
+      writer = null;
+      setStatus(`Finished ${frames.length === 1 ? 'frame ' + frames[0] : frames.length + ' frames'} in ${clock(started)} | ${last.filename}${source.warnings?.length ? ' | ' + source.warnings[0] : ''}`);
+      if (kind === 'animation') download(last);
     } catch (error) {
+      await writer?.cancel();
       setStatus(error.name === 'AbortError' ? 'Render cancelled' : 'Render failed: ' + (error.message || error));
       if (error.name !== 'AbortError') console.error(error);
     } finally {
-      frame.remove();
+      source?.dispose();
       job = null; sync();
     }
+  }
+
+  // The scene camera through the compositor, rendered in an isolated render context.
+  async function cameraSource(size) {
+    const { context, opened, dispose } = await openRenderContext(snapshot(), size);
+    return { label: 'Camera ' + opened.camera, warnings: opened.warnings, dispose, renderFrame: (frame) => context.renderFrame({ frame, ...size, quality: 'final' }) };
   }
 
   cancelButton.onclick = () => job?.controller.abort();

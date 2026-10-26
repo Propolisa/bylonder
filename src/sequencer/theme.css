@@ -33,6 +33,7 @@
   --color-timeline-image: #8c548c;
   --color-timeline-text: #9f926f;
   --color-timeline-shape: #99995c;
+  --color-timeline-scene: #91a84a;
   --color-timeline-playhead: var(--bl-playhead);
   --color-video-preview-background: #727272;
   font-family: "Inter", "DejaVu Sans", system-ui, -apple-system, "Segoe UI", sans-serif;

@@ -135,7 +135,10 @@ export function outputPanels({ world, row, panel }) {
         out('render.ffmpeg.constantRateFactor', 'Output Quality', { options: options(qualities) }),
         out('render.ffmpeg.gopsize', 'Keyframe Interval', { integer: true, min: 1, max: 1000, step: 1 }),
       ], { subpanel: true }),
-      h('p', { class: 'bl-message' }, 'Encoded in the browser with WebCodecs. Codecs the browser cannot encode report an error when rendering. No audio track yet.'),
+      h('p', { class: 'bl-message' }, 'Encoded in the browser with WebCodecs. Codecs the browser cannot encode report an error when rendering. Audio comes from the Sequencer.'),
     ])] : []),
+    panel('output.postProcessing', 'Post Processing', () => [
+      out('render.useSequencer', 'Sequencer'),
+    ], { defaultClosed: true }),
   ];
 }
