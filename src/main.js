@@ -466,7 +466,7 @@ const key = (e) => {
       return;
     }
     if (!mod && ["x", "y", "z"].includes(k)) {
-      editor.axis(k);
+      editor.axis(k, e.shiftKey);
       return;
     }
     if (!(mod && k === "z")) return;
@@ -487,7 +487,7 @@ const key = (e) => {
   if (viewKeys(e) || (!world.editMode.active && world.objectActions.key(e))) return;
   if (k === "escape") editor.setMode("select");
 };
-const transform = (type) => () => { if (world.editMode.active) return; creator.finish(); editor.start(type); };
+const transform = (type) => () => { creator.finish(); editor.start(type); };
 const viewAxis = (name, opposite) => () => activeView().nav.view(name, opposite);
 const globalKeys = createKeymap([
   { blender: "view3d.view_camera", keys: "Numpad 0", run: () => activeView()?.toggleCameraView() },

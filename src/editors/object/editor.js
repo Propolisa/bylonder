@@ -46,6 +46,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     guide.style.left = modal.center.x + "px";
     guide.style.top = modal.center.y + "px";
   };
+  const COMPONENT_TYPES = { move: "translate", rotate: "rotate", scale: "resize" };
   const emitState = () => world.onEditorState?.({mode, count:selection.size, modal:!!modal});
   const setMode = (value) => {
     mode = value;
@@ -87,7 +88,8 @@ export function createEditor(world, views, history, changed, notify, capture) {
   };
   const finish = (commit) => {
     if (!modal) return;
-    if (!commit) apply(objects, modal.before);
+    if (modal.session) modal.session.finish(commit);
+    else if (!commit) apply(objects, modal.before);
     else history.commit();
     modal = null;
     selection.sync();
@@ -116,6 +118,11 @@ export function createEditor(world, views, history, changed, notify, capture) {
       previous = { ...modal.point };
     modal.point.x += dx * fine;
     modal.point.y += dy * fine;
+    if (modal.session) {
+      modal.session.update(dx * fine, dy * fine, event);
+      showCursor();
+      return;
+    }
     if (event.altKey) {
       // Clutch: move the virtual cursor without changing the object. Start a new
       // sweep on release, preserving the original snapshot for one-step cancel.
@@ -200,6 +207,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     if (!view) return;
     const camera = view.camera;
     view.canvas.focus();
+    if (world.editMode?.active) return startComponents(type, view, external);
     selected.computeWorldMatrix(true);
     setMode(type);
     const center = project(selected.getAbsolutePosition(), view);
@@ -246,6 +254,16 @@ export function createEditor(world, views, history, changed, notify, capture) {
     notify(
       type + " · X/Y/Z axis · Alt reposition · Enter confirm · Esc cancel",
     );
+  };
+  // Edit Mode: G, R and S transform the selected components.
+  const startComponents = (type, view, external) => {
+    const session = world.editMode.transform(COMPONENT_TYPES[type], { camera: view.camera, canvas: view.canvas, project: (p) => project(p, view) }, last);
+    if (!session) return;
+    modal = { view, type, session, point: { ...session.start }, center: session.center };
+    if (!external) capture.begin(last, update, () => finish(false), view.canvas);
+    showCursor();
+    emitState();
+    notify(session.label + " · X/Y/Z axis · Shift X/Y/Z plane · Enter confirm · Esc cancel");
   };
   const track = (e) => {
     if (!modal && !capture.active) last = { x: e.clientX, y: e.clientY };
@@ -344,8 +362,11 @@ export function createEditor(world, views, history, changed, notify, capture) {
         changed();
       }
     },
-    axis(a) {
-      if (modal) {
+    axis(a, plane = false) {
+      if (modal?.session) {
+        modal.session.constrain(a, plane);
+        notify(modal.session.label + " · " + (modal.session.axis ? (plane ? "Shift " : "") + modal.session.axis.toUpperCase() : "screen"));
+      } else if (modal) {
         modal.axis = modal.axis === a ? null : a;
         rebase();
         notify(

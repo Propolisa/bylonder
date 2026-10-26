@@ -6,6 +6,7 @@ import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-m
 import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
 import { EDBM_mesh_hide, EDBM_mesh_reveal } from '../mesh/editmesh-utils.js';
+import { beginMeshTransform } from '../transform/transform-mesh.js';
 import { primitive_add } from '../mesh/editmesh-add.js';
 import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js';
 import { mesh_from_vertex_data } from '../../blenkernel/mesh/mesh-from-babylon.js';
@@ -42,8 +43,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     mesh_batch_cache_apply(mesh, object);
     const active = BM_select_history_active_get(bm);
     em.overlay.update(mesh, { selectmode: bm.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: bm[{ [BM_VERT]: 'v', [BM_EDGE]: 'e', [BM_FACE]: 'f' }[active.htype]].index[active.ele] } });
-    object.metadata = { ...object.metadata, wbCreation: { mesh: mesh_serialize(mesh) } };
-    if (commit) history.commit();
+    if (commit) {
+      object.metadata = { ...object.metadata, wbCreation: { mesh: mesh_serialize(mesh) } };
+      history.commit();
+    }
     changed();
     world.onModeChange?.();
   }
@@ -122,6 +125,9 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.hide', keys: 'H', run: run((bm) => EDBM_mesh_hide(bm, bm.selectmode, false)) },
     { blender: 'mesh.hide', keys: 'Shift H', run: run((bm) => EDBM_mesh_hide(bm, bm.selectmode, true)) },
     { blender: 'mesh.reveal', keys: 'Alt H', run: run((bm) => EDBM_mesh_reveal(bm, bm.selectmode)) },
+    { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
+    { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
+    { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
   ], ['Mesh']);
   const modeKeys = createKeymap([
     { blender: 'object.mode_set', keys: 'Tab', poll: () => !!em || editable(activeObject()), run: () => (em ? exit() : enter()) },
@@ -137,6 +143,16 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     setSelectMode(type, extend = false) { if (em) run((bm) => (selectmode = mesh_select_mode(bm, type, { use_extend: extend })))(); },
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
     key: (e) => modeKeys(e) || (!!em && keymap(e)),
+    // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.
+    transform(type, view, mouse) {
+      const session = em && beginMeshTransform(em.bm, em.object, view, type, mouse);
+      if (!session) return null;
+      return Object.assign(Object.create(session), {
+        update(dx, dy, event) { session.update(dx, dy, event); sync({ commit: false }); },
+        constrain(axis, plane) { session.constrain(axis, plane); sync({ commit: false }); },
+        finish(commit) { if (!commit) session.cancel(); sync({ commit }); },
+      });
+    },
     // view3d.select with Blender's left-click keymap: click selects, Shift click toggles.
     pick(view, e) {
       if (EDBM_select_pick(em.bm, viewAdapter(view), [e.clientX, e.clientY], { toggle: e.shiftKey })) sync();
