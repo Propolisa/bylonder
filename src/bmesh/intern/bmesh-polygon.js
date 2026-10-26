@@ -1,4 +1,5 @@
 // Face geometry (bmesh_polygon.cc).
+import { bmesh_kernel_loop_reverse } from './bmesh-core.js';
 
 // BM_face_calc_normal (Newell's method) into f->no; returns the face area times two before normalizing.
 export function BM_face_normal_update(bm, f) {
@@ -17,4 +18,9 @@ export function BM_face_normal_update(bm, f) {
   bm.f.no[f * 3 + 1] = ny * s;
   bm.f.no[f * 3 + 2] = nz * s;
   return len;
+}
+
+export function BM_face_normal_flip(bm, f) {
+  bmesh_kernel_loop_reverse(bm, f);
+  for (let a = 0; a < 3; a++) bm.f.no[f * 3 + a] = -bm.f.no[f * 3 + a];
 }

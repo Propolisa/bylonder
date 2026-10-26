@@ -70,3 +70,15 @@ export function BM_face_find_double(bm, f) {
   }
   return -1;
 }
+
+export function BM_vert_is_wire_endpoint(bm, v) {
+  const e = bm.v.e[v];
+  return e >= 0 && bm.e.l[e] < 0 && bmesh_disk_edge_next(bm, e, v) === e;
+}
+
+// The loop of the other face on `e` that uses the vertex of loop `lp`.
+export function BM_edge_other_loop(bm, e, lp) {
+  const { l } = bm;
+  const other = l.radial_next[l.e[lp] === e ? lp : l.prev[lp]];
+  return l.v[other] === l.v[lp] ? other : l.next[other];
+}

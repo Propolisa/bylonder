@@ -1,7 +1,8 @@
 // Entering and leaving Edit Mode (object_edit.cc) and what Edit Mode does with the mouse and keys. While editing,
 // the object's BMesh is the truth: every change converts it back to Mesh data (for drawing, undo and scene edits).
 import { Matrix, Ray, Vector3, VertexData } from '@babylonjs/core';
-import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
+import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
+import { BM_face_normal_update } from '../../bmesh/intern/bmesh-polygon.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
@@ -115,8 +116,30 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   }
 
   const run = (fn) => () => { fn(em.bm); sync(); };
+  // The Normal orientation's axis in world space: the summed normals of the selected faces.
+  function selectionNormal() {
+    const { bm, object } = em, sum = [0, 0, 0];
+    BM_ITER_MESH(bm.f, (f) => {
+      if (!BM_elem_flag_test(bm.f, f, BM_ELEM_SELECT)) return;
+      BM_face_normal_update(bm, f);
+      for (let a = 0; a < 3; a++) sum[a] += bm.f.no[f * 3 + a];
+    });
+    return Vector3.TransformNormal(new Vector3(sum[0], sum[2], sum[1]), object.computeWorldMatrix(true)).normalize();
+  }
+  // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
+  function extrudeMove() {
+    const faces = em.bm.totfacesel > 0;
+    if (!meshOperators['mesh.extrude_region'](em.bm, {})) { notify('Not a valid selection for extrude'); return; }
+    sync({ commit: false });
+    editor.start('move', { orient: faces ? 'NORMAL' : undefined, keep: true });
+    if (!editor.modal) sync();
+  }
   const exec = (idname, props = {}) => run((bm) => meshOperators[idname](bm, props))();
-  const deleteMenu = () => DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) }));
+  const deleteMenu = () => [
+    ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
+    '-',
+    { label: 'Dissolve Faces', blender: 'mesh.dissolve_faces', run: () => exec('mesh.dissolve_faces') },
+  ];
   const keymap = createKeymap([
     { blender: 'mesh.select_mode', keys: '1', run: run((bm) => (selectmode = mesh_select_mode(bm, 'VERT'))) },
     { blender: 'mesh.select_mode', keys: '2', run: run((bm) => (selectmode = mesh_select_mode(bm, 'EDGE'))) },
@@ -131,6 +154,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.hide', keys: 'Shift H', run: () => exec('mesh.hide', { unselected: true }) },
     { blender: 'mesh.reveal', keys: 'Alt H', run: () => exec('mesh.reveal') },
     { blender: 'VIEW3D_MT_edit_mesh_delete', keys: ['X', 'Delete'], run: () => openMenu(deleteMenu(), editor.pointer, 'Delete') },
+    { blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: extrudeMove },
     { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
     { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
     { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
@@ -149,16 +173,19 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     setSelectMode(type, extend = false) { if (em) run((bm) => (selectmode = mesh_select_mode(bm, type, { use_extend: extend })))(); },
     exec(idname, props) { if (em) exec(idname, props); },
     deleteMenu,
+    extrudeMove() { if (em) extrudeMove(); },
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
     key: (e) => modeKeys(e) || (!!em && keymap(e)),
     // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.
-    transform(type, view, mouse) {
-      const session = em && beginMeshTransform(em.bm, em.object, view, type, mouse);
+    // `orient: 'NORMAL'` constrains to the selection's normal; `keep` records an undo step even when cancelled, for
+    // the operator that ran first (extrude).
+    transform(type, view, mouse, { orient, keep } = {}) {
+      const session = em && beginMeshTransform(em.bm, em.object, view, type, mouse, { normal: orient === 'NORMAL' ? selectionNormal() : undefined });
       if (!session) return null;
       return Object.assign(Object.create(session), {
         update(dx, dy, event) { session.update(dx, dy, event); sync({ commit: false }); },
         constrain(axis, plane) { session.constrain(axis, plane); sync({ commit: false }); },
-        finish(commit) { if (!commit) session.cancel(); sync({ commit }); },
+        finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); },
       });
     },
     // view3d.select with Blender's left-click keymap: click selects, Shift click toggles.

@@ -207,7 +207,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     if (!view) return;
     const camera = view.camera;
     view.canvas.focus();
-    if (world.editMode?.active) return startComponents(type, view, external);
+    if (world.editMode?.active) return startComponents(type, view, external, options);
     selected.computeWorldMatrix(true);
     setMode(type);
     const center = project(selected.getAbsolutePosition(), view);
@@ -256,8 +256,8 @@ export function createEditor(world, views, history, changed, notify, capture) {
     );
   };
   // Edit Mode: G, R and S transform the selected components.
-  const startComponents = (type, view, external) => {
-    const session = world.editMode.transform(COMPONENT_TYPES[type], { camera: view.camera, canvas: view.canvas, project: (p) => project(p, view) }, last);
+  const startComponents = (type, view, external, options) => {
+    const session = world.editMode.transform(COMPONENT_TYPES[type], { camera: view.camera, canvas: view.canvas, project: (p) => project(p, view) }, last, options);
     if (!session) return;
     modal = { view, type, session, point: { ...session.start }, center: session.center };
     if (!external) capture.begin(last, update, () => finish(false), view.canvas);

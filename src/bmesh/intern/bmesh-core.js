@@ -252,3 +252,31 @@ export function BM_faces_join(bm, faces, do_del, want_double) {
   if (had_active_face && bm.act_face < 0) bm.act_face = result;
   return [result, f_double];
 }
+
+// bmesh_kernel_loop_reverse: flips a face's winding; each loop takes the previous loop's edge and radial links.
+export function bmesh_kernel_loop_reverse(bm, f) {
+  const { l } = bm;
+  const l_first = bm.f.l_first[f];
+  let e_prev = l.e[l.prev[l_first]];
+  let prev_radial_next = l.radial_next[l.prev[l_first]], prev_radial_prev = l.radial_prev[l.prev[l_first]];
+  let prev_boundary = prev_radial_next === l.radial_next[prev_radial_next];
+  let it = l_first;
+  do {
+    const e_iter = l.e[it], radial_next = l.radial_next[it], radial_prev = l.radial_prev[it];
+    const boundary = radial_next === l.radial_next[radial_next];
+    if (prev_boundary) l.radial_next[it] = l.radial_prev[it] = it;
+    else {
+      l.radial_next[it] = prev_radial_next;
+      l.radial_prev[it] = prev_radial_prev;
+      l.radial_prev[prev_radial_next] = it;
+      l.radial_next[prev_radial_prev] = it;
+    }
+    if (bm.e.l[e_iter] === it) bm.e.l[e_iter] = l.next[it];
+    l.e[it] = e_prev;
+    [l.next[it], l.prev[it]] = [l.prev[it], l.next[it]];
+    e_prev = e_iter;
+    prev_radial_next = radial_next;
+    prev_radial_prev = radial_prev;
+    prev_boundary = boundary;
+  } while ((it = l.prev[it]) !== l_first);
+}

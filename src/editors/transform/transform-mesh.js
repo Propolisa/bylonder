@@ -1,6 +1,7 @@
 // Moving, rotating and scaling the Edit Mode selection (transform_convert_mesh.cc, transform_mode_translate.cc,
 // transform_mode_rotate.cc, transform_mode_resize.cc) about its median point. Constraint axes are Blender's
-// global X, Y and Z (Z up); Shift with an axis constrains to the plane across it.
+// global X, Y and Z (Z up); Shift with an axis constrains to the plane across it. A `normal` (world space) starts
+// the transform constrained to it, as extrude does with the Normal orientation.
 import { Matrix, Quaternion, Vector3 } from '@babylonjs/core';
 import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
 import { radialRatio, angleDelta, snap } from '../../windowmanager/gesture-math.js';
@@ -11,7 +12,8 @@ const SNAP = { translate: 0.1, rotate: (5 * Math.PI) / 180, resize: 0.1 };
 const TRANSFORM_LABELS = { translate: 'Move', rotate: 'Rotate', resize: 'Scale' };
 
 // `view` gives the camera and screen projection: { camera, canvas, project(world) -> {x, y} client pixels }.
-export function beginMeshTransform(bm, object, view, type, mouse) {
+export function beginMeshTransform(bm, object, view, type, mouse, { normal } = {}) {
+  const axes = { ...AXES, normal };
   const world = object.computeWorldMatrix(true), inverse = Matrix.Invert(world);
   const verts = [];
   BM_ITER_MESH(bm.v, (v) => { if (BM_elem_flag_test(bm.v, v, BM_ELEM_SELECT) && !BM_elem_flag_test(bm.v, v, BM_ELEM_HIDDEN)) verts.push(v); });
@@ -25,7 +27,7 @@ export function beginMeshTransform(bm, object, view, type, mouse) {
   const pixelSize = (2 * depth * (camera.mode === 1 ? 1 : Math.tan(camera.fov / 2))) / view.canvas.clientHeight;
   // Starting away from the median point keeps rotate and scale well defined.
   const start = Math.hypot(mouse.x - centerScreen.x, mouse.y - centerScreen.y) < 12 && type !== 'translate' ? { x: centerScreen.x + 60, y: centerScreen.y } : { ...mouse };
-  const state = { point: { ...start }, total: { x: 0, y: 0 }, angle: 0, axis: null, plane: false, ctrl: false };
+  const state = { point: { ...start }, total: { x: 0, y: 0 }, angle: 0, axis: normal ? 'normal' : null, plane: false, ctrl: false };
 
   function apply(transformPoint) {
     verts.forEach((v, i) => {
@@ -37,7 +39,7 @@ export function beginMeshTransform(bm, object, view, type, mouse) {
   }
 
   function translation(ctrl) {
-    const axis = state.axis && AXES[state.axis];
+    const axis = state.axis && axes[state.axis];
     let offset;
     if (axis && !state.plane) {
       const end = view.project(center.add(axis)), vx = end.x - centerScreen.x, vy = end.y - centerScreen.y, len = vx * vx + vy * vy;
@@ -55,7 +57,7 @@ export function beginMeshTransform(bm, object, view, type, mouse) {
       const offset = translation(state.ctrl);
       apply((p) => p.add(offset));
     } else if (type === 'rotate') {
-      const axis = state.axis && !state.plane ? AXES[state.axis] : forward;
+      const axis = state.axis && !state.plane ? axes[state.axis] : forward;
       const sign = state.axis && !state.plane && Vector3.Dot(axis, forward) <= 0 ? 1 : -1;
       const angle = state.ctrl ? snap(state.angle, SNAP.rotate) : state.angle;
       const rotation = Quaternion.RotationAxis(axis, angle * sign);
@@ -63,7 +65,7 @@ export function beginMeshTransform(bm, object, view, type, mouse) {
     } else {
       let factor = radialRatio(start, state.point, centerScreen);
       if (state.ctrl) factor = snap(factor, SNAP.resize);
-      const axis = state.axis && AXES[state.axis];
+      const axis = state.axis && axes[state.axis];
       apply((p) => {
         const d = p.subtract(center);
         if (!axis) return center.add(d.scale(factor));

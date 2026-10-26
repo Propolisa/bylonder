@@ -40,21 +40,42 @@ console.log('Mesh: draw cache maps Blender axes onto Babylon with outward windin
 
 // Edit Mode operators on Blender's own selection, compared with Blender's result.
 import { meshOperators } from '../src/editors/mesh/editmesh-tools.js';
-import { BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
+import { BM_elem_select_set, BM_mesh_select_mode_flush, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
 import { BM_VERT, BM_EDGE, BM_FACE } from '../src/bmesh/intern/bmesh-class.js';
 const SELECT = { VERT: [SCE_SELECT_VERTEX, BM_VERT], EDGE: [SCE_SELECT_EDGE, BM_EDGE], FACE: [SCE_SELECT_FACE, BM_FACE] };
-let edited = 0;
+// Order-free form of a Mesh: vertices, edges and faces (winding kept) named by rounded position.
+function geometry(positions, edges, face_offsets, corner_verts) {
+  const key = (v) => Array.from(positions.slice(v * 3, v * 3 + 3), (x) => Math.round(x * 1e4) / 1e4 + 0).join(',');
+  const faces = [];
+  for (let f = 0; f + 1 < face_offsets.length; f++) {
+    const ring = Array.from(corner_verts.slice(face_offsets[f], face_offsets[f + 1]), key);
+    const start = ring.indexOf([...ring].sort()[0]);
+    faces.push(ring.slice(start).concat(ring.slice(0, start)).join(' '));
+  }
+  const verts = Array.from({ length: positions.length / 3 }, (_, v) => key(v));
+  const pairs = Array.from({ length: edges.length / 2 }, (_, e) => [key(edges[e * 2]), key(edges[e * 2 + 1])].sort().join(' '));
+  return { verts: verts.sort(), edges: pairs.sort(), faces: faces.sort() };
+}
+
+let edited = 0, geometric = 0;
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
   if (!fixture.edit) continue;
-  const name = file.replace('.json', ''), { select_mode, select, operator, props } = fixture.edit;
+  const name = file.replace('.json', ''), { select_mode, select, operator, props, move } = fixture.edit;
   const bm = BM_mesh_bm_from_me(primitive_add(fixture.operator, fixture.props));
   const [mode, htype] = SELECT[select_mode];
   bm.selectmode = mode;
   for (const i of select) BM_elem_select_set(bm, htype, i, true);
+  BM_mesh_select_mode_flush(bm);
   meshOperators[operator](bm, props);
+  if (move) for (let v = 0; v < bm.v.size; v++) if (bm.v.alive[v] && bm.v.hflag[v] & 1) move.forEach((d, a) => (bm.v.co[v * 3 + a] += d));
   const mesh = BM_mesh_bm_to_me(bm);
   assert.equal(mesh.verts_num, fixture.positions.length, name + ': vertex count');
+  if (move) {
+    assert.deepEqual(geometry(mesh.vert_positions, mesh.edges, mesh.face_offsets, mesh.corner_verts), geometry(fixture.positions.flat(), fixture.edges.flat(), fixture.face_offsets, fixture.corner_verts), name + ': geometry');
+    geometric++;
+    continue;
+  }
   fixture.positions.forEach((p, v) => p.forEach((x, a) => assert.ok(near(mesh.vert_positions[v * 3 + a], x), `${name}: vertex ${v}`)));
   assert.deepEqual(Array.from(mesh.edges), fixture.edges.flat(), name + ': edges');
   assert.deepEqual(Array.from(mesh.face_offsets), fixture.face_offsets, name + ': face offsets');
@@ -62,5 +83,5 @@ for (const file of await readdir(dir)) {
   assert.deepEqual(Array.from(mesh.corner_edges), fixture.corner_edges, name + ': corner edges');
   edited++;
 }
-assert.ok(edited >= 5);
-console.log(`Mesh: ${edited} Edit Mode operator results match Blender 5.2 exactly`);
+assert.ok(edited >= 7 && geometric >= 7);
+console.log(`Mesh: ${edited} Edit Mode operator results match Blender 5.2 exactly, ${geometric} extrudes match as geometry (Blender's order there varies by run)`);

@@ -147,6 +147,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const meshMenu = menuButton('Mesh', () => [
     { label: 'Transform', blender: 'VIEW3D_MT_transform', items: [['Move', 'transform.translate', 'G', 'move'], ['Rotate', 'transform.rotate', 'R', 'rotate'], ['Scale', 'transform.resize', 'S', 'scale']].map(([label, blender, keys, type]) => ({ label, blender, keys, run: () => editor.start(type) })) },
     '-',
+    { label: 'Extrude', blender: 'VIEW3D_MT_edit_mesh_extrude', items: [{ label: 'Extrude Faces', blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: () => world.editMode.extrudeMove() }] },
+    '-',
     { label: 'Show/Hide', blender: 'VIEW3D_MT_edit_mesh_showhide', items: [
       { label: 'Reveal Hidden', blender: 'mesh.reveal', keys: 'Alt H', run: () => world.editMode.exec('mesh.reveal') },
       { label: 'Hide Selected', blender: 'mesh.hide', keys: 'H', run: () => world.editMode.exec('mesh.hide') },

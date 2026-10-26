@@ -2,7 +2,7 @@
 import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable, BMO_flag_disable } from './bmesh-class.js';
 import { BM_vert_kill, BM_edge_kill, BM_face_kill } from './bmesh-core.js';
 
-export const DEL_VERTS = 1, DEL_EDGES = 2, DEL_ONLYFACES = 3, DEL_EDGESFACES = 4, DEL_FACES = 5;
+export const DEL_VERTS = 1, DEL_EDGES = 2, DEL_ONLYFACES = 3, DEL_EDGESFACES = 4, DEL_FACES = 5, DEL_ONLYTAGGED = 7;
 
 const removeTagged = (pool, kill) => (bm, oflag) => BM_ITER_MESH(bm[pool], (i) => { if (BMO_flag_test(bm[pool], i, oflag)) kill(bm, i); });
 const bmo_remove_tagged_faces = removeTagged('f', BM_face_kill);
@@ -12,8 +12,15 @@ const bmo_remove_tagged_verts_loose = (bm, oflag) => BM_ITER_MESH(bm.v, (v) => {
 
 const faceLoops = (bm, f, fn) => { const first = bm.f.l_first[f]; let l = first; do fn(l); while ((l = bm.l.next[l]) !== first); };
 
+export function BMO_mesh_delete_oflag_tagged(bm, oflag) {
+  bmo_remove_tagged_faces(bm, oflag);
+  bmo_remove_tagged_edges(bm, oflag);
+  bmo_remove_tagged_verts(bm, oflag);
+}
+
 export function BMO_mesh_delete_oflag_context(bm, oflag, type) {
-  if (type === DEL_VERTS) bmo_remove_tagged_verts(bm, oflag);
+  if (type === DEL_ONLYTAGGED) BMO_mesh_delete_oflag_tagged(bm, oflag);
+  else if (type === DEL_VERTS) bmo_remove_tagged_verts(bm, oflag);
   else if (type === DEL_EDGES) {
     BM_ITER_MESH(bm.e, (e) => { if (BMO_flag_test(bm.e, e, oflag)) { BMO_flag_enable(bm.v, bm.e.v1[e], oflag); BMO_flag_enable(bm.v, bm.e.v2[e], oflag); } });
     bmo_remove_tagged_edges(bm, oflag);

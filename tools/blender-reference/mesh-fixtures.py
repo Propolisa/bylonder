@@ -28,13 +28,25 @@ CASES = {
     "monkey": ("primitive_monkey_add", {}),
 }
 
-# Edit Mode operators: a primitive, a select mode, the selected element indices, then the operator.
+# Edit Mode operators: a primitive, a select mode, the selected element indices, then the operator. Extrude cases
+# then move the selection by MOVE, so every vertex has its own position: Blender orders the new side faces by a
+# pointer hash, which changes from run to run, so those results are compared as geometry rather than in order.
+MOVE = (0.25, 0.5, 1.0)
 EDIT_CASES = {
     "delete-vert": (("primitive_cube_add", {}), "VERT", [0], "delete", {"type": "VERT"}),
     "delete-edge": (("primitive_cube_add", {}), "EDGE", [0], "delete", {"type": "EDGE"}),
     "delete-face": (("primitive_grid_add", {"x_subdivisions": 3, "y_subdivisions": 3}), "FACE", [4], "delete", {"type": "FACE"}),
     "delete-edge-face": (("primitive_cube_add", {}), "EDGE", [0], "delete", {"type": "EDGE_FACE"}),
     "delete-only-face": (("primitive_cube_add", {}), "FACE", [0, 1], "delete", {"type": "ONLY_FACE"}),
+    "dissolve-faces": (("primitive_grid_add", {"x_subdivisions": 3, "y_subdivisions": 3}), "FACE", [0, 1, 3, 4], "dissolve_faces", {}),
+    "extrude-face-cube": (("primitive_cube_add", {}), "FACE", [0], "extrude_region", {}, MOVE),
+    "extrude-faces-grid": (("primitive_grid_add", {"x_subdivisions": 3, "y_subdivisions": 3}), "FACE", [3, 4], "extrude_region", {}, MOVE),
+    "extrude-plane": (("primitive_plane_add", {}), "FACE", [0], "extrude_region", {}, MOVE),
+    "extrude-edge": (("primitive_plane_add", {}), "EDGE", [0], "extrude_region", {}, MOVE),
+    "extrude-edges-circle": (("primitive_circle_add", {"vertices": 6}), "EDGE", [0, 1, 2], "extrude_region", {}, MOVE),
+    "extrude-vert": (("primitive_plane_add", {}), "VERT", [0], "extrude_region", {}, MOVE),
+    "extrude-verts-cube": (("primitive_cube_add", {}), "VERT", [0, 1, 2, 3], "extrude_region", {}, MOVE),
+    "dissolve-faces-cube": (("primitive_cube_add", {}), "FACE", [0, 1], "dissolve_faces", {}),
 }
 
 
@@ -60,12 +72,14 @@ for name, case in {**CASES, **EDIT_CASES}.items():
         bpy.ops.object.mode_set(mode="EDIT")
         select(edit[0], edit[1])
         getattr(bpy.ops.mesh, edit[2])(**edit[3])
+        if len(edit) > 4:
+            bpy.ops.transform.translate(value=edit[4])
         bpy.ops.object.mode_set(mode="OBJECT")
     me = bpy.context.object.data
     uv = me.uv_layers.active
     data = {
         "operator": "mesh." + op, "props": props,
-        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": "mesh." + edit[2], "props": edit[3]}} if edit else {}),
+        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": "mesh." + edit[2], "props": edit[3], **({"move": edit[4]} if len(edit) > 4 else {})}} if edit else {}),
         "positions": [r(v.co) for v in me.vertices],
         "edges": [list(e.vertices) for e in me.edges],
         "face_offsets": [p.loop_start for p in me.polygons] + [len(me.loops)],
