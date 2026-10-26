@@ -1,12 +1,14 @@
 // Scene time, shaped like Blender's Scene: frame_current, frame_start, frame_end, frame_step, render.fps,
-// use_preview_range, frame_preview_start/end and tool_settings.use_keyframe_insert_auto. `loop` is ours
+// use_preview_range, frame_preview_start/end, sync_mode and tool_settings.use_keyframe_insert_auto. `loop` is ours
 // (Blender playback always loops). Also owns the playback clock. Saved with the action in the animation payload.
-export const timeDefaults = { frameCurrent: 1, frameStart: 1, frameEnd: 250, frameStep: 1, fps: 24, usePreviewRange: false, framePreviewStart: 1, framePreviewEnd: 250, autoKey: false, loop: true };
+export const timeDefaults = { frameCurrent: 1, frameStart: 1, frameEnd: 250, frameStep: 1, fps: 24, usePreviewRange: false, framePreviewStart: 1, framePreviewEnd: 250, autoKey: false, loop: true, syncMode: 'FRAME_DROP' };
+export const syncModes = { FRAME_DROP: 'Frame Dropping', NONE: 'Play Every Frame' };
 const limit = 1e6;
 export function validateTime(input = {}) {
   const t = { ...timeDefaults, ...input };
   for (const key of ['frameCurrent', 'frameStart', 'frameEnd', 'frameStep', 'fps', 'framePreviewStart', 'framePreviewEnd']) if (!Number.isFinite(t[key]) || Math.abs(t[key]) > limit) throw Error('Invalid scene time: ' + key);
   for (const key of ['usePreviewRange', 'autoKey', 'loop']) if (typeof t[key] !== 'boolean') throw Error('Invalid scene time: ' + key);
+  if (!syncModes[t.syncMode]) throw Error('Invalid scene time: syncMode');
   if (t.frameStart >= t.frameEnd || t.framePreviewStart >= t.framePreviewEnd) throw Error('Invalid frame range');
   if (t.fps < 1 || t.fps > 240 || t.frameStep < 1 || !Number.isInteger(t.frameStep)) throw Error('Invalid frame rate or step');
   return Object.fromEntries(Object.keys(timeDefaults).map(key => [key, t[key]]));
@@ -40,12 +42,13 @@ export function createSceneTime(initial) {
     },
     play() { playing = !playing; previous = null; emit('playback'); },
     pause() { if (playing) { playing = false; previous = null; emit('playback'); } },
-    // Advances in real time at fps; frame_step makes playback skip frames like Blender's.
+    // Frame Dropping advances in real time at fps; Play Every Frame advances one frame step per tick.
+    // frame_step makes playback skip frames like Blender's.
     tick(now) {
       if (!playing) return;
       if (previous === null) { previous = now; return; }
       const [start, end] = range();
-      clock += (now - previous) / 1000 * state.fps; previous = now;
+      clock += state.syncMode === 'NONE' ? state.frameStep : (now - previous) / 1000 * state.fps; previous = now;
       if (clock > end) { if (state.loop) clock = start + (clock - start) % (end - start); else { clock = end; api.pause(); } }
       if (clock < start) clock = start;
       const frame = state.frameStep > 1 ? start + Math.floor((clock - start) / state.frameStep) * state.frameStep : clock;

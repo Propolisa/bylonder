@@ -7,7 +7,6 @@
 .node-editor-empty button:hover{background:var(--bl-widget-hi)}
 .node-editor-title{padding:0 6px;color:var(--bl-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node-editor-actions{display:flex;gap:4px;align-items:center}
-.bl-text-toggle{width:auto;padding:0 8px;font:var(--bl-font)}
 .bl-toggle{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 6px;color:var(--bl-text);font:var(--bl-font);white-space:nowrap;cursor:pointer}
 .bl-toggle input{width:14px;height:14px;margin:0;accent-color:var(--bl-select)}
 .logic-editor{position:absolute;inset:0;overflow:hidden;outline:none;background:#1d1d1d radial-gradient(#ffffff14 1px,transparent 1.2px) 0 0/24px 24px;cursor:default;touch-action:none}

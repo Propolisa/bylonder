@@ -4,6 +4,7 @@
 let loading = null;
 
 export function createSequencerAdapter({ project, sequenceEditor, time, history, frames, scenes, notify = console.warn }) {
+  let syncSceneTime = true;
   const clock = {
     get frame() { return time.frame; },
     get playing() { return time.playing; },
@@ -30,6 +31,7 @@ export function createSequencerAdapter({ project, sequenceEditor, time, history,
       scenes,
       notify: (message) => notify(message),
     });
+    if (!syncSceneTime) embed.setClockSync(false);
     sequenceEditor.subscribe((source) => { if (source === 'apply') embed.setHostEdit(sequenceEditor.state?.edit); });
     return embed;
   })());
@@ -41,6 +43,9 @@ export function createSequencerAdapter({ project, sequenceEditor, time, history,
     async menus() { return (await load()).menus(); },
     // The edit's frames and mixed audio for a render job; see openCompositor in kubeezcut-embed.
     async openCompositor(range) { return { label: 'Sequencer', ...(await (await load()).openCompositor(range)) }; },
+    // Blender's Sync Scene Time: when off, the Sequencer keeps its own playhead.
+    get syncSceneTime() { return syncSceneTime; },
+    async setSyncSceneTime(on) { syncSceneTime = on; if (loading) (await loading).setClockSync(on); },
     async setFormat(format) { if (loading) (await loading).setProjectFormat(format); },
     get proxyScale() { return frames.proxyScale; },
     setProxyScale: (scale) => frames.setProxyScale(scale),

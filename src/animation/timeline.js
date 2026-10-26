@@ -1,5 +1,6 @@
 import { createApp,h,reactive,Teleport } from 'vue';
 import { address } from './model.js';
+import { syncModes } from '../scene/time.js';
 import { menuButton } from '../ui/menu.js';
 import { icon } from '../properties/icons.js';
 import './timeline.css';
@@ -46,6 +47,8 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
       {label:'Set Start Frame…',run:()=>setRange(0,ask('Start frame',time.range()[0]))},
       {label:'Set End Frame…',run:()=>setRange(1,ask('End frame',time.range()[1]))},
       {label:'Use Preview Range',checked:()=>time.state.usePreviewRange,run:()=>time.configure({usePreviewRange:!time.state.usePreviewRange})},
+      '-',
+      {label:'Sync',items:Object.entries(syncModes).map(([syncMode,label])=>({label,checked:()=>time.state.syncMode===syncMode,run:()=>time.configure({syncMode})}))},
     ]),
   ];
   const transport=document.createElement('div');transport.className='timeline-transport';

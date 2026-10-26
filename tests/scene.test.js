@@ -63,3 +63,16 @@ assert.equal(worlds.active().name, 'World'); assert.equal(scene.fogEnd, 50);
 worlds.apply(saved);
 assert.equal(worlds.active(), null); assert.equal(worlds.all().length, 2);
 console.log('Scene: units, scene settings, world datablocks and Babylon mapping passed');
+
+// Playback sync, like Blender's scene.sync_mode: Frame Dropping follows real time, Play Every Frame steps.
+{
+  const { createSceneTime } = await import('../src/scene/time.js');
+  const drop = createSceneTime({ fps: 24 });
+  drop.play(); drop.tick(0); drop.tick(500);
+  assert.equal(drop.frame, 13, 'half a second at 24 fps drops to frame 13');
+  const every = createSceneTime({ fps: 24, syncMode: 'NONE' });
+  every.play(); every.tick(0); every.tick(500);
+  assert.equal(every.frame, 2, 'a slow tick still advances one frame');
+  assert.throws(() => createSceneTime({ syncMode: 'AUDIO' }), /syncMode/);
+}
+console.log('Scene time: playback sync modes passed');

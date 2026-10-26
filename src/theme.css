@@ -16,7 +16,7 @@ html,body{background:var(--bl-gap);color:var(--bl-text);font:var(--bl-font)}
 .bl-icon{display:inline-block;width:16px;height:16px;flex-shrink:0;background:currentColor;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;vertical-align:middle}
 .bl-icon.blank{background:none}.bl-icon.obj{color:var(--bl-obj)}.bl-icon.data{color:var(--bl-data)}.bl-icon.mod{color:var(--bl-mod)}.bl-icon.shading{color:var(--bl-shading)}
 .bl-icon-button{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 3px;border:0;border-radius:var(--bl-radius);background:transparent;color:var(--bl-text);cursor:pointer}
-.bl-icon-button:hover{background:var(--bl-hover)}.bl-icon-button[aria-pressed=true],.bl-icon-button.active{background:var(--bl-select);color:#fff}
+.bl-icon-button:hover{background:var(--bl-hover)}.bl-text-toggle{width:auto;padding:0 8px;font:var(--bl-font)}.bl-icon-button[aria-pressed=true],.bl-icon-button.active{background:var(--bl-select);color:#fff}
 .bl-pulldown{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 7px;border:0;border-radius:var(--bl-radius);background:transparent;color:var(--bl-text);font:var(--bl-font);white-space:nowrap;cursor:pointer}
 .bl-pulldown:hover,.bl-pulldown.open{background:var(--bl-hover);color:#fff}
 .bl-pulldown.bl-dropdown{background:var(--bl-menu);box-shadow:inset 0 0 0 1px var(--bl-widget-line)}
