@@ -4,6 +4,8 @@ import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../src/bmesh/intern/bmesh-
 import { BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../src/bmesh/intern/bmesh-class.js';
 import { Matrix, Vector3 } from '@babylonjs/core';
 import { createTransMesh } from '../src/editors/transform/transform-mesh.js';
+import { beginEdgeSlide, edge_slide_exec } from '../src/editors/transform/transform-mesh-edge-slide.js';
+import { BM_mesh_select_mode_flush } from '../src/bmesh/intern/bmesh-marking.js';
 import { initTransform } from '../src/editors/transform/transform.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_vert_select_set } from '../src/bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../src/editors/mesh/editmesh-select.js';
@@ -163,4 +165,10 @@ type(r.t, '5');
 assert.equal(selectedCoords(r.bm), expect(([x, y, z]) => [x + 5, y, z]), 'typing replaces the mouse');
 r.t.cancel();
 assert.equal(selectedCoords(r.bm), expect((p) => p), 'cancel restores');
-console.log('Transform values: typed values, negation, Tab, orientation cycling, rotate and scale values and increments passed');
+// G G 0.5: Edge Slide takes a typed factor too.
+const slid = (fn) => { const b = cube(); for (let v = 0; v < b.v.size; v++) if (b.v.co[v * 3] > 0 && b.v.co[v * 3 + 1] > 0) BM_vert_select_set(b, v, true); BM_mesh_select_mode_flush(b); fn(b); return coords(b) + ''; };
+let header;
+const typedSlide = slid((b) => { const s = beginEdgeSlide(b, identity, top, { x: 0, y: -50 }); type(s, '. 5'); header = s.header; });
+assert.ok([0.5, -0.5].some((value) => slid((b) => edge_slide_exec(b, { value })) === typedSlide), 'G G .5 slides half way');
+assert.equal(header, 'Edge Slide: [.5|] = 0.5');
+console.log('Transform values: typed values, negation, Tab, orientation cycling, rotate, scale and edge slide values and increments passed');

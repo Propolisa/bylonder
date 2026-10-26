@@ -2,6 +2,7 @@
 // transform_convert_mesh.cc): selected edge loops slide along the faces beside them.
 import { Vector3 } from '@babylonjs/core';
 import { snap } from '../../windowmanager/gesture-math.js';
+import { initNumInput, hasNumInput, applyNumInput, outputNumInput, handleNumInput } from '../util/numinput.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
 import { BM_edge_exists, BM_edge_is_boundary, BM_edge_is_manifold, BM_vert_is_edge_pair } from '../../bmesh/intern/bmesh-query.js';
@@ -234,13 +235,17 @@ export function beginEdgeSlide(bm, object, view, mouse) {
   if (mval_dir[0] ** 2 + mval_dir[1] ** 2 < 0.1) mval_dir = [0, 100];
   const half = [mval_dir[0] / 2, mval_dir[1] / 2], half_len = half[0] ** 2 + half[1] ** 2;
 
-  const state = { total: { x: 0, y: 0 }, ctrl: false, alt: false, use_even: false, flipped: false, unclamp: false, side: 0, perc: 0 };
+  const state = { total: { x: 0, y: 0 }, ctrl: false, shift: false, alt: false, use_even: false, flipped: false, unclamp: false, side: 0, perc: 0, header: '' };
+  const num = initNumInput();
   const use_clamp = () => state.unclamp === state.alt;
   function apply() {
     let perc = -(state.total.x * half[0] + state.total.y * half[1]) / half_len;
-    if (state.ctrl) perc = snap(perc, 0.1);
-    if (use_clamp()) perc = Math.max(-1, Math.min(1, perc));
-    state.perc = perc;
+    if (state.ctrl) perc = snap(perc, state.shift ? 0.01 : 0.1);
+    if (use_clamp() && !hasNumInput(num)) perc = Math.max(-1, Math.min(1, perc));
+    const typed = [perc];
+    applyNumInput(num, typed);
+    perc = state.perc = typed[0];
+    state.header = 'Edge Slide: ' + (hasNumInput(num) ? outputNumInput(num)[0] : perc.toFixed(4) + ' ');
     const curr_length_fac = state.use_even ? data.sv[curr_sv_index].edge_len * (((state.flipped ? perc : -perc) + 1) / 2) : 0;
     if (!state.use_even && use_clamp()) state.side = perc < 0 ? 1 : 0;
     for (const sv of data.sv) bm.v.co.set(edge_slide_apply_elem(sv, perc, curr_length_fac, state.side, use_clamp(), state.use_even, state.flipped), sv.v * 3);
@@ -250,16 +255,21 @@ export function beginEdgeSlide(bm, object, view, mouse) {
     label: 'Edge Slide',
     start: { ...mouse },
     center,
-    axis: null,
     get value() { return state.perc; },
+    get header() { return state.header; },
     update(dx, dy, event) {
       state.total.x += dx;
       state.total.y += dy;
       state.ctrl = event.ctrlKey;
+      state.shift = event.shiftKey;
       state.alt = !!event.altKey;
       apply();
     },
-    constrain() {},
+    numinput(event, active = false) {
+      if (event.value !== 'PRESS' || (active && !hasNumInput(num)) || !handleNumInput(num, event)) return false;
+      apply();
+      return true;
+    },
     // Hard-coded in handleEventEdgeSlide, so these have no modal keymap names.
     keymap: createKeymap([
       { keys: 'E', run: () => { state.use_even = !state.use_even; apply(); } },

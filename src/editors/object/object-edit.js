@@ -304,7 +304,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       if (type === 'edge_slide') {
         const slide = beginEdgeSlide(em.bm, em.object, view, mouse);
         if (!slide) { notify('Invalid Edge Selection'); return null; }
-        session = Object.assign(Object.create(slide), { update: changed(slide.update), keymap: (event) => slide.keymap(event) && (sync({ commit: false }), true), cancel: changed(slide.cancel) });
+        const handled = (fn) => (...args) => fn(...args) && (sync({ commit: false }), true);
+        session = Object.assign(Object.create(slide), { update: changed(slide.update), keymap: handled(slide.keymap), numinput: handled(slide.numinput), cancel: changed(slide.cancel) });
       } else {
         const data = createTransMesh(em.bm, em.object);
         if (!data) return null;
