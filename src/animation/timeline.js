@@ -19,19 +19,6 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
   const label=(track,ch)=>({group:ch?.group||names(track.id)||track.id,name:ch?.label||track.path});
   const bar=header||null;
   const menus=[
-    menuButton('Playback',()=>[
-      {label:'Loop Playback',checked:()=>time.state.loop,run:()=>time.configure({loop:!time.state.loop})},
-      '-',
-      {label:'Set Start Frame…',run:()=>setRange(0,ask('Start frame',time.range()[0]))},
-      {label:'Set End Frame…',run:()=>setRange(1,ask('End frame',time.range()[1]))},
-      {label:'Use Preview Range',checked:()=>time.state.usePreviewRange,run:()=>time.configure({usePreviewRange:!time.state.usePreviewRange})},
-    ]),
-    menuButton('Keying',()=>[
-      {label:'Auto Keying',checked:()=>time.state.autoKey,run:()=>time.configure({autoKey:!time.state.autoKey})},
-      '-',
-      {label:'Insert Keyframe',icon:'keyframe',keys:'I',run:insert},
-      {label:'Delete Keyframes',keys:'Alt I',enabled:()=>state.selected.length>0,run:remove},
-    ]),
     menuButton('View',()=>[
       {label:'Show Channels',checked:()=>state.channels,run:()=>state.channels=!state.channels},
       '-',
@@ -40,8 +27,11 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
       {label:'Zoom Out',keys:'Ctrl -',run:()=>state.zoom=Math.max(1,state.zoom/2)},
     ]),
     menuButton('Key',()=>[
-      {label:'Select All',keys:'A',run:()=>state.selected=allKeys()},
+      {label:'Auto Keying',checked:()=>time.state.autoKey,run:()=>time.configure({autoKey:!time.state.autoKey})},
+      {label:'Insert Keyframe',icon:'keyframe',keys:'I',run:insert},
+      {label:'Clear Keyframes',keys:'Alt I',enabled:()=>state.selected.length>0,run:remove},
       '-',
+      {label:'Select All',keys:'A',run:()=>state.selected=allKeys()},
       {label:'Move…',enabled:()=>state.selected.length>0,run:()=>move(ask('Move selected keys by frames',10))},
       {label:'Duplicate…',keys:'Shift D',enabled:()=>state.selected.length>0,run:()=>move(ask('Duplicate selected keys, offset in frames',10),true)},
       {label:'Delete Keyframes',keys:'X',enabled:()=>state.selected.length>0,run:remove},
@@ -49,6 +39,13 @@ export function mountTimeline(host,animation,{insert,undo,redo,header,names=id=>
       {label:'Interpolation Mode',items:[['BEZIER','Bézier'],['LINEAR','Linear'],['CONSTANT','Constant']].map(([interpolation,label])=>({label,enabled:()=>state.selected.length>0,run:()=>animation.editKeys(state.selected,{interpolation})}))},
       '-',
       {label:'Undo',keys:'Ctrl Z',run:undo},{label:'Redo',keys:'Shift Ctrl Z',run:redo},
+    ]),
+    menuButton('Playback',()=>[
+      {label:'Loop Playback',checked:()=>time.state.loop,run:()=>time.configure({loop:!time.state.loop})},
+      '-',
+      {label:'Set Start Frame…',run:()=>setRange(0,ask('Start frame',time.range()[0]))},
+      {label:'Set End Frame…',run:()=>setRange(1,ask('End frame',time.range()[1]))},
+      {label:'Use Preview Range',checked:()=>time.state.usePreviewRange,run:()=>time.configure({usePreviewRange:!time.state.usePreviewRange})},
     ]),
   ];
   const transport=document.createElement('div');transport.className='timeline-transport';

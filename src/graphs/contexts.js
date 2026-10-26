@@ -16,6 +16,13 @@ const toggle = (label, checked, run) => {
   return b;
 };
 
+const newButton = (run) => {
+  const b = iconButton('add', 'New compositor node group', run);
+  b.classList.add('bl-text-toggle');
+  b.append('New');
+  return b;
+};
+
 export function createNodeContexts({ world, editor }) {
   const activeMesh = () => { const node = editor.selection.nodes.at(-1); return node?.getTotalVertices ? node : null; };
   return {
@@ -42,9 +49,9 @@ export function createNodeContexts({ world, editor }) {
     },
     compositor() {
       const c = world.compositor;
-      const use = toggle('Use Nodes', c.enabled, value => c.setEnabled(value));
-      if (!c.enabled || !c.graph) return { key: 'off:' + c.enabled, title: 'Compositing', actions: [use], message: 'Enable Use Nodes to composite the scene through a Babylon frame graph.', buttons: [['Use Nodes', () => c.setEnabled(true), 'node_compositing']] };
-      return { key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [use], graph: c.graph, hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading or camera view.' };
+      // Blender 5 shows the compositor node group as a datablock: New when there is none, its name and X otherwise.
+      if (!c.enabled || !c.graph) return { key: 'off:' + c.enabled, title: '', actions: [newButton(() => c.setEnabled(true))], message: 'Add a compositor node group to composite the scene through a Babylon frame graph.', buttons: [['New', () => c.setEnabled(true), 'add']] };
+      return { key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [iconButton('x', 'Remove the compositor', () => c.setEnabled(false))], graph: c.graph, hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading or camera view.' };
     },
     particles() {
       const mesh = activeMesh(), entry = world.particles.active(mesh);

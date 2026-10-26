@@ -1,4 +1,4 @@
-import { iconEl, iconButton } from '../ui/icon.js';
+import { iconEl } from '../ui/icon.js';
 import { menuButton } from '../ui/menu.js';
 import './node-editor.css';
 import { installEditorTheme } from './editor-theme.js';
@@ -45,11 +45,12 @@ export function mountNodeEditor({ world, host, header, contexts, backdrop, stora
   host.addEventListener('keydown', e => { if (e.key === 'Home' && !e.target.closest('input,textarea,select')) { e.preventDefault(); frameAll(); } });
   let backdropOn = true;
   try { backdropOn = localStorage.getItem(storageKey + ':backdrop') !== '0'; } catch {}
-  const backdropButton = iconButton('render_result', 'Backdrop: show the composite behind the nodes', () => {
+  const backdropButton = Object.assign(document.createElement('button'), { type: 'button', className: 'bl-icon-button bl-text-toggle', textContent: 'Backdrop', title: 'Show the composite behind the nodes' });
+  backdropButton.onclick = () => {
     backdropOn = !backdropOn;
     try { localStorage.setItem(storageKey + ':backdrop', backdropOn ? '1' : '0'); } catch {}
     syncBackdrop();
-  });
+  };
   const syncBackdrop = () => {
     const compositor = type === 'compositor';
     backdropButton.hidden = !backdrop || !compositor;
