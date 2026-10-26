@@ -6,13 +6,9 @@ Scope for the next slice: Blender's mesh data and Edit Mode, mapped onto Babylon
 
 An experienced Blender user enters Edit Mode with Tab and works without relearning: the same primitives with the same topology and Adjust Last Operation fields, the same select modes, keys, operators, results and undo. Babylon has no mesh editing, so Blender's model leads here, and Babylon is only the display and picking backend.
 
-## Decisions needed
+## Decisions
 
-1. **License.** Blender is GPL-2.0-or-later. Porting its algorithms and names faithfully makes `src/bmesh`, `src/blenkernel/mesh` and `src/editors/mesh` a derivative work, and the bundled app with them. The options are:
-   - (a) Relicense Bylonder as GPL-3.0-or-later. MIT KubeezCut, Apache-2.0 Babylon and manifold-3d, and MPL-2.0 mediabunny can all be combined under it.
-   - (b) A clean-room implementation from the manual, the Python API and observed behavior, without reading Blender's C++ source. This is slower and less exact.
-
-   Recommendation: (a), since faithful parity is the goal.
+1. **License.** Decided: Bylonder is GPL-3.0-or-later, so `src/bmesh`, `src/blenkernel/mesh` and `src/editors/mesh` can port Blender (GPL-2.0-or-later) faithfully. MIT KubeezCut, Apache-2.0 Babylon and manifold-3d, and MPL-2.0 mediabunny combine under it.
 2. **Identifiers.** Keep Blender's names exactly for ported API (`BM_edge_split`, `bmo_extrude_face_region_exec`, `corner_verts`, operator idnames `mesh.extrude_region`, RNA property names), so a Blender change set greps straight to our code. Glue code stays in the repo's camelCase. Recommendation: yes.
 3. **Code-built meshes.** A mesh that `createScene` builds becomes Mesh data on its first edit, saved as a scene edit that replaces the code's geometry on every build, like a library override. A "Reset to Code Geometry" operator drops it. Recommendation: yes.
 
@@ -123,7 +119,6 @@ Sculpt, Weight and Vertex Paint, the UV Editor, Retopology tools, Remesh (OpenVD
 
 ## Risks
 
-- **License:** see decision 1. This blocks porting.
 - **Scene edits as an override of code:** slice 2 changes how edits persist for meshes. Saved projects migrate once and keep loading.
 - **Point and line width:** WebGPU draws points and lines 1 pixel wide, so the overlay draws them as screen-space quads from the start, so a later WebGPU engine needs no change.
 - **Bevel and Knife size:** they are the largest ports. They are scheduled late and phased.

@@ -1,6 +1,6 @@
 # Babylon scene starter
 
-Full-viewport Babylon.js workspace with modular reactive systems, generated Tweakpane controls, transform tools and browser-local persistence. MIT licensed. Dependencies are pinned; Inspector is loaded on demand.
+Full-viewport Babylon.js workspace with modular reactive systems, generated Tweakpane controls, transform tools and browser-local persistence. Licensed under GPL-3.0-or-later (see `LICENSE`). Dependencies are pinned; Inspector is loaded on demand.
 
 ## Develop / fork
 
