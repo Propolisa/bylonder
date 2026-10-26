@@ -1,5 +1,6 @@
 import { Mesh, TransformNode, VertexData } from "@babylonjs/core";
 import { nodeId, deleted, identify } from "./identity.js";
+import { rebuildMesh } from "./mesh-catalog.js";
 export function createObjectCommands(world, editor, history, refresh) {
   const { scene, objects } = world;
   const roots = () => editor.selection.roots;
@@ -156,7 +157,10 @@ export function createObjectCommands(world, editor, history, refresh) {
             ...(source.metadata?.wbModifiers?{wbModifiers:structuredClone(source.metadata.wbModifiers).map(m=>({...m,id:crypto.randomUUID()})),wbModifierBase:world.modifiers.source(source)}:{}),
             ...(source.metadata?.wbCurve?{wbCurve:structuredClone(source.metadata.wbCurve)}:{}),
           };
-          if (clone instanceof Mesh)
+          // Blender primitives keep their operator recipe, which also redraws their loose edges.
+          if (clone instanceof Mesh && source.metadata?.wbCreation?.operator && !source.metadata.wbModifiers)
+            rebuildMesh(clone, structuredClone(source.metadata.wbCreation));
+          else if (clone instanceof Mesh)
             clone.metadata.wbCreation = {
               ...(source.metadata?.wbCreation?.text ? {text:structuredClone(source.metadata.wbCreation.text)} : {}),
               vertices: world.modifiers?.source(source) || VertexData.ExtractFromMesh(clone).serialize(),

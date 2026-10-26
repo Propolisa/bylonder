@@ -101,7 +101,12 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     { label: 'Keyboard Shortcuts', keys: '?', run: () => ctx.help.showModal() },
   ], { blender: 'VIEW3D_MT_view' });
   const select = menuButton('Select', () => ['select-all', 'deselect', 'invert'].map(action), { blender: 'VIEW3D_MT_select_object' });
-  const meshes = () => creator.catalog.filter(p => p.id !== 'text').map(p => ({ label: p.title, icon: 'mesh_data', run: () => creator.add(p) }));
+  const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
+  const meshes = () => {
+    const mesh = creator.catalog.filter(p => p.id !== 'text');
+    const babylon = mesh.filter(p => p.group === 'babylon');
+    return [...mesh.filter(p => !p.group).map(meshItem), ...(babylon.length ? ['-', { label: 'Babylon', icon: 'mesh_data', items: babylon.map(meshItem) }] : [])];
+  };
   const add = menuButton('Add', () => [
     { label: 'Mesh', blender: 'VIEW3D_MT_mesh_add', icon: 'outliner_ob_mesh', items: meshes },
     { label: 'Text', blender: 'object.text_add', icon: 'outliner_ob_empty', run: () => creator.add(creator.catalog.find(p => p.id === 'text')) },

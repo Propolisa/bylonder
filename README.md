@@ -112,6 +112,12 @@ Store effects run initially and then coalesce once per animation frame by defaul
 | `source/blender/nodes`, `compositor`, `modifiers` | `src/nodes/`, `src/compositor/`, `src/modifiers/` | Geometry, particle and logic graphs; the compositor frame graph; the modifier stack |
 | `source/blender/render` | `src/render/` | Offline render context, virtual clock, sampling, encoding |
 | `source/blender/sequencer` | `src/sequencer/` | The edit slice, scene strip frames and the KubeezCut adapter |
+| `source/blender/bmesh` | `src/bmesh/` | BMesh in typed arrays: `intern/` (kernel, construction, queries, walkers, conversion), `operators/` (`bmo_*`) |
+| `source/blender/blenkernel/intern/mesh*` | `src/blenkernel/mesh/` | Mesh data (struct of arrays), normals, tessellation |
+| `source/blender/editors/mesh` | `src/editors/mesh/` | Mesh operators (`MESH_OT_*`) |
+| `source/blender/draw` | `src/draw/` | Mesh to Babylon geometry |
+| `source/blender/makesrna` | `src/makesrna/` | Operator RNA definitions read from Blender |
+| `source/blender/blenlib` | `src/blenlib/` | Math |
 | `source/blender/python` | `src/runtime/` | Running project code: the world builder and the `@workbench/sdk` API |
 
 `src/main.js` composes the viewport frame; `src/workspace/` is the browser IDE around it (projects, files, scenes, sharing) and has no Blender counterpart.
@@ -134,7 +140,7 @@ Monaco includes all 2,125 pinned Babylon declaration files, typed SDK globals, l
 
 ## Object-mode tools
 
-Shift+A opens the mesh menu. A temporary Tweakpane panel edits creation arguments live; Apply creates one undo step, Cancel restores the previous scene. F9 reopens the last creation settings until another edit. Twelve curated presets use arguments reflected at build time from Babylon's installed TypeScript declarations (`scripts/mesh-schema.mjs`). Complex callback/vector-array builders remain code APIs.
+Shift+A opens the mesh menu. A temporary Tweakpane panel edits creation arguments live; Apply creates one undo step, Cancel restores the previous scene. F9 reopens the last creation settings until another edit. Plane, Cube, Circle, Cylinder, Cone and Grid are Blender's own primitives, built by a port of Blender's BMesh operators and matching Blender 5.2 vertex for vertex; their fields are the operators' RNA properties (`src/makesrna/rna-operators.json`, written from Blender by `tools/blender-reference/operators.py`). UV Sphere, Ico Sphere and Torus still use Babylon builders, and Add > Mesh > Babylon has Babylon-only shapes, with arguments reflected from Babylon's TypeScript declarations (`scripts/mesh-schema.mjs`).
 
 ```js
 workbench.meshTools({

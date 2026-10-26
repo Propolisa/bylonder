@@ -2,6 +2,8 @@ import { createTextEditor } from "../curve/editfont.js";
 import { Pane } from "tweakpane";
 import { meshCatalog, buildMesh, rebuildMesh } from "./mesh-catalog.js";
 import { apply, snapshot } from "../undo/storage.js";
+
+const recipeOf = (preset, options) => (preset.operator ? { operator: preset.operator, options } : { builder: preset.builder, options });
 export function createAddMesh(
   world,
   editor,
@@ -55,10 +57,7 @@ export function createAddMesh(
       };
       pane.addBinding(values, key, options).on("change", () => {
         try {
-          rebuildMesh(node, {
-            builder: preset.builder,
-            options: { ...values },
-          });
+          rebuildMesh(node, recipeOf(preset, { ...values }));
           editor.reconcile();
         } catch (e) {
           notify(e.message);
@@ -81,12 +80,7 @@ export function createAddMesh(
     if (preset.id === "text") { textEditor.show(); return; }
     editor.finish(false);
     const before = snapshot(world.objects);
-    const recipe = {
-      builder: preset.builder,
-      options: Object.fromEntries(
-        Object.entries(preset.schema).map(([key, def]) => [key, def.default]),
-      ),
-    };
+    const recipe = recipeOf(preset, Object.fromEntries(Object.entries(preset.schema).map(([key, def]) => [key, def.default])));
     const node = buildMesh(
       world.scene,
       commands.unique(preset.title.replace(/\s/g, "")),

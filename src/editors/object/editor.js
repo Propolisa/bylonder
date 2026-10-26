@@ -11,9 +11,11 @@ export function createEditor(world, views, history, changed, notify, capture) {
     bound = new WeakSet();
   gizmos.usePointerToAttachGizmos = false;
   const selection = createSelection(scene, objects);
+  // Draw helpers (loose edge wires) stand for the object that owns them.
+  const owner = (m) => m?.metadata?.drawOwner ?? m;
   // One rule for what a click can select: live, unlocked, visible, and selectable through its collections.
   const selectable = (m) =>
-    objects.includes(m) && !m.metadata?.wbDeleted && !m.metadata?.wbLocked &&
+    (m = owner(m), objects.includes(m)) && !m.metadata?.wbDeleted && !m.metadata?.wbLocked &&
     m.isEnabled() && m.isVisible && (world.collections?.selectable(m) ?? true);
   const selected = selection.pivot;
   let mode = "select",
@@ -267,7 +269,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
       }
       const pick = pickIn(view, e.clientX, e.clientY);
       if (pick?.hit) {
-        let target = pick.pickedMesh;
+        let target = owner(pick.pickedMesh);
         while (
           target.parent?.metadata?.group &&
           !target.parent.metadata.wbDeleted
@@ -285,7 +287,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     }
     if (view.state.cameraView) return;
     const pick = pickIn(view, e.clientX, e.clientY);
-    let target = pick?.pickedMesh;
+    let target = owner(pick?.pickedMesh);
     while (target?.parent?.metadata?.group) target = target.parent;
     world.contextMenu?.open(e, target);
   };
@@ -304,7 +306,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     updateGesture: update,
     pick(x,y,view=views.input) {
       const hit=pickIn(view,x,y);
-      let node=hit?.pickedMesh;while(node?.parent?.metadata?.group&&!node.parent.metadata.wbDeleted)node=node.parent;return node;
+      let node=owner(hit?.pickedMesh);while(node?.parent?.metadata?.group&&!node.parent.metadata.wbDeleted)node=node.parent;return node;
     },
     // Listens for selection clicks and the context menu on a view's canvas.
     attach(view) {

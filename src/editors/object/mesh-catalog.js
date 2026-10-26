@@ -1,184 +1,97 @@
-import { MeshBuilder, VertexData } from "@babylonjs/core";
+import { Mesh, MeshBuilder, VertexData } from "@babylonjs/core";
 import reflected from "./builder-schema.json" with { type: "json" };
-const n = (value, min = 0.01, max = 100, step = 0.1) => ({
-  default: value,
-  min,
-  max,
-  step,
-});
-const sides = { default: 0, options: { Front: 0, Back: 1, Double: 2 } };
+import rna from "../../makesrna/rna-operators.json" with { type: "json" };
+import { primitiveOperators, primitive_add } from "../mesh/editmesh-add.js";
+import { mesh_batch_cache_apply } from "../../draw/mesh-batch-cache.js";
+
+const n = (value, min = 0.01, max = 100, step = 0.1) => ({ default: value, min, max, step });
 const detail = (value) => n(value, 3, 128, 1);
+// Operator properties drawn by the Add panel (Blender draws align, location and rotation separately).
+const PLACEMENT = ["align", "location", "rotation", "scale", "enter_editmode"];
+
+// An operator's RNA properties as panel fields.
+function operatorSchema(idname) {
+  const fields = Object.entries(rna[idname].properties).filter(([key, def]) => !def.hidden && !PLACEMENT.includes(key));
+  return Object.fromEntries(fields.map(([key, def]) => [key, {
+    label: def.name,
+    default: def.default,
+    ...(def.type === "ENUM" ? { options: Object.fromEntries(def.items.map(([id, name]) => [name, id])) } : {}),
+    ...(def.type === "INT" || def.type === "FLOAT" ? { min: def.soft_min, max: def.soft_max, step: def.type === "INT" ? 1 : 0.1 } : {}),
+  }]));
+}
+const operatorPreset = (preset) => ({ ...preset, title: rna[preset.blender].name.replace(/^Add /, ""), operator: preset.blender, schema: operatorSchema(preset.blender) });
+
+// Add > Mesh in Blender's order. Entries with `operator` build Blender's exact primitive; the rest are Babylon
+// builders standing in until their Blender operator is ported.
 export const presets = [
-  {
-    id: "box",
-    blender: "mesh.primitive_cube_add",
-    title: "Cube",
-    builder: "CreateBox",
-    schema: { width: n(2), height: n(2), depth: n(2) },
-  },
-  {
-    id: "sphere",
-    blender: "mesh.primitive_uv_sphere_add",
-    title: "UV Sphere",
-    builder: "CreateSphere",
-    schema: {
-      diameter: n(2),
-      segments: detail(32),
-      arc: n(1, 0.01, 1, 0.01),
-      slice: n(1, 0.01, 1, 0.01),
-    },
-  },
-  {
-    id: "ico",
-    blender: "mesh.primitive_ico_sphere_add",
-    title: "Icosphere",
-    builder: "CreateIcoSphere",
-    schema: {
-      radius: n(1),
-      subdivisions: n(4, 1, 16, 1),
-      flat: { default: true },
-    },
-  },
-  {
-    id: "cylinder",
-    blender: "mesh.primitive_cylinder_add",
-    title: "Cylinder",
-    builder: "CreateCylinder",
-    schema: {
-      height: n(2),
-      diameterTop: n(2, 0),
-      diameterBottom: n(2),
-      tessellation: detail(32),
-      subdivisions: n(1, 1, 64, 1),
-    },
-  },
-  {
-    id: "cone",
-    blender: "mesh.primitive_cone_add",
-    title: "Cone",
-    builder: "CreateCylinder",
-    schema: {
-      height: n(2),
-      diameterTop: n(0, 0),
-      diameterBottom: n(2),
-      tessellation: detail(32),
-    },
-  },
-  {
-    id: "torus",
-    blender: "mesh.primitive_torus_add",
-    title: "Torus",
-    builder: "CreateTorus",
-    schema: { diameter: n(2), thickness: n(0.5), tessellation: detail(48) },
-  },
-  {
-    id: "knot",
-    title: "Torus Knot",
-    builder: "CreateTorusKnot",
-    schema: {
-      radius: n(1),
-      tube: n(0.3),
-      radialSegments: detail(64),
-      tubularSegments: detail(32),
-      p: n(2, 1, 12, 1),
-      q: n(3, 1, 12, 1),
-    },
-  },
-  {
-    id: "plane",
-    blender: "mesh.primitive_plane_add",
-    title: "Plane",
-    builder: "CreatePlane",
-    schema: { width: n(2), height: n(2), sideOrientation: sides },
-  },
-  {
-    id: "ground",
-    blender: "mesh.primitive_grid_add",
-    title: "Ground",
-    builder: "CreateGround",
-    schema: { width: n(6), height: n(6), subdivisions: n(1, 1, 64, 1) },
-  },
-  {
-    id: "disc",
-    blender: "mesh.primitive_circle_add",
-    title: "Disc",
-    builder: "CreateDisc",
-    schema: {
-      radius: n(1),
-      tessellation: detail(48),
-      arc: n(1, 0.01, 1, 0.01),
-      sideOrientation: sides,
-    },
-  },
-  {
-    id: "capsule",
-    title: "Capsule",
-    builder: "CreateCapsule",
-    schema: {
-      height: n(2),
-      radius: n(0.5),
-      tessellation: detail(24),
-      subdivisions: n(2, 1, 32, 1),
-    },
-  },
-  {
-    id: "polyhedron",
-    title: "Polyhedron",
-    builder: "CreatePolyhedron",
-    schema: {
-      type: {
-        default: 0,
-        options: {
-          Tetrahedron: 0,
-          Octahedron: 1,
-          Dodecahedron: 2,
-          Icosahedron: 3,
-          Rhombicuboctahedron: 4,
-        },
-      },
-      size: n(1),
-      flat: { default: true },
-    },
-  },
+  operatorPreset({ id: "plane", blender: "mesh.primitive_plane_add", icon: "mesh_plane" }),
+  operatorPreset({ id: "box", blender: "mesh.primitive_cube_add", icon: "mesh_cube" }),
+  operatorPreset({ id: "disc", blender: "mesh.primitive_circle_add", icon: "mesh_circle" }),
+  { id: "sphere", blender: "mesh.primitive_uv_sphere_add", title: "UV Sphere", icon: "mesh_uvsphere", builder: "CreateSphere", schema: { diameter: n(2), segments: detail(32), arc: n(1, 0.01, 1, 0.01), slice: n(1, 0.01, 1, 0.01) } },
+  { id: "ico", blender: "mesh.primitive_ico_sphere_add", title: "Ico Sphere", icon: "mesh_icosphere", builder: "CreateIcoSphere", schema: { radius: n(1), subdivisions: n(4, 1, 16, 1), flat: { default: true } } },
+  operatorPreset({ id: "cylinder", blender: "mesh.primitive_cylinder_add", icon: "mesh_cylinder" }),
+  operatorPreset({ id: "cone", blender: "mesh.primitive_cone_add", icon: "mesh_cone" }),
+  { id: "torus", blender: "mesh.primitive_torus_add", title: "Torus", icon: "mesh_torus", builder: "CreateTorus", schema: { diameter: n(2), thickness: n(0.5), tessellation: detail(48) } },
+  operatorPreset({ id: "ground", blender: "mesh.primitive_grid_add", icon: "mesh_grid" }),
+  { id: "knot", group: "babylon", title: "Torus Knot", builder: "CreateTorusKnot", schema: { radius: n(1), tube: n(0.3), radialSegments: detail(64), tubularSegments: detail(32), p: n(2, 1, 12, 1), q: n(3, 1, 12, 1) } },
+  { id: "capsule", group: "babylon", title: "Capsule", builder: "CreateCapsule", schema: { height: n(2), radius: n(0.5), tessellation: detail(24), subdivisions: n(2, 1, 32, 1) } },
+  { id: "polyhedron", group: "babylon", title: "Polyhedron", builder: "CreatePolyhedron", schema: { type: { default: 0, options: { Tetrahedron: 0, Octahedron: 1, Dodecahedron: 2, Icosahedron: 3, Rhombicuboctahedron: 4 } }, size: n(1), flat: { default: true } } },
 ];
+
+// Field types a builder or operator accepts, for validating meshTools() overrides.
+function fieldType(preset, key) {
+  if (preset.operator) {
+    const def = rna[preset.operator].properties[key];
+    return def && { INT: "number", FLOAT: "number", BOOLEAN: "boolean", ENUM: "string" }[def.type];
+  }
+  const field = reflected[preset.builder]?.fields[key];
+  return ["number", "boolean", "string"].includes(field?.type) && field.type;
+}
+
 export function meshCatalog(config = {}) {
   return presets
     .filter((p) => !config.include || config.include.includes(p.id))
     .map((p) => {
       const schema = structuredClone(p.schema);
-      for (const [key, def] of Object.entries(config.fields?.[p.id] || {}))
-        schema[key] = { ...schema[key], ...def };
-      for (const [key, value] of Object.entries(
-        config.defaults?.[p.id] || {},
-      )) {
-        if (!schema[key])
-          throw Error("Unknown preset field " + p.id + "." + key);
+      for (const [key, def] of Object.entries(config.fields?.[p.id] || {})) schema[key] = { ...schema[key], ...def };
+      for (const [key, value] of Object.entries(config.defaults?.[p.id] || {})) {
+        if (!schema[key]) throw Error("Unknown preset field " + p.id + "." + key);
         schema[key].default = value;
       }
       for (const [key, def] of Object.entries(schema)) {
-        const field = reflected[p.builder]?.fields[key];
-        if (!field || !["number", "boolean", "string"].includes(field.type))
-          throw Error("Unsupported builder field " + p.builder + "." + key);
-        if (typeof def.default !== field.type)
-          throw Error("Invalid default " + key);
+        const type = fieldType(p, key);
+        if (!type) throw Error("Unsupported field " + (p.operator || p.builder) + "." + key);
+        if (typeof def.default !== type) throw Error("Invalid default " + key);
       }
       return { ...p, schema };
     });
 }
+
+// A recipe is { operator, options } for Blender primitives or { builder, options } for Babylon builders.
 export function buildMesh(scene, name, recipe) {
+  if (recipe.operator) {
+    if (!primitiveOperators[recipe.operator]) throw Error("Unknown mesh operator");
+    const node = new Mesh(name, scene);
+    mesh_batch_cache_apply(primitive_add(recipe.operator, recipe.options), node);
+    return node;
+  }
   const fn = MeshBuilder[recipe.builder];
   if (!fn || !reflected[recipe.builder]) throw Error("Unknown mesh builder");
   return fn(name, recipe.options, scene);
 }
+
 export function rebuildMesh(mesh, recipe) {
-  const temp = buildMesh(mesh.getScene(), "__previewGeometry", recipe);
-  try {
-    mesh.makeGeometryUnique();
-    VertexData.ExtractFromMesh(temp).applyToMesh(mesh);
-    mesh.refreshBoundingInfo();
-    mesh.metadata.wbCreation = { ...recipe };
-  } finally {
-    temp.dispose();
+  if (recipe.operator) mesh_batch_cache_apply(primitive_add(recipe.operator, recipe.options), mesh);
+  else {
+    const temp = buildMesh(mesh.getScene(), "__previewGeometry", recipe);
+    try {
+      mesh.makeGeometryUnique();
+      VertexData.ExtractFromMesh(temp).applyToMesh(mesh);
+      mesh.refreshBoundingInfo();
+    } finally {
+      temp.dispose();
+    }
   }
+  mesh.metadata.wbCreation = { ...recipe };
 }
 export { reflected as builderSchema };

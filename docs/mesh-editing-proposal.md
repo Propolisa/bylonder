@@ -10,7 +10,8 @@ An experienced Blender user enters Edit Mode with Tab and works without relearni
 
 1. **License.** Decided: Bylonder is GPL-3.0-or-later, so `src/bmesh`, `src/blenkernel/mesh` and `src/editors/mesh` can port Blender (GPL-2.0-or-later) faithfully. MIT KubeezCut, Apache-2.0 Babylon and manifold-3d, and MPL-2.0 mediabunny combine under it.
 2. **Identifiers.** Keep Blender's names exactly for ported API (`BM_edge_split`, `bmo_extrude_face_region_exec`, `corner_verts`, operator idnames `mesh.extrude_region`, RNA property names), so a Blender change set greps straight to our code. Glue code stays in the repo's camelCase. Recommendation: yes.
-3. **Code-built meshes.** A mesh that `createScene` builds becomes Mesh data on its first edit, saved as a scene edit that replaces the code's geometry on every build, like a library override. A "Reset to Code Geometry" operator drops it. Recommendation: yes.
+3. **BMesh layout.** Decided by benchmark (Grid 316 x 316, about 100k verts, Node 22): typed arrays build BMesh in about 200 ms against 270 to 520 ms for one JS object per element, compute normals in 20 ms against 90 to 155 ms, and use about 29 MB against 94 MB. BMesh stays in typed arrays.
+4. **Code-built meshes.** A mesh that `createScene` builds becomes Mesh data on its first edit, saved as a scene edit that replaces the code's geometry on every build, like a library override. A "Reset to Code Geometry" operator drops it. Recommendation: yes.
 
 ## Blender's model and ours
 
@@ -33,7 +34,7 @@ An experienced Blender user enters Edit Mode with Tab and works without relearni
 | `BLI_polyfill_2d` and its beautify step | N-gon tessellation, also the Beauty method of Triangulate | A port, replacing earcut for meshes so n-gons shade identically |
 | `BLI_kdopbvh` | Ray casts and snapping | A flat BVH over `corner_tris` in typed arrays |
 
-Axes: Bylonder keeps Babylon's Y-up, left-handed axes. Blender operators take a `matrix`. The Add menu passes one that maps Blender's Z-up to Babylon's Y-up. That map is a reflection, so primitives also reverse their corner order to keep normals pointing out. A test locks this (the cube's top face normal is +Y and it is front facing).
+Axes: Mesh data is in Blender's axes (Z up, right-handed), so every ported algorithm and every Blender fixture applies unchanged. `src/draw/mesh-batch-cache.js` is the one place it meets Babylon's axes: (x, y, z) becomes (x, z, y). Swapping two axes also flips handedness, so Blender's winding stays front facing in Babylon. A test checks Babylon's own normals against ours.
 
 ## Module layout
 
@@ -110,6 +111,16 @@ Each slice ships in small pushes, each visible in the app and covered by tests. 
 | 10 | Snapping and 3D cursor | Snap menu (Shift Tab, increment, vertex, edge, face, volume, edge center, perpendicular), snap base and target, Shift right click cursor, Shift S pie, BVH | Fixtures; snap benchmark | M |
 | 11 | Mesh data | UV Maps, Color Attributes, Attributes and Vertex Groups panels. Shape Keys mapped to Babylon's `MorphTargetManager` for display. Sharp edges and custom normals. Smooth by Angle as a modifier, as in Blender 4.1 and later | Attribute interpolation fixtures (`bmesh-interp`) | M |
 | 12 | Modifiers on Mesh | The stack evaluates Mesh data instead of `VertexData`. Edit Mode cage and On Cage. Subdivision Surface, Mirror (with clipping in Edit Mode), Solidify, Bevel (uses slice 9), Boolean (Manifold), Weld, Array on Mesh. Geometry Nodes keeps working through a Mesh to `VertexData` bridge | Fixtures; evaluation benchmark | L |
+
+## Critical path
+
+Read from the coverage tree (Splash Screen > Blender Coverage > 3D Viewport > Edit Mode, 476 items: 383 menu entries and 93 Mesh keymap bindings). Every item needs Mesh data, BMesh and the Edit Mode shell first; after that, items unlock by operator. In time-to-value order:
+
+1. Mesh data, BMesh kernel, draw cache and Blender's primitives. Done for Plane, Cube, Circle, Cylinder, Cone and Grid: all thirteen fixtures (defaults and option variants) match Blender 5.2 exactly, including element order and UVs. Still open: UV Sphere (spin), Ico Sphere (subdivide_edges), Torus, Monkey; n-gon tessellation (BLI_polyfill_2d).
+2. Edit Mode shell: Tab, select modes 1, 2, 3, the overlay, select buffer picking, A, Alt A, Ctrl I, B, C, H, Alt H, Edit Mode undo. Unlocks the Select menu and most of the Mesh keymap.
+3. G, R and S on components with partial updates. Unlocks the Transform menu.
+4. Operators by daily use: Extrude (E), Delete and Dissolve (X), Loop Cut (Ctrl R), Inset (I), Bevel (Ctrl B), Merge (M), Fill (F), Knife (K), Subdivide, Separate (P), Split (Y), Normals (Shift N).
+5. The remaining slices below, in table order.
 
 Slices 1 to 4 are the minimum for a credible Edit Mode. After slice 3, a user can enter Edit Mode and select. After slice 4, they can model with transforms. From slice 5 on, slices are mostly independent and can be reordered.
 

@@ -1,0 +1,39 @@
+import assert from 'node:assert/strict';
+import { readFile, readdir } from 'node:fs/promises';
+import { primitiveOperators, primitive_add } from '../src/editors/mesh/editmesh-add.js';
+import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../src/bmesh/intern/bmesh-mesh-convert.js';
+
+const dir = 'tests/fixtures/mesh/';
+const near = (a, b, tolerance = 1e-5) => Math.abs(a - b) <= tolerance;
+let compared = 0;
+for (const file of await readdir(dir)) {
+  const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
+  if (!primitiveOperators[fixture.operator]) continue;
+  const mesh = primitive_add(fixture.operator, fixture.props);
+  const name = file.replace('.json', '');
+  assert.equal(mesh.verts_num, fixture.positions.length, name + ': vertex count');
+  fixture.positions.forEach((p, v) => p.forEach((x, a) => assert.ok(near(mesh.vert_positions[v * 3 + a], x), `${name}: vertex ${v} ${mesh.vert_positions.subarray(v * 3, v * 3 + 3)} vs ${p}`)));
+  assert.deepEqual(Array.from(mesh.edges), fixture.edges.flat(), name + ': edges');
+  assert.deepEqual(Array.from(mesh.face_offsets), fixture.face_offsets, name + ': face offsets');
+  assert.deepEqual(Array.from(mesh.corner_verts), fixture.corner_verts, name + ': corner verts');
+  assert.deepEqual(Array.from(mesh.corner_edges), fixture.corner_edges, name + ': corner edges');
+  const uv = mesh.attribute('UVMap');
+  fixture.uv?.forEach((p, c) => p.forEach((x, a) => assert.ok(near(uv[c * 2 + a], x), `${name}: uv ${c} ${uv.subarray(c * 2, c * 2 + 2)} vs ${p}`)));
+  assert.deepEqual(Array.from(mesh.attribute('sharp_face') ?? [], Boolean), fixture.sharp_face, name + ': sharp faces');
+
+  const round = BM_mesh_bm_to_me(BM_mesh_bm_from_me(mesh));
+  for (const key of ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges']) assert.deepEqual(round[key], mesh[key], name + ': round trip ' + key);
+  compared++;
+}
+assert.ok(compared >= 13);
+console.log(`Mesh: ${compared} primitives match Blender 5.2 exactly (topology, order, positions, UVs) and round-trip through BMesh`);
+
+// Babylon sees the same outward faces: its own normals from our winding point the way ours do.
+import { mesh_batch_cache_vertex_data } from '../src/draw/mesh-batch-cache.js';
+import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
+const data = mesh_batch_cache_vertex_data(primitive_add('mesh.primitive_cube_add'));
+const computed = [];
+VertexData.ComputeNormals(data.positions, data.indices, computed);
+for (let i = 0; i < data.normals.length; i++) assert.ok(near(computed[i], data.normals[i], 1e-4), 'Babylon winding matches normals at ' + i);
+assert.ok(data.positions.length === 24 * 3 && data.indices.length === 36);
+console.log('Mesh: draw cache maps Blender axes onto Babylon with outward winding');

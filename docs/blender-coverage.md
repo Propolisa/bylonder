@@ -41,6 +41,14 @@ Edit > Preferences holds Bylonder's own settings (Keep Scenes Loaded). Blender's
 ## SEQUENCE_EDITOR > *
 The Video Sequencer and File Browser are KubeezCut islands. Their Blender identifiers live in the KubeezCut fork, which this scan does not read yet.
 
-## VIEW3D_MT_mesh_add > *
+## mesh.primitive_uv_sphere_add
 Status: partial
-Add > Mesh builds Babylon meshes with Blender's names and fields. Blender's exact topology comes with the mesh editing slice (docs/mesh-editing-proposal.md).
+Builds a Babylon sphere with Blender's name until the operator is ported. Plane, Cube, Circle, Cylinder, Cone and Grid are Blender's exact primitives.
+
+## mesh.primitive_ico_sphere_add
+Status: partial
+Builds a Babylon ico sphere with Blender's name until the operator is ported.
+
+## mesh.primitive_torus_add
+Status: partial
+Builds a Babylon torus with Blender's name until the operator is ported.

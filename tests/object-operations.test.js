@@ -13,14 +13,10 @@ const engine = new NullEngine(),
   objects = [];
 objects.scene = scene;
 for (const preset of meshCatalog()) {
-  const recipe = {
-    builder: preset.builder,
-    options: Object.fromEntries(
-      Object.entries(preset.schema).map(([k, v]) => [k, v.default]),
-    ),
-  };
+  const options = Object.fromEntries(Object.entries(preset.schema).map(([k, v]) => [k, v.default]));
+  const recipe = preset.operator ? { operator: preset.operator, options } : { builder: preset.builder, options };
   const m = buildMesh(scene, preset.id, recipe);
-  assert(m.getTotalVertices() > 0);
+  assert(m.getTotalVertices() > 0 || m.getChildMeshes().some((c) => c.getTotalVertices() > 0), preset.id + " draws");
   m.dispose();
 }
 const authored = MeshBuilder.CreateBox("source", {}, scene);
@@ -83,6 +79,16 @@ rebuildMesh(mesh, {
 history.commit();
 history.undo();
 assert.equal(mesh.metadata.wbCreation.options.diameter, 2);
+const cube = buildMesh(scene, "cube", { operator: "mesh.primitive_cube_add", options: { size: 2 } });
+cube.metadata = { wbId: "cube", wbCreation: { operator: "mesh.primitive_cube_add", options: { size: 2 } } };
+objects.push(cube);
+history.commit();
+rebuildMesh(cube, { operator: "mesh.primitive_cube_add", options: { size: 4 } });
+assert.equal(cube.getBoundingInfo().boundingBox.maximum.x, 2);
+history.commit();
+history.undo();
+assert.equal(cube.metadata.wbCreation.options.size, 2);
+assert.equal(cube.getBoundingInfo().boundingBox.maximum.x, 1);
 scene.dispose();
 newScene.dispose();
 engine.dispose();
