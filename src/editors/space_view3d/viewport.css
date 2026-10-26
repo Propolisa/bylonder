@@ -55,3 +55,5 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #objects .object-row.active-collection,#tree-root.active-collection{background:#ffffff14}
 #objects .object-row.active-collection .tree-label,#tree-root.active-collection span{color:#fff}
 #tree-root{cursor:default}
+
+.bl-select-box{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);background:var(--bl-hover)}

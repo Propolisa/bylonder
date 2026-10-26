@@ -6,6 +6,7 @@ import { BM_face_normal_update } from '../../bmesh/intern/bmesh-polygon.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
+import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
 import { beginMeshTransform, view3d_pixel_size } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
@@ -218,6 +219,34 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       notify,
     }));
   }
+  // The Select Box tool: a click selects (view3d.select), a drag selects in a box (view3d.select_box); Shift
+  // extends, Ctrl subtracts. B makes the next drag a box even from a click.
+  const DRAG_THRESHOLD_PX = 3;
+  let boxArmed = false;
+  function selectGesture(view, e) {
+    const start = { x: e.clientX, y: e.clientY }, forced = boxArmed;
+    boxArmed = false;
+    let box = null;
+    const rect = (p) => ({ xmin: Math.min(start.x, p.x), xmax: Math.max(start.x, p.x), ymin: Math.min(start.y, p.y), ymax: Math.max(start.y, p.y) });
+    const move = (ev) => {
+      if (!box && !forced && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < DRAG_THRESHOLD_PX) return;
+      box ??= document.body.appendChild(Object.assign(document.createElement('div'), { className: 'bl-select-box' }));
+      const r = rect({ x: ev.clientX, y: ev.clientY });
+      Object.assign(box.style, { left: r.xmin + 'px', top: r.ymin + 'px', width: r.xmax - r.xmin + 'px', height: r.ymax - r.ymin + 'px' });
+    };
+    const up = (ev) => {
+      removeEventListener('pointermove', move, true);
+      removeEventListener('pointerup', up, true);
+      if (!em) { box?.remove(); return; }
+      if (box) {
+        box.remove();
+        const op = ev.shiftKey ? SEL_OP_ADD : ev.ctrlKey ? SEL_OP_SUB : SEL_OP_SET;
+        if (do_mesh_box_select(em.bm, viewAdapter(view), rect({ x: ev.clientX, y: ev.clientY }), op)) sync();
+      } else if (!forced && EDBM_select_pick(em.bm, viewAdapter(view), [start.x, start.y], { toggle: e.shiftKey })) sync();
+    };
+    addEventListener('pointermove', move, true);
+    addEventListener('pointerup', up, true);
+  }
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
     '-',
@@ -240,6 +269,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: extrudeMove },
     { blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: loopcut },
     { blender: 'mesh.inset', keys: 'I', run: inset },
+    { blender: 'view3d.select_box', keys: 'B', run: () => { boxArmed = true; } },
     { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
     { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
     { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
@@ -284,8 +314,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
         finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); },
       });
     },
-    // A click in a view: the modal tool's confirm or cancel, else view3d.select with Blender's left-click keymap
-    // (click selects, Shift click toggles). Returns whether the click was used.
+    // A press in a view: the modal tool's confirm or cancel, else the Select Box tool. Returns whether it was used.
     pointerDown(view, e) {
       if (tool) {
         if (e.button === 0) tool.finish();
@@ -294,7 +323,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
         return true;
       }
       if (e.button !== 0) return false;
-      if (EDBM_select_pick(em.bm, viewAdapter(view), [e.clientX, e.clientY], { toggle: e.shiftKey })) sync();
+      selectGesture(view, e);
       return true;
     },
     // After undo or redo: the object's restored Mesh becomes the BMesh again.
