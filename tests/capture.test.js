@@ -34,7 +34,7 @@ capture.begin(
   canvas,
 );
 for (let i = 0; i < 10; i++)
-  send("mousemove", {
+  send("pointermove", {
     clientX: 100,
     clientY: 100,
     movementX: 500,
@@ -65,7 +65,7 @@ capture.begin(
   canvas,
 );
 await Promise.resolve();
-send("mousemove", { clientX: 30, clientY: 25, movementX: 0, movementY: 0 });
+send("pointermove", { clientX: 30, clientY: 25, movementX: 0, movementY: 0 });
 assert.equal(x, 20);
 assert.equal(y, 5);
 win.dispatchEvent(new Event("blur"));
