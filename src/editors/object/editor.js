@@ -278,8 +278,8 @@ export function createEditor(world, views, history, changed, notify, capture) {
       if (e.button === 0 || e.button === 2) finish(e.button === 0);
       return;
     }
-    if (e.button === 0 && world.editMode?.active) {
-      world.editMode.pick(view, e);
+    if (world.editMode?.active && world.editMode.pointerDown(view, e)) {
+      if (e.button === 2) suppressContext = true;
       return;
     }
     if (e.button === 0) {

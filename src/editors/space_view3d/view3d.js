@@ -159,6 +159,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   ], { blender: 'VIEW3D_MT_edit_mesh' });
   const edgeMenu = menuButton('Edge', () => [
     { label: 'Subdivide', blender: 'mesh.subdivide', run: () => world.editMode.exec('mesh.subdivide') },
+    '-',
+    { label: 'Loop Cut and Slide', blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: () => world.editMode.loopcut() },
   ], { blender: 'VIEW3D_MT_edit_mesh_edges' });
   const faceMenu = menuButton('Face', () => [
     { label: 'Extrude Faces', blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: () => world.editMode.extrudeMove() },

@@ -8,6 +8,7 @@ import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
 import { beginMeshTransform } from '../transform/transform-mesh.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
+import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
 import { openMenu } from '../interface/menu.js';
 import { createRedoPanel } from '../interface/redo-panel.js';
 import { operatorSchema } from './mesh-catalog.js';
@@ -86,6 +87,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
 
   function exit() {
     if (!em) return;
+    endTool();
     redo.hide();
     em.overlay.dispose();
     em.object.metadata = { ...em.object.metadata, editing: false };
@@ -147,6 +149,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   function exec(idname, props = {}) {
     const before = BM_mesh_bm_to_me(em.bm);
     meshOperators[idname](em.bm, props);
+    selectmode = em.bm.selectmode;
     sync();
     const schema = operatorSchema(idname);
     if (!Object.keys(schema).length) return;
@@ -162,6 +165,30 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       },
     });
   }
+  // A modal Edit Mode tool (Loop Cut) gets the pointer, wheel and keys until it finishes or is cancelled.
+  let tool = null;
+  const toolMove = (e) => tool?.move(viewAdapter(views.input), [e.clientX, e.clientY]);
+  const toolWheel = (e) => { if (!tool) return; e.preventDefault(); e.stopPropagation(); tool.wheel(e.deltaY < 0); };
+  function endTool() {
+    tool?.dispose();
+    tool = null;
+    removeEventListener('pointermove', toolMove, true);
+    removeEventListener('wheel', toolWheel, true);
+    notify('');
+  }
+  function startTool(create) {
+    endTool();
+    tool = create();
+    addEventListener('pointermove', toolMove, true);
+    addEventListener('wheel', toolWheel, { capture: true, passive: false });
+    toolMove(editor.pointer ? { clientX: editor.pointer.x, clientY: editor.pointer.y } : { clientX: 0, clientY: 0 });
+  }
+  const loopcut = () => startTool(() => loopcut_modal({
+    bm: () => em.bm,
+    owner: em.object,
+    notify,
+    confirm: (eed, number_cuts) => exec('mesh.loopcut', { edge_index: em.bm.e.index[eed], number_cuts }),
+  }));
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
     '-',
@@ -182,6 +209,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.reveal', keys: 'Alt H', run: () => exec('mesh.reveal') },
     { blender: 'VIEW3D_MT_edit_mesh_delete', keys: ['X', 'Delete'], run: () => openMenu(deleteMenu(), editor.pointer, 'Delete') },
     { blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: extrudeMove },
+    { blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: loopcut },
     { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
     { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
     { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
@@ -202,7 +230,16 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     deleteMenu,
     extrudeMove() { if (em) extrudeMove(); },
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
-    key: (e) => modeKeys(e) || (!!em && keymap(e)),
+    loopcut() { if (em) loopcut(); },
+    key(e) {
+      if (tool) {
+        const state = tool.key(e);
+        if (state === 'finished' || state === 'cancelled') endTool();
+        if (state) e.preventDefault();
+        return !!state;
+      }
+      return modeKeys(e) || (!!em && keymap(e));
+    },
     // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.
     // `orient: 'NORMAL'` constrains to the selection's normal; `keep` records an undo step even when cancelled, for
     // the operator that ran first (extrude).
@@ -215,9 +252,17 @@ export function createEditMode({ world, editor, views, history, notify, changed 
         finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); },
       });
     },
-    // view3d.select with Blender's left-click keymap: click selects, Shift click toggles.
-    pick(view, e) {
+    // A click in a view: the modal tool's confirm or cancel, else view3d.select with Blender's left-click keymap
+    // (click selects, Shift click toggles). Returns whether the click was used.
+    pointerDown(view, e) {
+      if (tool) {
+        if (e.button === 0) tool.finish();
+        endTool();
+        return true;
+      }
+      if (e.button !== 0) return false;
       if (EDBM_select_pick(em.bm, viewAdapter(view), [e.clientX, e.clientY], { toggle: e.shiftKey })) sync();
+      return true;
     },
     // After undo or redo: the object's restored Mesh becomes the BMesh again.
     reload() {
@@ -226,6 +271,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       em.bm = load(mesh_deserialize(em.object.metadata.wbCreation.mesh));
       sync({ commit: false });
     },
-    dispose() { em?.overlay.dispose(); em = null; redo.dispose(); },
+    dispose() { endTool(); em?.overlay.dispose(); em = null; redo.dispose(); },
   };
 }

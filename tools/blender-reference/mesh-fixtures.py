@@ -56,6 +56,11 @@ EDIT_CASES = {
     "subdivide-corner-fan": (("primitive_grid_add", {"x_subdivisions": 2, "y_subdivisions": 2}), "EDGE", [0, 1], "subdivide", {"ngon": False, "quadcorner": "FAN"}),
     "subdivide-tris": (("primitive_circle_add", {"vertices": 5, "fill_type": "TRIFAN"}), "FACE", [0, 1, 2, 3, 4], "subdivide", {"number_cuts": 2}),
     "subdivide-ring": (("primitive_cylinder_add", {"vertices": 6}), "EDGE", [1, 4, 7], "subdivide", {}),
+    "loopcut-cube": (("primitive_cube_add", {}), "EDGE", [], "loopcut", {"edge_index": 0, "object_index": 0}),
+    "loopcut-cube-3": (("primitive_cube_add", {}), "VERT", [], "loopcut", {"edge_index": 4, "object_index": 0, "number_cuts": 3}),
+    "loopcut-grid": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3}), "FACE", [], "loopcut", {"edge_index": 5, "object_index": 0, "number_cuts": 2}),
+    "loopcut-cylinder": (("primitive_cylinder_add", {"vertices": 8}), "EDGE", [], "loopcut", {"edge_index": 1, "object_index": 0}),
+    "loopcut-circle-edge": (("primitive_circle_add", {"vertices": 6}), "VERT", [], "loopcut", {"edge_index": 2, "object_index": 0, "number_cuts": 2}),
     "dissolve-faces-cube": (("primitive_cube_add", {}), "FACE", [0, 1], "dissolve_faces", {}),
 }
 
@@ -73,6 +78,32 @@ def select(kind, indices):
     bmesh.update_edit_mesh(bpy.context.object.data)
 
 
+def loopcut(edge_index, number_cuts=1, object_index=0):
+    """mesh.loopcut needs a 3D Viewport region, so in background mode the fixture selects the quad ring through
+    the edge and subdivides it with the arguments ringsel_finish passes to BM_mesh_esubdivide."""
+    import bmesh
+    me = bpy.context.object.data
+    bm = bmesh.from_edit_mesh(me)
+    bm.edges.ensure_lookup_table()
+    for e in bm.edges:
+        e.select_set(False)
+    start = bm.edges[edge_index]
+    ring, todo = {start}, [start]
+    while todo:
+        e = todo.pop()
+        for f in e.link_faces:
+            if len(f.edges) != 4:
+                continue
+            opposite = f.edges[(list(f.edges).index(e) + 2) % 4]
+            if opposite not in ring:
+                ring.add(opposite)
+                todo.append(opposite)
+    for e in ring:
+        e.select_set(True)
+    bmesh.update_edit_mesh(me)
+    bpy.ops.mesh.subdivide(number_cuts=number_cuts, ngon=True, quadcorner="PATH")
+
+
 r = lambda v: [round(x, 6) for x in v]
 for name, case in {**CASES, **EDIT_CASES}.items():
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -81,7 +112,7 @@ for name, case in {**CASES, **EDIT_CASES}.items():
     if edit:
         bpy.ops.object.mode_set(mode="EDIT")
         select(edit[0], edit[1])
-        getattr(bpy.ops.mesh, edit[2])(**edit[3])
+        (loopcut if edit[2] == "loopcut" else getattr(bpy.ops.mesh, edit[2]))(**edit[3])
         if len(edit) > 4:
             bpy.ops.transform.translate(value=edit[4])
         bpy.ops.object.mode_set(mode="OBJECT")

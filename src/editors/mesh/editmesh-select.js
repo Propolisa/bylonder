@@ -34,14 +34,14 @@ function segmentDistance(p, a, b) {
   return [Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy), t];
 }
 
-export function EDBM_edge_find_nearest(bm, view, mouse, dist = SELECT_DIST_PX) {
+export function EDBM_edge_find_nearest(bm, view, mouse, dist = SELECT_DIST_PX, use_select_bias = true) {
   let best = -1;
   BM_ITER_MESH(bm.e, (e) => {
     if (!visible(bm.e, e)) return;
     const a = view.project(co(bm, bm.e.v1[e])), b = view.project(co(bm, bm.e.v2[e]));
     if (!a || !b) return;
     const [d0, t] = segmentDistance(mouse, a, b);
-    const d = d0 + (BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT) ? SELECT_BIAS_PX : 0);
+    const d = d0 + (use_select_bias && BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT) ? SELECT_BIAS_PX : 0);
     if (d >= dist) return;
     const c1 = co(bm, bm.e.v1[e]), c2 = co(bm, bm.e.v2[e]);
     const mid = [0, 1, 2].map((i) => c1[i] + (c2[i] - c1[i]) * t);

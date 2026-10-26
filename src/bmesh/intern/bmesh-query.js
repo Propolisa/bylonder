@@ -121,3 +121,15 @@ export function BM_vert_pair_share_face_by_len(bm, v_a, v_b, allow_adjacent) {
   });
   return best;
 }
+
+const radialFaces = (bm, e) => { const out = [], first = bm.e.l[e]; if (first < 0) return out; let l = first; do out.push(bm.l.f[l]); while ((l = bm.l.radial_next[l]) !== first); return out; };
+export const BM_edge_is_any_face_len_test = (bm, e, len) => radialFaces(bm, e).some((f) => bm.f.len[f] === len);
+export function BM_edge_share_quad_check(bm, e1, e2) {
+  return radialFaces(bm, e1).some((f) => bm.f.len[f] === 4 && BM_face_edge_share_loop(bm, f, e2) >= 0);
+}
+
+// BM_edge_at_index: the edge whose index (as Mesh conversion numbered them) is `index`, or -1.
+export function BM_edge_at_index(bm, index) {
+  for (let e = 0; e < bm.e.size; e++) if (bm.e.alive[e] && bm.e.index[e] === index) return e;
+  return -1;
+}

@@ -11,3 +11,7 @@ export const view_3d = {
   editmesh_active: [1, 1, 1, 0.2],
   facedot_size: 3,
 };
+
+export const user_interface = {
+  gizmo_primary: [0.9608, 0.9451, 0.302],
+};

@@ -87,6 +87,7 @@ export function BM_mesh_bm_from_me(mesh) {
   }
   const pools = { v: verts, e: edges, f: [] };
   BM_ITER_MESH(bm.f, (f) => pools.f.push(f));
+  for (const [pool, list] of Object.entries(pools)) list.forEach((elem, i) => { bm[pool].index[elem] = i; });
   for (const [name, pool, flag] of FLAG_ATTRIBUTES) {
     const data = attr(name);
     if (data) pools[pool].forEach((elem, i) => { if (data[i]) bm[pool].hflag[elem] |= flag; });

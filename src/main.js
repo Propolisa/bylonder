@@ -44,7 +44,7 @@ let toastTimer;
 const notify = (text) => {
   const el = document.querySelector("#toast");
   el.textContent = text;
-  el.style.display = "block";
+  el.style.display = text ? "block" : "none";
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => (el.style.display = "none"), 2800);
 };
