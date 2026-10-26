@@ -38,23 +38,22 @@ export function BMW_island(bm, start, { only_manifold = false, ...options } = {}
   return order;
 }
 
-// BMW_VERT_SHELL: the edges connected to a vert (or edge) through verts.
-export function BMW_vert_shell(bm, start, { htype = 'v', ...options } = {}) {
-  const check = masks(bm, options), visited = new Set(), stack = [];
-  const visitEdge = (e) => { if (!visited.has(e) && check.edge(e)) { visited.add(e); stack.push(e); } };
+// BMW_VERT_SHELL: the edges connected to a vert (or edge) through verts, breadth first. Pass the same `visited` set
+// to later walks to skip what earlier ones reached, as one Blender walker over several starts does.
+export function BMW_vert_shell(bm, start, { htype = 'v', visited = new Set(), ...options } = {}) {
+  const check = masks(bm, options), queue = [];
+  const visitEdge = (e) => { if (!visited.has(e) && check.edge(e)) { visited.add(e); queue.push(e); } };
   if (htype === 'v') BM_EDGES_OF_VERT(bm, start).forEach(visitEdge);
   else visitEdge(start);
-  const order = [];
-  while (stack.length) {
-    const e = stack.pop();
-    order.push(e);
+  for (let i = 0; i < queue.length; i++) {
+    const e = queue[i];
     for (const v of [bm.e.v1[e], bm.e.v2[e]]) BM_EDGES_OF_VERT(bm, v).forEach(visitEdge);
   }
-  return order;
+  return queue;
 }
 
 // BMW_LOOP_SHELL_WIRE: the loops of the faces connected through edges, and the wire edges reached on the way, as
-// { loops, edges }. Starts at a vert or an edge.
+// { loops, edges }, breadth first. Starts at a vert or an edge.
 export function BMW_loop_shell_wire(bm, start, { htype = 'v', ...options } = {}) {
   const { l } = bm, check = masks(bm, options), test_hidden = !!options.test_hidden;
   const loops = new Set(), alt = { v: new Set(), e: new Set() }, stack = [], out = { loops: [], edges: [] };
@@ -91,8 +90,8 @@ export function BMW_loop_shell_wire(bm, start, { htype = 'v', ...options } = {})
       visitVert(bm.e.v2[start]);
     } else radial((it) => { visitLoop(it); visitLoop(l.next[it]); });
   }
-  while (stack.length) {
-    const [kind, ele] = stack.pop();
+  for (let i = 0; i < stack.length; i++) {
+    const [kind, ele] = stack[i];
     if (kind === 'l') {
       stepLoop(ele);
       visitVert(l.v[ele]);

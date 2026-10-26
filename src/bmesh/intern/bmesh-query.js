@@ -103,6 +103,24 @@ export function BM_face_vert_share_loop(bm, f, v) {
 }
 export const BM_vert_in_face = (bm, v, f) => BM_face_vert_share_loop(bm, f, v) >= 0;
 
+// The face with exactly these verts in this cyclic order, in either winding, or -1.
+export function BM_face_exists(bm, verts) {
+  const { l } = bm, len = verts.length;
+  for (const e of BM_EDGES_OF_VERT(bm, verts[0])) {
+    const first = bm.e.l[e];
+    if (first < 0) continue;
+    let r = first;
+    do {
+      if (l.v[r] !== verts[0] || bm.f.len[l.f[r]] !== len) continue;
+      let i_walk = 2;
+      const dir = l.v[l.next[r]] === verts[1] ? l.next : l.v[l.prev[r]] === verts[1] ? l.prev : null;
+      if (dir) for (let walk = dir[dir[r]]; i_walk !== len && l.v[walk] === verts[i_walk]; walk = dir[walk]) i_walk++;
+      if (i_walk === len) return l.f[r];
+    } while ((r = l.radial_next[r]) !== first);
+  }
+  return -1;
+}
+
 // BM_EDGES_OF_VERT: around the disk cycle from v->e.
 export function BM_EDGES_OF_VERT(bm, v) {
   const out = [], first = bm.v.e[v];

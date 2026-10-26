@@ -1,5 +1,5 @@
 // Element creation and removal and the topology kernel (bmesh_core.cc). Handles are indices; -1 is null.
-import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_SMOOTH, _FLAG_JF, _FLAG_WALK, BM_ELEM_API_FLAG_TEST, BM_ELEM_API_FLAG_ENABLE, BM_ELEM_API_FLAG_DISABLE, poolAlloc, poolFree } from './bmesh-class.js';
+import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_SMOOTH, BM_elem_flag_test, _FLAG_JF, _FLAG_WALK, BM_ELEM_API_FLAG_TEST, BM_ELEM_API_FLAG_ENABLE, BM_ELEM_API_FLAG_DISABLE, poolAlloc, poolFree } from './bmesh-class.js';
 import {
   bmesh_disk_edge_append, bmesh_disk_edge_remove, bmesh_disk_edge_next, bmesh_edge_vert_swap, bmesh_disk_vert_replace,
   bmesh_radial_loop_append, bmesh_radial_loop_remove,
@@ -88,13 +88,18 @@ export function BM_elem_attrs_copy(pool, src, dst) {
   for (const layer of pool.layers) layer.data.copyWithin(dst * layer.size, src * layer.size, src * layer.size + layer.size);
 }
 
-const bm_kill_only_vert = (bm, v) => { BM_select_history_remove(bm, BM_VERT, v); poolFree(bm.v, v); };
-const bm_kill_only_edge = (bm, e) => { BM_select_history_remove(bm, BM_EDGE, e); poolFree(bm.e, e); };
+// Freeing an element also drops it from the selection history and the selection counts.
+function bm_kill_only(bm, name, htype, total, i) {
+  BM_select_history_remove(bm, htype, i);
+  if (BM_elem_flag_test(bm[name], i, BM_ELEM_SELECT) && bm[total]) bm[total]--;
+  poolFree(bm[name], i);
+}
+const bm_kill_only_vert = (bm, v) => bm_kill_only(bm, 'v', BM_VERT, 'totvertsel', v);
+const bm_kill_only_edge = (bm, e) => bm_kill_only(bm, 'e', BM_EDGE, 'totedgesel', e);
 const bm_kill_only_loop = (bm, l) => poolFree(bm.l, l);
 function bm_kill_only_face(bm, f) {
   if (bm.act_face === f) bm.act_face = -1;
-  BM_select_history_remove(bm, BM_FACE, f);
-  poolFree(bm.f, f);
+  bm_kill_only(bm, 'f', BM_FACE, 'totfacesel', f);
 }
 
 export function BM_face_kill(bm, f) {
@@ -412,4 +417,20 @@ export function BM_vert_splice(bm, v_dst, v_src) {
   while (bm.v.e[v_src] >= 0) bmesh_edge_vert_swap(bm, bm.v.e[v_src], v_dst, v_src);
   BM_vert_kill(bm, v_src);
   return true;
+}
+
+// bmesh_face_swap_data: the two faces trade loops and fields, keeping their index and custom data.
+export function bmesh_face_swap_data(bm, f_a, f_b) {
+  const { f, l } = bm;
+  for (const [face, other] of [[f_a, f_b], [f_b, f_a]]) {
+    const first = f.l_first[face];
+    let it = first;
+    do l.f[it] = other; while ((it = l.next[it]) !== first);
+  }
+  for (const [name, n] of f.fields) {
+    if (name === 'index' || name === 'oflag') continue;
+    const a = f[name].slice(f_a * n, f_a * n + n);
+    f[name].copyWithin(f_a * n, f_b * n, f_b * n + n);
+    f[name].set(a, f_b * n);
+  }
 }

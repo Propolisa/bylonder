@@ -27,6 +27,7 @@ import { createKeymap } from '../../windowmanager/input/keymap.js';
 
 // VIEW3D_MT_edit_mesh_delete, as far as its operators are ported.
 const DELETE_ITEMS = [['VERT', 'Vertices'], ['EDGE', 'Edges'], ['FACE', 'Faces'], ['EDGE_FACE', 'Only Edges & Faces'], ['ONLY_FACE', 'Only Faces']];
+const MERGE_ITEMS = [['CENTER', 'At Center'], ['CURSOR', 'At Cursor'], ['COLLAPSE', 'Collapse'], ['FIRST', 'At First'], ['LAST', 'At Last']];
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
 
 // The Mesh an object's geometry comes from: its saved Mesh, its Blender primitive, or its Babylon geometry welded.
@@ -154,7 +155,9 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // from the Mesh as it was before.
   function exec(idname, props = {}) {
     const before = BM_mesh_bm_to_me(em.bm);
-    meshOperators[idname](em.bm, props);
+    // An operator may return its report.
+    const run = (values) => { const report = meshOperators[idname](em.bm, values); if (typeof report === 'string') notify(report); };
+    run(props);
     selectmode = em.bm.selectmode;
     sync();
     const schema = operatorSchema(idname);
@@ -166,7 +169,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       values,
       apply(next) {
         em.bm = load(before);
-        meshOperators[idname](em.bm, next);
+        run(next);
         sync({ amend: true });
       },
     });
@@ -233,6 +236,17 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     edbm_select_loop(em.bm, eed, props);
     sync();
   };
+  // VIEW3D_MT_edit_mesh_merge: At First and At Last only when the selection history starts or ends with a vert.
+  const mergeMenu = () => {
+    const history = em.bm.selected, vert = (ese) => ese?.htype === BM_VERT && em.bm.selectmode & SCE_SELECT_VERTEX;
+    const cursor = toBlender(Vector3.TransformCoordinates(Vector3.Zero(), Matrix.Invert(em.object.computeWorldMatrix(true))));
+    return [
+      ...MERGE_ITEMS.filter(([type]) => (type !== 'FIRST' || vert(history[0])) && (type !== 'LAST' || vert(history.at(-1))))
+        .map(([type, label]) => ({ label, blender: 'mesh.merge:' + type, run: () => exec('mesh.merge', { type, cursor }) })),
+      '-',
+      { label: 'By Distance', blender: 'mesh.remove_doubles', run: () => exec('mesh.remove_doubles') },
+    ];
+  };
   const linkedPick = (event, deselect) => { if (edbm_select_linked_pick(em.bm, viewAdapter(event.view), [event.x, event.y], { deselect })) sync(); };
   const inView = (event) => !!event.view;
   const deleteMenu = () => [
@@ -255,6 +269,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => exec('mesh.select_linked') },
     { blender: 'mesh.select_linked_pick', keys: 'L', poll: inView, run: (event) => linkedPick(event, false) },
     { blender: 'mesh.select_linked_pick', keys: 'Shift L', poll: inView, run: (event) => linkedPick(event, true) },
+    { blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', run: () => openMenu(mergeMenu(), editor.pointer, 'Merge') },
     { blender: 'mesh.hide', keys: 'H', run: () => exec('mesh.hide') },
     { blender: 'mesh.hide', keys: 'Shift H', run: () => exec('mesh.hide', { unselected: true }) },
     { blender: 'mesh.reveal', keys: 'Alt H', run: () => exec('mesh.reveal') },
@@ -300,6 +315,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     setSelectMode(type, extend = false) { if (em) run((bm) => (selectmode = mesh_select_mode(bm, type, { use_extend: extend })))(); },
     exec(idname, props) { if (em) exec(idname, props); },
     deleteMenu,
+    mergeMenu: () => (em ? mergeMenu() : []),
     extrudeMove() { if (em) extrudeMove(); },
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
     loopcut() { if (em) loopcut(); },

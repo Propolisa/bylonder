@@ -125,6 +125,7 @@ r = typed('translate', [axis('AXIS_Z'), '- 1 . 5']);
 assert.equal(selectedCoords(r.bm), expect(([x, y, z]) => [x, y, z - 1.5]), 'G Z -1.5');
 assert.equal(r.t.header, 'D: [-(1.5|)] = -1.5 m (1.5 m) along global Z');
 assert.equal(selectedCoords(typed('translate', ['2 Tab 3']).bm), expect(([x, y, z]) => [x + 2, y + 3, z]), 'G 2 Tab 3');
+assert.equal(selectedCoords(typed('translate', [axis('PLANE_Z'), '1 Tab 2']).bm), expect(([x, y, z]) => [x + 1, y, z]), 'G Shift Z 1 Tab 2 moves along X only, as Blender 5.2 does');
 assert.equal(selectedCoords(typed('translate', ['3 Backspace 2']).bm), expect(([x, y, z]) => [x + 2, y, z]), 'Backspace removes a digit');
 
 // The object turned 90 degrees about Z, its local X along world -Y (vertex coordinates are local).

@@ -90,6 +90,11 @@ export const BM_ELEM_API_FLAG_ENABLE = (pool, i, flag) => { pool.api_flag[i] |= 
 export const BM_ELEM_API_FLAG_DISABLE = (pool, i, flag) => { pool.api_flag[i] &= ~flag; };
 
 // BMO tool flags (bmesh_operator_api.hh).
+// BM_elem_flag_merge_ex: both elements get the union of their flags, keeping `hflag_and` only where both had it.
+export function BM_elem_flag_merge_ex(pool_a, a, pool_b, b, hflag_and) {
+  if (!(pool_a.hflag[a] & pool_b.hflag[b] & hflag_and)) { pool_a.hflag[a] &= ~hflag_and; pool_b.hflag[b] &= ~hflag_and; }
+  pool_a.hflag[a] = pool_b.hflag[b] = pool_a.hflag[a] | pool_b.hflag[b];
+}
 export const BMO_flag_test = (pool, i, flag) => (pool.oflag[i] & flag) !== 0;
 export const BMO_flag_enable = (pool, i, flag) => { pool.oflag[i] |= flag; };
 export const BMO_flag_disable = (pool, i, flag) => { pool.oflag[i] &= ~flag; };

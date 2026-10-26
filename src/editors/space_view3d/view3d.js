@@ -118,6 +118,14 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     { label: 'All', blender: 'mesh.select_all:SELECT', keys: 'A', run: () => world.editMode.selectAll('SELECT') },
     { label: 'None', blender: 'mesh.select_all:DESELECT', keys: 'Alt A', run: () => world.editMode.selectAll('DESELECT') },
     { label: 'Invert', blender: 'mesh.select_all:INVERT', keys: 'Ctrl I', run: () => world.editMode.selectAll('INVERT') },
+    '-',
+    { label: 'Select More/Less', blender: 'VIEW3D_MT_edit_mesh_select_more_less', items: [
+      { label: 'More', blender: 'mesh.select_more', keys: 'Ctrl Numpad +', run: () => world.editMode.exec('mesh.select_more') },
+      { label: 'Less', blender: 'mesh.select_less', keys: 'Ctrl Numpad -', run: () => world.editMode.exec('mesh.select_less') },
+    ] },
+    { label: 'Select Linked', blender: 'VIEW3D_MT_edit_mesh_select_linked', items: [
+      { label: 'Linked', blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => world.editMode.exec('mesh.select_linked') },
+    ] },
   ];
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
   const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
@@ -148,6 +156,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     { label: 'Transform', blender: 'VIEW3D_MT_transform', items: [['Move', 'transform.translate', 'G', 'move'], ['Rotate', 'transform.rotate', 'R', 'rotate'], ['Scale', 'transform.resize', 'S', 'scale']].map(([label, blender, keys, type]) => ({ label, blender, keys, run: () => editor.start(type) })) },
     '-',
     { label: 'Extrude', blender: 'VIEW3D_MT_edit_mesh_extrude', items: [{ label: 'Extrude Faces', blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: () => world.editMode.extrudeMove() }] },
+    '-',
+    { label: 'Merge', blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', items: world.editMode.mergeMenu },
     '-',
     { label: 'Show/Hide', blender: 'VIEW3D_MT_edit_mesh_showhide', items: [
       { label: 'Reveal Hidden', blender: 'mesh.reveal', keys: 'Alt H', run: () => world.editMode.exec('mesh.reveal') },

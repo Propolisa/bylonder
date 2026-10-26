@@ -123,6 +123,20 @@ export function BM_mesh_elem_hflag_disable_all(bm, htype, hflag, respecthide = f
   }
   if (hflag & BM_ELEM_SELECT) { BM_select_history_clear(bm); recount(bm); }
 }
+// BM_mesh_elem_hflag_enable_test: sets `hflag` on the elements of `htype` that have `hflag_test` (all with 0), and
+// with `overwrite` clears it on the others. Hidden elements stay as they are with `respecthide`.
+export function BM_mesh_elem_hflag_enable_test(bm, htype, hflag, respecthide, overwrite, hflag_test) {
+  for (const [type, name] of [[BM_VERT, 'v'], [BM_EDGE, 'e'], [BM_FACE, 'f']]) {
+    if (!(htype & type)) continue;
+    BM_ITER_MESH(bm[name], (i) => {
+      if (respecthide && BM_elem_flag_test(bm[name], i, BM_ELEM_HIDDEN)) return;
+      const match = !hflag_test || BM_elem_flag_test(bm[name], i, hflag_test);
+      if (!match && !overwrite) return;
+      if (hflag & BM_ELEM_SELECT) BM_elem_select_set(bm, type, i, match);
+      (match ? BM_elem_flag_enable : BM_elem_flag_disable)(bm[name], i, match ? hflag & ~BM_ELEM_SELECT : hflag);
+    });
+  }
+}
 export function BM_mesh_elem_hflag_enable_all(bm, htype, hflag, respecthide = false) {
   for (const type of [BM_VERT, BM_EDGE, BM_FACE]) {
     if (!(htype & type)) continue;
@@ -143,6 +157,17 @@ export function BM_select_history_store(bm, htype, ele) {
 }
 export function BM_select_history_validate(bm) {
   bm.selected = (bm.selected ?? []).filter(({ htype, ele }) => bm[POOL[htype]].alive[ele] && BM_elem_flag_test(bm[POOL[htype]], ele, BM_ELEM_SELECT));
+}
+// BM_select_history_merge_from_targetmap: entries follow `maps` (by htype) to the elements that replace them. An
+// entry survives only when its new element was itself in the history (_FLAG_OVERLAP), once.
+export function BM_select_history_merge_from_targetmap(bm, maps) {
+  const key = (htype, ele) => htype + ':' + ele;
+  const overlap = new Set(bm.selected.map((ese) => key(ese.htype, ese.ele)));
+  bm.selected = bm.selected.flatMap((ese) => {
+    let ele = ese.ele;
+    for (let next; (next = maps[ese.htype]?.get(ele)) !== undefined;) ele = next;
+    return overlap.delete(key(ese.htype, ele)) ? [{ ...ese, ele }] : [];
+  });
 }
 export const BM_select_history_active_get = (bm) => bm.selected?.at(-1) ?? null;
 

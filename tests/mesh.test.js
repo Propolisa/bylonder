@@ -40,7 +40,7 @@ console.log('Mesh: draw cache maps Blender axes onto Babylon with outward windin
 
 // Edit Mode operators on Blender's own selection, compared with Blender's result.
 import { meshOperators } from '../src/editors/mesh/editmesh-tools.js';
-import { BM_elem_select_set, BM_mesh_select_mode_flush, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
+import { BM_elem_select_set, BM_select_history_store, BM_mesh_select_mode_flush, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
 import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SEAM } from '../src/bmesh/intern/bmesh-class.js';
 const SELECT = { VERT: [SCE_SELECT_VERTEX, BM_VERT], EDGE: [SCE_SELECT_EDGE, BM_EDGE], FACE: [SCE_SELECT_FACE, BM_FACE] };
 // Order-free form of a Mesh: vertices, edges and faces (winding kept) named by rounded position.
@@ -68,7 +68,7 @@ for (const file of await readdir(dir)) {
   for (const e of seams) bm.e.hflag[e] |= BM_ELEM_SEAM;
   const [mode, htype] = SELECT[select_mode];
   bm.selectmode = mode;
-  for (const i of select) BM_elem_select_set(bm, htype, i, true);
+  for (const i of select) { BM_elem_select_set(bm, htype, i, true); BM_select_history_store(bm, htype, i); }
   BM_mesh_select_mode_flush(bm);
   meshOperators[operator](bm, props);
   if (move) for (let v = 0; v < bm.v.size; v++) if (bm.v.alive[v] && bm.v.hflag[v] & 1) move.forEach((d, a) => (bm.v.co[v * 3 + a] += d));

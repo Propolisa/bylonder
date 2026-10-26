@@ -1,11 +1,13 @@
 // Edit Mode mesh operators (editmesh_tools.cc).
-import { BM_ITER_MESH, BM_ELEM_SELECT, BM_VERT, BM_EDGE, BM_FACE, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
+import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_TAG, BM_VERT, BM_EDGE, BM_FACE, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
+import { bmo_pointmerge_exec, bmo_collapse_exec, bmo_remove_doubles_exec } from '../../bmesh/operators/bmo-removedoubles.js';
+import { add_v3, mul_v3_fl } from '../../blenlib/math-geom.js';
 import { bmo_extrude_face_region_exec, bmo_extrude_edge_only_exec, bmo_extrude_vert_indiv_exec } from '../../bmesh/operators/bmo-extrude.js';
 import { BMO_op_callf } from '../../bmesh/intern/bmesh-operators.js';
 import { DEL_VERTS, DEL_EDGES, DEL_FACES, DEL_EDGESFACES, DEL_ONLYFACES } from '../../bmesh/intern/bmesh-delete.js';
 import { bmo_delete_exec } from '../../bmesh/operators/bmo-dupe.js';
 import { bmo_dissolve_faces_exec } from '../../bmesh/operators/bmo-dissolve.js';
-import { BM_mesh_elem_hflag_disable_all, BM_face_select_set, BM_vert_select_set, BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
+import { BM_mesh_elem_hflag_disable_all, BM_mesh_elem_hflag_enable_test, BM_mesh_select_mode_flush_ex, BM_face_select_set, BM_vert_select_set, BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_mesh_esubdivide, SUBD_CORNER_INNERVERT, SUBD_CORNER_PATH, SUBD_CORNER_FAN, SUBD_CORNER_STRAIGHT_CUT, SUBDIV_SELECT_ORIG } from '../../bmesh/operators/bmo-subdivide.js';
 import { edbm_loopcut } from './editmesh-loopcut.js';
 import { edbm_select_loop, edbm_select_linked_exec } from './editmesh-select.js';
@@ -116,6 +118,39 @@ export function edbm_subdivide_exec(bm, { number_cuts = 1, smoothness = 0, ngon 
   return true;
 }
 
+const selectedVerts = (bm) => BMO_slot_buffer_from_hflag(bm, 'v', BM_ELEM_SELECT).v;
+const co = (bm, v) => [...bm.v.co.subarray(v * 3, v * 3 + 3)];
+
+// mesh.merge: CENTER, CURSOR (`cursor` in object space), COLLAPSE, FIRST or LAST (by the selection history).
+export function edbm_merge_exec(bm, { type = 'CENTER', cursor = [0, 0, 0] } = {}) {
+  if (!bm.totvertsel) return false;
+  const verts = selectedVerts(bm);
+  if (type === 'COLLAPSE') BMO_op_callf(bm, bmo_collapse_exec, { edges: BMO_slot_buffer_from_hflag(bm, 'e', BM_ELEM_SELECT).e });
+  else if (type === 'FIRST' || type === 'LAST') {
+    const ese = type === 'FIRST' ? bm.selected[0] : bm.selected.at(-1);
+    if (ese?.htype !== BM_VERT || !BM_elem_flag_test(bm.v, ese.ele, BM_ELEM_SELECT)) return false;
+    BMO_op_callf(bm, bmo_pointmerge_exec, { verts, merge_co: co(bm, ese.ele), vert_target: ese.ele });
+  } else {
+    const merge_co = type === 'CURSOR' ? cursor : mul_v3_fl(verts.reduce((sum, v) => add_v3(sum, co(bm, v)), [0, 0, 0]), 1 / verts.length);
+    BMO_op_callf(bm, bmo_pointmerge_exec, { verts, merge_co });
+  }
+  // Once collapsed there is no edge or face selection.
+  if (!(bm.selectmode & SCE_SELECT_VERTEX)) BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+  return true;
+}
+
+// mesh.remove_doubles (Merge by Distance): returns how many verts were removed.
+export function edbm_remove_doubles_exec(bm, { threshold = 0.0001, use_centroid = true } = {}) {
+  if (!bm.totvertsel) return 0;
+  const [pool, htype] = bm.selectmode & SCE_SELECT_VERTEX ? ['v', BM_VERT] : bm.selectmode & SCE_SELECT_EDGE ? ['e', BM_EDGE] : ['f', BM_FACE];
+  // The selection survives the weld as tags.
+  BM_mesh_elem_hflag_enable_test(bm, htype, BM_ELEM_TAG, true, true, BM_ELEM_SELECT);
+  const count = BMO_op_callf(bm, bmo_remove_doubles_exec, { verts: selectedVerts(bm), dist: threshold, use_centroid });
+  BM_mesh_elem_hflag_enable_test(bm, htype, BM_ELEM_SELECT, true, true, BM_ELEM_TAG);
+  BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
+  return count;
+}
+
 // Edit Mode operators by Blender idname, as (bm, props) for fixtures and keymaps.
 export const meshOperators = {
   'mesh.delete': (bm, props) => edbm_delete_exec(bm, props.type),
@@ -131,4 +166,6 @@ export const meshOperators = {
   'mesh.select_more': (bm, props) => EDBM_select_more(bm, bm.selectmode, props.use_face_step ?? true),
   'mesh.select_less': (bm, props) => EDBM_select_less(bm, bm.selectmode, props.use_face_step ?? true),
   'mesh.select_linked': (bm, props) => edbm_select_linked_exec(bm, props),
+  'mesh.merge': (bm, props) => edbm_merge_exec(bm, props),
+  'mesh.remove_doubles': (bm, props) => { const removed = edbm_remove_doubles_exec(bm, props); return `Removed ${removed} ${removed === 1 ? 'vertex' : 'vertices'}`; },
 };

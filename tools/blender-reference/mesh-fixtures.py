@@ -1,6 +1,8 @@
 # Writes Blender's output for mesh operators as fixtures (tests/fixtures/mesh/*.json): positions, edges, faces,
 # corner vertices and UVs of the resulting Mesh, in Blender's element order.
 # usage: blender -b --factory-startup --python tools/blender-reference/mesh-fixtures.py -- OUT_DIR
+# Run it with Blender 5.2.3 and port from the v5.2.3 source tag: some algorithms (find_doubles, constrained typed
+# moves) differ in later versions.
 import bpy, json, os, sys
 
 out_dir = sys.argv[sys.argv.index("--") + 1]
@@ -97,6 +99,16 @@ EDIT_CASES = {
     "select-linked-vert-seam": (("primitive_grid_add", GRID4, SEAM_X0), "VERT", [0], "select_linked", {"delimit": ["SEAM"]}),
     "select-linked-edge-seam": (("primitive_grid_add", GRID4, SEAM_X0), "EDGE", [0], "select_linked", {"delimit": ["SEAM"]}),
     "select-linked-face-normal": (("primitive_cube_add", {}), "FACE", [0], "select_linked", {"delimit": ["NORMAL"]}),
+    "merge-center": (("primitive_grid_add", GRID4), "VERT", [6, 7, 11, 12], "merge", {"type": "CENTER"}),
+    "merge-cursor": (("primitive_cube_add", {}), "VERT", [0, 1], "merge", {"type": "CURSOR"}),
+    "merge-first": (("primitive_grid_add", GRID4), "VERT", [12, 6, 7], "merge", {"type": "FIRST"}),
+    "merge-last": (("primitive_grid_add", GRID4), "VERT", [12, 6, 7], "merge", {"type": "LAST"}),
+    "merge-collapse": (("primitive_grid_add", GRID4), "EDGE", [0, 1, 30, 35], "merge", {"type": "COLLAPSE"}),
+    "merge-face": (("primitive_cube_add", {}), "FACE", [0], "merge", {"type": "CENTER"}),
+    "merge-edge-loop": (("primitive_cylinder_add", {"vertices": 8}), "EDGE", [0, 3, 6, 9, 12, 15, 18, 21], "merge", {"type": "CENTER"}),
+    "remove-doubles": (("primitive_grid_add", GRID4), "VERT", list(range(25)), "remove_doubles", {"threshold": 0.6}),
+    "remove-doubles-no-centroid": (("primitive_grid_add", GRID4), "VERT", list(range(25)), "remove_doubles", {"threshold": 0.6, "use_centroid": False}),
+    "remove-doubles-part": (("primitive_grid_add", GRID4), "VERT", [0, 1, 2, 5, 6], "remove_doubles", {"threshold": 0.55}),
 }
 
 
@@ -119,6 +131,7 @@ def select(kind, indices):
     seq.ensure_lookup_table()
     for i in indices:
         seq[i].select_set(True)
+        bm.select_history.add(seq[i])
     bm.select_flush_mode()
     bmesh.update_edit_mesh(bpy.context.object.data)
 

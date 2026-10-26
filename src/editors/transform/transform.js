@@ -142,7 +142,8 @@ export function initTransform(mode, data, view, mouse, { orient } = {}) {
   function applyTranslation() {
     const typed = [0, 0, 0];
     let dir;
-    if (applyNumInput(t.num, typed)) dir = t.con.mode ? mul_m3_v3(spacemtx(), constraintNumInput(typed)) : typed;
+    // Blender 5.2 moves a constrained typed value along the first constrained axis only.
+    if (applyNumInput(t.num, typed)) dir = t.con.mode ? mul_v3_fl(spacemtx()[AXES.findIndex((a) => t.con.mode & a)], typed[0]) : mul_m3_v3(spacemtx(), typed);
     else {
       const d = { x: t.mval.x - imval.x, y: imval.y - t.mval.y };
       dir = add_v3(mul_v3_fl(viewinv.right, d.x * pixelSize), mul_v3_fl(viewinv.up, d.y * pixelSize));
