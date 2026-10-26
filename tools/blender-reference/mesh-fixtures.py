@@ -61,6 +61,14 @@ EDIT_CASES = {
     "loopcut-grid": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3}), "FACE", [], "loopcut", {"edge_index": 5, "object_index": 0, "number_cuts": 2}),
     "loopcut-cylinder": (("primitive_cylinder_add", {"vertices": 8}), "EDGE", [], "loopcut", {"edge_index": 1, "object_index": 0}),
     "loopcut-circle-edge": (("primitive_circle_add", {"vertices": 6}), "VERT", [], "loopcut", {"edge_index": 2, "object_index": 0, "number_cuts": 2}),
+    "edge-slide-column": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "EDGE", [5, 16, 25], "edge_slide", {"value": 0.5}),
+    "edge-slide-column-back": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "EDGE", [5, 16, 25], "edge_slide", {"value": -0.3}),
+    "edge-slide-inner": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "EDGE", [16], "edge_slide", {"value": 0.7}),
+    "edge-slide-row": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "EDGE", [3, 6, 9, 12], "edge_slide", {"value": 0.25}),
+    "edge-slide-even": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "EDGE", [5, 16, 25], "edge_slide", {"value": 0.5, "use_even": True}),
+    "edge-slide-unclamped": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "EDGE", [5, 16, 25], "edge_slide", {"value": -0.4, "use_clamp": False}),
+    "edge-slide-ngon": (("primitive_cylinder_add", {"vertices": 6}), "EDGE", [1, 5, 8, 11, 14, 17], "edge_slide", {"value": 0.5}),
+    "edge-slide-ngon-back": (("primitive_cylinder_add", {"vertices": 6}), "EDGE", [1, 5, 8, 11, 14, 17], "edge_slide", {"value": -0.5}),
     "dissolve-faces-cube": (("primitive_cube_add", {}), "FACE", [0, 1], "dissolve_faces", {}),
 }
 
@@ -112,7 +120,7 @@ for name, case in {**CASES, **EDIT_CASES}.items():
     if edit:
         bpy.ops.object.mode_set(mode="EDIT")
         select(edit[0], edit[1])
-        (loopcut if edit[2] == "loopcut" else getattr(bpy.ops.mesh, edit[2]))(**edit[3])
+        {"loopcut": loopcut, "edge_slide": bpy.ops.transform.edge_slide}.get(edit[2], getattr(bpy.ops.mesh, edit[2], None))(**edit[3])
         if len(edit) > 4:
             bpy.ops.transform.translate(value=edit[4])
         bpy.ops.object.mode_set(mode="OBJECT")
@@ -120,7 +128,7 @@ for name, case in {**CASES, **EDIT_CASES}.items():
     uv = me.uv_layers.active
     data = {
         "operator": "mesh." + op, "props": props,
-        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": "mesh." + edit[2], "props": edit[3], **({"move": edit[4]} if len(edit) > 4 else {})}} if edit else {}),
+        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": ("transform." if edit[2] == "edge_slide" else "mesh.") + edit[2], "props": edit[3], **({"move": edit[4]} if len(edit) > 4 else {})}} if edit else {}),
         "positions": [r(v.co) for v in me.vertices],
         "edges": [list(e.vertices) for e in me.edges],
         "face_offsets": [p.loop_start for p in me.polygons] + [len(me.loops)],

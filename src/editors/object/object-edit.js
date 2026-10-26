@@ -7,6 +7,7 @@ import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-m
 import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
 import { beginMeshTransform } from '../transform/transform-mesh.js';
+import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
 import { openMenu } from '../interface/menu.js';
@@ -187,7 +188,11 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     bm: () => em.bm,
     owner: em.object,
     notify,
-    confirm: (eed, number_cuts) => exec('mesh.loopcut', { edge_index: em.bm.e.index[eed], number_cuts }),
+    // mesh.loopcut_slide: the cut, then Edge Slide.
+    confirm: (eed, number_cuts) => {
+      exec('mesh.loopcut', { edge_index: em.bm.e.index[eed], number_cuts });
+      editor.start('edge_slide');
+    },
   }));
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
@@ -244,8 +249,9 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     // `orient: 'NORMAL'` constrains to the selection's normal; `keep` records an undo step even when cancelled, for
     // the operator that ran first (extrude).
     transform(type, view, mouse, { orient, keep } = {}) {
-      const session = em && beginMeshTransform(em.bm, em.object, view, type, mouse, { normal: orient === 'NORMAL' ? selectionNormal() : undefined });
-      if (!session) return null;
+      if (!em) return null;
+      const session = type === 'edge_slide' ? beginEdgeSlide(em.bm, em.object, view, mouse) : beginMeshTransform(em.bm, em.object, view, type, mouse, { normal: orient === 'NORMAL' ? selectionNormal() : undefined });
+      if (!session) { if (type === 'edge_slide') notify('Invalid Edge Selection'); return null; }
       return Object.assign(Object.create(session), {
         update(dx, dy, event) { session.update(dx, dy, event); sync({ commit: false }); },
         constrain(axis, plane) { session.constrain(axis, plane); sync({ commit: false }); },

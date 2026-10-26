@@ -465,6 +465,15 @@ const key = (e) => {
       editor.finish(k === "enter");
       return;
     }
+    if (editor.modal.session?.key?.(e)) {
+      e.preventDefault();
+      return;
+    }
+    // G again while moving components: Edge Slide (transform.translate's modal map).
+    if (k === "g" && !mod && world.editMode.active && editor.modal.type === "move") {
+      editor.start("edge_slide");
+      return;
+    }
     if (!mod && ["x", "y", "z"].includes(k)) {
       editor.axis(k, e.shiftKey);
       return;

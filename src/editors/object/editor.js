@@ -46,7 +46,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     guide.style.left = modal.center.x + "px";
     guide.style.top = modal.center.y + "px";
   };
-  const COMPONENT_TYPES = { move: "translate", rotate: "rotate", scale: "resize" };
+  const COMPONENT_TYPES = { move: "translate", rotate: "rotate", scale: "resize", edge_slide: "edge_slide" };
   const emitState = () => world.onEditorState?.({mode, count:selection.size, modal:!!modal});
   const setMode = (value) => {
     mode = value;
