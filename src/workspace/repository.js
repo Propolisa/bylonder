@@ -1,5 +1,6 @@
 import { hash } from "./opfs.js";
 import { validateProject } from "./project-model.js";
+import { storedScenes } from "./scenes.js";
 export function createRepository(io) {
   const read = async (path) => {
     const raw = await io.read(path);
@@ -54,12 +55,19 @@ export function createRepository(io) {
           if (!(await io.read(`objects/${digest}.json`)))
             await io.write(`objects/${digest}.json`, content);
         }
+        const remember = !!project.settings?.remember;
+        const scenes = storedScenes(project);
         const state = {
           files,
           folders: project.folders || [],
           animation: project.animation || null,
           settings: project.settings || { remember: false },
-          overrides: project.settings?.remember ? project.overrides || {} : {},
+          overrides: remember ? project.overrides || {} : {},
+          // Other scenes of the project (scenes.js); scene edits are kept only with Remember Scene Edits, as above.
+          ...(scenes.scenes && {
+            scene: scenes.scene,
+            scenes: scenes.scenes.map((s) => (s.overrides && !remember ? { ...s, overrides: {} } : s)),
+          }),
         };
         const old = previous ? await version(project.id, previous.head) : null;
         if (
@@ -72,6 +80,7 @@ export function createRepository(io) {
               animation: old.animation || null,
               settings: old.settings,
               overrides: old.overrides,
+              ...(old.scenes && { scene: old.scene, scenes: old.scenes }),
             }) &&
           previous.name === project.name
         )

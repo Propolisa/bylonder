@@ -1,6 +1,7 @@
 import { normalizeAnimation } from '../animation/model.js';
 import { gzipSync, Gunzip, strToU8, strFromU8 } from 'fflate';
 import { validateFiles, normalizePath } from './project-model.js';
+import { storedScenes } from './scenes.js';
 const MAX_BYTES=8*1024*1024, MAX_HASH=128*1024;
 function validate(payload){
   if(payload?.version!==1||typeof payload.name!=='string'||payload.name.length>200)throw Error('Invalid shared project.');
@@ -12,10 +13,12 @@ function validate(payload){
   payload.settings={...payload.settings,remember:!!payload.settings.remember};
   if(!payload.overrides||typeof payload.overrides!=='object'||Array.isArray(payload.overrides))throw Error('Invalid scene overrides.');
   if(payload.animation) payload.animation=normalizeAnimation(payload.animation);
+  if(payload.scenes&&(!Array.isArray(payload.scenes)||payload.scenes.some(s=>typeof s?.id!=='string'||typeof s.name!=='string')))throw Error('Invalid scenes.');
   return payload;
 }
+const sharedScenes=(project,includeOverrides)=>{const stored=storedScenes(project);return stored.scenes?{scene:stored.scene,scenes:stored.scenes.map(s=>includeOverrides||!s.overrides?s:{...s,overrides:{}})}:{};};
 export function encodeProject(project,{includeOverrides=true,overrides=project.overrides}={}){
-  const payload={animation:project.animation||null,version:1,name:project.name,files:project.files,folders:project.folders||[],sourceVersion:project.head||null,settings:{...project.settings,remember:includeOverrides},overrides:includeOverrides?(overrides||{}):{}};
+  const payload={animation:project.animation||null,version:1,name:project.name,files:project.files,folders:project.folders||[],sourceVersion:project.head||null,settings:{...project.settings,remember:includeOverrides},overrides:includeOverrides?(overrides||{}):{},...sharedScenes(project,includeOverrides)};
   validate(payload);
   const bytes=strToU8(JSON.stringify(payload));
   if(bytes.length>MAX_BYTES)throw Error('Project is too large for a link. Export a project ZIP instead.');

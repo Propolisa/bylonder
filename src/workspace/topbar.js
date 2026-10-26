@@ -1,5 +1,6 @@
 import { menuButton } from '../ui/menu.js';
 import { iconEl } from '../ui/icon.js';
+import { openPreferences } from './preferences.js';
 
 export function mountTopbar({ dock, send, examples, openExample, newProject }) {
   const $ = id => document.getElementById(id);
@@ -35,10 +36,12 @@ export function mountTopbar({ dock, send, examples, openExample, newProject }) {
       '-',
       { label: 'Remember Scene Edits', checked: () => $('remember').checked, run: click('toggle-remember') },
       { label: 'Clear Scene Edits', run: click('clear-scene-edits') },
+      '-',
+      { label: 'Preferences…', icon: 'preferences', run: openPreferences },
     ]),
     menuButton('Render', [
-      { label: 'Run Scene', icon: 'play', keys: 'Ctrl Enter', run: click('run') },
-      { label: 'Stop Scene', icon: 'pause', run: click('stop') },
+      { label: 'Run', icon: 'play', keys: 'Ctrl Enter', run: click('run'), title: 'Run the project code and rebuild the active scene' },
+      { label: 'Stop', icon: 'pause', run: click('stop'), title: 'Stop the running scenes' },
       { label: 'Auto-run', checked: () => autoRun.checked, run: () => { autoRun.checked = !autoRun.checked; autoRun.dispatchEvent(new Event('change')); } },
       '-',
       { label: 'Render Image', icon: 'render_result', keys: 'F12', run: () => send('render', 'image') },

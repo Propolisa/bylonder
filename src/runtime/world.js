@@ -20,11 +20,12 @@ registerModifier(geometryNodesDefinition);
 // Builds the scene world from a run payload: runs the project's createScene, identifies editable objects
 // and registers every document slice. Shared by the interactive viewport and the offline render context,
 // so both see the same scene for the same document state. Hosts own cameras, UI, history and persistence.
-//   input: run payload (base, importmap, files, animation, remember, overrides)
+//   input: run payload (base, importmap, files, animation, remember, overrides, scene: { id, name, builder })
 //   hooks: commit() for undo steps, saveOverrides() for scene edits, onAnimation(data), notify(text),
-//          setCamera(next) when the scene camera changes (the host decides what camera view means)
+//          setCamera(next) when the scene camera changes (the host decides what camera view means),
+//          renameScene(name) when the scene is renamed in Properties
 export async function createWorld({ input, engine, canvas, hooks = {} }) {
-  const { commit = () => {}, saveOverrides = () => {}, onAnimation = () => {}, notify = console.warn, setCamera = () => {} } = hooks;
+  const { commit = () => {}, saveOverrides = () => {}, onAnimation = () => {}, notify = console.warn, setCamera = () => {}, renameScene = () => {} } = hooks;
   const sdk = createSDK(input.base, input.overrides, () => saveOverrides(), onAnimation);
   const animation = sdk.animation;
   Object.assign(globalThis, { BABYLON: { ...BABYLON }, engine, canvas, workbench: sdk });
@@ -66,12 +67,18 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   importmap.type = "importmap";
   importmap.textContent = JSON.stringify({ imports, scopes });
   document.head.append(importmap);
-  const module = await import(/* @vite-ignore */ root + "index.js");
-  if (typeof module.createScene !== "function")
-    throw Error("index.js must export createScene()");
-  const scene = await module.createScene({ BABYLON, engine, canvas, workbench: sdk });
-  if (!(scene instanceof BABYLON.Scene))
-    throw Error("createScene() must return a Babylon Scene from the supplied engine.");
+  // The scene builder: an index.js export (createScene unless the scene names another), or none for an empty
+  // scene, which starts without objects and does not load the project code.
+  const builder = input.scene ? input.scene.builder : "createScene";
+  let scene;
+  if (builder) {
+    const module = await import(/* @vite-ignore */ root + "index.js");
+    if (typeof module[builder] !== "function")
+      throw Error(`index.js must export ${builder}()`);
+    scene = await module[builder]({ BABYLON, engine, canvas, workbench: sdk });
+    if (!(scene instanceof BABYLON.Scene))
+      throw Error(`${builder}() must return a Babylon Scene from the supplied engine.`);
+  } else scene = new BABYLON.Scene(engine);
   let authoredCamera = scene.activeCamera;
   authoredCamera?.detachControl();
   const objects = [
@@ -94,7 +101,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   registerObjects(animation, objects);
   const documentState = createDocument();
   world.materials = documentState.register("materials", createMaterialLibrary(world, { commit, asset: (path) => sdk.asset(path), files: input.files || [] }));
-  world.sceneSettings = documentState.register("scene", createSceneSettings(world, { commit, cameras: {
+  world.sceneSettings = documentState.register("scene", createSceneSettings(world, { commit, name: input.scene?.name, rename: renameScene, cameras: {
     list: () => scene.cameras.filter((c) => !c.name.startsWith("__")),
     get: () => authoredCamera,
     set(next) {

@@ -1,3 +1,4 @@
+import { activeScene, sceneRecords } from "./scenes.js";
 export const RUN_CACHE = "babylon-workspace-runs-v1";
 export const APP_BASE = new URL(import.meta.env.BASE_URL, location.href).pathname;
 export async function ensureModuleHost() {
@@ -97,6 +98,9 @@ export async function publishRun(project) {
     remember: !!project.settings.remember,
     overrides: project.settings.remember ? project.overrides : {},
     projectId: project.id,
+    // The scene this run builds, and every scene with its saved data so render jobs can build any of them.
+    scene: activeScene(project),
+    scenes: sceneRecords(project).map((s) => ({ ...s, overrides: project.settings.remember ? s.overrides : {} })),
     files: Object.keys(project.files),
   };
 }

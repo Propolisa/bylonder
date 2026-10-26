@@ -110,6 +110,8 @@ try {
     saveOverrides: () => saveOverrides(),
     onAnimation: (data) => send("animation", data),
     notify,
+    // The scene's name belongs to the project's scene list, kept by the workspace.
+    renameScene: (name) => send("rename-scene", name),
     // Scene camera changed (Properties > Scene > Camera): views in camera view look through the new camera.
     setCamera(next, previous) {
       for (const view of views?.all || []) view.sceneCameraChanged(next, previous);
@@ -203,6 +205,10 @@ window.addEventListener("message", (e) => {
     remember = e.data.payload;
     if (remember) saveOverrides();
   }
+  // Another scene became active while this one stays loaded (Keep Scenes Loaded); it waits hidden.
+  if (e.data.type === "suspend") animation.pause();
+  if (e.data.type === "resume") views.wake();
+  if (e.data.type === "scene-name") world.sceneSettings.renamed(e.data.payload);
 });
 let ui;
 history = createHistory(world.objects, () => {

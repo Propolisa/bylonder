@@ -4,12 +4,14 @@ import { unitSettings, unitDefaults, baseLengthUnit } from '../properties/units.
 // Scene datablock settings (Properties > Scene), shaped like Blender's Scene: name, camera, unit_settings,
 // use_gravity, gravity. Document slice "scene"; saved as a diff from the code-built scene.
 // cameras: { list() -> cameras, get() -> scene camera, set(camera) } supplied by the host, which owns camera view.
-export function createSceneSettings(world, { commit = () => {}, cameras } = {}) {
+// The name belongs to the project's scene record (src/workspace/scenes.js): it comes in as `name` and edits go
+// out through rename(name); the slice does not save it.
+export function createSceneSettings(world, { commit = () => {}, cameras, name = 'Scene', rename = () => {} } = {}) {
   const { scene, animation } = world;
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const cameraId = camera => camera ? camera.metadata?.wbId || camera.name : null;
-  let state = { name: 'Scene', camera: cameraId(cameras?.get()), unitSettings: { ...unitDefaults }, useGravity: true, gravity: scene.gravity.asArray().map(v => +v.toFixed(6)) };
+  let state = { name, camera: cameraId(cameras?.get()), unitSettings: { ...unitDefaults }, useGravity: true, gravity: scene.gravity.asArray().map(v => +v.toFixed(6)) };
   const baseline = JSON.parse(JSON.stringify(state));
   const push = () => {
     Object.assign(unitSettings, state.unitSettings);
@@ -34,17 +36,20 @@ export function createSceneSettings(world, { commit = () => {}, cameras } = {}) 
         state.unitSettings = { ...state.unitSettings, [key]: value };
         if (key === 'system') state.unitSettings.length = baseLengthUnit(value);
       }
+      else if (path === 'name') { state.name = value; rename(value); }
       else state[path] = value;
       push();
       if (finish) { emit(); commit(); }
     },
+    // The scene was renamed elsewhere (scene selector).
+    renamed(next) { if (next !== state.name) { state.name = next; emit(); } },
     capture() {
       const out = {};
-      for (const key of Object.keys(baseline)) if (JSON.stringify(state[key]) !== JSON.stringify(baseline[key])) out[key] = state[key];
+      for (const key of Object.keys(baseline)) if (key !== 'name' && JSON.stringify(state[key]) !== JSON.stringify(baseline[key])) out[key] = state[key];
       return Object.keys(out).length ? JSON.parse(JSON.stringify(out)) : undefined;
     },
     apply(saved = {}) {
-      const next = JSON.parse(JSON.stringify({ ...baseline, ...saved, unitSettings: { ...baseline.unitSettings, ...saved.unitSettings } }));
+      const next = JSON.parse(JSON.stringify({ ...baseline, ...saved, name: state.name, unitSettings: { ...baseline.unitSettings, ...saved.unitSettings } }));
       if (JSON.stringify(next) === JSON.stringify(state)) return;
       state = next; push(); emit();
     },

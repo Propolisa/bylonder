@@ -17,6 +17,10 @@ import {
   removePath,
 } from "./project-model";
 import { publishRun, removeRun, APP_BASE } from "./module-host";
+import { sceneList, activeSceneId, setSceneData, switchScene, addScene, renameScene, removeScene, storedScenes } from "./scenes.js";
+import { preferences, openPreferences } from "./preferences.js";
+import { menuButton } from "../ui/menu.js";
+import { iconButton } from "../ui/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
@@ -40,6 +44,8 @@ let repo,
 const models = new Map(),
   viewStates = new Map();
 const snapshotRequests = new Map();
+// Inactive scenes kept loaded (Keep Scenes Loaded); the active scene's viewport is `frame`.
+const parked = new Map();
 let suppress = false;
 const editor = monaco.editor.create($("editor-container"), {
   theme: "vs-dark",
@@ -320,10 +326,83 @@ async function updateProjects() {
   );
   if (project) $("project").value = project.id;
 }
+function renderScenes() {
+  const select = $("scene");
+  select.replaceChildren(...sceneList(project).map((scene) => Object.assign(document.createElement("option"), { value: scene.id, textContent: scene.name })));
+  select.value = activeSceneId(project);
+  $("scene-delete").disabled = sceneList(project).length < 2;
+}
+function postToScene(sceneId, type, payload) {
+  const entry = sceneId === activeSceneId(project) ? (frame && { frame, channel }) : parked.get(sceneId);
+  entry?.frame.contentWindow.postMessage({ channel: entry.channel, type, payload }, location.origin);
+}
+function renameSceneTo(sceneId, name) {
+  renameScene(project, sceneId, name);
+  const renamed = sceneList(project).find((scene) => scene.id === sceneId).name;
+  if (renamed !== name) postToScene(sceneId, "scene-name", renamed);
+  renderScenes();
+  markDirty(false);
+}
+async function activateScene(sceneId) {
+  const previous = activeSceneId(project);
+  if (sceneId === previous) return;
+  switchScene(project, sceneId);
+  if (frame && runData && preferences.get("keepScenesLoaded")) {
+    frame.hidden = true;
+    frame.contentWindow.postMessage({ channel, type: "suspend" }, location.origin);
+    parked.set(previous, { frame, channel, runData });
+    frame = null;
+    runData = null;
+  }
+  renderScenes();
+  markDirty(false);
+  const loaded = parked.get(sceneId);
+  if (loaded) {
+    parked.delete(sceneId);
+    if (frame) { frame.remove(); removeRun(runData.base).catch(console.warn); }
+    ({ frame, channel, runData } = loaded);
+    frame.hidden = false;
+    frame.contentWindow.postMessage({ channel, type: "resume" }, location.origin);
+    $("run-status").textContent = "Running";
+    return;
+  }
+  await run({ keepParked: true });
+}
+const newSceneTypes = [
+  ["NEW", "New", "Add a new, empty scene with default settings"],
+  ["EMPTY", "Copy Settings", "Add a new, empty scene, and copy settings from the current scene"],
+  ["FULL_COPY", "Full Copy", "Make a full copy of the current scene"],
+];
+$("scene-actions").append(
+  menuButton("", () => newSceneTypes.map(([type, label, title]) => ({ label, title, run: action(async () => {
+    const id = addScene(project, type);
+    await activateScene(id);
+  }) })), { icon: "add", className: "bl-icon-only", title: "New Scene" }),
+  Object.assign(iconButton("x", "Delete Scene", action(async () => {
+    const scene = sceneList(project).find((s) => s.id === activeSceneId(project));
+    if (!confirm(`Delete scene "${scene.name}"?`)) return;
+    const deleted = scene.id;
+    const list = sceneList(project), index = list.findIndex((s) => s.id === deleted);
+    await activateScene(list[index === 0 ? 1 : index - 1].id);
+    const entry = parked.get(deleted);
+    if (entry) { entry.frame.remove(); removeRun(entry.runData.base).catch(console.warn); parked.delete(deleted); }
+    removeScene(project, deleted);
+    renderScenes();
+    markDirty(false);
+  })), { id: "scene-delete" }),
+);
+$("scene").onchange = action((e) => activateScene(e.target.value));
+$("scene").ondblclick = action(() => {
+  const scene = sceneList(project).find((s) => s.id === activeSceneId(project));
+  const name = prompt("Scene name", scene.name);
+  if (name) { renameSceneTo(scene.id, name); postToScene(scene.id, "scene-name", sceneList(project).find((s) => s.id === scene.id).name); }
+});
+preferences.subscribe((key, value) => { if (key === "keepScenesLoaded" && !value) unloadParked(); });
 async function load(id, autoRun = true) {
   await save();
   stop();
   project = await repo.load(id);
+  renderScenes();
   dirty = false;
   editGeneration = 0;
   tabs = ["index.js"];
@@ -340,8 +419,9 @@ async function load(id, autoRun = true) {
   scheduleTypes();
   if (autoRun) await run();
 }
-async function run() {
+async function run({ keepParked = false } = {}) {
   if (!project) return;
+  if (!keepParked) unloadParked();
   const generation = ++runGeneration;
   clearTimeout(runTimer);
   await save();
@@ -359,11 +439,19 @@ async function run() {
   frame.title = "Babylon scene";
   frame.allow = "fullscreen; clipboard-write; web-share";
   frame.src = APP_BASE + "viewport.html?channel=" + encodeURIComponent(channel);
-  $("frame-host").replaceChildren(frame);
+  $("frame-host").append(frame);
   $("run-status").textContent = "Running createScene…";
   if (old) removeRun(old.base).catch(console.warn);
 }
+function unloadParked() {
+  for (const entry of parked.values()) {
+    entry.frame.remove();
+    removeRun(entry.runData.base).catch(console.warn);
+  }
+  parked.clear();
+}
 function stop() {
+  unloadParked();
   runGeneration++;
   frame?.remove();
   frame = null;
@@ -372,19 +460,31 @@ function stop() {
   $("frame-host").textContent = "";
   $("run-status").textContent = "Stopped";
 }
+function parkedMessage(sceneId, { type, payload }) {
+  if (type === "snapshot-result") snapshotResult(payload);
+  if (type === "console") log(payload.text, payload.level);
+  if (type === "run-error") log(payload.message, "error");
+  if (type === "animation") { setSceneData(project, sceneId, { animation: payload }); markDirty(false); }
+  if (type === "overrides" && project.settings.remember) { setSceneData(project, sceneId, { overrides: payload }); markDirty(false); }
+  if (type === "rename-scene") renameSceneTo(sceneId, payload);
+}
+function snapshotResult(payload) {
+  const pending = snapshotRequests.get(payload.requestId);
+  if (pending) { clearTimeout(pending.timer); snapshotRequests.delete(payload.requestId); payload.error ? pending.reject(Error(payload.error)) : pending.resolve(payload.state); }
+}
 window.addEventListener("message", (e) => {
+  if (e.origin !== location.origin) return;
+  for (const [sceneId, entry] of parked)
+    if (e.source === entry.frame.contentWindow && e.data?.channel === entry.channel) return parkedMessage(sceneId, e.data);
   if (
     !frame ||
     e.source !== frame.contentWindow ||
-    e.origin !== location.origin ||
     e.data?.channel !== channel
   )
     return;
   const { type, payload } = e.data;
-  if (type === "snapshot-result") {
-    const pending = snapshotRequests.get(payload.requestId);
-    if (pending) { clearTimeout(pending.timer); snapshotRequests.delete(payload.requestId); payload.error ? pending.reject(Error(payload.error)) : pending.resolve(payload.state); }
-  }
+  if (type === "snapshot-result") snapshotResult(payload);
+  if (type === "rename-scene") renameSceneTo(activeSceneId(project), payload);
   if (type === "ready")
     frame.contentWindow.postMessage(
       { channel, type: "init", payload: runData },
@@ -414,6 +514,7 @@ function setRemember(enabled, notifyFrame = true) {
       { channel, type: "remember", payload: enabled },
       location.origin,
     );
+  if (notifyFrame) for (const entry of parked.values()) entry.frame.contentWindow.postMessage({ channel: entry.channel, type: "remember", payload: enabled }, location.origin);
   markDirty(false);
 }
 async function showHistory() {
@@ -474,6 +575,9 @@ async function restore() {
   project.settings = previous.settings;
   project.overrides = previous.overrides;
   project.animation = previous.animation || null;
+  project.scenes = previous.scenes;
+  project.scene = previous.scene;
+  unloadParked();
   markDirty();
   await save("Restore " + diffVersion.rev.slice(0, 8));
   syncModels();
@@ -508,6 +612,7 @@ async function exportZip() {
         settings: project.settings,
         animation: project.animation || null,
         overrides: project.overrides,
+        ...storedScenes(project),
       },
       null,
       2,
@@ -553,6 +658,7 @@ async function importZip(file) {
       settings: settings.settings || { remember: false },
       animation: settings.animation || null,
       overrides: settings.overrides || {},
+      ...(settings.scenes && { scenes: settings.scenes, scene: settings.scene }),
     },
   );
   await load(created.id);
@@ -568,7 +674,10 @@ async function updateQuota() {
     ? "OPFS · durable"
     : "OPFS · browser managed";
 }
-const openRenderSettings = setupRenderSettings(value => frame?.contentWindow.postMessage({channel,type:"render-settings",payload:value},location.origin));
+const openRenderSettings = setupRenderSettings(value => {
+  frame?.contentWindow.postMessage({channel,type:"render-settings",payload:value},location.origin);
+  for (const entry of parked.values()) entry.frame.contentWindow.postMessage({channel:entry.channel,type:"render-settings",payload:value},location.origin);
+});
 $("render-settings").onclick = openRenderSettings;
 document.addEventListener('dock-reset', () => {
   try { localStorage.removeItem('workbench:layout:viewport:v1'); } catch {}
@@ -592,7 +701,7 @@ const sharing = setupSharing({
   },
   async importProject(payload) {
     await save();
-    const created = await repo.create(payload.name + ' shared', payload.files, {folders:payload.folders,settings:payload.settings,animation:payload.animation,overrides:payload.overrides});
+    const created = await repo.create(payload.name + ' shared', payload.files, {folders:payload.folders,settings:payload.settings,animation:payload.animation,overrides:payload.overrides,...(payload.scenes&&{scenes:payload.scenes,scene:payload.scene})});
     await load(created.id, false);
     dock.show('code', dock.profile === 'portrait');
     log('Shared project imported. Review index.js, then press Run.');
@@ -601,7 +710,7 @@ const sharing = setupSharing({
 $("share-project").onclick = () => sharing.open();
 $("project").onchange = action((e) => load(e.target.value));
 $("new-project").onclick = action(async () => {
-  const name = prompt("Project name", "Untitled scene");
+  const name = prompt("Project name", "Untitled");
   if (!name) return;
   await save();
   const created = await repo.create(name, defaultFiles());
@@ -621,6 +730,7 @@ $("fork-project").onclick = action(async () => {
     settings: project.settings,
     animation: project.animation || null,
         overrides: project.overrides,
+    ...structuredClone(storedScenes(project)),
   });
   await load(created.id);
 });
@@ -821,7 +931,7 @@ document.addEventListener("visibilitychange", () => {
     const projects = await repo.list();
     let id = localStorage.getItem("babylon-active-project");
     if (!projects.some((p) => p.id === id)) id = projects[0]?.id;
-    if (!id) id = (await repo.create("Scene project", defaultFiles())).id;
+    if (!id) id = (await repo.create("Untitled", defaultFiles())).id;
     await load(id, !location.hash.startsWith("#project="));
     await sharing.incoming();
     if (!projects.length && !location.hash.startsWith("#project=")) topbar.splash();
