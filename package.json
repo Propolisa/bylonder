@@ -25,7 +25,7 @@
     "esbuild-wasm": "0.25.0",
     "fflate": "0.8.2",
     "fontkit": "2.0.4",
-    "kubeezcut-embed": "github:Propolisa/KubeezCut#a26dee819e70de115e4df60e467ab5f28f5c859e",
+    "kubeezcut-embed": "github:Propolisa/KubeezCut#e3149dacfadd44bda4676a23ec0f16d7f377483d",
     "marked": "15.0.12",
     "mediabunny": "1.61.4",
     "monaco-editor": "0.52.2",
