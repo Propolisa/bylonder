@@ -121,6 +121,9 @@ export function BM_face_exists(bm, verts) {
   return -1;
 }
 
+// Whether some face uses both edges.
+export const BM_edge_share_face_check = (bm, e1, e2) => bm.e.l[e2] >= 0 && BM_FACES_OF_EDGE(bm, e1).some((f) => BM_face_edge_share_loop(bm, f, e2) >= 0);
+
 // BM_EDGES_OF_VERT: around the disk cycle from v->e.
 export function BM_EDGES_OF_VERT(bm, v) {
   const out = [], first = bm.v.e[v];

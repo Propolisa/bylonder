@@ -49,7 +49,30 @@ export function isect_line_line_epsilon_v3(v1, v2, v3, v4, epsilon) {
 export const len_squared_v3 = (a) => dot_v3(a, a);
 export const is_zero_v3 = (a) => a[0] === 0 && a[1] === 0 && a[2] === 0;
 export const project_v3_v3v3 = (p, v) => mul_v3_fl(v, dot_v3(p, v) / dot_v3(v, v));
-export const angle_v3v3 = (a, b) => Math.acos(Math.max(-1, Math.min(1, dot_v3(normalize_v3(a), normalize_v3(b)))));
+const safe_asin = (x) => Math.asin(Math.max(-1, Math.min(1, x)));
+// angle_normalized_v3v3: more accurate than acos of the dot product.
+export function angle_normalized_v3v3(a, b) {
+  if (dot_v3(a, b) >= 0) return 2 * safe_asin(len_v3(sub_v3(a, b)) / 2);
+  return Math.PI - 2 * safe_asin(len_v3(add_v3(a, b)) / 2);
+}
+export const angle_v3v3 = (a, b) => angle_normalized_v3v3(normalize_v3(a), normalize_v3(b));
+export const project_plane_normalized_v3_v3v3 = (p, v_plane) => sub_v3(p, mul_v3_fl(v_plane, dot_v3(p, v_plane)));
+// The angle from v1 to v2 around `axis`, 0 to 2 pi.
+export function angle_signed_on_axis_v3v3_v3(v1, v2, axis) {
+  const v1_proj = project_plane_normalized_v3_v3v3(v1, axis), v2_proj = project_plane_normalized_v3_v3v3(v2, axis);
+  const angle = angle_v3v3(v1_proj, v2_proj);
+  return dot_v3(cross_v3(v2_proj, v1_proj), axis) < 0 ? Math.PI * 2 - angle : angle;
+}
+export const angle_signed_on_axis_v3v3v3_v3 = (v1, v2, v3, axis) => angle_signed_on_axis_v3v3_v3(sub_v3(v1, v2), sub_v3(v3, v2), axis);
+// The unit normals of a triangle and of a quad's diagonals (zero when degenerate).
+export const normal_tri_v3 = (v1, v2, v3) => normalize_v3(cross_v3(sub_v3(v1, v2), sub_v3(v2, v3)));
+export const normal_quad_v3 = (v1, v2, v3, v4) => normalize_v3(cross_v3(sub_v3(v1, v3), sub_v3(v2, v4)));
+// One step of Newell's method for a polygon normal.
+export const add_newell_cross_v3_v3v3 = (n, a, b) => [
+  n[0] + (a[1] - b[1]) * (a[2] + b[2]),
+  n[1] + (a[2] - b[2]) * (a[0] + b[0]),
+  n[2] + (a[0] - b[0]) * (a[1] + b[1]),
+];
 
 // The factor along the ray where it meets the plane, or null when parallel.
 export function isect_ray_plane_v3_factor(ray_origin, ray_direction, plane_co, plane_no) {

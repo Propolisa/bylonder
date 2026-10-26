@@ -167,6 +167,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     '-',
     { label: 'Delete', blender: 'VIEW3D_MT_edit_mesh_delete', items: world.editMode.deleteMenu },
   ], { blender: 'VIEW3D_MT_edit_mesh' });
+  const vertexMenu = menuButton('Vertex', () => [
+    { label: 'New Edge/Face from Vertices', blender: 'mesh.edge_face_add', keys: 'F', run: () => world.editMode.exec('mesh.edge_face_add') },
+  ], { blender: 'VIEW3D_MT_edit_mesh_vertices' });
   const edgeMenu = menuButton('Edge', () => [
     { label: 'Subdivide', blender: 'mesh.subdivide', run: () => world.editMode.exec('mesh.subdivide') },
     '-',
@@ -185,7 +188,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   shading.append(...shadingButtons);
   const overlayButton = iconButton('overlay', 'Show Overlays', () => { state.overlays = !state.overlays; sync(); views.wake(); });
   const spacer = () => Object.assign(document.createElement('span'), { className: 'spacer' });
-  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, meshMenu, edgeMenu, faceMenu, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
+  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, meshMenu, vertexMenu, edgeMenu, faceMenu, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
 
   // Navigation gizmo and buttons, drawn from this view's camera.
   const drag = (el, fn) => {
@@ -237,7 +240,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     selectModes.hidden = !editing;
     selectModeButtons.forEach((b) => b.setAttribute('aria-pressed', String(!!(world.editMode?.selectmode & b.dataset.selectBit))));
     add.hidden = object.hidden = editing;
-    meshMenu.hidden = edgeMenu.hidden = faceMenu.hidden = !editing;
+    meshMenu.hidden = vertexMenu.hidden = edgeMenu.hidden = faceMenu.hidden = !editing;
     select.dataset.blender = selectMenuIds[editing ? 'edit' : 'object'];
     name.textContent = state.cameraView ? 'Camera Perspective' : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
     section.classList.toggle('overlays-off', !state.overlays || state.cameraView);

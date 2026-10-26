@@ -269,6 +269,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => exec('mesh.select_linked') },
     { blender: 'mesh.select_linked_pick', keys: 'L', poll: inView, run: (event) => linkedPick(event, false) },
     { blender: 'mesh.select_linked_pick', keys: 'Shift L', poll: inView, run: (event) => linkedPick(event, true) },
+    { blender: 'mesh.edge_face_add', keys: 'F', run: () => exec('mesh.edge_face_add') },
     { blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', run: () => openMenu(mergeMenu(), editor.pointer, 'Merge') },
     { blender: 'mesh.hide', keys: 'H', run: () => exec('mesh.hide') },
     { blender: 'mesh.hide', keys: 'Shift H', run: () => exec('mesh.hide', { unselected: true }) },

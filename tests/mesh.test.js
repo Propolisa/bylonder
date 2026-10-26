@@ -40,8 +40,8 @@ console.log('Mesh: draw cache maps Blender axes onto Babylon with outward windin
 
 // Edit Mode operators on Blender's own selection, compared with Blender's result.
 import { meshOperators } from '../src/editors/mesh/editmesh-tools.js';
-import { BM_elem_select_set, BM_select_history_store, BM_mesh_select_mode_flush, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
-import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SEAM } from '../src/bmesh/intern/bmesh-class.js';
+import { BM_elem_select_set, BM_select_history_store, BM_mesh_elem_hflag_disable_all, BM_mesh_select_mode_flush, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
+import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SEAM, BM_ELEM_SELECT } from '../src/bmesh/intern/bmesh-class.js';
 const SELECT = { VERT: [SCE_SELECT_VERTEX, BM_VERT], EDGE: [SCE_SELECT_EDGE, BM_EDGE], FACE: [SCE_SELECT_FACE, BM_FACE] };
 // Order-free form of a Mesh: vertices, edges and faces (winding kept) named by rounded position.
 function geometry(positions, edges, face_offsets, corner_verts) {
@@ -66,11 +66,18 @@ for (const file of await readdir(dir)) {
   const name = file.replace('.json', ''), { select_mode, select, operator, props, move, seams = [] } = fixture.edit;
   const bm = BM_mesh_bm_from_me(primitive_add(fixture.operator, fixture.props));
   for (const e of seams) bm.e.hflag[e] |= BM_ELEM_SEAM;
-  const [mode, htype] = SELECT[select_mode];
-  bm.selectmode = mode;
-  for (const i of select) { BM_elem_select_set(bm, htype, i, true); BM_select_history_store(bm, htype, i); }
-  BM_mesh_select_mode_flush(bm);
-  meshOperators[operator](bm, props);
+  // Selects by index as Blender's lookup tables count: the i-th live element.
+  const run = ({ select_mode, select, operator, props }) => {
+    const [mode, htype] = SELECT[select_mode], pool = bm[{ [BM_VERT]: 'v', [BM_EDGE]: 'e', [BM_FACE]: 'f' }[htype]];
+    const live = [...Array(pool.size).keys()].filter((i) => pool.alive[i]);
+    BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+    bm.selectmode = mode;
+    for (const i of select) { BM_elem_select_set(bm, htype, live[i], true); BM_select_history_store(bm, htype, live[i]); }
+    BM_mesh_select_mode_flush(bm);
+    meshOperators[operator](bm, props);
+  };
+  if (fixture.edit.pre) run(fixture.edit.pre);
+  run({ select_mode, select, operator, props });
   if (move) for (let v = 0; v < bm.v.size; v++) if (bm.v.alive[v] && bm.v.hflag[v] & 1) move.forEach((d, a) => (bm.v.co[v * 3 + a] += d));
   const mesh = BM_mesh_bm_to_me(bm);
   assert.equal(mesh.verts_num, fixture.positions.length, name + ': vertex count');

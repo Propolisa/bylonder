@@ -37,6 +37,9 @@ MOVE = (0.25, 0.5, 1.0)
 GRID4 = {"x_subdivisions": 4, "y_subdivisions": 4, "size": 2}
 # Seams along the grid's middle column, at X = 0.
 SEAM_X0 = {"seam_x": 0.0}
+# A hole: face 5 deleted; a notch: corner face 0 deleted.
+HOLE5 = {"pre": ("FACE", [5], "delete", {"type": "FACE"})}
+CORNER0 = {"pre": ("FACE", [0], "delete", {"type": "FACE"})}
 EDIT_CASES = {
     "delete-vert": (("primitive_cube_add", {}), "VERT", [0], "delete", {"type": "VERT"}),
     "delete-edge": (("primitive_cube_add", {}), "EDGE", [0], "delete", {"type": "EDGE"}),
@@ -109,6 +112,16 @@ EDIT_CASES = {
     "remove-doubles": (("primitive_grid_add", GRID4), "VERT", list(range(25)), "remove_doubles", {"threshold": 0.6}),
     "remove-doubles-no-centroid": (("primitive_grid_add", GRID4), "VERT", list(range(25)), "remove_doubles", {"threshold": 0.6, "use_centroid": False}),
     "remove-doubles-part": (("primitive_grid_add", GRID4), "VERT", [0, 1, 2, 5, 6], "remove_doubles", {"threshold": 0.55}),
+    "fill-two-verts": (("primitive_grid_add", GRID4), "VERT", [0, 6], "edge_face_add", {}),
+    "fill-circle": (("primitive_circle_add", {"vertices": 8}), "VERT", list(range(8)), "edge_face_add", {}),
+    "fill-circle-two-edges": (("primitive_circle_add", {"vertices": 8}), "EDGE", [0, 4], "edge_face_add", {}),
+    "fill-circle-chain": (("primitive_circle_add", {"vertices": 8}), "EDGE", [0, 1, 2], "edge_face_add", {}),
+    "fill-circle-verts-cloud": (("primitive_circle_add", {"vertices": 8}), "VERT", [0, 2, 4, 6], "edge_face_add", {}),
+    "fill-cylinder-cap": (("primitive_cylinder_add", {"vertices": 8, "end_fill_type": "NOTHING"}), "EDGE", [1, 4, 7, 10, 13, 16, 19, 22], "edge_face_add", {}),
+    "fill-grid-hole": (("primitive_grid_add", GRID4, HOLE5), "EDGE", [6, 8, 13, 14], "edge_face_add", {}),
+    "fill-grid-hole-verts": (("primitive_grid_add", GRID4, HOLE5), "VERT", [6, 7, 11, 12], "edge_face_add", {}),
+    "fill-tricky-vert": (("primitive_grid_add", GRID4, CORNER0), "VERT", [5], "edge_face_add", {}),
+    "fill-faces-dissolve": (("primitive_grid_add", GRID4), "FACE", [0, 1], "edge_face_add", {}),
 }
 
 
@@ -170,8 +183,12 @@ for name, case in {**CASES, **EDIT_CASES}.items():
     seams = None
     if edit:
         bpy.ops.object.mode_set(mode="EDIT")
-        if setup:
+        if setup and "seam_x" in setup[0]:
             seams = mark_seams(setup[0]["seam_x"])
+        if setup and "pre" in setup[0]:
+            pre = setup[0]["pre"]
+            select(pre[0], pre[1])
+            getattr(bpy.ops.mesh, pre[2])(**pre[3])
         select(edit[0], edit[1])
         op_props = {k: set(v) if k == "delimit" else v for k, v in edit[3].items()}
         {"loopcut": loopcut, "edge_slide": bpy.ops.transform.edge_slide}.get(edit[2], getattr(bpy.ops.mesh, edit[2], None))(**op_props)
@@ -182,7 +199,7 @@ for name, case in {**CASES, **EDIT_CASES}.items():
     uv = me.uv_layers.active
     data = {
         "operator": "mesh." + op, "props": props,
-        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": ("transform." if edit[2] == "edge_slide" else "mesh.") + edit[2], "props": edit[3], **({"move": edit[4]} if len(edit) > 4 else {}), **({"seams": seams} if seams else {})}} if edit else {}),
+        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": ("transform." if edit[2] == "edge_slide" else "mesh.") + edit[2], "props": edit[3], **({"move": edit[4]} if len(edit) > 4 else {}), **({"seams": seams} if seams else {}), **({"pre": dict(zip(("select_mode", "select", "operator", "props"), (setup[0]["pre"][0], setup[0]["pre"][1], "mesh." + setup[0]["pre"][2], setup[0]["pre"][3])))} if setup and "pre" in setup[0] else {})}} if edit else {}),
         "positions": [r(v.co) for v in me.vertices],
         "edges": [list(e.vertices) for e in me.edges],
         "face_offsets": [p.loop_start for p in me.polygons] + [len(me.loops)],

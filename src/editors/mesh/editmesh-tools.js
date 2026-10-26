@@ -1,5 +1,5 @@
 // Edit Mode mesh operators (editmesh_tools.cc).
-import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_TAG, BM_VERT, BM_EDGE, BM_FACE, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
+import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_TAG, BM_ELEM_HIDDEN, BM_ELEM_SMOOTH, BM_VERT, BM_EDGE, BM_FACE, BM_elem_flag_test, BM_elem_flag_disable } from '../../bmesh/intern/bmesh-class.js';
 import { bmo_pointmerge_exec, bmo_collapse_exec, bmo_remove_doubles_exec } from '../../bmesh/operators/bmo-removedoubles.js';
 import { add_v3, mul_v3_fl } from '../../blenlib/math-geom.js';
 import { bmo_extrude_face_region_exec, bmo_extrude_edge_only_exec, bmo_extrude_vert_indiv_exec } from '../../bmesh/operators/bmo-extrude.js';
@@ -7,13 +7,14 @@ import { BMO_op_callf } from '../../bmesh/intern/bmesh-operators.js';
 import { DEL_VERTS, DEL_EDGES, DEL_FACES, DEL_EDGESFACES, DEL_ONLYFACES } from '../../bmesh/intern/bmesh-delete.js';
 import { bmo_delete_exec } from '../../bmesh/operators/bmo-dupe.js';
 import { bmo_dissolve_faces_exec } from '../../bmesh/operators/bmo-dissolve.js';
-import { BM_mesh_elem_hflag_disable_all, BM_mesh_elem_hflag_enable_test, BM_mesh_select_mode_flush_ex, BM_face_select_set, BM_vert_select_set, BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
+import { BM_mesh_elem_hflag_disable_all, BM_mesh_elem_hflag_enable_test, BM_mesh_select_mode_flush_ex, BM_face_select_set, BM_edge_select_set, BM_vert_select_set, BM_elem_select_set, BM_select_history_clear, BM_select_history_store, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_mesh_esubdivide, SUBD_CORNER_INNERVERT, SUBD_CORNER_PATH, SUBD_CORNER_FAN, SUBD_CORNER_STRAIGHT_CUT, SUBDIV_SELECT_ORIG } from '../../bmesh/operators/bmo-subdivide.js';
 import { edbm_loopcut } from './editmesh-loopcut.js';
 import { edbm_select_loop, edbm_select_linked_exec } from './editmesh-select.js';
 import { bmo_inset_region_exec } from '../../bmesh/operators/bmo-inset.js';
 import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
-import { BM_edge_at_index } from '../../bmesh/intern/bmesh-query.js';
+import { BM_edge_at_index, BM_EDGES_OF_VERT, BM_edge_exists, BM_edge_other_vert, BM_edge_is_wire, BM_edge_is_boundary, BM_edge_share_face_check, BM_face_vert_share_loop, BM_face_edge_share_loop } from '../../bmesh/intern/bmesh-query.js';
+import { bmo_contextual_create_exec } from '../../bmesh/operators/bmo-create.js';
 import { EDBM_mesh_hide, EDBM_mesh_reveal, EDBM_select_more, EDBM_select_less } from './editmesh-utils.js';
 
 // The %hv, %he and %hf operator slots: elements with a header flag.
@@ -151,6 +152,75 @@ export function edbm_remove_doubles_exec(bm, { threshold = 0.0001, use_centroid 
   return count;
 }
 
+// USE_FACE_CREATE_SEL_EXTEND: one selected vert (or edge) on a boundary or wire grows the selection to its two
+// neighbouring edges, so pressing F again and again keeps filling. Returns the element to deselect afterwards.
+function add_edge_face_tricky_extend_sel(bm) {
+  const lookup = (v, e_used, max, test) => BM_EDGES_OF_VERT(bm, v).filter((e) => !BM_elem_flag_test(bm.e, e, BM_ELEM_HIDDEN) && e !== e_used && test(bm, e)).slice(0, max);
+  const tests = [BM_edge_is_wire, BM_edge_is_boundary];
+  if (bm.totvertsel === 1 && !bm.totedgesel && !bm.totfacesel) {
+    const v = selectedVerts(bm)[0];
+    for (const test of tests) {
+      const pair = lookup(v, -1, 3, test);
+      if (pair.length !== 2 || BM_edge_share_face_check(bm, pair[0], pair[1])) continue;
+      const e_other = BM_edge_exists(bm, BM_edge_other_vert(bm, pair[0], v), BM_edge_other_vert(bm, pair[1], v));
+      for (const e of [...pair, e_other]) if (e >= 0) BM_edge_select_set(bm, e, true);
+      return { htype: BM_VERT, ele: v };
+    }
+  } else if (bm.totvertsel === 2 && bm.totedgesel === 1 && !bm.totfacesel) {
+    const e = BMO_slot_buffer_from_hflag(bm, 'e', BM_ELEM_SELECT).e[0], v1 = bm.e.v1[e], v2 = bm.e.v2[e];
+    for (const [t1, t2] of [[0, 0], [0, 1], [1, 0], [1, 1]]) {
+      const p1 = lookup(v1, e, 2, tests[t1]), p2 = lookup(v2, e, 2, tests[t2]);
+      if (p1.length !== 1 || p2.length !== 1 || BM_edge_share_face_check(bm, e, p1[0]) || BM_edge_share_face_check(bm, e, p2[0])) continue;
+      const v1_other = BM_edge_other_vert(bm, p1[0], v1), v2_other = BM_edge_other_vert(bm, p2[0], v2);
+      const e_other = v1_other !== v2_other ? BM_edge_exists(bm, v1_other, v2_other) : -1;
+      for (const s of [p1[0], p2[0], e_other]) if (s >= 0) BM_edge_select_set(bm, s, true);
+      return { htype: BM_EDGE, ele: e };
+    }
+  }
+  return null;
+}
+
+// The new face stays unselected and the edge (or vert) across from the starting element becomes active.
+function add_edge_face_tricky_finalize_sel(bm, desel, f) {
+  BM_select_history_clear(bm);
+  BM_elem_flag_disable(bm.f, f, BM_ELEM_HIDDEN);
+  BM_face_select_set(bm, f, false);
+  const { l } = bm;
+  if (desel.htype === BM_VERT) {
+    const lp = BM_face_vert_share_loop(bm, f, desel.ele);
+    BM_vert_select_set(bm, desel.ele, false);
+    BM_edge_select_set(bm, l.e[l.next[lp]], true);
+    BM_select_history_store(bm, BM_EDGE, l.e[l.next[lp]]);
+    return;
+  }
+  const lp = BM_face_edge_share_loop(bm, f, desel.ele);
+  BM_edge_select_set(bm, desel.ele, false);
+  const [htype, ele] = bm.f.len[f] === 4 ? [BM_EDGE, l.e[l.next[l.next[lp]]]] : [BM_VERT, l.v[l.next[l.next[lp]]]];
+  const pool = htype === BM_EDGE ? bm.e : bm.v;
+  BM_elem_flag_disable(pool, ele, BM_ELEM_HIDDEN);
+  BM_elem_select_set(bm, htype, ele, true);
+  BM_select_history_store(bm, htype, ele);
+}
+
+// mesh.edge_face_add (Fill, F): an edge, faces, a dissolve or an n-gon from the selection, as contextual_create
+// decides. New faces are smooth when most selected edges' faces are.
+export function edbm_add_edge_face_exec(bm) {
+  if (!bm.totvertsel && !bm.totedgesel && !bm.totfacesel) return false;
+  const smooth = [0, 0];
+  BM_ITER_MESH(bm.e, (e) => { if (BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT) && bm.e.l[e] >= 0) smooth[BM_elem_flag_test(bm.f, bm.l.f[bm.e.l[e]], BM_ELEM_SMOOTH) ? 1 : 0]++; });
+  const totedge = bm.totedge, totface = bm.totface;
+  const desel = add_edge_face_tricky_extend_sel(bm);
+  const geom = { verts: selectedVerts(bm), edges: BMO_slot_buffer_from_hflag(bm, 'e', BM_ELEM_SELECT).e, faces: BMO_slot_buffer_from_hflag(bm, 'f', BM_ELEM_SELECT).f };
+  const out = BMO_op_callf(bm, bmo_contextual_create_exec, { geom, use_smooth: smooth[0] < smooth[1] });
+  if (totedge === bm.totedge && totface === bm.totface) return false;
+  if (desel && out.faces.length === 1) add_edge_face_tricky_finalize_sel(bm, desel, out.faces[0]);
+  else {
+    for (const f of out.faces) { BM_elem_flag_disable(bm.f, f, BM_ELEM_HIDDEN); BM_face_select_set(bm, f, true); }
+    for (const e of out.edges) { BM_elem_flag_disable(bm.e, e, BM_ELEM_HIDDEN); BM_edge_select_set(bm, e, true); }
+  }
+  return true;
+}
+
 // Edit Mode operators by Blender idname, as (bm, props) for fixtures and keymaps.
 export const meshOperators = {
   'mesh.delete': (bm, props) => edbm_delete_exec(bm, props.type),
@@ -167,5 +237,6 @@ export const meshOperators = {
   'mesh.select_less': (bm, props) => EDBM_select_less(bm, bm.selectmode, props.use_face_step ?? true),
   'mesh.select_linked': (bm, props) => edbm_select_linked_exec(bm, props),
   'mesh.merge': (bm, props) => edbm_merge_exec(bm, props),
+  'mesh.edge_face_add': (bm) => edbm_add_edge_face_exec(bm),
   'mesh.remove_doubles': (bm, props) => { const removed = edbm_remove_doubles_exec(bm, props); return `Removed ${removed} ${removed === 1 ? 'vertex' : 'vertices'}`; },
 };
