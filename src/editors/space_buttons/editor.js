@@ -25,7 +25,7 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
   const panel=(id,title,content,{subpanel=false,actions,defaultClosed=false}={})=>{if(!state.panels.includes(id))state.panels.push(id);return h(Panel,{key:id,panelId:id,title,state,subpanel,actions,defaultClosed},{default:content});};
   const transform=()=>{
     const node=active();if(!node)return h('p',{class:'bl-message'},'No active object.');
-    return panel('transform','Transform',()=>[
+    return panel('OBJECT_PT_transform','Transform',()=>[
       ...[['position','Location','length'],['rotation','Rotation','angle'],['scaling','Scale',null]].map(([property,label,unit])=>h('div',{class:'bl-vector'},['x','y','z'].map((axis,i)=>{
         const path=property+'.'+axis,ref=address('object:'+nodeId(node),path),get=()=>world.animation.channels.get(ref)?.get()??node[property][axis];
         return row({id:path,label:(i===0?label+' ':'')+axis.toUpperCase(),default:property==='scaling'?1:0,unit,step:property==='rotation'?Math.PI/180:0.01,min:property==='scaling'?0.001:undefined,
@@ -69,7 +69,7 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
   };
   const modifiers=()=>{
     const node=active();if(!node?.getTotalVertices?.())return h('p',{class:'bl-message'},'Select a mesh to add modifiers.');
-    return [h('button',{class:'bl-add-modifier',onClick:()=>state.add=!state.add,title:'Add Modifier (Shift-A)'},[icon('ADD'),' Add Modifier']),state.add?h('div',{class:'bl-add-menu'},[
+    return [h('button',{class:'bl-add-modifier',onClick:()=>state.add=!state.add,title:'Add Modifier (Shift-A)','data-blender':'OBJECT_MT_modifier_add'},[icon('ADD'),' Add Modifier']),state.add?h('div',{class:'bl-add-menu'},[
       h('input',{placeholder:'Search…',value:state.search,onInput:e=>state.search=e.target.value}),h('strong','Generate'),
       ...[...world.modifiers.definitions.values()].filter(d=>d.name.toLowerCase().includes(state.search.toLowerCase())).map(d=>h('button',{onClick:()=>{try{const m=world.modifiers.add(node,d.id);state.activeModifier=m.id;state.add=false;}catch(error){world.notify(error.message);}}},[icon(d.icon,{class:'bl-icon bl-modifier-color'}),d.name]))
     ]):null,...world.modifiers.stack(node).map((m,i)=>modifierPanel(node,m,i)),world.modifiers.errors.get(nodeId(node))?h('p',{class:'bl-message bl-error'},world.modifiers.errors.get(nodeId(node))):null];

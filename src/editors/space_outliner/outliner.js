@@ -44,9 +44,9 @@ export function createOutliner(world, editor, commands) {
     openMenu([
       { label: "New Collection", icon: "collection_new", run: () => cols.create({ parent: id }) },
       ...(master ? [] : [
-        { label: "Delete", icon: "x", run: () => cols.remove(id) },
+        { label: "Delete", blender: "outliner.delete", icon: "x", run: () => cols.remove(id) },
         "-",
-        { label: "Rename", keys: "F2", run: () => { const c = cols.byId(id), name = prompt("Collection name", c.name); if (name) cols.rename(id, name); } },
+        { label: "Rename", blender: "outliner.item_rename", keys: "F2", run: () => { const c = cols.byId(id), name = prompt("Collection name", c.name); if (name) cols.rename(id, name); } },
       ]),
       "-",
       { label: "Select Objects", run: () => { editor.selection.replace(cols.objects(id).map((o) => world.objects.find((n) => nodeId(n) === o)).filter((n) => n && !deleted(n) && cols.selectable(n))); editor.reconcile(); } },

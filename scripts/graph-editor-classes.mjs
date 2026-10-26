@@ -30,5 +30,5 @@ for (const editor of editors) {
     } catch {}
   }
 }
-await writeFile('src/graphs/editor-classes.json', JSON.stringify(modules, null, 1) + '\n');
+await writeFile('src/editors/space_node/editor-classes.json', JSON.stringify(modules, null, 1) + '\n');
 console.log('Graph editor CSS modules: ' + Object.keys(modules).length);

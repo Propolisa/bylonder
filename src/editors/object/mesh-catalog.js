@@ -11,12 +11,14 @@ const detail = (value) => n(value, 3, 128, 1);
 export const presets = [
   {
     id: "box",
+    blender: "mesh.primitive_cube_add",
     title: "Cube",
     builder: "CreateBox",
     schema: { width: n(2), height: n(2), depth: n(2) },
   },
   {
     id: "sphere",
+    blender: "mesh.primitive_uv_sphere_add",
     title: "UV Sphere",
     builder: "CreateSphere",
     schema: {
@@ -28,6 +30,7 @@ export const presets = [
   },
   {
     id: "ico",
+    blender: "mesh.primitive_ico_sphere_add",
     title: "Icosphere",
     builder: "CreateIcoSphere",
     schema: {
@@ -38,6 +41,7 @@ export const presets = [
   },
   {
     id: "cylinder",
+    blender: "mesh.primitive_cylinder_add",
     title: "Cylinder",
     builder: "CreateCylinder",
     schema: {
@@ -50,6 +54,7 @@ export const presets = [
   },
   {
     id: "cone",
+    blender: "mesh.primitive_cone_add",
     title: "Cone",
     builder: "CreateCylinder",
     schema: {
@@ -61,6 +66,7 @@ export const presets = [
   },
   {
     id: "torus",
+    blender: "mesh.primitive_torus_add",
     title: "Torus",
     builder: "CreateTorus",
     schema: { diameter: n(2), thickness: n(0.5), tessellation: detail(48) },
@@ -80,18 +86,21 @@ export const presets = [
   },
   {
     id: "plane",
+    blender: "mesh.primitive_plane_add",
     title: "Plane",
     builder: "CreatePlane",
     schema: { width: n(2), height: n(2), sideOrientation: sides },
   },
   {
     id: "ground",
+    blender: "mesh.primitive_grid_add",
     title: "Ground",
     builder: "CreateGround",
     schema: { width: n(6), height: n(6), subdivisions: n(1, 1, 64, 1) },
   },
   {
     id: "disc",
+    blender: "mesh.primitive_circle_add",
     title: "Disc",
     builder: "CreateDisc",
     schema: {

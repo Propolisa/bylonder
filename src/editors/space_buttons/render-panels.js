@@ -12,26 +12,26 @@ export function renderPanels({ world, row, panel }) {
   const field = (path, label, extra = {}) => row({ id: 'render.' + path, label, default: getRenderPath(renderDefaults, path), get: () => getRenderPath(settings.state, path), set: (v, finish) => settings.set(path, v, finish !== false), refs: () => animatable.has(path) ? [address('scene', path)] : [], ...extra });
   return [
     h('div', { class: 'bl-property' }, [h('label', 'Render Engine'), h('span', { class: 'bl-node-link bl-plain' }, 'Babylon'), h('span')]),
-    panel('render.sampling', 'Sampling', () => [
-      panel('render.sampling.viewport', 'Viewport', () => [field('eevee.taaSamples', 'Samples', { integer: true, min: 1, max: 8, step: 1, description: 'Babylon MSAA samples' })], { subpanel: true }),
-      panel('render.sampling.render', 'Render', () => [field('eevee.taaRenderSamples', 'Samples', { integer: true, min: 1, max: 256, step: 1, description: 'Renders averaged per frame in Render Image and Render Animation: sub-pixel jitter for anti-aliasing, and sub-frame times across the shutter when Motion Blur is on' })], { subpanel: true }),
+    panel('RENDER_PT_eevee_sampling', 'Sampling', () => [
+      panel('RENDER_PT_eevee_sampling_viewport', 'Viewport', () => [field('eevee.taaSamples', 'Samples', { integer: true, min: 1, max: 8, step: 1, description: 'Babylon MSAA samples' })], { subpanel: true }),
+      panel('RENDER_PT_eevee_sampling_render', 'Render', () => [field('eevee.taaRenderSamples', 'Samples', { integer: true, min: 1, max: 256, step: 1, description: 'Renders averaged per frame in Render Image and Render Animation: sub-pixel jitter for anti-aliasing, and sub-frame times across the shutter when Motion Blur is on' })], { subpanel: true }),
     ]),
-    panel('render.raytracing', 'Raytracing', () => [
+    panel('RENDER_PT_eevee_raytracing', 'Raytracing', () => [
       field('eevee.rayTracingMethod', 'Method', { options: { 'Light Probe': 'PROBE', 'Screen-Trace': 'SCREEN' }, disabled: () => !settings.state.eevee.useRaytracing }),
-      ...(s.eevee.rayTracingMethod === 'SCREEN' ? [panel('render.raytracing.screen', 'Screen Tracing', () => [
+      ...(s.eevee.rayTracingMethod === 'SCREEN' ? [panel('RENDER_PT_eevee_screen_trace', 'Screen Tracing', () => [
         field('eevee.screenTraceQuality', 'Precision', { min: 0, max: 1, step: 0.01, disabled: () => !settings.state.eevee.useRaytracing }),
         field('eevee.screenTraceThickness', 'Thickness', { min: 0, max: 100, step: 0.01, disabled: () => !settings.state.eevee.useRaytracing }),
       ], { subpanel: true })] : []),
-      panel('render.raytracing.fastgi', 'Fast GI Approximation', () => [
+      panel('RENDER_PT_eevee_gi_approximation', 'Fast GI Approximation', () => [
         field('eevee.fastGiMethod', 'Method', { options: { 'Ambient Occlusion': 'AMBIENT_OCCLUSION' }, disabled: () => !settings.state.eevee.useRaytracing }),
         field('eevee.fastGiDistance', 'Distance', { unit: 'length', min: 0, max: 1000, step: 0.1, disabled: () => !settings.state.eevee.useRaytracing }),
       ], { subpanel: true }),
     ], { defaultClosed: !s.eevee.useRaytracing, actions: headerToggle(s.eevee.useRaytracing, 'Use Raytracing', v => settings.set('eevee.useRaytracing', v)) }),
-    panel('render.motionBlur', 'Motion Blur', () => [
+    panel('RENDER_PT_eevee_motion_blur', 'Motion Blur', () => [
       field('render.motionBlurShutter', 'Shutter', { min: 0, max: 2, step: 0.01, disabled: () => !settings.state.render.useMotionBlur }),
       h('p', { class: 'bl-message' }, 'Viewport: a motion blur post effect. Render: Samples spread across the shutter (up to 1 frame).'),
     ], { defaultClosed: !s.render.useMotionBlur, actions: headerToggle(s.render.useMotionBlur, 'Use Motion Blur', v => settings.set('render.useMotionBlur', v)) }),
-    panel('render.colorManagement', 'Color Management', () => [
+    panel('RENDER_PT_color_management', 'Color Management', () => [
       field('displaySettings.displayDevice', 'Display Device', { options: { sRGB: 'sRGB' } }),
       field('viewSettings.viewTransform', 'View Transform', { options: Object.fromEntries(Object.entries(viewTransforms).map(([k, v]) => [v.label, k])) }),
       field('viewSettings.look', 'Look', { options: Object.fromEntries(Object.entries(looks).map(([k, [label]]) => [label, k])) }),

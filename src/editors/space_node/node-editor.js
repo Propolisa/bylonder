@@ -41,7 +41,7 @@ export function mountNodeEditor({ world, host, header, contexts, backdrop, stora
   const typeButton = menuButton('', () => Object.entries(treeTypes).map(([id, t]) => ({ label: t.label, icon: t.icon, checked: () => id === type, run: () => api.setType(id) })), { className: 'bl-dropdown', title: 'Node Tree Type' });
   const title = Object.assign(document.createElement('span'), { className: 'node-editor-title' });
   const actions = Object.assign(document.createElement('span'), { className: 'node-editor-actions' });
-  const view = menuButton('View', [{ label: 'Frame All', keys: 'Home', run: frameAll }, { label: 'Reorganize Nodes', run: () => current?.onReOrganizedRequiredObservable?.notifyObservers() }]);
+  const view = menuButton('View', [{ label: 'Frame All', blender: 'node.view_all', keys: 'Home', run: frameAll }, { label: 'Reorganize Nodes', run: () => current?.onReOrganizedRequiredObservable?.notifyObservers() }], { blender: 'NODE_MT_view' });
   host.addEventListener('keydown', e => { if (e.key === 'Home' && !e.target.closest('input,textarea,select')) { e.preventDefault(); frameAll(); } });
   let backdropOn = true;
   try { backdropOn = localStorage.getItem(storageKey + ':backdrop') !== '0'; } catch {}

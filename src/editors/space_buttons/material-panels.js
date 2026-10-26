@@ -75,8 +75,8 @@ export function materialPanels({ world, editor, node, row, panel, state, preview
   preview.request(material, url => { state.previewUrl = url; });
   return [
     list, datablock,
-    panel('material.preview', 'Preview', () => [h('div', { class: 'bl-preview' }, state.previewUrl ? h('img', { src: state.previewUrl, alt: material.name + ' preview' }) : h('span', 'Rendering…'))]),
-    panel('material.surface', 'Surface', () => [
+    panel('MATERIAL_PT_preview', 'Preview', () => [h('div', { class: 'bl-preview' }, state.previewUrl ? h('img', { src: state.previewUrl, alt: material.name + ' preview' }) : h('span', 'Rendering…'))]),
+    panel('EEVEE_MATERIAL_PT_surface', 'Surface', () => [
       typeRow,
       ...graphRows(),
       ...sections.filter(s => s.id === 'surface').flatMap(s => s.fields.map(field)),

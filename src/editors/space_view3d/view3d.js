@@ -83,43 +83,43 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     return a && { label: a.label, keys: a.keys[0]?.replace(/\+/g, ' '), enabled: a.enabled, run: () => registry.invoke(id) };
   };
   const header = dock.header(headerId);
-  const cameraItem = { label: 'Camera', keys: 'Numpad 0', checked: () => state.cameraView, run: toggleCameraView };
-  const mode = menuButton('Object Mode', [{ label: 'Object Mode', icon: 'object_datamode', checked: () => !state.cameraView, run: () => state.cameraView && toggleCameraView() }, cameraItem], { icon: 'object_datamode', className: 'bl-dropdown' });
+  const cameraItem = { label: 'Camera', blender: 'view3d.view_camera', keys: 'Numpad 0', checked: () => state.cameraView, run: toggleCameraView };
+  const mode = menuButton('Object Mode', [{ label: 'Object Mode', blender: 'object.mode_set:OBJECT', icon: 'object_datamode', checked: () => !state.cameraView, run: () => state.cameraView && toggleCameraView() }, cameraItem], { icon: 'object_datamode', className: 'bl-dropdown' });
   const viewpoint = Object.entries(viewNames).map(([key, label]) => {
     const [vname, opposite] = key.split(',');
-    return { label, keys: 'Numpad ' + { right: 3, top: 7, front: 1 }[vname] + (opposite === 'true' ? ' Ctrl' : ''), run: () => nav.view(vname, opposite === 'true') };
+    return { label, blender: 'view3d.view_axis:' + { right: 'RIGHT', top: 'TOP', front: 'FRONT' }[vname], keys: 'Numpad ' + { right: 3, top: 7, front: 1 }[vname] + (opposite === 'true' ? ' Ctrl' : ''), run: () => nav.view(vname, opposite === 'true') };
   });
   const viewMenu = menuButton('View', () => [
-    { label: 'Frame Selected', keys: 'Numpad .', enabled: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },
+    { label: 'Frame Selected', blender: 'view3d.view_selected', keys: 'Numpad .', enabled: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },
     '-',
-    { label: 'Perspective / Orthographic', keys: 'Numpad 5', run: () => nav.toggle() },
-    { label: 'Viewpoint', items: viewpoint },
+    { label: 'Perspective / Orthographic', blender: 'view3d.view_persportho', keys: 'Numpad 5', run: () => nav.toggle() },
+    { label: 'Viewpoint', blender: 'VIEW3D_MT_view_viewpoint', items: viewpoint },
     cameraItem,
     '-',
-    { label: 'Area', items: [{ label: 'Toggle Maximize Area', keys: 'Ctrl Space', run: () => dock.maximize(headerId) }] },
+    { label: 'Area', blender: 'INFO_MT_area', items: [{ label: 'Toggle Maximize Area', blender: 'screen.screen_full_area', keys: 'Ctrl Space', run: () => dock.maximize(headerId) }] },
     { label: 'Babylon Inspector', keys: 'Shift Ctrl I', run: ctx.inspector },
     { label: 'Keyboard Shortcuts', keys: '?', run: () => ctx.help.showModal() },
-  ]);
-  const select = menuButton('Select', () => ['select-all', 'deselect', 'invert'].map(action));
+  ], { blender: 'VIEW3D_MT_view' });
+  const select = menuButton('Select', () => ['select-all', 'deselect', 'invert'].map(action), { blender: 'VIEW3D_MT_select_object' });
   const meshes = () => creator.catalog.filter(p => p.id !== 'text').map(p => ({ label: p.title, icon: 'mesh_data', run: () => creator.add(p) }));
   const add = menuButton('Add', () => [
-    { label: 'Mesh', icon: 'outliner_ob_mesh', items: meshes },
-    { label: 'Text', icon: 'outliner_ob_empty', run: () => creator.add(creator.catalog.find(p => p.id === 'text')) },
+    { label: 'Mesh', blender: 'VIEW3D_MT_mesh_add', icon: 'outliner_ob_mesh', items: meshes },
+    { label: 'Text', blender: 'object.text_add', icon: 'outliner_ob_empty', run: () => creator.add(creator.catalog.find(p => p.id === 'text')) },
     '-',
     { label: 'Search…', keys: 'Shift A', run: () => creator.show() },
-  ]);
+  ], { blender: 'VIEW3D_MT_add' });
   const object = menuButton('Object', () => [
-    { label: 'Transform', items: ['move', 'rotate', 'scale'].map(action) },
-    { label: 'Clear', items: ['clear-location', 'clear-rotation', 'clear-scale'].map(action) },
+    { label: 'Transform', blender: 'VIEW3D_MT_transform_object', items: ['move', 'rotate', 'scale'].map(action) },
+    { label: 'Clear', blender: 'VIEW3D_MT_object_clear', items: ['clear-location', 'clear-rotation', 'clear-scale'].map(action) },
     '-',
     ...['duplicate', 'rename', 'delete'].map(action),
     '-',
-    { label: 'Parent', items: ['parent', 'unparent', 'group', 'ungroup'].map(action) },
-    { label: 'Collection', items: ['move-to-collection', 'link-to-collection', 'new-collection', 'remove-from-collection'].map(action) },
-    { label: 'Show/Hide', items: ['hide', 'hide-others', 'show-all', 'isolate'].map(action) },
+    { label: 'Parent', blender: 'VIEW3D_MT_object_parent', items: ['parent', 'unparent', 'group', 'ungroup'].map(action) },
+    { label: 'Collection', blender: 'VIEW3D_MT_object_collection', items: ['move-to-collection', 'link-to-collection', 'new-collection', 'remove-from-collection'].map(action) },
+    { label: 'Show/Hide', blender: 'VIEW3D_MT_object_showhide', items: ['hide', 'hide-others', 'show-all', 'isolate'].map(action) },
     '-',
     ...['add-array', 'creation', 'edit-text'].map(action),
-  ]);
+  ], { blender: 'VIEW3D_MT_object' });
   const shadingButtons = [['wire', 'shading_wire', 'Wireframe'], ['solid', 'shading_solid', 'Solid'], ['rendered', 'shading_rendered', 'Rendered']].map(([id, icon, title]) => {
     const b = iconButton(icon, 'Viewport Shading: ' + title, () => view.setShading(id));
     b.dataset.shading = id;

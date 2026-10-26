@@ -36,6 +36,7 @@ import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
 import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequencer/editor.js";
 import { createUI } from "./editors/interface/ui";
+import { createKeymap } from "./windowmanager/input/keymap.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -444,9 +445,7 @@ const key = (e) => {
     creator.open
   )
     return;
-  if (e.code === "Numpad0" && !e.repeat) { e.preventDefault(); activeView()?.toggleCameraView(); return; }
-  if (e.key === "F12" && !e.repeat) { e.preventDefault(); (e.ctrlKey || e.metaKey ? renderHost.renderAnimation : renderHost.renderImage)(); return; }
-  if (e.key === "F11" && !e.repeat) { e.preventDefault(); renderHost.viewRender(); return; }
+  if (!e.repeat && globalKeys(e)) return;
   if (e.key === "Escape" && !editor.modal && !creator.pending && renderHost.escape()) { e.preventDefault(); return; }
   if (e.target.closest(".timeline") || e.repeat || !activeView() || activeView().state.cameraView) return;
   const k = e.key.toLowerCase(),
@@ -468,17 +467,8 @@ const key = (e) => {
     }
     if (!(mod && k === "z")) return;
   }
-  if (mod && k === "z") {
-    e.preventDefault();
-    undoRedo(e.shiftKey);
-    return;
-  }
+  if (undoKeys(e)) return;
   if (world.contextMenu.isOpen) return;
-  if (k === "f9") {
-    e.preventDefault();
-    creator.reopen();
-    return;
-  }
   if (k === "escape" && creator.pending) {
     e.preventDefault();
     creator.finish(false);
@@ -489,26 +479,38 @@ const key = (e) => {
     creator.finish();
     return;
   }
-  if (!mod && k === 'i') { e.preventDefault(); e.altKey ? animation.deleteKeys(objectRefs(editor.selection.roots).map(ref=>({ref,frame:Math.round(animation.time.frame)}))) : insertKeys(); return; }
-  if (e.code === 'Space') {e.preventDefault();animation.play();return;}
-  if (world.objectActions.key(e)) return;
-  if (mod && !["1", "3", "7"].includes(k)) return;
-  if (["g", "r", "s"].includes(k)) {
-    e.preventDefault();
-    creator.finish();
-    editor.start({ g: "move", r: "rotate", s: "scale" }[k]);
-  } else if (k === "escape") editor.setMode("select");
-  else if (k === "5") {
-    e.preventDefault();
-    activeView().nav.toggle();
-  } else if (["1", "3", "7"].includes(k)) {
-    e.preventDefault();
-    activeView().nav.view({ 1: "front", 3: "right", 7: "top" }[k], mod);
-  } else if (k === "f" || e.code === "NumpadDecimal") {
-    e.preventDefault();
-    nav.frame(editor.selected);
-  } else if (k === "?") help.showModal();
+  if (viewKeys(e) || world.objectActions.key(e)) return;
+  if (k === "escape") editor.setMode("select");
 };
+const transform = (type) => () => { creator.finish(); editor.start(type); };
+const viewAxis = (name, opposite) => () => activeView().nav.view(name, opposite);
+const globalKeys = createKeymap([
+  { blender: "view3d.view_camera", keys: "Numpad 0", run: () => activeView()?.toggleCameraView() },
+  { blender: "render.render", keys: ["F12", "Ctrl F12"], run: (e) => (e.ctrlKey || e.metaKey ? renderHost.renderAnimation : renderHost.renderImage)() },
+  { blender: "render.view_show", keys: "F11", run: () => renderHost.viewRender() },
+], ["3D View", "Screen"]);
+const undoKeys = createKeymap([
+  { blender: "ed.undo", keys: "Ctrl Z", run: () => undoRedo(false) },
+  { blender: "ed.redo", keys: "Shift Ctrl Z", run: () => undoRedo(true) },
+], ["Screen"]);
+const viewKeys = createKeymap([
+  { blender: "screen.redo_last", keys: "F9", run: () => creator.reopen() },
+  { blender: "anim.keyframe_insert", keys: "I", run: () => insertKeys() },
+  { blender: "anim.keyframe_delete_v3d", keys: "Alt I", run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
+  { blender: "screen.animation_play", keys: "Space", run: () => animation.play() },
+  { blender: "transform.translate", keys: "G", run: transform("move") },
+  { blender: "transform.rotate", keys: "R", run: transform("rotate") },
+  { blender: "transform.resize", keys: "S", run: transform("scale") },
+  { blender: "view3d.view_persportho", keys: ["Numpad 5", "5"], run: () => activeView().nav.toggle() },
+  { blender: "view3d.view_axis", keys: ["Numpad 1", "1"], run: viewAxis("front", false) },
+  { blender: "view3d.view_axis", keys: ["Ctrl Numpad 1", "Ctrl 1"], run: viewAxis("front", true) },
+  { blender: "view3d.view_axis", keys: ["Numpad 3", "3"], run: viewAxis("right", false) },
+  { blender: "view3d.view_axis", keys: ["Ctrl Numpad 3", "Ctrl 3"], run: viewAxis("right", true) },
+  { blender: "view3d.view_axis", keys: ["Numpad 7", "7"], run: viewAxis("top", false) },
+  { blender: "view3d.view_axis", keys: ["Ctrl Numpad 7", "Ctrl 7"], run: viewAxis("top", true) },
+  { blender: "view3d.view_selected", keys: ["Numpad .", "F"], run: () => nav.frame(editor.selected) },
+  { keys: "Shift /", run: () => help.showModal() },
+], ["3D View", "Object Mode", "Frames", "Screen"]);
 window.addEventListener("keydown", key);
 let last = 0;
 // Once per animation frame, before views decide whether to render.

@@ -68,9 +68,10 @@ export function openMenu(items, at, title) {
   return render(items, rect, 0, false, title);
 }
 
-export function menuButton(label, items, { icon, className = '', title } = {}) {
+export function menuButton(label, items, { icon, className = '', title, blender } = {}) {
   const button = document.createElement('button');
   button.type = 'button';
+  if (blender) button.dataset.blender = blender;
   button.className = 'bl-pulldown ' + className;
   if (title) button.title = title;
   if (icon) button.append(iconEl(icon));

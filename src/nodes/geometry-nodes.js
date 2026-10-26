@@ -32,7 +32,7 @@ export function storeGeometryGraph(modifier) {
 
 let carrier;
 export const geometryNodesDefinition = {
-  id: 'NODES', name: 'GeometryNodes', category: 'Generate', icon: 'GEOMETRY_NODES',
+  id: 'NODES', blender: 'object.modifier_add:NODES', name: 'GeometryNodes', category: 'Generate', icon: 'GEOMETRY_NODES',
   schema: { graph: { label: 'Node Group', default: '', animatable: false, hidden: true } },
   defaults: () => ({ graph: defaultGeometryGraph() }),
   evaluate(input, modifier) {

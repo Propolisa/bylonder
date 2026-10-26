@@ -1,5 +1,6 @@
 :root{
-  --bl-font:12px "Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bl-font-family:"Inter","DejaVu Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--bl-font-size:12px;
+  --bl-font:var(--bl-font-size) var(--bl-font-family);
   --bl-gap:#161616;--bl-topbar:#232323;--bl-header:#303030;--bl-region:#303030;--bl-back:#282828;--bl-viewport:#3d3d3d;
   --bl-panel:#3d3d3d;--bl-panel-header:#424242;--bl-tabs:#1d1d1d;
   --bl-text:#e6e6e6;--bl-text-dim:#a6a6a6;--bl-text-off:#7a7a7a;
@@ -9,6 +10,8 @@
   --bl-obj:#ffaf29;--bl-data:#00d4a3;--bl-mod:#84b8ff;--bl-shading:#ea7581;--bl-scene:#e6e6e6;
   --bl-axis-x:#ff3352;--bl-axis-y:#8bdc00;--bl-axis-z:#2890ff;
   --bl-playhead:#4772b3;--bl-key:#e6e6e6;--bl-key-sel:#ffbe33;
+  --bl-status-done:#2f9e44;--bl-status-alt:#4c8dff;--bl-status-partial:#c08a1e;--bl-status-track:#4a4a4a;
+  --bl-shadow-popup:0 10px 40px #000a;--bl-shadow-menu:0 4px 12px #0007;
   --bl-header-h:26px;--bl-row:20px;--bl-radius:4px
 }
 @media(pointer:coarse){:root{--bl-header-h:36px;--bl-row:30px}}

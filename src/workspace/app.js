@@ -24,7 +24,7 @@ import { iconButton } from "../editors/interface/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
-const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
+const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
 let repo,
   project,
   active = "index.js",

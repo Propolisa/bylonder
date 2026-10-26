@@ -16,6 +16,7 @@ const show = () => {
   for (const img of body.querySelectorAll('img[src]')) {
     const target = new URL(img.getAttribute('src'), 'http://x/' + path).pathname.slice(1);
     if (target in media) img.src = media[target];
+    else if (target.startsWith('public/')) img.src = import.meta.env.BASE_URL + target.slice(7);
   }
   for (const a of nav.children) a.classList.toggle('active', a.dataset.path === path);
   document.title = title(path, files[path] || '') + ' - Bylonder Docs';

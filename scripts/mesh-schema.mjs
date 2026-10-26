@@ -8,4 +8,4 @@ for(const member of type.getProperties()){
  const fields={};for(const field of checker.getTypeOfSymbolAtLocation(options,source).getProperties()){const t=checker.typeToString(checker.getTypeOfSymbolAtLocation(field,source));fields[field.name]={type:t,required:!(field.flags&ts.SymbolFlags.Optional)}}
  catalog[member.name]={parameters:fn.parameters.map(p=>p.name),fields};
 }
-await writeFile('src/objects/builder-schema.json',JSON.stringify(catalog,null,2)+'\n');
+await writeFile('src/editors/object/builder-schema.json',JSON.stringify(catalog,null,2)+'\n');

@@ -20,7 +20,7 @@ export function viewLayerPanels({ world, panel }) {
       iconButton('ADD', 'Add View Layer', () => cols.createViewLayer()),
       iconButton('X', 'Remove View Layer', () => cols.removeViewLayer(current.id), { disabled: cols.viewLayers().length < 2 }),
     ]),
-    panel('viewlayer.info', 'View Layer', () => [h('p', { class: 'bl-message' }, 'Each view layer keeps its own Exclude and Hide in Viewport state per collection. Set them in the Outliner. Render passes are not available.')]),
+    panel('VIEWLAYER_PT_layer', 'View Layer', () => [h('p', { class: 'bl-message' }, 'Each view layer keeps its own Exclude and Hide in Viewport state per collection. Set them in the Outliner. Render passes are not available.')]),
   ];
 }
 
@@ -33,7 +33,7 @@ export function collectionPanels({ world, row, panel }) {
       h('span', { class: 'bl-id-browse' }, [icon('OUTLINER_COLLECTION')]),
       h('input', { class: 'bl-id-name', value: c.name, 'aria-label': 'Collection name', onChange: e => cols.rename(id, e.target.value) }),
     ]),
-    panel('collection.restrictions', 'Restrictions', () => [
+    panel('COLLECTION_PT_collection_flags', 'Restrictions', () => [
       row({ id: 'collection.selectable', label: 'Selectable', default: true, get: () => !cols.byId(id).hideSelect, set: v => cols.set(id, { hideSelect: !v }) }),
       row({ id: 'collection.hideViewport', label: 'Disable in Viewports', default: false, get: () => !!cols.byId(id).hideViewport, set: v => cols.set(id, { hideViewport: v }) }),
     ]),
@@ -43,7 +43,7 @@ export function collectionPanels({ world, row, panel }) {
 // Properties > Object > Collections: the collections this object is linked to.
 export function objectCollectionsPanel({ world, node, panel }) {
   const cols = world.collections, objectId = nodeId(node), linked = cols.memberships(objectId);
-  return panel('object.collections', 'Collections', () => [
+  return panel('OBJECT_PT_collections', 'Collections', () => [
     h('button', { type: 'button', class: 'bl-wide-button', onClick: e => openMenu([{ heading: 'Add to Collection' }, ...tree(cols, id => cols.link([objectId], id), linked)], e.currentTarget) }, [icon('ADD'), 'Add to Collection']),
     ...(linked.length ? linked : [cols.MASTER]).map(id => h('div', { class: 'bl-id-row' }, [
       h('span', { class: 'bl-id-browse' }, [icon('OUTLINER_COLLECTION')]),

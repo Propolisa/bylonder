@@ -1,5 +1,6 @@
 import { nodeId } from "./identity.js";
 import { openMenu } from "../interface/menu.js";
+import { createKeymap } from "../../windowmanager/input/keymap.js";
 export function createObjectActions({
   world,
   editor,
@@ -31,22 +32,22 @@ export function createObjectActions({
     }
   };
   const actions = [
-    {id:"add-array",label:"Add Array Modifier",keys:[],section:"Modifiers",enabled:()=>!!active()?.getTotalVertices?.(),run:()=>world.modifiers.add(active(),"ARRAY")},
-    {id:"undo",label:"Undo",keys:[],section:"History",run:()=>{creator.finish();editor.finish(false);history.undo();editor.reconcile();}},
-    {id:"redo",label:"Redo",keys:[],section:"History",run:()=>{creator.finish();editor.finish(false);history.redo();editor.reconcile();}},
-    {id:"creation",label:"Last Creation Settings",keys:[],section:"Create",run:()=>creator.reopen()},
-    {id:"frame",label:"Frame Selected",keys:[],section:"View",enabled:has,run:()=>nav.frame(editor.selected)},
+    {id:"add-array",blender:"object.modifier_add:ARRAY",label:"Add Array Modifier",keys:[],section:"Modifiers",enabled:()=>!!active()?.getTotalVertices?.(),run:()=>world.modifiers.add(active(),"ARRAY")},
+    {id:"undo",blender:"ed.undo",label:"Undo",keys:[],section:"History",run:()=>{creator.finish();editor.finish(false);history.undo();editor.reconcile();}},
+    {id:"redo",blender:"ed.redo",label:"Redo",keys:[],section:"History",run:()=>{creator.finish();editor.finish(false);history.redo();editor.reconcile();}},
+    {id:"creation",blender:"screen.redo_last",label:"Last Creation Settings",keys:[],section:"Create",run:()=>creator.reopen()},
+    {id:"frame",blender:"view3d.view_selected",label:"Frame Selected",keys:[],section:"View",enabled:has,run:()=>nav.frame(editor.selected)},
 
     {id:"edit-text",label:"Edit Text…",keys:["Tab"],section:"Text",enabled:()=>!!active()?.metadata?.wbCreation?.text,run:()=>creator.editText(active())},
     {
-      id: "add",
+      id: "add", blender: "VIEW3D_MT_add",
       label: "Add Object…",
       keys: ["Shift+A"],
       section: "Create",
       run: () => creator.show(),
     },
     {
-      id: "duplicate",
+      id: "duplicate", blender: "object.duplicate_move",
       label: "Duplicate",
       keys: ["Shift+D"],
       section: "Object",
@@ -54,7 +55,7 @@ export function createObjectActions({
       run: () => commands.duplicate(),
     },
     {
-      id: "rename",
+      id: "rename", blender: "TOPBAR_PT_name",
       label: "Rename…",
       keys: ["F2"],
       section: "Object",
@@ -62,7 +63,7 @@ export function createObjectActions({
       run: rename,
     },
     {
-      id: "delete",
+      id: "delete", blender: "object.delete",
       label: "Delete",
       keys: ["Delete", "X"],
       section: "Object",
@@ -70,7 +71,7 @@ export function createObjectActions({
       run: () => commands.remove(),
     },
     {
-      id: "move",
+      id: "move", blender: "transform.translate",
       label: "Move",
       keys: [],
       section: "Transform",
@@ -81,7 +82,7 @@ export function createObjectActions({
       },
     },
     {
-      id: "rotate",
+      id: "rotate", blender: "transform.rotate",
       label: "Rotate",
       keys: [],
       section: "Transform",
@@ -92,7 +93,7 @@ export function createObjectActions({
       },
     },
     {
-      id: "scale",
+      id: "scale", blender: "transform.resize",
       label: "Scale",
       keys: [],
       section: "Transform",
@@ -103,7 +104,7 @@ export function createObjectActions({
       },
     },
     {
-      id: "clear-location",
+      id: "clear-location", blender: "object.location_clear",
       label: "Clear Location",
       keys: ["Alt+G"],
       section: "Transform",
@@ -111,7 +112,7 @@ export function createObjectActions({
       run: () => commands.reset("position"),
     },
     {
-      id: "clear-rotation",
+      id: "clear-rotation", blender: "object.rotation_clear",
       label: "Clear Rotation",
       keys: ["Alt+R"],
       section: "Transform",
@@ -119,7 +120,7 @@ export function createObjectActions({
       run: () => commands.reset("rotation"),
     },
     {
-      id: "clear-scale",
+      id: "clear-scale", blender: "object.scale_clear",
       label: "Clear Scale",
       keys: ["Alt+S"],
       section: "Transform",
@@ -141,7 +142,7 @@ export function createObjectActions({
       },
     },
     {
-      id: "hide",
+      id: "hide", blender: "object.hide_view_set",
       label: "Hide Selected",
       keys: ["H"],
       section: "Visibility",
@@ -149,7 +150,7 @@ export function createObjectActions({
       run: () => commands.hide(),
     },
     {
-      id: "hide-others",
+      id: "hide-others", blender: "object.hide_view_set",
       label: "Hide Unselected",
       keys: ["Shift+H"],
       section: "Visibility",
@@ -157,14 +158,14 @@ export function createObjectActions({
       run: () => commands.hide(true),
     },
     {
-      id: "show-all",
+      id: "show-all", blender: "object.hide_view_clear",
       label: "Show All",
       keys: ["Alt+H"],
       section: "Visibility",
       run: () => commands.showAll(),
     },
     {
-      id: "isolate",
+      id: "isolate", blender: "view3d.localview",
       label: "Toggle Local View",
       keys: ["/"],
       section: "Visibility",
@@ -173,10 +174,10 @@ export function createObjectActions({
     },
     // Blender's collection operators. Ctrl+G creates the collection inside the active collection (Blender leaves
     // it unlinked from the scene) and moves the selection into it.
-    {id:"move-to-collection",label:"Move to Collection",keys:["M"],section:"Collection",enabled:has,run:()=>collectionMenu("Move to Collection",(ids,id)=>world.collections.move(ids,id))},
-    {id:"link-to-collection",label:"Link to Collection",keys:["Shift+M"],section:"Collection",enabled:has,run:()=>collectionMenu("Link to Collection",(ids,id)=>world.collections.link(ids,id))},
-    {id:"new-collection",label:"Create New Collection",keys:["Ctrl+G"],section:"Collection",enabled:has,run:()=>{creator.finish();world.collections.create({objects:ids(),move:true});}},
-    {id:"remove-from-collection",label:"Remove from Collection",keys:["Ctrl+Alt+G"],section:"Collection",enabled:has,run:()=>openMenu([{heading:"Remove from Collection"},...[...new Set(ids().flatMap(id=>world.collections.memberships(id)))].map(id=>({label:id===world.collections.MASTER?"Scene Collection":world.collections.byId(id).name,icon:"outliner_collection",run:()=>world.collections.unlink(ids(),id)}))],pointer)},
+    {id:"move-to-collection",blender:["OBJECT_MT_move_to_collection", "object.move_to_collection"],label:"Move to Collection",keys:["M"],section:"Collection",enabled:has,run:()=>collectionMenu("Move to Collection",(ids,id)=>world.collections.move(ids,id))},
+    {id:"link-to-collection",blender:["OBJECT_MT_link_to_collection", "object.link_to_collection"],label:"Link to Collection",keys:["Shift+M"],section:"Collection",enabled:has,run:()=>collectionMenu("Link to Collection",(ids,id)=>world.collections.link(ids,id))},
+    {id:"new-collection",blender:"collection.create",label:"Create New Collection",keys:["Ctrl+G"],section:"Collection",enabled:has,run:()=>{creator.finish();world.collections.create({objects:ids(),move:true});}},
+    {id:"remove-from-collection",blender:"collection.objects_remove",label:"Remove from Collection",keys:["Ctrl+Alt+G"],section:"Collection",enabled:has,run:()=>openMenu([{heading:"Remove from Collection"},...[...new Set(ids().flatMap(id=>world.collections.memberships(id)))].map(id=>({label:id===world.collections.MASTER?"Scene Collection":world.collections.byId(id).name,icon:"outliner_collection",run:()=>world.collections.unlink(ids(),id)}))],pointer)},
     {
       id: "group",
       label: "Parent to New Empty",
@@ -200,7 +201,7 @@ export function createObjectActions({
       },
     },
     {
-      id: "parent",
+      id: "parent", blender: ["object.parent_set", "object.parent_set:OBJECT"],
       label: "Parent to Active",
       keys: ["Ctrl+P"],
       section: "Hierarchy",
@@ -208,7 +209,7 @@ export function createObjectActions({
       run: () => commands.parent(active()),
     },
     {
-      id: "unparent",
+      id: "unparent", blender: ["object.parent_clear", "object.parent_clear:CLEAR"],
       label: "Clear Parent",
       keys: ["Alt+P"],
       section: "Hierarchy",
@@ -216,21 +217,21 @@ export function createObjectActions({
       run: () => commands.parent(null),
     },
     {
-      id: "select-all",
+      id: "select-all", blender: ["object.select_all", "object.select_all:SELECT"],
       label: "Select All",
       keys: ["A"],
       section: "Selection",
       run: () => commands.selectAll(),
     },
     {
-      id: "deselect",
+      id: "deselect", blender: ["object.select_all", "object.select_all:DESELECT"],
       label: "Deselect All",
       keys: ["Alt+A"],
       section: "Selection",
       run: () => commands.deselect(),
     },
     {
-      id: "invert",
+      id: "invert", blender: ["object.select_all", "object.select_all:INVERT"],
       label: "Invert Selection",
       keys: ["Ctrl+I"],
       section: "Selection",
@@ -248,21 +249,7 @@ export function createObjectActions({
     const action = actions.find((a) => a.id === id);
     if (action && (!action.enabled || action.enabled())) action.run();
   };
-  const key = (e) => {
-    const token = [
-      e.ctrlKey || e.metaKey ? "Ctrl" : null,
-      e.altKey ? "Alt" : null,
-      e.shiftKey ? "Shift" : null,
-      e.key.length === 1 ? e.key.toUpperCase() : e.key,
-    ]
-      .filter(Boolean)
-      .join("+");
-    const action = actions.find((a) => a.keys.includes(token));
-    if (!action) return false;
-    e.preventDefault();
-    invoke(action.id);
-    return true;
-  };
+  const key = createKeymap(actions.map((a) => ({ keys: a.keys, poll: () => !a.enabled || a.enabled(), run: () => a.run() })), ["Object Mode", "3D View", "Window", "Screen"]);
   return {
     actions,
     invoke,

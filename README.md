@@ -1,4 +1,6 @@
-# Babylon scene starter
+<img src="public/logo/bylonder.svg" alt="Bylonder logo" width="96" height="99">
+
+# Bylonder
 
 Full-viewport Babylon.js workspace with modular reactive systems, generated Tweakpane controls, transform tools and browser-local persistence. Licensed under GPL-3.0-or-later (see `LICENSE`). Dependencies are pinned; Inspector is loaded on demand.
 
@@ -113,6 +115,10 @@ Store effects run initially and then coalesce once per animation frame by defaul
 | `source/blender/python` | `src/runtime/` | Running project code: the world builder and the `@workbench/sdk` API |
 
 `src/main.js` composes the viewport frame; `src/workspace/` is the browser IDE around it (projects, files, scenes, sharing) and has no Blender counterpart.
+
+## Blender coverage
+
+Splash Screen > Blender Coverage shows how much of Blender's interface Bylonder covers, per editor, down to menus, panels, operators and key bindings. Blender's side comes from Blender itself: `tools/blender-reference/surface.py` writes `src/coverage/blender-surface.json`. Bylonder's side is scanned from the Blender identifiers in `src/` (`scripts/blender-coverage.mjs`). Design decisions, equivalents and notes for whole subtrees are written by hand in [docs/blender-coverage.md](docs/blender-coverage.md). New UI uses shadcn-vue components on the theme's design tokens (`src/editors/interface/components/`).
 
 Tests cover store isolation/scheduling, gesture math, relative-input lifecycle, native grouping, multi-object transforms, undo and persistence reconstruction via Babylon's NullEngine. They do not replace browser/WebGL interaction tests. The development preview service was unavailable in the build environment, so browser interaction remains unverified.
 

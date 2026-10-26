@@ -20,20 +20,20 @@ export function scenePanels({ world, row, panel }) {
       h('button', { type: 'button', class: 'bl-id-browse', title: 'Browse Scene to be linked', onClick: e => openMenu([{ heading: 'Browse Scene to be linked' }, { label: s.name, icon: 'scene_data', checked: () => true, run: () => {} }], e.currentTarget) }, [icon('SCENE_DATA')]),
       h('input', { class: 'bl-id-name', value: s.name, 'aria-label': 'Scene name', onChange: e => e.target.value.trim() && settings.set('name', e.target.value.trim()) }),
     ]),
-    panel('scene.scene', 'Scene', () => [
+    panel('SCENE_PT_scene', 'Scene', () => [
       row({ id: 'scene.camera', label: 'Camera', reference: true, default: '', title: 'Active camera, used for camera view (Numpad 0) and rendering',
         choices: () => settings.cameras().map(c => [c.metadata?.wbId || c.name, c.name]),
         get: () => { const c = settings.camera(); return c ? c.metadata?.wbId || c.name : ''; },
         set: v => settings.set('camera', settings.cameras().find(c => (c.metadata?.wbId || c.name) === v) || null) }),
     ]),
-    panel('scene.units', 'Units', () => [
+    panel('SCENE_PT_unit', 'Units', () => [
       unit('system', 'Unit System', { options: { None: 'NONE', Metric: 'METRIC', Imperial: 'IMPERIAL' } }),
       unit('scale', 'Unit Scale', { default: 1, min: 1e-9, max: 1e9, step: 0.01, disabled: () => none }),
       unit('separate', 'Separate Units', { default: false, disabled: () => none }),
       unit('rotation', 'Rotation', { options: { Degrees: 'DEGREES', Radians: 'RADIANS' } }),
       unit('length', 'Length', { options: lengthUnitOptions(s.unitSettings.system), disabled: () => none }),
     ], { defaultClosed: true }),
-    panel('scene.gravity', 'Gravity', () => [
+    panel('SCENE_PT_physics', 'Gravity', () => [
       vector(row, 'Gravity', [0, 1, 2].map(i => ({ id: 'scene.gravity.' + i, default: [0, -9.807, 0][i], step: 0.1, disabled: () => !settings.state.useGravity,
         get: () => settings.state.gravity[i], set: (v, finish) => { const g = [...settings.state.gravity]; g[i] = v; settings.set('gravity', g, finish !== false); },
         refs: () => [address('scene', 'gravity.' + 'xyz'[i])] }))),
@@ -66,7 +66,7 @@ export function worldPanels({ world, row, panel, files = [] }) {
   const fog = entry.volume.type, input = entry.background.input;
   return [
     datablock,
-    panel('world.surface', 'Surface', () => [
+    panel('EEVEE_WORLD_PT_surface', 'Surface', () => [
       h('div', { class: 'bl-property' }, [h('label', 'Surface'), h('span', { class: 'bl-node-link', title: 'Babylon has no world shader; this maps onto the scene background and environment' }, 'Background'), h('span')]),
       value('background.input', 'Color', { default: 'COLOR', options: { Color: 'COLOR', 'Environment Texture': 'ENVIRONMENT' }, refs: undefined }),
       h('div', { class: 'bl-node-inputs' }, input === 'COLOR'
@@ -75,7 +75,7 @@ export function worldPanels({ world, row, panel, files = [] }) {
           value('background.rotation', 'Rotation', { default: 0, unit: 'angle', step: Math.PI / 180 })]),
       value('background.strength', 'Strength', { default: 1, min: 0, max: 1e6, step: 0.01 }),
     ]),
-    panel('world.volume', 'Volume', () => [
+    panel('EEVEE_WORLD_PT_volume', 'Volume', () => [
       value('volume.type', 'Volume', { default: 'NONE', options: { None: 'NONE', 'Volume Scatter': 'SCATTER', 'Exponential Squared Fog': 'EXP2', 'Linear Fog': 'LINEAR' }, refs: undefined }),
       ...(fog === 'NONE' ? [] : [h('div', { class: 'bl-node-inputs' }, [
         color('volume.color', 'Color'),
@@ -85,7 +85,7 @@ export function worldPanels({ world, row, panel, files = [] }) {
       ])]),
       h('p', { class: 'bl-message' }, 'Babylon fog: shown in Rendered shading and camera view.'),
     ], { defaultClosed: fog === 'NONE' }),
-    panel('world.settings', 'Settings', () => [
+    panel('EEVEE_WORLD_PT_settings', 'Settings', () => [
       panel('world.settings.visibility', 'Ray Visibility', () => [
         value('visibility.camera', 'Camera', { default: true, refs: undefined, description: 'Show the environment texture as the background (skybox). Off: the background uses the Color input.' }),
         ...(input === 'ENVIRONMENT' && !entry.visibility.camera ? [color('background.color', 'Background')] : []),
@@ -106,7 +106,7 @@ export function outputPanels({ world, row, panel }) {
   const options = (table, keys = Object.keys(table)) => Object.fromEntries(keys.map(k => [table[k].label, k]));
   const size = outputSize(r), video = fileFormats[r.imageSettings.fileFormat]?.video;
   return [
-    panel('output.format', 'Format', () => [
+    panel('RENDER_PT_format', 'Format', () => [
       out('render.resolutionX', 'Resolution X', { integer: true, min: 4, max: 16384, step: 1 }),
       out('render.resolutionY', 'Y', { integer: true, min: 4, max: 16384, step: 1 }),
       out('render.resolutionPercentage', '%', { integer: true, min: 1, max: 100, step: 1 }),
@@ -115,29 +115,29 @@ export function outputPanels({ world, row, panel }) {
       ...(preset === 'CUSTOM' ? [row({ id: 'output.fps', label: 'FPS', default: 24, min: 1, max: 240, step: 1, get: () => time.state.fps, set: (v, finish) => time.configure({ fps: v }, { record: finish !== false }) })] : []),
       h('p', { class: 'bl-message' }, `Renders at ${size.width} x ${size.height} px. Render > Render Image (F12) or Render Animation (Ctrl F12).`),
     ]),
-    panel('output.frameRange', 'Frame Range', () => [
+    panel('RENDER_PT_frame_range', 'Frame Range', () => [
       field('frameStart', 'Frame Start', { min: -1e6, max: t.frameEnd - 1 }),
       field('frameEnd', 'End', { min: t.frameStart + 1, max: 1e6 }),
       field('frameStep', 'Step', { min: 1, max: 1000 }),
     ]),
-    panel('output.output', 'Output', () => [
+    panel('RENDER_PT_output', 'Output', () => [
       out('render.imageSettings.fileFormat', 'File Format', { options: options(fileFormats) }),
       ...(fileFormats[r.imageSettings.fileFormat]?.quality ? [out('render.imageSettings.quality', 'Quality', { integer: true, min: 0, max: 100, step: 1 })] : []),
       h('p', { class: 'bl-message' }, video ? 'Render Animation writes one video file.' : 'Render Animation writes one image per frame, downloaded as a ZIP.'),
     ]),
-    ...(video ? [panel('output.encoding', 'Encoding', () => [
+    ...(video ? [panel('RENDER_PT_encoding', 'Encoding', () => [
       out('render.ffmpeg.format', 'Container', { options: options(containers), set: (v, finish) => {
         if (!containers[v].codecs.includes(settings.state.render.ffmpeg.codec)) settings.set('render.ffmpeg.codec', containers[v].codecs[0], false);
         settings.set('render.ffmpeg.format', v, finish !== false);
       } }),
-      panel('output.encoding.video', 'Video', () => [
+      panel('RENDER_PT_encoding_video', 'Video', () => [
         out('render.ffmpeg.codec', 'Video Codec', { options: options(videoCodecs, containers[r.ffmpeg.format].codecs) }),
         out('render.ffmpeg.constantRateFactor', 'Output Quality', { options: options(qualities) }),
         out('render.ffmpeg.gopsize', 'Keyframe Interval', { integer: true, min: 1, max: 1000, step: 1 }),
       ], { subpanel: true }),
       h('p', { class: 'bl-message' }, 'Encoded in the browser with WebCodecs. Codecs the browser cannot encode report an error when rendering. Audio comes from the Sequencer.'),
     ])] : []),
-    panel('output.postProcessing', 'Post Processing', () => [
+    panel('RENDER_PT_post_processing', 'Post Processing', () => [
       out('render.useSequencer', 'Sequencer'),
     ], { defaultClosed: true }),
   ];
