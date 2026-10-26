@@ -46,6 +46,16 @@ EDIT_CASES = {
     "extrude-edges-circle": (("primitive_circle_add", {"vertices": 6}), "EDGE", [0, 1, 2], "extrude_region", {}, MOVE),
     "extrude-vert": (("primitive_plane_add", {}), "VERT", [0], "extrude_region", {}, MOVE),
     "extrude-verts-cube": (("primitive_cube_add", {}), "VERT", [0, 1, 2, 3], "extrude_region", {}, MOVE),
+    "subdivide-cube": (("primitive_cube_add", {}), "FACE", [0, 1, 2, 3, 4, 5], "subdivide", {}),
+    "subdivide-cube-3": (("primitive_cube_add", {}), "FACE", [0, 1, 2, 3, 4, 5], "subdivide", {"number_cuts": 3}),
+    "subdivide-face": (("primitive_grid_add", {"x_subdivisions": 3, "y_subdivisions": 3}), "FACE", [4], "subdivide", {"number_cuts": 2}),
+    "subdivide-edge": (("primitive_cube_add", {}), "EDGE", [0], "subdivide", {}),
+    "subdivide-edge-quadtri": (("primitive_cube_add", {}), "EDGE", [0], "subdivide", {"ngon": False, "number_cuts": 2}),
+    "subdivide-corner-path": (("primitive_grid_add", {"x_subdivisions": 2, "y_subdivisions": 2}), "EDGE", [0, 1], "subdivide", {"ngon": False, "quadcorner": "PATH"}),
+    "subdivide-corner-innervert": (("primitive_grid_add", {"x_subdivisions": 2, "y_subdivisions": 2}), "EDGE", [0, 1], "subdivide", {"ngon": False, "number_cuts": 2}),
+    "subdivide-corner-fan": (("primitive_grid_add", {"x_subdivisions": 2, "y_subdivisions": 2}), "EDGE", [0, 1], "subdivide", {"ngon": False, "quadcorner": "FAN"}),
+    "subdivide-tris": (("primitive_circle_add", {"vertices": 5, "fill_type": "TRIFAN"}), "FACE", [0, 1, 2, 3, 4], "subdivide", {"number_cuts": 2}),
+    "subdivide-ring": (("primitive_cylinder_add", {"vertices": 6}), "EDGE", [1, 4, 7], "subdivide", {}),
     "dissolve-faces-cube": (("primitive_cube_add", {}), "FACE", [0, 1], "dissolve_faces", {}),
 }
 

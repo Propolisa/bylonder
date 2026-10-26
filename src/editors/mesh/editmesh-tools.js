@@ -6,6 +6,7 @@ import { DEL_VERTS, DEL_EDGES, DEL_FACES, DEL_EDGESFACES, DEL_ONLYFACES } from '
 import { bmo_delete_exec } from '../../bmesh/operators/bmo-dupe.js';
 import { bmo_dissolve_faces_exec } from '../../bmesh/operators/bmo-dissolve.js';
 import { BM_mesh_elem_hflag_disable_all, BM_face_select_set, BM_vert_select_set, BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
+import { BM_mesh_esubdivide, SUBD_CORNER_INNERVERT, SUBD_CORNER_PATH, SUBD_CORNER_FAN, SUBD_CORNER_STRAIGHT_CUT, SUBDIV_SELECT_ORIG } from '../../bmesh/operators/bmo-subdivide.js';
 import { EDBM_mesh_hide, EDBM_mesh_reveal } from './editmesh-utils.js';
 
 // The %hv, %he and %hf operator slots: elements with a header flag.
@@ -89,10 +90,22 @@ export function edbm_extrude_mesh(bm, props = {}) {
   return nr !== 'NONE';
 }
 
+const QUAD_CORNER = { INNERVERT: SUBD_CORNER_INNERVERT, PATH: SUBD_CORNER_PATH, STRAIGHT_CUT: SUBD_CORNER_STRAIGHT_CUT, FAN: SUBD_CORNER_FAN };
+
+// mesh.subdivide (smoothness and fractal are not ported yet).
+export function edbm_subdivide_exec(bm, { number_cuts = 1, smoothness = 0, ngon = true, quadcorner = 'STRAIGHT_CUT' } = {}) {
+  if (!(bm.totedgesel || bm.totfacesel)) return false;
+  const use_quad_tri = !ngon;
+  const corner = use_quad_tri && quadcorner === 'STRAIGHT_CUT' ? 'INNERVERT' : quadcorner;
+  BM_mesh_esubdivide(bm, { seltype: SUBDIV_SELECT_ORIG, cuts: number_cuts, smooth: smoothness, quad_corner_type: QUAD_CORNER[corner], use_single_edge: use_quad_tri, use_grid_fill: true });
+  return true;
+}
+
 // Edit Mode operators by Blender idname, as (bm, props) for fixtures and keymaps.
 export const meshOperators = {
   'mesh.delete': (bm, props) => edbm_delete_exec(bm, props.type),
   'mesh.extrude_region': (bm, props) => edbm_extrude_mesh(bm, props),
+  'mesh.subdivide': (bm, props) => edbm_subdivide_exec(bm, props),
   'mesh.dissolve_faces': (bm) => edbm_dissolve_faces_exec(bm),
   'mesh.hide': (bm, props) => EDBM_mesh_hide(bm, bm.selectmode, !!props.unselected),
   'mesh.reveal': (bm) => EDBM_mesh_reveal(bm, bm.selectmode),

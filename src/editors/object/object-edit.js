@@ -9,6 +9,9 @@ import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/edi
 import { beginMeshTransform } from '../transform/transform-mesh.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
 import { openMenu } from '../interface/menu.js';
+import { createRedoPanel } from '../interface/redo-panel.js';
+import { operatorSchema } from './mesh-catalog.js';
+import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { primitive_add } from '../mesh/editmesh-add.js';
 import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js';
 import { mesh_from_vertex_data } from '../../blenkernel/mesh/mesh-from-babylon.js';
@@ -31,14 +34,16 @@ export function objectMesh(node) {
 export function createEditMode({ world, editor, views, history, notify, changed }) {
   const { scene } = world;
   let em = null;
+  const redo = createRedoPanel(document.querySelector('#redo-panel'));
   // scene.tool_settings.mesh_select_mode, kept across Edit Mode sessions as in Blender.
   let selectmode = SCE_SELECT_VERTEX;
 
   const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.text && !node.metadata?.group;
   const reason = (node) => (node.metadata?.wbModifiers?.length ? 'Edit Mode on objects with modifiers comes with modifiers on Mesh data.' : null);
 
-  // Converts the BMesh back to Mesh data, redraws and, for an operator, records an undo step.
-  function sync({ commit = true } = {}) {
+  // Converts the BMesh back to Mesh data, redraws and, for an operator, records an undo step (or, with `amend`,
+  // replaces the last one).
+  function sync({ commit = true, amend = false } = {}) {
     const { bm, object } = em;
     const mesh = BM_mesh_bm_to_me(bm);
     em.elems = { v: [], e: [], f: [] };
@@ -47,8 +52,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     mesh_batch_cache_apply(mesh, object);
     const active = BM_select_history_active_get(bm);
     em.overlay.update(mesh, { selectmode: bm.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: bm[{ [BM_VERT]: 'v', [BM_EDGE]: 'e', [BM_FACE]: 'f' }[active.htype]].index[active.ele] } });
-    if (commit) {
-      object.metadata = { ...object.metadata, wbCreation: { mesh: mesh_serialize(mesh) } };
+    if (commit || amend) object.metadata = { ...object.metadata, wbCreation: { mesh: mesh_serialize(mesh) } };
+    if (amend) history.amend();
+    else if (commit) {
+      redo.hide();
       history.commit();
     }
     changed();
@@ -79,6 +86,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
 
   function exit() {
     if (!em) return;
+    redo.hide();
     em.overlay.dispose();
     em.object.metadata = { ...em.object.metadata, editing: false };
     em = null;
@@ -134,7 +142,26 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     editor.start('move', { orient: faces ? 'NORMAL' : undefined, keep: true });
     if (!editor.modal) sync();
   }
-  const exec = (idname, props = {}) => run((bm) => meshOperators[idname](bm, props))();
+  // Runs an operator as one undo step; one with visible properties opens Adjust Last Operation, which re-runs it
+  // from the Mesh as it was before.
+  function exec(idname, props = {}) {
+    const before = BM_mesh_bm_to_me(em.bm);
+    meshOperators[idname](em.bm, props);
+    sync();
+    const schema = operatorSchema(idname);
+    if (!Object.keys(schema).length) return;
+    const values = { ...Object.fromEntries(Object.entries(schema).map(([key, def]) => [key, def.default])), ...props };
+    redo.show({
+      title: rna[idname].name,
+      schema,
+      values,
+      apply(next) {
+        em.bm = load(before);
+        meshOperators[idname](em.bm, next);
+        sync({ amend: true });
+      },
+    });
+  }
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
     '-',
@@ -199,6 +226,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       em.bm = load(mesh_deserialize(em.object.metadata.wbCreation.mesh));
       sync({ commit: false });
     },
-    dispose() { em?.overlay.dispose(); em = null; },
+    dispose() { em?.overlay.dispose(); em = null; redo.dispose(); },
   };
 }

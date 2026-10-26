@@ -1,10 +1,10 @@
 // Element creation and removal and the topology kernel (bmesh_core.cc). Handles are indices; -1 is null.
 import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_SMOOTH, _FLAG_JF, BM_ELEM_API_FLAG_TEST, BM_ELEM_API_FLAG_ENABLE, BM_ELEM_API_FLAG_DISABLE, poolAlloc, poolFree } from './bmesh-class.js';
 import {
-  bmesh_disk_edge_append, bmesh_disk_edge_remove, bmesh_disk_edge_next, bmesh_edge_vert_swap,
+  bmesh_disk_edge_append, bmesh_disk_edge_remove, bmesh_disk_edge_next, bmesh_edge_vert_swap, bmesh_disk_vert_replace,
   bmesh_radial_loop_append, bmesh_radial_loop_remove,
 } from './bmesh-structure.js';
-import { BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_face_find_double, BM_edge_face_count_is_over } from './bmesh-query.js';
+import { BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_verts_in_edge, BM_face_find_double, BM_edge_face_count_is_over } from './bmesh-query.js';
 import { BM_face_create_ngon } from './bmesh-construct.js';
 import { BM_select_history_remove } from './bmesh-marking.js';
 
@@ -38,9 +38,11 @@ export function BM_edge_create(bm, v1, v2, e_example = -1, create_flag = BM_CREA
   return edge;
 }
 
-function bm_loop_create(bm, v, edge, f) {
+// `l_example` gives the new loop its custom data (UVs).
+function bm_loop_create(bm, v, edge, f, l_example = -1) {
   const { l } = bm;
   const loop = poolAlloc(l);
+  if (l_example >= 0) for (const layer of l.layers) layer.data.copyWithin(loop * layer.size, l_example * layer.size, l_example * layer.size + layer.size);
   l.v[loop] = v;
   l.e[loop] = edge;
   l.f[loop] = f;
@@ -279,4 +281,78 @@ export function bmesh_kernel_loop_reverse(bm, f) {
     prev_radial_prev = radial_prev;
     prev_boundary = boundary;
   } while ((it = l.prev[it]) !== l_first);
+}
+
+// Split Face Make Edge: cuts f between the verts of l_v1 and l_v2. f keeps the loops from l_v1 to l_v2's previous
+// loop, f2 gets the rest; r_l (returned with f2) is f2's new loop.
+export function bmesh_kernel_split_face_make_edge(bm, f, l_v1, l_v2, e_example = -1, no_double = false) {
+  const { l } = bm;
+  const v1 = l.v[l_v1], v2 = l.v[l_v2];
+  const e = BM_edge_create(bm, v1, v2, e_example, no_double ? BM_CREATE_NO_DOUBLE : BM_CREATE_NOP);
+  const f2 = bm_face_create__internal(bm);
+  BM_elem_attrs_copy(bm.f, f, f2);
+  const l_f1 = bm_loop_create(bm, v2, e, f, l_v2), l_f2 = bm_loop_create(bm, v1, e, f2, l_v1);
+  l.prev[l_f1] = l.prev[l_v2];
+  l.prev[l_f2] = l.prev[l_v1];
+  l.next[l.prev[l_v2]] = l_f1;
+  l.next[l.prev[l_v1]] = l_f2;
+  l.next[l_f1] = l_v1;
+  l.next[l_f2] = l_v2;
+  l.prev[l_v1] = l_f1;
+  l.prev[l_v2] = l_f2;
+
+  const first = bm.f.l_first[f];
+  let first_in_f1 = false, it = l_f1;
+  do if (it === first) first_in_f1 = true; while ((it = l.next[it]) !== l_f1);
+  // f2 starts as close as possible to where f started; tools such as dupli-faces rely on the order.
+  if (first_in_f1) bm.f.l_first[f2] = l.prev[first] === l_f1 ? l.prev[l_f2] : l.next[first] === l_f1 ? l.next[l_f2] : l_f2;
+  else {
+    bm.f.l_first[f2] = first;
+    bm.f.l_first[f] = l.prev[first] === l_f2 ? l.prev[l_f1] : l.next[first] === l_f2 ? l.next[l_f1] : l_f1;
+  }
+  const count = (face) => { let n = 0; const start = bm.f.l_first[face]; let lp = start; do { if (face === f2) l.f[lp] = f2; n++; } while ((lp = l.next[lp]) !== start); return n; };
+  bm.f.len[f2] = count(f2);
+  bmesh_radial_loop_append(bm, e, l_f1);
+  bmesh_radial_loop_append(bm, e, l_f2);
+  bm.f.len[f] = count(f);
+  return [f2, l_f2];
+}
+
+// Split Edge Make Vert: a new vert on e next to tv; e now runs from the new vert to the other end and the
+// returned edge from tv to the new vert. Returns [v_new, e_new].
+export function bmesh_kernel_split_edge_make_vert(bm, tv, e) {
+  const { l } = bm;
+  const v_new = BM_vert_create(bm, bm.v.co.subarray(tv * 3, tv * 3 + 3), tv);
+  const e_new = BM_edge_create(bm, tv, v_new, e);
+  bmesh_disk_edge_remove(bm, e_new, tv);
+  bmesh_disk_edge_remove(bm, e_new, v_new);
+  bmesh_disk_vert_replace(bm, e, v_new, tv);
+  bmesh_disk_edge_append(bm, e_new, v_new);
+  bmesh_disk_edge_append(bm, e_new, tv);
+
+  let l_next = bm.e.l[e];
+  bm.e.l[e] = -1;
+  while (l_next >= 0) {
+    const lp = l_next;
+    bm.f.len[l.f[lp]]++;
+    l_next = l_next !== l.radial_next[l_next] ? l.radial_next[l_next] : -1;
+    if (l.radial_next[lp] !== lp) {
+      l.radial_prev[l.radial_next[lp]] = l.radial_prev[lp];
+      l.radial_next[l.radial_prev[lp]] = l.radial_next[lp];
+    }
+    l.radial_next[lp] = l.radial_prev[lp] = -1;
+    l.e[lp] = -1;
+    const l_new = bm_loop_create(bm, v_new, -1, l.f[lp], lp);
+    l.prev[l_new] = lp;
+    l.next[l_new] = l.next[lp];
+    l.next[lp] = l_new;
+    l.prev[l.next[l_new]] = l_new;
+    const onE = BM_verts_in_edge(bm, l.v[l_new], l.v[l.next[l_new]], e);
+    if (!onE && !BM_verts_in_edge(bm, l.v[l_new], l.v[l.next[l_new]], e_new)) continue;
+    l.e[l_new] = onE ? e : e_new;
+    l.e[lp] = onE ? e_new : e;
+    bmesh_radial_loop_append(bm, l.e[l_new], l_new);
+    bmesh_radial_loop_append(bm, l.e[lp], lp);
+  }
+  return [v_new, e_new];
 }

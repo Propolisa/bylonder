@@ -185,6 +185,13 @@ export function createHistory(objects, onChange, extras = {}) {
       revision++;
       onChange();
     },
+    // Replaces the latest step, for an operator re-run from the redo panel.
+    amend() {
+      extras.beforeCommit?.();
+      entries[index] = capture();
+      revision++;
+      onChange();
+    },
     undo() {
       if (index > 0) {
         restore(entries[--index]);

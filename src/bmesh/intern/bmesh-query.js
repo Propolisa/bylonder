@@ -82,3 +82,42 @@ export function BM_edge_other_loop(bm, e, lp) {
   const other = l.radial_next[l.e[lp] === e ? lp : l.prev[lp]];
   return l.v[other] === l.v[lp] ? other : l.next[other];
 }
+
+export const BM_verts_in_edge = (bm, v1, v2, e) => (bm.e.v1[e] === v1 && bm.e.v2[e] === v2) || (bm.e.v1[e] === v2 && bm.e.v2[e] === v1);
+export const BM_edge_share_vert_check = (bm, e1, e2) => BM_vert_in_edge(bm, e2, bm.e.v1[e1]) || BM_vert_in_edge(bm, e2, bm.e.v2[e1]);
+export const BM_loop_is_adjacent = (bm, l_a, l_b) => bm.l.next[l_a] === l_b || bm.l.prev[l_a] === l_b;
+
+// The loop of face f at vertex v, or -1.
+export function BM_face_vert_share_loop(bm, f, v) {
+  const first = bm.f.l_first[f];
+  let l = first;
+  do if (bm.l.v[l] === v) return l; while ((l = bm.l.next[l]) !== first);
+  return -1;
+}
+export const BM_vert_in_face = (bm, v, f) => BM_face_vert_share_loop(bm, f, v) >= 0;
+
+// BM_LOOPS_OF_VERT in Blender's order: around the disk from v->e, each edge's radial loops that start at v.
+export function BM_ITER_LOOPS_OF_VERT(bm, v, fn) {
+  const e_first = bm.v.e[v];
+  if (e_first < 0) return;
+  let e = e_first;
+  do {
+    const l0 = bm.e.l[e];
+    if (l0 < 0) continue;
+    let l = l0;
+    do if (bm.l.v[l] === v) fn(l); while ((l = bm.l.radial_next[l]) !== l0);
+  } while ((e = bmesh_disk_edge_next(bm, e, v)) !== e_first);
+}
+
+// The smallest face using both verts: [f, l_a, l_b], or null.
+export function BM_vert_pair_share_face_by_len(bm, v_a, v_b, allow_adjacent) {
+  let best = null;
+  if (bm.v.e[v_a] < 0 || bm.v.e[v_b] < 0) return null;
+  BM_ITER_LOOPS_OF_VERT(bm, v_a, (l_a) => {
+    const f = bm.l.f[l_a];
+    if (best && bm.f.len[f] >= bm.f.len[best[0]]) return;
+    const l_b = BM_face_vert_share_loop(bm, f, v_b);
+    if (l_b >= 0 && (allow_adjacent || !BM_loop_is_adjacent(bm, l_a, l_b))) best = [f, l_a, l_b];
+  });
+  return best;
+}

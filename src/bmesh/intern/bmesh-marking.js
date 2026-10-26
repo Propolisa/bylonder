@@ -180,3 +180,16 @@ export function BM_elem_hide_set(bm, htype, ele, hide) {
   if (hide) BM_elem_select_set(bm, htype, ele, false);
   ({ [BM_VERT]: BM_vert_hide_set, [BM_EDGE]: BM_edge_hide_set, [BM_FACE]: BM_face_hide_set })[htype](bm, ele, hide);
 }
+
+// BM_mesh_select_flush_from_verts (select only): edges and faces whose verts are all selected become selected.
+export function BM_mesh_select_flush_from_verts(bm) {
+  const sel = (i) => BM_elem_flag_test(bm.v, i, BM_ELEM_SELECT);
+  BM_ITER_MESH(bm.e, (e) => { if (sel(bm.e.v1[e]) && sel(bm.e.v2[e]) && !BM_elem_flag_test(bm.e, e, BM_ELEM_HIDDEN)) BM_elem_flag_enable(bm.e, e, BM_ELEM_SELECT); });
+  BM_ITER_MESH(bm.f, (f) => {
+    if (BM_elem_flag_test(bm.f, f, BM_ELEM_HIDDEN)) return;
+    let ok = true;
+    loopsOf(bm, f, (l) => { if (!sel(bm.l.v[l])) ok = false; });
+    if (ok) BM_elem_flag_enable(bm.f, f, BM_ELEM_SELECT);
+  });
+  recount(bm);
+}

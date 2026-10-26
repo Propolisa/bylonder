@@ -11,7 +11,7 @@ const detail = (value) => n(value, 3, 128, 1);
 const PLACEMENT = ["align", "location", "rotation", "scale", "enter_editmode"];
 
 // An operator's RNA properties as panel fields.
-function operatorSchema(idname) {
+export function operatorSchema(idname) {
   const fields = Object.entries(rna[idname].properties).filter(([key, def]) => !def.hidden && !PLACEMENT.includes(key));
   return Object.fromEntries(fields.map(([key, def]) => [key, {
     label: def.name,
