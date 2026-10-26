@@ -52,3 +52,6 @@ Builds a Babylon ico sphere with Blender's name until the operator is ported.
 ## mesh.primitive_torus_add
 Status: partial
 Builds a Babylon torus with Blender's name until the operator is ported.
+
+## Transform Modal Map > *
+Typed values, the Global and Local cycling of repeated axis keys and the header text follow transform.cc. The scene orientation is always Global, so the second axis press is Local. Ctrl snaps to 1 unit in every view; Blender's orthographic axis views step the grid with zoom.

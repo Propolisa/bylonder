@@ -23,3 +23,10 @@ export function invert_m4(m) {
     (a11 * b07 - a10 * b09 - a12 * b06) * d, (a00 * b09 - a01 * b07 + a02 * b06) * d, (a31 * b01 - a30 * b03 - a32 * b00) * d, (a20 * b03 - a21 * b01 + a22 * b00) * d,
   ];
 }
+
+// 3x3 matrices as three columns, like Blender's float[3][3] (m[col][row]).
+export const unit_m3 = () => [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+export const mul_m3_v3 = (m, [x, y, z]) => [0, 1, 2].map((r) => m[0][r] * x + m[1][r] * y + m[2][r] * z);
+export const mul_m3_m3m3 = (a, b) => b.map((column) => mul_m3_v3(a, column));
+export const transpose_m3 = (m) => [0, 1, 2].map((c) => [m[0][c], m[1][c], m[2][c]]);
+export const size_to_mat3 = ([x, y, z]) => [[x, 0, 0], [0, y, 0], [0, 0, z]];

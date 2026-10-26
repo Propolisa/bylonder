@@ -1,7 +1,8 @@
 import { createSelection } from "./selection";
-import { GizmoManager, Matrix, Quaternion, Vector3 } from "@babylonjs/core";
-import { snapshot, apply } from "../undo/storage";
-import { radialRatio, angleDelta, snap, wrap } from "../../windowmanager/gesture-math";
+import { GizmoManager, Matrix, Vector3 } from "@babylonjs/core";
+import { wrap } from "../../windowmanager/gesture-math";
+import { initTransform } from "../transform/transform.js";
+import { createTransObject } from "../transform/transform-object.js";
 import { createKeymap } from "../../windowmanager/input/keymap.js";
 
 // Object-mode editing shared by every 3D Viewport: one selection, one tool mode, one gizmo set (drawn in every
@@ -88,114 +89,34 @@ export function createEditor(world, views, history, changed, notify, capture) {
   const finish = (commit) => {
     if (!modal) return;
     modal.removeHandler?.();
-    if (modal.session) modal.session.finish(commit);
-    else if (!commit) apply(objects, modal.before);
-    else history.commit();
+    modal.session.finish(commit);
     modal = null;
     selection.sync();
     capture.release();
     cursor.hidden = true;
     guide.hidden = true;
+    notify("");
     setMode(mode);
     changed();
   };
-  const rebase = () => {
-    modal.base = snapshot(objects);
-    modal.pivotBase = {
-      p: selected.position.clone(),
-      r: selected.rotation.clone(),
-      s: selected.scaling.clone(),
-    };
-    selection.begin();
-    modal.start = { ...modal.point };
-    modal.total = { x: 0, y: 0 };
-    modal.angle = 0;
-    modal.center = project(selected.getAbsolutePosition());
-  };
+  const report = () => notify(modal.session.header || modal.session.label);
   const update = (dx, dy, event) => {
     if (!modal) return;
-    const fine = event.shiftKey ? 0.1 : 1,
-      previous = { ...modal.point };
+    const fine = event.shiftKey ? 0.1 : 1;
     modal.point.x += dx * fine;
     modal.point.y += dy * fine;
-    if (modal.session) {
-      modal.session.update(dx * fine, dy * fine, event);
-      showCursor();
-      return;
-    }
-    if (event.altKey) {
-      // Clutch: move the virtual cursor without changing the object. Start a new
-      // sweep on release, preserving the original snapshot for one-step cancel.
-      const r = modal.view.canvas.getBoundingClientRect();
-      modal.point.x = wrap(modal.point.x, r.left, r.width);
-      modal.point.y = wrap(modal.point.y, r.top, r.height);
-      rebase();
-      showCursor();
-      return;
-    }
-    modal.total.x += dx * fine;
-    modal.total.y += dy * fine;
-    modal.angle += angleDelta(previous, modal.point, modal.center);
-    apply(objects, modal.base);
-    selected.position.copyFrom(modal.pivotBase.p);
-    selected.rotation.copyFrom(modal.pivotBase.r);
-    selected.scaling.copyFrom(modal.pivotBase.s);
-    selected.rotationQuaternion = null;
-    const axis = modal.axis;
-    if (modal.type === "move") {
-      const scale =
-        (2 * modal.depth * Math.tan(modal.view.camera.fov / 2)) / modal.view.canvas.clientHeight;
-      if (axis) {
-        const direction =
-          Vector3[axis === "x" ? "Right" : axis === "y" ? "Up" : "Forward"]();
-        const end = project(selected.position.add(direction));
-        const vx = end.x - modal.center.x,
-          vy = end.y - modal.center.y,
-          len = vx * vx + vy * vy;
-        let amount =
-          len > 4
-            ? (modal.total.x * vx + modal.total.y * vy) / len
-            : modal.total.x * scale;
-        if (event.ctrlKey) amount = snap(amount, 0.1);
-        selected.position[axis] += amount;
-      } else {
-        const offset = modal.right
-          .scale(modal.total.x * scale)
-          .add(modal.up.scale(-modal.total.y * scale));
-        if (event.ctrlKey) {
-          offset.x = snap(offset.x, 0.1);
-          offset.y = snap(offset.y, 0.1);
-          offset.z = snap(offset.z, 0.1);
-        }
-        selected.position.addInPlace(offset);
-      }
-    } else if (modal.type === "scale") {
-      let factor = radialRatio(modal.start, modal.point, modal.center);
-      if (event.ctrlKey) factor = snap(factor, 0.1);
-      for (const a of axis ? [axis] : ["x", "y", "z"])
-        selected.scaling[a] = Math.max(0.001, selected.scaling[a] * factor);
-    } else {
-      let angle = modal.angle;
-      if (event.ctrlKey) angle = snap(angle, Math.PI / 12);
-      // Screen coordinates have Y down: negative rotation about camera forward
-      // follows the visible pointer. Premultiply for a world-space axis.
-      let rotationAxis = modal.forward,
-        sign = -1;
-      if (axis) {
-        rotationAxis =
-          Vector3[axis === "x" ? "Right" : axis === "y" ? "Up" : "Forward"]();
-        sign = Vector3.Dot(rotationAxis, modal.forward) > 0 ? -1 : 1;
-      }
-      const initial = Quaternion.FromEulerVector(selected.rotation);
-      const result = Quaternion.RotationAxis(
-        rotationAxis,
-        angle * sign,
-      ).multiply(initial);
-      selected.rotation.copyFrom(result.toEulerAngles());
-    }
-    selection.update();
+    modal.session.update(dx * fine, dy * fine, event);
     showCursor();
-    changed();
+    report();
+  };
+  // Object Mode: the selection pivot carries every selected object.
+  const objectTransform = (type, view) => {
+    selected.computeWorldMatrix(true);
+    selection.begin();
+    const data = createTransObject(selected);
+    const moved = (fn) => (...args) => { fn(...args); selection.update(); changed(); };
+    const session = initTransform(type, { ...data, apply: moved(data.apply), restore: moved(data.restore) }, view, last);
+    return Object.assign(Object.create(session), { finish: (commit) => (commit ? history.commit() : session.cancel()) });
   };
   const start = (type, options = {}) => {
     const external = options.external ?? matchMedia("(pointer:coarse)").matches;
@@ -205,79 +126,42 @@ export function createEditor(world, views, history, changed, notify, capture) {
     if (modal) finish(false);
     const view = options.view || views.input;
     if (!view) return;
-    const camera = view.camera;
     view.canvas.focus();
-    if (world.editMode?.active) return startComponents(type, view, external, options);
-    selected.computeWorldMatrix(true);
-    setMode(type);
-    const center = project(selected.getAbsolutePosition(), view);
-    // Avoid singular radial gestures when invoked exactly at the pivot.
-    const point =
-      Math.hypot(last.x - center.x, last.y - center.y) < 12 && type !== "move"
-        ? { x: center.x + 60, y: center.y }
-        : { ...last };
-    modal = {
-      view,
-      type,
-      before: snapshot(objects),
-      base: snapshot(objects),
-      start: { ...point },
-      point,
-      center,
-      axis: null,
-      total: { x: 0, y: 0 },
-      angle: 0,
-      depth:
-        camera.mode === 1 && camera.radius
-          ? camera.radius
-          : Math.max(
-              0.1,
-              Vector3.Dot(
-                selected.position.subtract(camera.position),
-                camera.getDirection(Vector3.Forward()),
-              ),
-            ),
-      right: camera.getDirection(Vector3.Right()),
-      up: camera.getDirection(Vector3.Up()),
-      forward: camera.getDirection(Vector3.Forward()),
-    };
-    modal.pivotBase = {
-      p: selected.position.clone(),
-      r: selected.rotation.clone(),
-      s: selected.scaling.clone(),
-    };
-    selection.begin();
-    gizmos.attachToNode(null);
-    modal.removeHandler = world.wm?.addModal({ keymap: transformModalKeymap });
-    if (!external) capture.begin(last, update, () => finish(false), view.canvas);
-    showCursor();
-    emitState();
-    notify(
-      type + " · X/Y/Z axis · Alt reposition · Enter confirm · Esc cancel",
-    );
-  };
-  // Edit Mode: G, R and S transform the selected components.
-  const startComponents = (type, view, external, options) => {
-    const session = world.editMode.transform(COMPONENT_TYPES[type], { camera: view.camera, canvas: view.canvas, project: (p) => project(p, view) }, last, options);
+    const target = { camera: view.camera, canvas: view.canvas, project: (p) => project(p, view) };
+    const session = world.editMode?.active ? world.editMode.transform(COMPONENT_TYPES[type], target, last, options) : objectTransform(COMPONENT_TYPES[type], target);
     if (!session) return;
+    if (!world.editMode?.active) {
+      setMode(type);
+      gizmos.attachToNode(null);
+    }
     modal = { view, type, session, point: { ...session.start }, center: session.center };
-    modal.removeHandler = world.wm?.addModal({ keymap: (event) => transformModalKeymap(event) || !!session.keymap?.(event) });
+    modal.removeHandler = world.wm?.addModal({ keymap: modalKeymap });
     if (!external) capture.begin(last, update, () => finish(false), view.canvas);
     showCursor();
     emitState();
-    notify(session.label + " · X/Y/Z axis · Shift X/Y/Z plane · Enter confirm · Esc cancel");
+    report();
   };
-  // X, Y or Z constrains to that axis (again: none); with a plane, to the plane across it.
-  function axis(a, plane = false) {
-    if (modal?.session) {
-      modal.session.constrain(a, plane);
-      notify(modal.session.label + " · " + (modal.session.axis ? (plane ? "Shift " : "") + modal.session.axis.toUpperCase() : "screen"));
-    } else if (modal) {
-      modal.axis = modal.axis === a ? null : a;
-      rebase();
-      notify(modal.type + " · " + (modal.axis?.toUpperCase() || "screen") + " axis");
+  // TRANSLATE, ROTATE and RESIZE start over in another mode; Edge Slide, a session of its own, starts a new one.
+  const switchMode = (type) => {
+    if (modal.session.setMode && type !== "edge_slide") {
+      modal.type = type;
+      modal.session.setMode(COMPONENT_TYPES[type]);
+      if (!world.editMode?.active) {
+        setMode(type);
+        gizmos.attachToNode(null);
+      }
+      report();
+      return;
     }
-  }
+    modal.session.cancel();
+    const { view, session } = modal;
+    modal.removeHandler?.();
+    capture.release();
+    modal = null;
+    start(type, { view, point: last, keep: session.keep });
+  };
+  // A Transform Modal Map item that changes the transform, then the header.
+  const act = (fn) => () => { if (!modal) return; fn(modal.session); report(); };
   const track = (e) => {
     if (!modal && !capture.active) last = { x: e.clientX, y: e.clientY };
   };
@@ -309,16 +193,36 @@ export function createEditor(world, views, history, changed, notify, capture) {
   const contextKeymap = createKeymap([
     { blender: "VIEW3D_MT_object_context_menu", keys: "RIGHTMOUSE", poll: inView, run: contextMenu },
   ], ["Object Mode"]);
-  // The Transform Modal Map: confirm, cancel, axis and plane constraints, and G again for vertex or edge slide.
+  // The Transform Modal Map. Edit Mode's G during Move starts Edge Slide.
   const transformModalKeymap = createKeymap([
     { blender: "CONFIRM", keys: ["Any LEFTMOUSE", "Any RET", "Any NUMPAD_ENTER", "Any SPACE"], run: () => finish(true) },
     { blender: "CANCEL", keys: ["Any RIGHTMOUSE", "Any ESC"], run: () => finish(false) },
     ...["X", "Y", "Z"].flatMap((a) => [
-      { blender: "AXIS_" + a, keys: a, run: () => axis(a.toLowerCase(), false) },
-      { blender: "PLANE_" + a, keys: "Shift " + a, run: () => axis(a.toLowerCase(), true) },
+      { blender: "AXIS_" + a, keys: a, poll: () => !!modal?.session.constrain, run: act((s) => s.constrain("AXIS_" + a)) },
+      { blender: "PLANE_" + a, keys: "Shift " + a, poll: () => !!modal?.session.constrain, run: act((s) => s.constrain("PLANE_" + a)) },
     ]),
-    { blender: "VERT_EDGE_SLIDE", keys: "G", poll: () => !!world.editMode?.active && modal?.type === "move", run: () => start("edge_slide") },
+    { blender: "CONS_OFF", keys: "C", poll: () => !!modal?.session.constrained, run: act((s) => s.unconstrain()) },
+    { blender: "TRANSLATE", keys: "G", poll: () => modal?.type !== "move", run: () => switchMode("move") },
+    { blender: "VERT_EDGE_SLIDE", keys: "G", poll: () => !!world.editMode?.active && modal?.type === "move", run: () => switchMode("edge_slide") },
+    { blender: "ROTATE", keys: "R", poll: () => modal?.type !== "rotate", run: () => switchMode("rotate") },
+    { blender: "RESIZE", keys: "S", poll: () => modal?.type !== "scale", run: () => switchMode("scale") },
+    { blender: "SNAP_INV_ON", keys: ["Any LEFT_CTRL", "Any RIGHT_CTRL"], poll: () => !!modal?.session.setSnap, run: act((s) => s.setSnap(true)) },
+    { blender: "SNAP_INV_OFF", keys: ["Any LEFT_CTRL RELEASE", "Any RIGHT_CTRL RELEASE"], poll: () => !!modal?.session.setSnap, run: act((s) => s.setSnap(false)) },
   ], ["Transform Modal Map"]);
+  // transformEvent's order: typed values while they are being typed, the modal map, the tool's own keys, then any
+  // key that starts typing a value.
+  const modalKeymap = (event) => {
+    const session = modal?.session;
+    if (!session) return false;
+    if (session.numinput?.(event, true) || transformModalKeymap(event) || session.keymap?.(event) || session.numinput?.(event)) {
+      event.native?.preventDefault();
+      if (modal) report();
+      return true;
+    }
+    return false;
+  };
+  // X, Y or Z from the touch toolbar.
+  const axis = (a) => modal?.session.constrain && (modal.session.constrain("AXIS_" + a.toUpperCase()), report());
   window.addEventListener("mousemove", track);
   setMode("select");
   return {

@@ -45,3 +45,22 @@ export function isect_line_line_epsilon_v3(v1, v2, v3, v4, epsilon) {
   const i1 = add_v3(v1, mul_v3_fl(a, dot_v3(cross_v3(c, b), ab) / dot_v3(ab, ab)));
   return [2, i1, sub_v3(i1, t)];
 }
+
+export const len_squared_v3 = (a) => dot_v3(a, a);
+export const is_zero_v3 = (a) => a[0] === 0 && a[1] === 0 && a[2] === 0;
+export const project_v3_v3v3 = (p, v) => mul_v3_fl(v, dot_v3(p, v) / dot_v3(v, v));
+export const angle_v3v3 = (a, b) => Math.acos(Math.max(-1, Math.min(1, dot_v3(normalize_v3(a), normalize_v3(b)))));
+
+// The factor along the ray where it meets the plane, or null when parallel.
+export function isect_ray_plane_v3_factor(ray_origin, ray_direction, plane_co, plane_no) {
+  const dot = dot_v3(plane_no, ray_direction);
+  return dot === 0 ? null : -dot_v3(plane_no, sub_v3(ray_origin, plane_co)) / dot;
+}
+
+// The factor along ray a of its closest point to ray b, or null when parallel.
+export function isect_ray_ray_v3(origin_a, direction_a, origin_b, direction_b) {
+  const n = cross_v3(direction_b, direction_a), nlen = len_squared_v3(n);
+  if (nlen < 1.1754944e-38) return null;
+  const c = sub_v3(n, sub_v3(origin_b, origin_a));
+  return dot_v3(cross_v3(c, direction_b), n) / nlen;
+}

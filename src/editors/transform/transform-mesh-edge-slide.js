@@ -207,7 +207,7 @@ export function edge_slide_exec(bm, { value = 0, use_even = false, flipped = fal
   return true;
 }
 
-// The modal Edge Slide, as a transform session for the editor's modal (see transform-mesh.js). The mouse moves
+// The modal Edge Slide, as a transform session for the editor's modal (see transform.js). The mouse moves
 // along the screen direction of the slide edge nearest to it; E toggles Even, F flips, C or Alt unclamps.
 export function beginEdgeSlide(bm, object, view, mouse) {
   const data = transform_mesh_edge_slide_data_create(bm);

@@ -18,3 +18,13 @@ export function sin_cos_from_fraction(numerator, denominator) {
   // With the result pointers swapped, sin lands in cos and cos (signed) in sin.
   return swap ? [f32(c * cos_sign), s] : [s, f32(c * cos_sign)];
 }
+
+// Rotation about a unit axis, right handed (a positive angle turns X towards Y about Z).
+export function axis_angle_normalized_to_mat3([x, y, z], angle) {
+  const c = Math.cos(angle), s = Math.sin(angle), t = 1 - c;
+  return [
+    [t * x * x + c, t * x * y + s * z, t * x * z - s * y],
+    [t * x * y - s * z, t * y * y + c, t * y * z + s * x],
+    [t * x * z + s * y, t * y * z - s * x, t * z * z + c],
+  ];
+}

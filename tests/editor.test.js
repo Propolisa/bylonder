@@ -8,27 +8,10 @@ import {
 } from "@babylonjs/core";
 import { createSelection } from "../src/editors/object/selection.js";
 import { snapshot, apply, createHistory } from "../src/editors/undo/storage.js";
-import { radialRatio, angleDelta, wrap } from "../src/windowmanager/gesture-math.js";
+import { wrap } from "../src/windowmanager/gesture-math.js";
+import { initTransform } from "../src/editors/transform/transform.js";
+import { createTransObject } from "../src/editors/transform/transform-object.js";
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-5, `${a} != ${b}`);
-close(radialRatio({ x: 100, y: 0 }, { x: 200, y: 0 }, { x: 0, y: 0 }), 2);
-close(radialRatio({ x: 0, y: 100 }, { x: 0, y: 50 }, { x: 0, y: 0 }), 0.5);
-close(radialRatio({ x: -100, y: 0 }, { x: -200, y: 0 }, { x: 0, y: 0 }), 2);
-close(
-  angleDelta({ x: -100, y: 1 }, { x: -100, y: -1 }, { x: 0, y: 0 }),
-  Math.atan2(200, 9999),
-);
-let angle = 0;
-const circle = [
-  { x: 100, y: 0 },
-  { x: 0, y: 100 },
-  { x: -100, y: 0 },
-  { x: 0, y: -100 },
-  { x: 100, y: 0 },
-];
-for (let j = 0; j < 3; j++)
-  for (let i = 1; i < circle.length; i++)
-    angle += angleDelta(circle[i - 1], circle[i], { x: 0, y: 0 });
-close(angle, Math.PI * 6);
 assert.equal(wrap(1500, 0, 500), 0);
 const engine = new NullEngine();
 const scene = new Scene(engine);
@@ -100,8 +83,28 @@ selection.update();
 a.computeWorldMatrix(true);
 close(a.getAbsolutePosition().y, -1);
 selection.dispose();
+
+// Object Mode values from a top orthographic view: R Z 90, then S X 2 on the turned box.
+const top = {
+  camera: { mode: 1, orthoTop: 5, orthoBottom: -5, globalPosition: new Vector3(0, 10, 0), getDirection: (v) => (v.z === 1 ? new Vector3(0, -1, 0) : v.y === 1 ? new Vector3(0, 0, 1) : new Vector3(1, 0, 0)) },
+  canvas: { clientHeight: 1000 },
+  project: (p) => ({ x: p.x * 100, y: -p.z * 100 }),
+};
+const typeKeys = (t, keys) => { for (const key of keys) t.numinput({ type: key, value: "PRESS", native: { key: { nine: "9", zero: "0", two: "2" }[key] } }); };
+const box = MeshBuilder.CreateBox("C", {}, scene);
+let t = initTransform("rotate", createTransObject(box), top, { x: 100, y: 0 });
+t.constrain("AXIS_Z");
+typeKeys(t, ["nine", "zero"]);
+close(box.rotation.y, -Math.PI / 2);
+t = initTransform("resize", createTransObject(box), top, { x: 100, y: 0 });
+t.constrain("AXIS_X");
+typeKeys(t, ["two"]);
+close(box.scaling.z, 2);
+close(box.scaling.x, 1);
+t.cancel();
+close(box.scaling.z, 1);
 scene.dispose();
 engine.dispose();
 console.log(
-  "Gesture math, selection outlines/toggle, multi-transform, grouping, undo and hierarchy restore passed",
+  "Object transform values, selection outlines/toggle, multi-transform, grouping, undo and hierarchy restore passed",
 );

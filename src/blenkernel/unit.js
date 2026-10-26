@@ -10,15 +10,17 @@ const base = { METRIC: 'METERS', IMPERIAL: 'FEET' };
 export const lengthUnitOptions = system => Object.fromEntries([['Adaptive', 'ADAPTIVE'], ...(tables[system] || []).map(([id, label]) => [label, id])]);
 // Blender resets the length unit to the system's base unit when the system changes (rna_UnitSettings_system_update).
 export const baseLengthUnit = system => base[system] || 'ADAPTIVE';
-const trim = n => String(Number(n.toFixed(Math.abs(n) >= 100 ? 2 : Math.abs(n) >= 1 ? 3 : 4)));
+const integerDigits = n => (n === 0 ? 0 : Math.floor(Math.log10(Math.abs(n))) + 1);
+// With `precision`, that many significant digits as Blender's variable width unit strings show (unit_as_string).
+const trim = (n, precision) => String(Number(n.toFixed(precision === undefined ? (Math.abs(n) >= 100 ? 2 : Math.abs(n) >= 1 ? 3 : 4) : Math.min(6, Math.max(0, precision - integerDigits(n))))));
 const pick = (table, meters) => unitSettings.length === 'ADAPTIVE' ? table.find(([, , , f]) => Math.abs(meters) >= f * 0.9999) || table.at(-1) : table.find(([id]) => id === unitSettings.length) || table[0];
-export function formatLength(value) {
+export function formatLength(value, precision) {
   const table = tables[unitSettings.system];
-  if (!table) return trim(value);
+  if (!table) return trim(value, precision);
   const meters = value * unitSettings.scale;
   if (meters === 0) return '0 ' + table.find(([id]) => id === (unitSettings.length === 'ADAPTIVE' ? base[unitSettings.system] : unitSettings.length))[2];
   const [, , symbol, factor] = pick(table, meters), n = meters / factor;
-  if (!unitSettings.separate) return trim(n) + ' ' + symbol;
+  if (!unitSettings.separate) return trim(n, precision) + ' ' + symbol;
   const index = table.findIndex(([, , s]) => s === symbol), next = table[index + 1], whole = Math.trunc(n), rest = (n - whole) * factor;
   return !next || Math.abs(rest) < 1e-9 ? trim(n) + ' ' + symbol : whole + ' ' + symbol + ' ' + trim(rest / next[3]) + ' ' + next[2];
 }

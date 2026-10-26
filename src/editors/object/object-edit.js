@@ -8,7 +8,8 @@ import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_
 import { EDBM_select_pick, EDBM_edge_find_nearest, edbm_select_loop, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
-import { beginMeshTransform, view3d_pixel_size } from '../transform/transform-mesh.js';
+import { initTransform, createSpaceNormal, toBlender, view3d_pixel_size } from '../transform/transform.js';
+import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
@@ -130,15 +131,16 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   }
 
   const run = (fn) => () => { fn(em.bm); sync(); };
-  // The Normal orientation's axis in world space: the summed normals of the selected faces.
-  function selectionNormal() {
+  // The Normal orientation, Z along the summed normals of the selected faces, for a move constrained to it.
+  function normalOrientation() {
     const { bm, object } = em, sum = [0, 0, 0];
     BM_ITER_MESH(bm.f, (f) => {
       if (!BM_elem_flag_test(bm.f, f, BM_ELEM_SELECT)) return;
       BM_face_normal_update(bm, f);
       for (let a = 0; a < 3; a++) sum[a] += bm.f.no[f * 3 + a];
     });
-    return Vector3.TransformNormal(new Vector3(sum[0], sum[2], sum[1]), object.computeWorldMatrix(true)).normalize();
+    const normal = Vector3.TransformNormal(new Vector3(sum[0], sum[2], sum[1]), object.computeWorldMatrix(true));
+    return { type: 'NORMAL', matrix: createSpaceNormal(toBlender(normal)), axis: 'Z' };
   }
   // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
   function extrudeMove() {
@@ -297,13 +299,18 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     // the operator that ran first (extrude).
     transform(type, view, mouse, { orient, keep } = {}) {
       if (!em) return null;
-      const session = type === 'edge_slide' ? beginEdgeSlide(em.bm, em.object, view, mouse) : beginMeshTransform(em.bm, em.object, view, type, mouse, { normal: orient === 'NORMAL' ? selectionNormal() : undefined });
-      if (!session) { if (type === 'edge_slide') notify('Invalid Edge Selection'); return null; }
-      return Object.assign(Object.create(session), {
-        update(dx, dy, event) { session.update(dx, dy, event); sync({ commit: false }); },
-        constrain(axis, plane) { session.constrain(axis, plane); sync({ commit: false }); },
-        finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); },
-      });
+      const changed = (fn) => (...args) => { const result = fn(...args); sync({ commit: false }); return result; };
+      let session;
+      if (type === 'edge_slide') {
+        const slide = beginEdgeSlide(em.bm, em.object, view, mouse);
+        if (!slide) { notify('Invalid Edge Selection'); return null; }
+        session = Object.assign(Object.create(slide), { update: changed(slide.update), keymap: (event) => slide.keymap(event) && (sync({ commit: false }), true), cancel: changed(slide.cancel) });
+      } else {
+        const data = createTransMesh(em.bm, em.object);
+        if (!data) return null;
+        session = initTransform(type, { ...data, apply: changed(data.apply), restore: changed(data.restore) }, view, mouse, { orient: orient === 'NORMAL' ? normalOrientation() : undefined });
+      }
+      return Object.assign(Object.create(session), { keep, finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); } });
     },
     // After undo or redo: the object's restored Mesh becomes the BMesh again.
     reload() {

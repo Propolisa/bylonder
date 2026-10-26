@@ -54,7 +54,7 @@ File > New from Example (or the splash screen shown on first visit) creates a pr
 | Perspective / orthographic         | Numpad 5                                               |
 | Frame selection                    | F or numpad decimal                                    |
 | Modal move / rotate / scale        | G / R / S                                              |
-| World-axis constraint              | X / Y / Z during transform                             |
+| Axis constraint and value          | X / Y / Z, then a number, during transform             |
 | Precision / snapping               | Hold Shift / Ctrl                                      |
 | Reposition without applying motion | Hold Alt; release to start another sweep               |
 | Confirm / cancel                   | Enter or left-click / Escape or right-click            |
@@ -63,9 +63,9 @@ File > New from Example (or the splash screen shown on first visit) creates a pr
 
 No selection is active initially. Selected meshes show an orange outline. Clicking a mesh in a group selects its outermost group; the hierarchy list can select individual children. Grouping creates native Babylon `TransformNode` parents and preserves child world transforms. Ungrouping reparents children without recursively disposing them. Groups can nest.
 
-Modal movement uses the camera plane by default. Scaling is the ratio of current to initial distance from the projected selection pivot; it works in every screen direction. Rotation accumulates signed pointer angle around that pivot, about the camera forward axis, allowing multiple turns. Axis constraints replace the default frame. Pointer lock requests relative input for modal transforms and MMB navigation so the physical screen edge does not stop a gesture. A virtual cursor wraps visually while transform coordinates remain unbounded. Hold Alt to reposition/rebase for additional sweeps without committing; the entire operation still cancels/undoes as one transaction. A small pivot dead zone avoids division by zero. Shift reduces incremental motion; Ctrl snaps translation to 0.1 units, rotation to 15 degrees, and scale factor to 0.1.
+Object Mode and Edit Mode share one modal transform (`src/editors/transform/transform.js`), a port of Blender's that works in Blender's world axes. Move follows the mouse in the view plane, Rotate turns about the view axis by the angle swept around the center, and Scale is the ratio of the mouse's distance from the center to where it started, flipping past the center. X, Y and Z constrain to an axis, Shift X, Y and Z to the plane across it; pressing the same axis again switches from Global to Local, then turns the constraint off. Typing a number sets the value (`G X 2`, `R Z 90`, `S 0.5`, `G -1`), Tab moves to the next component, Backspace edits, `-` negates and `=` allows expressions with units (`2*pi`, `10cm`). G, R and S switch mode mid-transform, C removes the constraint. Ctrl snaps to increments (1 unit, 5 degrees, 0.1 scale; Shift Ctrl a tenth of that) and Shift adds precision. The header shows Blender's text, such as `D: [2|] = 2 m (2 m) along global X`. Pointer lock requests relative input for modal transforms and MMB navigation so the physical screen edge does not stop a gesture; a virtual cursor wraps visually while transform coordinates remain unbounded.
 
-Browsers may deny pointer lock (including restricted embeds). The app reports this and falls back to ordinary mouse movement; Alt reposition remains available. Escape/lost pointer lock/window blur cancels the transform. Toolbar gizmos use Babylon's direct manipulation rather than the modal pointer-lock gesture path. Text inputs suppress scene shortcuts. Touch navigation delegates to Babylon.
+Browsers may deny pointer lock (including restricted embeds). The app reports this and falls back to ordinary mouse movement. Escape/lost pointer lock/window blur cancels the transform. Toolbar gizmos use Babylon's direct manipulation rather than the modal pointer-lock gesture path. Text inputs suppress scene shortcuts. Touch navigation delegates to Babylon.
 
 ## Selection and transforms
 

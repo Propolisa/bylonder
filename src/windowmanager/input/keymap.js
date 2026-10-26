@@ -38,6 +38,7 @@ export const normalizeKeys = (keys) => parseKeys(keys).combo;
 const CODES = {
   NumpadDecimal: 'numpad_period', NumpadAdd: 'numpad_plus', NumpadSubtract: 'numpad_minus', NumpadDivide: 'numpad_slash', NumpadMultiply: 'numpad_asterix',
   NumpadEnter: 'numpad_enter', Space: 'spacebar', Enter: 'ret', Escape: 'esc', Delete: 'del', Backspace: 'back_space', PageUp: 'page_up', PageDown: 'page_down',
+  ArrowLeft: 'left_arrow', ArrowRight: 'right_arrow', ArrowUp: 'up_arrow', ArrowDown: 'down_arrow',
   ControlLeft: 'left_ctrl', ControlRight: 'right_ctrl', ShiftLeft: 'left_shift', ShiftRight: 'right_shift', AltLeft: 'left_alt', AltRight: 'right_alt', MetaLeft: 'oskey', MetaRight: 'oskey',
 };
 
