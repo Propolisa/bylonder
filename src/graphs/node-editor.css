@@ -26,3 +26,13 @@
 .logic-socket:hover{filter:brightness(1.5)}
 .logic-value{width:62px;height:18px;padding:0 4px;border:0;border-radius:4px;background:#545454;color:#e6e6e6;font:var(--bl-font);text-align:right}
 .logic-hint{position:absolute;left:10px;bottom:8px;color:#a6a6a6a0;font:var(--bl-font);font-size:11px;pointer-events:none}
+.compositor-backdrop{position:absolute;inset:0;margin:auto;pointer-events:none;z-index:0}
+.node-editor-host.bl-backdrop .node-editor-stage{z-index:1}
+.node-editor-host.bl-backdrop :is([id$=-graph-root],#graph-canvas,[class*=diagram-c]){background-color:transparent!important}
+.node-editor-host.bl-backdrop :is([id$=NodeList],:has(>#propertyTab)){background:#1d1d1d}
+/* Babylon's editors block themselves below a 900px window; fit them to small areas instead. */
+.node-editor-host .blocker,.node-editor-host .wait-screen.hidden{display:none!important}
+.node-editor-host{container-type:size}
+@container (max-width:760px){
+  .node-editor-host [id$=NodeList],.node-editor-host :has(>#propertyTab){width:min(170px,30cqw)!important;min-width:0!important;max-width:30cqw!important}
+}

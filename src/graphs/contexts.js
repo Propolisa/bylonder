@@ -44,7 +44,7 @@ export function createNodeContexts({ world, editor }) {
       const c = world.compositor;
       const use = toggle('Use Nodes', c.enabled, value => c.setEnabled(value));
       if (!c.enabled || !c.graph) return { key: 'off:' + c.enabled, title: 'Compositing', actions: [use], message: 'Enable Use Nodes to composite the scene through a Babylon frame graph.', buttons: [['Use Nodes', () => c.setEnabled(true), 'node_compositing']] };
-      return { key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [use], graph: c.graph, hint: 'The compositor shows in the viewport in Rendered shading and camera view.' };
+      return { key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [use], graph: c.graph, hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading or camera view.' };
     },
     particles() {
       const mesh = activeMesh(), entry = world.particles.active(mesh);

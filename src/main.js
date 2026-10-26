@@ -1,4 +1,5 @@
 import { mountNodeEditor } from './graphs/node-editor.js';
+import { createCompositorBackdrop } from './graphs/compositor-backdrop.js';
 import { createNodeContexts } from './graphs/contexts.js';
 import { registerObjects, objectRefs } from './animation/bindings.js';
 import { mountTimeline } from './animation/timeline.js';
@@ -107,6 +108,8 @@ let saveOverrides = () => {};
 let history;
 const commit = () => history?.commit();
 let views;
+// The 3D Viewports among the engine views (the compositor backdrop is the other kind).
+const viewports = () => views?.all.filter((view) => view.nav) || [];
 let built;
 try {
   built = await createWorld({ input, engine, canvas, hooks: {
@@ -118,7 +121,7 @@ try {
     renameScene: (name) => send("rename-scene", name),
     // Scene camera changed (Properties > Scene > Camera): views in camera view look through the new camera.
     setCamera(next, previous) {
-      for (const view of views?.all || []) view.sceneCameraChanged(next, previous);
+      for (const view of viewports()) view.sceneCameraChanged(next, previous);
     },
   } });
 } catch (error) {
@@ -282,7 +285,16 @@ const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
 ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || []);
 const nodeSection = document.querySelector("#nodes-section");
-const nodeEditor = mountNodeEditor({ world, host: nodeSection, header: viewportDock.header("nodes"), contexts: createNodeContexts({ world, editor }) });
+let shadingReady = false;
+const backdrop = createCompositorBackdrop({
+  world,
+  overlays,
+  camera: () => authored(),
+  output: () => outputSize(world.renderSettings.state.render),
+  shadingChanged: () => shadingReady && viewportCtx.shadingChanged(),
+});
+views.add(backdrop.view);
+const nodeEditor = mountNodeEditor({ world, host: nodeSection, header: viewportDock.header("nodes"), contexts: createNodeContexts({ world, editor }), backdrop });
 nodeSection.addEventListener("node-tree", (e) => nodeEditor.setType(e.detail));
 world.openNodeEditor = (type) => { nodeEditor.setType(type); viewportDock.show("nodes"); };
 for (const source of [documentState, world.particles, world.modifiers]) source.subscribe(() => nodeEditor.refresh());
@@ -326,8 +338,9 @@ const viewportCtx = {
   // Shading or camera view changed somewhere: effects attach to rendered views' cameras and one rendered view
   // (the last one clicked, else the first) shows the compositor.
   shadingChanged() {
-    const all = views.all, rendered = all.filter((v) => v.rendered);
-    const compositorView = world.compositor.enabled ? (rendered.includes(views.focused) ? views.focused : rendered[0]) || null : null;
+    const all = views.all, rendered = all.filter((v) => v.rendered && v.active !== false);
+    const preferred = backdrop.shown ? backdrop.view : views.focused;
+    const compositorView = world.compositor.enabled ? (rendered.includes(preferred) ? preferred : rendered[0]) || null : null;
     for (const v of all) v.wantsCompositor = v === compositorView;
     world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera });
     const cameraView = !!views.input?.state.cameraView;
@@ -345,6 +358,7 @@ const mountView = (options) => {
   viewportCtx.shadingChanged();
   return view;
 };
+shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
 if (authored()) {
   primary.editorCamera.setPosition(authored().position.clone());
@@ -501,7 +515,7 @@ let last = 0;
 const perFrame = engine.onBeginFrameObservable.add(() => {
   animation.tick(performance.now());
   world.modifiers.refresh();
-  for (const view of views.all) if (!view.state.cameraView) view.nav.updateBounds();
+  for (const view of viewports()) if (!view.state.cameraView) view.nav.updateBounds();
   status.tick();
   if (performance.now() - last > 500) {
     world.outliner.refresh();
@@ -518,7 +532,7 @@ function dispose() {
   storage.save();
   timeline.dispose();
   engine.onBeginFrameObservable.remove(perFrame);
-  for (const view of views.all) view.dispose();
+  for (const view of viewports()) view.dispose();
   views.dispose();
   overlays.dispose();
   renderHost.dispose();

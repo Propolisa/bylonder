@@ -33,14 +33,20 @@ export function createViews({ engine, scene, live = () => false }) {
       const pw = Math.max(1, Math.floor(w * k)), ph = Math.max(1, Math.floor(h * k));
       if (view.canvas.width !== pw || view.canvas.height !== ph) { view.canvas.width = pw; view.canvas.height = ph; }
       view.scale = k;
-      view.camera.viewport = view === anchor ? new Viewport(0, 0, 1, 1) : new Viewport(0, 1 - ph / workSize[1], pw / workSize[0], ph / workSize[1]);
+      view.region = view === anchor ? new Viewport(0, 0, 1, 1) : new Viewport(0, 1 - ph / workSize[1], pw / workSize[0], ph / workSize[1]);
     }
   };
   const observer = new ResizeObserver(() => { layoutDirty = true; api.wake(); });
   // Anything else resizing the engine (hardware scaling, engine.resize() in user code) re-runs the layout.
   const resized = engine.onResizeObservable.add(() => { layoutDirty = true; api.wake(); });
 
-  const before = engine.onBeforeViewRenderObservable.add(engineView => views.get(engineView.target)?.view.beforeRender?.());
+  // Views may share a camera (camera view, compositor backdrop), so each applies its region as it renders.
+  const before = engine.onBeforeViewRenderObservable.add(engineView => {
+    const view = views.get(engineView.target)?.view;
+    if (!view) return;
+    if (view.region) view.camera.viewport = view.region;
+    view.beforeRender?.();
+  });
   const after = engine.onAfterViewRenderObservable.add(engineView => views.get(engineView.target)?.view.afterRender?.());
   // Decide, once per frame, which views render.
   const frame = engine.onBeginFrameObservable.add(() => {

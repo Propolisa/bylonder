@@ -1,4 +1,4 @@
-import { iconEl } from '../ui/icon.js';
+import { iconEl, iconButton } from '../ui/icon.js';
 import { menuButton } from '../ui/menu.js';
 import './node-editor.css';
 import { installEditorTheme } from './editor-theme.js';
@@ -26,7 +26,7 @@ const overlapping = root => {
   }));
 };
 
-export function mountNodeEditor({ world, host, header, contexts, storageKey = 'workbench:node-editor' }) {
+export function mountNodeEditor({ world, host, header, contexts, backdrop, storageKey = 'workbench:node-editor' }) {
   let type = 'shader';
   try { type = localStorage.getItem(storageKey) || type; } catch {}
   if (!treeTypes[type]) type = 'shader';
@@ -43,7 +43,20 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
   const actions = Object.assign(document.createElement('span'), { className: 'node-editor-actions' });
   const view = menuButton('View', [{ label: 'Frame All', keys: 'Home', run: frameAll }, { label: 'Reorganize Nodes', run: () => current?.onReOrganizedRequiredObservable?.notifyObservers() }]);
   host.addEventListener('keydown', e => { if (e.key === 'Home' && !e.target.closest('input,textarea,select')) { e.preventDefault(); frameAll(); } });
-  header.append(typeButton, view, title, Object.assign(document.createElement('span'), { className: 'spacer' }), actions);
+  let backdropOn = true;
+  try { backdropOn = localStorage.getItem(storageKey + ':backdrop') !== '0'; } catch {}
+  const backdropButton = iconButton('render_result', 'Backdrop: show the composite behind the nodes', () => {
+    backdropOn = !backdropOn;
+    try { localStorage.setItem(storageKey + ':backdrop', backdropOn ? '1' : '0'); } catch {}
+    syncBackdrop();
+  });
+  const syncBackdrop = () => {
+    const compositor = type === 'compositor';
+    backdropButton.hidden = !backdrop || !compositor;
+    backdropButton.setAttribute('aria-pressed', String(backdropOn));
+    if (backdrop) backdrop[compositor && backdropOn && contexts.compositor?.().graph ? 'show' : 'hide'](host);
+  };
+  header.append(typeButton, view, title, Object.assign(document.createElement('span'), { className: 'spacer' }), actions, backdropButton);
 
   const message = (text, buttons = []) => {
     empty.replaceChildren(Object.assign(document.createElement('p'), { textContent: text }), ...buttons.map(([label, run, icon]) => {
@@ -59,6 +72,7 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
   };
 
   const render = async (force = false) => {
+    syncBackdrop();
     const tree = treeTypes[type], ctx = contexts[type]?.() || {};
     const key = type + '|' + (ctx.key ?? ctx.graph?.uniqueId ?? '');
     if (!force && key === lastKey) return;
@@ -118,7 +132,7 @@ export function mountNodeEditor({ world, host, header, contexts, storageKey = 'w
       render(true);
     },
     refresh: () => render(),
-    dispose() { token++; untheme(); mounted?.dispose?.(); stage.replaceChildren(); },
+    dispose() { token++; backdrop?.hide(); untheme(); mounted?.dispose?.(); stage.replaceChildren(); },
   };
   render();
   return api;
