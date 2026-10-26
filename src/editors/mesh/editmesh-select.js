@@ -1,6 +1,8 @@
 // Edit Mode selection (editmesh_select.cc): finding the element under the mouse and the select operators.
 // `view` projects Blender-axis local coordinates to screen pixels and tells whether a point is hidden behind the
 // mesh: { project(co) -> [x, y, depth] | null, occluded(co) -> bool, faceAt(x, y) -> face | -1, xray }.
+import { BMW_edgeloop, BMW_edgering, BMW_faceloop, BMW_edgeboundary } from '../../bmesh/intern/bmesh-walkers.js';
+import { BM_edge_is_boundary } from '../../bmesh/intern/bmesh-query.js';
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
 import {
   SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_select_set, BM_mesh_select_mode_flush, BM_mesh_select_mode_set,
@@ -132,4 +134,36 @@ export function mesh_select_mode(bm, type, { use_extend = false } = {}) {
   const next = use_extend ? bm.selectmode ^ mode || mode : mode;
   BM_mesh_select_mode_set(bm, next);
   return next;
+}
+
+// mesh.loop_select (Alt click): the edge loop through `eed`, or in face select mode the face loop across it. A
+// boundary loop that is already selected grows to the whole boundary. `extend`, `deselect` and `toggle` as in
+// Blender's keymap (Shift Alt toggles).
+export function edbm_select_loop(bm, eed, { extend = false, deselect = false, toggle = false, ring = false } = {}) {
+  let select = true, select_clear = false, select_cycle = true;
+  if (!extend && !deselect && !toggle) select_clear = true;
+  if (extend) select = true;
+  else if (deselect) select = false;
+  else if (select_clear || !BM_elem_flag_test(bm.e, eed, BM_ELEM_SELECT)) select = true;
+  else if (toggle) { select = false; select_cycle = false; }
+
+  const walkSelect = (htype, elems) => elems.forEach((ele) => { if (!select) BM_select_history_remove(bm, htype, ele); BM_elem_select_set(bm, htype, ele, select); });
+  if (bm.selectmode & SCE_SELECT_FACE) {
+    if (select_clear) BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+    walkSelect(BM_FACE, BMW_faceloop(bm, eed));
+  } else if (ring) {
+    if (select_clear) BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+    walkSelect(BM_EDGE, BMW_edgering(bm, eed));
+  } else {
+    const delimit = { outer_corners: true, ngons: true };
+    let full_boundary = false;
+    if (select_cycle && BM_edge_is_boundary(bm, eed)) {
+      const counts = (edges) => edges.filter((e) => BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT) !== select).length;
+      if (counts(BMW_edgeloop(bm, eed, delimit)) === 0) full_boundary = counts(BMW_edgeboundary(bm, eed)) !== 0;
+    }
+    if (select_clear) BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+    walkSelect(BM_EDGE, full_boundary ? BMW_edgeboundary(bm, eed) : BMW_edgeloop(bm, eed, delimit));
+  }
+  BM_mesh_select_mode_flush(bm);
+  if (select && bm.selectmode & SCE_SELECT_EDGE) BM_select_history_store(bm, BM_EDGE, eed);
 }

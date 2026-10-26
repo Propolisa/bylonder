@@ -147,6 +147,7 @@ for name, case in {**CASES, **EDIT_CASES}.items():
         "corner_edges": [l.edge_index for l in me.loops],
         "uv": [r(d.uv) for d in uv.data] if uv else None,
         "sharp_face": [not p.use_smooth for p in me.polygons],
+        "selection": [[i for i, x in enumerate(seq) if x.select] for seq in (me.vertices, me.edges, me.polygons)],
     }
     with open(os.path.join(out_dir, name + ".json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))

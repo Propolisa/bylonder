@@ -57,6 +57,8 @@ function geometry(positions, edges, face_offsets, corner_verts) {
   return { verts: verts.sort(), edges: pairs.sort(), faces: faces.sort() };
 }
 
+// Operators whose resulting selection is compared with Blender's too.
+const SELECTION_CHECKED = /select/;
 let edited = 0, geometric = 0;
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
@@ -71,6 +73,10 @@ for (const file of await readdir(dir)) {
   if (move) for (let v = 0; v < bm.v.size; v++) if (bm.v.alive[v] && bm.v.hflag[v] & 1) move.forEach((d, a) => (bm.v.co[v * 3 + a] += d));
   const mesh = BM_mesh_bm_to_me(bm);
   assert.equal(mesh.verts_num, fixture.positions.length, name + ': vertex count');
+  if (SELECTION_CHECKED.test(operator) && fixture.selection) {
+    const selected = (attr) => Array.from(mesh.attribute(attr) ?? [], Boolean).flatMap((x, i) => (x ? [i] : []));
+    assert.deepEqual([selected('.select_vert'), selected('.select_edge'), selected('.select_poly')], fixture.selection, name + ': selection');
+  }
   if (move) {
     assert.deepEqual(geometry(mesh.vert_positions, mesh.edges, mesh.face_offsets, mesh.corner_verts), geometry(fixture.positions.flat(), fixture.edges.flat(), fixture.face_offsets, fixture.corner_verts), name + ': geometry');
     geometric++;
