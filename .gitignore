@@ -21,7 +21,7 @@ public/app-source.zip
 npm-debug.log*
 .npm/
 .eslintcache
-coverage/
+/coverage/
 
 # Editor / OS
 .DS_Store
