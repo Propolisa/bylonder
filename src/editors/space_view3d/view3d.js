@@ -164,6 +164,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   ], { blender: 'VIEW3D_MT_edit_mesh_edges' });
   const faceMenu = menuButton('Face', () => [
     { label: 'Extrude Faces', blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: () => world.editMode.extrudeMove() },
+    { label: 'Inset Faces', blender: 'mesh.inset', keys: 'I', run: () => world.editMode.inset() },
   ], { blender: 'VIEW3D_MT_edit_mesh_faces' });
   const shadingButtons = [['wire', 'shading_wire', 'Wireframe'], ['solid', 'shading_solid', 'Solid'], ['rendered', 'shading_rendered', 'Rendered']].map(([id, icon, title]) => {
     const b = iconButton(icon, 'Viewport Shading: ' + title, () => view.setShading(id));

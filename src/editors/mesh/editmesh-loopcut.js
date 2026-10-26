@@ -30,8 +30,9 @@ export function edbm_loopcut(bm, eed, { number_cuts = 1, smoothness = 0 } = {}) 
 const SUBD_CUTS_MAX = 500;
 
 // The modal part of mesh.loopcut: the ring under the mouse previews its cuts; the wheel or Page Up and Page Down
-// change the number of cuts. `confirm(edge, cuts)` runs the cut.
-export function loopcut_modal({ bm, owner, notify, confirm }) {
+// change the number of cuts. `confirm(edge, cuts)` runs the cut; `adapter(view)` gives the view as
+// editmesh-select needs it.
+export function loopcut_modal({ bm, owner, adapter, notify, confirm }) {
   const preview = createPreselectEdgering(owner);
   let eed = -1, cuts = 1;
   const status = () => notify(`Cuts: ${cuts}, Smoothness: 0.00`);
@@ -39,9 +40,8 @@ export function loopcut_modal({ bm, owner, notify, confirm }) {
   const setCuts = (n) => { cuts = Math.max(1, Math.min(SUBD_CUTS_MAX, n)); refresh(); status(); };
   status();
   return {
-    // `view` as editmesh-select needs it.
     move(view, mouse) {
-      const e = EDBM_edge_find_nearest(bm(), view, mouse, SELECT_DIST_PX, false);
+      const e = EDBM_edge_find_nearest(bm(), adapter(view), mouse, SELECT_DIST_PX, false);
       if (e !== eed) { eed = e; refresh(); }
     },
     wheel(up) { setCuts(cuts + (up ? 1 : -1)); },

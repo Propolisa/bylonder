@@ -11,6 +11,13 @@ const AXES = { x: new Vector3(1, 0, 0), y: new Vector3(0, 0, 1), z: new Vector3(
 const SNAP = { translate: 0.1, rotate: (5 * Math.PI) / 180, resize: 0.1 };
 const TRANSFORM_LABELS = { translate: 'Move', rotate: 'Rotate', resize: 'Scale' };
 
+// ED_view3d_pixel_size: the world size of one screen pixel at `point`.
+export function view3d_pixel_size({ camera, canvas }, point) {
+  const forward = camera.getDirection(Vector3.Forward());
+  const depth = camera.mode === 1 ? (camera.orthoTop - camera.orthoBottom) / 2 : Math.max(0.1, Vector3.Dot(point.subtract(camera.globalPosition), forward));
+  return (2 * depth * (camera.mode === 1 ? 1 : Math.tan(camera.fov / 2))) / canvas.clientHeight;
+}
+
 // `view` gives the camera and screen projection: { camera, canvas, project(world) -> {x, y} client pixels }.
 export function beginMeshTransform(bm, object, view, type, mouse, { normal } = {}) {
   const axes = { ...AXES, normal };
@@ -23,8 +30,7 @@ export function beginMeshTransform(bm, object, view, type, mouse, { normal } = {
   const center = original.reduce((sum, p) => sum.addInPlace(p), Vector3.Zero()).scaleInPlace(1 / original.length);
   const camera = view.camera, forward = camera.getDirection(Vector3.Forward());
   const centerScreen = view.project(center);
-  const depth = camera.mode === 1 ? (camera.orthoTop - camera.orthoBottom) / 2 : Math.max(0.1, Vector3.Dot(center.subtract(camera.globalPosition), forward));
-  const pixelSize = (2 * depth * (camera.mode === 1 ? 1 : Math.tan(camera.fov / 2))) / view.canvas.clientHeight;
+  const pixelSize = view3d_pixel_size(view, center);
   // Starting away from the median point keeps rotate and scale well defined.
   const start = Math.hypot(mouse.x - centerScreen.x, mouse.y - centerScreen.y) < 12 && type !== 'translate' ? { x: centerScreen.x + 60, y: centerScreen.y } : { ...mouse };
   const state = { point: { ...start }, total: { x: 0, y: 0 }, angle: 0, axis: normal ? 'normal' : null, plane: false, ctrl: false };

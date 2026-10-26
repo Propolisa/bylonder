@@ -69,6 +69,17 @@ EDIT_CASES = {
     "edge-slide-unclamped": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "EDGE", [5, 16, 25], "edge_slide", {"value": -0.4, "use_clamp": False}),
     "edge-slide-ngon": (("primitive_cylinder_add", {"vertices": 6}), "EDGE", [1, 5, 8, 11, 14, 17], "edge_slide", {"value": 0.5}),
     "edge-slide-ngon-back": (("primitive_cylinder_add", {"vertices": 6}), "EDGE", [1, 5, 8, 11, 14, 17], "edge_slide", {"value": -0.5}),
+    "inset-cube": (("primitive_cube_add", {}), "FACE", [0], "inset", {"thickness": 0.2}),
+    "inset-cube-depth": (("primitive_cube_add", {}), "FACE", [0, 1], "inset", {"thickness": 0.2, "depth": 0.1}),
+    "inset-grid-region": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "FACE", [1, 2, 5, 6], "inset", {"thickness": 0.1}),
+    "inset-grid-boundary": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "FACE", [0, 1], "inset", {"thickness": 0.1}),
+    "inset-grid-no-boundary": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "FACE", [0, 1], "inset", {"thickness": 0.1, "use_boundary": False}),
+    "inset-grid-not-even": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "FACE", [0, 1, 5], "inset", {"thickness": 0.1, "use_even_offset": False}),
+    "inset-grid-relative-depth": (("primitive_grid_add", {"x_subdivisions": 5, "y_subdivisions": 5, "size": 2}), "FACE", [6, 7, 8, 11, 12, 13, 16, 17, 18], "inset", {"thickness": 0.05, "depth": 0.2, "use_relative_offset": True}),
+    "inset-outset": (("primitive_grid_add", {"x_subdivisions": 4, "y_subdivisions": 3, "size": 2}), "FACE", [5, 6], "inset", {"thickness": 0.1, "use_outset": True}),
+    "inset-edge-rail": (("primitive_cylinder_add", {"vertices": 8}), "FACE", [0, 1, 2], "inset", {"thickness": 0.1, "use_edge_rail": True}),
+    "inset-select": (("primitive_cube_add", {}), "FACE", [2], "inset", {"thickness": 0.3, "use_select_inset": True}),
+    "inset-cylinder-cap": (("primitive_cylinder_add", {"vertices": 8}), "FACE", [8], "inset", {"thickness": 0.2, "depth": -0.1}),
     "dissolve-faces-cube": (("primitive_cube_add", {}), "FACE", [0, 1], "dissolve_faces", {}),
 }
 

@@ -8,6 +8,7 @@ import { bmo_dissolve_faces_exec } from '../../bmesh/operators/bmo-dissolve.js';
 import { BM_mesh_elem_hflag_disable_all, BM_face_select_set, BM_vert_select_set, BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_mesh_esubdivide, SUBD_CORNER_INNERVERT, SUBD_CORNER_PATH, SUBD_CORNER_FAN, SUBD_CORNER_STRAIGHT_CUT, SUBDIV_SELECT_ORIG } from '../../bmesh/operators/bmo-subdivide.js';
 import { edbm_loopcut } from './editmesh-loopcut.js';
+import { bmo_inset_region_exec } from '../../bmesh/operators/bmo-inset.js';
 import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
 import { BM_edge_at_index } from '../../bmesh/intern/bmesh-query.js';
 import { EDBM_mesh_hide, EDBM_mesh_reveal } from './editmesh-utils.js';
@@ -93,6 +94,16 @@ export function edbm_extrude_mesh(bm, props = {}) {
   return nr !== 'NONE';
 }
 
+// mesh.inset (Inset Faces; individual insets are not ported yet).
+export function edbm_inset_exec(bm, { use_boundary = true, use_even_offset = true, use_relative_offset = false, use_edge_rail = false, thickness = 0, depth = 0, use_outset = false, use_select_inset = false } = {}) {
+  const faces = BMO_slot_buffer_from_hflag(bm, 'f', BM_ELEM_SELECT).f;
+  if (!faces.length) return false;
+  const out = BMO_op_callf(bm, bmo_inset_region_exec, faces, { use_boundary, use_even_offset, use_relative_offset, use_edge_rail, thickness, depth, use_outset });
+  BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+  for (const f of use_select_inset ? out : faces) BM_face_select_set(bm, f, true);
+  return true;
+}
+
 const QUAD_CORNER = { INNERVERT: SUBD_CORNER_INNERVERT, PATH: SUBD_CORNER_PATH, STRAIGHT_CUT: SUBD_CORNER_STRAIGHT_CUT, FAN: SUBD_CORNER_FAN };
 
 // mesh.subdivide (smoothness and fractal are not ported yet).
@@ -110,6 +121,7 @@ export const meshOperators = {
   'mesh.extrude_region': (bm, props) => edbm_extrude_mesh(bm, props),
   'mesh.loopcut': (bm, props) => edbm_loopcut(bm, BM_edge_at_index(bm, props.edge_index), props),
   'transform.edge_slide': (bm, props) => edge_slide_exec(bm, props),
+  'mesh.inset': (bm, props) => edbm_inset_exec(bm, props),
   'mesh.subdivide': (bm, props) => edbm_subdivide_exec(bm, props),
   'mesh.dissolve_faces': (bm) => edbm_dissolve_faces_exec(bm),
   'mesh.hide': (bm, props) => EDBM_mesh_hide(bm, bm.selectmode, !!props.unselected),

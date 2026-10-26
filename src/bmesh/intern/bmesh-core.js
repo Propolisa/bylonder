@@ -1,5 +1,5 @@
 // Element creation and removal and the topology kernel (bmesh_core.cc). Handles are indices; -1 is null.
-import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_SMOOTH, _FLAG_JF, BM_ELEM_API_FLAG_TEST, BM_ELEM_API_FLAG_ENABLE, BM_ELEM_API_FLAG_DISABLE, poolAlloc, poolFree } from './bmesh-class.js';
+import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_SMOOTH, _FLAG_JF, _FLAG_WALK, BM_ELEM_API_FLAG_TEST, BM_ELEM_API_FLAG_ENABLE, BM_ELEM_API_FLAG_DISABLE, poolAlloc, poolFree } from './bmesh-class.js';
 import {
   bmesh_disk_edge_append, bmesh_disk_edge_remove, bmesh_disk_edge_next, bmesh_edge_vert_swap, bmesh_disk_vert_replace,
   bmesh_radial_loop_append, bmesh_radial_loop_remove,
@@ -355,4 +355,61 @@ export function bmesh_kernel_split_edge_make_vert(bm, tv, e) {
     bmesh_radial_loop_append(bm, l.e[lp], lp);
   }
   return [v_new, e_new];
+}
+
+// Moves `l_sep` off e onto a new copy of e, so its face no longer shares e.
+export function bmesh_kernel_edge_separate(bm, e, l_sep) {
+  const { l } = bm;
+  if (l.radial_next[bm.e.l[e]] === bm.e.l[e]) return;
+  if (l_sep === bm.e.l[e]) bm.e.l[e] = l.radial_next[l_sep];
+  const e_new = BM_edge_create(bm, bm.e.v1[e], bm.e.v2[e], e);
+  bmesh_radial_loop_remove(bm, e, l_sep);
+  bmesh_radial_loop_append(bm, e_new, l_sep);
+  l.e[l_sep] = e_new;
+  return e_new;
+}
+
+// Splits v into one vert per fan of faces (and wire edge). Returns the verts, v first, then the new ones newest
+// first (as Blender's small stack lists them).
+export function bmesh_kernel_vert_separate(bm, v) {
+  const { l } = bm, EDGE_VISIT = _FLAG_WALK;
+  const verts_new = [];
+  const first = bm.v.e[v];
+  if (first >= 0) {
+    let v_edges_num = 0, edges_found = 0, e = first;
+    do { v_edges_num++; BM_ELEM_API_FLAG_ENABLE(bm.e, e, EDGE_VISIT); } while ((e = bmesh_disk_edge_next(bm, e, v)) !== first);
+    for (;;) {
+      const edges = [], edges_search = [];
+      e = bm.v.e[v];
+      BM_ELEM_API_FLAG_DISABLE(bm.e, e, EDGE_VISIT);
+      do {
+        edges.push(e);
+        edges_found++;
+        const l0 = bm.e.l[e];
+        if (l0 >= 0) {
+          let it = l0;
+          do {
+            const adjacent = l.e[l.v[it] === v ? l.prev[it] : l.next[it]];
+            if (BM_ELEM_API_FLAG_TEST(bm.e, adjacent, EDGE_VISIT)) {
+              BM_ELEM_API_FLAG_DISABLE(bm.e, adjacent, EDGE_VISIT);
+              edges_search.push(adjacent);
+            }
+          } while ((it = l.radial_next[it]) !== l0);
+        }
+      } while ((e = edges_search.length ? edges_search.pop() : -1) >= 0);
+      if (edges_found === v_edges_num) break;
+      const v_new = BM_vert_create(bm, bm.v.co.subarray(v * 3, v * 3 + 3), v);
+      while (edges.length) bmesh_edge_vert_swap(bm, edges.pop(), v_new, v);
+      verts_new.push(v_new);
+    }
+  }
+  return [v, ...verts_new.reverse()];
+}
+
+// Merges v_src into v_dst (they must not share a face).
+export function BM_vert_splice(bm, v_dst, v_src) {
+  if (v_src === v_dst) return false;
+  while (bm.v.e[v_src] >= 0) bmesh_edge_vert_swap(bm, bm.v.e[v_src], v_dst, v_src);
+  BM_vert_kill(bm, v_src);
+  return true;
 }

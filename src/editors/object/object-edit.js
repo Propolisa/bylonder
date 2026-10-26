@@ -6,10 +6,11 @@ import { BM_face_normal_update } from '../../bmesh/intern/bmesh-polygon.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
-import { beginMeshTransform } from '../transform/transform-mesh.js';
+import { beginMeshTransform, view3d_pixel_size } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
+import { inset_modal } from '../mesh/editmesh-inset.js';
 import { openMenu } from '../interface/menu.js';
 import { createRedoPanel } from '../interface/redo-panel.js';
 import { operatorSchema } from './mesh-catalog.js';
@@ -168,7 +169,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   }
   // A modal Edit Mode tool (Loop Cut) gets the pointer, wheel and keys until it finishes or is cancelled.
   let tool = null;
-  const toolMove = (e) => tool?.move(viewAdapter(views.input), [e.clientX, e.clientY]);
+  const toolMove = (e) => tool?.move(views.input, [e.clientX, e.clientY], e);
   const toolWheel = (e) => { if (!tool) return; e.preventDefault(); e.stopPropagation(); tool.wheel(e.deltaY < 0); };
   function endTool() {
     tool?.dispose();
@@ -187,6 +188,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   const loopcut = () => startTool(() => loopcut_modal({
     bm: () => em.bm,
     owner: em.object,
+    adapter: viewAdapter,
     notify,
     // mesh.loopcut_slide: the cut, then Edge Slide.
     confirm: (eed, number_cuts) => {
@@ -194,6 +196,28 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       editor.start('edge_slide');
     },
   }));
+  // mesh.inset invoked: previews from the Mesh as it was, then runs as one undo step with its redo panel.
+  function inset() {
+    if (!em.bm.totfacesel) return;
+    const view = views.input, before = BM_mesh_bm_to_me(em.bm), world_m = em.object.computeWorldMatrix(true);
+    const median = [0, 0, 0];
+    let count = 0;
+    BM_ITER_MESH(em.bm.v, (v) => { if (BM_elem_flag_test(em.bm.v, v, BM_ELEM_SELECT)) { for (let a = 0; a < 3; a++) median[a] += em.bm.v.co[v * 3 + a]; count++; } });
+    const center = Vector3.TransformCoordinates(new Vector3(median[0] / count, median[2] / count, median[1] / count), world_m);
+    const screen = viewAdapter(view).project([median[0] / count, median[1] / count, median[2] / count]) ?? [0, 0];
+    const scale = new Vector3();
+    world_m.decompose(scale);
+    const restore = () => { em.bm = load(before); };
+    startTool(() => inset_modal({
+      center: { x: screen[0], y: screen[1] },
+      mouse: [editor.pointer.x, editor.pointer.y],
+      pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
+      preview(props) { restore(); meshOperators['mesh.inset'](em.bm, props); sync({ commit: false }); },
+      confirm(props) { restore(); exec('mesh.inset', props); },
+      cancel() { restore(); sync({ commit: false }); },
+      notify,
+    }));
+  }
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
     '-',
@@ -215,6 +239,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'VIEW3D_MT_edit_mesh_delete', keys: ['X', 'Delete'], run: () => openMenu(deleteMenu(), editor.pointer, 'Delete') },
     { blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: extrudeMove },
     { blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: loopcut },
+    { blender: 'mesh.inset', keys: 'I', run: inset },
     { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
     { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
     { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
@@ -236,6 +261,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     extrudeMove() { if (em) extrudeMove(); },
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
     loopcut() { if (em) loopcut(); },
+    inset() { if (em) inset(); },
     key(e) {
       if (tool) {
         const state = tool.key(e);
@@ -263,6 +289,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     pointerDown(view, e) {
       if (tool) {
         if (e.button === 0) tool.finish();
+        else tool.cancel?.();
         endTool();
         return true;
       }
