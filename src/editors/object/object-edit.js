@@ -5,8 +5,9 @@ import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmes
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
-import { EDBM_mesh_hide, EDBM_mesh_reveal } from '../mesh/editmesh-utils.js';
 import { beginMeshTransform } from '../transform/transform-mesh.js';
+import { meshOperators } from '../mesh/editmesh-tools.js';
+import { openMenu } from '../interface/menu.js';
 import { primitive_add } from '../mesh/editmesh-add.js';
 import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js';
 import { mesh_from_vertex_data } from '../../blenkernel/mesh/mesh-from-babylon.js';
@@ -14,6 +15,8 @@ import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
 
+// VIEW3D_MT_edit_mesh_delete, as far as its operators are ported.
+const DELETE_ITEMS = [['VERT', 'Vertices'], ['EDGE', 'Edges'], ['FACE', 'Faces'], ['EDGE_FACE', 'Only Edges & Faces'], ['ONLY_FACE', 'Only Faces']];
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
 
 // The Mesh an object's geometry comes from: its saved Mesh, its Blender primitive, or its Babylon geometry welded.
@@ -112,6 +115,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   }
 
   const run = (fn) => () => { fn(em.bm); sync(); };
+  const exec = (idname, props = {}) => run((bm) => meshOperators[idname](bm, props))();
+  const deleteMenu = () => DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) }));
   const keymap = createKeymap([
     { blender: 'mesh.select_mode', keys: '1', run: run((bm) => (selectmode = mesh_select_mode(bm, 'VERT'))) },
     { blender: 'mesh.select_mode', keys: '2', run: run((bm) => (selectmode = mesh_select_mode(bm, 'EDGE'))) },
@@ -122,9 +127,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: ['mesh.select_all', 'mesh.select_all:SELECT'], keys: 'A', run: run((bm) => mesh_select_all(bm, 'SELECT')) },
     { blender: ['mesh.select_all', 'mesh.select_all:DESELECT'], keys: 'Alt A', run: run((bm) => mesh_select_all(bm, 'DESELECT')) },
     { blender: ['mesh.select_all', 'mesh.select_all:INVERT'], keys: 'Ctrl I', run: run((bm) => mesh_select_all(bm, 'INVERT')) },
-    { blender: 'mesh.hide', keys: 'H', run: run((bm) => EDBM_mesh_hide(bm, bm.selectmode, false)) },
-    { blender: 'mesh.hide', keys: 'Shift H', run: run((bm) => EDBM_mesh_hide(bm, bm.selectmode, true)) },
-    { blender: 'mesh.reveal', keys: 'Alt H', run: run((bm) => EDBM_mesh_reveal(bm, bm.selectmode)) },
+    { blender: 'mesh.hide', keys: 'H', run: () => exec('mesh.hide') },
+    { blender: 'mesh.hide', keys: 'Shift H', run: () => exec('mesh.hide', { unselected: true }) },
+    { blender: 'mesh.reveal', keys: 'Alt H', run: () => exec('mesh.reveal') },
+    { blender: 'VIEW3D_MT_edit_mesh_delete', keys: ['X', 'Delete'], run: () => openMenu(deleteMenu(), editor.pointer, 'Delete') },
     { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
     { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
     { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
@@ -141,6 +147,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     exit,
     toggle: () => (em ? exit() : enter()),
     setSelectMode(type, extend = false) { if (em) run((bm) => (selectmode = mesh_select_mode(bm, type, { use_extend: extend })))(); },
+    exec(idname, props) { if (em) exec(idname, props); },
+    deleteMenu,
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
     key: (e) => modeKeys(e) || (!!em && keymap(e)),
     // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.

@@ -8,7 +8,7 @@ const near = (a, b, tolerance = 1e-5) => Math.abs(a - b) <= tolerance;
 let compared = 0;
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
-  if (!primitiveOperators[fixture.operator]) continue;
+  if (fixture.edit || !primitiveOperators[fixture.operator]) continue;
   const mesh = primitive_add(fixture.operator, fixture.props);
   const name = file.replace('.json', '');
   assert.equal(mesh.verts_num, fixture.positions.length, name + ': vertex count');
@@ -37,3 +37,30 @@ VertexData.ComputeNormals(data.positions, data.indices, computed);
 for (let i = 0; i < data.normals.length; i++) assert.ok(near(computed[i], data.normals[i], 1e-4), 'Babylon winding matches normals at ' + i);
 assert.ok(data.positions.length === 24 * 3 && data.indices.length === 36);
 console.log('Mesh: draw cache maps Blender axes onto Babylon with outward winding');
+
+// Edit Mode operators on Blender's own selection, compared with Blender's result.
+import { meshOperators } from '../src/editors/mesh/editmesh-tools.js';
+import { BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
+import { BM_VERT, BM_EDGE, BM_FACE } from '../src/bmesh/intern/bmesh-class.js';
+const SELECT = { VERT: [SCE_SELECT_VERTEX, BM_VERT], EDGE: [SCE_SELECT_EDGE, BM_EDGE], FACE: [SCE_SELECT_FACE, BM_FACE] };
+let edited = 0;
+for (const file of await readdir(dir)) {
+  const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
+  if (!fixture.edit) continue;
+  const name = file.replace('.json', ''), { select_mode, select, operator, props } = fixture.edit;
+  const bm = BM_mesh_bm_from_me(primitive_add(fixture.operator, fixture.props));
+  const [mode, htype] = SELECT[select_mode];
+  bm.selectmode = mode;
+  for (const i of select) BM_elem_select_set(bm, htype, i, true);
+  meshOperators[operator](bm, props);
+  const mesh = BM_mesh_bm_to_me(bm);
+  assert.equal(mesh.verts_num, fixture.positions.length, name + ': vertex count');
+  fixture.positions.forEach((p, v) => p.forEach((x, a) => assert.ok(near(mesh.vert_positions[v * 3 + a], x), `${name}: vertex ${v}`)));
+  assert.deepEqual(Array.from(mesh.edges), fixture.edges.flat(), name + ': edges');
+  assert.deepEqual(Array.from(mesh.face_offsets), fixture.face_offsets, name + ': face offsets');
+  assert.deepEqual(Array.from(mesh.corner_verts), fixture.corner_verts, name + ': corner verts');
+  assert.deepEqual(Array.from(mesh.corner_edges), fixture.corner_edges, name + ': corner edges');
+  edited++;
+}
+assert.ok(edited >= 5);
+console.log(`Mesh: ${edited} Edit Mode operator results match Blender 5.2 exactly`);

@@ -325,6 +325,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     },
     select,
     get mode() { return mode; },
+    get pointer() { return last; },
     updateGesture: update,
     pick(x,y,view=views.input) {
       const hit=pickIn(view,x,y);
