@@ -18,6 +18,13 @@ export function createMesh({ vert_positions, edges, face_offsets, corner_verts, 
     face_size: (f) => mesh.face_offsets[f + 1] - mesh.face_offsets[f],
     attribute: (name) => mesh.attributes.get(name)?.data,
     corner_tris: () => (cache.corner_tris ??= mesh_corner_tris_calc(mesh)),
+    // The face of each corner triangle.
+    corner_tri_faces() {
+      if (cache.corner_tri_faces) return cache.corner_tri_faces;
+      const out = new Int32Array(mesh.corners_num - 2 * mesh.faces_num);
+      for (let f = 0, t = 0; f < mesh.faces_num; f++) for (let i = 2; i < mesh.face_size(f); i++) out[t++] = f;
+      return (cache.corner_tri_faces = out);
+    },
     face_normals: () => (cache.face_normals ??= mesh_face_normals_calc(mesh)),
     vert_normals: () => (cache.vert_normals ??= mesh_vert_normals_calc(mesh, mesh.face_normals())),
     // Edges no face uses, as indices.
@@ -33,8 +40,26 @@ export function createMesh({ vert_positions, edges, face_offsets, corner_verts, 
       for (let i = 0; i < p.length; i += 3) for (let a = 0; a < 3; a++) { min[a] = Math.min(min[a], p[i + a]); max[a] = Math.max(max[a], p[i + a]); }
       return (cache.bounds = mesh.verts_num ? { min, max } : null);
     },
-    tag_positions_changed() { cache = { corner_tris: cache.corner_tris }; },
+    tag_positions_changed() { cache = { corner_tris: cache.corner_tris, corner_tri_faces: cache.corner_tri_faces }; },
     tag_topology_changed() { cache = {}; },
   };
   return mesh;
+}
+
+const TYPED = { vert_positions: Float32Array, edges: Int32Array, face_offsets: Int32Array, corner_verts: Int32Array, corner_edges: Int32Array };
+const ATTRIBUTE_TYPED = { FLOAT: Float32Array, FLOAT2: Float32Array, INT: Int32Array, BOOLEAN: Uint8Array };
+
+// Plain JSON for scene edits and undo steps.
+export function mesh_serialize(mesh) {
+  return {
+    ...Object.fromEntries(Object.keys(TYPED).map((key) => [key, Array.from(mesh[key])])),
+    attributes: Object.fromEntries([...mesh.attributes].map(([name, { domain, type, data }]) => [name, { domain, type, data: Array.from(data) }])),
+  };
+}
+
+export function mesh_deserialize(json) {
+  return createMesh({
+    ...Object.fromEntries(Object.entries(TYPED).map(([key, Type]) => [key, Type.from(json[key])])),
+    attributes: Object.fromEntries(Object.entries(json.attributes ?? {}).map(([name, { domain, type, data }]) => [name, { domain, type, data: ATTRIBUTE_TYPED[type].from(data) }])),
+  });
 }

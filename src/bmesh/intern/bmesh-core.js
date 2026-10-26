@@ -1,11 +1,12 @@
 // Element creation and removal and the topology kernel (bmesh_core.cc). Handles are indices; -1 is null.
-import { BM_ELEM_SELECT, BM_ELEM_SMOOTH, _FLAG_JF, BM_ELEM_API_FLAG_TEST, BM_ELEM_API_FLAG_ENABLE, BM_ELEM_API_FLAG_DISABLE, poolAlloc, poolFree } from './bmesh-class.js';
+import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_SMOOTH, _FLAG_JF, BM_ELEM_API_FLAG_TEST, BM_ELEM_API_FLAG_ENABLE, BM_ELEM_API_FLAG_DISABLE, poolAlloc, poolFree } from './bmesh-class.js';
 import {
   bmesh_disk_edge_append, bmesh_disk_edge_remove, bmesh_disk_edge_next, bmesh_edge_vert_swap,
   bmesh_radial_loop_append, bmesh_radial_loop_remove,
 } from './bmesh-structure.js';
 import { BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_face_find_double, BM_edge_face_count_is_over } from './bmesh-query.js';
 import { BM_face_create_ngon } from './bmesh-construct.js';
+import { BM_select_history_remove } from './bmesh-marking.js';
 
 export const BM_CREATE_NOP = 0, BM_CREATE_NO_DOUBLE = 1 << 1, BM_CREATE_SKIP_CD = 1 << 2;
 
@@ -85,12 +86,12 @@ export function BM_elem_attrs_copy(pool, src, dst) {
   for (const layer of pool.layers) layer.data.copyWithin(dst * layer.size, src * layer.size, src * layer.size + layer.size);
 }
 
-const bm_kill_only_vert = (bm, v) => { if (bm.select_history) bm.select_history.delete('v' + v); poolFree(bm.v, v); };
-const bm_kill_only_edge = (bm, e) => { if (bm.select_history) bm.select_history.delete('e' + e); poolFree(bm.e, e); };
+const bm_kill_only_vert = (bm, v) => { BM_select_history_remove(bm, BM_VERT, v); poolFree(bm.v, v); };
+const bm_kill_only_edge = (bm, e) => { BM_select_history_remove(bm, BM_EDGE, e); poolFree(bm.e, e); };
 const bm_kill_only_loop = (bm, l) => poolFree(bm.l, l);
 function bm_kill_only_face(bm, f) {
   if (bm.act_face === f) bm.act_face = -1;
-  if (bm.select_history) bm.select_history.delete('f' + f);
+  BM_select_history_remove(bm, BM_FACE, f);
   poolFree(bm.f, f);
 }
 

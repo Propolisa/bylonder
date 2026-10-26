@@ -25,7 +25,8 @@ export function createSelection(scene, objects) {
   const meshes = () => objects.filter((n) => n.getTotalVertices?.() > 0);
   function highlight() {
     for (const mesh of meshes()) {
-      mesh.renderOutline = nodes().some(
+      // Edit Mode draws its own overlay instead of the object outline, as Blender does.
+      mesh.renderOutline = !mesh.metadata?.editing && nodes().some(
         (n) => mesh === n || mesh.isDescendantOf(n),
       );
       mesh.outlineColor = new Color3(1, 0.58, 0.17);

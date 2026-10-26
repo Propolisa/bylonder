@@ -36,6 +36,8 @@ export function mesh_batch_cache_vertex_data(mesh) {
 export function mesh_batch_cache_apply(mesh, babylonMesh) {
   babylonMesh.makeGeometryUnique?.();
   mesh_batch_cache_vertex_data(mesh).applyToMesh(babylonMesh, true);
+  // A single submesh would keep its old index count when an edit changes the topology.
+  if (babylonMesh.subMeshes?.length <= 1) babylonMesh._createGlobalSubMesh(true);
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());
   const loose = mesh.loose_edges();
   if (loose.length) {

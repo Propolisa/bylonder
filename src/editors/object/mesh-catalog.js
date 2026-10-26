@@ -3,6 +3,7 @@ import reflected from "./builder-schema.json" with { type: "json" };
 import rna from "../../makesrna/rna-operators.json" with { type: "json" };
 import { primitiveOperators, primitive_add } from "../mesh/editmesh-add.js";
 import { mesh_batch_cache_apply } from "../../draw/mesh-batch-cache.js";
+import { mesh_deserialize } from "../../blenkernel/mesh/mesh.js";
 
 const n = (value, min = 0.01, max = 100, step = 0.1) => ({ default: value, min, max, step });
 const detail = (value) => n(value, 3, 128, 1);
@@ -67,12 +68,18 @@ export function meshCatalog(config = {}) {
     });
 }
 
-// A recipe is { operator, options } for Blender primitives or { builder, options } for Babylon builders.
+// A recipe is { mesh } for edited Mesh data, { operator, options } for Blender primitives or { builder, options }
+// for Babylon builders.
+const recipeMesh = (recipe) => {
+  if (recipe.mesh) return mesh_deserialize(recipe.mesh);
+  if (!primitiveOperators[recipe.operator]) throw Error("Unknown mesh operator");
+  return primitive_add(recipe.operator, recipe.options);
+};
+
 export function buildMesh(scene, name, recipe) {
-  if (recipe.operator) {
-    if (!primitiveOperators[recipe.operator]) throw Error("Unknown mesh operator");
+  if (recipe.mesh || recipe.operator) {
     const node = new Mesh(name, scene);
-    mesh_batch_cache_apply(primitive_add(recipe.operator, recipe.options), node);
+    mesh_batch_cache_apply(recipeMesh(recipe), node);
     return node;
   }
   const fn = MeshBuilder[recipe.builder];
@@ -81,7 +88,7 @@ export function buildMesh(scene, name, recipe) {
 }
 
 export function rebuildMesh(mesh, recipe) {
-  if (recipe.operator) mesh_batch_cache_apply(primitive_add(recipe.operator, recipe.options), mesh);
+  if (recipe.mesh || recipe.operator) mesh_batch_cache_apply(recipeMesh(recipe), mesh);
   else {
     const temp = buildMesh(mesh.getScene(), "__previewGeometry", recipe);
     try {

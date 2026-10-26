@@ -157,8 +157,8 @@ export function createObjectCommands(world, editor, history, refresh) {
             ...(source.metadata?.wbModifiers?{wbModifiers:structuredClone(source.metadata.wbModifiers).map(m=>({...m,id:crypto.randomUUID()})),wbModifierBase:world.modifiers.source(source)}:{}),
             ...(source.metadata?.wbCurve?{wbCurve:structuredClone(source.metadata.wbCurve)}:{}),
           };
-          // Blender primitives keep their operator recipe, which also redraws their loose edges.
-          if (clone instanceof Mesh && source.metadata?.wbCreation?.operator && !source.metadata.wbModifiers)
+          // Mesh data and Blender primitives keep their recipe, which also redraws their loose edges.
+          if (clone instanceof Mesh && (source.metadata?.wbCreation?.operator || source.metadata?.wbCreation?.mesh) && !source.metadata.wbModifiers)
             rebuildMesh(clone, structuredClone(source.metadata.wbCreation));
           else if (clone instanceof Mesh)
             clone.metadata.wbCreation = {

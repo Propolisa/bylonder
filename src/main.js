@@ -37,6 +37,7 @@ import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
 import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequencer/editor.js";
 import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
+import { createEditMode } from "./editors/object/object-edit.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -264,6 +265,8 @@ creator = createAddMesh(
   notify,
 );
 commands.setBefore(() => creator.finish());
+world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { ui?.refresh(); views.wake(); } });
+world.onModeChange = () => viewports().forEach((view) => view.sync());
 world.beforeSelection = () => creator.finish();
 world.objectActions = createObjectActions({
   world,
@@ -435,6 +438,7 @@ function undoRedo(redo) {
   editor.finish(false);
   redo ? history.redo() : history.undo();
   editor.reconcile();
+  world.editMode.reload();
 }
 const key = (e) => {
   // Keys over the Video Sequencer (and its menu commands, which run as synthetic key events) belong to it.
@@ -479,10 +483,11 @@ const key = (e) => {
     creator.finish();
     return;
   }
-  if (viewKeys(e) || world.objectActions.key(e)) return;
+  if (world.editMode.key(e)) return;
+  if (viewKeys(e) || (!world.editMode.active && world.objectActions.key(e))) return;
   if (k === "escape") editor.setMode("select");
 };
-const transform = (type) => () => { creator.finish(); editor.start(type); };
+const transform = (type) => () => { if (world.editMode.active) return; creator.finish(); editor.start(type); };
 const viewAxis = (name, opposite) => () => activeView().nav.view(name, opposite);
 const globalKeys = createKeymap([
   { blender: "view3d.view_camera", keys: "Numpad 0", run: () => activeView()?.toggleCameraView() },
@@ -545,6 +550,7 @@ function dispose() {
   world.modifiers.dispose();
   sdk.dispose();
   creator.dispose();
+  world.editMode.dispose();
   world.outliner.dispose();
   world.contextMenu.dispose();
   nodeEditor.dispose();

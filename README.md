@@ -152,6 +152,8 @@ workbench.meshTools({
 
 Call this during createScene. `workbench.meshBuilders` exposes the reflected parameter catalog. New numeric/boolean/string field subsets are validated against the actual builder signature. Avoid combining size and axis overrides unless intended; Babylon's axis-specific options take precedence.
 
+Tab enters Edit Mode on the active mesh, with Blender's select modes (1, 2, 3, Shift to combine), click select (Shift toggles, clicking again cycles through overlapping elements), A, Alt A, Ctrl I, H, Shift H and Alt H. Edits are stored as Mesh data on the object (`wbCreation.mesh`) and saved with scene edits, so they replace the geometry that code builds. Selection and every edit are undo steps.
+
 Object actions live in one registry (`src/editors/object/object-actions.js`), shared by keyboard shortcuts and the same context-menu renderer for viewport and outliner. Shift+D duplicates with independent geometry, then starts Move; cancelling Move keeps the duplicate. X/Delete removes selection, F2 renames, A/Alt+A/Ctrl+I selects/deselects/inverts, H/Shift+H/Alt+H controls visibility, / isolates, Alt+G/R/S resets transforms, Ctrl+P parents to the active object, and Alt+P unparents. Native groups remain available.
 
 The outliner supports hierarchy expansion, search/type filters, range/additive selection, visibility, selection locks, drag parenting, drop-to-root unparenting and camera/light inspection. Unsupported object operations are disabled. This is an object-mode subset, not Blender's mesh-editing/modifier/animation stack.

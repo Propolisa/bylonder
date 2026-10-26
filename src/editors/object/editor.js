@@ -260,6 +260,10 @@ export function createEditor(world, views, history, changed, notify, capture) {
       if (e.button === 0 || e.button === 2) finish(e.button === 0);
       return;
     }
+    if (e.button === 0 && world.editMode?.active) {
+      world.editMode.pick(view, e);
+      return;
+    }
     if (e.button === 0) {
       // Let the utility-layer gizmo consume its own click before scene selection.
       if (mode !== "select" && selection.size) {
@@ -285,7 +289,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
       suppressContext = false;
       return;
     }
-    if (view.state.cameraView) return;
+    if (view.state.cameraView || world.editMode?.active) return;
     const pick = pickIn(view, e.clientX, e.clientY);
     let target = owner(pick?.pickedMesh);
     while (target?.parent?.metadata?.group) target = target.parent;

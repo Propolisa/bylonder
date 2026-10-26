@@ -1,0 +1,135 @@
+// Edit Mode selection (editmesh_select.cc): finding the element under the mouse and the select operators.
+// `view` projects Blender-axis local coordinates to screen pixels and tells whether a point is hidden behind the
+// mesh: { project(co) -> [x, y, depth] | null, occluded(co) -> bool, faceAt(x, y) -> face | -1, xray }.
+import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
+import {
+  SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_select_set, BM_mesh_select_mode_flush, BM_mesh_select_mode_set,
+  BM_mesh_elem_hflag_disable_all, BM_mesh_elem_hflag_enable_all, BM_select_history_store, BM_select_history_remove,
+  BM_select_history_active_get, BM_select_history_clear,
+} from '../../bmesh/intern/bmesh-marking.js';
+
+// ED_view3d_select_dist_px.
+export const SELECT_DIST_PX = 75;
+// Elements already selected count this much farther, so clicking again cycles to the next one (use_select_bias).
+const SELECT_BIAS_PX = 5;
+
+const co = (bm, v) => bm.v.co.subarray(v * 3, v * 3 + 3);
+const visible = (pool, i) => !BM_elem_flag_test(pool, i, BM_ELEM_HIDDEN);
+
+export function EDBM_vert_find_nearest(bm, view, mouse, dist = SELECT_DIST_PX) {
+  let best = -1;
+  BM_ITER_MESH(bm.v, (v) => {
+    if (!visible(bm.v, v)) return;
+    const p = view.project(co(bm, v));
+    if (!p) return;
+    const d = Math.hypot(p[0] - mouse[0], p[1] - mouse[1]) + (BM_elem_flag_test(bm.v, v, BM_ELEM_SELECT) ? SELECT_BIAS_PX : 0);
+    if (d < dist && (view.xray || !view.occluded(co(bm, v)))) { dist = d; best = v; }
+  });
+  return best;
+}
+
+function segmentDistance(p, a, b) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], len = dx * dx + dy * dy;
+  const t = len ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len)) : 0;
+  return [Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy), t];
+}
+
+export function EDBM_edge_find_nearest(bm, view, mouse, dist = SELECT_DIST_PX) {
+  let best = -1;
+  BM_ITER_MESH(bm.e, (e) => {
+    if (!visible(bm.e, e)) return;
+    const a = view.project(co(bm, bm.e.v1[e])), b = view.project(co(bm, bm.e.v2[e]));
+    if (!a || !b) return;
+    const [d0, t] = segmentDistance(mouse, a, b);
+    const d = d0 + (BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT) ? SELECT_BIAS_PX : 0);
+    if (d >= dist) return;
+    const c1 = co(bm, bm.e.v1[e]), c2 = co(bm, bm.e.v2[e]);
+    const mid = [0, 1, 2].map((i) => c1[i] + (c2[i] - c1[i]) * t);
+    if (view.xray || !view.occluded(mid)) { dist = d; best = e; }
+  });
+  return best;
+}
+
+// In solid shading the face under the mouse; in X-ray the face whose center is nearest.
+export function EDBM_face_find_nearest(bm, view, mouse, dist = SELECT_DIST_PX) {
+  if (!view.xray) return view.faceAt(mouse[0], mouse[1]);
+  let best = -1;
+  BM_ITER_MESH(bm.f, (f) => {
+    if (!visible(bm.f, f)) return;
+    const center = [0, 0, 0];
+    let l = bm.f.l_first[f];
+    do for (let i = 0; i < 3; i++) center[i] += bm.v.co[bm.l.v[l] * 3 + i] / bm.f.len[f]; while ((l = bm.l.next[l]) !== bm.f.l_first[f]);
+    const p = view.project(center);
+    if (!p) return;
+    const d = Math.hypot(p[0] - mouse[0], p[1] - mouse[1]);
+    if (d < dist) { dist = d; best = f; }
+  });
+  return best;
+}
+
+const MODES = [[SCE_SELECT_VERTEX, BM_VERT, EDBM_vert_find_nearest], [SCE_SELECT_EDGE, BM_EDGE, EDBM_edge_find_nearest], [SCE_SELECT_FACE, BM_FACE, EDBM_face_find_nearest]];
+
+// The nearest element in the enabled select modes: { htype, ele } or null.
+export function EDBM_unified_findnearest(bm, view, mouse) {
+  for (const [mode, htype, find] of MODES) {
+    if (!(bm.selectmode & mode)) continue;
+    const ele = find(bm, view, mouse);
+    if (ele >= 0) return { htype, ele };
+  }
+  return null;
+}
+
+// view3d.select in Edit Mode with Blender's left-click keymap: a click selects only the element under the mouse
+// (or deselects all over empty space); Shift toggles, making a selected element active first.
+export function EDBM_select_pick(bm, view, mouse, { toggle = false, deselect_all = true } = {}) {
+  const hit = EDBM_unified_findnearest(bm, view, mouse);
+  if (!hit) {
+    if (deselect_all) BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+    return deselect_all;
+  }
+  const pool = { [BM_VERT]: bm.v, [BM_EDGE]: bm.e, [BM_FACE]: bm.f }[hit.htype];
+  const selected = BM_elem_flag_test(pool, hit.ele, BM_ELEM_SELECT);
+  const active = BM_select_history_active_get(bm);
+  if (toggle) {
+    if (selected && active?.htype === hit.htype && active.ele === hit.ele) {
+      BM_select_history_remove(bm, hit.htype, hit.ele);
+      BM_elem_select_set(bm, hit.htype, hit.ele, false);
+    } else {
+      BM_select_history_store(bm, hit.htype, hit.ele);
+      BM_elem_select_set(bm, hit.htype, hit.ele, true);
+    }
+  } else {
+    BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
+    BM_select_history_store(bm, hit.htype, hit.ele);
+    BM_elem_select_set(bm, hit.htype, hit.ele, true);
+  }
+  if (hit.htype === BM_FACE) bm.act_face = hit.ele;
+  BM_mesh_select_mode_flush(bm);
+  return true;
+}
+
+// mesh.select_all: SELECT, DESELECT, INVERT or TOGGLE.
+export function mesh_select_all(bm, action) {
+  const all = BM_VERT | BM_EDGE | BM_FACE;
+  if (action === 'TOGGLE') action = bm.totvertsel || bm.totedgesel || bm.totfacesel ? 'DESELECT' : 'SELECT';
+  if (action === 'SELECT') BM_mesh_elem_hflag_enable_all(bm, all, BM_ELEM_SELECT, true);
+  else if (action === 'DESELECT') BM_mesh_elem_hflag_disable_all(bm, all, BM_ELEM_SELECT);
+  else {
+    // EDBM_select_swap: invert the elements of the lowest enabled mode, then flush.
+    const [pool, htype] = bm.selectmode & SCE_SELECT_VERTEX ? ['v', BM_VERT] : bm.selectmode & SCE_SELECT_EDGE ? ['e', BM_EDGE] : ['f', BM_FACE];
+    const was = [];
+    BM_ITER_MESH(bm[pool], (i) => { if (visible(bm[pool], i)) was.push([i, BM_elem_flag_test(bm[pool], i, BM_ELEM_SELECT)]); });
+    BM_mesh_elem_hflag_disable_all(bm, all, BM_ELEM_SELECT);
+    for (const [i, on] of was) if (!on) BM_elem_select_set(bm, htype, i, true);
+    BM_select_history_clear(bm);
+  }
+  BM_mesh_select_mode_flush(bm);
+}
+
+// mesh.select_mode: switch to one mode, or with use_extend add or remove it from the enabled modes.
+export function mesh_select_mode(bm, type, { use_extend = false } = {}) {
+  const mode = { VERT: SCE_SELECT_VERTEX, EDGE: SCE_SELECT_EDGE, FACE: SCE_SELECT_FACE }[type];
+  const next = use_extend ? bm.selectmode ^ mode || mode : mode;
+  BM_mesh_select_mode_set(bm, next);
+  return next;
+}

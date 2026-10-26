@@ -1,6 +1,6 @@
 import { ArcRotateCamera, Color4, Vector3 } from '@babylonjs/core';
 import { menuButton } from '../interface/menu.js';
-import { iconEl, iconButton } from '../interface/icon.js';
+import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
 
 const toolIcons = {
@@ -84,7 +84,20 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   };
   const header = dock.header(headerId);
   const cameraItem = { label: 'Camera', blender: 'view3d.view_camera', keys: 'Numpad 0', checked: () => state.cameraView, run: toggleCameraView };
-  const mode = menuButton('Object Mode', [{ label: 'Object Mode', blender: 'object.mode_set:OBJECT', icon: 'object_datamode', checked: () => !state.cameraView, run: () => state.cameraView && toggleCameraView() }, cameraItem], { icon: 'object_datamode', className: 'bl-dropdown' });
+  const editMode = () => world.editMode?.active;
+  const mode = menuButton('Object Mode', () => [
+    { label: 'Object Mode', blender: 'object.mode_set:OBJECT', icon: 'object_datamode', checked: () => !editMode() && !state.cameraView, run: () => { if (editMode()) world.editMode.exit(); if (state.cameraView) toggleCameraView(); } },
+    { label: 'Edit Mode', blender: 'object.mode_set:EDIT', icon: 'editmode_hlt', keys: 'Tab', checked: () => !!editMode(), run: () => editMode() || world.editMode.enter() },
+    cameraItem,
+  ], { icon: 'object_datamode', className: 'bl-dropdown' });
+  // Header select mode buttons (Edit Mode): click switches, Shift click adds or removes a mode.
+  const selectModes = Object.assign(document.createElement('span'), { className: 'bl-group' });
+  const selectModeButtons = [['VERT', 'vertexsel', 'Vertex', 1, '1'], ['EDGE', 'edgesel', 'Edge', 2, '2'], ['FACE', 'facesel', 'Face', 4, '3']].map(([type, icon, title, bit, key]) => {
+    const b = iconButton(icon, `${title} select mode (${key})`, (e) => world.editMode.setSelectMode(type, e?.shiftKey));
+    b.dataset.selectBit = bit;
+    return b;
+  });
+  selectModes.append(...selectModeButtons);
   const viewpoint = Object.entries(viewNames).map(([key, label]) => {
     const [vname, opposite] = key.split(',');
     return { label, blender: 'view3d.view_axis:' + { right: 'RIGHT', top: 'TOP', front: 'FRONT' }[vname], keys: 'Numpad ' + { right: 3, top: 7, front: 1 }[vname] + (opposite === 'true' ? ' Ctrl' : ''), run: () => nav.view(vname, opposite === 'true') };
@@ -100,7 +113,13 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     { label: 'Babylon Inspector', keys: 'Shift Ctrl I', run: ctx.inspector },
     { label: 'Keyboard Shortcuts', keys: '?', run: () => ctx.help.showModal() },
   ], { blender: 'VIEW3D_MT_view' });
-  const select = menuButton('Select', () => ['select-all', 'deselect', 'invert'].map(action), { blender: 'VIEW3D_MT_select_object' });
+  const select = menuButton('Select', () => (editMode() ? editSelectItems : ['select-all', 'deselect', 'invert'].map(action)), { blender: 'VIEW3D_MT_select_object' });
+  const editSelectItems = [
+    { label: 'All', blender: 'mesh.select_all:SELECT', keys: 'A', run: () => world.editMode.selectAll('SELECT') },
+    { label: 'None', blender: 'mesh.select_all:DESELECT', keys: 'Alt A', run: () => world.editMode.selectAll('DESELECT') },
+    { label: 'Invert', blender: 'mesh.select_all:INVERT', keys: 'Ctrl I', run: () => world.editMode.selectAll('INVERT') },
+  ];
+  const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
   const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
   const meshes = () => {
     const mesh = creator.catalog.filter(p => p.id !== 'text');
@@ -134,7 +153,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   shading.append(...shadingButtons);
   const overlayButton = iconButton('overlay', 'Show Overlays', () => { state.overlays = !state.overlays; sync(); views.wake(); });
   const spacer = () => Object.assign(document.createElement('span'), { className: 'spacer' });
-  header.replaceChildren(mode, viewMenu, select, add, object, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
+  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
 
   // Navigation gizmo and buttons, drawn from this view's camera.
   const drag = (el, fn) => {
@@ -180,6 +199,13 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   };
 
   const sync = () => {
+    const editing = !!editMode();
+    mode.querySelector('span:not(.bl-icon)').textContent = editing ? 'Edit Mode' : 'Object Mode';
+    mode.querySelector('.bl-icon').style.maskImage = `url(${iconUrl(editing ? 'editmode_hlt' : 'object_datamode')})`;
+    selectModes.hidden = !editing;
+    selectModeButtons.forEach((b) => b.setAttribute('aria-pressed', String(!!(world.editMode?.selectmode & b.dataset.selectBit))));
+    add.hidden = object.hidden = editing;
+    select.dataset.blender = selectMenuIds[editing ? 'edit' : 'object'];
     name.textContent = state.cameraView ? 'Camera Perspective' : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
     section.classList.toggle('overlays-off', !state.overlays || state.cameraView);
     section.classList.toggle('camera-view', state.cameraView);
