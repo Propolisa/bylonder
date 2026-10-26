@@ -99,7 +99,7 @@ Keep the fork's existing `deps/` contract seams and feature boundaries. Put our 
 
 ![Architecture](media/sequencer-architecture.svg)
 
-The fork is a separate repository (`bylonder-sequencer`) built as an ESM library and consumed here as a pinned dependency. Reasons: it is about 27 times our source size, it is TypeScript, and our ChatGPT upstream sync and Download App Source archive should not carry it. The fork exports its framework-free core (stores, actions, render and export engine) and, during the port, React islands for views not yet in Vue. Islands are not new here: the Babylon node editors bundle their own React. The Vue views live in this repository next to the other editors.
+The fork is a separate repository (`bylonder-sequencer`) built as an ESM library and consumed here as a pinned dependency. Reasons: it is about 27 times our source size, it is TypeScript, and the Download App Source archive should not carry it. The fork exports its framework-free core (stores, actions, render and export engine) and, during the port, React islands for views not yet in Vue. Islands are not new here: the Babylon node editors bundle their own React. The Vue views live in this repository next to the other editors.
 
 Host contract as first sketched (superseded by the contracts in the [render architecture proposal](render-architecture-proposal.md#interaction-model-swappable-sequencer)):
 
