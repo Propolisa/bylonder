@@ -15,7 +15,7 @@ export function createSequencerAdapter({ project, sequenceEditor, time, history,
   };
   const load = () => (loading ??= (async () => {
     const [embed] = await Promise.all([import('kubeezcut-embed'), import('kubeezcut-embed/embed.css')]);
-    await import('./theme.css');
+    await import('../editors/space_sequencer/theme.css');
     embed.setIconBase(import.meta.env.BASE_URL + 'icons/blender');
     embed.setKeymap('blender');
     await embed.openProject({

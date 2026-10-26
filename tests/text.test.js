@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, Mesh } from '@babylonjs/core';
-import { textGeometry } from '../src/text/geometry.js';
-import { applyText, textDefaults } from '../src/text/text.js';
-import { snapshot, apply, createHistory } from '../src/storage.js';
+import { textGeometry } from '../src/blenkernel/text/geometry.js';
+import { applyText, textDefaults } from '../src/blenkernel/text/text.js';
+import { snapshot, apply, createHistory } from '../src/editors/undo/storage.js';
 const engine = new NullEngine(), scene = new Scene(engine);
 const ring = points => [{command:'moveTo',args:points[0]},...points.slice(1).map(args=>({command:'lineTo',args})),{command:'closePath',args:[]}];
 const font = {unitsPerEm:1,layout:()=>({glyphs:[{path:{commands:[...ring([[0,0],[3,0],[3,3],[0,3]]),...ring([[1,1],[1,2],[2,2],[2,1]])]}}],positions:[{xAdvance:3,xOffset:0,yOffset:0}]})};

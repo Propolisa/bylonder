@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, MeshBuilder, NodeMaterial, InputBlock, Color3, ArcRotateCamera, Vector3 } from '@babylonjs/core';
-import { createAnimationModel, address } from '../src/animation/model.js';
-import { bindGraph } from '../src/graphs/bindings.js';
-import { geometryNodesDefinition } from '../src/graphs/geometry-nodes.js';
+import { createAnimationModel, address } from '../src/blenkernel/animation/model.js';
+import { bindGraph } from '../src/nodes/bindings.js';
+import { geometryNodesDefinition } from '../src/nodes/geometry-nodes.js';
 import { createModifierSystem, registerModifier } from '../src/modifiers/stack.js';
-import { createHistory } from '../src/storage.js';
-import { createLogic } from '../src/graphs/logic.js';
+import { createHistory } from '../src/editors/undo/storage.js';
+import { createLogic } from '../src/nodes/logic.js';
 const engine = new NullEngine(), scene = new Scene(engine);
 new ArcRotateCamera('c', 0, 1, 5, Vector3.Zero(), scene);
 const animation = createAnimationModel();

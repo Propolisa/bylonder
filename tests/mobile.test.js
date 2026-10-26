@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { gzipSync } from 'fflate';
-import { createTouchSession } from '../src/input/touch-session.js';
+import { createTouchSession } from '../src/windowmanager/input/touch-session.js';
 import { encodeProject, decodeProject } from '../src/workspace/share-codec.js';
-import { validateLayout, swapSections, focusedSection } from '../src/layout/model.js';
+import { validateLayout, swapSections, focusedSection } from '../src/editors/screen/model.js';
 let taps=0,starts=[],moves=[],ends=[];
 const touch=createTouchSession({tap:()=>taps++,start:p=>starts.push(p.count),move:p=>moves.push(p),end:cancel=>ends.push(cancel)});
 touch.down(1,{x:10,y:10});touch.move(1,{x:12,y:10});touch.up(1,{x:12,y:10});assert.equal(taps,1);

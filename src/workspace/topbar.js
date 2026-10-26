@@ -1,5 +1,5 @@
-import { menuButton } from '../ui/menu.js';
-import { iconEl } from '../ui/icon.js';
+import { menuButton } from '../editors/interface/menu.js';
+import { iconEl } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
 
 export function mountTopbar({ dock, send, examples, openExample, newProject }) {

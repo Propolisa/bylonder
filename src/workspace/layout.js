@@ -1,4 +1,4 @@
-import { mountDock } from '../layout/dock.js';
+import { mountDock } from '../editors/screen/dock.js';
 export function mountWorkspaceLayout() {
   const host=document.querySelector('#workspace');
   document.querySelector('#splitter')?.remove();

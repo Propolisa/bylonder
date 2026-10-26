@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { NullEngine, Scene, MeshBuilder } from "@babylonjs/core";
-import { createSelection } from "../src/selection.js";
-import { snapshot, apply, createHistory } from "../src/storage.js";
-import { createObjectCommands } from "../src/objects/commands.js";
+import { createSelection } from "../src/editors/object/selection.js";
+import { snapshot, apply, createHistory } from "../src/editors/undo/storage.js";
+import { createObjectCommands } from "../src/editors/object/commands.js";
 import {
   meshCatalog,
   buildMesh,
   rebuildMesh,
-} from "../src/objects/mesh-catalog.js";
+} from "../src/editors/object/mesh-catalog.js";
 const engine = new NullEngine(),
   scene = new Scene(engine),
   objects = [];

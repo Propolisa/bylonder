@@ -33,7 +33,7 @@ The KubeezCut sequencer sits on top of both through narrow contracts and never t
 | Constraint | Where | Effect |
 | --- | --- | --- |
 | Wall-clock time in user code | `src/workspace/examples.js:58` advances the Solar System by `scene.getEngine().getDeltaTime()` | The same frame renders differently on a slow and a fast machine |
-| One evaluated state | Animation evaluation writes live objects (`src/animation/model.js`) | The viewport and a render cannot show different frames at the same time |
+| One evaluated state | Animation evaluation writes live objects (`src/blenkernel/animation/model.js`) | The viewport and a render cannot show different frames at the same time |
 | One canvas and one camera | `src/main.js` renders `world.scene.render()` in `runRenderLoop` | One 3D Viewport |
 | Rendered gate is global | `world.setViewportRendered` switches world, render effects and compositor together | Solid and Rendered viewports cannot coexist |
 | Compositor is scene-global | `scene.frameGraph = ...` replaces the scene's render function (`scene.js`, `customRenderFunction = this._renderWithFrameGraph`) | Every view would show the compositor output |

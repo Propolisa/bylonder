@@ -9,7 +9,7 @@ Status (2026-10-26): phases 2, 3 and 5 are done (fork, Sequencer and Preview are
 Decision (2026-10-25): KubeezCut views run as React islands with scoped style overrides for now; the Vue port below is kept as analysis for later. The sequencer sits behind a Blender-shaped `sequenceEditor` record and one adapter so it can be replaced. Contracts, scene strips, multiple viewports and deterministic rendering are in the [render architecture proposal](render-architecture-proposal.md), which supersedes the host contract sketched here.
 
 - KubeezCut covers most of Blender's Video Sequencer (strips, channels, preview, transitions, effects, blend modes, markers, meta strips) and a WebCodecs export pipeline. It is a good base for the **Sequencer**, **Preview** and the encoding half of **Render Animation**.
-- It does not cover the Dope Sheet, Graph Editor, NLA or Drivers in a form we can use. Its keyframe editor animates 8 fixed clip properties; ours animates any registered channel. Those editors should be built natively over `src/animation/model.js`, with the sequencer's strip properties registered as ordinary channels so they show up there, as in Blender.
+- It does not cover the Dope Sheet, Graph Editor, NLA or Drivers in a form we can use. Its keyframe editor animates 8 fixed clip properties; ours animates any registered channel. Those editors should be built natively over `src/blenkernel/animation/model.js`, with the sequencer's strip properties registered as ordinary channels so they show up there, as in Blender.
 - A fork is needed. The parts to replace are the ones that define our UX: keyframe store, undo, project storage, keymap, styling and app shell. The rendering, compositing and export core can stay close to upstream.
 - Porting the UI from React to Vue and our Blender component library is moderate. Raw `.tsx` volume is large, but the core scope is 112 components in 93 files plus 27 hook modules, and only about 9,000 of its lines are React-specific (JSX and hook wrappers); the rest is plain TypeScript inside components, comments, imports and brackets. Core scope is estimated at 1.5 to 2.5 engineer-months, full parity at about 3 to 4. About 96,000 lines of framework-free TypeScript (timeline actions, export engine, GPU libraries, media services) are reused unchanged. The recommended route is a staged port that starts with the cheap panels and ends with the timeline, see [Porting the UI to Vue](#porting-the-ui-to-vue).
 - glTF (GLB) is the interchange format with Blender. Every channel and feature gets a glTF class (native, pointer extension, baked, not exported) so exports can report what is lost; see [glTF interop constraint](#gltf-interop-constraint).
@@ -117,7 +117,7 @@ Scene strip: frames come from a hidden **render iframe** that runs the project l
 
 ## Render settings and output
 
-Blender keeps resolution, frame rate, frame range and encoding on the scene (`properties_output.py`). On `main`, scene time (`src/scene/time.js`) already holds fps and range and the Output tab edits them. The rest of Properties > Output to add:
+Blender keeps resolution, frame rate, frame range and encoding on the scene (`properties_output.py`). On `main`, scene time (`src/blenkernel/scene/time.js`) already holds fps and range and the Output tab edits them. The rest of Properties > Output to add:
 
 | Blender panel and field | Our implementation |
 | --- | --- |
@@ -182,7 +182,7 @@ Components in the core scope, counted per declared component:
 | Effects panels | 6 | Generic panel, curves, color wheels |
 | **Total** | **112 components in 93 files** | Plus 27 hook modules that become composables |
 
-By size: 35 files under 150 lines, 39 between 150 and 499, 19 of 500 or more. Not ported, replaced by our library: KubeezCut's property controls (`NumberInput`, `SliderInput`, `ColorPicker`, `PropertyRow`, `PropertySection`, 1,141 lines) and the 16 shadcn primitives the core uses (button, dropdown menu, context menu, select, dialog, popover, slider and others), which map to `src/properties/` rows and `src/ui/menu.js`.
+By size: 35 files under 150 lines, 39 between 150 and 499, 19 of 500 or more. Not ported, replaced by our library: KubeezCut's property controls (`NumberInput`, `SliderInput`, `ColorPicker`, `PropertyRow`, `PropertySection`, 1,141 lines) and the 16 shadcn primitives the core uses (button, dropdown menu, context menu, select, dialog, popover, slider and others), which map to `src/editors/interface/` rows and `src/editors/interface/menu.js`.
 
 What those lines are, classified line by line with a heuristic script (multi-line JSX expressions are partly counted as logic, so JSX is a lower bound):
 
@@ -221,7 +221,7 @@ Consequences for this work:
 
 | Phase | Deliverable | Done when |
 | --- | --- | --- |
-| 0. Model groundwork (here) | Scene time off the action (done on `main` in `src/scene/time.js`); `sample(ref, frame)`; markers slice; `gltf` field on channels | Tests cover range migration from existing actions and pure sampling |
+| 0. Model groundwork (here) | Scene time off the action (done on `main` in `src/blenkernel/scene/time.js`); `sample(ref, frame)`; markers slice; `gltf` field on channels | Tests cover range migration from existing actions and pure sampling |
 | 1. Render Animation (here plus fork engine) | Properties > Output, render iframe with virtual clock, Render Image and Render Animation of the camera through the compositor, encoded with mediabunny | A keyed example renders to MP4 and WebM with exact frame count and timestamps |
 | 2. Fork setup | Strip AI, accounts and shell; export core and islands; host contract stubs; builds as a library | Fork `npm run verify` passes; bundle loads in a dock area |
 | 3. Sequencer and Preview areas | Host clock, undo, `sequenceEditor` slice and adapter, media store, Blender keymap; React islands themed with our tokens | Edit, undo, reload and ZIP round trip keep the edit |

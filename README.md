@@ -12,8 +12,8 @@ Node 20+: `npm ci`, `npm run dev`, `npm test`, `npm run build`. Serve `dist/` on
 
 Three layers, each with one contract and no knowledge of the others' internals:
 
-1. **Channels** (`src/animation/model.js`): every editable scalar is registered once as `{id, path, label, get, set, available}`. Property rows, keyframes, the Timeline and context menus only see channels. Producers: generated controls, objects, materials, modifiers and graph bindings (`src/graphs/bindings.js`).
-2. **Document slices** (`src/state/document.js`): each subsystem that owns state beyond its channels registers a slice with `capture()`, `apply(state)` (undefined means code defaults), and optional `subscribe`/`dispose`. Current slices: `materials`, `compositor`, `logic`, and `channels`, which persists edits to channels no other slice owns as a diff from code values. Object-level data (transforms, modifiers, particle systems) lives on objects and is captured by `src/storage.js`.
+1. **Channels** (`src/blenkernel/animation/model.js`): every editable scalar is registered once as `{id, path, label, get, set, available}`. Property rows, keyframes, the Timeline and context menus only see channels. Producers: generated controls, objects, materials, modifiers and graph bindings (`src/nodes/bindings.js`).
+2. **Document slices** (`src/blenkernel/document.js`): each subsystem that owns state beyond its channels registers a slice with `capture()`, `apply(state)` (undefined means code defaults), and optional `subscribe`/`dispose`. Current slices: `materials`, `compositor`, `logic`, and `channels`, which persists edits to channels no other slice owns as a diff from code values. Object-level data (transforms, modifiers, particle systems) lives on objects and is captured by `src/editors/undo/storage.js`.
 3. **Consumers**: undo history and Remember scene edits call only `document.capture()` / `document.apply()`; editors call subsystem APIs. Adding a subsystem means one `register(...)` call, with no changes to history, persistence or UI wiring.
 
 ## Materials and node editors
@@ -30,7 +30,7 @@ The Node Editor area (pick it from any area's editor-type menu) hosts Babylon's 
 | Particle Node Editor | Node Particle Editor | Active object's particle system (Properties > Particles) |
 | Logic Editor | FlowGraph (own editor; Babylon ships none) | Scene logic; Shift A, drag sockets, Run |
 
-`src/graphs/bindings.js` reflects live graph inputs (uniform Input blocks, geometry and particle inputs, render-graph block settings declared with `editableInPropertyPage`) into animation channels and property rows, resolved by stable block names so they survive editor rebuilds.
+`src/nodes/bindings.js` reflects live graph inputs (uniform Input blocks, geometry and particle inputs, render-graph block settings declared with `editableInPropertyPage`) into animation channels and property rows, resolved by stable block names so they survive editor rebuilds.
 
 ## Examples and deployment
 
@@ -67,13 +67,13 @@ Browsers may deny pointer lock (including restricted embeds). The app reports th
 
 ## Selection and transforms
 
-`selection.js` owns stable selection IDs, outlines, native groups and a transient `TransformNode` pivot. Multi-selection filters parent/child duplicates. The pivot's world delta is applied to selected root nodes and converted back to local space. It is never serialized. Gizmos, numeric fields and modal operations share this transform path. Babylon uses TRS decomposition; arbitrary shear from rotated non-uniform parent scaling is not supported. Grouping is organizational, not mesh merging or geometry editing.
+`editors/object/selection.js` owns stable selection IDs, outlines, native groups and a transient `TransformNode` pivot. Multi-selection filters parent/child duplicates. The pivot's world delta is applied to selected root nodes and converted back to local space. It is never serialized. Gizmos, numeric fields and modal operations share this transform path. Babylon uses TRS decomposition; arbitrary shear from rotated non-uniform parent scaling is not supported. Grouping is organizational, not mesh merging or geometry editing.
 
-`storage.js` persists versioned node transforms and parent IDs, including groups. Version 1 flat snapshots migrate when read. Remember transforms is off by default. Enabling writes current and subsequent committed changes. Disabling/forgetting removes the saved snapshot without changing the current scene. Camera and system parameters remain session-only. Undo/redo covers 100 committed transform/group states; Inspector edits are direct advanced edits outside that history. Mesh names must be unique and stable; change the storage key for independently deployed projects.
+`editors/undo/storage.js` persists versioned node transforms and parent IDs, including groups. Version 1 flat snapshots migrate when read. Remember transforms is off by default. Enabling writes current and subsequent committed changes. Disabling/forgetting removes the saved snapshot without changing the current scene. Camera and system parameters remain session-only. Undo/redo covers 100 committed transform/group states; Inspector edits are direct advanced edits outside that history. Mesh names must be unique and stable; change the storage key for independently deployed projects.
 
 ## Reactive systems
 
-`systems.js` composes independent definitions `{id,title,schema,connect}`. Each instance owns a store, subscriptions and cleanup. Display, lighting and geometry are separate example systems. `config.js` defines defaults, labels, ranges and options. `ui.js` generates a section per system. `effects.js` connects explicit dependencies to Babylon objects via injected context.
+`systems.js` composes independent definitions `{id,title,schema,connect}`. Each instance owns a store, subscriptions and cleanup. Display, lighting and geometry are separate example systems. `config.js` defines defaults, labels, ranges and options. `editors/interface/ui.js` generates a section per system. `effects.js` connects explicit dependencies to Babylon objects via injected context.
 
 ```js
 const materialDefinition = {
@@ -97,18 +97,22 @@ Store effects run initially and then coalesce once per animation frame by defaul
 
 `store.set` validates scalar types, finite numbers, ranges and options; schemas may add `validate(value)`. UI and programmatic edits use the same path. Never directly mutate `store.values`. Each store is independent; repeat keys across stores or instantiate the same definition with distinct IDs and dependencies. Cross-system dependencies should be explicit subscriptions with cleanup.
 
-## Module map
+## Source layout
 
-- `scene.js`: engine, sample meshes, lights and ground.
-- `store.js`, `config.js`, `systems.js`, `effects.js`: reactive configuration.
-- `mouse-capture.js`: pointer-lock lifecycle and fallback.
-- `gesture-math.js`: radial scale, unwrapped angle and cursor wrapping math.
-- `navigation.js`: projection, view presets and camera input.
-- `selection.js`: outlines, multi-selection, group hierarchy and pivot transforms.
-- `editor.js`: modal transactions, constraints, gizmos and picking.
-- `storage.js`: snapshots, persistence and history.
-- `ui.js`: generated parameters, hierarchy and numeric transforms.
-- `main.js`: composition, commands, Inspector, render loop and cleanup.
+`src/` follows Blender's source tree, so a Blender change set points at the matching folder here:
+
+| Blender | Bylonder | Contents |
+|---|---|---|
+| `source/blender/blenkernel` | `src/blenkernel/` | Data and its Babylon mapping: scene (time, render, collections, world), animation, materials, text, units, the document slices |
+| `source/blender/editors/space_*` | `src/editors/space_*/` | Editors: `space_view3d`, `space_buttons` (Properties, one file per panel group), `space_node`, `space_sequencer`, `space_outliner`, `space_action` (Timeline) |
+| `source/blender/editors/{object,transform,undo,curve,render,screen,interface}` | `src/editors/object/`, `undo/`, `curve/`, `render/`, `screen/`, `interface/` | Object mode editing and operators, undo history, text editing, Render Result window, area layout, widgets and menus |
+| `source/blender/windowmanager` | `src/windowmanager/` | Pointer capture, gestures, touch input |
+| `source/blender/nodes`, `compositor`, `modifiers` | `src/nodes/`, `src/compositor/`, `src/modifiers/` | Geometry, particle and logic graphs; the compositor frame graph; the modifier stack |
+| `source/blender/render` | `src/render/` | Offline render context, virtual clock, sampling, encoding |
+| `source/blender/sequencer` | `src/sequencer/` | The edit slice, scene strip frames and the KubeezCut adapter |
+| `source/blender/python` | `src/runtime/` | Running project code: the world builder and the `@workbench/sdk` API |
+
+`src/main.js` composes the viewport frame; `src/workspace/` is the browser IDE around it (projects, files, scenes, sharing) and has no Blender counterpart.
 
 Tests cover store isolation/scheduling, gesture math, relative-input lifecycle, native grouping, multi-object transforms, undo and persistence reconstruction via Babylon's NullEngine. They do not replace browser/WebGL interaction tests. The development preview service was unavailable in the build environment, so browser interaction remains unverified.
 
@@ -136,7 +140,7 @@ workbench.meshTools({
 
 Call this during createScene. `workbench.meshBuilders` exposes the reflected parameter catalog. New numeric/boolean/string field subsets are validated against the actual builder signature. Avoid combining size and axis overrides unless intended; Babylon's axis-specific options take precedence.
 
-Object actions live in one registry (`src/objects/object-actions.js`), shared by keyboard shortcuts and the same context-menu renderer for viewport and outliner. Shift+D duplicates with independent geometry, then starts Move; cancelling Move keeps the duplicate. X/Delete removes selection, F2 renames, A/Alt+A/Ctrl+I selects/deselects/inverts, H/Shift+H/Alt+H controls visibility, / isolates, Alt+G/R/S resets transforms, Ctrl+P parents to the active object, and Alt+P unparents. Native groups remain available.
+Object actions live in one registry (`src/editors/object/object-actions.js`), shared by keyboard shortcuts and the same context-menu renderer for viewport and outliner. Shift+D duplicates with independent geometry, then starts Move; cancelling Move keeps the duplicate. X/Delete removes selection, F2 renames, A/Alt+A/Ctrl+I selects/deselects/inverts, H/Shift+H/Alt+H controls visibility, / isolates, Alt+G/R/S resets transforms, Ctrl+P parents to the active object, and Alt+P unparents. Native groups remain available.
 
 The outliner supports hierarchy expansion, search/type filters, range/additive selection, visibility, selection locks, drag parenting, drop-to-root unparenting and camera/light inspection. Unsupported object operations are disabled. This is an object-mode subset, not Blender's mesh-editing/modifier/animation stack.
 
@@ -181,7 +185,7 @@ Touch viewport controls:
 - X/Y/Z, Snap, Fine, Apply, Cancel, Undo and Redo are touch buttons. Parenting, grouping, duplication, visibility, text editing and other commands are available through Actions. Numeric transforms and generated scene controls are in Properties.
 - The code toolbar exposes undo, redo, indentation, suggestions, find and format without modifier keys. Project/file operations remain available through the top menu and Files section.
 
-`src/input/touch-session.js` recognizes tap, drag, hold, pinch transitions and cancellation. `viewport-touch.js` dispatches those gestures to the existing editor/navigation operations; it does not maintain a second transform implementation. The authored camera still controls input in Scene mode.
+`src/windowmanager/input/touch-session.js` recognizes tap, drag, hold, pinch transitions and cancellation. `viewport-touch.js` dispatches those gestures to the existing editor/navigation operations; it does not maintain a second transform implementation. The authored camera still controls input in Scene mode.
 
 ## Share links and resolution
 
@@ -265,6 +269,6 @@ workbench.addModifier(sphere, 'ARRAY', {
 
 Use stable `workbench.editable(node, { id })` identities for referenced objects. Curve points are local-space evaluated samples; they can be updated by calling `workbench.curve` again. Modifiers expose scalar addresses as `animation.ref('modifier:'+objectId+':'+modifier.id, propertyPath)` where `objectId` is the object's stable `wbId` (without the `object:` prefix).
 
-New modifier modules register a schema and evaluator with `registerModifier`; new Properties contexts/panels register with `registerPropertiesContext` / `registerPropertiesPanel`. Both code and UI use the same modifier values. `src/properties/primitives.js` provides panels, subpanels and field rows. `src/layout/dock.js` provides editor factories with persistent area instances. Babylon Node Geometry handles generated topology; thin instances avoid realizing geometry until requested.
+New modifier modules register a schema and evaluator with `registerModifier`; new Properties contexts/panels register with `registerPropertiesContext` / `registerPropertiesPanel`. Both code and UI use the same modifier values. `src/editors/interface/primitives.js` provides panels, subpanels and field rows. `src/editors/screen/dock.js` provides editor factories with persistent area instances. Babylon Node Geometry handles generated topology; thin instances avoid realizing geometry until requested.
 
 See [interface assessment](docs/blender-interface-assessment.md) for reference coverage, architectural decisions and explicit Blender compatibility limits, the [video sequencer proposal](docs/video-sequencer-proposal.md) for the KubeezCut, render output and glTF plan, and the [render architecture proposal](docs/render-architecture-proposal.md) for viewports, previews and deterministic rendering. Blender SVG icons are distributed under their upstream terms in `public/icons/blender/`.

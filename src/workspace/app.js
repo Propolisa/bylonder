@@ -19,8 +19,8 @@ import {
 import { publishRun, removeRun, APP_BASE } from "./module-host";
 import { sceneList, activeSceneId, setSceneData, switchScene, addScene, renameScene, removeScene, storedScenes } from "./scenes.js";
 import { preferences, openPreferences } from "./preferences.js";
-import { menuButton } from "../ui/menu.js";
-import { iconButton } from "../ui/icon.js";
+import { menuButton } from "../editors/interface/menu.js";
+import { iconButton } from "../editors/interface/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();

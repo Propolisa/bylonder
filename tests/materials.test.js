@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, MeshBuilder, StandardMaterial, Color3 } from '@babylonjs/core';
-import { createAnimationModel } from '../src/animation/model.js';
-import { address } from '../src/animation/model.js';
-import { createMaterialLibrary, materialId } from '../src/materials/library.js';
+import { createAnimationModel } from '../src/blenkernel/animation/model.js';
+import { address } from '../src/blenkernel/animation/model.js';
+import { createMaterialLibrary, materialId } from '../src/blenkernel/material/library.js';
 const engine = new NullEngine(), scene = new Scene(engine);
 const a = MeshBuilder.CreateBox('A', {}, scene), b = MeshBuilder.CreateBox('B', {}, scene);
 a.metadata = { wbId: 'a' }; b.metadata = { wbId: 'b' };

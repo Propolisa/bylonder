@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, Color4, Color3, FreeCamera, Vector3 } from '@babylonjs/core';
-import { createAnimationModel, address } from '../src/animation/model.js';
-import { unitSettings as units, format, parse } from '../src/properties/units.js';
-import { createSceneSettings } from '../src/scene/settings.js';
-import { createWorlds } from '../src/scene/world.js';
+import { createAnimationModel, address } from '../src/blenkernel/animation/model.js';
+import { unitSettings as units, format, parse } from '../src/blenkernel/unit.js';
+import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
+import { createWorlds } from '../src/blenkernel/scene/world.js';
 
 assert.equal(format(1.25, 'length'), '1.25 m');
 assert.equal(format(1500, 'length'), '1.5 km');
@@ -66,7 +66,7 @@ console.log('Scene: units, scene settings, world datablocks and Babylon mapping 
 
 // Playback sync, like Blender's scene.sync_mode: Frame Dropping follows real time, Play Every Frame steps.
 {
-  const { createSceneTime } = await import('../src/scene/time.js');
+  const { createSceneTime } = await import('../src/blenkernel/scene/time.js');
   const drop = createSceneTime({ fps: 24 });
   drop.play(); drop.tick(0); drop.tick(500);
   assert.equal(drop.frame, 13, 'half a second at 24 fps drops to frame 13');

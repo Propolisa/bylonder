@@ -6,9 +6,9 @@ import {
   Vector3,
   Quaternion,
 } from "@babylonjs/core";
-import { createSelection } from "../src/selection.js";
-import { snapshot, apply, createHistory } from "../src/storage.js";
-import { radialRatio, angleDelta, wrap } from "../src/gesture-math.js";
+import { createSelection } from "../src/editors/object/selection.js";
+import { snapshot, apply, createHistory } from "../src/editors/undo/storage.js";
+import { radialRatio, angleDelta, wrap } from "../src/windowmanager/gesture-math.js";
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-5, `${a} != ${b}`);
 close(radialRatio({ x: 100, y: 0 }, { x: 200, y: 0 }, { x: 0, y: 0 }), 2);
 close(radialRatio({ x: 0, y: 100 }, { x: 0, y: 50 }, { x: 0, y: 0 }), 0.5);

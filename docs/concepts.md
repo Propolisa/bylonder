@@ -107,7 +107,7 @@ Blender (Properties > Output, `properties_output.py`): Format (resolution X/Y, p
 
 Babylon: canvas size and `engine.setHardwareScalingLevel`; screenshots via `CreateScreenshotUsingRenderTarget`; video via `VideoRecorder` (WebM in browsers); no frame range concept outside animations.
 
-Ours: scene time (`src/scene/time.js`) holds frame current/start/end/step, fps, preview range and auto keying, as on Blender's Scene. Properties > Output has Format > Frame Rate (Blender presets plus Custom) and Frame Range. The Timeline has the preview range toggle; Start/End edit the preview range while it is on. Format also has resolution X, Y and %; Output has the file format and encoding; Post Processing has Sequencer, which renders the edit instead of the camera when it has strips. See [babylon-blender.md](babylon-blender.md).
+Ours: scene time (`src/blenkernel/scene/time.js`) holds frame current/start/end/step, fps, preview range and auto keying, as on Blender's Scene. Properties > Output has Format > Frame Rate (Blender presets plus Custom) and Frame Range. The Timeline has the preview range toggle; Start/End edit the preview range while it is on. Format also has resolution X, Y and %; Output has the file format and encoding; Post Processing has Sequencer, which renders the edit instead of the camera when it has strips. See [babylon-blender.md](babylon-blender.md).
 
 ## World
 

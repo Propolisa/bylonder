@@ -1,41 +1,41 @@
-import { mountNodeEditor } from './graphs/node-editor.js';
-import { createCompositorBackdrop } from './graphs/compositor-backdrop.js';
-import { createNodeContexts } from './graphs/contexts.js';
-import { registerObjects, objectRefs } from './animation/bindings.js';
-import { mountTimeline } from './animation/timeline.js';
-import { mountRuntimeLayout } from "./layout/runtime.js";
-import { createViewportTouch } from "./input/viewport-touch.js";
+import { mountNodeEditor } from './editors/space_node/node-editor.js';
+import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
+import { createNodeContexts } from './editors/space_node/contexts.js';
+import { registerObjects, objectRefs } from './blenkernel/animation/bindings.js';
+import { mountTimeline } from './editors/space_action/timeline.js';
+import { mountRuntimeLayout } from "./editors/screen/runtime.js";
+import { createViewportTouch } from "./windowmanager/input/viewport-touch.js";
 import { applyRenderSettings } from "./workspace/render-settings.js";
 import {
   createObjectActions,
   createObjectContextMenu,
-} from "./objects/object-actions";
-import { createObjectCommands } from "./objects/commands";
-import { createAddMesh } from "./objects/add-mesh";
-import { createOutliner } from "./objects/outliner";
-import { nodeId } from "./objects/identity";
-import { createMouseCapture } from "./mouse-capture";
+} from "./editors/object/object-actions";
+import { createObjectCommands } from "./editors/object/commands";
+import { createAddMesh } from "./editors/object/add-mesh";
+import { createOutliner } from "./editors/space_outliner/outliner";
+import { nodeId } from "./editors/object/identity";
+import { createMouseCapture } from "./windowmanager/mouse-capture";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
-import "./viewport.css";
-import { createViewportOverlays, createViewportStatus } from "./viewport-ui.js";
-import { createViews } from "./viewport/views.js";
-import { createView3D } from "./viewport/view3d.js";
+import "./editors/space_view3d/viewport.css";
+import { createViewportOverlays, createViewportStatus } from "./editors/space_view3d/viewport-ui.js";
+import { createViews } from "./editors/space_view3d/views.js";
+import { createView3D } from "./editors/space_view3d/view3d.js";
 import "@babylonjs/core/Debug/debugLayer";
 
-import { createEditor } from "./editor";
-import { createHistory, snapshot } from "./storage";
+import { createEditor } from "./editors/object/editor";
+import { createHistory, snapshot } from "./editors/undo/storage";
 import { createWorld } from "./runtime/world.js";
-import { createRenderHost } from "./render/host.js";
-import { outputSize, renderDefaults } from "./scene/render.js";
-import { timeDefaults } from "./scene/time.js";
+import { createRenderHost } from "./editors/render/host.js";
+import { outputSize, renderDefaults } from "./blenkernel/scene/render.js";
+import { timeDefaults } from "./blenkernel/scene/time.js";
 import { createSceneFrames } from "./sequencer/scene-frames.js";
 import { strips } from "./sequencer/sequence-editor.js";
 import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
-import { mountSequencerEditor, mountFileBrowser } from "./sequencer/editor.js";
-import { createUI } from "./ui";
+import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequencer/editor.js";
+import { createUI } from "./editors/interface/ui";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -97,7 +97,7 @@ const input = await new Promise((resolve) => {
   });
   send("ready", {});
 });
-// The engine renders into a hidden working canvas; every 3D Viewport is an engine view (src/viewport/views.js).
+// The engine renders into a hidden working canvas; every 3D Viewport is an engine view (src/editors/space_view3d/views.js).
 // User code gets the primary viewport's canvas, for camera.attachControl and input.
 const workCanvas = Object.assign(document.createElement("canvas"), { className: "engine-working-canvas" });
 workCanvas.setAttribute("aria-hidden", "true");

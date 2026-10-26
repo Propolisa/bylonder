@@ -11,13 +11,13 @@
   <text x="32" y="42" fill="#e6e6e6" font-size="15" font-weight="600">Bylonder (host, Vue, plain JS)</text>
 
   <rect x="32" y="60" width="408" height="92" rx="4" fill="#303030" stroke="#5a5a5a"/>
-  <text x="44" y="82" fill="#e6e6e6" font-weight="600">Animation model (src/animation/model.js)</text>
+  <text x="44" y="82" fill="#e6e6e6" font-weight="600">Animation model (src/blenkernel/animation/model.js)</text>
   <text x="44" y="102" fill="#bdbdbd">channels [id, path] with get / set</text>
   <text x="44" y="120" fill="#bdbdbd">one action, scene frame, fps, range</text>
   <text x="44" y="138" fill="#e0b85a">new: sample(ref, frame) pure, offset keys on strip move</text>
 
   <rect x="32" y="166" width="408" height="74" rx="4" fill="#303030" stroke="#5a5a5a"/>
-  <text x="44" y="188" fill="#e6e6e6" font-weight="600">Document slices (src/state/document.js)</text>
+  <text x="44" y="188" fill="#e6e6e6" font-weight="600">Document slices (src/blenkernel/document.js)</text>
   <text x="44" y="208" fill="#bdbdbd">materials, compositor, logic, channels</text>
   <text x="44" y="226" fill="#e0b85a">new: sequencer, markers, output</text>
 

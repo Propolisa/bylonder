@@ -3,9 +3,9 @@ import { NullEngine,Scene,MeshBuilder,Vector3,Matrix,VertexData,TransformNode } 
 import { arrayDefaults,arrayMatrices,realize,geometryBounds } from '../src/modifiers/array.js';
 import { instanceGraph } from '../src/modifiers/node-geometry.js';
 import { createModifierSystem,curve } from '../src/modifiers/stack.js';
-import { createAnimationModel } from '../src/animation/model.js';
-import { snapshot,apply,createHistory } from '../src/storage.js';
-import { mapArea,removeArea,validAreaTree } from '../src/layout/area-tree.js';
+import { createAnimationModel } from '../src/blenkernel/animation/model.js';
+import { snapshot,apply,createHistory } from '../src/editors/undo/storage.js';
+import { mapArea,removeArea,validAreaTree } from '../src/editors/screen/area-tree.js';
 const engine=new NullEngine(),scene=new Scene(engine),box=MeshBuilder.CreateBox('Cube',{size:2},scene);box.metadata={wbId:'cube'};
 const objects=[box];objects.scene=scene;const world={scene,objects,animation:createAnimationModel()};
 let history;const mods=createModifierSystem(world,{commit:()=>history?.commit(),notify:message=>{throw Error(message);}});history=createHistory(objects,()=>mods.refresh());

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createMouseCapture } from "../src/mouse-capture.js";
+import { createMouseCapture } from "../src/windowmanager/mouse-capture.js";
 const doc = new EventTarget(),
   win = new EventTarget();
 globalThis.document = doc;

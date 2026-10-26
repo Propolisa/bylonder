@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, MeshBuilder } from '@babylonjs/core';
-import { createAnimationModel } from '../src/animation/model.js';
-import { createCollections, MASTER } from '../src/scene/collections.js';
-import { createRenderSettings } from '../src/scene/render.js';
-import { createSceneTime } from '../src/scene/time.js';
+import { createAnimationModel } from '../src/blenkernel/animation/model.js';
+import { createCollections, MASTER } from '../src/blenkernel/scene/collections.js';
+import { createRenderSettings } from '../src/blenkernel/scene/render.js';
+import { createSceneTime } from '../src/blenkernel/scene/time.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const [a, b, c] = ['A', 'B', 'C'].map(n => { const m = MeshBuilder.CreateBox(n, {}, scene); m.metadata = { wbId: n }; return m; });

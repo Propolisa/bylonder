@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { createAnimationModel, address } from '../src/animation/model.js';
-import { createDocument, channelSlice } from '../src/state/document.js';
+import { createAnimationModel, address } from '../src/blenkernel/animation/model.js';
+import { createDocument, channelSlice } from '../src/blenkernel/document.js';
 const animation = createAnimationModel();
 const target = { roughness: 0.5, owned: 1 };
 animation.register({ id: 'material:a', path: 'roughness', label: 'Roughness', get: () => target.roughness, set: v => { target.roughness = v; } });

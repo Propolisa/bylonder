@@ -1,7 +1,7 @@
 // Offline render context: the hidden iframe behind Render Image and Render Animation. It runs the project
 // from a document snapshot on its own engine and canvas, on a virtual clock, so renders are deterministic
 // and the user's viewport is never disturbed (Blender renders from its own evaluated copy of the scene the
-// same way). The host (src/render/host.js) creates one per job and talks to window.bylonderRender.
+// same way). The host (src/editors/render/host.js) creates one per job and talks to window.bylonderRender.
 import { Engine, Matrix, Camera } from '@babylonjs/core';
 import { installVirtualClock } from './clock.js';
 import { createWorld } from '../runtime/world.js';

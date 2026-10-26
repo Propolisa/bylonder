@@ -1,6 +1,6 @@
 import { Matrix, Vector3, VertexData } from '@babylonjs/core';
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
-import { nodeId, deleted } from '../objects/identity.js';
+import { nodeId, deleted } from '../editors/object/identity.js';
 import { arrayDefinition, realize } from './array.js';
 export const modifierDefinitions=new Map([[arrayDefinition.id,arrayDefinition]]);
 export function registerModifier(definition){if(!definition.id||!definition.schema||!definition.evaluate)throw Error('Invalid modifier definition');modifierDefinitions.set(definition.id,definition);}

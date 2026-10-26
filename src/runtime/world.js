@@ -1,21 +1,21 @@
 import * as BABYLON from "@babylonjs/core";
 import { createModifierSystem, registerModifier } from "../modifiers/stack.js";
-import { geometryNodesDefinition } from "../graphs/geometry-nodes.js";
-import { createCompositor } from "../graphs/compositor.js";
-import { createParticles } from "../graphs/particles.js";
-import { createLogic } from "../graphs/logic.js";
-import { createDocument, channelSlice } from "../state/document.js";
-import { registerObjects } from "../animation/bindings.js";
-import { identify } from "../objects/identity.js";
-import { createSDK } from "../runtime-sdk.js";
+import { geometryNodesDefinition } from "../nodes/geometry-nodes.js";
+import { createCompositor } from "../compositor/compositor.js";
+import { createParticles } from "../nodes/particles.js";
+import { createLogic } from "../nodes/logic.js";
+import { createDocument, channelSlice } from "../blenkernel/document.js";
+import { registerObjects } from "../blenkernel/animation/bindings.js";
+import { identify } from "../editors/object/identity.js";
+import { createSDK } from "./sdk.js";
 import { RUN_CACHE } from "../workspace/module-host.js";
-import { createMaterialLibrary } from "../materials/library.js";
-import { createSceneSettings } from "../scene/settings.js";
-import { createWorlds } from "../scene/world.js";
-import { createRenderSettings } from "../scene/render.js";
-import { createCollections } from "../scene/collections.js";
+import { createMaterialLibrary } from "../blenkernel/material/library.js";
+import { createSceneSettings } from "../blenkernel/scene/settings.js";
+import { createWorlds } from "../blenkernel/scene/world.js";
+import { createRenderSettings } from "../blenkernel/scene/render.js";
+import { createCollections } from "../blenkernel/scene/collections.js";
 import { createSequenceEditor } from "../sequencer/sequence-editor.js";
-import { snapshot, apply } from "../storage.js";
+import { snapshot, apply } from "../editors/undo/storage.js";
 registerModifier(geometryNodesDefinition);
 
 // Builds the scene world from a run payload: runs the project's createScene, identifies editable objects

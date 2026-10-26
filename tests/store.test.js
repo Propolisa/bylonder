@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createStore } from "../src/store.js";
+import { createStore } from "../src/runtime/store.js";
 let jobs = new Map(),
   id = 0,
   calls = 0;

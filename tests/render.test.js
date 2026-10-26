@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { NullEngine, Scene, Matrix, Vector3 } from '@babylonjs/core';
-import { createAnimationModel } from '../src/animation/model.js';
-import { createRenderSettings, outputSize } from '../src/scene/render.js';
+import { createAnimationModel } from '../src/blenkernel/animation/model.js';
+import { createRenderSettings, outputSize } from '../src/blenkernel/scene/render.js';
 import { outputSpec, encodeSize, containers } from '../src/render/formats.js';
 import { installVirtualClock, seededRandom } from '../src/render/clock.js';
 import { halton, jitter, sampleTimes, jitterProjection, createAccumulator } from '../src/render/sampling.js';
