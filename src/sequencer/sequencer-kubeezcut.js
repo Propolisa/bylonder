@@ -42,6 +42,8 @@ export function createSequencerAdapter({ project, sequenceEditor, time, history,
     // The edit's frames and mixed audio for a render job; see openCompositor in kubeezcut-embed.
     async openCompositor(range) { return { label: 'Sequencer', ...(await (await load()).openCompositor(range)) }; },
     async setFormat(format) { if (loading) (await loading).setProjectFormat(format); },
+    get proxyScale() { return frames.proxyScale; },
+    setProxyScale: (scale) => frames.setProxyScale(scale),
     get loaded() { return !!loading; },
     async dispose() { if (loading) (await loading).disposeAll(); loading = null; },
   };

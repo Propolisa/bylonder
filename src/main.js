@@ -31,6 +31,7 @@ import { outputSize, renderDefaults } from "./scene/render.js";
 import { timeDefaults } from "./scene/time.js";
 import { createSceneFrames } from "./sequencer/scene-frames.js";
 import { strips } from "./sequencer/sequence-editor.js";
+import { hash } from "./workspace/opfs.js";
 import { createSequencerAdapter } from "./sequencer/sequencer-kubeezcut.js";
 import { mountSequencerEditor, mountFileBrowser } from "./sequencer/editor.js";
 import { createUI } from "./ui";
@@ -153,7 +154,7 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Development handle for debugging and browser tests; not present in production builds.
-if (import.meta.env.DEV) window.__bylonder = { world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; } };
+if (import.meta.env.DEV) window.__bylonder = { world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
@@ -369,22 +370,23 @@ const hostScenes = () => sceneRecords().map((record) => {
   const render = live ? world.renderSettings.state.render : { ...renderDefaults.render, ...record.overrides?.render?.render };
   return { id: record.id, name: live ? world.sceneSettings.state.name : record.name, frameStart: time.frameStart, frameEnd: time.frameEnd, ...outputSize(render) };
 });
-// Scene strips of the active scene re-render when its saved state changes, not on sequencer edits or seeks.
-let liveRevision = 0;
-const liveKey = () => {
-  const { sequenceEditor, ...overrides } = currentOverrides();
-  const { time, ...action } = animation.serialize();
-  return JSON.stringify([overrides, action, { ...time, frameCurrent: 0 }]);
+// A scene's revision hashes everything its frames depend on (code, builder, scene edits, animation; not the
+// current frame or the sequencer edit), so cached and baked scene frames stay valid until the scene changes.
+const revisions = new Map();
+const sceneState = ({ builder, overrides, animation: action }) => {
+  const { sequenceEditor, ...rest } = overrides || {};
+  return [input.code, builder, rest, action && { ...action, time: { ...action.time, frameCurrent: 0 } }];
 };
-let lastLiveKey = liveKey();
-const sceneFrames = createSceneFrames({ payload: scenePayload, revision: (id) => (id === activeSceneId ? liveRevision : 0) });
-sceneChanged = () => {
-  const key = liveKey();
-  if (key === lastLiveKey) return;
-  lastLiveKey = key;
-  liveRevision++;
+const sceneFrames = createSceneFrames({ payload: scenePayload, revision: (id) => revisions.get(id) ?? "" });
+const updateRevision = async (id, state) => {
+  const next = await hash(JSON.stringify(state));
+  if (revisions.get(id) === next) return;
+  revisions.set(id, next);
   sceneFrames.changed();
 };
+for (const record of sceneRecords()) if (record.id !== activeSceneId) updateRevision(record.id, sceneState(record));
+sceneChanged = () => updateRevision(activeSceneId, sceneState({ builder: input.scene?.builder, overrides: currentOverrides(), animation: animation.serialize() }));
+sceneChanged();
 const sequencerFormat = () => ({ ...outputSize(world.renderSettings.state.render), fps: animation.time.state.fps });
 const sequencerAdapter = createSequencerAdapter({
   project: () => ({ id: "bylonder:" + (input.projectId || "default"), name: world.sceneSettings.state.name, ...sequencerFormat() }),

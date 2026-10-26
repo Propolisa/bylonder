@@ -39,10 +39,13 @@ export function mountSequencerEditor(section, { adapter, header, notify }) {
   const viewMenu = menuButton('Sequencer & Preview', () => Object.entries(viewTypes).map(([id, [label, icon]]) => ({ label, icon, checked: () => state.viewType === id, run: () => { state.viewType = id; sync(); } })), { icon: 'sequence', className: 'bl-dropdown', title: 'View Type' });
   const viewLabel = viewMenu.querySelector('span:last-child');
   const sidebarButton = iconButton('menu_panel', 'Sidebar (N): strip properties', () => { state.sidebar = !state.sidebar; sync(); });
+  // Blender's Proxy Render Size: the size scene strips render at in the Preview.
+  const proxySizes = [0.25, 0.5, 0.75, 1];
+  const proxyMenu = menuButton('Proxy', () => proxySizes.map((scale) => ({ label: scale * 100 + '%', checked: () => adapter.proxyScale === scale, run: () => adapter.setProxyScale(scale) })), { className: 'bl-dropdown', title: 'Proxy Render Size for scene strips' });
   const spacer = Object.assign(document.createElement('span'), { className: 'spacer' });
   // Blender's header menus, filled from the adapter once KubeezCut has loaded.
   const menuSlot = Object.assign(document.createElement('span'), { className: 'vse-menus' });
-  header.replaceChildren(viewMenu, menuSlot, spacer, sidebarButton);
+  header.replaceChildren(viewMenu, menuSlot, spacer, proxyMenu, sidebarButton);
   const showMenus = async () => {
     const menus = await adapter.menus();
     menuSlot.replaceChildren(...Object.entries(menus).map(([label, items]) => menuButton(label, items)));
