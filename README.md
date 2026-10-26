@@ -6,6 +6,8 @@ Full-viewport Babylon.js workspace with modular reactive systems, generated Twea
 
 Node 20+: `npm ci`, `npm run dev`, `npm test`, `npm run build`. Serve `dist/` on any static host. No backend, remote fonts or credentials are needed at runtime. To fork, copy source, remove `.openai/hosting.json` (the original Site identity), rename the package and register a new Site if using Sites hosting.
 
+
+**Blender reference screenshots.** `tools/blender-reference/capture.sh Layout Compositing Video_Editing` runs Blender 5.2.3 headless on the CPU (Xvfb and Mesa llvmpipe; needs ImageMagick) and saves 1920 x 1080 screenshots of workspaces or app templates to `.blender-reference/shots/`, for comparing Bylonder's UI with Blender's. Blender downloads once into `.blender-reference/`, which is not committed.
 ## Data model
 
 Three layers, each with one contract and no knowledge of the others' internals:
