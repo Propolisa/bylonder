@@ -261,11 +261,13 @@ export function createObjectActions({
 }
 export function createObjectContextMenu(world, editor, registry) {
   const menu = document.querySelector("#object-context");
+  let openedBy = null;
   const close = () => {
     menu.hidden = true;
   };
   const open = (event, node) => {
     event.preventDefault();
+    openedBy = event;
     if (editor.modal) return;
     world.beforeSelection?.();
     if (node && world.objects.includes(node) && !editor.selection.has(node)) {
@@ -313,8 +315,9 @@ export function createObjectContextMenu(world, editor, registry) {
       Math.max(8, Math.min(event.clientY, innerHeight - height - 8)) + "px";
     menu.querySelector("button:not(:disabled)")?.focus();
   };
+  // The press that opened the menu reaches this listener too.
   const dismiss = (e) => {
-    if (!menu.contains(e.target)) close();
+    if (e !== openedBy && !menu.contains(e.target)) close();
   };
   const key = (e) => {
     if (menu.hidden) return;

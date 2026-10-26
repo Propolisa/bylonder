@@ -40,7 +40,7 @@ export function createMouseCapture(notify) {
       lost();
     }
   };
-  document.addEventListener("mousemove", move);
+  document.addEventListener("pointermove", move);
   document.addEventListener("pointerlockchange", lockChanged);
   document.addEventListener("pointerlockerror", failed);
   window.addEventListener("blur", blur);
@@ -74,7 +74,7 @@ export function createMouseCapture(notify) {
     release,
     dispose() {
       release();
-      document.removeEventListener("mousemove", move);
+      document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerlockchange", lockChanged);
       document.removeEventListener("pointerlockerror", failed);
       window.removeEventListener("blur", blur);

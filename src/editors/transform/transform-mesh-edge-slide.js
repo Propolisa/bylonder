@@ -2,6 +2,7 @@
 // transform_convert_mesh.cc): selected edge loops slide along the faces beside them.
 import { Vector3 } from '@babylonjs/core';
 import { snap } from '../../windowmanager/gesture-math.js';
+import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
 import { BM_edge_exists, BM_edge_is_boundary, BM_edge_is_manifold, BM_vert_is_edge_pair } from '../../bmesh/intern/bmesh-query.js';
 import { bmesh_disk_edge_next } from '../../bmesh/intern/bmesh-structure.js';
@@ -259,15 +260,12 @@ export function beginEdgeSlide(bm, object, view, mouse) {
       apply();
     },
     constrain() {},
-    key(e) {
-      const k = e.key.toLowerCase();
-      if (k === 'e') state.use_even = !state.use_even;
-      else if (k === 'f') state.flipped = !state.flipped;
-      else if (k === 'c') state.unclamp = !state.unclamp;
-      else return false;
-      apply();
-      return true;
-    },
+    // Hard-coded in handleEventEdgeSlide, so these have no modal keymap names.
+    keymap: createKeymap([
+      { keys: 'E', run: () => { state.use_even = !state.use_even; apply(); } },
+      { keys: 'F', run: () => { state.flipped = !state.flipped; apply(); } },
+      { keys: 'C', run: () => { state.unclamp = !state.unclamp; apply(); } },
+    ]),
     cancel() { for (const sv of data.sv) bm.v.co.set(sv.iloc, sv.v * 3); },
   };
 }

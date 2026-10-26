@@ -1,5 +1,6 @@
 import { Camera, Vector3 } from "@babylonjs/core";
-// Editor-camera navigation for one 3D Viewport: MMB orbit, Shift MMB pan, wheel zoom, numpad views.
+// Editor-camera navigation for one 3D Viewport: orbit, pan and wheel zoom (view3d.rotate, view3d.move and
+// view3d.zoom, bound by the window manager's 3D View keymap) and the numpad views.
 // enabled(): false while the view looks through the scene camera. onSync(): the view's label needs updating.
 export function createNavigation({ camera, engine, canvas, capture, enabled = () => true, onSync = () => {} }) {
   camera.attachControl(canvas, true);
@@ -22,15 +23,11 @@ export function createNavigation({ camera, engine, canvas, capture, enabled = ()
     updateBounds();
     onSync();
   };
-  const down = (e) => {
-    if (!enabled()) return;
-    if (e.pointerType === "touch") return;
-    if (e.button === 1 && !capture.active) {
-      e.preventDefault();
-
-      drag = true;
-      capture.begin({ x: e.clientX, y: e.clientY }, move, up, canvas);
-    }
+  // Drags with the mouse until the button that started it is released; Shift pans.
+  const begin = (event, panning) => {
+    if (!enabled() || capture.active) return;
+    drag = { pan: panning };
+    capture.begin({ x: event.x, y: event.y }, move, up, canvas);
   };
   const pan = (dx,dy) => {
     const scale=(2*camera.radius*Math.tan(camera.fov/2))/canvas.clientHeight;
@@ -38,37 +35,24 @@ export function createNavigation({ camera, engine, canvas, capture, enabled = ()
   };
   const orbit = (dx,dy) => {if(viewName!=="User"){viewName="User";sync();}camera.alpha-=dx*0.006;camera.beta=Math.max(0.001,Math.min(Math.PI-0.001,camera.beta-dy*0.006));};
   const zoom = factor => {camera.radius=Math.max(0.4,Math.min(200,camera.radius*factor));sync();};
-  const move = (dx,dy,event) => {if(drag)(event.shiftKey?pan:orbit)(dx,dy);};
+  const move = (dx,dy) => {if(drag)(drag.pan?pan:orbit)(dx,dy);};
   const up = () => {
     if (drag) {
       drag = null;
       capture.release();
     }
   };
-  const wheel = (e) => {
-    if (!enabled()) return;
-    e.preventDefault();
-    if (capture.active) return;
-    camera.radius = Math.max(
-      0.4,
-      Math.min(200, camera.radius * Math.exp(e.deltaY * 0.001)),
-    );
-    sync();
-  };
-  canvas.addEventListener("pointerdown", down, true);
-
   const mouseUp = (e) => {
     if (e.button === 1) up();
   };
-  const context = (e) => e.preventDefault();
-  window.addEventListener("mouseup", mouseUp);
-  canvas.addEventListener("pointerup", up);
-  canvas.addEventListener("pointercancel", up);
-  canvas.addEventListener("wheel", wheel, { passive: false });
-  canvas.addEventListener("contextmenu", context);
+  window.addEventListener("pointerup", mouseUp);
   return {
     sync,
     pan, orbit, zoom,
+    rotate: (event) => begin(event, false),
+    move: (event) => begin(event, true),
+    // view3d.zoom by one wheel step: `delta` 1 zooms in.
+    wheelZoom(delta) { if (enabled()) zoom(Math.exp(-delta * 0.1)); },
     updateBounds,
     get viewName() { return viewName; },
     opposite() { camera.alpha += Math.PI; camera.beta = Math.PI - camera.beta; viewName = "User"; sync(); },
@@ -105,13 +89,7 @@ export function createNavigation({ camera, engine, canvas, capture, enabled = ()
     dispose() {
       up();
       camera.detachControl();
-      canvas.removeEventListener("pointerdown", down, true);
-
-      window.removeEventListener("mouseup", mouseUp);
-      canvas.removeEventListener("pointerup", up);
-      canvas.removeEventListener("pointercancel", up);
-      canvas.removeEventListener("wheel", wheel);
-      canvas.removeEventListener("contextmenu", context);
+      window.removeEventListener("pointerup", mouseUp);
     },
   };
 }

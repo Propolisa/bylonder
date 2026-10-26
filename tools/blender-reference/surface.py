@@ -246,6 +246,24 @@ def dedupe_keys(nodes):
     return result
 
 
+# Modal keymaps of 3D View tools, listed under the 3D Viewport. Their items are modal events (propvalues such as
+# AXIS_X, which C names TFM_MODAL_AXIS_X), counted per keymap.
+VIEW3D_MODAL_KEYMAPS = ("Transform Modal Map", "Gesture Box", "View3D Gesture Circle", "Gesture Lasso", "Standard Modal Map",
+                        "Knife Tool Modal Map", "Bevel Modal Map", "Custom Normals Modal Map", "Transform Axis Target Modal Map",
+                        "View3D Rotate Modal", "View3D Move Modal", "View3D Zoom Modal", "View3D Dolly Modal", "View3D Fly Modal",
+                        "View3D Walk Modal", "View3D Placement Modal", "Generic Gizmo Tweak Modal Map")
+MODAL_IDS = set()
+
+
+def modal_keymap_node(name):
+    params, items = KEYMAPS[name]
+    children = []
+    for propvalue, event, _extra in items:
+        MODAL_IDS.add(propvalue)
+        children.append({"k": "key", "id": propvalue, "l": propvalue.replace("_", " ").title(), "x": key_text(event or {})})
+    return {"k": "keymap", "id": "keymap:" + name, "l": name, "c": dedupe_keys(children)}
+
+
 def keymaps_for(space):
     maps = [keymap_node(name) for name, (params, items) in KEYMAPS.items()
             if params.get("space_type") == space and not params.get("modal") and items]
@@ -313,11 +331,13 @@ for ui_type, label, menus in EDITORS:
             if popovers:
                 children.append({"k": "group", "id": ui_type + ":popovers", "l": "Header Popovers", "c": popovers})
         children += keymaps_for(space_type)
+        if ui_type == "VIEW_3D":
+            children.append({"k": "group", "id": "VIEW_3D:modal", "l": "Modal Keymaps", "c": [modal_keymap_node(n) for n in VIEW3D_MODAL_KEYMAPS if n in KEYMAPS]})
     editors.append({"k": "area", "id": ui_type, "l": label, "c": children})
 
 with open(out_path, "w") as f:
     ids = sorted({m + "." + o for m in dir(bpy.ops) for o in dir(getattr(bpy.ops, m))}
                  | {c.__name__ for c in bpy.types.Menu.__subclasses__() + bpy.types.Panel.__subclasses__() + bpy.types.Header.__subclasses__()}
-                 | {t for t in dir(bpy.types) if "_MT_" in t or "_PT_" in t or "_HT_" in t} | CALLED)
+                 | {t for t in dir(bpy.types) if "_MT_" in t or "_PT_" in t or "_HT_" in t} | CALLED | MODAL_IDS)
     json.dump({"blender": bpy.app.version_string, "ids": ids, "tree": editors}, f, separators=(",", ":"))
 print("surface written", out_path)

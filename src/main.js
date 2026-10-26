@@ -15,6 +15,7 @@ import { createAddMesh } from "./editors/object/add-mesh";
 import { createOutliner } from "./editors/space_outliner/outliner";
 import { nodeId } from "./editors/object/identity";
 import { createMouseCapture } from "./windowmanager/mouse-capture";
+import { createEventSystem } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
@@ -242,6 +243,7 @@ history = createHistory(world.objects, () => {
 },beforeCommit:()=>{world.collections.adopt();animation.captureEdits();}});
 animation.setCommit(()=>history.commit());
 const capture = createMouseCapture(notify);
+world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e) });
 const editor = createEditor(
   world,
   views,
@@ -440,81 +442,33 @@ function undoRedo(redo) {
   editor.reconcile();
   world.editMode.reload();
 }
-const key = (e) => {
-  // Keys over the Video Sequencer (and its menu commands, which run as synthetic key events) belong to it.
-  if (!e.isTrusted || (e.key !== "F12" && document.querySelector(".vse-area:hover"))) return;
-  if (
-    e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host') ||
-    help.open ||
-    creator.open
-  )
-    return;
-  if (!e.repeat && globalKeys(e)) return;
-  if (e.key === "Escape" && !editor.modal && !creator.pending && renderHost.escape()) { e.preventDefault(); return; }
-  if (e.target.closest(".timeline") || e.repeat || !activeView() || activeView().state.cameraView) return;
-  const k = e.key.toLowerCase(),
-    mod = e.ctrlKey || e.metaKey;
-  if (mod && e.shiftKey && k === "i") {
-    e.preventDefault();
-    inspector();
-    return;
-  }
-  if (editor.modal) {
-    if (k === "escape" || k === "enter") {
-      e.preventDefault();
-      editor.finish(k === "enter");
-      return;
-    }
-    if (editor.modal.session?.key?.(e)) {
-      e.preventDefault();
-      return;
-    }
-    // G again while moving components: Edge Slide (transform.translate's modal map).
-    if (k === "g" && !mod && world.editMode.active && editor.modal.type === "move") {
-      editor.start("edge_slide");
-      return;
-    }
-    if (!mod && ["x", "y", "z"].includes(k)) {
-      editor.axis(k, e.shiftKey);
-      return;
-    }
-    if (!(mod && k === "z")) return;
-  }
-  if (undoKeys(e)) return;
-  if (world.contextMenu.isOpen) return;
-  if (k === "escape" && creator.pending) {
-    e.preventDefault();
-    creator.finish(false);
-    return;
-  }
-  if (k === "enter" && creator.pending) {
-    e.preventDefault();
-    creator.finish();
-    return;
-  }
-  if (world.editMode.key(e)) return;
-  if (viewKeys(e) || (!world.editMode.active && world.objectActions.key(e))) return;
-  if (k === "escape") editor.setMode("select");
-};
+// Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
+// run as synthetic key events) or for an open dialog or menu.
+const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.timeline') && !help.open && !creator.open && !world.contextMenu.isOpen;
+const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const transform = (type) => () => { creator.finish(); editor.start(type); };
 const viewAxis = (name, opposite) => () => activeView().nav.view(name, opposite);
-const globalKeys = createKeymap([
-  { blender: "view3d.view_camera", keys: "Numpad 0", run: () => activeView()?.toggleCameraView() },
-  { blender: "render.render", keys: ["F12", "Ctrl F12"], run: (e) => (e.ctrlKey || e.metaKey ? renderHost.renderAnimation : renderHost.renderImage)() },
-  { blender: "render.view_show", keys: "F11", run: () => renderHost.viewRender() },
-], ["3D View", "Screen"]);
-const undoKeys = createKeymap([
-  { blender: "ed.undo", keys: "Ctrl Z", run: () => undoRedo(false) },
-  { blender: "ed.redo", keys: "Shift Ctrl Z", run: () => undoRedo(true) },
-], ["Screen"]);
-const viewKeys = createKeymap([
-  { blender: "screen.redo_last", keys: "F9", run: () => creator.reopen() },
+const inView = (event) => !!event.view;
+// The Add panel's own keys while a new object waits for its settings.
+const creatorKeys = createKeymap([
+  { keys: "ESC", poll: () => creator.pending, run: () => creator.finish(false) },
+  { keys: "RET", poll: () => creator.pending, run: () => creator.finish() },
+]);
+const objectModeKeys = createKeymap([
   { blender: "anim.keyframe_insert", keys: "I", run: () => insertKeys() },
   { blender: "anim.keyframe_delete_v3d", keys: "Alt I", run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
-  { blender: "screen.animation_play", keys: "Space", run: () => animation.play() },
   { blender: "transform.translate", keys: "G", run: transform("move") },
   { blender: "transform.rotate", keys: "R", run: transform("rotate") },
   { blender: "transform.resize", keys: "S", run: transform("scale") },
+  { keys: "ESC", run: () => renderHost.escape() || editor.setMode("select") },
+], ["Object Mode"]);
+const view3dKeys = createKeymap([
+  { blender: "view3d.view_camera", keys: "Numpad 0", run: () => activeView()?.toggleCameraView() },
+  { blender: "view3d.rotate", keys: "MIDDLEMOUSE", poll: inView, run: (event) => event.view.nav.rotate(event) },
+  { blender: "view3d.move", keys: "Shift MIDDLEMOUSE", poll: inView, run: (event) => event.view.nav.move(event) },
+  { blender: "view3d.zoom", keys: "WHEELINMOUSE", poll: inView, run: (event) => event.view.nav.wheelZoom(1) },
+  { blender: "view3d.zoom", keys: "WHEELOUTMOUSE", poll: inView, run: (event) => event.view.nav.wheelZoom(-1) },
   { blender: "view3d.view_persportho", keys: ["Numpad 5", "5"], run: () => activeView().nav.toggle() },
   { blender: "view3d.view_axis", keys: ["Numpad 1", "1"], run: viewAxis("front", false) },
   { blender: "view3d.view_axis", keys: ["Ctrl Numpad 1", "Ctrl 1"], run: viewAxis("front", true) },
@@ -523,9 +477,27 @@ const viewKeys = createKeymap([
   { blender: "view3d.view_axis", keys: ["Numpad 7", "7"], run: viewAxis("top", false) },
   { blender: "view3d.view_axis", keys: ["Ctrl Numpad 7", "Ctrl 7"], run: viewAxis("top", true) },
   { blender: "view3d.view_selected", keys: ["Numpad .", "F"], run: () => nav.frame(editor.selected) },
+], ["3D View"]);
+const screenKeys = createKeymap([
+  { blender: "ed.undo", keys: "Ctrl Z", run: () => undoRedo(false) },
+  { blender: "ed.redo", keys: "Shift Ctrl Z", run: () => undoRedo(true) },
+  { blender: "screen.redo_last", keys: "F9", run: () => creator.reopen() },
+  { blender: "screen.animation_play", keys: "Space", run: () => animation.play() },
+  { blender: "render.render", keys: ["F12", "Ctrl F12"], run: (event) => (event.ctrl ? renderHost.renderAnimation : renderHost.renderImage)() },
+  { blender: "render.view_show", keys: "F11", run: () => renderHost.viewRender() },
+  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
   { keys: "Shift /", run: () => help.showModal() },
-], ["3D View", "Object Mode", "Frames", "Screen"]);
-window.addEventListener("keydown", key);
+  { keys: "Shift Ctrl I", run: () => inspector() },
+], ["Screen", "Frames"]);
+// The handler stack below modal handlers: the mode, then the 3D View, then Screen. Through the scene camera only
+// the camera toggle and Screen keys work.
+const keyLayers = () => {
+  const view = activeView();
+  if (!view) return [screenKeys];
+  if (view.state.cameraView) return [view3dKeys, screenKeys];
+  return [creatorKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap, world.objectActions.key, objectModeKeys]), view3dKeys, screenKeys];
+};
+
 let last = 0;
 // Once per animation frame, before views decide whether to render.
 const perFrame = engine.onBeginFrameObservable.add(() => {
@@ -570,9 +542,9 @@ function dispose() {
   viewportDock.dispose();
   editor.dispose();
   capture.dispose();
+  world.wm.dispose();
   world.scene.dispose();
   world.engine.dispose();
-  window.removeEventListener("keydown", key);
   clearTimeout(toastTimer);
 }
 send("running", {});

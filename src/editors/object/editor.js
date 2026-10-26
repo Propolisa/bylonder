@@ -2,6 +2,7 @@ import { createSelection } from "./selection";
 import { GizmoManager, Matrix, Quaternion, Vector3 } from "@babylonjs/core";
 import { snapshot, apply } from "../undo/storage";
 import { radialRatio, angleDelta, snap, wrap } from "../../windowmanager/gesture-math";
+import { createKeymap } from "../../windowmanager/input/keymap.js";
 
 // Object-mode editing shared by every 3D Viewport: one selection, one tool mode, one gizmo set (drawn in every
 // view). Picking, projection and modal transforms use the view the gesture happens in (views.input).
@@ -20,9 +21,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
   const selected = selection.pivot;
   let mode = "select",
     modal = null;
-  let suppressContext = false;
   let last = { x: 0, y: 0 };
-  const attached = new Map(); // view -> detach()
   const cursor = document.querySelector("#gesture-cursor");
   const guide = document.querySelector("#gesture-guide");
   // World point to client coordinates in a view.
@@ -88,6 +87,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
   };
   const finish = (commit) => {
     if (!modal) return;
+    modal.removeHandler?.();
     if (modal.session) modal.session.finish(commit);
     else if (!commit) apply(objects, modal.before);
     else history.commit();
@@ -248,6 +248,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     };
     selection.begin();
     gizmos.attachToNode(null);
+    modal.removeHandler = world.wm?.addModal({ keymap: transformModalKeymap });
     if (!external) capture.begin(last, update, () => finish(false), view.canvas);
     showCursor();
     emitState();
@@ -260,59 +261,64 @@ export function createEditor(world, views, history, changed, notify, capture) {
     const session = world.editMode.transform(COMPONENT_TYPES[type], { camera: view.camera, canvas: view.canvas, project: (p) => project(p, view) }, last, options);
     if (!session) return;
     modal = { view, type, session, point: { ...session.start }, center: session.center };
+    modal.removeHandler = world.wm?.addModal({ keymap: (event) => transformModalKeymap(event) || !!session.keymap?.(event) });
     if (!external) capture.begin(last, update, () => finish(false), view.canvas);
     showCursor();
     emitState();
     notify(session.label + " · X/Y/Z axis · Shift X/Y/Z plane · Enter confirm · Esc cancel");
   };
+  // X, Y or Z constrains to that axis (again: none); with a plane, to the plane across it.
+  function axis(a, plane = false) {
+    if (modal?.session) {
+      modal.session.constrain(a, plane);
+      notify(modal.session.label + " · " + (modal.session.axis ? (plane ? "Shift " : "") + modal.session.axis.toUpperCase() : "screen"));
+    } else if (modal) {
+      modal.axis = modal.axis === a ? null : a;
+      rebase();
+      notify(modal.type + " · " + (modal.axis?.toUpperCase() || "screen") + " axis");
+    }
+  }
   const track = (e) => {
     if (!modal && !capture.active) last = { x: e.clientX, y: e.clientY };
   };
-  const down = (view, e) => {
-    if (e.pointerType === "touch" || view.state.cameraView) return;
+  // view3d.select in Object Mode: the object under the mouse, or nothing.
+  const selectPick = (event, toggle) => {
+    const view = event.view;
     view.canvas.focus();
-    if (modal) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      if (e.button === 2) suppressContext = true;
-      if (e.button === 0 || e.button === 2) finish(e.button === 0);
-      return;
+    // Let the utility-layer gizmo keep its own clicks.
+    if (mode !== "select" && selection.size) {
+      const p = views.pickPoint(view, event.x, event.y);
+      if (gizmos.utilityLayer.utilityLayerScene.pick(p.x, p.y, undefined, false, view.camera)?.hit) return;
     }
-    if (world.editMode?.active && world.editMode.pointerDown(view, e)) {
-      if (e.button === 2) suppressContext = true;
-      return;
-    }
-    if (e.button === 0) {
-      // Let the utility-layer gizmo consume its own click before scene selection.
-      if (mode !== "select" && selection.size) {
-        const p = views.pickPoint(view, e.clientX, e.clientY);
-        const hit = gizmos.utilityLayer.utilityLayerScene.pick(p.x, p.y, undefined, false, view.camera);
-        if (hit?.hit) return;
-      }
-      const pick = pickIn(view, e.clientX, e.clientY);
-      if (pick?.hit) {
-        let target = owner(pick.pickedMesh);
-        while (
-          target.parent?.metadata?.group &&
-          !target.parent.metadata.wbDeleted
-        )
-          target = target.parent;
-        select(target, e.shiftKey);
-      } else select(null, e.shiftKey);
-    }
+    const pick = pickIn(view, event.x, event.y);
+    let target = pick?.hit ? owner(pick.pickedMesh) : null;
+    while (target?.parent?.metadata?.group && !target.parent.metadata.wbDeleted) target = target.parent;
+    select(target, toggle);
   };
-  const context = (view, e) => {
-    e.preventDefault();
-    if (suppressContext) {
-      suppressContext = false;
-      return;
-    }
-    if (view.state.cameraView || world.editMode?.active) return;
-    const pick = pickIn(view, e.clientX, e.clientY);
+  const contextMenu = (event) => {
+    const pick = pickIn(event.view, event.x, event.y);
     let target = owner(pick?.pickedMesh);
     while (target?.parent?.metadata?.group) target = target.parent;
-    world.contextMenu?.open(e, target);
+    world.contextMenu?.open(event.native, target);
   };
+  const inView = (event) => !!event.view && !event.view.state.cameraView && !world.editMode?.active;
+  const selectKeymap = createKeymap([
+    { blender: "view3d.select", keys: "LEFTMOUSE CLICK", poll: inView, run: (event) => selectPick(event, false) },
+    { blender: "view3d.select", keys: "Shift LEFTMOUSE CLICK", poll: inView, run: (event) => selectPick(event, true) },
+  ], ["3D View"]);
+  const contextKeymap = createKeymap([
+    { blender: "VIEW3D_MT_object_context_menu", keys: "RIGHTMOUSE", poll: inView, run: contextMenu },
+  ], ["Object Mode"]);
+  // The Transform Modal Map: confirm, cancel, axis and plane constraints, and G again for vertex or edge slide.
+  const transformModalKeymap = createKeymap([
+    { blender: "CONFIRM", keys: ["Any LEFTMOUSE", "Any RET", "Any NUMPAD_ENTER", "Any SPACE"], run: () => finish(true) },
+    { blender: "CANCEL", keys: ["Any RIGHTMOUSE", "Any ESC"], run: () => finish(false) },
+    ...["X", "Y", "Z"].flatMap((a) => [
+      { blender: "AXIS_" + a, keys: a, run: () => axis(a.toLowerCase(), false) },
+      { blender: "PLANE_" + a, keys: "Shift " + a, run: () => axis(a.toLowerCase(), true) },
+    ]),
+    { blender: "VERT_EDGE_SLIDE", keys: "G", poll: () => !!world.editMode?.active && modal?.type === "move", run: () => start("edge_slide") },
+  ], ["Transform Modal Map"]);
   window.addEventListener("mousemove", track);
   setMode("select");
   return {
@@ -331,13 +337,11 @@ export function createEditor(world, views, history, changed, notify, capture) {
       const hit=pickIn(view,x,y);
       let node=owner(hit?.pickedMesh);while(node?.parent?.metadata?.group&&!node.parent.metadata.wbDeleted)node=node.parent;return node;
     },
-    // Listens for selection clicks and the context menu on a view's canvas.
+    // Object Mode keymaps: click select (3D View) and the context menu (Object Mode).
+    keymap: (event) => selectKeymap(event) || contextKeymap(event),
+    // A view going away ends a transform running in it.
     attach(view) {
-      const onDown = (e) => down(view, e), onContext = (e) => context(view, e);
-      view.canvas.addEventListener("pointerdown", onDown, true);
-      view.canvas.addEventListener("contextmenu", onContext);
-      attached.set(view, () => { view.canvas.removeEventListener("pointerdown", onDown, true); view.canvas.removeEventListener("contextmenu", onContext); });
-      return () => { attached.get(view)?.(); attached.delete(view); if (modal?.view === view) finish(false); };
+      return () => { if (modal?.view === view) finish(false); };
     },
     setMode,
     start,
@@ -363,26 +367,10 @@ export function createEditor(world, views, history, changed, notify, capture) {
         changed();
       }
     },
-    axis(a, plane = false) {
-      if (modal?.session) {
-        modal.session.constrain(a, plane);
-        notify(modal.session.label + " · " + (modal.session.axis ? (plane ? "Shift " : "") + modal.session.axis.toUpperCase() : "screen"));
-      } else if (modal) {
-        modal.axis = modal.axis === a ? null : a;
-        rebase();
-        notify(
-          modal.type +
-            " · " +
-            (modal.axis?.toUpperCase() || "screen") +
-            " axis",
-        );
-      }
-    },
+    axis,
     dispose() {
       finish(false);
       window.removeEventListener("mousemove", track);
-      for (const detach of attached.values()) detach();
-      attached.clear();
       gizmos.dispose();
       selection.dispose();
     },
