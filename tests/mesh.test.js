@@ -41,7 +41,7 @@ console.log('Mesh: draw cache maps Blender axes onto Babylon with outward windin
 // Edit Mode operators on Blender's own selection, compared with Blender's result.
 import { meshOperators } from '../src/editors/mesh/editmesh-tools.js';
 import { BM_elem_select_set, BM_mesh_select_mode_flush, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
-import { BM_VERT, BM_EDGE, BM_FACE } from '../src/bmesh/intern/bmesh-class.js';
+import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SEAM } from '../src/bmesh/intern/bmesh-class.js';
 const SELECT = { VERT: [SCE_SELECT_VERTEX, BM_VERT], EDGE: [SCE_SELECT_EDGE, BM_EDGE], FACE: [SCE_SELECT_FACE, BM_FACE] };
 // Order-free form of a Mesh: vertices, edges and faces (winding kept) named by rounded position.
 function geometry(positions, edges, face_offsets, corner_verts) {
@@ -63,8 +63,9 @@ let edited = 0, geometric = 0;
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
   if (!fixture.edit) continue;
-  const name = file.replace('.json', ''), { select_mode, select, operator, props, move } = fixture.edit;
+  const name = file.replace('.json', ''), { select_mode, select, operator, props, move, seams = [] } = fixture.edit;
   const bm = BM_mesh_bm_from_me(primitive_add(fixture.operator, fixture.props));
+  for (const e of seams) bm.e.hflag[e] |= BM_ELEM_SEAM;
   const [mode, htype] = SELECT[select_mode];
   bm.selectmode = mode;
   for (const i of select) BM_elem_select_set(bm, htype, i, true);

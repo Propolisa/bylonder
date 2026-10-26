@@ -1,13 +1,14 @@
 // Edit Mode selection (editmesh_select.cc): finding the element under the mouse and the select operators.
 // `view` projects Blender-axis local coordinates to screen pixels and tells whether a point is hidden behind the
 // mesh: { project(co) -> [x, y, depth] | null, occluded(co) -> bool, faceAt(x, y) -> face | -1, xray }.
-import { BMW_edgeloop, BMW_edgering, BMW_faceloop, BMW_edgeboundary } from '../../bmesh/intern/bmesh-walkers.js';
-import { BM_edge_is_boundary } from '../../bmesh/intern/bmesh-query.js';
-import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
+import { BMW_edgeloop, BMW_edgering, BMW_faceloop, BMW_edgeboundary, BMW_island, BMW_vert_shell, BMW_loop_shell_wire } from '../../bmesh/intern/bmesh-walkers.js';
+import { BM_edge_is_boundary, BM_edge_is_contiguous, BM_FACES_OF_EDGE } from '../../bmesh/intern/bmesh-query.js';
+import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_SEAM, BM_ELEM_SMOOTH, BM_elem_flag_test, BMO_flag_test, BMO_flag_enable } from '../../bmesh/intern/bmesh-class.js';
+import { BMO_op_callf } from '../../bmesh/intern/bmesh-operators.js';
 import {
   SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_select_set, BM_mesh_select_mode_flush, BM_mesh_select_mode_set,
   BM_mesh_elem_hflag_disable_all, BM_mesh_elem_hflag_enable_all, BM_select_history_store, BM_select_history_remove,
-  BM_select_history_active_get, BM_select_history_clear,
+  BM_select_history_active_get, BM_select_history_clear, BM_vert_select_set, BM_edge_select_set, BM_face_select_set, BM_mesh_select_mode_flush_ex,
 } from '../../bmesh/intern/bmesh-marking.js';
 
 // ED_view3d_select_dist_px.
@@ -166,4 +167,90 @@ export function edbm_select_loop(bm, eed, { extend = false, deselect = false, to
   }
   BM_mesh_select_mode_flush(bm);
   if (select && bm.selectmode & SCE_SELECT_EDGE) BM_select_history_store(bm, BM_EDGE, eed);
+}
+
+// select_linked_delimit_test: whether an edge stops the linked walk.
+const DELIMITS = {
+  SEAM: (bm, e) => BM_elem_flag_test(bm.e, e, BM_ELEM_SEAM),
+  SHARP: (bm, e) => !BM_elem_flag_test(bm.e, e, BM_ELEM_SMOOTH),
+  NORMAL: (bm, e) => !BM_edge_is_contiguous(bm, e),
+  MATERIAL: (bm, e) => new Set(BM_FACES_OF_EDGE(bm, e).map((f) => bm.f.mat_nr[f])).size > 1,
+};
+const BMO_ELE_TAG = 1;
+// USE_LINKED_SELECT_DEFAULT_HACK: without a delimit given, faces stop at seams and verts and edges do not.
+const delimitDefault = (selectmode, delimit) => delimit ?? (selectmode & (SCE_SELECT_VERTEX | SCE_SELECT_EDGE) ? [] : ['SEAM']);
+
+// select_linked_delimit_begin: tags the edges the walk may cross. Runs `fn` inside its own tool flag layer.
+function withDelimit(bm, delimit, fn) {
+  const tests = delimit.map((d) => DELIMITS[d]).filter(Boolean);
+  return BMO_op_callf(bm, () => {
+    if (tests.length) BM_ITER_MESH(bm.e, (e) => { if (!tests.some((test) => test(bm, e))) BMO_flag_enable(bm.e, e, BMO_ELE_TAG); });
+    return fn(tests.length ? BMO_ELE_TAG : 0);
+  });
+}
+
+// The selection a linked walk from a vert or edge gives: delimited walks select the verts (or edges) of the loops
+// they reach and the wire edges, plain walks every connected edge.
+function selectLinkedFrom(bm, htype, ele, select, mask_edge) {
+  const walk = { htype: htype === BM_VERT ? 'v' : 'e', mask_edge, test_hidden: true };
+  if (!mask_edge) return BMW_vert_shell(bm, ele, walk).forEach((e) => BM_edge_select_set(bm, e, select));
+  const { loops, edges } = BMW_loop_shell_wire(bm, ele, walk);
+  for (const l of loops) htype === BM_VERT ? BM_vert_select_set(bm, bm.l.v[l], select) : BM_edge_select_set(bm, bm.l.e[l], select);
+  for (const e of edges) BM_edge_select_set(bm, e, select);
+}
+
+// mesh.select_linked: everything connected to the selection, stopping at the `delimit` edges.
+export function edbm_select_linked_exec(bm, { delimit } = {}) {
+  delimit = delimitDefault(bm.selectmode, delimit);
+  withDelimit(bm, delimit, (mask_edge) => {
+    const tagged = (pool, list) => { const out = []; BM_ITER_MESH(bm[pool], (i) => { if (list(i)) out.push(i); }); return out; };
+    const selected = (pool) => (i) => BM_elem_flag_test(bm[pool], i, BM_ELEM_SELECT);
+    if (bm.selectmode & SCE_SELECT_VERTEX) {
+      const start = new Set(tagged('v', selected('v')));
+      // Delimited edges next to selected faces leave their verts out, so isolated verts can still step off.
+      if (mask_edge) BM_ITER_MESH(bm.e, (e) => { if (!BMO_flag_test(bm.e, e, mask_edge) && BM_FACES_OF_EDGE(bm, e).some(selected('f'))) { start.delete(bm.e.v1[e]); start.delete(bm.e.v2[e]); } });
+      BM_ITER_MESH(bm.v, (v) => {
+        if (!start.has(v)) return;
+        if (mask_edge) {
+          const { loops, edges } = BMW_loop_shell_wire(bm, v, { mask_edge, test_hidden: true });
+          for (const l of loops) { BM_vert_select_set(bm, bm.l.v[l], true); start.delete(bm.l.v[l]); }
+          for (const e of edges) { BM_edge_select_set(bm, e, true); start.delete(bm.e.v1[e]); start.delete(bm.e.v2[e]); }
+        } else for (const e of BMW_vert_shell(bm, v, { test_hidden: true })) BM_edge_select_set(bm, e, true);
+      });
+      BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
+    } else if (bm.selectmode & SCE_SELECT_EDGE) {
+      const start = new Set(tagged('e', (e) => selected('e')(e) && (!mask_edge || BMO_flag_test(bm.e, e, mask_edge) || !BM_FACES_OF_EDGE(bm, e).some(selected('f')))));
+      BM_ITER_MESH(bm.e, (e) => {
+        if (!start.has(e)) return;
+        if (mask_edge) {
+          const { loops, edges } = BMW_loop_shell_wire(bm, e, { htype: 'e', mask_edge, test_hidden: true });
+          for (const l of loops) { BM_edge_select_set(bm, bm.l.e[l], true); BM_edge_select_set(bm, bm.l.e[bm.l.prev[l]], true); start.delete(bm.l.e[l]); }
+          for (const w of edges) { BM_edge_select_set(bm, w, true); start.delete(w); }
+        } else for (const w of BMW_vert_shell(bm, e, { htype: 'e', test_hidden: true })) BM_edge_select_set(bm, w, true);
+      });
+      BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
+    } else {
+      const start = new Set(tagged('f', selected('f')));
+      BM_ITER_MESH(bm.f, (f) => {
+        if (!start.has(f)) return;
+        for (const w of BMW_island(bm, f, { mask_edge, test_hidden: true })) { BM_face_select_set(bm, w, true); start.delete(w); }
+      });
+    }
+  });
+}
+
+// mesh.select_linked_pick: everything connected to the element under the mouse, or with `deselect` deselected.
+export function edbm_select_linked_pick(bm, view, mouse, { deselect = false, delimit } = {}) {
+  if (!bm.e.size) return false;
+  const hit = EDBM_unified_findnearest(bm, view, mouse);
+  if (!hit) return false;
+  delimit = delimitDefault(bm.selectmode, delimit);
+  withDelimit(bm, delimit, (mask_edge) => {
+    if (hit.htype === BM_FACE) for (const f of BMW_island(bm, hit.ele, { mask_edge, test_hidden: true })) BM_face_select_set(bm, f, !deselect);
+    else {
+      selectLinkedFrom(bm, hit.htype, hit.ele, !deselect, mask_edge);
+      BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
+    }
+  });
+  return true;
 }

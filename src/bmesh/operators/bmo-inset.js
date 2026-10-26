@@ -3,8 +3,7 @@
 import { BM_ITER_MESH, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
 import { BM_edge_create, BM_elem_attrs_copy, BM_vert_splice, bmesh_kernel_edge_separate, bmesh_kernel_vert_separate } from '../intern/bmesh-core.js';
 import { BM_face_create_verts } from '../intern/bmesh-construct.js';
-import { BM_edge_is_boundary, BM_edge_other_vert, BM_edge_other_loop, BM_ITER_LOOPS_OF_VERT } from '../intern/bmesh-query.js';
-import { bmesh_disk_edge_next } from '../intern/bmesh-structure.js';
+import { BM_edge_is_boundary, BM_edge_other_vert, BM_edge_other_loop, BM_ITER_LOOPS_OF_VERT, BM_EDGES_OF_VERT } from '../intern/bmesh-query.js';
 import { BM_mesh_normals_update } from '../intern/bmesh-mesh-normals.js';
 import { sub_v3, add_v3, mul_v3_fl, dot_v3, cross_v3, len_v3, normalize_v3 } from '../../blenlib/math-geom.js';
 
@@ -12,7 +11,6 @@ const ELE_NEW = 1;
 const SMALL_NUMBER = 1e-8;
 const co = (bm, v) => Array.from(bm.v.co.subarray(v * 3, v * 3 + 3));
 const fno = (bm, f) => Array.from(bm.f.no.subarray(f * 3, f * 3 + 3));
-const diskEdges = (bm, v) => { const out = [], first = bm.v.e[v]; if (first < 0) return out; let e = first; do out.push(e); while ((e = bmesh_disk_edge_next(bm, e, v)) !== first); return out; };
 const shell_v3v3_normalized_to_dist = (a, b) => { const c = Math.abs(dot_v3(a, b)); return c < SMALL_NUMBER ? 1 : 1 / c; };
 function shell_v3v3_mid_normalized_to_dist(a, b) {
   const ab = add_v3(a, b), len = len_v3(ab);
@@ -109,7 +107,7 @@ export function bmo_inset_region_exec(bm, faces, {
         if (use_edge_rail) vert_coords.set(v_split, co(bm, v_split));
         const vecpair = [];
         let tot = 0;
-        for (const e of diskEdges(bm, v_split)) {
+        for (const e of BM_EDGES_OF_VERT(bm, v_split)) {
           if (BM_elem_flag_test(bm.e, e, BM_ELEM_TAG) && bm.e.l[e] >= 0 && BM_elem_flag_test(bm.f, l.f[bm.e.l[e]], BM_ELEM_TAG)) {
             if (tot < 2) vecpair[tot] = bm.e.index[e];
             tot++;
@@ -196,7 +194,7 @@ export function bmo_inset_region_exec(bm, faces, {
     }
     const averageLength = (v) => {
       let len = 0, tot = 0;
-      for (const e of diskEdges(bm, v)) if (bm.e.index[e] !== -1) { len += edge_info[bm.e.index[e]].length; tot++; }
+      for (const e of BM_EDGES_OF_VERT(bm, v)) if (bm.e.index[e] !== -1) { len += edge_info[bm.e.index[e]].length; tot++; }
       return tot ? len / tot : -1;
     };
     let vert_lengths = null;
@@ -224,7 +222,7 @@ export function bmo_inset_region_exec(bm, faces, {
             const vl = vert_lengths.get(v);
             vl.length_accum /= vl.count;
             vl.count = -1;
-            for (const e of diskEdges(bm, v)) {
+            for (const e of BM_EDGES_OF_VERT(bm, v)) {
               if (!BM_elem_flag_test(bm.e, e, BM_ELEM_TAG)) continue;
               const v_other = BM_edge_other_vert(bm, e, v);
               if (!BM_elem_flag_test(bm.v, v_other, BM_ELEM_TAG)) continue;

@@ -88,6 +88,22 @@ export function BM_mesh_select_mode_flush_ex(bm, selectmode) {
 }
 export const BM_mesh_select_mode_flush = (bm) => BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
 
+// Drops selection the mode cannot show: in edge mode verts come only from selected edges, in face mode verts and
+// edges only from selected faces.
+export function BM_mesh_select_mode_clean_ex(bm, selectmode) {
+  if (selectmode & SCE_SELECT_VERTEX) return;
+  BM_ITER_MESH(bm.v, (v) => BM_elem_flag_disable(bm.v, v, BM_ELEM_SELECT));
+  bm.totvertsel = 0;
+  if (selectmode & SCE_SELECT_EDGE) {
+    BM_ITER_MESH(bm.e, (e) => { if (BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT)) { BM_vert_select_set(bm, bm.e.v1[e], true); BM_vert_select_set(bm, bm.e.v2[e], true); } });
+    return;
+  }
+  BM_ITER_MESH(bm.e, (e) => BM_elem_flag_disable(bm.e, e, BM_ELEM_SELECT));
+  bm.totedgesel = 0;
+  BM_ITER_MESH(bm.f, (f) => { if (BM_elem_flag_test(bm.f, f, BM_ELEM_SELECT)) loopsOf(bm, f, (lp) => BM_edge_select_set(bm, bm.l.e[lp], true)); });
+}
+export const BM_mesh_select_mode_clean = (bm) => BM_mesh_select_mode_clean_ex(bm, bm.selectmode);
+
 export function BM_mesh_select_mode_set(bm, selectmode) {
   bm.selectmode = selectmode;
   if (selectmode & SCE_SELECT_EDGE && !(selectmode & SCE_SELECT_VERTEX)) {

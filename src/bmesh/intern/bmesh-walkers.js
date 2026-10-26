@@ -1,12 +1,17 @@
 // Walkers (bmesh_walkers.cc, bmesh_walkers_impl.cc) as functions returning the elements in walk order.
 import { BMO_flag_test, BM_ELEM_HIDDEN } from './bmesh-class.js';
+import { BM_EDGES_OF_VERT, BM_FACES_OF_EDGE, BM_ITER_LOOPS_OF_VERT, BM_edge_other_vert } from './bmesh-query.js';
 
-// BMW_ISLAND and BMW_ISLAND_MANIFOLD: faces connected to `start` through edges, breadth first. `faceMask` is a
-// tool flag a face needs to be walked onto.
-export function BMW_island(bm, start, faceMask, only_manifold = false) {
-  const { l } = bm;
-  const walkable = (f) => !faceMask || BMO_flag_test(bm.f, f, faceMask);
-  if (!walkable(start)) return [];
+// The walker masks (bmw_mask_check_*): a tool flag an element needs, and with `test_hidden` not hidden.
+const masks = (bm, { mask_vert = 0, mask_edge = 0, mask_face = 0, test_hidden = false }) => {
+  const check = (pool, mask) => (i) => !(test_hidden && pool.hflag[i] & BM_ELEM_HIDDEN) && (!mask || BMO_flag_test(pool, i, mask));
+  return { vert: check(bm.v, mask_vert), edge: check(bm.e, mask_edge), face: check(bm.f, mask_face) };
+};
+
+// BMW_ISLAND and BMW_ISLAND_MANIFOLD: faces connected to `start` through edges, breadth first.
+export function BMW_island(bm, start, { only_manifold = false, ...options } = {}) {
+  const { l } = bm, check = masks(bm, options);
+  if (!check.face(start)) return [];
   const visited = new Set([start]), queue = [start], order = [];
   while (queue.length) {
     const cur = queue.shift();
@@ -14,15 +19,16 @@ export function BMW_island(bm, start, faceMask, only_manifold = false) {
     const first = bm.f.l_first[cur];
     let it = first;
     do {
+      if (!check.edge(l.e[it])) continue;
       if (only_manifold && l.radial_next[it] !== it) {
         let count = 1, r = l.radial_next[it];
-        do if (walkable(l.f[r]) && ++count === 3) break; while ((r = l.radial_next[r]) !== it);
+        do if (check.face(l.f[r]) && ++count === 3) break; while ((r = l.radial_next[r]) !== it);
         if (count !== 2) continue;
       }
       let r = it;
       while ((r = l.radial_next[r]) !== it) {
         const f = l.f[r];
-        if (!walkable(f) || f === cur || visited.has(f)) continue;
+        if (!check.face(f) || f === cur || visited.has(f)) continue;
         visited.add(f);
         queue.push(f);
         break;
@@ -30,6 +36,74 @@ export function BMW_island(bm, start, faceMask, only_manifold = false) {
     } while ((it = l.next[it]) !== first);
   }
   return order;
+}
+
+// BMW_VERT_SHELL: the edges connected to a vert (or edge) through verts.
+export function BMW_vert_shell(bm, start, { htype = 'v', ...options } = {}) {
+  const check = masks(bm, options), visited = new Set(), stack = [];
+  const visitEdge = (e) => { if (!visited.has(e) && check.edge(e)) { visited.add(e); stack.push(e); } };
+  if (htype === 'v') BM_EDGES_OF_VERT(bm, start).forEach(visitEdge);
+  else visitEdge(start);
+  const order = [];
+  while (stack.length) {
+    const e = stack.pop();
+    order.push(e);
+    for (const v of [bm.e.v1[e], bm.e.v2[e]]) BM_EDGES_OF_VERT(bm, v).forEach(visitEdge);
+  }
+  return order;
+}
+
+// BMW_LOOP_SHELL_WIRE: the loops of the faces connected through edges, and the wire edges reached on the way, as
+// { loops, edges }. Starts at a vert or an edge.
+export function BMW_loop_shell_wire(bm, start, { htype = 'v', ...options } = {}) {
+  const { l } = bm, check = masks(bm, options), test_hidden = !!options.test_hidden;
+  const loops = new Set(), alt = { v: new Set(), e: new Set() }, stack = [], out = { loops: [], edges: [] };
+  const is_wire = (e) => bm.e.l[e] < 0 || (test_hidden && BM_FACES_OF_EDGE(bm, e).every((f) => bm.f.hflag[f] & BM_ELEM_HIDDEN));
+  const visitLoop = (lp) => { if (!loops.has(lp) && check.face(l.f[lp])) { loops.add(lp); stack.push(['l', lp]); } };
+  const visitEdgeWire = (e) => { if (!alt.e.has(e) && check.edge(e)) { alt.e.add(e); stack.push(['e', e]); } };
+  const visitVert = (v, e_from = -1) => {
+    if (alt.v.has(v) || !check.vert(v)) return;
+    for (const e of BM_EDGES_OF_VERT(bm, v)) {
+      if (!is_wire(e) || e === e_from) continue;
+      visitEdgeWire(e);
+      BM_ITER_LOOPS_OF_VERT(bm, BM_edge_other_vert(bm, e, v), visitLoop);
+    }
+    alt.v.add(v);
+  };
+  const stepLoop = (lp) => {
+    visitLoop(l.next[lp]);
+    visitLoop(l.prev[lp]);
+    for (const e of [l.e[lp], l.e[l.prev[lp]]]) {
+      if (!check.edge(e)) continue;
+      const first = bm.e.l[e];
+      let it = first;
+      do { const radial = l.v[it] === l.v[lp] ? it : l.next[it]; if (radial !== lp) visitLoop(radial); } while ((it = l.radial_next[it]) !== first);
+    }
+  };
+  if (htype === 'v') {
+    BM_ITER_LOOPS_OF_VERT(bm, start, visitLoop);
+    if (bm.v.e[start] >= 0) visitVert(start);
+  } else {
+    const first = bm.e.l[start], radial = (fn) => { let it = first; if (first >= 0) do fn(it); while ((it = l.radial_next[it]) !== first); };
+    radial(visitLoop);
+    if (check.edge(start)) {
+      visitVert(bm.e.v1[start]);
+      visitVert(bm.e.v2[start]);
+    } else radial((it) => { visitLoop(it); visitLoop(l.next[it]); });
+  }
+  while (stack.length) {
+    const [kind, ele] = stack.pop();
+    if (kind === 'l') {
+      stepLoop(ele);
+      visitVert(l.v[ele]);
+      out.loops.push(ele);
+    } else {
+      visitVert(bm.e.v1[ele], ele);
+      visitVert(bm.e.v2[ele], ele);
+      out.edges.push(ele);
+    }
+  }
+  return out;
 }
 
 // BMW_EDGERING: edges across quads (or even n-gons) from `e_start`, in Blender's order: the walk first rewinds to

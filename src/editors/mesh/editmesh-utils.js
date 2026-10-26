@@ -1,6 +1,8 @@
 // Edit Mode helpers (editmesh_utils.cc).
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable } from '../../bmesh/intern/bmesh-class.js';
-import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_hide_set, BM_elem_select_set, BM_mesh_select_mode_flush_ex, BM_mesh_elem_hflag_disable_all } from '../../bmesh/intern/bmesh-marking.js';
+import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_hide_set, BM_elem_select_set, BM_mesh_select_mode_flush_ex, BM_mesh_elem_hflag_disable_all, BM_vert_select_set, BM_edge_select_set, BM_edge_select_set_noflush, BM_face_select_set, BM_face_select_set_noflush, BM_mesh_select_mode_clean_ex } from '../../bmesh/intern/bmesh-marking.js';
+import { BMO_op_callf } from '../../bmesh/intern/bmesh-operators.js';
+import { bmo_region_extend_exec } from '../../bmesh/operators/bmo-utils.js';
 import { BM_edge_is_wire } from '../../bmesh/intern/bmesh-query.js';
 
 const TYPES = [['v', BM_VERT], ['e', BM_EDGE], ['f', BM_FACE]];
@@ -47,3 +49,20 @@ export function EDBM_mesh_reveal(bm, selectmode, select = true) {
   BM_mesh_select_mode_flush_ex(bm, selectmode);
   return true;
 }
+
+// EDBM_select_more and EDBM_select_less: grow or shrink the selection by one step of edges, or of faces with
+// `use_face_step`. Only face mode flushes the change.
+function select_region_extend(bm, selectmode, use_face_step, use_contract) {
+  const use_faces = selectmode === SCE_SELECT_FACE;
+  const geom = Object.fromEntries([['verts', 'v'], ['edges', 'e'], ['faces', 'f']].map(([slot, pool]) => [slot, selectedOf(bm, pool)]));
+  const out = BMO_op_callf(bm, bmo_region_extend_exec, { geom, use_contract, use_faces, use_face_step });
+  const select = !use_contract;
+  for (const v of out.verts) BM_vert_select_set(bm, v, select);
+  for (const e of out.edges) (use_faces ? BM_edge_select_set : BM_edge_select_set_noflush)(bm, e, select);
+  for (const f of out.faces) (use_faces ? BM_face_select_set : BM_face_select_set_noflush)(bm, f, select);
+  BM_mesh_select_mode_flush_ex(bm, selectmode);
+  if (use_contract) BM_mesh_select_mode_clean_ex(bm, selectmode);
+}
+const selectedOf = (bm, pool) => { const out = []; BM_ITER_MESH(bm[pool], (i) => { if (BM_elem_flag_test(bm[pool], i, BM_ELEM_SELECT)) out.push(i); }); return out; };
+export const EDBM_select_more = (bm, selectmode, use_face_step = true) => select_region_extend(bm, selectmode, use_face_step, false);
+export const EDBM_select_less = (bm, selectmode, use_face_step = true) => select_region_extend(bm, selectmode, use_face_step, true);

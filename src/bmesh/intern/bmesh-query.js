@@ -6,6 +6,13 @@ export const BM_edge_other_vert = (bm, e, v) => (bm.e.v1[e] === v ? bm.e.v2[e] :
 export const BM_FACE_FIRST_LOOP = (bm, f) => bm.f.l_first[f];
 
 export const BM_edge_is_wire = (bm, e) => bm.e.l[e] < 0;
+// Two faces using the edge in opposite directions, so their normals agree.
+export function BM_edge_is_contiguous(bm, e) {
+  const l = bm.e.l[e];
+  if (l < 0) return false;
+  const l_other = bm.l.radial_next[l];
+  return l_other !== l && bm.l.radial_next[l_other] === l && bm.l.v[l_other] !== bm.l.v[l];
+}
 export function BM_edge_is_manifold(bm, e) {
   const l = bm.e.l[e];
   return l >= 0 && bm.l.radial_next[l] !== l && bm.l.radial_next[bm.l.radial_next[l]] === l;
@@ -96,6 +103,29 @@ export function BM_face_vert_share_loop(bm, f, v) {
 }
 export const BM_vert_in_face = (bm, v, f) => BM_face_vert_share_loop(bm, f, v) >= 0;
 
+// BM_EDGES_OF_VERT: around the disk cycle from v->e.
+export function BM_EDGES_OF_VERT(bm, v) {
+  const out = [], first = bm.v.e[v];
+  if (first < 0) return out;
+  let e = first;
+  do out.push(e); while ((e = bmesh_disk_edge_next(bm, e, v)) !== first);
+  return out;
+}
+// BM_FACES_OF_EDGE: around the radial cycle from e->l.
+export function BM_FACES_OF_EDGE(bm, e) {
+  const out = [], first = bm.e.l[e];
+  if (first < 0) return out;
+  let l = first;
+  do out.push(bm.l.f[l]); while ((l = bm.l.radial_next[l]) !== first);
+  return out;
+}
+// BM_FACES_OF_VERT, in BM_LOOPS_OF_VERT's order.
+export function BM_FACES_OF_VERT(bm, v) {
+  const out = [];
+  BM_ITER_LOOPS_OF_VERT(bm, v, (l) => out.push(bm.l.f[l]));
+  return out;
+}
+
 // BM_LOOPS_OF_VERT in Blender's order: around the disk from v->e, each edge's radial loops that start at v.
 export function BM_ITER_LOOPS_OF_VERT(bm, v, fn) {
   const e_first = bm.v.e[v];
@@ -122,8 +152,7 @@ export function BM_vert_pair_share_face_by_len(bm, v_a, v_b, allow_adjacent) {
   return best;
 }
 
-const radialFaces = (bm, e) => { const out = [], first = bm.e.l[e]; if (first < 0) return out; let l = first; do out.push(bm.l.f[l]); while ((l = bm.l.radial_next[l]) !== first); return out; };
-export const BM_edge_is_any_face_len_test = (bm, e, len) => radialFaces(bm, e).some((f) => bm.f.len[f] === len);
+export const BM_edge_is_any_face_len_test = (bm, e, len) => BM_FACES_OF_EDGE(bm, e).some((f) => bm.f.len[f] === len);
 export function BM_edge_share_quad_check(bm, e1, e2) {
   return radialFaces(bm, e1).some((f) => bm.f.len[f] === 4 && BM_face_edge_share_loop(bm, f, e2) >= 0);
 }

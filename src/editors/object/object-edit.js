@@ -5,7 +5,7 @@ import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_elem_flag_t
 import { BM_face_normal_update } from '../../bmesh/intern/bmesh-polygon.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
-import { EDBM_select_pick, EDBM_edge_find_nearest, edbm_select_loop, mesh_select_all, mesh_select_mode } from '../mesh/editmesh-select.js';
+import { EDBM_select_pick, EDBM_edge_find_nearest, edbm_select_loop, mesh_select_all, mesh_select_mode, edbm_select_linked_pick } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
 import { initTransform, createSpaceNormal, toBlender, view3d_pixel_size } from '../transform/transform.js';
@@ -233,6 +233,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     edbm_select_loop(em.bm, eed, props);
     sync();
   };
+  const linkedPick = (event, deselect) => { if (edbm_select_linked_pick(em.bm, viewAdapter(event.view), [event.x, event.y], { deselect })) sync(); };
   const inView = (event) => !!event.view;
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
@@ -249,6 +250,11 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: ['mesh.select_all', 'mesh.select_all:SELECT'], keys: 'A', run: run((bm) => mesh_select_all(bm, 'SELECT')) },
     { blender: ['mesh.select_all', 'mesh.select_all:DESELECT'], keys: 'Alt A', run: run((bm) => mesh_select_all(bm, 'DESELECT')) },
     { blender: ['mesh.select_all', 'mesh.select_all:INVERT'], keys: 'Ctrl I', run: run((bm) => mesh_select_all(bm, 'INVERT')) },
+    { blender: 'mesh.select_more', keys: 'Ctrl NUMPAD_PLUS', run: () => exec('mesh.select_more') },
+    { blender: 'mesh.select_less', keys: 'Ctrl NUMPAD_MINUS', run: () => exec('mesh.select_less') },
+    { blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => exec('mesh.select_linked') },
+    { blender: 'mesh.select_linked_pick', keys: 'L', poll: inView, run: (event) => linkedPick(event, false) },
+    { blender: 'mesh.select_linked_pick', keys: 'Shift L', poll: inView, run: (event) => linkedPick(event, true) },
     { blender: 'mesh.hide', keys: 'H', run: () => exec('mesh.hide') },
     { blender: 'mesh.hide', keys: 'Shift H', run: () => exec('mesh.hide', { unselected: true }) },
     { blender: 'mesh.reveal', keys: 'Alt H', run: () => exec('mesh.reveal') },
@@ -282,6 +288,12 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     get active() { return !!em; },
     get object() { return em?.object ?? null; },
     get selectmode() { return em?.bm.selectmode ?? selectmode; },
+    // stats_object_edit: selected and total elements, and the triangle count.
+    get stats() {
+      if (!em) return null;
+      const { bm } = em;
+      return { verts: [bm.totvertsel ?? 0, bm.totvert], edges: [bm.totedgesel ?? 0, bm.totedge], faces: [bm.totfacesel ?? 0, bm.totface], tris: bm.totloop - 2 * bm.totface };
+    },
     enter,
     exit,
     toggle: () => (em ? exit() : enter()),

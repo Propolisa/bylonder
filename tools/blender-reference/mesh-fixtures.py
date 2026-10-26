@@ -32,6 +32,9 @@ CASES = {
 # then move the selection by MOVE, so every vertex has its own position: Blender orders the new side faces by a
 # pointer hash, which changes from run to run, so those results are compared as geometry rather than in order.
 MOVE = (0.25, 0.5, 1.0)
+GRID4 = {"x_subdivisions": 4, "y_subdivisions": 4, "size": 2}
+# Seams along the grid's middle column, at X = 0.
+SEAM_X0 = {"seam_x": 0.0}
 EDIT_CASES = {
     "delete-vert": (("primitive_cube_add", {}), "VERT", [0], "delete", {"type": "VERT"}),
     "delete-edge": (("primitive_cube_add", {}), "EDGE", [0], "delete", {"type": "EDGE"}),
@@ -81,7 +84,30 @@ EDIT_CASES = {
     "inset-select": (("primitive_cube_add", {}), "FACE", [2], "inset", {"thickness": 0.3, "use_select_inset": True}),
     "inset-cylinder-cap": (("primitive_cylinder_add", {"vertices": 8}), "FACE", [8], "inset", {"thickness": 0.2, "depth": -0.1}),
     "dissolve-faces-cube": (("primitive_cube_add", {}), "FACE", [0, 1], "dissolve_faces", {}),
+    "select-more-vert": (("primitive_grid_add", GRID4), "VERT", [12], "select_more", {}),
+    "select-more-vert-edge-step": (("primitive_grid_add", GRID4), "VERT", [12], "select_more", {"use_face_step": False}),
+    "select-more-edge": (("primitive_grid_add", GRID4), "EDGE", [20], "select_more", {}),
+    "select-more-face": (("primitive_grid_add", GRID4), "FACE", [5], "select_more", {}),
+    "select-more-face-edge-step": (("primitive_grid_add", GRID4), "FACE", [5], "select_more", {"use_face_step": False}),
+    "select-less-face": (("primitive_grid_add", GRID4), "FACE", [0, 1, 2, 4, 5, 6, 8, 9, 10], "select_less", {}),
+    "select-less-face-edge-step": (("primitive_grid_add", GRID4), "FACE", [0, 1, 2, 4, 5, 6, 8, 9, 10], "select_less", {"use_face_step": False}),
+    "select-less-vert": (("primitive_grid_add", GRID4), "VERT", [0, 1, 2, 5, 6, 7, 10, 11, 12], "select_less", {}),
+    "select-linked-vert": (("primitive_grid_add", GRID4), "VERT", [0], "select_linked", {"delimit": []}),
+    "select-linked-face-seam": (("primitive_grid_add", GRID4, SEAM_X0), "FACE", [0], "select_linked", {"delimit": ["SEAM"]}),
+    "select-linked-vert-seam": (("primitive_grid_add", GRID4, SEAM_X0), "VERT", [0], "select_linked", {"delimit": ["SEAM"]}),
+    "select-linked-edge-seam": (("primitive_grid_add", GRID4, SEAM_X0), "EDGE", [0], "select_linked", {"delimit": ["SEAM"]}),
+    "select-linked-face-normal": (("primitive_cube_add", {}), "FACE", [0], "select_linked", {"delimit": ["NORMAL"]}),
 }
+
+
+def mark_seams(x):
+    import bmesh
+    bm = bmesh.from_edit_mesh(bpy.context.object.data)
+    seams = [e.index for e in bm.edges if all(abs(v.co.x - x) < 1e-6 for v in e.verts)]
+    for e in bm.edges:
+        e.seam = e.index in seams
+    bmesh.update_edit_mesh(bpy.context.object.data)
+    return seams
 
 
 def select(kind, indices):
@@ -126,12 +152,16 @@ def loopcut(edge_index, number_cuts=1, object_index=0):
 r = lambda v: [round(x, 6) for x in v]
 for name, case in {**CASES, **EDIT_CASES}.items():
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    (op, props), edit = (case, None) if name in CASES else (case[0], case[1:])
+    (op, props, *setup), edit = (case, None) if name in CASES else (case[0], case[1:])
     getattr(bpy.ops.mesh, op)(**props)
+    seams = None
     if edit:
         bpy.ops.object.mode_set(mode="EDIT")
+        if setup:
+            seams = mark_seams(setup[0]["seam_x"])
         select(edit[0], edit[1])
-        {"loopcut": loopcut, "edge_slide": bpy.ops.transform.edge_slide}.get(edit[2], getattr(bpy.ops.mesh, edit[2], None))(**edit[3])
+        op_props = {k: set(v) if k == "delimit" else v for k, v in edit[3].items()}
+        {"loopcut": loopcut, "edge_slide": bpy.ops.transform.edge_slide}.get(edit[2], getattr(bpy.ops.mesh, edit[2], None))(**op_props)
         if len(edit) > 4:
             bpy.ops.transform.translate(value=edit[4])
         bpy.ops.object.mode_set(mode="OBJECT")
@@ -139,7 +169,7 @@ for name, case in {**CASES, **EDIT_CASES}.items():
     uv = me.uv_layers.active
     data = {
         "operator": "mesh." + op, "props": props,
-        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": ("transform." if edit[2] == "edge_slide" else "mesh.") + edit[2], "props": edit[3], **({"move": edit[4]} if len(edit) > 4 else {})}} if edit else {}),
+        **({"edit": {"select_mode": edit[0], "select": edit[1], "operator": ("transform." if edit[2] == "edge_slide" else "mesh.") + edit[2], "props": edit[3], **({"move": edit[4]} if len(edit) > 4 else {}), **({"seams": seams} if seams else {})}} if edit else {}),
         "positions": [r(v.co) for v in me.vertices],
         "edges": [list(e.vertices) for e in me.edges],
         "face_offsets": [p.loop_start for p in me.polygons] + [len(me.loops)],

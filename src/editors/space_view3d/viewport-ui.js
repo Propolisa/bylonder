@@ -42,7 +42,11 @@ export function createViewportStatus({ world, editor, views, send }) {
       ? [[['mouse_lmb'], 'Confirm'], [['mouse_rmb'], 'Cancel'], [['X', 'Y', 'Z'], 'Axis'], [['Shift'], 'Precision'], [['Ctrl'], 'Snap']]
       : [[['mouse_lmb'], 'Select'], [['mouse_mmb'], 'Rotate View'], [['mouse_rmb'], 'Object Context Menu']];
     const fps = views.idle ? 'Idle' : Math.round(world.engine.getFps()) + ' FPS';
-    const stats = `${collection}${active ? ' | ' + active.name : ''} | Verts:${verts.toLocaleString()} | Tris:${Math.round(tris).toLocaleString()} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`;
+    const edit = world.editMode?.stats, count = (n) => n.toLocaleString(), ratio = ([sel, total]) => `${count(sel)}/${count(total)}`;
+    const geometry = edit
+      ? `Verts:${ratio(edit.verts)} | Edges:${ratio(edit.edges)} | Faces:${ratio(edit.faces)} | Tris:${count(edit.tris)}`
+      : `Verts:${count(verts)} | Tris:${count(Math.round(tris))}`;
+    const stats = `${collection}${active ? ' | ' + active.name : ''} | ${geometry} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`;
     const next = JSON.stringify([hints, stats]);
     if (next !== last) { last = next; send('status', { hints, stats }); }
   };

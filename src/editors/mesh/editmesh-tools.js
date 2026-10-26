@@ -8,11 +8,11 @@ import { bmo_dissolve_faces_exec } from '../../bmesh/operators/bmo-dissolve.js';
 import { BM_mesh_elem_hflag_disable_all, BM_face_select_set, BM_vert_select_set, BM_elem_select_set, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_mesh_esubdivide, SUBD_CORNER_INNERVERT, SUBD_CORNER_PATH, SUBD_CORNER_FAN, SUBD_CORNER_STRAIGHT_CUT, SUBDIV_SELECT_ORIG } from '../../bmesh/operators/bmo-subdivide.js';
 import { edbm_loopcut } from './editmesh-loopcut.js';
-import { edbm_select_loop } from './editmesh-select.js';
+import { edbm_select_loop, edbm_select_linked_exec } from './editmesh-select.js';
 import { bmo_inset_region_exec } from '../../bmesh/operators/bmo-inset.js';
 import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
 import { BM_edge_at_index } from '../../bmesh/intern/bmesh-query.js';
-import { EDBM_mesh_hide, EDBM_mesh_reveal } from './editmesh-utils.js';
+import { EDBM_mesh_hide, EDBM_mesh_reveal, EDBM_select_more, EDBM_select_less } from './editmesh-utils.js';
 
 // The %hv, %he and %hf operator slots: elements with a header flag.
 export function BMO_slot_buffer_from_hflag(bm, pool, hflag) {
@@ -128,4 +128,7 @@ export const meshOperators = {
   'mesh.dissolve_faces': (bm) => edbm_dissolve_faces_exec(bm),
   'mesh.hide': (bm, props) => EDBM_mesh_hide(bm, bm.selectmode, !!props.unselected),
   'mesh.reveal': (bm) => EDBM_mesh_reveal(bm, bm.selectmode),
+  'mesh.select_more': (bm, props) => EDBM_select_more(bm, bm.selectmode, props.use_face_step ?? true),
+  'mesh.select_less': (bm, props) => EDBM_select_less(bm, bm.selectmode, props.use_face_step ?? true),
+  'mesh.select_linked': (bm, props) => edbm_select_linked_exec(bm, props),
 };

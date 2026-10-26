@@ -2,8 +2,7 @@
 import { BM_ITER_MESH, BM_VERT, BM_ELEM_HIDDEN, BM_ELEM_SEAM, BM_ELEM_SMOOTH, BMO_flag_test, BMO_flag_enable, BM_elem_flag_disable } from '../intern/bmesh-class.js';
 import { BM_vert_create, BM_edge_create, BM_face_create, BM_elem_attrs_copy, BM_CREATE_NOP, BM_CREATE_NO_DOUBLE } from '../intern/bmesh-core.js';
 import { BM_face_create_verts } from '../intern/bmesh-construct.js';
-import { BM_edge_exists, BM_edge_is_boundary, BM_edge_other_loop, BM_vert_is_wire_endpoint } from '../intern/bmesh-query.js';
-import { bmesh_disk_edge_next } from '../intern/bmesh-structure.js';
+import { BM_edge_exists, BM_edge_is_boundary, BM_edge_other_loop, BM_vert_is_wire_endpoint, BM_EDGES_OF_VERT, BM_FACES_OF_EDGE } from '../intern/bmesh-query.js';
 import { BM_face_normal_flip } from '../intern/bmesh-polygon.js';
 import { BMO_op_callf } from '../intern/bmesh-operators.js';
 import { DEL_ONLYTAGGED } from '../intern/bmesh-delete.js';
@@ -12,8 +11,6 @@ import { bmo_duplicate_exec, bmo_delete_exec } from './bmo-dupe.js';
 const EXT_INPUT = 1, EXT_KEEP = 2, EXT_DEL = 4;
 const POOLS = ['v', 'e', 'f'];
 
-const radialFaces = (bm, e, fn) => { const l0 = bm.e.l[e]; if (l0 < 0) return false; let l = l0; do if (fn(bm.l.f[l])) return true; while ((l = bm.l.radial_next[l]) !== l0); return false; };
-const diskEdges = (bm, v, fn) => { const e0 = bm.v.e[v]; if (e0 < 0) return false; let e = e0; do if (fn(e)) return true; while ((e = bmesh_disk_edge_next(bm, e, v)) !== e0); return false; };
 const flagged = (bm, oflag) => Object.fromEntries(POOLS.map((pool) => { const list = []; BM_ITER_MESH(bm[pool], (i) => BMO_flag_test(bm[pool], i, oflag) && list.push(i)); return [pool, list]; }));
 
 function bm_extrude_copy_face_loop_attributes(bm, f) {
@@ -32,7 +29,7 @@ function bm_extrude_copy_face_loop_attributes(bm, f) {
 // Seam and smooth flags a new side edge takes from the face edges around `v`: [enable, disable], or null.
 function bm_extrude_region_edge_flag(bm, v) {
   let any = 0, all = 0xff, ok = false;
-  diskEdges(bm, v, (e) => {
+  BM_EDGES_OF_VERT(bm, v).some((e) => {
     if (bm.e.l[e] >= 0 && !BM_edge_is_boundary(bm, e)) { any |= bm.e.hflag[e]; all &= bm.e.hflag[e]; ok = true; }
   });
   return ok ? [any & BM_ELEM_SEAM, BM_ELEM_SMOOTH & ~all] : null;
@@ -56,15 +53,15 @@ export function bmo_extrude_face_region_exec(bm, geom, { use_normal_flip = false
     BM_ITER_MESH(bm.e, (e) => {
       if (!BMO_flag_test(bm.e, e, EXT_INPUT)) return;
       let count = 0;
-      const found = radialFaces(bm, e, (f) => { if (!BMO_flag_test(bm.f, f, EXT_INPUT)) return true; count++; return false; });
+      const found = BM_FACES_OF_EDGE(bm, e).some((f) => { if (!BMO_flag_test(bm.f, f, EXT_INPUT)) return true; count++; return false; });
       if (found) delorig = true;
       else if (count > 1) BMO_flag_enable(bm.e, e, EXT_DEL);
     });
   }
   BM_ITER_MESH(bm.v, (v) => {
     if (bm.v.e[v] < 0) return;
-    const keep = diskEdges(bm, v, (e) => !BMO_flag_test(bm.e, e, EXT_INPUT) || !BMO_flag_test(bm.e, e, EXT_DEL)) ||
-      diskEdges(bm, v, (e) => radialFaces(bm, e, (f) => !BMO_flag_test(bm.f, f, EXT_INPUT)));
+    const keep = BM_EDGES_OF_VERT(bm, v).some((e) => !BMO_flag_test(bm.e, e, EXT_INPUT) || !BMO_flag_test(bm.e, e, EXT_DEL)) ||
+      BM_EDGES_OF_VERT(bm, v).some((e) => BM_FACES_OF_EDGE(bm, e).some((f) => !BMO_flag_test(bm.f, f, EXT_INPUT)));
     if (!keep) BMO_flag_enable(bm.v, v, EXT_DEL);
   });
   BM_ITER_MESH(bm.f, (f) => BMO_flag_test(bm.f, f, EXT_INPUT) && BMO_flag_enable(bm.f, f, EXT_DEL));

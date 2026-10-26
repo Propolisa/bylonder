@@ -11,7 +11,7 @@ export function bmo_dissolve_faces_exec(bm, faces) {
   const regions = [];
   for (const f of faces) {
     if (!BMO_flag_test(bm.f, f, FACE_TAG)) continue;
-    const region = BMW_island(bm, f, FACE_MARK, true);
+    const region = BMW_island(bm, f, { mask_face: FACE_MARK, only_manifold: true });
     if (region.length < 2) continue;
     for (const face of region) {
       BMO_flag_disable(bm.f, face, FACE_TAG);

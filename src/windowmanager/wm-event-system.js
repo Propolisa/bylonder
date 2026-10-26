@@ -17,14 +17,15 @@ const BUTTONS = ['leftmouse', 'middlemouse', 'rightmouse', 'button4mouse', 'butt
 // over (or null); `accepts(event)` filters out keys meant for text fields and other editors.
 export function createEventSystem({ layers, viewAt, accepts = () => true }) {
   const modal = [];
-  let press = null;
+  // Every event carries the mouse position, key presses included, as Blender's do.
+  let press = null, mouse = { x: 0, y: 0 };
 
   const wmEvent = (native, type, value, extra = {}) => ({
     type, value, native,
     shift: native.shiftKey, ctrl: native.ctrlKey || native.metaKey, alt: native.altKey, oskey: native.metaKey,
     // DOM-style names for handlers written against them.
     shiftKey: native.shiftKey, ctrlKey: native.ctrlKey, altKey: native.altKey, metaKey: native.metaKey,
-    x: native.clientX ?? press?.x, y: native.clientY ?? press?.y, clientX: native.clientX, clientY: native.clientY,
+    x: native.clientX ?? mouse.x, y: native.clientY ?? mouse.y, clientX: native.clientX ?? mouse.x, clientY: native.clientY ?? mouse.y,
     ...extra,
   });
 
@@ -56,6 +57,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true }) {
     if (handled) e.preventDefault();
   };
   const pointermove = (e) => {
+    mouse = { x: e.clientX, y: e.clientY };
     for (const handler of [...modal]) handler.mousemove?.(wmEvent(e, 'mousemove', 'NOTHING', { view: viewAt(e) }));
     if (!press || press.handled || press.dragged) return;
     if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < WM_DRAG_THRESHOLD_MOUSE) return;

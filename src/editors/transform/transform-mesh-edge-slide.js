@@ -5,14 +5,12 @@ import { snap } from '../../windowmanager/gesture-math.js';
 import { initNumInput, hasNumInput, applyNumInput, outputNumInput, handleNumInput } from '../util/numinput.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
-import { BM_edge_exists, BM_edge_is_boundary, BM_edge_is_manifold, BM_vert_is_edge_pair } from '../../bmesh/intern/bmesh-query.js';
-import { bmesh_disk_edge_next } from '../../bmesh/intern/bmesh-structure.js';
+import { BM_edge_exists, BM_edge_is_boundary, BM_edge_is_manifold, BM_vert_is_edge_pair, BM_EDGES_OF_VERT } from '../../bmesh/intern/bmesh-query.js';
 import { sub_v3, add_v3, mul_v3_fl, dot_v3, cross_v3, len_v3, mid_v3, interp_v3, normalize_v3, line_point_factor_v3, isect_line_plane_v3, isect_line_line_epsilon_v3 } from '../../blenlib/math-geom.js';
 
 const FLT_EPSILON = 1.1920929e-7;
 const co = (bm, v) => Array.from(bm.v.co.subarray(v * 3, v * 3 + 3));
-const diskEdges = (bm, v) => { const out = [], first = bm.v.e[v]; if (first < 0) return out; let e = first; do out.push(e); while ((e = bmesh_disk_edge_next(bm, e, v)) !== first); return out; };
-const BM_vert_is_boundary = (bm, v) => diskEdges(bm, v).some((e) => BM_edge_is_boundary(bm, e));
+const BM_vert_is_boundary = (bm, v) => BM_EDGES_OF_VERT(bm, v).some((e) => BM_edge_is_boundary(bm, e));
 const mesh_vert_is_inner = (bm, v) => BM_vert_is_edge_pair(bm, v) && !BM_vert_is_boundary(bm, v);
 
 function BM_loop_calc_face_direction(bm, l) {
@@ -101,7 +99,7 @@ export function transform_mesh_edge_slide_data_create(bm) {
   const verts = [];
   BM_ITER_MESH(bm.v, (v) => { if (BM_elem_flag_test(bm.v, v, BM_ELEM_SELECT) && !BM_elem_flag_test(bm.v, v, BM_ELEM_HIDDEN)) verts.push(v); });
   for (const v of verts) {
-    const numsel = diskEdges(bm, v).filter((e) => BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT)).length;
+    const numsel = BM_EDGES_OF_VERT(bm, v).filter((e) => BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT)).length;
     if (numsel === 0 || numsel > 2) return null;
   }
   let invalid = false;
