@@ -34,13 +34,19 @@ export function mountSequencerEditor(section, { adapter, header, notify }) {
     viewLabel.textContent = viewTypes[state.viewType][0];
     if (!started) return;
     const wanted = [...(state.viewType !== 'SEQUENCER' ? ['preview'] : []), ...(state.viewType !== 'PREVIEW' ? ['sequencer'] : []), ...(state.sidebar ? ['properties'] : [])];
-    Promise.all(wanted.map(ensure)).then(() => { loading.hidden = true; });
+    Promise.all(wanted.map(ensure)).then(() => { loading.hidden = true; if (!menuSlot.childElementCount) showMenus(); });
   };
   const viewMenu = menuButton('Sequencer & Preview', () => Object.entries(viewTypes).map(([id, [label, icon]]) => ({ label, icon, checked: () => state.viewType === id, run: () => { state.viewType = id; sync(); } })), { icon: 'sequence', className: 'bl-dropdown', title: 'View Type' });
   const viewLabel = viewMenu.querySelector('span:last-child');
   const sidebarButton = iconButton('menu_panel', 'Sidebar (N): strip properties', () => { state.sidebar = !state.sidebar; sync(); });
   const spacer = Object.assign(document.createElement('span'), { className: 'spacer' });
-  header.replaceChildren(viewMenu, spacer, sidebarButton);
+  // Blender's header menus, filled from the adapter once KubeezCut has loaded.
+  const menuSlot = Object.assign(document.createElement('span'), { className: 'vse-menus' });
+  header.replaceChildren(viewMenu, menuSlot, spacer, sidebarButton);
+  const showMenus = async () => {
+    const menus = await adapter.menus();
+    menuSlot.replaceChildren(...Object.entries(menus).map(([label, items]) => menuButton(label, items)));
+  };
   section.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest('input,textarea,select,[contenteditable="true"]')) { state.sidebar = !state.sidebar; sync(); }
   });

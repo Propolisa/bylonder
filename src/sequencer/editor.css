@@ -10,3 +10,4 @@
 .vse-file-browser .vse-media{flex:1}
 .vse-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--bl-text-dim);font:var(--bl-font);pointer-events:none}
 .vse-loading[hidden]{display:none}
+.vse-menus{display:inline-flex;align-items:center;gap:1px;margin-left:6px}

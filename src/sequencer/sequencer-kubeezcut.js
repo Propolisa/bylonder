@@ -8,6 +8,9 @@ export function createSequencerAdapter({ project, notify = console.warn, commit 
   const load = () => (loading ??= (async () => {
     const [embed] = await Promise.all([import('kubeezcut-embed'), import('kubeezcut-embed/embed.css')]);
     await import('./theme.css');
+    // Blender's icons replace KubeezCut's where an equivalent exists (served from public/icons/blender).
+    embed.setIconBase(import.meta.env.BASE_URL + 'icons/blender');
+    embed.setKeymap('blender');
     await embed.openProject({ project: project(), notify: (message) => notify(message), commit });
     return embed;
   })());
@@ -22,6 +25,8 @@ export function createSequencerAdapter({ project, notify = console.warn, commit 
     async importMedia(handles) { return (await load()).importMedia(handles); },
     // Places a media pool entry on the Sequencer at a frame (default: the playhead). Resolves to the strip ids.
     async addMediaStrip(mediaId, options) { return (await load()).addMediaStrip(mediaId, options); },
+    // Header menus (View, Select, Marker, Add, Strip): { [menu]: [{ label, keys, run, enabled } | '-'] }.
+    async menus() { return (await load()).menus(); },
     get loaded() { return !!loading; },
     async dispose() { if (loading) (await loading).disposeAll(); loading = null; },
   };

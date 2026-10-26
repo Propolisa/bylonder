@@ -367,6 +367,8 @@ document
   .querySelectorAll("[data-view]")
   .forEach((b) => (b.onclick = () => activeView().nav.view(b.dataset.view)));
 const key = (e) => {
+  // Keys over the Video Sequencer (and its menu commands, which run as synthetic key events) belong to it.
+  if (!e.isTrusted || (e.key !== "F12" && document.querySelector(".vse-area:hover"))) return;
   if (
     e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host') ||
     help.open ||
