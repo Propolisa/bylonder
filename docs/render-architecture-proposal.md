@@ -9,9 +9,13 @@ Snapshot as of 2026-10-25, on top of `main` at `3c760aa` (scene time, Render and
 - **Encoder:** mediabunny 1.61.4, used unmodified (MPL-2.0 is file-level, so this is fine as a dependency).
 - **Step 4 implemented:** multiple 3D Viewports as engine views of one hidden working canvas, sized to an anchor view (the compositor view, else the largest) so it only resizes when the layout changes; other views render into its top-left corner through `camera.viewport`. Checked in Chromium: two side-by-side viewports (Solid and Rendered, perspective and top orthographic), selection and modal moves exact in both (a 60 px gesture moves the object 60 px on screen in each), zero engine resizes during interaction, zero view renders while idle, split areas restored after reload, Render Image unaffected.
 - **Findings:** post-process pipelines (MSAA, bloom, custom post processes) respect a camera viewport sub-rectangle; the compositor's frame graph does not (its output lands misaligned), hence the anchor rule and one compositor view at a time. Babylon's view observables are module-level, shared by every engine in a page.
-- **Step 5 partly:** the compositor shows in the last clicked rendered viewport. A backdrop in the Node Editor is not done yet.
-- **Sequencer step 6 started:** KubeezCut fork set up (`Propolisa/KubeezCut`, branch `bylonder`): AI features compiled out (`VITE_AI_FEATURES=false`; Whisper, Gemma, RNNoise and Kitten TTS code is absent from the embed), a library build with island mounts and a first host contract, scoped styles, popups in a scoped portal. Bylonder shows it as Video Sequencer and File Browser editors. Checked: islands load in dev and in the production build under `/bylonder/`, media import works. Placing a clip crashes headless Chromium in this container, standalone KubeezCut included, so playback needs a check in a desktop browser.
-- **Next:** the `sequenceEditor` slice and adapter (edit stored with the project, undo through Bylonder), strip channels, Blender icons and shell for the islands, then scene strips.
+- **Step 5 implemented:** the Compositor shows its result behind the nodes (backdrop): an engine view through the scene camera at the output aspect, without overlays, which takes the compositor while shown. Views now apply their camera viewport region as they render, since a backdrop and a camera view share the scene camera.
+- **Steps 6 to 8 implemented** with the KubeezCut fork (`Propolisa/KubeezCut`, branch `bylonder`, consumed as `kubeezcut-embed`):
+  - The edit is the scene's `sequenceEditor` slice. KubeezCut reports finished edits through a history delegate in its command store and asks Bylonder to undo; its playhead follows the scene clock. Checked: two edits, Ctrl Z and redo over the Sequencer, reload with Remember Scene Edits.
+  - Scene strips: a `scene` item type in the fork draws frames from a host `SceneFrameSource` (`getFrame`, `peekFrame`, `subscribe`, `bake`). Bylonder renders them in a render context per scene, keyed by a content hash of code, builder, scene edits and animation, so edits re-render only that scene and stored proxies survive reloads. Previews render at the Proxy Render Size (25% to 100%) and prefetch ahead; Strip > Rebuild Proxy stores frames in OPFS. Checked: proxy sizes, a moved object re-rendering the strip, 250 stored frames.
+  - Sequencer output: the host owns the frame loop and the encoder for every render. With Post Processing > Sequencer on and strips in the edit, KubeezCut's `openCompositor` composites each frame and mixes the audio; scene strips render at full quality with their scene's samples and pre-roll. Checked: a scene strip with a text strip over it rendered to H.264 MP4 with the expected 12 frames.
+- **Multiple scenes per project** (Blender's model, see [concepts.md](concepts.md#terms)): one scene is active in the viewport; render jobs and scene strips build any scene in isolation. Edit > Preferences > Keep Scenes Loaded keeps inactive scenes in their own viewport so switching is instant.
+- **Not yet:** strip properties as Bylonder channels (keys in the Timeline), live scene-strip frames from other loaded scenes (they render from saved data), audio for scene strips.
 
 ## Summary
 
@@ -64,6 +68,10 @@ Everything here runs inside the existing viewport iframe on the existing engine.
 | Render Result after F12 | Offline tier, below |
 
 Interactive previews run at viewport quality. A full-quality still of the composite is a Render Image job.
+
+![Compositor backdrop](media/compositor-backdrop.png)
+
+*The Compositor with its backdrop: the composite through the scene camera behind the nodes.*
 
 ## Offline tier: the render service
 
@@ -132,18 +140,15 @@ Following the scene-level data pattern in [babylon-blender.md](babylon-blender.m
 - **Contracts.** Small, framework-free, owned by Bylonder:
 
 ```js
-// Host provides
-frameSource = { getFrame({ stripId, frame, width, height, shading, samples }) }; // resolves to a VideoFrame
-renderService = { render(job) };       // async iterator of VideoFrame; used by F12, Ctrl F12, strips, thumbnails
-encoder = { open(outputSettings), write(videoFrame, audioData), close() }; // resolves to a file
+// Host provides (kubeezcut-embed SequencerHost)
+project, edit, history: { commit(edit, label), undo(), redo() }, clock: { frame, playing, subscribe, seek, play, pause },
+frames: { getFrame({ scene, camera, frame, width, height, quality }), peekFrame(request), subscribe(fn), bake(request, frameEnd) },
+scenes() // [{ id, name, frameStart, frameEnd, width, height }] for Add > Scene
 
 // Sequencer engine provides (KubeezCut adapter today)
-sequencerEngine = {
-  mount(element, view),                // 'sequencer' | 'preview' | 'media' island
-  composite({ frame, width, height }), // resolves to a VideoFrame of the final edit
-  audio({ start, end, sampleRate }),   // resolves to AudioData for the range
-  dispose(),
-};
+mount(kind, element)                                   // 'sequencer' | 'preview' | 'media' | 'properties'
+openCompositor({ frameStart, frameEnd, width, height }) // { renderFrame(frame), audio(), dispose() }
+setHostEdit(edit), setProjectFormat({ width, height, fps }), menus()
 ```
 
 KubeezCut's export currently decodes, composites and encodes in one pass (`client-render-engine.ts`). The one fork change this needs is to stop at the composited frame and audio and let the host encoder finish, so the encoder is shared with plain 3D renders.

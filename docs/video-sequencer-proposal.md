@@ -4,6 +4,8 @@ Snapshot as of 2026-10-25. Sources: KubeezCut `main` at commit `3aa8741` (2026-0
 
 ## Summary
 
+Status (2026-10-26): phases 2, 3 and 5 are done (fork, Sequencer and Preview areas with the edit in the scene's `sequenceEditor` slice, Bylonder undo and clock, Blender keymap, menus and icons, scene strips, sequencer output through the shared encoder); see the [render architecture status](render-architecture-proposal.md#status). Media stays in KubeezCut's per-project library rather than a host media store. Phase 4 (strip channels) is next.
+
 Decision (2026-10-25): KubeezCut views run as React islands with scoped style overrides for now; the Vue port below is kept as analysis for later. The sequencer sits behind a Blender-shaped `sequenceEditor` record and one adapter so it can be replaced. Contracts, scene strips, multiple viewports and deterministic rendering are in the [render architecture proposal](render-architecture-proposal.md), which supersedes the host contract sketched here.
 
 - KubeezCut covers most of Blender's Video Sequencer (strips, channels, preview, transitions, effects, blend modes, markers, meta strips) and a WebCodecs export pipeline. It is a good base for the **Sequencer**, **Preview** and the encoding half of **Render Animation**.

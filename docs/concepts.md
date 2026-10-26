@@ -23,12 +23,24 @@ Most useful files: `scripts/startup/bl_ui/properties_*.py` (exact panel layout a
 - **Blender**: a file is a database of typed, named, reference-counted datablocks (IDs). Scenes reference collections of objects; objects reference data (mesh, camera, light); evaluation runs on copies through the dependency graph.
 - **Babylon**: a runtime `Scene` owns nodes, meshes, materials, cameras, lights and textures directly; there is no file database, user counting or evaluated copy. Code builds the scene each run.
 
+## Terms
+
+Bylonder uses these words with one meaning each, in code, UI and docs:
+
+| Term | Meaning | Blender |
+|---|---|---|
+| Project | A workspace item: code, assets, settings and its scenes | `.blend` file |
+| Scene | Named data in a project: builder, scene edits, animation and time, render and output settings, world, compositor, sequencer edit. One scene is active in the viewport at a time | Scene |
+| Scene builder | The `index.js` export that builds a scene's content (`createScene`), or none for an empty scene | No equivalent; Blender stores objects in the file |
+| Babylon scene | The runtime `BABYLON.Scene` a builder creates for a scene, in the viewport or a render context | Evaluated depsgraph |
+| Scene edits | Changes made in the editor and saved on the scene (Edit > Remember Scene Edits) | Scene data |
+
 ## Concept map
 
 | Blender | Babylon | Ours |
 |---|---|---|
 | Datablock (ID), users, fake user, link/append | Plain objects in `Scene`; `AssetContainer` for add/remove sets | IDs by `wbId` or name; users counted for materials and worlds |
-| Scene | `Scene` | One scene per run; Properties > Scene (name, camera, units, gravity) |
+| Scene | `Scene` | Several scenes per project, one active; each builds its own Babylon scene. Properties > Scene (name, camera, units, gravity) |
 | Scene collection, collections (nested, objects in many) | No equivalent. Parenting via `TransformNode`; `AssetContainer` groups assets | Collections as data, mapped to per-mesh `isVisible`; parenting separate |
 | View layer (per-scene include/exclude, holdout, passes) | `layerMask` on meshes and cameras; rendering groups | View layers with exclude and hide per collection |
 | Object vs object data (mesh, camera, light shared by many objects) | Mesh holds geometry; `InstancedMesh`, `clone`, thin instances share geometry | Not modelled |
@@ -69,7 +81,7 @@ Babylon: `Scene` holds clear color, ambient color, environment texture and inten
 
 Mapping notes: active camera maps to `scene.activeCamera` (ours already switches between editor and authored camera). Units are presentation only on both sides. Background scene has no Babylon equivalent other than rendering several scenes into one canvas (`autoClear` off).
 
-Ours: Properties > Scene has the scene ID row (rename only, one scene), Scene (Camera), Units (system, scale, separate units, rotation, length; no mass, time or temperature since nothing uses them) and Gravity (header toggle, vector in Babylon Y-up axes, animatable; drives `scene.gravity` and the physics engine). Not yet: Background Scene, Active Clip, Keying Sets, Audio, Simulation, Rigid Body World, Light Probes.
+Ours: scenes are listed in the top bar's scene selector (New, Copy Settings, Full Copy, delete; Linked Copy is not offered since separately built scenes cannot share objects). Properties > Scene has the scene ID row (rename), Scene (Camera), Units (system, scale, separate units, rotation, length; no mass, time or temperature since nothing uses them) and Gravity (header toggle, vector in Babylon Y-up axes, animatable; drives `scene.gravity` and the physics engine). Not yet: Background Scene, Active Clip, Keying Sets, Audio, Simulation, Rigid Body World, Light Probes.
 
 ## View layers and collections
 
@@ -95,7 +107,7 @@ Blender (Properties > Output, `properties_output.py`): Format (resolution X/Y, p
 
 Babylon: canvas size and `engine.setHardwareScalingLevel`; screenshots via `CreateScreenshotUsingRenderTarget`; video via `VideoRecorder` (WebM in browsers); no frame range concept outside animations.
 
-Ours: scene time (`src/scene/time.js`) holds frame current/start/end/step, fps, preview range and auto keying, as on Blender's Scene. Properties > Output has Format > Frame Rate (Blender presets plus Custom) and Frame Range. The Timeline has the preview range toggle; Start/End edit the preview range while it is on. No resolution or file output.
+Ours: scene time (`src/scene/time.js`) holds frame current/start/end/step, fps, preview range and auto keying, as on Blender's Scene. Properties > Output has Format > Frame Rate (Blender presets plus Custom) and Frame Range. The Timeline has the preview range toggle; Start/End edit the preview range while it is on. Format also has resolution X, Y and %; Output has the file format and encoding; Post Processing has Sequencer, which renders the edit instead of the camera when it has strips. See [babylon-blender.md](babylon-blender.md).
 
 ## World
 

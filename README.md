@@ -193,11 +193,21 @@ Properties > Output sets the render size (Resolution X, Y and %), frame rate, fr
 
 **Render > Render Image** (F12) renders the current frame from the scene camera; **Render Animation** (Ctrl F12) renders the frame range and downloads the video, or a ZIP of images for image formats; **View Render** (F11) shows the Render Result window. Escape cancels a running render. Renders run in a hidden copy of the project built from the current scene edits, so the viewport keeps working and nothing needs to be saved first.
 
-Renders are deterministic: time, `engine.getDeltaTime()`, `Date.now()` and `Math.random()` follow a virtual clock, and frames are pre-rolled from Frame Start, so code that integrates time reaches the same state on every machine. Each sample shifts the camera by a sub-pixel offset; with Motion Blur on, samples also spread across the shutter for true sub-frame blur. Video is encoded in the browser with WebCodecs; codecs the browser cannot encode report an error. Audio, file paths and saving directly to disk are not implemented yet.
+Renders are deterministic: time, `engine.getDeltaTime()`, `Date.now()` and `Math.random()` follow a virtual clock, and frames are pre-rolled from Frame Start, so code that integrates time reaches the same state on every machine. Each sample shifts the camera by a sub-pixel offset; with Motion Blur on, samples also spread across the shutter for true sub-frame blur. Video is encoded in the browser with WebCodecs; codecs the browser cannot encode report an error. With **Post Processing > Sequencer** on (the default) and strips in the Video Sequencer, renders output the edit with its audio instead of the camera. File paths and saving directly to disk are not implemented yet.
+
+The Compositor (Node Editor > Compositor, Use Nodes) shows its result behind the nodes; the header's backdrop button turns it off.
 
 ## Video Sequencer
 
-Pick **Video Sequencer** or **File Browser** from any area's editor type menu. The Video Sequencer has Blender's view types (Sequencer, Preview, Sequencer & Preview) and a sidebar (N) with the active strip's properties; the File Browser imports footage, audio and images into the project's media pool. Both are KubeezCut editors ([Propolisa/KubeezCut](https://github.com/Propolisa/KubeezCut), MIT) running as embedded islands in Bylonder's theme, loaded on first use. The video uses the scene's output resolution and frame rate. Media is referenced, not copied, and the edit is stored in the browser per project. Requires a Chromium-based browser (File System Access, WebCodecs).
+Pick **Video Sequencer** or **File Browser** from any area's editor type menu. The Video Sequencer has Blender's view types (Sequencer, Preview, Sequencer & Preview) and a sidebar (N) with the active strip's properties; the File Browser imports footage, audio and images into the project's media pool. Both are KubeezCut editors ([Propolisa/KubeezCut](https://github.com/Propolisa/KubeezCut), MIT) running as embedded islands in Bylonder's theme, loaded on first use. The video uses the scene's output resolution and frame rate, and its playhead is the scene frame. The edit belongs to the scene: Ctrl Z undoes it with everything else and Remember Scene Edits keeps it. Media is referenced, not copied, and stays in the browser per project. Requires a Chromium-based browser (File System Access, WebCodecs).
+
+**Add > Scene** adds a scene strip that shows a scene of the project through its camera. Its frames render in the background at the **Proxy** size from the Sequencer header and are cached until the scene changes; **Strip > Rebuild Proxy** keeps them across reloads.
+
+![Scene strip in the Preview](docs/media/scene-strip.png)
+
+## Scenes
+
+A project holds one or more scenes, like a Blender file. The top bar's scene selector switches, adds (New, Copy Settings, Full Copy) and deletes scenes; double-click it or use Properties > Scene to rename. A new empty scene starts without objects; Full Copy builds from the same code with a copy of the scene edits and animation. With **Edit > Preferences > Keep Scenes Loaded** (on by default), scenes stay loaded after switching away, so switching back is instant.
 
 ## Animation
 
