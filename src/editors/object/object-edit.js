@@ -213,7 +213,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     end,
     // mesh.loopcut_slide: the cut, then Edge Slide.
     confirm: (edge_index, number_cuts) => {
-      exec('mesh.loopcut', { edge_index, number_cuts });
+      exec('mesh.loopcut', { object_index: 0, edge_index, number_cuts });
       editor.start('edge_slide');
     },
   }));

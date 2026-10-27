@@ -26,6 +26,7 @@
 #include "BKE_report.hh"
 #include "BKE_screen.hh"
 #include "DNA_key_types.h"
+#include "DNA_modifier_types.h"
 #include "ED_mesh.hh"
 #include "ED_object.hh"
 #include "ED_screen.hh"
@@ -361,6 +362,21 @@ const Mesh *BKE_object_get_editmesh_eval_final(const Object *object)
   return reinterpret_cast<Mesh *>(object->runtime->data_eval);
 }
 const Mesh *BKE_object_get_editmesh_eval_cage(const Object *object) { return object->runtime->editmesh_eval_cage; }
+void BKE_object_get_mirror_axes(const Object *ob, bool r_axis[3])
+{
+  r_axis[0] = r_axis[1] = r_axis[2] = false;
+  for (const ModifierData &md : ob->modifiers) {
+    if (md.type == eModifierType_Mirror && (md.mode & eModifierMode_Realtime)) {
+      const MirrorModifierData *mmd = reinterpret_cast<const MirrorModifierData *>(&md);
+      if (mmd->mirror_ob || (mmd->flag & MOD_MIR_NO_MERGE)) {
+        continue;
+      }
+      r_axis[0] |= (mmd->flag & MOD_MIR_AXIS_X) != 0;
+      r_axis[1] |= (mmd->flag & MOD_MIR_AXIS_Y) != 0;
+      r_axis[2] |= (mmd->flag & MOD_MIR_AXIS_Z) != 0;
+    }
+  }
+}
 Mesh *BKE_object_get_original_mesh(const Object *object)
 {
   return id_cast<Mesh *>(object->id.orig_id == nullptr ? object->data : id_cast<Object *>(object->id.orig_id)->data);

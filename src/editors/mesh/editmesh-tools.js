@@ -1,15 +1,13 @@
 // Edit Mode operators by Blender idname on the edit mesh (an EditMesh, src/bmesh/bmesh-wasm.js): Blender's own, run by
 // their exec in WebAssembly, and the two still ported to JS.
 import { POOL } from '../../bmesh/intern/bmesh-marking.js';
-import { BM_edge_at_index } from '../../bmesh/intern/bmesh-mesh.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { hasOperator } from '../../bmesh/bmesh-wasm.js';
-import { edbm_loopcut } from './editmesh-loopcut.js';
 import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
 
-// Loop Cut and Edge Slide run as JS ports until Blender's run in WebAssembly (Loop Cut reads the evaluated mesh
-// through the depsgraph; Edge Slide is part of Blender's transform system). They work on a BMesh of the edit mesh's
-// Mesh arrays, whose elements are in the same order, for as long as they run.
+// Edge Slide and Loop Cut's preview run as JS ports until Blender's run in WebAssembly (Edge Slide is part of
+// Blender's transform system). They work on a BMesh of the edit mesh's Mesh arrays, whose elements are in the same
+// order, for as long as they run.
 export function editBMesh(edit, mesh = edit.toMesh()) {
   const bm = BM_mesh_bm_from_me(mesh);
   bm.selectmode = edit.selectmode;
@@ -24,7 +22,6 @@ function applyBMesh(edit, bm) {
 }
 
 const PORTED = {
-  'mesh.loopcut': (bm, props) => edbm_loopcut(bm, BM_edge_at_index(bm, props.edge_index), props),
   'transform.edge_slide': edge_slide_exec,
 };
 
@@ -34,12 +31,10 @@ export const hasMeshOperator = (idname) => idname in PORTED || hasOperator(idnam
 // out (tests/editmesh-menus.test.js checks the rest run).
 const lacking = (reason, idnames) => idnames.map((idname) => [idname, reason]);
 const NOT_YET = Object.fromEntries([
-  ...lacking("Blender's object data functions", [
-    'mesh.uv_texture_add', 'mesh.uv_texture_remove', 'mesh.customdata_mask_clear', 'mesh.customdata_face_sets_clear',
-    'mesh.customdata_skin_add', 'mesh.customdata_skin_clear', 'mesh.customdata_custom_splitnormals_add',
-    'mesh.customdata_custom_splitnormals_clear', 'mesh.reorder_vertices_spatial', 'mesh.colors_rotate', 'mesh.colors_reverse',
-    'mesh.attribute_set', 'mesh.separate', 'mesh.sort_elements', 'mesh.circularize', 'mesh.shape_propagate_to_all',
-  ]),
+  ...lacking('new objects, which need a Main the module does not have', ['mesh.separate']),
+  ...lacking("the 3D View's view matrix", ['mesh.sort_elements']),
+  ...lacking("Blender's attribute RNA", ['mesh.attribute_set']),
+  ...lacking("Blender's shape key checks", ['mesh.shape_propagate_to_all']),
   ...lacking("Blender's gizmos", ['mesh.bisect', 'mesh.spin']),
   ...lacking("Blender's live UV unwrap", ['mesh.mark_seam']),
   ...lacking('Bullet, which the module is built without', ['mesh.convex_hull']),
