@@ -110,8 +110,8 @@ const POKE_CENTER = { MEDIAN_WEIGHTED: 0, MEDIAN: 1, BOUNDS: 2 };
 // mesh.quads_convert_to_tris (Ctrl T): the new faces selected, duplicates removed.
 export function edbm_quads_convert_to_tris_exec(bm, { quad_method = 'BEAUTY', ngon_method = 'BEAUTY' } = {}) {
   if (!bm.totfacesel) return false;
-  const bmop = {}, oiter = {};
-  EDBM_op_init(bm, bmop, 'triangulate faces=%hf quad_method=%i ngon_method=%i', BM_ELEM_SELECT, QUAD_METHOD[quad_method], NGON_METHOD[ngon_method]);
+  const oiter = {};
+  const bmop = EDBM_op_init(bm, 'triangulate faces=%hf quad_method=%i ngon_method=%i', BM_ELEM_SELECT, QUAD_METHOD[quad_method], NGON_METHOD[ngon_method]);
   BMO_op_exec(bm, bmop);
   BMO_slot_buffer_hflag_enable(bm, bmop.slots_out, 'faces.out', BM_FACE, BM_ELEM_SELECT, true);
   for (let f = BMO_iter_new(oiter, bmop.slots_out, 'face_map_double.out', BM_FACE); f >= 0; f = BMO_iter_step(oiter)) BM_face_kill(bm, f);
@@ -152,8 +152,7 @@ export function edbm_vertices_smooth_exec(bm, { factor = 0, repeat = 1, xaxis = 
 // mesh.poke: a vertex in each selected face, fanned to its corners.
 export function edbm_poke_face_exec(bm, { offset = 0, use_relative_offset = false, center_mode = 'MEDIAN_WEIGHTED' } = {}) {
   if (!bm.totfacesel) return false;
-  const bmop = {};
-  EDBM_op_init(bm, bmop, 'poke faces=%hf offset=%f use_relative_offset=%b center_mode=%i', BM_ELEM_SELECT, offset, use_relative_offset, POKE_CENTER[center_mode]);
+  const bmop = EDBM_op_init(bm, 'poke faces=%hf offset=%f use_relative_offset=%b center_mode=%i', BM_ELEM_SELECT, offset, use_relative_offset, POKE_CENTER[center_mode]);
   BMO_op_exec(bm, bmop);
   BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
   BMO_slot_buffer_hflag_enable(bm, bmop.slots_out, 'verts.out', BM_VERT, BM_ELEM_SELECT, true);

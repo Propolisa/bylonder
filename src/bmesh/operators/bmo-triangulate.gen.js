@@ -2,19 +2,22 @@
 // exporting the same name from bmo-triangulate.js.
 import { BM_EDGE, BM_ELEM_TAG, BM_FACE } from '../intern/bmesh-class.js';
 import { BM_mesh_elem_hflag_disable_all } from '../intern/bmesh-marking.js';
-import { BMO_slot_buffer_from_enabled_hflag, BMO_slot_buffer_hflag_enable, BMO_slot_get, BMO_slot_int_get } from '../intern/bmesh-operators.js';
+import {
+  BMO_slot_buffer_from_enabled_hflag,
+  BMO_slot_buffer_hflag_enable,
+  BMO_slot_get,
+  BMO_slot_int_get,
+} from '../intern/bmesh-operators.js';
 import { BM_mesh_triangulate } from '../tools/bmesh-triangulate.js';
 
-
-
 export function bmo_triangulate_exec(bm, op) {
-let quad_method = BMO_slot_int_get(bm, op.slots_in, "quad_method");
-let ngon_method = BMO_slot_int_get(bm, op.slots_in, "ngon_method");
-let slot_facemap_out = BMO_slot_get(bm, op.slots_out, "face_map.out");
-let slot_facemap_double_out = BMO_slot_get(bm, op.slots_out, "face_map_double.out");
-BM_mesh_elem_hflag_disable_all(bm, (BM_FACE | BM_EDGE), BM_ELEM_TAG, false);
-BMO_slot_buffer_hflag_enable(bm, op.slots_in, "faces", BM_FACE, BM_ELEM_TAG, false);
-BM_mesh_triangulate(bm, quad_method, ngon_method, 4, true, op, slot_facemap_out, slot_facemap_double_out);
-BMO_slot_buffer_from_enabled_hflag(bm, op, op.slots_out, "edges.out", BM_EDGE, BM_ELEM_TAG);
-BMO_slot_buffer_from_enabled_hflag(bm, op, op.slots_out, "faces.out", BM_FACE, BM_ELEM_TAG);
+  const quad_method = BMO_slot_int_get(bm, op.slots_in, 'quad_method');
+  const ngon_method = BMO_slot_int_get(bm, op.slots_in, 'ngon_method');
+  const slot_facemap_out = BMO_slot_get(bm, op.slots_out, 'face_map.out');
+  const slot_facemap_double_out = BMO_slot_get(bm, op.slots_out, 'face_map_double.out');
+  BM_mesh_elem_hflag_disable_all(bm, BM_FACE | BM_EDGE, BM_ELEM_TAG, false);
+  BMO_slot_buffer_hflag_enable(bm, op.slots_in, 'faces', BM_FACE, BM_ELEM_TAG, false);
+  BM_mesh_triangulate(bm, quad_method, ngon_method, 4, true, op, slot_facemap_out, slot_facemap_double_out);
+  BMO_slot_buffer_from_enabled_hflag(bm, op, op.slots_out, 'edges.out', BM_EDGE, BM_ELEM_TAG);
+  BMO_slot_buffer_from_enabled_hflag(bm, op, op.slots_out, 'faces.out', BM_FACE, BM_ELEM_TAG);
 }

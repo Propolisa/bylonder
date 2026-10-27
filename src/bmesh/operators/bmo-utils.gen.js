@@ -8,73 +8,71 @@ import { BM_face_normal_flip_ex } from '../intern/bmesh-polygon.js';
 import { BM_EDGES_OF_VERT, BM_edge_other_vert } from '../intern/bmesh-query.js';
 import { CD_MDISPS } from '../../makesdna/customdata-types.js';
 
-
-
 export function bmo_reverse_faces_exec(bm, op) {
-let cd_loop_mdisp_offset = CustomData_get_offset(bm.ldata, CD_MDISPS);
-let use_loop_mdisp_flip = BMO_slot_bool_get(bm, op.slots_in, "flip_multires");
-let siter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
-let f = -1;
-for (; ; ) {
-BM_face_normal_flip_ex(bm, f, cd_loop_mdisp_offset, use_loop_mdisp_flip);
-}
+  const cd_loop_mdisp_offset = CustomData_get_offset(bm.ldata, CD_MDISPS);
+  const use_loop_mdisp_flip = BMO_slot_bool_get(bm, op.slots_in, 'flip_multires');
+  const siter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
+  const f = -1;
+  for (;;) {
+    BM_face_normal_flip_ex(bm, f, cd_loop_mdisp_offset, use_loop_mdisp_flip);
+  }
 }
 
 export function bmo_smooth_vert_exec(bm, _unused0, op) {
-let siter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
-let v = -1;
-let e = -1;
-let cos = MEM_new_array_uninitialized(BMO_slot_buffer_len(bm, op.slots_in, "verts"), "bmo_smooth_vert_exec");
-let co = null;
-let co2 = null;
-let clip_dist = BMO_slot_float_get(bm, op.slots_in, "clip_dist");
-let fac = BMO_slot_float_get(bm, op.slots_in, "factor");
-let j = 0;
-let clipx = Number(BMO_slot_bool_get(bm, op.slots_in, "mirror_clip_x"));
-let clipy = Number(BMO_slot_bool_get(bm, op.slots_in, "mirror_clip_y"));
-let clipz = Number(BMO_slot_bool_get(bm, op.slots_in, "mirror_clip_z"));
-let xaxis = Number(BMO_slot_bool_get(bm, op.slots_in, "use_axis_x"));
-let yaxis = Number(BMO_slot_bool_get(bm, op.slots_in, "use_axis_y"));
-let zaxis = Number(BMO_slot_bool_get(bm, op.slots_in, "use_axis_z"));
-let i = 0;
-for (; ; ) {
-co = cos[i];
-co = [0, 0, 0];
-j = 0;
-for (e of BM_EDGES_OF_VERT(bm, v)) {
-co2 = vco(bm, BM_edge_other_vert(bm, e, v));
-co = add_v3(co, co2);
-(j += 1);
-}
-if (!(j)) {
-co = vco(bm, v).slice(0, 3);
-i++;
-continue;
-}
-co = mul_v3_fl(co, Math.fround(1.0 / j));
-co = interp_v3(vco(bm, v), co, fac);
-if ((clipx && (Math.fround(Math.abs(vco(bm, v)[0])) <= clip_dist))) {
-co[0] = 0.0;
-}
-if ((clipy && (Math.fround(Math.abs(vco(bm, v)[1])) <= clip_dist))) {
-co[1] = 0.0;
-}
-if ((clipz && (Math.fround(Math.abs(vco(bm, v)[2])) <= clip_dist))) {
-co[2] = 0.0;
-}
-i++;
-}
-i = 0;
-for (; ; ) {
-if (xaxis) {
-vco(bm, v)[0] = cos[i][0];
-}
-if (yaxis) {
-vco(bm, v)[1] = cos[i][1];
-}
-if (zaxis) {
-vco(bm, v)[2] = cos[i][2];
-}
-i++;
-}
+  const siter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
+  const v = -1;
+  let e = -1;
+  const cos = MEM_new_array_uninitialized(BMO_slot_buffer_len(bm, op.slots_in, 'verts'), 'bmo_smooth_vert_exec');
+  let co = null;
+  let co2 = null;
+  const clip_dist = BMO_slot_float_get(bm, op.slots_in, 'clip_dist');
+  const fac = BMO_slot_float_get(bm, op.slots_in, 'factor');
+  let j = 0;
+  const clipx = Number(BMO_slot_bool_get(bm, op.slots_in, 'mirror_clip_x'));
+  const clipy = Number(BMO_slot_bool_get(bm, op.slots_in, 'mirror_clip_y'));
+  const clipz = Number(BMO_slot_bool_get(bm, op.slots_in, 'mirror_clip_z'));
+  const xaxis = Number(BMO_slot_bool_get(bm, op.slots_in, 'use_axis_x'));
+  const yaxis = Number(BMO_slot_bool_get(bm, op.slots_in, 'use_axis_y'));
+  const zaxis = Number(BMO_slot_bool_get(bm, op.slots_in, 'use_axis_z'));
+  let i = 0;
+  for (;;) {
+    co = cos[i];
+    co = [0, 0, 0];
+    j = 0;
+    for (e of BM_EDGES_OF_VERT(bm, v)) {
+      co2 = vco(bm, BM_edge_other_vert(bm, e, v));
+      co = add_v3(co, co2);
+      j += 1;
+    }
+    if (!j) {
+      co = vco(bm, v).slice(0, 3);
+      i++;
+      continue;
+    }
+    co = mul_v3_fl(co, Math.fround(1.0 / j));
+    co = interp_v3(vco(bm, v), co, fac);
+    if (clipx && Math.fround(Math.abs(vco(bm, v)[0])) <= clip_dist) {
+      co[0] = 0.0;
+    }
+    if (clipy && Math.fround(Math.abs(vco(bm, v)[1])) <= clip_dist) {
+      co[1] = 0.0;
+    }
+    if (clipz && Math.fround(Math.abs(vco(bm, v)[2])) <= clip_dist) {
+      co[2] = 0.0;
+    }
+    i++;
+  }
+  i = 0;
+  for (;;) {
+    if (xaxis) {
+      vco(bm, v)[0] = cos[i][0];
+    }
+    if (yaxis) {
+      vco(bm, v)[1] = cos[i][1];
+    }
+    if (zaxis) {
+      vco(bm, v)[2] = cos[i][2];
+    }
+    i++;
+  }
 }

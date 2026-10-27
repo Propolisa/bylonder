@@ -4,9 +4,18 @@
     "shimmed": {},
     "excluded": {
       "MEM_new_array_uninitialized": "intern/guardedalloc/MEM_guardedalloc.h",
-      "MEM_new_array_zeroed": "intern/guardedalloc/MEM_guardedalloc.h"
+      "MEM_delete_void": "intern/guardedalloc/intern/mallocn.cc",
+      "MEM_new_zeroed": "intern/guardedalloc/MEM_guardedalloc.h",
+      "MEM_new_array_zeroed": "intern/guardedalloc/MEM_guardedalloc.h",
+      "MEM_new_uninitialized": "intern/guardedalloc/MEM_guardedalloc.h",
+      "MEM_dupalloc": "intern/guardedalloc/MEM_guardedalloc.h"
     },
-    "missing": {}
+    "missing": {
+      "MEM_SIZE_OPTIMAL": "prelude macro without a home in rules.PRELUDE_HOMES",
+      "BLI_assert": "prelude macro without a home in rules.PRELUDE_HOMES",
+      "__builtin_expect": "no definition found",
+      "qsort": "no definition found"
+    }
   },
   "blenkernel/curveprofile.js": {
     "generated": [],
@@ -20,16 +29,18 @@
     "generated": [],
     "shimmed": {},
     "excluded": {
+      "CustomData_get_offset": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_get_offset_named": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
       "CustomData_get_n_offset": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
       "CustomData_number_of_layers": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
-      "CustomData_has_layer": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
-      "CustomData_get_offset_named": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
       "CustomData_get_named_layer_index": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
       "CustomData_get_layer_index": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
-      "CustomData_layer_has_math": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
-      "CustomData_data_equals": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_has_layer": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
       "CustomData_bmesh_interp": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
-      "CustomData_get_offset": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet"
+      "CustomData_layer_has_math": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_sizeof": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_data_equals": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_bmesh_copy_block": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet"
     },
     "missing": {}
   },
@@ -57,81 +68,306 @@
     },
     "missing": {}
   },
+  "blenlib/assert.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "_BLI_assert_print_backtrace": "Debug checks",
+      "_BLI_assert_print_pos": "Debug checks"
+    },
+    "missing": {}
+  },
+  "blenlib/ghash.js": {
+    "generated": [
+      "BLI_ghashIterator_getKey",
+      "BLI_ghash_insert",
+      "BLI_ghashIterator_getValue",
+      "ghash_insert",
+      "ghash_insert_ex",
+      "ghash_bucket_index",
+      "ghash_keyhash",
+      "ghash_buckets_expand",
+      "ghash_buckets_resize",
+      "GHASH_LIMIT_SHRINK",
+      "GHASH_LIMIT_GROW",
+      "ghash_entryhash"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/heap-simple.js": {
+    "generated": [
+      "BLI_heapsimple_is_empty",
+      "BLI_heapsimple_new",
+      "BLI_heapsimple_free",
+      "BLI_heapsimple_clear",
+      "BLI_heapsimple_insert",
+      "BLI_heapsimple_pop_min",
+      "BLI_heapsimple_new_ex",
+      "heapsimple_up",
+      "heapsimple_down",
+      "HEAP_PARENT"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/heap.js": {
+    "generated": [
+      "BLI_heap_insert",
+      "BLI_heap_new",
+      "BLI_heap_is_empty",
+      "BLI_heap_top_value",
+      "BLI_heap_pop_min",
+      "BLI_heap_free",
+      "BLI_heap_new_ex",
+      "heap_node_alloc",
+      "heap_up",
+      "heap_down",
+      "heap_node_free",
+      "heap_swap",
+      "heap_node_alloc_chunk",
+      "HEAP_PARENT",
+      "HEAP_COMPARE",
+      "BLI_heap_node_value",
+      "BLI_heap_node_value_update",
+      "HEAP_LEFT",
+      "HEAP_RIGHT",
+      "BLI_heap_clear",
+      "BLI_heap_remove",
+      "BLI_heap_insert_or_update",
+      "BLI_heap_node_value_update_ptr"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/linklist.js": {
+    "generated": [
+      "BLI_linklist_pop_pool",
+      "BLI_linklist_prepend_pool",
+      "BLI_linklist_prepend",
+      "BLI_linklist_prepend_nlink"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/listbase.js": {
+    "generated": [
+      "BLI_addtail",
+      "BLI_remlink",
+      "BLI_listbase_rotate_first",
+      "BLI_rfindlink",
+      "BLI_addhead",
+      "BLI_insertlinkbefore",
+      "BLI_insertlinkafter",
+      "BLI_duplicatelist",
+      "BLI_listbase_reverse"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
   "blenlib/math-geom.js": {
     "generated": [
+      "dot_m3_v3_row_x",
+      "compare_v2v2",
+      "power_of_2_max_i",
       "mul_v2_fl",
       "add_v2_v2",
-      "power_of_2_max_i",
-      "compare_v2v2",
+      "compare_v3v3",
+      "area_tri_v3",
+      "is_quad_flip_v3",
+      "minmax_v3v3_v3",
+      "ortho_v3_v3",
+      "axis_dominant_v3_to_m3",
+      "zero_v2",
+      "power_of_2_max_u",
+      "is_finite_v3",
+      "mod_i",
       "safe_divide",
       "isect_line_line_v3",
       "is_power_of_2_i",
-      "minmax_v3v3_v3",
-      "closest_to_plane_normalized_v3",
       "plane_from_point_normal_v3",
       "dist_squared_to_plane_v3",
+      "closest_to_plane_normalized_v3",
+      "closest_to_line_segment_v3",
       "dist_squared_to_line_segment_v2",
       "line_point_factor_v2",
-      "closest_to_line_segment_v3",
+      "axis_dominant_v3_to_m3_negate",
+      "cross_tri_v3",
+      "axis_dominant_v3_single",
+      "ortho_basis_v3v3_v3",
       "dist_squared_to_line_segment_v3",
       "plane_point_side_v3",
+      "closest_to_line_v3",
       "closest_to_line_segment_v2",
       "len_squared_v2v2",
       "line_point_factor_v2_ex",
-      "closest_to_line_v3",
-      "axis_dominant_v3_to_m3",
-      "ortho_v3_v3",
-      "isect_point_poly_v2",
-      "closest_to_plane_v3",
-      "compare_v3v3",
-      "interp_bilinear_quad_v3",
-      "closest_to_line_v2",
-      "sub_v2_v2v2",
-      "dot_v2v2",
       "len_squared_v2",
+      "interp_bilinear_quad_v3",
+      "closest_to_plane_v3",
+      "isect_point_poly_v2",
       "closest_to_ray_v3",
-      "ortho_basis_v3v3_v3",
-      "axis_dominant_v3_single",
+      "closest_to_line_v2",
+      "dot_v2v2",
+      "sub_v2_v2v2",
+      "signum_i_ex",
+      "cross_tri_v2",
+      "cross_poly_v2",
+      "rotate_normalized_v3_v3v3fl",
+      "mid_v3_v3v3v3v3",
+      "axis_sort_v3",
       "area_poly_v2",
       "equals_v3v3",
-      "cross_poly_v2",
-      "axis_sort_v3",
-      "mid_v3_v3v3v3v3",
-      "cross_v2v2",
+      "len_v2v2",
       "isect_point_quad_v2",
-      "sub_v2_v2",
       "resolve_quad_uv_v2",
-      "safe_acos_approx",
+      "sub_v2_v2",
+      "cross_v2v2",
       "line_point_side_v2",
       "resolve_quad_uv_v2_deriv",
-      "zero_v2",
+      "safe_acos_approx",
       "interp_v2_v2v2"
     ],
     "shimmed": {
       "angle_v3v3": null,
-      "angle_v3v3v3": null,
-      "is_zero_v3": null,
       "angle_normalized_v3v3": null,
-      "isect_line_plane_v3": null,
-      "isect_line_line_epsilon_v3": null,
-      "len_squared_v3": null,
+      "normal_tri_v3": null,
       "interp_weights_poly_v2": {
         "override": "Blender steps a float pointer back across rows (`v[n - 1] - 2` for v[n - 2]); here rows are indexed."
       },
-      "project_v3_v3v3": null,
-      "normal_quad_v3": null
+      "is_zero_v3": null,
+      "project_plane_normalized_v3_v3v3": null,
+      "len_squared_v3": null,
+      "angle_v3v3v3": null,
+      "isect_line_plane_v3": null,
+      "len_v3": null,
+      "add_newell_cross_v3_v3v3": null,
+      "isect_line_line_epsilon_v3": null,
+      "angle_signed_on_axis_v3v3_v3": null,
+      "normal_quad_v3": null,
+      "project_v3_v3v3": null
+    },
+    "excluded": {},
+    "missing": {
+      "dist_squared_to_line_segment_v2": "a shim calls it; no definition found",
+      "line_point_factor_v2": "a shim calls it; no definition found"
+    }
+  },
+  "blenlib/math-matrix.js": {
+    "generated": [
+      "mul_v2_m3v3",
+      "invert_m3",
+      "invert_m3_m3",
+      "copy_m3_m3",
+      "determinant_m3_array",
+      "adjoint_m3_m3"
+    ],
+    "shimmed": {
+      "transpose_m3": null,
+      "invert_m4_m4": null
     },
     "excluded": {},
     "missing": {}
   },
-  "blenlib/math-matrix.js": {
-    "generated": [
-      "mul_v2_m3v3"
-    ],
-    "shimmed": {
-      "invert_m4_m4": null,
-      "transpose_m3": null
+  "blenlib/memarena.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "BLI_memarena_new": "JS allocates with the garbage collector"
     },
+    "missing": {}
+  },
+  "blenlib/mempool.js": {
+    "generated": [
+      "BLI_mempool_create",
+      "BLI_mempool_destroy",
+      "BLI_mempool_alloc",
+      "mempool_maxchunks",
+      "mempool_chunk_add",
+      "mempool_chunk_alloc",
+      "mempool_chunk_free_all",
+      "BLI_mempool_free",
+      "MAKE_ID",
+      "NODE_STEP_NEXT",
+      "MAKE_ID_8",
+      "CHUNK_DATA",
+      "NODE_STEP_PREV",
+      "mempool_chunk_free",
+      "BLI_mempool_len",
+      "BLI_mempool_iternew",
+      "BLI_mempool_iterstep"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/polyfill-2d-beautify.js": {
+    "generated": [
+      "BLI_polyfill_beautify",
+      "BLI_polyfill_edge_calc_rotate_beauty__area",
+      "polyedge_beauty_cost_update",
+      "polyedge_rotate_beauty_calc",
+      "is_boundary_edge",
+      "oedge_cmp",
+      "polyedge_rotate",
+      "BLI_polyfill_beautify_quad_rotate_calc_ex",
+      "polyedge_beauty_cost_update_single"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/polyfill-2d.js": {
+    "generated": [
+      "BLI_polyfill_calc_arena",
+      "polyfill_prepare",
+      "polyfill_calc",
+      "pf_coord_sign_calc",
+      "kdtree2d_init_mapping",
+      "pf_triangulate",
+      "kdtree2d_new",
+      "kdtree2d_balance",
+      "kdtree2d_init",
+      "span_tri_v2_sign",
+      "pf_tri_add",
+      "pf_ear_tip_find",
+      "pf_ear_tip_cut",
+      "kdtree2d_node_remove",
+      "kdtree2d_balance_recursive",
+      "area_tri_signed_v2_alt_2x",
+      "signum_enum",
+      "pf_ear_tip_check",
+      "pf_coord_remove",
+      "kdtree2d_isect_tri",
+      "kdtree2d_isect_tri_single",
+      "kdtree2d_isect_tri_recursive",
+      "tri_isect_precomputed_init",
+      "tri_isect_precomputed_test"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/stack.js": {
+    "generated": [
+      "BLI_stack_free",
+      "BLI_stack_count",
+      "BLI_stack_push",
+      "BLI_stack_pop_n_reverse",
+      "BLI_stack_new",
+      "stack_free_chunks",
+      "BLI_stack_push_r",
+      "BLI_stack_pop",
+      "BLI_stack_new_ex",
+      "stack_get_last_elem",
+      "BLI_stack_discard",
+      "stack_chunk_elem_max_calc"
+    ],
+    "shimmed": {},
     "excluded": {},
     "missing": {}
   },
@@ -151,12 +387,21 @@
     "excluded": {},
     "missing": {}
   },
+  "blenlib/utildefines.js": {
+    "generated": [
+      "ARRAY_SIZE"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
   "bmesh/intern/bmesh-construct.js": {
     "generated": [],
     "shimmed": {
       "BM_elem_attrs_copy": null,
-      "BM_edges_from_verts": null,
-      "BM_edges_from_verts_ensure": null
+      "BM_face_create_quad_tri": null,
+      "BM_edges_from_verts_ensure": null,
+      "BM_edges_from_verts": null
     },
     "excluded": {},
     "missing": {}
@@ -166,30 +411,71 @@
       "BM_face_create_verts"
     ],
     "shimmed": {
-      "BM_face_kill": null,
       "BM_vert_kill": null,
-      "BM_edge_create": null,
+      "BM_face_kill": null,
       "BM_vert_create": null,
+      "BM_edge_create": null,
+      "bmesh_kernel_loop_reverse": {
+        "signature": "Blender (bm, f, cd_loop_mdisp_offset, use_loop_mdisp_flip), shim (bm, f)"
+      },
+      "bmesh_face_swap_data": null,
       "BM_face_create": null
     },
     "excluded": {},
     "missing": {}
   },
+  "bmesh/intern/bmesh-edgeloop.js": {
+    "generated": [
+      "BM_mesh_edgeloops_calc_normal",
+      "BM_mesh_edgeloops_find",
+      "BM_edgeloop_length_get",
+      "BM_mesh_edgeloops_calc_center",
+      "BM_mesh_edgeloops_calc_order",
+      "BM_edgeloop_calc_normal",
+      "BM_edgeloop_free",
+      "bm_loop_build",
+      "BM_edgeloop_calc_center",
+      "BM_edgeloop_verts_get",
+      "BM_edgeloop_expand",
+      "BM_edgeloop_is_closed",
+      "BM_edgeloop_center_get",
+      "BM_edgeloop_normal_get",
+      "BM_edgeloop_copy",
+      "BM_edgeloop_calc_normal_aligned",
+      "BM_edgeloop_flip",
+      "NODE_AS_CO",
+      "bm_vert_other_tag"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
   "bmesh/intern/bmesh-interp.js": {
     "generated": [
+      "BM_face_interp_multires_ex",
       "BM_loop_interp_from_face",
-      "BM_loop_interp_multires",
       "BM_loop_interp_multires_ex",
-      "compute_mdisp_quad",
+      "BM_loop_interp_multires",
       "loop_interp_multires_cb",
       "mdisp_axis_from_quad",
-      "bm_loop_flip_disp",
+      "compute_mdisp_quad",
+      "BM_data_interp_from_verts",
       "mdisp_in_mdispquad",
-      "bm_loop_flip_equotion",
-      "quad_co"
+      "bm_loop_flip_disp",
+      "bm_data_interp_from_elem",
+      "quad_co",
+      "bm_loop_flip_equotion"
     ],
     "shimmed": {
       "BM_data_layer_add_named": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-marking.js": {
+    "generated": [],
+    "shimmed": {
+      "BM_mesh_elem_hflag_disable_all": null
     },
     "excluded": {},
     "missing": {}
@@ -207,8 +493,8 @@
   "bmesh/intern/bmesh-mesh.js": {
     "generated": [],
     "shimmed": {
-      "BM_face_at_index": null,
       "BM_mesh_elem_table_ensure": null,
+      "BM_face_at_index": null,
       "BM_mesh_elem_index_ensure": null
     },
     "excluded": {},
@@ -217,61 +503,256 @@
   "bmesh/intern/bmesh-mods.js": {
     "generated": [],
     "shimmed": {
+      "BM_edge_split": null,
+      "BM_faces_join_pair": null,
       "BM_face_split": null
     },
     "excluded": {},
     "missing": {}
   },
-  "bmesh/intern/bmesh-polygon.js": {
+  "bmesh/intern/bmesh-opdefines.js": {
     "generated": [
-      "BM_face_calc_center_bounds",
-      "BM_face_point_inside_test",
-      "BM_face_calc_tangent_auto",
-      "BM_face_as_array_vert_tri",
-      "BM_vert_tri_calc_tangent_from_edge",
-      "BM_face_calc_tangent_from_edge",
-      "bm_face_calc_tangent_from_quad_edge_pair",
-      "BM_face_calc_center_median",
-      "bm_vert_tri_find_unique_edge",
-      "BM_face_as_array_vert_quad",
-      "BM_vert_normal_update_all",
-      "bm_loop_normal_accum",
-      "poly_rotate_plane"
+      "to_subtype_union"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-operators.js": {
+    "generated": [
+      "_bmo_slot_copy",
+      "BMO_elem_flag_from_header",
+      "_bmo_elem_flag_enable"
     ],
     "shimmed": {
-      "BM_face_normal_update": null
+      "BMO_slot_buffer_hflag_enable": null,
+      "BMO_slot_int_get": null,
+      "BMO_slot_buffer_from_enabled_hflag": null,
+      "BMO_slot_get": {
+        "signature": "Blender (bm, slot_args, identifier), shim (slot_args, identifier)"
+      },
+      "BMO_slot_buffer_from_enabled_flag": null,
+      "BMO_slot_bool_get": {
+        "signature": "Blender (bm, slot_args, slot_name), shim (slot_args, name)"
+      },
+      "BMO_slot_float_get": {
+        "signature": "Blender (bm, slot_args, slot_name), shim (slot_args, name)"
+      },
+      "BMO_slot_buffer_flag_enable": null,
+      "BMO_slot_buffer_len": {
+        "signature": "Blender (bm, slot_args, slot_name), shim (slot_args, name)"
+      },
+      "BMO_op_initf": {
+        "signature": "Blender (bm, flag, fmt), shim (bm, op, flag, fmt, ...args)"
+      },
+      "BMO_op_finish": {
+        "signature": "Blender (bm, op), shim ()"
+      },
+      "BMO_op_exec": null,
+      "BMO_error_raise": null,
+      "BMO_slot_map_elem_insert": null,
+      "BMO_op_init": {
+        "signature": "Blender (bm, flag, opname), shim (bm, op, flag, opname)"
+      }
+    },
+    "excluded": {},
+    "missing": {
+      "BMO_FLAG_DEFAULTS": "a shim calls it; no definition found"
+    }
+  },
+  "bmesh/intern/bmesh-polygon.js": {
+    "generated": [
+      "BM_face_as_array_vert_quad",
+      "BM_face_normal_flip_ex",
+      "BM_face_calc_center_bounds",
+      "BM_face_calc_center_median",
+      "BM_face_triangulate",
+      "BM_face_as_array_loop_quad",
+      "BM_face_calc_tangent_auto",
+      "bm_face_calc_tangent_from_quad_edge_pair",
+      "BM_vert_tri_calc_tangent_from_edge",
+      "BM_face_as_array_vert_tri",
+      "BM_face_calc_tangent_from_edge",
+      "BM_face_point_inside_test",
+      "bm_vert_tri_find_unique_edge",
+      "BM_vert_normal_update_all",
+      "poly_rotate_plane",
+      "bm_loop_normal_accum"
+    ],
+    "shimmed": {
+      "BM_face_calc_center_median_weighted": null,
+      "BM_face_normal_update": null,
+      "BM_face_normal_flip": null,
+      "BM_face_calc_area": null
     },
     "excluded": {},
     "missing": {}
   },
   "bmesh/intern/bmesh-query.js": {
     "generated": [
-      "BM_edge_calc_length",
-      "BM_edge_face_count",
+      "BM_mesh_calc_face_groups",
       "BM_vert_step_fan_loop",
+      "BM_edge_face_count",
+      "BM_edge_calc_length",
+      "BM_iter_new",
+      "BM_iter_step",
+      "BM_iter_at_index",
       "BM_vert_face_check",
+      "BM_edge_is_contiguous_loop_cd",
+      "BM_iter_init",
       "BM_edge_calc_face_angle_signed_ex",
-      "BM_edge_is_convex",
-      "BM_face_find_longest_loop"
+      "bmiter__loop_of_loop_step",
+      "bmiter__loop_of_vert_begin",
+      "bmiter__elem_of_mesh_begin",
+      "bmiter__vert_of_face_step",
+      "bmiter__face_of_edge_begin",
+      "bmiter__face_of_vert_begin",
+      "bmiter__elem_of_mesh_step",
+      "bmiter__vert_of_edge_step",
+      "bmiter__vert_of_face_begin",
+      "bmiter__loop_of_vert_step",
+      "bmiter__loop_of_edge_step",
+      "bmiter__face_of_edge_step",
+      "bmiter__loop_of_face_begin",
+      "bmiter__edge_of_face_begin",
+      "bmiter__vert_of_edge_begin",
+      "bmiter__face_of_vert_step",
+      "bmiter__loop_of_edge_begin",
+      "bmiter__loop_of_loop_begin",
+      "bmiter__edge_of_face_step",
+      "bmiter__edge_of_vert_step",
+      "bmiter__loop_of_face_step",
+      "bmiter__edge_of_vert_begin",
+      "BM_face_find_longest_loop",
+      "BM_edge_is_convex"
     ],
     "shimmed": {
+      "BM_edge_face_pair": null,
       "BM_edge_other_vert": null,
-      "BM_edge_is_wire": null,
       "BM_edge_is_manifold": null,
       "BM_edge_exists": null,
+      "BM_edge_is_wire": null,
+      "BM_face_exists": {
+        "signature": "Blender (bm, varr, len), shim (bm, verts)"
+      },
+      "BM_edge_is_boundary": null,
       "BM_face_edge_share_loop": null,
-      "BM_edge_loop_pair": null,
       "BM_edge_other_loop": null,
+      "BM_edge_loop_pair": null,
       "BM_face_vert_share_loop": null
     },
     "excluded": {},
     "missing": {}
   },
   "bmesh/intern/bmesh-structure.js": {
-    "generated": [],
+    "generated": [
+      "bmesh_disk_faceloop_find_first",
+      "bmesh_disk_facevert_count",
+      "bmesh_radial_faceloop_find_first",
+      "bmesh_radial_faceloop_find_next",
+      "bmesh_disk_faceedge_find_next",
+      "bmesh_radial_facevert_count",
+      "bmesh_radial_facevert_check"
+    ],
     "shimmed": {
       "bmesh_disk_edge_next": null
     },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/operators/bmo-bridge.js": {
+    "generated": [
+      "bmo_bridge_loops_exec",
+      "bm_edge_test_cb",
+      "bridge_loop_pair",
+      "bm_vert_loop_pair",
+      "bm_face_edges_tag_out",
+      "bm_bridge_splice_loops",
+      "bm_bridge_best_rotation",
+      "bm_edgeloop_offset_length"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/operators/bmo-connect-pair.js": {
+    "generated": [
+      "bmo_connect_vert_pair_exec",
+      "state_link_add",
+      "bm_vert_pair_to_matrix",
+      "state_step",
+      "state_calc_co_pair_fac",
+      "state_calc_co_pair",
+      "FACE_WALK_TEST"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/operators/bmo-join-triangles.js": {
+    "generated": [
+      "bmo_join_triangles_exec",
+      "bm_edge_to_quad_verts",
+      "reprioritize_face_neighbors",
+      "quad_calc_error",
+      "bm_faces_join_pair_by_edge",
+      "bm_edge_is_delimit",
+      "bm_edge_delmimit_data_from_op",
+      "reprioritize_join",
+      "add_neighbors",
+      "ASSERT_VALID_ERROR_METRIC",
+      "bm_edge_is_contiguous_loop_cd_all",
+      "bm_edge_delimit_cdata",
+      "compute_alignment",
+      "add_without_duplicates",
+      "rotate_to_plane"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/operators/bmo-normals.js": {
+    "generated": [
+      "bmo_recalc_face_normals_exec",
+      "bmo_recalc_normal_loop_filter_cb",
+      "bmo_recalc_face_normals_array",
+      "recalc_face_normals_find_index"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/operators/bmo-poke.js": {
+    "generated": [
+      "bmo_poke_exec"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/operators/bmo-triangulate.js": {
+    "generated": [
+      "bmo_triangulate_exec"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/operators/bmo-utils.js": {
+    "generated": [
+      "bmo_reverse_faces_exec",
+      "bmo_smooth_vert_exec"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/tools/bmesh-beautify.js": {
+    "generated": [
+      "BM_verts_calc_rotate_beauty",
+      "bm_edge_calc_rotate_beauty__angle"
+    ],
+    "shimmed": {},
     "excluded": {},
     "missing": {}
   },
@@ -279,141 +760,150 @@
     "generated": [
       "BM_mesh_bevel",
       "bevel_limit_offset",
-      "bevel_merge_uvs",
       "build_vmesh",
-      "set_profile_spacing",
-      "determine_uv_vert_connectivity",
       "get_face_kind",
+      "bevel_reattach_wires",
+      "regularize_profile_orientation",
+      "bevel_harden_normals",
+      "determine_uv_vert_connectivity",
+      "set_profile_spacing",
+      "adjust_offsets",
+      "bevel_extend_edge_data",
+      "build_boundary",
+      "find_profile_fullness",
+      "bevel_build_edge_polygons",
+      "find_bevvert",
+      "uv_vert_map_pop",
+      "bevel_vert_construct",
+      "bevel_set_weighted_normal_face_strength",
       "math_layer_info_init",
       "bevel_rebuild_existing_polygons",
-      "build_boundary",
-      "adjust_offsets",
-      "regularize_profile_orientation",
-      "find_bevvert",
-      "bevel_extend_edge_data",
+      "bevel_merge_uvs",
       "uv_vert_map_init",
-      "bevel_reattach_wires",
-      "bevel_vert_construct",
-      "uv_vert_map_pop",
-      "bevel_harden_normals",
-      "bevel_build_edge_polygons",
-      "find_profile_fullness",
-      "bevel_set_weighted_normal_face_strength",
       "geometry_collide_offset",
       "vertex_collide_offset",
-      "move_weld_profile_planes",
-      "bevel_build_cutoff",
-      "bevel_build_poly",
-      "mesh_vert",
-      "pipe_test",
       "set_profile_params",
-      "get_profile_point",
       "bevel_build_rings",
-      "create_mesh_bmvert",
+      "bevel_build_cutoff",
       "bevel_build_trifan",
-      "bevel_vert_two_edges",
-      "copy_mesh_vert",
+      "bevel_build_poly",
+      "move_weld_profile_planes",
+      "get_profile_point",
       "calculate_vm_profiles",
+      "mesh_vert",
+      "bevel_vert_two_edges",
+      "pipe_test",
+      "create_mesh_bmvert",
+      "copy_mesh_vert",
+      "find_edge_half",
+      "next_edgehalf_bev",
+      "bevel_edges_sharp_boundary",
       "find_even_superellipse_chords",
+      "find_other_end_edge_half",
+      "adjust_the_cycle_or_chain",
+      "bevel_extend_edge_data_ex",
+      "eh_on_plane",
+      "adjust_bound_vert",
+      "adjust_miter_inner_coords",
+      "build_boundary_vertex_only",
+      "edges_angle_kind",
+      "offset_on_edge_between",
+      "add_new_bound_vert",
+      "set_bound_vert_seams",
+      "next_bev",
+      "good_offset_on_edge_between",
+      "build_boundary_terminal_edge",
+      "offset_meet",
+      "adjust_miter_coords",
+      "weld_cross_attrs_copy",
+      "bevvert_is_weld_cross",
+      "bev_create_ngon",
+      "record_face_kind",
+      "choose_rep_face",
+      "find_bevel_edge_order",
+      "bev_ccw_test",
+      "BM_BEVEL_EDGE_TAG_ENABLE",
+      "BM_BEVEL_EDGE_TAG_DISABLE",
+      "edge_face_angle",
       "contig_ldata_across_edge",
       "swap_face_components",
       "bev_rebuild_polygon",
-      "adjust_bound_vert",
-      "build_boundary_vertex_only",
-      "edges_angle_kind",
-      "adjust_miter_coords",
-      "offset_meet",
-      "offset_on_edge_between",
-      "next_bev",
-      "adjust_miter_inner_coords",
-      "eh_on_plane",
-      "add_new_bound_vert",
-      "good_offset_on_edge_between",
-      "build_boundary_terminal_edge",
-      "set_bound_vert_seams",
-      "adjust_the_cycle_or_chain",
-      "find_other_end_edge_half",
-      "next_edgehalf_bev",
-      "find_edge_half",
-      "bevel_extend_edge_data_ex",
-      "bev_ccw_test",
-      "BM_BEVEL_EDGE_TAG_ENABLE",
-      "find_bevel_edge_order",
-      "edge_face_angle",
-      "BM_BEVEL_EDGE_TAG_DISABLE",
-      "bevel_edges_sharp_boundary",
-      "bev_create_ngon",
-      "bevvert_is_weld_cross",
-      "choose_rep_face",
-      "weld_cross_attrs_copy",
-      "record_face_kind",
-      "get_incident_edges",
-      "boundvert_rep_face",
-      "find_face_internal_boundverts",
-      "frep_for_center_poly",
-      "find_closer_edge",
-      "nearly_parallel",
       "project_to_edge",
-      "tri_corner_adj_vmesh",
+      "nearly_parallel",
       "build_square_in_vmesh",
-      "vmesh_copy_equiv_verts",
-      "tri_corner_test",
-      "pipe_adj_vmesh",
-      "is_canon",
-      "snap_edges_for_vmesh_vert",
-      "build_center_ngon",
-      "square_out_adj_vmesh",
       "adj_vmesh",
-      "flag_out_vert",
+      "square_out_adj_vmesh",
+      "is_canon",
+      "boundvert_rep_face",
+      "tri_corner_adj_vmesh",
+      "snap_edges_for_vmesh_vert",
+      "frep_for_center_poly",
+      "tri_corner_test",
+      "vmesh_copy_equiv_verts",
+      "build_center_ngon",
+      "pipe_adj_vmesh",
       "flag_out_edge",
+      "find_closer_edge",
+      "get_incident_edges",
+      "find_face_internal_boundverts",
       "calculate_profile",
+      "flag_out_vert",
       "find_even_superellipse_chords_general",
-      "contig_ldata_across_loops",
-      "disable_flag_out_edge",
-      "count_ccw_edges_between",
       "contig_ldata_around_vert",
       "slide_dist",
       "nearly_parallel_normalized",
+      "offset_meet_edge",
+      "check_edge_data_seam_sharp_edges",
+      "move_profile_plane",
+      "offset_in_plane",
       "offset_meet_lines_percent_or_absolute",
       "is_outside_edge",
       "point_between_edges",
-      "offset_meet_edge",
-      "move_profile_plane",
-      "offset_in_plane",
-      "check_edge_data_seam_sharp_edges",
+      "update_uv_vert_map",
+      "register_uv_face",
       "BM_BEVEL_EDGE_TAG_TEST",
       "fast_bevel_edge_order",
       "bevel_edge_order_extend",
-      "update_uv_vert_map",
-      "register_uv_face",
-      "is_bad_uv_poly",
+      "contig_ldata_across_loops",
+      "count_ccw_edges_between",
+      "disable_flag_out_edge",
+      "new_adj_vmesh",
+      "cubic_subdiv",
+      "interp_vmesh",
+      "closer_v3_v3v3v3",
       "make_cube_corner_adj_vmesh",
       "make_unit_cube_map",
+      "snap_edge_for_center_vmesh_vert",
+      "is_bad_uv_poly",
       "mesh_vert_canon",
       "snap_to_pipe_profile",
-      "snap_edge_for_center_vmesh_vert",
-      "closer_v3_v3v3v3",
-      "new_adj_vmesh",
-      "interp_vmesh",
-      "cubic_subdiv",
       "make_unit_square_map",
       "calculate_profile_segments",
       "superellipse_co",
       "find_superellipse_chord_endpoint",
-      "edge_edge_angle_less_than_180",
       "HASNOT_SEAMSHARP",
-      "edges_face_connected_at_vert",
+      "edge_edge_angle_less_than_180",
       "find_uv_face",
-      "projected_boundary_area",
-      "make_cube_corner_square",
-      "snap_to_superellipsoid",
-      "make_cube_corner_square_in",
-      "fill_profile_fracs",
+      "edges_face_connected_at_vert",
+      "sabin_gamma",
+      "avg4",
       "fill_vmesh_fracs",
       "vmesh_center",
       "interp_range",
-      "avg4",
-      "sabin_gamma"
+      "fill_profile_fracs",
+      "make_cube_corner_square",
+      "snap_to_superellipsoid",
+      "make_cube_corner_square_in",
+      "projected_boundary_area"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/tools/bmesh-triangulate.js": {
+    "generated": [
+      "BM_mesh_triangulate",
+      "bm_face_triangulate_mapping"
     ],
     "shimmed": {},
     "excluded": {},
@@ -422,12 +912,12 @@
   "intern/eigen.js": {
     "generated": [],
     "shimmed": {
-      "EIG_linear_solver_variable_get": null,
       "EIG_linear_least_squares_solver_new": null,
-      "EIG_linear_solver_solve": null,
-      "EIG_linear_solver_right_hand_side_add": null,
       "EIG_linear_solver_matrix_add": null,
-      "EIG_linear_solver_delete": null
+      "EIG_linear_solver_right_hand_side_add": null,
+      "EIG_linear_solver_variable_get": null,
+      "EIG_linear_solver_delete": null,
+      "EIG_linear_solver_solve": null
     },
     "excluded": {},
     "missing": {}

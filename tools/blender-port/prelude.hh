@@ -5,9 +5,6 @@
 #include <utility>
 
 #undef ELEM
-#undef BLI_assert
-#undef BLI_assert_msg
-#undef BLI_assert_unreachable
 #undef UNUSED_VARS
 #undef LIKELY
 #undef UNLIKELY
@@ -43,9 +40,6 @@
 #undef BMO_face_flag_set
 
 template<class T, class... A> bool ELEM(T, A...) { return {}; }
-template<class... A> void BLI_assert(A...) {}
-#define BLI_assert_msg(a, msg) BLI_assert(a)
-#define BLI_assert_unreachable() BLI_assert(0)
 #define UNUSED_VARS(...)
 #define LIKELY(x) (x)
 #define UNLIKELY(x) (x)
@@ -111,7 +105,6 @@ template<class B, class E, class F, class V> void BMO_face_flag_set(B bm, E e, F
 #undef BM_ELEM_CD_SET_FLOAT
 #undef BM_DISK_EDGE_NEXT
 #undef BM_DISK_EDGE_PREV
-#undef BLI_ASSERT_UNIT_V3
 #undef MEM_SIZE_OPTIMAL
 #undef BM_ELEM_API_FLAG_ENABLE
 #undef BM_ELEM_API_FLAG_DISABLE
@@ -127,7 +120,6 @@ template<class E, class O> int BM_ELEM_CD_GET_INT(E, O) { return {}; }
 template<class E, class O, class V> void BM_ELEM_CD_SET_FLOAT(E, O, V) {}
 template<class E, class V> std::remove_const_t<std::remove_pointer_t<E>> *BM_DISK_EDGE_NEXT(E, V) { return {}; }
 template<class E, class V> std::remove_const_t<std::remove_pointer_t<E>> *BM_DISK_EDGE_PREV(E, V) { return {}; }
-template<class V> void BLI_ASSERT_UNIT_V3(V) {}
 template<class S> S MEM_SIZE_OPTIMAL(S) { return {}; }
 template<class E, class F> void BM_ELEM_API_FLAG_ENABLE(E, F) {}
 template<class E, class F> void BM_ELEM_API_FLAG_DISABLE(E, F) {}

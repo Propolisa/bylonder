@@ -68,7 +68,8 @@ export const EDBM_select_more = (bm, selectmode, use_face_step = true) => select
 export const EDBM_select_less = (bm, selectmode, use_face_step = true) => select_region_extend(bm, selectmode, use_face_step, true);
 
 // EDBM_op_init, EDBM_op_finish, EDBM_op_callf and EDBM_op_call_and_selectf (editmesh_utils.cc), on the BMesh itself.
-export const EDBM_op_init = (bm, bmop, fmt, ...args) => BMO_op_vinitf(bm, bmop, BMO_FLAG_DEFAULTS, fmt, args);
+// EDBM_op_init gives the operator, or null for a format that does not parse.
+export const EDBM_op_init = (bm, fmt, ...args) => BMO_op_vinitf(bm, BMO_FLAG_DEFAULTS, fmt, args);
 
 // Whether the operator changed the mesh: false when it cancelled with an error.
 export function EDBM_op_finish(bm, bmop) {
@@ -79,15 +80,15 @@ export function EDBM_op_finish(bm, bmop) {
 }
 
 export function EDBM_op_callf(bm, fmt, ...args) {
-  const bmop = {};
-  if (!BMO_op_vinitf(bm, bmop, BMO_FLAG_DEFAULTS, fmt, args)) return false;
+  const bmop = EDBM_op_init(bm, fmt, ...args);
+  if (!bmop) return false;
   BMO_op_exec(bm, bmop);
   return EDBM_op_finish(bm, bmop);
 }
 
 export function EDBM_op_call_and_selectf(bm, select_slot_out, select_extend, fmt, ...args) {
-  const bmop = {};
-  if (!BMO_op_vinitf(bm, bmop, BMO_FLAG_DEFAULTS, fmt, args)) return false;
+  const bmop = EDBM_op_init(bm, fmt, ...args);
+  if (!bmop) return false;
   BMO_op_exec(bm, bmop);
   const hflag = BMO_slot_get(bmop.slots_out, select_slot_out).slot_subtype.elem & (BM_VERT | BM_EDGE | BM_FACE);
   if (!select_extend) BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);

@@ -6,76 +6,96 @@ import { BMO_flag_enable, BM_FACE, BM_VERT, fno, vco, vno } from '../intern/bmes
 import { BM_elem_attrs_copy, BM_face_create_quad_tri } from '../intern/bmesh-construct.js';
 import { BM_CREATE_NOP, BM_face_kill, BM_vert_create } from '../intern/bmesh-core.js';
 import { BM_face_interp_multires_ex, BM_loop_interp_from_face } from '../intern/bmesh-interp.js';
-import { BMOP_POKE_BOUNDS, BMOP_POKE_MEDIAN, BMOP_POKE_MEDIAN_WEIGHTED, BMO_slot_bool_get, BMO_slot_buffer_from_enabled_flag, BMO_slot_float_get, BMO_slot_int_get } from '../intern/bmesh-operators.js';
-import { BM_face_calc_center_bounds, BM_face_calc_center_median, BM_face_calc_center_median_weighted } from '../intern/bmesh-polygon.js';
+import {
+  BMOP_POKE_BOUNDS,
+  BMOP_POKE_MEDIAN,
+  BMOP_POKE_MEDIAN_WEIGHTED,
+  BMO_slot_bool_get,
+  BMO_slot_buffer_from_enabled_flag,
+  BMO_slot_float_get,
+  BMO_slot_int_get,
+} from '../intern/bmesh-operators.js';
+import {
+  BM_face_calc_center_bounds,
+  BM_face_calc_center_median,
+  BM_face_calc_center_median_weighted,
+} from '../intern/bmesh-polygon.js';
 import { CD_MDISPS } from '../../makesdna/customdata-types.js';
 
 const ELE_NEW = 1;
 
 export function bmo_poke_exec(bm, op) {
-let cd_loop_mdisp_offset = CustomData_get_offset(bm.ldata, CD_MDISPS);
-let oiter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
-let f = -1;
-let offset = BMO_slot_float_get(bm, op.slots_in, "offset");
-let use_relative_offset = BMO_slot_bool_get(bm, op.slots_in, "use_relative_offset");
-let center_mode = BMO_slot_int_get(bm, op.slots_in, "center_mode");
-let bm_face_calc_center_fn = null;
-switch (center_mode) {
-case BMOP_POKE_MEDIAN_WEIGHTED:
-bm_face_calc_center_fn = BM_face_calc_center_median_weighted;
-break;
-case BMOP_POKE_BOUNDS:
-bm_face_calc_center_fn = BM_face_calc_center_bounds;
-break;
-case BMOP_POKE_MEDIAN:
-bm_face_calc_center_fn = BM_face_calc_center_median;
-break;
-default:
-return;
-}
-for (; ; ) {
-let f_center = [0, 0, 0];
-let v_center = -1;
-let l_first = -1;
-let l_center_example = -1;
-let offset_fac = 0;
-bm_face_calc_center_fn(bm, f, f_center);
-v_center = BM_vert_create(bm, f_center, -1, BM_CREATE_NOP);
-BMO_flag_enable(bm.v, v_center, ELE_NEW);
-if (use_relative_offset) {
-offset_fac = 0.0;
-} else {
-offset_fac = 1.0;
-}
-let i = 0;
-let l_iter = l_first = (bm.f.l_first[(f)]);
-do {
-let f_new = BM_face_create_quad_tri(bm, bm.l.v[l_iter], bm.l.v[bm.l.next[l_iter]], v_center, -1, f, BM_CREATE_NOP);
-let l_new = (bm.f.l_first[(f_new)]);
-if ((i === 0)) {
-l_center_example = bm.l.prev[l_new];
-BM_loop_interp_from_face(bm, l_center_example, f, true, false);
-} else {
-BM_elem_attrs_copy(bm.l, l_center_example, bm.l.prev[l_new]);
-}
-BM_elem_attrs_copy(bm.l, l_iter, l_new);
-BM_elem_attrs_copy(bm.l, bm.l.next[l_iter], bm.l.next[l_new]);
-BMO_flag_enable(bm.f, f_new, ELE_NEW);
-if ((cd_loop_mdisp_offset !== -(1))) {
-let f_new_center = BM_face_calc_center_median(bm, f_new);
-BM_face_interp_multires_ex(bm, f_new, f, f_new_center, f_center, cd_loop_mdisp_offset);
-}
-if (use_relative_offset) {
-offset_fac = Math.fround(offset_fac + len_v3(sub_v3(f_center, vco(bm, bm.l.v[l_iter]))));
-}
-} while ((i++ , ((l_iter = bm.l.next[l_iter]) !== l_first)));
-if (use_relative_offset) {
-offset_fac = Math.fround(offset_fac / bm.f.len[f]);
-}
-bm.v.no.set(fno(bm, f).slice(0, 3), v_center * 3);
-bm.v.co.set(madd(vco(bm, v_center), vno(bm, v_center), Math.fround(offset * offset_fac)), v_center * 3);
-BM_face_kill(bm, f);
-}
-BMO_slot_buffer_from_enabled_flag(bm, op, op.slots_out, "verts.out", BM_VERT, ELE_NEW);
-BMO_slot_buffer_from_enabled_flag(bm, op, op.slots_out, "faces.out", BM_FACE, ELE_NEW);
+  const cd_loop_mdisp_offset = CustomData_get_offset(bm.ldata, CD_MDISPS);
+  const oiter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
+  const f = -1;
+  const offset = BMO_slot_float_get(bm, op.slots_in, 'offset');
+  const use_relative_offset = BMO_slot_bool_get(bm, op.slots_in, 'use_relative_offset');
+  const center_mode = BMO_slot_int_get(bm, op.slots_in, 'center_mode');
+  let bm_face_calc_center_fn = null;
+  switch (center_mode) {
+    case BMOP_POKE_MEDIAN_WEIGHTED:
+      bm_face_calc_center_fn = BM_face_calc_center_median_weighted;
+      break;
+    case BMOP_POKE_BOUNDS:
+      bm_face_calc_center_fn = BM_face_calc_center_bounds;
+      break;
+    case BMOP_POKE_MEDIAN:
+      bm_face_calc_center_fn = BM_face_calc_center_median;
+      break;
+    default:
+      return;
+  }
+  for (;;) {
+    const f_center = [0, 0, 0];
+    let v_center = -1;
+    let l_first = -1;
+    let l_center_example = -1;
+    let offset_fac = 0;
+    bm_face_calc_center_fn(bm, f, f_center);
+    v_center = BM_vert_create(bm, f_center, -1, BM_CREATE_NOP);
+    BMO_flag_enable(bm.v, v_center, ELE_NEW);
+    if (use_relative_offset) {
+      offset_fac = 0.0;
+    } else {
+      offset_fac = 1.0;
+    }
+    let i = 0;
+    let l_iter = (l_first = bm.f.l_first[f]);
+    do {
+      const f_new = BM_face_create_quad_tri(
+        bm,
+        bm.l.v[l_iter],
+        bm.l.v[bm.l.next[l_iter]],
+        v_center,
+        -1,
+        f,
+        BM_CREATE_NOP,
+      );
+      const l_new = bm.f.l_first[f_new];
+      if (i === 0) {
+        l_center_example = bm.l.prev[l_new];
+        BM_loop_interp_from_face(bm, l_center_example, f, true, false);
+      } else {
+        BM_elem_attrs_copy(bm.l, l_center_example, bm.l.prev[l_new]);
+      }
+      BM_elem_attrs_copy(bm.l, l_iter, l_new);
+      BM_elem_attrs_copy(bm.l, bm.l.next[l_iter], bm.l.next[l_new]);
+      BMO_flag_enable(bm.f, f_new, ELE_NEW);
+      if (cd_loop_mdisp_offset !== -1) {
+        const f_new_center = BM_face_calc_center_median(bm, f_new);
+        BM_face_interp_multires_ex(bm, f_new, f, f_new_center, f_center, cd_loop_mdisp_offset);
+      }
+      if (use_relative_offset) {
+        offset_fac = Math.fround(offset_fac + len_v3(sub_v3(f_center, vco(bm, bm.l.v[l_iter]))));
+      }
+    } while ((i++, (l_iter = bm.l.next[l_iter]) !== l_first));
+    if (use_relative_offset) {
+      offset_fac = Math.fround(offset_fac / bm.f.len[f]);
+    }
+    bm.v.no.set(fno(bm, f).slice(0, 3), v_center * 3);
+    bm.v.co.set(madd(vco(bm, v_center), vno(bm, v_center), Math.fround(offset * offset_fac)), v_center * 3);
+    BM_face_kill(bm, f);
+  }
+  BMO_slot_buffer_from_enabled_flag(bm, op, op.slots_out, 'verts.out', BM_VERT, ELE_NEW);
+  BMO_slot_buffer_from_enabled_flag(bm, op, op.slots_out, 'faces.out', BM_FACE, ELE_NEW);
 }

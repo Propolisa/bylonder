@@ -273,9 +273,11 @@ def needs_mesh(ref):
         return True
     if not ref.location.file or '/source/blender/bmesh/' not in ref.location.file.name:
         return False
-    params = list(ref.get_arguments())
-    first = pointee(params[0].type) if params else None
-    return not (first is not None and first.get_declaration().spelling == 'BMesh')
+    # It takes elements (or arrays of them) and not the mesh.
+    held = [pointee(canon(p.type)) or canon(p.type) for p in ref.get_arguments()]
+    if any(t is not None and canon(t).get_declaration().spelling == 'BMesh' for t in held):
+        return False
+    return any(pool_of(p.type) or (t is not None and pool_of(t)) for p, t in zip(ref.get_arguments(), held))
 
 
 def module_for(path, root):
@@ -311,7 +313,8 @@ class Source:
         self.original = open(path).read()
         self.tmp = os.path.join(os.path.dirname(path), f'{TMP_PREFIX}{os.path.basename(path)}')
         resource = subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
-        self.args = ['-std=c++20', '-x', 'c++', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
+        # As Blender's release build: NDEBUG leaves out debug checks and validation.
+        self.args = ['-std=c++20', '-x', 'c++', '-DNDEBUG', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
         # Headers Blender's build generates (tools/blender-reference/rna-prototypes.py).
         self.args += [f'-I{os.path.join(os.path.dirname(os.path.abspath(__file__)), "include")}']
         self.args += [f'-I{os.path.join(self.root, "source/blender", d)}' for d in INCLUDES]
@@ -536,7 +539,7 @@ class Source:
             return fp.emit(), fp.deps
         except Exception as error:  # A converter bug in one function leaves the C++ for porting by hand.
             message = json.dumps(f'{f.spelling}: the converter failed ({type(error).__name__}: {error})')
-            return f'function {f.spelling}() {{\n  throw new Error({message}); /*FIX converter*/\n}}\n/*\n{self.text(f)}\n*/', fp.deps
+            return f'function {f.spelling}() {{\n  throw new Error({message}); /*FIX converter*/\n}}\n/*\n{self.text(f).replace('*/', '* /')}\n*/', fp.deps
 
 
 class FunctionPort:
@@ -1211,6 +1214,8 @@ class FunctionPort:
         s = strip(c)
         if is_binary(s, '=') and strip(kids(s)[0]).spelling in DROPPED_FIELDS:
             return None
+        if is_binary(s, '=') and strip(kids(s)[0]).kind == K.DECL_REF_EXPR and dropped(strip(kids(s)[0]).type):
+            return None  # A variable of a type the port drops (a memory arena) is never set.
         if s.kind == K.CSTYLE_CAST_EXPR and canon(s.type).kind == T.VOID and clangx.evaluate(kids(s)[-1]) is not None:
             return None  # `(void)0`, as macros end statements.
         if s.kind == K.CALL_EXPR:
@@ -1401,7 +1406,8 @@ class FunctionPort:
             t = f'_r{self.temps}'
             self.temps += 1
             return f'({t} = {self.helper("len_v3")}({v}), {v} = {self.helper("normalize_v3")}({v}), {t})'
-        pool = lambda: pool_of(strip_parens_casts(args[0]).type) or '/*FIX pool*/'
+        # The element's type as written, cast included: BM_elem_flag_set((BMVert *)el->data, ...).
+        pool = lambda: pool_of(args[0].type) or pool_of(strip_parens_casts(args[0]).type) or '/*FIX pool*/'
         if name == 'BM_elem_index_get':
             return f'{self.bm}.{pool()}.index[{self.expr(args[0])}]'
         if name == 'BM_elem_index_set':
@@ -1526,7 +1532,10 @@ def number_js(value, t, exact=False):
     if value is None:
         return None
     if canon(t).kind == T.FLOAT:
-        single = struct.unpack('f', struct.pack('f', value))[0]
+        try:
+            single = struct.unpack('f', struct.pack('f', value))[0]
+        except OverflowError:
+            return 'Infinity' if value > 0 else '-Infinity'  # Beyond the float range it rounds to infinity, as in C.
         if exact:
             return repr(single)
         return next(s for p in range(1, 18) for s in [f'{single:.{p}g}'] if struct.unpack('f', struct.pack('f', float(s)))[0] == single)

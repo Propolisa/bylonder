@@ -4,7 +4,7 @@
 import {
   BMO_OP_SLOT_ELEMENT_BUF, BMO_OP_SLOT_INT, BMO_OP_SLOT_MAPPING, BMO_OP_SLOT_SUBTYPE_INT_ENUM, BMO_OP_SLOT_SUBTYPE_INT_FLAG,
   BMO_OP_SLOT_VEC, BMO_OPTYPE_FLAG_NORMALS_CALC, BMO_OPTYPE_FLAG_SELECT_FLUSH, BMO_OPTYPE_FLAG_SELECT_VALIDATE,
-  BMO_FLAG_RESPECT_HIDE, BMO_FLAG_DEFAULTS, BMO_ERROR_CANCEL,
+  BMO_FLAG_RESPECT_HIDE, BMO_ERROR_CANCEL,
 } from './bmesh-operators.gen.js';
 import * as opdefines from './bmesh-opdefines.js';
 import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_HIDDEN, BM_ELEM_SELECT, BM_ITER_MESH, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable } from './bmesh-class.js';
@@ -66,11 +66,13 @@ function slots_init(slot_types) {
   return slots;
 }
 
-export function BMO_op_init(bm, op, flag, opname) {
+// The operator, which Blender's fills in through its argument.
+export function BMO_op_init(bm, flag, opname) {
   const opcode = Math.max(BMO_opcode_from_opname(opname), 0);
   const def = bmo_opdefines()[opcode];
-  Object.assign(op, { type: opcode, type_flag: def.type_flag, flag, slots_in: slots_init(def.slot_types_in), slots_out: slots_init(def.slot_types_out), exec: def.exec });
+  const op = { type: opcode, type_flag: def.type_flag, flag, slots_in: slots_init(def.slot_types_in), slots_out: slots_init(def.slot_types_out), exec: def.exec };
   def.init?.(op);
+  return op;
 }
 
 export function BMO_op_exec(bm, op) {
@@ -89,25 +91,25 @@ function bmesh_edit_end(bm, type_flag) {
   if (!(type_flag & BMO_OPTYPE_FLAG_SELECT_VALIDATE)) bm.selected = history;
 }
 
-export function BMO_op_finish() {}
+// Slot buffers and maps are garbage collected.
+export function BMO_op_finish(_bm, _op) {}
 
-export function BMO_op_initf(bm, op, flag, fmt, ...args) {
-  return BMO_op_vinitf(bm, op, flag, fmt, args);
-}
+export const BMO_op_initf = (bm, flag, fmt, ...args) => BMO_op_vinitf(bm, flag, fmt, args);
 
 export function BMO_op_callf(bm, flag, fmt, ...args) {
-  const op = {};
-  if (!BMO_op_vinitf(bm, op, flag, fmt, args)) return false;
+  const op = BMO_op_vinitf(bm, flag, fmt, args);
+  if (!op) return false;
   BMO_op_exec(bm, op);
   BMO_op_finish(bm, op);
   return true;
 }
 
-// BMO_op_vinitf: "opname slot=%f other=%hv ..." sets the named input slots from args, as Blender's format codes say.
-export function BMO_op_vinitf(bm, op, flag, fmt, args) {
+// BMO_op_vinitf: the operator "opname slot=%f other=%hv ..." names, its input slots set from args as Blender's format
+// codes say; null for an unknown operator.
+export function BMO_op_vinitf(bm, flag, fmt, args) {
   const [opname, ...assignments] = fmt.trim().split(/\s+/);
-  if (BMO_opcode_from_opname(opname) === -1) return false;
-  BMO_op_init(bm, op, flag, opname);
+  if (BMO_opcode_from_opname(opname) === -1) return null;
+  const op = BMO_op_init(bm, flag, opname);
   const next = () => args.shift();
   for (const assignment of assignments) {
     const [, name, code] = assignment.match(/^([^=]+)=%(.+)$/);
@@ -133,7 +135,7 @@ export function BMO_op_vinitf(bm, op, flag, fmt, args) {
     } else if (type === 'f') BMO_slot_buffer_from_enabled_flag(bm, op, op.slots_in, name, htype, next());
     else if (type === 'F') BMO_slot_buffer_from_disabled_flag(bm, op, op.slots_in, name, htype, next());
   }
-  return true;
+  return op;
 }
 
 export const BMO_slot_get = (slot_args, identifier) => slot_args[identifier];
@@ -279,6 +281,7 @@ export function BMO_error_raise(bm, owner, level, msg) {
 export const BMO_error_occurred_at_level = (bm, level) => (bm.errorstack ?? []).some((e) => e.level >= level);
 export const BMO_error_pop = (bm) => bm.errorstack?.pop() ?? null;
 
+export const BMO_FLAG_DEFAULTS = BMO_FLAG_RESPECT_HIDE;
 // Constants the editors use with these calls.
-export { BMO_FLAG_DEFAULTS, BMO_ERROR_CANCEL };
+export { BMO_ERROR_CANCEL };
 export * from './bmesh-operators.gen.js';

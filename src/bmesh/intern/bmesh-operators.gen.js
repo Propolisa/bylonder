@@ -5,96 +5,146 @@ import { BLI_ghashIterator_getKey, BLI_ghashIterator_getValue, BLI_ghash_insert 
 import { BM_ALL_NOLOOP, BM_EDGE, BM_FACE, BM_VERT } from './bmesh-class.js';
 import { BMO_slot_get } from './bmesh-operators.js';
 
-export const BMO_OP_SLOT_BOOL = 1, BMO_OP_SLOT_INT = 2, BMO_OP_SLOT_FLT = 3, BMO_OP_SLOT_PTR = 4, BMO_OP_SLOT_MAT = 5, BMO_OP_SLOT_VEC = 8, BMO_OP_SLOT_ELEMENT_BUF = 9, BMO_OP_SLOT_MAPPING = 10;
-export const BMO_OP_SLOT_SUBTYPE_MAP_EMPTY = 64, BMO_OP_SLOT_SUBTYPE_MAP_ELEM = 65, BMO_OP_SLOT_SUBTYPE_MAP_FLT = 66, BMO_OP_SLOT_SUBTYPE_MAP_INT = 67, BMO_OP_SLOT_SUBTYPE_MAP_BOOL = 68, BMO_OP_SLOT_SUBTYPE_MAP_INTERNAL = 69;
-export const BMO_OP_SLOT_SUBTYPE_INT_ENUM = 200, BMO_OP_SLOT_SUBTYPE_INT_FLAG = 201;
-export const BMO_OPTYPE_FLAG_NOP = 0, BMO_OPTYPE_FLAG_UNTAN_MULTIRES = 1, BMO_OPTYPE_FLAG_NORMALS_CALC = 2, BMO_OPTYPE_FLAG_SELECT_FLUSH = 4, BMO_OPTYPE_FLAG_SELECT_VALIDATE = 8, BMO_OPTYPE_FLAG_INVALIDATE_CLNOR_ALL = 16;
+export const BMO_OP_SLOT_BOOL = 1,
+  BMO_OP_SLOT_INT = 2,
+  BMO_OP_SLOT_FLT = 3,
+  BMO_OP_SLOT_PTR = 4,
+  BMO_OP_SLOT_MAT = 5,
+  BMO_OP_SLOT_VEC = 8,
+  BMO_OP_SLOT_ELEMENT_BUF = 9,
+  BMO_OP_SLOT_MAPPING = 10;
+export const BMO_OP_SLOT_SUBTYPE_MAP_EMPTY = 64,
+  BMO_OP_SLOT_SUBTYPE_MAP_ELEM = 65,
+  BMO_OP_SLOT_SUBTYPE_MAP_FLT = 66,
+  BMO_OP_SLOT_SUBTYPE_MAP_INT = 67,
+  BMO_OP_SLOT_SUBTYPE_MAP_BOOL = 68,
+  BMO_OP_SLOT_SUBTYPE_MAP_INTERNAL = 69;
+export const BMO_OP_SLOT_SUBTYPE_INT_ENUM = 200,
+  BMO_OP_SLOT_SUBTYPE_INT_FLAG = 201;
+export const BMO_OPTYPE_FLAG_NOP = 0,
+  BMO_OPTYPE_FLAG_UNTAN_MULTIRES = 1,
+  BMO_OPTYPE_FLAG_NORMALS_CALC = 2,
+  BMO_OPTYPE_FLAG_SELECT_FLUSH = 4,
+  BMO_OPTYPE_FLAG_SELECT_VALIDATE = 8,
+  BMO_OPTYPE_FLAG_INVALIDATE_CLNOR_ALL = 16;
 export const BMO_FLAG_RESPECT_HIDE = 1;
 const BMO_OPSLOT_TYPEINFO = [0, 4, 4, 4, 8, 8, 0, 0, 12, 8, 8];
-export const BMOP_POKE_MEDIAN_WEIGHTED = 0, BMOP_POKE_MEDIAN = 1, BMOP_POKE_BOUNDS = 2;
-export const BEVEL_AMT_OFFSET = 0, BEVEL_AMT_WIDTH = 1, BEVEL_AMT_DEPTH = 2, BEVEL_AMT_PERCENT = 3, BEVEL_AMT_ABSOLUTE = 4;
-export const BEVEL_PROFILE_SUPERELLIPSE = 0, BEVEL_PROFILE_CUSTOM = 1;
-export const BEVEL_FACE_STRENGTH_NONE = 0, BEVEL_FACE_STRENGTH_NEW = 1, BEVEL_FACE_STRENGTH_AFFECTED = 2, BEVEL_FACE_STRENGTH_ALL = 3;
-export const BEVEL_MITER_SHARP = 0, BEVEL_MITER_PATCH = 1, BEVEL_MITER_ARC = 2;
-export const BEVEL_VMESH_ADJ = 0, BEVEL_VMESH_CUTOFF = 1;
-export const BEVEL_AFFECT_VERTICES = 0, BEVEL_AFFECT_EDGES = 1;
-export const FACE_STRENGTH_WEAK = -16384, FACE_STRENGTH_MEDIUM = 0, FACE_STRENGTH_STRONG = 16384;
+export const BMOP_POKE_MEDIAN_WEIGHTED = 0,
+  BMOP_POKE_MEDIAN = 1,
+  BMOP_POKE_BOUNDS = 2;
+export const BEVEL_AMT_OFFSET = 0,
+  BEVEL_AMT_WIDTH = 1,
+  BEVEL_AMT_DEPTH = 2,
+  BEVEL_AMT_PERCENT = 3,
+  BEVEL_AMT_ABSOLUTE = 4;
+export const BEVEL_PROFILE_SUPERELLIPSE = 0,
+  BEVEL_PROFILE_CUSTOM = 1;
+export const BEVEL_FACE_STRENGTH_NONE = 0,
+  BEVEL_FACE_STRENGTH_NEW = 1,
+  BEVEL_FACE_STRENGTH_AFFECTED = 2,
+  BEVEL_FACE_STRENGTH_ALL = 3;
+export const BEVEL_MITER_SHARP = 0,
+  BEVEL_MITER_PATCH = 1,
+  BEVEL_MITER_ARC = 2;
+export const BEVEL_VMESH_ADJ = 0,
+  BEVEL_VMESH_CUTOFF = 1;
+export const BEVEL_AFFECT_VERTICES = 0,
+  BEVEL_AFFECT_EDGES = 1;
+export const FACE_STRENGTH_WEAK = -16384,
+  FACE_STRENGTH_MEDIUM = 0,
+  FACE_STRENGTH_STRONG = 16384;
 
 export function BMO_elem_flag_from_header(ele_head) {
-switch (ele_head.htype) {
-case BM_VERT:
-return (ele_head).oflags;
-case BM_EDGE:
-return (ele_head).oflags;
-default:
-return (ele_head).oflags;
-}
+  switch (ele_head.htype) {
+    case BM_VERT:
+      return ele_head.oflags;
+    case BM_EDGE:
+      return ele_head.oflags;
+    default:
+      return ele_head.oflags;
+  }
 }
 
 export function _bmo_elem_flag_enable(bm, oflags, oflag) {
-((!((bm.use_toolflags)) ? (((((_BLI_assert_print_backtrace() , _BLI_assert_print_pos("/tmp/claude-0/-home-user/cf3c2bf6-912c-5a1b-b85e-4586cd237752/scratchpad/b523src/source/blender/bmesh/intern/bmesh_operator_api_inline.hh", 45, "_bmo_elem_flag_enable", "bm->use_toolflags")) , 0) , null))) : null));
-(oflags[bm.toolflag_index].f |= oflag);
+  !bm.use_toolflags
+    ? (((_BLI_assert_print_backtrace(),
+      _BLI_assert_print_pos(
+        '/tmp/claude-0/-home-user/cf3c2bf6-912c-5a1b-b85e-4586cd237752/scratchpad/b523src/source/blender/bmesh/intern/bmesh_operator_api_inline.hh',
+        45,
+        '_bmo_elem_flag_enable',
+        'bm->use_toolflags',
+      )),
+      0),
+      null)
+    : null;
+  oflags[bm.toolflag_index].f |= oflag;
 }
 
 export function _bmo_slot_copy(bm, slot_args_src, slot_name_src, slot_args_dst, slot_name_dst, arena_dst) {
-let _r0;
-let slot_src = BMO_slot_get(bm, slot_args_src, slot_name_src);
-let slot_dst = BMO_slot_get(bm, slot_args_dst, slot_name_dst);
-if ((slot_src === slot_dst)) {
-return;
-}
-if ((slot_src.slot_type !== slot_dst.slot_type)) {
-return;
-}
-if ((slot_dst.slot_type === BMO_OP_SLOT_ELEMENT_BUF)) {
-slot_dst.data.buf = null;
-slot_dst.len = slot_src.len;
-if (slot_dst.len) {
-let src_elem_flag = ((slot_src.slot_subtype.elem & BM_ALL_NOLOOP));
-let dst_elem_flag = ((slot_dst.slot_subtype.elem & BM_ALL_NOLOOP));
-if ((((src_elem_flag | dst_elem_flag)) === dst_elem_flag)) {
-
-} else {
-let tot = slot_src.len;
-let i = 0;
-let out = 0;
-let ele_src = slot_src.data.buf;
-for (i = 0; (i < tot); (i++ , ele_src++)) {
-if (((ele_src).head.htype & dst_elem_flag)) {
-out++;
-}
-}
-if ((out !== tot)) {
-slot_dst.len = out;
-}
-}
-if (slot_dst.len) {
-let slot_alloc_size = (BMO_OPSLOT_TYPEINFO[slot_dst.slot_type] * slot_dst.len);
-slot_dst.data.buf = new Array(slot_alloc_size).fill(null);
-if ((slot_src.len === slot_dst.len)) {
-slot_dst.data.buf.splice(0, slot_alloc_size, ...slot_src.data.buf.slice(0, slot_alloc_size));
-} else {
-let tot = slot_src.len;
-let i = 0;
-let ele_src = slot_src.data.buf;
-let ele_dst = slot_dst.data.buf;
-for (i = 0; (i < tot); (i++ , ele_src++)) {
-if (((ele_src).head.htype & dst_elem_flag)) {
-ele_dst = ele_src;
-ele_dst++;
-}
-}
-}
-}
-}
-} else if ((slot_dst.slot_type === BMO_OP_SLOT_MAPPING)) {
-let gh_iter = { gh: null, curEntry: null, curBucket: 0 };
-for (; ; ) {
-let key = BLI_ghashIterator_getKey(gh_iter);
-let val = BLI_ghashIterator_getValue(gh_iter);
-BLI_ghash_insert(slot_dst.data.ghash, key, val);
-}
-} else {
-((_r0 = slot_src.data), (slot_dst.data.i = _r0.i), (slot_dst.data.f = _r0.f), (slot_dst.data.p = _r0.p), (slot_dst.data.vec = _r0.vec), (slot_dst.data.buf = _r0.buf), (slot_dst.data.ghash = _r0.ghash), (slot_dst.data.enum_data = _r0.enum_data));
-}
+  let _r0;
+  const slot_src = BMO_slot_get(bm, slot_args_src, slot_name_src);
+  const slot_dst = BMO_slot_get(bm, slot_args_dst, slot_name_dst);
+  if (slot_src === slot_dst) {
+    return;
+  }
+  if (slot_src.slot_type !== slot_dst.slot_type) {
+    return;
+  }
+  if (slot_dst.slot_type === BMO_OP_SLOT_ELEMENT_BUF) {
+    slot_dst.data.buf = null;
+    slot_dst.len = slot_src.len;
+    if (slot_dst.len) {
+      const src_elem_flag = slot_src.slot_subtype.elem & BM_ALL_NOLOOP;
+      const dst_elem_flag = slot_dst.slot_subtype.elem & BM_ALL_NOLOOP;
+      if ((src_elem_flag | dst_elem_flag) === dst_elem_flag) {
+      } else {
+        const tot = slot_src.len;
+        let i = 0;
+        let out = 0;
+        let ele_src = slot_src.data.buf;
+        for (i = 0; i < tot; i++, ele_src++) {
+          if (ele_src.head.htype & dst_elem_flag) {
+            out++;
+          }
+        }
+        if (out !== tot) {
+          slot_dst.len = out;
+        }
+      }
+      if (slot_dst.len) {
+        const slot_alloc_size = BMO_OPSLOT_TYPEINFO[slot_dst.slot_type] * slot_dst.len;
+        slot_dst.data.buf = new Array(slot_alloc_size).fill(null);
+        if (slot_src.len === slot_dst.len) {
+          slot_dst.data.buf.splice(0, slot_alloc_size, ...slot_src.data.buf.slice(0, slot_alloc_size));
+        } else {
+          const tot = slot_src.len;
+          let i = 0;
+          let ele_src = slot_src.data.buf;
+          let ele_dst = slot_dst.data.buf;
+          for (i = 0; i < tot; i++, ele_src++) {
+            if (ele_src.head.htype & dst_elem_flag) {
+              ele_dst = ele_src;
+              ele_dst++;
+            }
+          }
+        }
+      }
+    }
+  } else if (slot_dst.slot_type === BMO_OP_SLOT_MAPPING) {
+    const gh_iter = { gh: null, curEntry: null, curBucket: 0 };
+    for (;;) {
+      const key = BLI_ghashIterator_getKey(gh_iter);
+      const val = BLI_ghashIterator_getValue(gh_iter);
+      BLI_ghash_insert(slot_dst.data.ghash, key, val);
+    }
+  } else {
+    (_r0 = slot_src.data),
+      (slot_dst.data.i = _r0.i),
+      (slot_dst.data.f = _r0.f),
+      (slot_dst.data.p = _r0.p),
+      (slot_dst.data.vec = _r0.vec),
+      (slot_dst.data.buf = _r0.buf),
+      (slot_dst.data.ghash = _r0.ghash),
+      (slot_dst.data.enum_data = _r0.enum_data);
+  }
 }
