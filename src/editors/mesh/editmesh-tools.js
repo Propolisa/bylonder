@@ -16,10 +16,10 @@ import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
 import { BM_EDGES_OF_VERT, BM_edge_exists, BM_edge_other_vert, BM_edge_is_wire, BM_edge_is_boundary, BM_edge_share_face_check, BM_face_vert_share_loop, BM_face_edge_share_loop } from '../../bmesh/intern/bmesh-query.js';
 import { BM_edge_at_index } from '../../bmesh/intern/bmesh-mesh.js';
 import { bmo_contextual_create_exec } from '../../bmesh/operators/bmo-create.js';
-import { EDBM_mesh_hide, EDBM_mesh_reveal, EDBM_select_more, EDBM_select_less, EDBM_op_init, EDBM_op_finish, EDBM_op_callf, EDBM_op_call_and_selectf } from './editmesh-utils.js';
-import { BMO_op_exec, BMO_slot_buffer_hflag_enable, BMO_iter_new, BMO_iter_step } from '../../bmesh/intern/bmesh-operators.js';
-import { BM_face_kill } from '../../bmesh/intern/bmesh-core.js';
+import { EDBM_mesh_hide, EDBM_mesh_reveal, EDBM_select_more, EDBM_select_less } from './editmesh-utils.js';
 import { edbm_bevel_exec } from './editmesh-bevel.js';
+import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
+import { editMeshFromMesh, editMeshFree, meshFromEditMesh, runOperator } from '../../bmesh/bmesh-wasm.js';
 
 // The %hv, %he and %hf operator slots: elements with a header flag.
 export function BMO_slot_buffer_from_hflag(bm, pool, hflag) {
@@ -102,61 +102,20 @@ export function edbm_extrude_mesh(bm, props = {}) {
   return nr !== 'NONE';
 }
 
-// RNA enum items of the operators below, by identifier.
-const QUAD_METHOD = { BEAUTY: 0, FIXED: 1, FIXED_ALTERNATE: 2, SHORTEST_DIAGONAL: 3, LONGEST_DIAGONAL: 4 };
-const NGON_METHOD = { BEAUTY: 0, CLIP: 1 };
-const POKE_CENTER = { MEDIAN_WEIGHTED: 0, MEDIAN: 1, BOUNDS: 2 };
-
-// mesh.quads_convert_to_tris (Ctrl T): the new faces selected, duplicates removed.
-export function edbm_quads_convert_to_tris_exec(bm, { quad_method = 'BEAUTY', ngon_method = 'BEAUTY' } = {}) {
-  if (!bm.totfacesel) return false;
-  const bmop = EDBM_op_init(bm, 'triangulate faces=%hf quad_method=%i ngon_method=%i', BM_ELEM_SELECT, QUAD_METHOD[quad_method], NGON_METHOD[ngon_method]);
-  BMO_op_exec(bm, bmop);
-  BMO_slot_buffer_hflag_enable(bm, bmop.slots_out, 'faces.out', BM_FACE, BM_ELEM_SELECT, true);
-  for (let [f, oiter] = BMO_iter_new(bmop.slots_out, 'face_map_double.out', BM_FACE); f >= 0; f = BMO_iter_step(oiter)) BM_face_kill(bm, f);
-  BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
-  return EDBM_op_finish(bm, bmop);
-}
-
-// mesh.tris_convert_to_quads (Alt J).
-export function edbm_tris_convert_to_quads_exec(bm, { face_threshold = 0.6981316804885864, shape_threshold = 0.6981316804885864, topology_influence = 0, uvs = false, vcols = false, seam = false, sharp = false, materials = false, deselect_joined = false } = {}) {
-  if (!bm.totfacesel) return false;
-  if (!EDBM_op_call_and_selectf(bm, 'faces.out', !deselect_joined,
-    'join_triangles faces=%hf angle_face_threshold=%f angle_shape_threshold=%f cmp_seam=%b cmp_sharp=%b cmp_uvs=%b cmp_vcols=%b cmp_materials=%b topology_influence=%f deselect_joined=%b',
-    BM_ELEM_SELECT, face_threshold, shape_threshold, seam, sharp, uvs, vcols, materials, topology_influence, deselect_joined)) return false;
-  if (deselect_joined && bm.selectmode & (SCE_SELECT_VERTEX | SCE_SELECT_EDGE)) BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
-  return true;
-}
-
-// mesh.flip_normals.
-export const edbm_flip_normals_exec = (bm) => bm.totfacesel > 0 && EDBM_op_callf(bm, 'reverse_faces faces=%hf flip_multires=%b', BM_ELEM_SELECT, true);
-
-// mesh.normals_make_consistent (Shift N), facing outside, or inside.
-export function edbm_normals_make_consistent_exec(bm, { inside = false } = {}) {
-  if (!bm.totfacesel || !EDBM_op_callf(bm, 'recalc_face_normals faces=%hf', BM_ELEM_SELECT)) return false;
-  if (inside) EDBM_op_callf(bm, 'reverse_faces faces=%hf flip_multires=%b', BM_ELEM_SELECT, true);
-  return true;
-}
-
-// mesh.vertices_smooth, repeated; mirror clipping is not ported.
-export function edbm_vertices_smooth_exec(bm, { factor = 0, repeat = 1, xaxis = true, yaxis = true, zaxis = true } = {}) {
-  if (!bm.totvertsel) return false;
-  for (let i = 0; i < repeat; i++) {
-    if (!EDBM_op_callf(bm, 'smooth_vert verts=%hv factor=%f mirror_clip_x=%b mirror_clip_y=%b mirror_clip_z=%b clip_dist=%f use_axis_x=%b use_axis_y=%b use_axis_z=%b',
-      BM_ELEM_SELECT, factor, false, false, false, 0, xaxis, yaxis, zaxis)) return false;
-  }
-  return true;
-}
-
-// mesh.poke: a vertex in each selected face, fanned to its corners.
-export function edbm_poke_face_exec(bm, { offset = 0, use_relative_offset = false, center_mode = 'MEDIAN_WEIGHTED' } = {}) {
-  if (!bm.totfacesel) return false;
-  const bmop = EDBM_op_init(bm, 'poke faces=%hf offset=%f use_relative_offset=%b center_mode=%i', BM_ELEM_SELECT, offset, use_relative_offset, POKE_CENTER[center_mode]);
-  BMO_op_exec(bm, bmop);
-  BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);
-  BMO_slot_buffer_hflag_enable(bm, bmop.slots_out, 'verts.out', BM_VERT, BM_ELEM_SELECT, true);
-  BMO_slot_buffer_hflag_enable(bm, bmop.slots_out, 'faces.out', BM_FACE, BM_ELEM_SELECT, true);
-  return EDBM_op_finish(bm, bmop);
+// Runs Blender's own operator (src/bmesh/bmesh-wasm.js) on the edit mesh: it goes into WebAssembly with its UV map and
+// flags, the operator runs as Blender runs it, and the result replaces the edit mesh.
+function blenderOperator(idname) {
+  return (bm, props) => {
+    const edit = editMeshFromMesh(BM_mesh_bm_to_me(bm), bm.selectmode);
+    try {
+      runOperator(edit, idname, props);
+      const { selectmode } = bm;
+      Object.defineProperties(bm, Object.getOwnPropertyDescriptors(BM_mesh_bm_from_me(meshFromEditMesh(edit))));
+      bm.selectmode = selectmode;
+    } finally {
+      editMeshFree(edit);
+    }
+  };
 }
 
 // mesh.inset (Inset Faces; individual insets are not ported yet).
@@ -310,12 +269,12 @@ export const meshOperators = {
   'mesh.loop_select': (bm, props) => edbm_select_loop(bm, BM_edge_at_index(bm, props.edge_index), props),
   'mesh.inset': (bm, props) => edbm_inset_exec(bm, props),
   'mesh.bevel': (bm, props) => edbm_bevel_exec(bm, props),
-  'mesh.quads_convert_to_tris': (bm, props) => edbm_quads_convert_to_tris_exec(bm, props),
-  'mesh.tris_convert_to_quads': (bm, props) => edbm_tris_convert_to_quads_exec(bm, props),
-  'mesh.flip_normals': (bm) => edbm_flip_normals_exec(bm),
-  'mesh.normals_make_consistent': (bm, props) => edbm_normals_make_consistent_exec(bm, props),
-  'mesh.vertices_smooth': (bm, props) => edbm_vertices_smooth_exec(bm, props),
-  'mesh.poke': (bm, props) => edbm_poke_face_exec(bm, props),
+  'mesh.quads_convert_to_tris': blenderOperator('mesh.quads_convert_to_tris'),
+  'mesh.tris_convert_to_quads': blenderOperator('mesh.tris_convert_to_quads'),
+  'mesh.flip_normals': blenderOperator('mesh.flip_normals'),
+  'mesh.normals_make_consistent': blenderOperator('mesh.normals_make_consistent'),
+  'mesh.vertices_smooth': blenderOperator('mesh.vertices_smooth'),
+  'mesh.poke': blenderOperator('mesh.poke'),
   'mesh.subdivide': (bm, props) => edbm_subdivide_exec(bm, props),
   'mesh.dissolve_faces': (bm) => edbm_dissolve_faces_exec(bm),
   'mesh.dissolve_verts': (bm, props) => { edbm_dissolve_verts_exec(bm, props); },

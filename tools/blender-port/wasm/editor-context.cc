@@ -20,6 +20,10 @@
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 
+#include "BKE_report.hh"
+#include "DNA_key_types.h"
+#include "ED_mesh.hh"
+#include "ED_object.hh"
 #include "ED_screen.hh"
 
 #include "WM_api.hh"
@@ -190,6 +194,19 @@ void _BKE_view_layer_synced_ensure_or_assert(const Main * /*bmain*/, const Scene
 const float4x4 &Object::object_to_world() const { return this->runtime->object_to_world; }
 const float4x4 &Object::world_to_object() const { return this->runtime->world_to_object; }
 
+/* As object_shapekey.cc checks a mesh: an operator that moves vertices refuses a locked active shape key. */
+bool ed::object::shape_key_report_if_locked(const Object *obedit, ReportList *reports)
+{
+  const KeyBlock *key_block = obedit->type == OB_MESH ? ED_mesh_get_edit_shape_key(id_cast<Mesh *>(obedit->data)) : nullptr;
+  if (key_block && (key_block->flag & KEYBLOCK_LOCKED_SHAPE) != 0) {
+    if (reports) {
+      BKE_reportf(reports, RPT_ERROR, "The active shape key of %s is locked", obedit->id.name + 2);
+    }
+    return true;
+  }
+  return false;
+}
+
 /* port-override: Blender's poll (screen_ops.cc), which comes with Blender's screens. */
 bool ED_operator_editmesh(bContext *C)
 {
@@ -211,6 +228,7 @@ void WM_operatortype_props_advanced_begin(wmOperatorType * /*ot*/) {}
 void WM_operator_type_modal_from_exec_for_object_edit_coords(wmOperatorType * /*ot*/) {}
 
 /* No window, depsgraph or view to update. */
+void ED_workspace_status_text(bContext * /*C*/, const char * /*str*/) {}
 void DEG_id_tag_update(ID * /*id*/, unsigned int /*flags*/) {}
 void DEG_id_tag_update_ex(Main * /*bmain*/, ID * /*id*/, unsigned int /*flags*/) {}
 void WM_main_add_notifier(uint /*type*/, void * /*reference*/) {}

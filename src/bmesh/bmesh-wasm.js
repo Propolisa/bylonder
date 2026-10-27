@@ -59,6 +59,7 @@ export function meshFromEditMesh(bm) {
 // Selection: by index per element type (BM_VERT, BM_EDGE, BM_FACE), recorded in the history as a click is.
 export const select = (bm, htype, index) => x.bm_select(bm, htype, index);
 export const selectFlush = (bm) => x.bm_select_flush(bm);
+export const translateSelected = (bm, [dx, dy, dz]) => x.bm_translate_selected(bm, dx, dy, dz);
 export function selectClear(bm, selectmode) {
   x.bm_select_clear(bm, selectmode);
   x.edit_context_selectmode_set(contextOf(bm), selectmode);
@@ -81,15 +82,17 @@ const contextOf = (bm) => contexts.get(bm) ?? contexts.set(bm, x.edit_context_ne
 // wmOperatorStatus flags.
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4;
 
-// Runs a Blender mesh operator's exec on a BMesh, with properties by name (an enum by its item's identifier; the rest
-// keep their defaults). Returns its status flags, or 0 when it does not poll.
+// Runs a Blender mesh operator's exec on a BMesh, with properties by name (an enum by its item's identifier, an enum
+// flag by a list of them; the rest keep their defaults). Returns its status flags, or 0 when it does not poll.
 export function runOperator(bm, idname, props = {}) {
   const op = x.operator_new(operatorTypes.get(idname));
   try {
     for (const [name, value] of Object.entries(props)) {
       const numbers = Float64Array.from([value].flat(), Number);
-      const ok = withString(name, (namePointer) => typeof value === 'string'
-        ? withString(value, (item) => x.operator_set(op, namePointer, 0, 0, item))
+      // An enum by its item's identifier; an enum flag by a list of them.
+      const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
+      const ok = withString(name, (namePointer) => items !== null
+        ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
         : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
       if (!ok) throw new Error(`${idname} has no property ${name} = ${value}`);
     }

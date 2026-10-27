@@ -293,23 +293,36 @@ PropertyRNA *RNA_struct_name_property(const StructRNA *) { return nullptr; }
 PointerRNA RNA_pointer_create_discrete(ID *id, StructRNA *type, void *data) { return PointerRNA{id, type, data}; }
 
 /* Sets a property from JS by identifier: numbers for booleans, ints, floats and their arrays; an enum by the identifier
- * of its item in Blender's table. False when the operator has no such property or item. */
-bool operator_property_set(PointerRNA *ptr, const char *name, const double *numbers, int len, const char *enum_identifier)
+ * of its item in Blender's table, and an enum flag by its items' identifiers joined with commas. False when the operator
+ * has no such property or item. */
+bool operator_property_set(PointerRNA *ptr, const char *name, const double *numbers, int len, const char *enum_identifiers)
 {
   PropertyRNA *prop = RNA_struct_find_property(ptr, name);
   if (!prop) {
     return false;
   }
-  if (enum_identifier) {
-    for (const EnumPropertyItem *item = prop->items; item && item->identifier; item++) {
-      if (STREQ(item->identifier, enum_identifier)) {
-        set_values(ptr, prop, {double(item->value)});
-        return true;
-      }
-    }
-    return false;
+  if (!enum_identifiers) {
+    set_values(ptr, prop, std::vector<double>(numbers, numbers + len));
+    return true;
   }
-  set_values(ptr, prop, std::vector<double>(numbers, numbers + len));
+  int value = 0;
+  const std::string identifiers = enum_identifiers;
+  for (size_t start = 0, end; start <= identifiers.size(); start = end + 1) {
+    end = std::min(identifiers.find(',', start), identifiers.size());
+    const std::string identifier = identifiers.substr(start, end - start);
+    if (identifier.empty()) {
+      continue;
+    }
+    const EnumPropertyItem *item = prop->items;
+    while (item && item->identifier && identifier != item->identifier) {
+      item++;
+    }
+    if (!item || !item->identifier) {
+      return false;
+    }
+    value |= item->value;
+  }
+  set_values(ptr, prop, {double(value)});
   return true;
 }
 
