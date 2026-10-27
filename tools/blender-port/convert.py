@@ -1121,11 +1121,29 @@ class FunctionPort:
                 ret_kind = canon(sig['ret']).kind
                 if ret_kind in (T.VOID, T.BOOL) and len(targets) == 1:
                     return self.assign(targets[0], call) if targets[0] is not None else call
-                lhs = ([] if ret_kind == T.VOID else ['']) + [self.expr(t) if t is not None else '' for t in targets]
+                slots, after = self.out_slots(targets)
+                lhs = ([] if ret_kind == T.VOID else ['']) + slots
                 while lhs and lhs[-1] == '':
                     lhs.pop()
-                return f'[{", ".join(lhs)}] = {call}' if lhs else call
+                return ', '.join([f'[{", ".join(lhs)}] = {call}' if lhs else call, *after])
         return self.expr(c)
+
+    def out_slots(self, targets):
+        """Destructuring slots for out targets, and the assignments to run after: a target that is no plain JS lvalue
+        (`v->co`, which is `bm.v.co.set(...)`) takes the value through a temporary."""
+        slots, after = [], []
+        for t in targets:
+            if t is None:
+                slots.append('')
+                continue
+            plain = self.expr(t)
+            if self.assign(t, '_value') == f'{plain} = _value':
+                slots.append(plain)
+            else:
+                tmp = self.temp()
+                slots.append(tmp)
+                after.append(self.assign(t, tmp))
+        return slots, after
 
     def has_outs(self, sig):
         return any(p['out'] for p in sig['params'])
@@ -1197,15 +1215,14 @@ class FunctionPort:
         if self.p.float32 and js_name.startswith('Math.') and canon(c.type).kind == T.FLOAT:
             call = f'Math.fround({call})'
         if sig and self.has_outs(sig) and not self.statement_call:
-            targets = [self.expr(t) if t is not None else '' for t in self.out_targets(sig, args)]
+            targets, after = self.out_slots(self.out_targets(sig, args))
             ret_kind = canon(sig['ret']).kind
             if not any(targets):
                 return call if ret_kind == T.VOID or (ret_kind == T.BOOL and len(targets) == 1) else f'{call}[0]'
             if ret_kind == T.BOOL and len(targets) == 1:
-                return f'(({targets[0]} = {call}) != null)'
-            t = f'_r{self.temps}'
-            self.temps += 1
-            return f'(([{"" if ret_kind == T.VOID else t + ", "}{", ".join(targets)}] = {call}), {t})'
+                return f'(({targets[0]} = {call}) != null' + (f' ? ({", ".join(after)}, true) : false)' if after else ')')
+            t = self.temp()
+            return f'(([{"" if ret_kind == T.VOID else t + ", "}{", ".join(targets)}] = {call}), {"".join(a + ", " for a in after)}{t})'
         return call
 
     def special_call(self, name, args, want=None):

@@ -27,3 +27,5 @@ export const mul_m3_v3 = (m, [x, y, z]) => [0, 1, 2].map((r) => m[0][r] * x + m[
 export const mul_m3_m3m3 = (a, b) => b.map((column) => mul_m3_v3(a, column));
 export const transpose_m3 = (m) => [0, 1, 2].map((c) => [m[0][c], m[1][c], m[2][c]]);
 export const size_to_mat3 = ([x, y, z]) => [[x, 0, 0], [0, y, 0], [0, 0, z]];
+
+export * from './math-matrix.gen.js';

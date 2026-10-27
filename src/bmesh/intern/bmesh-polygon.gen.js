@@ -2,6 +2,7 @@
 // exporting the same name from bmesh-polygon.js.
 import {
   add_v3,
+  axis_dominant_v3_to_m3,
   axis_sort_v3,
   dot_v3,
   isect_point_poly_v2,
@@ -15,6 +16,7 @@ import {
   safe_acos_approx,
   sub_v3,
 } from '../../blenlib/math-geom.js';
+import { mul_v2_m3v3 } from '../../blenlib/math-matrix.js';
 import { INIT_MINMAX } from '../../blenlib/utildefines.js';
 import { fno, vco, vno } from './bmesh-class.js';
 import { BM_face_normal_update } from './bmesh-polygon.js';

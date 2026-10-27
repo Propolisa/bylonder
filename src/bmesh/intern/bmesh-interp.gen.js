@@ -4,6 +4,7 @@ import { CustomData_bmesh_interp, CustomData_get_offset } from '../../blenkernel
 import { old_mdisps_bilinear } from '../../blenkernel/multires.js';
 import {
   add_v3,
+  axis_dominant_v3_to_m3,
   cross_v2v2,
   cross_v3,
   dot_v3,
@@ -24,6 +25,7 @@ import {
   sub_v2_v2,
   sub_v3,
 } from '../../blenlib/math-geom.js';
+import { mul_v2_m3v3 } from '../../blenlib/math-matrix.js';
 import { BLI_task_parallel_range } from '../../blenlib/task-range.js';
 import { BLI_parallel_range_settings_defaults } from '../../blenlib/task.js';
 import { BM_ELEM_CD_GET_VOID_P, fno, vco, vno } from './bmesh-class.js';
