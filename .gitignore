@@ -32,3 +32,4 @@ Thumbs.db
 *.swp
 .blender-reference/
 .shots/
+__pycache__/
