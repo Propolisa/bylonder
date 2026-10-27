@@ -3,7 +3,7 @@
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
 import { BM_edge_split, BM_face_split } from '../intern/bmesh-mods.js';
 import { BM_vert_pair_share_face_by_len, BM_edge_share_vert_check, BM_vert_in_face, BM_LOOPS_OF_VERT } from '../intern/bmesh-query.js';
-import { BMO_op_callf } from '../intern/bmesh-operators.js';
+import { bmo_call } from '../intern/bmesh-operators.js';
 import { BM_elem_select_set, BM_mesh_elem_hflag_disable_all, BM_mesh_select_flush_from_verts } from '../intern/bmesh-marking.js';
 
 export const SUBD_CORNER_INNERVERT = 0, SUBD_CORNER_PATH = 1, SUBD_CORNER_FAN = 2, SUBD_CORNER_STRAIGHT_CUT = 3;
@@ -185,7 +185,7 @@ const tri_1edge = { seledges: [1, 0, 0], connectexec: tri_1edge_split };
 const tri_3edge = { seledges: [1, 1, 1], connectexec: tri_3edge_subdivide };
 const CORNER_PATTERNS = { [SUBD_CORNER_PATH]: quad_2edge_path, [SUBD_CORNER_INNERVERT]: quad_2edge_innervert, [SUBD_CORNER_FAN]: quad_2edge_fan };
 
-// subdivide_edges. Returns { inner, split, geom } as { v, e, f }. Run through BMO_op_callf.
+// subdivide_edges. Returns { inner, split, geom } as { v, e, f }. Run through bmo_call.
 export function bmo_subdivide_edges_exec(bm, edges, {
   cuts = 1, smooth = 0, quad_corner_type = SUBD_CORNER_STRAIGHT_CUT, use_single_edge = false, use_grid_fill = false,
   use_only_quads = false, use_sphere = false, edge_percents = new Map(),
@@ -280,7 +280,7 @@ export function bmo_subdivide_edges_exec(bm, edges, {
 export function BM_mesh_esubdivide(bm, { seltype = SUBDIV_SELECT_ORIG, ...options }) {
   const edges = [];
   BM_ITER_MESH(bm.e, (e) => (bm.e.hflag[e] & BM_ELEM_SELECT) && edges.push(e));
-  const { inner } = BMO_op_callf(bm, bmo_subdivide_edges_exec, edges, options);
+  const { inner } = bmo_call(bm, bmo_subdivide_edges_exec, edges, options);
   const select = (types) => [[BM_VERT, inner.v], [BM_EDGE, inner.e], [BM_FACE, inner.f]].forEach(([htype, list]) => types & htype && list.forEach((ele) => BM_elem_select_set(bm, htype, ele, true)));
   if (seltype === SUBDIV_SELECT_ORIG) { select(BM_VERT | BM_EDGE | BM_FACE); BM_mesh_select_flush_from_verts(bm); }
   else if (seltype === SUBDIV_SELECT_INNER) select(BM_VERT | BM_EDGE);

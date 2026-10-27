@@ -29,7 +29,7 @@ const edgesOfVert = (bm, v, fn) => {
 };
 
 // bmo_duplicate_exec within one BMesh. `geom` is { v, e, f }. Maps are Maps in insertion order; vert, edge and face
-// maps hold both directions, like Blender's slot maps. Run through BMO_op_callf.
+// maps hold both directions, like Blender's slot maps. Run through bmo_call.
 export function bmo_duplicate_exec(bm, geom, { use_select_history = false, use_edge_flip_from_face = false } = {}) {
   for (const pool of POOLS) for (const i of geom[pool] ?? []) BMO_flag_enable(bm[pool], i, DUPE_INPUT);
   const out = { vert_map: new Map(), edge_map: new Map(), face_map: new Map(), boundary_map: new Map(), isovert_map: new Map() };
@@ -98,7 +98,7 @@ export function BMO_mesh_selected_remap(bm, { vert_map, edge_map, face_map }) {
   if (bm.act_face >= 0 && face_map.has(bm.act_face)) bm.act_face = face_map.get(bm.act_face);
 }
 
-// delete: `geom` is { v, e, f } element lists. Run through BMO_op_callf.
+// delete: `geom` is { v, e, f } element lists. Run through bmo_call.
 export function bmo_delete_exec(bm, geom, context) {
   for (const pool of POOLS) for (const i of geom[pool] ?? []) BMO_flag_enable(bm[pool], i, DEL_INPUT);
   BMO_mesh_delete_oflag_context(bm, DEL_INPUT, context);

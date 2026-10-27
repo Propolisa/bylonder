@@ -7,7 +7,7 @@ import { BM_edge_exists, BM_face_exists, BM_face_vert_share_loop, BM_loop_is_adj
 import { BM_select_history_merge_from_targetmap } from '../intern/bmesh-marking.js';
 import { BMO_mesh_delete_oflag_context, DEL_ONLYTAGGED } from '../intern/bmesh-delete.js';
 import { BMW_vert_shell } from '../intern/bmesh-walkers.js';
-import { BMO_op_callf } from '../intern/bmesh-operators.js';
+import { bmo_call } from '../intern/bmesh-operators.js';
 import { add_v3, mul_v3_fl } from '../../blenlib/math-geom.js';
 import { kdtree_build, kdtree_calc_duplicates_cb } from '../../blenlib/kdtree.js';
 
@@ -131,7 +131,7 @@ export function bmo_pointmerge_exec(bm, { verts, merge_co, vert_target = -1 }) {
       bm.v.co.set(merge_co, v * 3);
     } else if (v !== vert_target) targetmap.set(v, vert_target);
   }
-  BMO_op_callf(bm, bmo_weld_verts_exec, { targetmap });
+  bmo_call(bm, bmo_weld_verts_exec, { targetmap });
 }
 
 // collapse: each group of connected `edges` collapses to its center.
@@ -161,7 +161,7 @@ export function bmo_collapse_exec(bm, { edges }) {
       }
     }
   });
-  BMO_op_callf(bm, bmo_weld_verts_exec, { targetmap });
+  bmo_call(bm, bmo_weld_verts_exec, { targetmap });
 }
 
 const f32 = Math.fround;
@@ -194,6 +194,6 @@ export function bmo_remove_doubles_exec(bm, { verts, dist, use_centroid = false 
   const targetmap = new Map();
   duplicates?.forEach((d, i) => { if (d !== -1 && d !== i) targetmap.set(verts[i], verts[d]); });
   const before = bm.totvert;
-  BMO_op_callf(bm, bmo_weld_verts_exec, { targetmap, use_centroid });
+  bmo_call(bm, bmo_weld_verts_exec, { targetmap, use_centroid });
   return before - bm.totvert;
 }

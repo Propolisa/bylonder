@@ -6,7 +6,7 @@ import { BM_face_create_ngon_verts, BM_verts_sort_radial_plane, BM_face_copy_sha
 import { BM_EDGES_OF_VERT, BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_edge_share_vert_check, BM_edge_is_manifold, BM_face_exists } from '../intern/bmesh-query.js';
 import { BM_face_normal_update, BM_face_normal_flip, BM_face_calc_area, BM_face_calc_center_median_weighted } from '../intern/bmesh-polygon.js';
 import { BM_mesh_elem_hflag_disable_all } from '../intern/bmesh-marking.js';
-import { BMO_op_callf } from '../intern/bmesh-operators.js';
+import { bmo_call } from '../intern/bmesh-operators.js';
 import { BM_mesh_edgenet } from '../tools/bmesh-edgenet.js';
 import { bmo_dissolve_faces_exec } from './bmo-dissolve.js';
 import { add_v3, sub_v3, mul_v3_fl, dot_v3, cross_v3, len_squared_v3, normalize_v3, normal_tri_v3 } from '../../blenlib/math-geom.js';
@@ -149,7 +149,7 @@ function bmo_edgenet_fill_exec(bm, edges, { mat_nr = 0, use_smooth = false } = {
     BM_face_normal_update(bm, f);
   }
   const failed = bmo_face_attribute_fill_exec(bm, faces);
-  if (failed.length) BMO_op_callf(bm, bmo_recalc_face_normals_exec, failed);
+  if (failed.length) bmo_call(bm, bmo_recalc_face_normals_exec, failed);
   return faces;
 }
 
@@ -265,16 +265,16 @@ export function bmo_contextual_create_exec(bm, { geom, mat_nr = 0, use_smooth = 
   }
 
   if (tote) {
-    for (const e of BMO_op_callf(bm, bmo_edgenet_prepare_exec, marked())) BMO_flag_enable(bm.e, e, ELE_NEW);
-    const faces = BMO_op_callf(bm, bmo_edgenet_fill_exec, marked(), { mat_nr, use_smooth });
+    for (const e of bmo_call(bm, bmo_edgenet_prepare_exec, marked())) BMO_flag_enable(bm.e, e, ELE_NEW);
+    const faces = bmo_call(bm, bmo_edgenet_fill_exec, marked(), { mat_nr, use_smooth });
     if (faces.length) return { edges: [], faces };
   }
   if (totf) {
-    const region = BMO_op_callf(bm, bmo_dissolve_faces_exec, geom.faces.filter((f) => bm.f.alive[f]));
+    const region = bmo_call(bm, bmo_dissolve_faces_exec, geom.faces.filter((f) => bm.f.alive[f]));
     if (region?.length) return { edges: [], faces: region };
   }
   if (tote > 2) {
-    const faces = BMO_op_callf(bm, bmo_edgeloop_fill_exec, marked(), { mat_nr, use_smooth });
+    const faces = bmo_call(bm, bmo_edgeloop_fill_exec, marked(), { mat_nr, use_smooth });
     if (faces.length) return { edges: [], faces };
   }
   if (totv > 2) {

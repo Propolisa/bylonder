@@ -67,6 +67,16 @@ struct bl_port_iter {
 #define BM_ITER_MESH_MUTABLE(ele, ele_next, iter, bm, itype) \
   for (bl_port_iter bl_port_it(bm, itype); bl_port_it.next(ele);)
 
+/* BMO_ITER keeps Blender's iterator calls, typed so the element is assigned without BM_CHECK_TYPE_ELEM_ASSIGN. */
+#undef BMO_ITER
+#undef BMO_ITER_INDEX
+#define BMO_ITER(ele, iter, slot_args, slot_name, restrict_flag) \
+  for (ele = static_cast<decltype(ele)>(BMO_iter_new(iter, slot_args, slot_name, restrict_flag)); ele; \
+       ele = static_cast<decltype(ele)>(BMO_iter_step(iter)))
+#define BMO_ITER_INDEX(ele, iter, slot_args, slot_name, restrict_flag, i_) \
+  for (ele = static_cast<decltype(ele)>(BMO_iter_new(iter, slot_args, slot_name, restrict_flag)), i_ = 0; ele; \
+       ele = static_cast<decltype(ele)>(BMO_iter_step(iter)), i_++)
+
 template<class E, class F> int BM_elem_flag_test(E e, F hflag) { return {}; }
 template<class E, class F> bool BM_elem_flag_test_bool(E e, F hflag) { return {}; }
 template<class E, class F> void BM_elem_flag_enable(E e, F hflag) {}

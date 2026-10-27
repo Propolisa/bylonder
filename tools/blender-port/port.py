@@ -91,6 +91,7 @@ class Driver:
         self.modules = {}  # module: {'functions': {name: item}, 'constants': {name: item}}
         self.status = {}
         self.home = {}  # name: the module that defines it
+        self.followed = set()  # constants whose uses are followed
 
     def source(self, rel):
         if rel not in self.sources:
@@ -126,7 +127,10 @@ class Driver:
         stem = os.path.splitext(os.path.basename(header))[0].removesuffix('_inline')
         candidates = [os.path.join(d, f'{s}.cc') for d in (directory, os.path.join(directory, 'intern'))
                       for s in (stem, stem.removeprefix('BLI_'), stem.removeprefix('BKE_'))]
-        candidates += sorted(os.path.relpath(p, self.root) for p in glob.glob(os.path.join(self.root, directory, '**/*.cc'), recursive=True))
+        # The header's directory, then for an intern header its parent's tree: bmesh/intern declares what
+        # bmesh/operators defines.
+        for d in (directory, *([os.path.dirname(directory)] if os.path.basename(directory) == 'intern' else [])):
+            candidates += sorted(os.path.relpath(p, self.root) for p in glob.glob(os.path.join(self.root, d, '**/*.cc'), recursive=True))
         for rel in dict.fromkeys(candidates):
             path = os.path.join(self.root, rel)
             if os.path.exists(path) and decl.spelling in open(path, errors='replace').read() and self.source(rel).find(decl.spelling) is not None:
@@ -135,7 +139,9 @@ class Driver:
 
     def run(self):
         # (file defining the function, function, the parsed file that holds its definition)
-        queue = [(root['source'], name, root['source']) for root in self.manifest['roots'] for name in root['functions']]
+        queue = [(root['source'], name, root['source']) for root in self.manifest['roots'] for name in root.get('functions', [])]
+        for rel, name, ref in self.root_constants():
+            queue += self.follow(self.source(rel), rel, self.module_of(rel), self.constant(self.source(rel), self.module_of(rel), name, ref, root=True))
         done = set()
         while queue:
             rel, name, provider = queue.pop(0)
@@ -151,8 +157,13 @@ class Driver:
                 self.note(module, 'shimmed', name, self.check_shim(provider, rel, module, name))
                 # What the shim calls of Blender's, found from its declaration like any call.
                 for need in self.exports.needs(module):
-                    decl = self.source(provider).declaration(need)
-                    where = self.definition_file(decl, self.source(provider)) if decl is not None else None
+                    source = self.source(provider)
+                    constant = source.constant_declaration(need)
+                    if constant is not None:
+                        self.constant(source, module, need, constant)
+                        continue
+                    decl = source.declaration(need)
+                    where = self.definition_file(decl, source) if decl is not None else None
                     if where:
                         queue.append((where[0], need, where[1]))
                     else:
@@ -185,6 +196,19 @@ class Driver:
         for module, name, item in items:
             self.follow(self.sources[item['source']], item['source'], module, item['deps'])
             self.note(module, 'generated', name)
+        # Root constants again, now that their calls know which functions take bm.
+        for rel, name, ref in self.root_constants():
+            self.constant(self.source(rel), self.module_of(rel), name, ref, root=True)
+
+    def root_constants(self):
+        """(file, name, declaration) of the manifest's root constants, such as the BMesh operator definitions."""
+        for root in self.manifest['roots']:
+            for name in root.get('constants', []):
+                source = self.source(root['source'])
+                ref = next((c for c in source.tu.cursor.walk_preorder() if c.kind == K.VAR_DECL and c.spelling == name and source.in_main(c)), None)
+                if ref is None:
+                    sys.exit(f'{root["source"]}: no constant {name}')
+                yield root['source'], name, ref
 
     def follow(self, source, rel, module, deps):
         """The functions deps reach, to port next. Constants are placed and helpers checked on the way."""
@@ -204,7 +228,10 @@ class Driver:
                     if name not in self.exports.of(home):
                         self.note(home, 'missing', name, 'no definition found')
             elif kind == 'constant':
-                self.constant(source, module, name, ref)
+                uses = self.constant(source, module, name, ref)
+                if name not in self.followed:
+                    self.followed.add(name)
+                    queue += self.follow(source, rel, module, uses)
             elif kind == 'helper':
                 if ref is None:
                     self.note(None, 'missing', name, 'prelude macro without a home in rules.PRELUDE_HOMES')
@@ -250,10 +277,12 @@ class Driver:
             want.insert(0, 'bm')
         return want
 
-    def constant(self, source, module, name, ref):
-        """An enum, file-scope variable or macro constant, written in the module of the file that defines it."""
+    def constant(self, source, module, name, ref, root=False):
+        """An enum, file-scope variable or macro constant, written in the module of the file that defines it; returns
+        what a variable's value uses. A root constant is exported."""
+        deps = set()
         if name in CONSTANTS:
-            return
+            return deps
         if isinstance(ref, tuple):  # A macro: (definition, JS value).
             decl, value = ref
             names, js = [name], f'const {name} = {value};'
@@ -271,18 +300,20 @@ class Driver:
             init = convert.clangx.var_init(ref)
             fp = convert.FunctionPort(source, None, {'params': [], 'ret': ref.type})
             names, js = [name], f'const {name} = {fp.expr(init, ref.type) if init is not None else convert.zero_of(ref.type)};'
+            deps = fp.deps
         if decl is None or not decl.location.file:
-            return
+            return deps
         local = source.in_main(decl)
         target = module if local else self.module_of(decl.location.file.name)
         if not target:
-            return
+            return deps
         for n in names:
             self.home[n] = target
         if not local and all(n in self.exports.of(target) for n in names):
-            return
+            return deps
         key = (source.rel if local else os.path.relpath(decl.location.file.name, self.root), decl.extent.start.offset)
-        self.entry(target)['constants'][names[0]] = {'key': key, 'js': js, 'exported': not local, 'names': names}
+        self.entry(target)['constants'][names[0]] = {'key': key, 'js': js, 'exported': root or not local, 'names': names}
+        return deps
 
     def write(self):
         tag = self.manifest['blender']

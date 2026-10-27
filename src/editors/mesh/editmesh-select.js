@@ -4,7 +4,7 @@
 import { BMW_edgeloop, BMW_edgering, BMW_faceloop, BMW_edgeboundary, BMW_island, BMW_vert_shell, BMW_loop_shell_wire } from '../../bmesh/intern/bmesh-walkers.js';
 import { BM_edge_is_boundary, BM_edge_is_contiguous, BM_FACES_OF_EDGE } from '../../bmesh/intern/bmesh-query.js';
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_SEAM, BM_ELEM_SMOOTH, BM_elem_flag_test, BMO_flag_test, BMO_flag_enable } from '../../bmesh/intern/bmesh-class.js';
-import { BMO_op_callf } from '../../bmesh/intern/bmesh-operators.js';
+import { bmo_call } from '../../bmesh/intern/bmesh-operators.js';
 import {
   SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_select_set, BM_mesh_select_mode_flush, BM_mesh_select_mode_set,
   BM_mesh_elem_hflag_disable_all, BM_mesh_elem_hflag_enable_all, BM_select_history_store, BM_select_history_remove,
@@ -183,7 +183,7 @@ const delimitDefault = (selectmode, delimit) => delimit ?? (selectmode & (SCE_SE
 // select_linked_delimit_begin: tags the edges the walk may cross. Runs `fn` inside its own tool flag layer.
 function withDelimit(bm, delimit, fn) {
   const tests = delimit.map((d) => DELIMITS[d]).filter(Boolean);
-  return BMO_op_callf(bm, () => {
+  return bmo_call(bm, () => {
     if (tests.length) BM_ITER_MESH(bm.e, (e) => { if (!tests.some((test) => test(bm, e))) BMO_flag_enable(bm.e, e, BMO_ELE_TAG); });
     return fn(tests.length ? BMO_ELE_TAG : 0);
   });

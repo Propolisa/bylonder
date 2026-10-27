@@ -93,6 +93,23 @@ def source_rel(path, root):
     return os.path.relpath(path, root).replace(f'/{TMP_PREFIX}', '/')
 
 
+def is_zero(c):
+    """Whether an initializer is all zeros: Clang's implicit value-initialization, a braced list of zeros, or a zero
+    constant. Evaluation stays off the lists, where libclang's evaluator crashes."""
+    c = strip(c)
+    if c.kind == K.UNEXPOSED_EXPR and not kids(c):
+        return True
+    if c.kind == K.INIT_LIST_EXPR:
+        return all(is_zero(x) for x in kids(c))
+    return clangx.evaluate(c) == 0
+
+
+def is_text(t):
+    """Whether t is a char array, which the port holds as a JS string."""
+    t = canon(t)
+    return t.kind == T.CONSTANTARRAY and canon(t.element_type).kind == T.CHAR_S
+
+
 def in_out(name):
     """(helper, index of the argument updated) of an IN_OUT function."""
     rule = IN_OUT[name]
@@ -102,6 +119,8 @@ def in_out(name):
 def zero_of(t):
     """The JS of a default-initialized value of type t, or None when it has none."""
     t = canon(t)
+    if is_text(t):
+        return "''"
     if t.kind == T.CONSTANTARRAY:
         inner = zero_of(t.element_type)
         if inner is None:
@@ -385,6 +404,11 @@ class Source:
 
     def find(self, name):
         return next((f for f in self.functions if f.spelling == name), None)
+
+    def constant_declaration(self, name):
+        """The enum constant or file-scope constant name in the translation unit, or None."""
+        return next((c for c in self.tu.cursor.walk_preorder() if c.kind in (K.ENUM_CONSTANT_DECL, K.VAR_DECL) and c.spelling == name
+                     and c.semantic_parent is not None and c.semantic_parent.kind in (K.ENUM_DECL, K.TRANSLATION_UNIT, K.NAMESPACE)), None)
 
     def declaration(self, name):
         """A declaration of the function name anywhere in the translation unit (its own file or a header), or None."""
@@ -977,6 +1001,9 @@ class FunctionPort:
         """A braced initializer of type t: a struct with every field, an array with every element, omitted ones zero."""
         t, items = canon(t), kids(c)
         explicit = lambda x: not (x.kind == K.UNEXPOSED_EXPR and not kids(x))  # Clang's implicit value-initialization.
+        if is_text(t):
+            text = next((x for x in items if strip(x).kind == K.STRING_LITERAL), None)
+            return self.expr(text) if text is not None else "''"
         if decl_name(t) in ('Map', 'Set'):
             return f'new {decl_name(t)}([{", ".join(self.expr(x) for x in items)}])'
         if t.kind == T.RECORD and decl_name(t) not in ARRAY_TYPES:
@@ -984,7 +1011,7 @@ class FunctionPort:
             values = [self.expr(items[i], f.type) if i < len(items) and explicit(items[i]) else (zero_of(f.type) or 'null')
                       for i, f in enumerate(fields)]
             return '{ ' + ', '.join(f'{f.spelling}: {v}' for f, v in zip(fields, values)) + ' }'
-        if t.kind == T.CONSTANTARRAY and all(clangx.evaluate(x) == 0 for x in items):
+        if t.kind == T.CONSTANTARRAY and all(is_zero(x) for x in items):
             return zero_of(t)
         element = canon(t.element_type) if t.kind == T.CONSTANTARRAY else None
         keyed = element is not None and decl_name(element) in ('Map', 'Set')

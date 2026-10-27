@@ -7,6 +7,19 @@
       "functions": [
         "BM_mesh_bevel"
       ]
+    },
+    {
+      "source": "source/blender/bmesh/intern/bmesh_opdefines.cc",
+      "constants": [
+        "bmo_triangulate_def",
+        "bmo_join_triangles_def",
+        "bmo_reverse_faces_def",
+        "bmo_recalc_face_normals_def",
+        "bmo_smooth_vert_def",
+        "bmo_poke_def",
+        "bmo_connect_vert_pair_def",
+        "bmo_bridge_loops_def"
+      ]
     }
   ],
   "units": {

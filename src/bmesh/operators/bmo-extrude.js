@@ -4,7 +4,7 @@ import { BM_vert_create, BM_edge_create, BM_face_create, BM_CREATE_NOP, BM_CREAT
 import { BM_elem_attrs_copy } from '../intern/bmesh-construct.js';
 import { BM_edge_exists, BM_edge_is_boundary, BM_edge_other_loop, BM_vert_is_wire_endpoint, BM_EDGES_OF_VERT, BM_FACES_OF_EDGE } from '../intern/bmesh-query.js';
 import { BM_face_normal_flip } from '../intern/bmesh-polygon.js';
-import { BMO_op_callf } from '../intern/bmesh-operators.js';
+import { bmo_call } from '../intern/bmesh-operators.js';
 import { DEL_ONLYTAGGED } from '../intern/bmesh-delete.js';
 import { bmo_duplicate_exec, bmo_delete_exec } from './bmo-dupe.js';
 
@@ -44,7 +44,7 @@ function sideEdge(bm, v_a, v_b, v_flag) {
   return e;
 }
 
-// extrude_face_region: `geom` is { v, e, f }. Returns geom.out. Run through BMO_op_callf.
+// extrude_face_region: `geom` is { v, e, f }. Returns geom.out. Run through bmo_call.
 export function bmo_extrude_face_region_exec(bm, geom, { use_normal_flip = false, use_select_history = false, use_keep_orig = false, skip_input_flip = false } = {}) {
   for (const e of geom.e ?? []) BMO_flag_enable(bm.e, e, EXT_INPUT);
   for (const f of geom.f ?? []) BMO_flag_enable(bm.f, f, EXT_INPUT);
@@ -67,9 +67,9 @@ export function bmo_extrude_face_region_exec(bm, geom, { use_normal_flip = false
   BM_ITER_MESH(bm.f, (f) => BMO_flag_test(bm.f, f, EXT_INPUT) && BMO_flag_enable(bm.f, f, EXT_DEL));
   const del = delorig && flagged(bm, EXT_DEL);
 
-  const dupe = BMO_op_callf(bm, bmo_duplicate_exec, geom, { use_select_history });
+  const dupe = bmo_call(bm, bmo_duplicate_exec, geom, { use_select_history });
   if (bm.act_face >= 0 && BMO_flag_test(bm.f, bm.act_face, EXT_INPUT)) bm.act_face = dupe.face_map.get(bm.act_face) ?? -1;
-  if (del) BMO_op_callf(bm, bmo_delete_exec, del, DEL_ONLYTAGGED);
+  if (del) bmo_call(bm, bmo_delete_exec, del, DEL_ONLYTAGGED);
   if (!delorig && !skip_input_flip) BM_ITER_MESH(bm.f, (f) => BMO_flag_test(bm.f, f, EXT_INPUT) && BM_face_normal_flip(bm, f));
 
   for (const [e, e_new] of dupe.boundary_map) {
@@ -85,14 +85,14 @@ export function bmo_extrude_face_region_exec(bm, geom, { use_normal_flip = false
   return dupe.geom_out;
 }
 
-// extrude_edge_only: returns geom.out. Run through BMO_op_callf.
+// extrude_edge_only: returns geom.out. Run through bmo_call.
 export function bmo_extrude_edge_only_exec(bm, edges, { use_normal_flip = false, use_select_history = false } = {}) {
   for (const e of edges) {
     BMO_flag_enable(bm.e, e, EXT_INPUT);
     BMO_flag_enable(bm.v, bm.e.v1[e], EXT_INPUT);
     BMO_flag_enable(bm.v, bm.e.v2[e], EXT_INPUT);
   }
-  const dupe = BMO_op_callf(bm, bmo_duplicate_exec, flagged(bm, EXT_INPUT), { use_select_history });
+  const dupe = bmo_call(bm, bmo_duplicate_exec, flagged(bm, EXT_INPUT), { use_select_history });
   for (let [e, e_new] of dupe.boundary_map) {
     const flip = !(bm.e.l[e] >= 0 && bm.e.v1[e] !== bm.l.v[bm.e.l[e]]);
     const verts = flip === use_normal_flip ? [bm.e.v1[e], bm.e.v2[e], bm.e.v2[e_new], bm.e.v1[e_new]] : [bm.e.v2[e], bm.e.v1[e], bm.e.v1[e_new], bm.e.v2[e_new]];
@@ -107,7 +107,7 @@ export function bmo_extrude_edge_only_exec(bm, edges, { use_normal_flip = false,
   return flagged(bm, EXT_KEEP);
 }
 
-// extrude_vert_indiv: returns { verts, edges } out. Run through BMO_op_callf.
+// extrude_vert_indiv: returns { verts, edges } out. Run through bmo_call.
 export function bmo_extrude_vert_indiv_exec(bm, verts, { use_select_history = false } = {}) {
   for (let v of verts) {
     let dupev = BM_vert_create(bm, bm.v.co.subarray(v * 3, v * 3 + 3), v, BM_CREATE_NOP);

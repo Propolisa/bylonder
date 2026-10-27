@@ -11,7 +11,7 @@ import { BMW_island } from '../intern/bmesh-walkers.js';
 
 const FACE_MARK = 1 << 1, FACE_ORIG = 1 << 2, FACE_NEW = 1 << 3, FACE_TAG = 1 << 4;
 
-// dissolve_faces: joins each manifold region of `faces` into one face. Returns region.out. Run through BMO_op_callf.
+// dissolve_faces: joins each manifold region of `faces` into one face. Returns region.out. Run through bmo_call.
 export function bmo_dissolve_faces_exec(bm, faces) {
   for (const f of faces) BMO_flag_enable(bm.f, f, FACE_MARK | FACE_TAG);
   const regions = [];

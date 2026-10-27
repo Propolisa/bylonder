@@ -1,4 +1,4 @@
-// Primitive operators (bmo_primitive.cc). Run through BMO_op_callf; `matrix` is a 4x4 of columns.
+// Primitive operators (bmo_primitive.cc). Run through bmo_call; `matrix` is a 4x4 of columns.
 import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
 import { CustomData_get_offset } from '../../blenkernel/customdata.js';
 import { CD_PROP_FLOAT2 } from '../../makesdna/customdata-types.js';
@@ -6,7 +6,7 @@ import { BM_vert_create, BM_edge_create, BM_vert_kill, BM_face_create_verts, BM_
 import { BM_face_create_quad_tri } from '../intern/bmesh-construct.js';
 import { BM_edge_collapse } from '../intern/bmesh-mods.js';
 import { BM_face_normal_update } from '../intern/bmesh-polygon.js';
-import { BMO_op_callf } from '../intern/bmesh-operators.js';
+import { bmo_call } from '../intern/bmesh-operators.js';
 import { bmo_dissolve_faces_exec } from './bmo-dissolve.js';
 import { sin_cos_from_fraction } from '../../blenlib/math-rotation.js';
 import { mul_m4_v3, mul_mat3_m4_v3, invert_m4_m4, unit_m4 } from '../../blenlib/math-matrix.js';
@@ -121,7 +121,7 @@ export function bmo_create_circle_exec(bm, { segments: segs, radius, cap_ends, c
 function dissolveMarked(bm, flag) {
   const faces = [];
   markedFaces(bm, flag, (f) => faces.push(f));
-  BMO_op_callf(bm, bmo_dissolve_faces_exec, faces);
+  bmo_call(bm, bmo_dissolve_faces_exec, faces);
 }
 
 export function BM_mesh_calc_uvs_circle(bm, matrix, radius, oflag, uv) {

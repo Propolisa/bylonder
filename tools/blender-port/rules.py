@@ -43,7 +43,7 @@ DROPPED_CALL_PREFIXES = ('BLI_memarena_',)
 DROPPED_FIELDS = {'mem_arena'}
 ALLOCATORS = {'BLI_memarena_alloc', 'BLI_memarena_calloc', 'MEM_malloc_arrayN', 'MEM_calloc_arrayN', 'MEM_mallocN', 'MEM_callocN'}
 # Declarations the port has no use for.
-DROPPED_TYPES = {'BMIter', 'MemArena', 'BMOIter', 'bl_port_iter'}
+DROPPED_TYPES = {'BMIter', 'MemArena', 'bl_port_iter'}
 # blender::Vector, Map and Set as JS arrays, Maps and Sets.
 ARRAY_TYPES = {'Vector', 'Array', 'Span', 'MutableSpan'}
 # Types that only wrap an integer for operator overloading, used as the integer.

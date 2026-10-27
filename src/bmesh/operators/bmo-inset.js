@@ -47,7 +47,7 @@ function BM_loop_other_vert_loop(bm, lp, v) {
   return l.v[l.prev[lp]] === v ? l.prev[l.prev[lp]] : l.next[l.next[lp]];
 }
 
-// inset_region: insets the boundary between `faces` and the rest. Returns faces.out. Run through BMO_op_callf.
+// inset_region: insets the boundary between `faces` and the rest. Returns faces.out. Run through bmo_call.
 export function bmo_inset_region_exec(bm, faces, {
   use_boundary = false, use_even_offset = false, use_relative_offset = false, use_edge_rail = false,
   thickness = 0, depth = 0, use_outset = false,
