@@ -44,6 +44,7 @@ DROPPED_FIELDS = {'mem_arena'}
 ALLOCATORS = {'BLI_memarena_alloc', 'BLI_memarena_calloc', 'MEM_mallocN', 'MEM_callocN'}
 # Allocators whose first argument is the element count.
 COUNTED_ALLOCATORS = {'MEM_malloc_arrayN', 'MEM_calloc_arrayN', 'MEM_new_array_uninitialized', 'MEM_new_array_zeroed'}
+REALLOCATORS = {'MEM_realloc_uninitialized_id', 'MEM_reallocN_id', 'MEM_recallocN_id'}
 # Declarations the port has no use for.
 DROPPED_TYPES = {'BMIter', 'MemArena', 'bl_port_iter'}
 # blender::Vector, Map and Set as JS arrays, Maps and Sets.

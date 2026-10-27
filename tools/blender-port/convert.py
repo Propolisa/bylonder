@@ -27,7 +27,7 @@ import sys
 import clang.cindex as ci
 
 import clangx
-from rules import (INTEGER_WRAPPERS, ALLOCATORS, ARRAY_TYPES, COUNTED_ALLOCATORS, CONSTANTS, DROPPED_CALL_PREFIXES, DROPPED_CALLS, DROPPED_FIELDS, DROPPED_TYPES,
+from rules import (INTEGER_WRAPPERS, ALLOCATORS, ARRAY_TYPES, COUNTED_ALLOCATORS, REALLOCATORS, CONSTANTS, DROPPED_CALL_PREFIXES, DROPPED_CALLS, DROPPED_FIELDS, DROPPED_TYPES,
                    HEADER_FIELDS, HELPER_MODULES, HTYPE, IN_OUT, METHODS, MODULE_FOR_SOURCE, OUT_FIRST, POOL, PRELUDE_HOMES,
                    PRELUDE_NEEDS_BM, RENAME, VEC_FIELDS, VECTOR_CONSTRUCTORS)
 
@@ -552,6 +552,7 @@ class FunctionPort:
         self.deps = set()
         self.cursors = {}
         self.views = {}
+        self.kept = set()
 
     def temp(self):
         name = f'_r{self.temps}'
@@ -612,6 +613,21 @@ class FunctionPort:
             if ok and key in stepped:
                 cursors[key] = (base, start)
         return cursors
+
+    @staticmethod
+    def find_kept(body):
+        """Variables of a dropped type that a ported call takes, as `BM_iter_new(&iter, ...)` does: these stay."""
+        kept = set()
+        for c in body.walk_preorder():
+            ref = c.referenced if c.kind == K.CALL_EXPR else None
+            if ref is None or ref.kind != K.FUNCTION_DECL or is_prelude(ref) or c.spelling in DROPPED_CALLS \
+                    or c.spelling.startswith(DROPPED_CALL_PREFIXES) or c.spelling in ALLOCATORS:
+                continue
+            for a in arguments(c):
+                a = strip_parens_casts(address_of(a) or a)
+                if a.kind == K.DECL_REF_EXPR and a.referenced is not None and dropped(a.referenced.type):
+                    kept.add(a.referenced.hash)
+        return kept
 
     def find_views(self, body):
         """Number pointers into a buffer that are only written through (`float *co = buf + 3 * k`), as {var: (buf,
@@ -677,6 +693,7 @@ class FunctionPort:
         body = next(k for k in self.f.get_children() if k.kind == K.COMPOUND_STMT)
         self.cursors = self.find_cursors(body)
         self.views = self.find_views(body)
+        self.kept = self.find_kept(body)
         lines = self.block_lines(body, [(f'let {p["name"]}{self.out_init(p)};', p['cursor']) for p in outs])
         statements = list(body.get_children())
         if self.outs() and canon(sig['ret']).kind == T.VOID and not (statements and statements[-1].kind == K.RETURN_STMT):
@@ -895,7 +912,7 @@ class FunctionPort:
     def declaration_of(self, v):
         """`let name = value;` for a variable declaration, or None for one the port drops."""
         t = canon(v.type)
-        if dropped(t):
+        if dropped(t) and v.hash not in self.kept:
             return None
         if v.hash in self.cursors:
             _, start = self.cursors[v.hash]
@@ -937,7 +954,7 @@ class FunctionPort:
         if s.kind == K.DECL_REF_EXPR and any(p['name'] == s.spelling and p['out'] == 'out' for p in self.sig['params']):
             return 'true'
         if pool_of(s.type):
-            return f'({self.expr(s)} >= 0)'
+            return f'(({self.expr(s)}) >= 0)'
         if is_unary(s, '!'):
             inner = strip_parens_casts(kids(s)[0])
             if pool_of(inner.type):
@@ -976,7 +993,7 @@ class FunctionPort:
             ref = c.referenced
             if ref is not None and ref.hash in self.cursors:
                 return f'{self.expr(self.cursors[ref.hash][0])}[{ref.spelling}_i]'
-            if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL) and dropped(ref.type):
+            if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL) and dropped(ref.type) and ref.hash not in self.kept:
                 return 'null'
             if ref is not None and ref.kind == K.ENUM_CONSTANT_DECL and ref.semantic_parent.is_scoped_enum():
                 self.note_ref(ref, ref.semantic_parent.spelling)
@@ -1363,18 +1380,14 @@ class FunctionPort:
     def special_call(self, name, args, want=None):
         """Calls with their own JS form, or None."""
         js = lambda xs: [self.expr(a) for a in xs]
+        if name in REALLOCATORS:
+            # The old elements, then fresh ones up to the new size.
+            elem = pointee(want) if want is not None and pointee(want) is not None else pointee(args[0].type)
+            n = ' * '.join(self.element_count(args, elem)) or '0'
+            return f'Object.assign({buffer_of(elem, n)}, {self.expr(args[0])}.slice(0, {n}))'
         if name in ALLOCATORS or name in COUNTED_ALLOCATORS:
             elem = pointee(want) if want is not None and pointee(want) is not None and canon(pointee(want)).kind != T.VOID else pointee(self.call_type)
-            if name in COUNTED_ALLOCATORS:
-                count = [self.expr(args[0])]
-            else:
-                factors = self.product(args[-1]) if args else []
-                count = [self.expr(f) for f in factors if strip_parens_casts(f).kind != K.CXX_UNARY_EXPR]
-                # sizeof(float[3]) * n of float is 3 * n floats: the sizes give how many elements each counted item is.
-                sizes = math.prod(clangx.evaluate(f) or 1 for f in factors if strip_parens_casts(f).kind == K.CXX_UNARY_EXPR)
-                size = canon(elem).get_size() if elem is not None and canon(elem).kind != T.VOID else 0
-                if size > 0 and sizes != size and sizes % size == 0:
-                    count.insert(0, str(sizes // size))
+            count = [self.expr(args[0])] if name in COUNTED_ALLOCATORS else self.element_count(args, elem)
             if elem is None or canon(elem).kind == T.VOID:
                 return f'new Array({" * ".join(count)})' if count else '{}'
             if not count:
@@ -1443,6 +1456,18 @@ class FunctionPort:
         if m:
             return f'{self.helper("BMO_flag_" + m.group(2))}({self.bm}.{m.group(1)[0]}, {", ".join(js(args[1:]))})'
         return None
+
+    def element_count(self, args, elem):
+        """The factors of how many elems a byte size argument (the last integer one) holds."""
+        size_arg = next((a for a in reversed(args) if is_int(a.type)), None)
+        factors = self.product(size_arg) if size_arg is not None else []
+        count = [self.expr(f) for f in factors if strip_parens_casts(f).kind != K.CXX_UNARY_EXPR]
+        # sizeof(float[3]) * n of float is 3 * n floats: the sizes give how many elements each counted item is.
+        sizes = math.prod(clangx.evaluate(f) or 1 for f in factors if strip_parens_casts(f).kind == K.CXX_UNARY_EXPR)
+        size = canon(elem).get_size() if elem is not None and canon(elem).kind != T.VOID else 0
+        if size > 0 and sizes != size and sizes % size == 0:
+            count.insert(0, str(sizes // size))
+        return count
 
     def product(self, c):
         """The factors of a product like `sizeof(T) * count * (n + 1)`."""

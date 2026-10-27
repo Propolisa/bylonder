@@ -131,6 +131,17 @@ const pool_alive = (pool) => {
   for (let i = 0, n = pool.size; i < n; i++) if (pool.alive[i]) out.push(i);
   return out;
 };
+// port-override: an iterator type here is a function giving the elements, so a BMIter walks what it gives.
+export function BM_iter_init(iter, bm, itype, data) {
+  iter.itype = itype;
+  iter.items = itype(bm, data)[Symbol.iterator]();
+  return true;
+}
+export function BM_iter_step(iter) {
+  const next = iter.items.next();
+  return next.done ? -1 : next.value;
+}
+export const BM_iter_new = (iter, bm, itype, data) => (BM_iter_init(iter, bm, itype, data) ? BM_iter_step(iter) : -1);
 export const BM_VERTS_OF_MESH = (bm) => pool_alive(bm.v);
 export const BM_EDGES_OF_MESH = (bm) => pool_alive(bm.e);
 export const BM_FACES_OF_MESH = (bm) => pool_alive(bm.f);
