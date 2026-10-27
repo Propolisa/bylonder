@@ -64,7 +64,8 @@ let edited = 0, geometric = 0;
 const failures = [];
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
-  if (!fixture.edit) continue;
+  // Operators only Blender's own code runs (src/bmesh/bmesh-wasm.js) are checked by editmesh-wasm.test.js.
+  if (!fixture.edit || [fixture.edit, fixture.edit.pre].some((step) => step && !meshOperators[step.operator])) continue;
   try {
     checkEdit(file.replace('.json', ''), fixture);
   } catch (error) {
