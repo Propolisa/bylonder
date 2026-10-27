@@ -376,7 +376,7 @@ class Source:
     # --- out parameters
 
     def signature(self, f):
-        params = [{'name': p.spelling, 'type': p.type, 'cursor': p} for p in f.get_arguments()]
+        params = [{'name': p.spelling or f'_unused{i}', 'type': p.type, 'cursor': p} for i, p in enumerate(f.get_arguments())]
         body = next((k for k in f.get_children() if k.kind == K.COMPOUND_STMT), None)
         for p in params:
             p['out'] = self.out_kind(p, body) if body is not None else None
@@ -1120,6 +1120,8 @@ class FunctionPort:
             elem = pointee(strip_parens_casts(dst).type)
             if (elem is None or elem.kind == T.VOID) and want is not None:
                 elem = pointee(want)
+            if elem is not None and byte == 0 and is_struct_value(elem) and clangx.evaluate(args[2]) == canon(elem).get_size():
+                return f'Object.assign({self.expr(strip_parens_casts(dst), want)}, {zero_of(elem)})'  # One struct, zeroed.
             value = fill_value(elem, byte) if elem is not None and byte is not None else None
             return f'{self.expr(dst, want)}.fill({value})' if value is not None else fix('memset', self.p.text(self.call_node))
         if name == 'memcpy':
