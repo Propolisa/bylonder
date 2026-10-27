@@ -4,6 +4,7 @@
 @import "tailwindcss/utilities.css" source(none);
 @source "./";
 @source "../../../coverage/";
+@source "../../../workspace/changelog/";
 
 /* shadcn-vue's semantic tokens, defined by Bylonder's theme tokens (src/theme.css). */
 @theme inline {

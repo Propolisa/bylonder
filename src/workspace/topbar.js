@@ -1,6 +1,7 @@
 import { menuButton } from '../editors/interface/menu.js';
 import { iconEl } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
+import { fullDate, timeAgo } from './relative-time.js';
 
 export function mountTopbar({ dock, send, examples, openExample, newProject, recentProjects, openProject }) {
   const $ = id => document.getElementById(id);
@@ -79,6 +80,14 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   sync();
   bar.querySelector('.bl-logo').replaceChildren(iconEl('bylonder'));
 
+  // The version and the build's commit; hovering tells when it last changed.
+  function versionLabel() {
+    const change = __BYLONDER_CHANGE__;
+    const label = Object.assign(document.createElement('span'), { className: 'bl-splash-version', textContent: change ? `${__BYLONDER_VERSION__} (${change.hash})` : __BYLONDER_VERSION__ });
+    if (change) label.title = `Last changed ${timeAgo(change.time)}, ${fullDate(change.time)}: ${change.subject}`;
+    return label;
+  }
+
   // Laid out like Blender's splash: artwork with logo and version, New File and Recent Files, then Open and links.
   function splash() {
     const dialog = document.createElement('dialog');
@@ -99,7 +108,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     banner.className = 'bl-splash-banner';
     const brand = Object.assign(document.createElement('div'), { className: 'bl-splash-brand' });
     brand.append(iconEl('bylonder'), Object.assign(document.createElement('strong'), { textContent: 'blember' }));
-    banner.append(brand, Object.assign(document.createElement('span'), { className: 'bl-splash-version', textContent: __BYLONDER_VERSION__ }), Object.assign(document.createElement('span'), { className: 'bl-splash-credit', textContent: 'Babylon.js workbench' }));
+    banner.append(brand, versionLabel(), Object.assign(document.createElement('span'), { className: 'bl-splash-credit', textContent: 'Babylon.js workbench' }));
     const recent = column('Recent Files', []);
     recentProjects().then((projects) => recent.append(...projects.slice(0, 5).map((p) => item(p.name, 'file_blend', () => openProject(p.id))), item('More…', 'viewzoom', () => document.getElementById('project').focus())));
     const files = Object.assign(document.createElement('div'), { className: 'bl-splash-columns' });
@@ -107,7 +116,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     const links = Object.assign(document.createElement('div'), { className: 'bl-splash-columns bl-splash-links' });
     links.append(
       column('', [item('Open…', 'file_folder', () => document.getElementById('import').click()), item('Keyboard Shortcuts', 'help', () => send('help'))]),
-      column('', [item('Blender Coverage', 'blender', () => import('../coverage/open.js').then((m) => m.openCoverage())), item('Documentation', 'help', () => open(import.meta.env.BASE_URL + 'docs.html', '_blank', 'noopener'))]),
+      column('', [item('Blender Coverage', 'blender', () => import('../coverage/open.js').then((m) => m.openCoverage())), item('Documentation', 'help', () => open(import.meta.env.BASE_URL + 'docs.html', '_blank', 'noopener')), item('Changelog', 'time', () => import('./changelog/open.js').then((m) => m.openChangelog()))]),
     );
     dialog.append(banner, files, links);
     dialog.addEventListener('close', () => dialog.remove());
