@@ -112,3 +112,4 @@ function renderSample(t, offset, { start, fps, width, height }) {
 
 
 window.bylonderRender = { open, renderFrame, warnings, get clock() { return clock.ms; } };
+dispatchEvent(new Event('bylonder-render'));
