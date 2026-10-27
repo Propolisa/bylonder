@@ -3,7 +3,7 @@
 // ModifierData at the DNA fields RNA names (dna-modifiers.json).
 import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
-import { evaluateModifiers } from '../bmesh/bmesh-wasm.js';
+import { evaluateModifiers, drawModifierPanel } from '../bmesh/bmesh-wasm.js';
 
 // The types that evaluate on a mesh alone; the rest need other objects, vertex groups, bind data or simulation.
 const MESH_ONLY = ['ARRAY', 'BEVEL', 'BUILD', 'DECIMATE', 'EDGE_SPLIT', 'MIRROR', 'REMESH', 'SCREW', 'SKIN', 'SOLIDIFY', 'SUBSURF', 'TRIANGULATE',
@@ -61,6 +61,7 @@ function definition(id) {
     }
   };
   return {
+    id, name, description, icon, category: 'Generate', blender: `object.modifier_add:${id}`,
     schema: fields,
     defaults: () => Object.fromEntries(Object.entries(fields).map(([path, entry]) => [path, entry.default])),
     mesh: { type, write },
@@ -69,13 +70,26 @@ function definition(id) {
 
 export const blenderModifierDefinitions = MESH_ONLY.map(definition);
 
-// Evaluates Blender modifiers on a Mesh; throws the first modifier's error, as Blender shows it in its panel.
-export function evaluateBlenderModifiers(mesh, modifiers) {
-  const { mesh: result, errors } = evaluateModifiers(mesh, modifiers.map(({ type, values }) => {
-    const { mesh: { type: value, write } } = blenderModifierDefinitions.find((d) => d.id === type);
-    return { type: value, write: write(values) };
-  }));
+// The Blender modifiers of a stack shown in the viewport, as the module takes them.
+export const viewportModifiers = (stack) =>
+  moduleModifiers(stack.filter((m) => m.showViewport && blenderModifierDefinitions.some((d) => d.id === m.type)));
+
+// Stack entries ({type, values}) as the module takes them.
+export const moduleModifiers = (modifiers) => modifiers.map(({ type, values }) => {
+  const { mesh: { type: value, write } } = blenderModifierDefinitions.find((d) => d.id === type);
+  return { type: value, write: write(values) };
+});
+
+// The evaluated Mesh of an evaluation ({mesh, errors}); throws the first modifier's error, as Blender shows it in its
+// panel.
+export function evaluated({ mesh, errors }) {
   const error = errors.find(Boolean);
   if (error) throw new Error(error);
-  return result;
+  return mesh;
 }
+
+// Evaluates Blender modifiers on a Mesh.
+export const evaluateBlenderModifiers = (mesh, modifiers) => evaluated(evaluateModifiers(mesh, moduleModifiers(modifiers)));
+
+// What Blender's panel for a stack entry draws with its values (drawModifierPanel).
+export const modifierPanel = (modifier) => drawModifierPanel(moduleModifiers([modifier])[0]);

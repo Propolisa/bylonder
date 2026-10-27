@@ -16,6 +16,9 @@ CASES = {
     "bevel-segments": [("BEVEL", {"width": 0.2, "segments": 3, "affect": "EDGES"})],
     "solidify-even": [("SOLIDIFY", {"thickness": 0.3, "use_even_offset": True})],
     "simple-deform-bend": [("SIMPLE_DEFORM", {"deform_method": "BEND", "angle": 1.0})],
+    "remesh-blocks": [("REMESH", {"mode": "BLOCKS", "octree_depth": 3})],
+    "remesh-smooth": [("REMESH", {"mode": "SMOOTH", "octree_depth": 3})],
+    "remesh-voxel-small": [("REMESH", {"voxel_size": 0.25})],
     "mirror-subsurf": [("MIRROR", {}), ("SUBSURF", {"levels": 1})],
     "array-bevel-subsurf": [("ARRAY", {"count": 2}), ("BEVEL", {"width": 0.1}), ("SUBSURF", {})],
 }

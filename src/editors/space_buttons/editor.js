@@ -13,11 +13,14 @@ import { particlePanels, compositingPanel } from './node-panels.js';
 import { scenePanels, worldPanels, outputPanels } from './scene-panels.js';
 import { renderPanels } from './render-panels.js';
 import { viewLayerPanels, collectionPanels, objectCollectionsPanel } from './collection-panels.js';
+import { openMenu } from '../interface/menu.js';
+import { modifierAddMenu } from './modifier-add-menu.js';
+import { blenderModifierContent } from './modifier-panel.js';
 import '../interface/widgets.css';
 export function mountProperties(host,{world,editor,history,storage,systems,properties,files=[]},areaId='properties',header){
   const key='workbench:properties:'+areaId;let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}');}catch{}
   const preview=createPreview();
-  const state=reactive({context:saved.context||'object',closed:saved.closed||[],opened:saved.opened||[],panels:[],pinned:null,revision:0,add:false,search:'',activeModifier:null,previewUrl:'',previewFor:null});
+  const state=reactive({context:saved.context||'object',closed:saved.closed||[],opened:saved.opened||[],panels:[],pinned:null,revision:0,activeModifier:null,previewUrl:'',previewFor:null});
   watch(()=>[state.context,state.closed,state.opened],()=>{try{localStorage.setItem(key,JSON.stringify({context:state.context,closed:state.closed,opened:state.opened}));}catch{}},{deep:true});
   const active=()=>state.pinned?world.objects.find(n=>nodeId(n)===state.pinned&&!deleted(n)):editor.selection.nodes.at(-1);
   const commit=()=>{history.commit();editor.selection.sync();state.revision++;};
@@ -39,7 +42,7 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
   const modifierPanel=(node,modifier,index)=>{
     const id='modifier.'+modifier.id,values=modifier.values,definition=world.modifiers.definitions.get(modifier.type);
     if(!definition)return h('p',{class:'bl-error'},'Unknown modifier '+modifier.type);
-    const field=path=>{const def=definition.schema[path];return row({...def,id:id+'.'+path,get:()=>modifier.values[path],set:(value,finish)=>world.modifiers.set(node,modifier.id,path,value,{finish:false}),refs:()=>def.animatable===false?[]:[address('modifier:'+nodeId(node)+':'+modifier.id,path)],choices:()=>world.objects.filter(n=>n!==node&&!deleted(n)&&(def.reference!=='curve'||n.metadata?.wbCurve)).map(n=>[nodeId(n),n.name])});};
+    const field=(path,extra={})=>{const def=definition.schema[path];return row({...def,...extra,id:id+'.'+path,get:()=>modifier.values[path],set:(value,finish)=>world.modifiers.set(node,modifier.id,path,value,{finish:false}),refs:()=>def.animatable===false?[]:[address('modifier:'+nodeId(node)+':'+modifier.id,path)],choices:()=>world.objects.filter(n=>n!==node&&!deleted(n)&&(def.reference!=='curve'||n.metadata?.wbCurve)).map(n=>[nodeId(n),n.name])});};
     const vector=(path,label)=>h('div',{class:'bl-vector'},['x','y','z'].map((axis,i)=>{const def=definition.schema[path+'.'+axis];return row({...def,id:id+'.'+path+'.'+axis,label:(i===0?label+' ':'')+axis.toUpperCase(),get:()=>modifier.values[path+'.'+axis],set:value=>world.modifiers.set(node,modifier.id,path+'.'+axis,value,{finish:false}),refs:()=>[address('modifier:'+nodeId(node)+':'+modifier.id,path+'.'+axis)]});}));
     const actions=()=>[
       iconButton(modifier.showViewport?'RESTRICT_VIEW_OFF':'RESTRICT_VIEW_ON','Display modifier in viewport',()=>world.modifiers.update(node,modifier.id,{showViewport:!modifier.showViewport}),{'aria-pressed':modifier.showViewport}),
@@ -49,6 +52,7 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
     ];
     const content=()=>{
       if(modifier.type==='NODES'){const rows=bindGraph(world.animation,{id:'modifier:'+nodeId(node)+':'+modifier.id+':graph',title:node.name+' › '+modifier.name,graph:()=>geometryGraph(modifier),kind:'geometry',onChange:()=>{modifier.revision=(modifier.revision||0)+1;world.modifiers.refresh();}}).map(f=>row({...f,default:undefined}));return [...(rows.length?rows:[h('p',{class:'bl-message'},'Add Input blocks to the node group to expose values here.')]),h('button',{type:'button',class:'bl-wide-button',onClick:()=>world.openNodeEditor?.('geometry')},[icon('GEOMETRY_NODES'),'Edit in Geometry Node Editor'])];}
+      if(definition.mesh)return blenderModifierContent({id,modifier,definition,field,panel});
       if(modifier.type!=='GN_ARRAY')return Object.keys(definition.schema).filter(path=>!definition.schema[path].hidden).map(field);
       const p=values,result=[field('shape')];
       if(['Circle','Curve'].includes(p.shape))result.push(field('countMethod'));
@@ -69,10 +73,8 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
   };
   const modifiers=()=>{
     const node=active();if(!node?.getTotalVertices?.())return h('p',{class:'bl-message'},'Select a mesh to add modifiers.');
-    return [h('button',{class:'bl-add-modifier',onClick:()=>state.add=!state.add,title:'Add Modifier (Shift-A)','data-blender':'OBJECT_MT_modifier_add'},[icon('ADD'),' Add Modifier']),state.add?h('div',{class:'bl-add-menu'},[
-      h('input',{placeholder:'Search…',value:state.search,onInput:e=>state.search=e.target.value}),h('strong','Generate'),
-      ...[...world.modifiers.definitions.values()].filter(d=>d.name.toLowerCase().includes(state.search.toLowerCase())).map(d=>h('button',{onClick:()=>{try{const m=world.modifiers.add(node,d.id);state.activeModifier=m.id;state.add=false;}catch(error){world.notify(error.message);}}},[icon(d.icon,{class:'bl-icon bl-modifier-color'}),d.name]))
-    ]):null,...world.modifiers.stack(node).map((m,i)=>modifierPanel(node,m,i)),world.modifiers.errors.get(nodeId(node))?h('p',{class:'bl-message bl-error'},world.modifiers.errors.get(nodeId(node))):null];
+    const add=e=>openMenu(modifierAddMenu(world,node,m=>state.activeModifier=m.id),e.currentTarget);
+    return [h('button',{class:'bl-add-modifier',onClick:add,title:'Add Modifier (Shift-A)','data-blender':'OBJECT_MT_modifier_add'},[icon('ADD'),' Add Modifier']),...world.modifiers.stack(node).map((m,i)=>modifierPanel(node,m,i)),world.modifiers.errors.get(nodeId(node))?h('p',{class:'bl-message bl-error'},world.modifiers.errors.get(nodeId(node))):null];
   };
   const scene=()=>[
     ...(world.sceneSettings?scenePanels({world,row,panel}):[]),
@@ -104,7 +106,7 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
     if(sceneLevel()||!node)return [icon('SCENE_DATA'),h('span',{class:'bl-context-name',title:sceneName},sceneName)];
     return [icon('OBJECT_DATA',{class:'bl-icon bl-object-color'}),h('span',{class:'bl-context-name',title:node.name},node.name)];
   };
-  const app=createApp({setup(){return()=>{state.revision;const node=active();return h('section',{class:'bl-properties',onKeydown:e=>{if(e.target.closest('input,textarea,select'))return;if(e.shiftKey&&e.key.toLowerCase()==='a'&&state.context==='modifiers'){e.preventDefault();e.stopPropagation();state.add=true;}else if(e.ctrlKey&&e.key==='Tab'){e.preventDefault();e.stopPropagation();const ids=[...propertyContexts.keys()],i=ids.indexOf(state.context);state.context=ids[(i+(e.shiftKey?-1:1)+ids.length)%ids.length];}}},[
+  const app=createApp({setup(){return()=>{state.revision;const node=active();return h('section',{class:'bl-properties',onKeydown:e=>{if(e.target.closest('input,textarea,select'))return;if(e.shiftKey&&e.key.toLowerCase()==='a'&&state.context==='modifiers'){e.preventDefault();e.stopPropagation();e.currentTarget.querySelector('.bl-add-modifier')?.click();}else if(e.ctrlKey&&e.key==='Tab'){e.preventDefault();e.stopPropagation();const ids=[...propertyContexts.keys()],i=ids.indexOf(state.context);state.context=ids[(i+(e.shiftKey?-1:1)+ids.length)%ids.length];}}},[
       (header?(c=>h(Teleport,{to:header},[c])):(c=>c))(h('div',{class:'bl-header'},[...breadcrumb(node),iconButton(state.pinned?'PINNED':'UNPINNED',state.pinned?'Unpin Properties context':'Pin Properties context',()=>state.pinned=state.pinned?null:node?nodeId(node):null,{'aria-pressed':!!state.pinned})])),
       h('div',{class:'bl-body'},[
         h('nav',{class:'bl-tabs',role:'tablist','aria-label':'Properties context'},[...propertyContexts.values()].map(context=>iconButton(context.icon,context.title,()=>state.context=context.id,{role:'tab','aria-selected':state.context===context.id,style:{color:context.color,marginTop:context.id==='object'?'8px':undefined}}))),

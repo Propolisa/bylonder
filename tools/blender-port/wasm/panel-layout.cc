@@ -1,0 +1,296 @@
+/* Blender's modifier panels (each MOD_*.cc's panel_draw and its sub-panels) without Blender's interface: ui::Layout
+ * records what a panel draws as a tree, which JS reads as JSON and draws with its own widgets. The panels read and
+ * write the modifier through RNA, which reads and writes its DNA (operator-properties.cc). */
+#include <map>
+#include <sstream>
+
+#include "BKE_context.hh"
+#include "BKE_modifier.hh"
+#include "BKE_screen.hh"
+#include "BLI_listbase.h"
+#include "DNA_modifier_types.h"
+#include "DNA_object_types.h"
+#include "DNA_screen_types.h"
+#include "RNA_access.hh"
+#include "UI_interface_c.hh"
+#include "UI_interface_layout.hh"
+
+#include "operator-properties.hh"
+
+using namespace blender;
+
+#define EXPORT(name) extern "C" __attribute__((export_name(#name)))
+
+namespace blender::ui {
+
+/* What a layout or an item in it draws; a layout's own state (active, enabled) is read from it when written out. */
+struct Node {
+  std::string kind, prop, owner, heading;
+  /* \x01: none, so the widget shows its RNA name. */
+  std::string text = "\x01";
+  int index = -1, flag = 0;
+  bool split = false, decorate = true;
+  const Layout *layout = nullptr;
+  std::vector<std::unique_ptr<Node>> children;
+};
+
+static std::map<const Layout *, Node *> nodes;
+static std::vector<std::unique_ptr<Layout>> layouts;
+
+/* Reads a layout's protected state, as Blender's interface code does through its friend. */
+struct LayoutInternal {
+  static bool active(const Layout &layout) { return layout.active_; }
+  static bool enabled(const Layout &layout) { return layout.enabled_; }
+  static bool red_alert(const Layout &layout) { return layout.redalert_; }
+  static void init(Layout &layout)
+  {
+    layout.active_ = true;
+    layout.enabled_ = true;
+  }
+};
+
+static Node &add(const Layout *parent, const char *kind)
+{
+  Node &node = *nodes.at(parent)->children.emplace_back(std::make_unique<Node>());
+  node.kind = kind;
+  node.split = nodes.at(parent)->split;
+  node.decorate = nodes.at(parent)->decorate;
+  return node;
+}
+
+static Layout &sub_layout(const Layout *parent, const char *kind)
+{
+  Layout &layout = *layouts.emplace_back(std::make_unique<Layout>(ItemType(0), nullptr));
+  Node &node = add(parent, kind);
+  node.layout = &layout;
+  nodes[&layout] = &node;
+  return layout;
+}
+
+static const char *owner(const PointerRNA *ptr) { return ptr && ptr->type ? RNA_struct_identifier(ptr->type) : ""; }
+
+Item::Item(ItemType type) : type_(type) {}
+Layout::Layout(ItemType type, LayoutRoot *root) : Item(type)
+{
+  root_ = root;
+  LayoutInternal::init(*this);
+}
+void Layout::estimate_impl() {}
+void Layout::resolve_impl() {}
+Block *Layout::block() const { return nullptr; }
+
+Layout &Layout::column(bool /*align*/) { return sub_layout(this, "column"); }
+Layout &Layout::column(bool /*align*/, StringRef heading)
+{
+  Layout &layout = sub_layout(this, "column");
+  nodes[&layout]->heading = heading;
+  return layout;
+}
+Layout &Layout::row(bool /*align*/) { return sub_layout(this, "row"); }
+Layout &Layout::row(bool /*align*/, StringRef heading)
+{
+  Layout &layout = sub_layout(this, "row");
+  nodes[&layout]->heading = heading;
+  return layout;
+}
+Layout &Layout::box() { return sub_layout(this, "box"); }
+Layout &Layout::split(float /*percentage*/, bool /*align*/) { return sub_layout(this, "split"); }
+
+void Layout::use_property_split_set(bool value) { nodes.at(this)->split = value; }
+void Layout::use_property_decorate_set(bool value) { nodes.at(this)->decorate = value; }
+void Layout::emboss_set(EmbossType /*emboss*/) {}
+void Layout::operator_context_set(wm::OpCallContext /*opcontext*/) {}
+void Layout::context_ptr_set(StringRef /*name*/, const PointerRNA * /*ptr*/) {}
+
+void Layout::prop(PointerRNA *ptr, StringRefNull propname, eUI_Item_Flag flag, std::optional<StringRef> name, int /*icon*/)
+{
+  Node &node = add(this, "prop");
+  node.prop = propname;
+  node.owner = owner(ptr);
+  node.flag = int(flag);
+  node.text = name ? std::string(*name) : std::string("\x01");
+}
+void Layout::prop(PointerRNA *ptr, PropertyRNA *prop, int index, int /*value*/, eUI_Item_Flag flag, std::optional<StringRef> name_opt,
+                  int icon, std::optional<StringRef> /*placeholder*/)
+{
+  this->prop(ptr, RNA_property_identifier(prop), flag, name_opt, icon);
+  nodes.at(this)->children.back()->index = index;
+}
+void Layout::prop_search(PointerRNA *ptr, StringRefNull propname, PointerRNA * /*searchptr*/, StringRefNull /*searchpropname*/,
+                         std::optional<StringRefNull> name, int icon)
+{
+  this->prop(ptr, propname, eUI_Item_Flag(0), name ? std::optional<StringRef>(*name) : std::nullopt, icon);
+  nodes.at(this)->children.back()->kind = "search";
+}
+void Layout::prop_search(PointerRNA *ptr, PropertyRNA *prop, PointerRNA *searchptr, PropertyRNA * /*searchprop*/,
+                         PropertyRNA * /*item_searchpropname*/, std::optional<StringRefNull> name, int icon, bool /*suggestions*/)
+{
+  this->prop_search(ptr, RNA_property_identifier(prop), searchptr, "", name, icon);
+}
+void Layout::decorator(PointerRNA * /*ptr*/, PropertyRNA * /*prop*/, int /*index*/) {}
+void Layout::decorator(PointerRNA * /*ptr*/, std::optional<StringRefNull> /*propname*/, int /*index*/) {}
+void Layout::separator(float /*factor*/, LayoutSeparatorType /*type*/) { add(this, "separator"); }
+void Layout::label(StringRef name, int /*icon*/) { add(this, "label").text = name; }
+void Layout::menu_fn(StringRefNull name, int /*icon*/, MenuCreateFunc /*func*/, void * /*arg*/) { add(this, "menu").text = name; }
+
+/* Operators are recorded by name; the properties a panel sets on them go nowhere. */
+PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int /*icon*/, wm::OpCallContext /*context*/,
+                      eUI_Item_Flag /*flag*/)
+{
+  Node &node = add(this, "operator");
+  node.prop = opname;
+  node.text = name ? std::string(*name) : std::string();
+  return PointerRNA_NULL;
+}
+PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int icon)
+{
+  return this->op(opname, name, icon, wm::OpCallContext::InvokeRegionWin, eUI_Item_Flag(0));
+}
+PointerRNA Layout::op(wmOperatorType *ot, std::optional<StringRef> name, int icon, wm::OpCallContext context, eUI_Item_Flag flag)
+{
+  return this->op(ot->idname, name, icon, context, flag);
+}
+PointerRNA Layout::op(wmOperatorType *ot, std::optional<StringRef> name, int icon)
+{
+  return this->op(ot->idname, name, icon);
+}
+
+/* Sub-panels inside a panel's layout, always open: JS keeps their open state. */
+PanelLayout Layout::panel_prop(const bContext * /*C*/, PointerRNA * /*open_prop_owner*/, StringRefNull open_prop_name)
+{
+  Layout &panel = sub_layout(this, "panel");
+  nodes[&panel]->prop = open_prop_name;
+  return {&sub_layout(&panel, "header"), &sub_layout(&panel, "body")};
+}
+Layout *Layout::panel_prop(const bContext *C, PointerRNA *open_prop_owner, StringRefNull open_prop_name, StringRef label)
+{
+  PanelLayout panel = this->panel_prop(C, open_prop_owner, open_prop_name);
+  panel.header->label(label, 0);
+  return panel.body;
+}
+PanelLayout Layout::panel_prop_with_bool_header(const bContext *C, PointerRNA *open_prop_owner, StringRefNull open_prop_name,
+                                                PointerRNA *bool_prop_owner, StringRefNull bool_prop_name,
+                                                std::optional<StringRef> label)
+{
+  PanelLayout panel = this->panel_prop(C, open_prop_owner, open_prop_name);
+  panel.header->prop(bool_prop_owner, bool_prop_name, eUI_Item_Flag(0), label, 0);
+  return panel;
+}
+
+/* The panel being drawn and the modifier it draws. */
+static PointerRNA panel_ptr;
+PointerRNA *panel_custom_data_get(const Panel * /*panel*/) { return &panel_ptr; }
+void panel_context_pointer_set(Panel * /*panel*/, const char * /*name*/, PointerRNA * /*ptr*/) {}
+void block_lock_set(Block * /*block*/, bool /*val*/, const char * /*lockstr*/) {}
+
+static void quote(std::ostringstream &out, const std::string &text)
+{
+  out << '"';
+  for (const char c : text) {
+    if (c == '"' || c == '\\') {
+      out << '\\' << c;
+    }
+    else if (c >= 0 && c < 0x20) {
+      out << "\\u00" << "0123456789abcdef"[c >> 4] << "0123456789abcdef"[c & 15];
+    }
+    else {
+      out << c;
+    }
+  }
+  out << '"';
+}
+
+/* A node as JSON: its kind, what it shows, and for a layout its state and children. */
+static void write(std::ostringstream &out, const Node &node)
+{
+  out << "{\"kind\":";
+  quote(out, node.kind);
+  for (const auto &[key, value] : {std::pair{"prop", &node.prop}, {"owner", &node.owner}, {"heading", &node.heading}}) {
+    if (!value->empty()) {
+      out << ",\"" << key << "\":";
+      quote(out, *value);
+    }
+  }
+  if (node.text != "\x01") {
+    out << ",\"text\":";
+    quote(out, node.text);
+  }
+  out << ",\"index\":" << node.index << ",\"flag\":" << node.flag << ",\"split\":" << node.split << ",\"decorate\":" << node.decorate;
+  if (node.layout) {
+    out << ",\"active\":" << LayoutInternal::active(*node.layout) << ",\"enabled\":" << LayoutInternal::enabled(*node.layout)
+        << ",\"alert\":" << LayoutInternal::red_alert(*node.layout);
+  }
+  out << ",\"children\":[";
+  for (size_t i = 0; i < node.children.size(); i++) {
+    out << (i ? "," : "");
+    write(out, *node.children[i]);
+  }
+  out << "]}";
+}
+
+/* A registered panel type drawn into a node: a sub-panel's header (its checkbox), then its body and its sub-panels. */
+static void draw_panel(const bContext *C, PanelType *type, Node &parent, bool root)
+{
+  Node &node = *parent.children.emplace_back(std::make_unique<Node>());
+  node.kind = "panel";
+  node.text = type->label;
+  node.prop = type->idname;
+  Panel panel = {};
+  panel.type = type;
+  for (const auto &[kind, draw] : {std::pair{"header", root ? nullptr : type->draw_header}, {"body", type->draw}}) {
+    if (!draw) {
+      continue;
+    }
+    Layout &layout = *layouts.emplace_back(std::make_unique<Layout>(ItemType(0), nullptr));
+    Node &part = *node.children.emplace_back(std::make_unique<Node>());
+    part.kind = kind;
+    part.layout = &layout;
+    nodes[&layout] = &part;
+    panel.layout = &layout;
+    draw(C, &panel);
+  }
+  for (LinkData &link : type->children) {
+    draw_panel(C, static_cast<PanelType *>(link.data), node, false);
+  }
+}
+
+}  // namespace blender::ui
+
+/* The modifier panels' types, as the Properties editor's region registers them. */
+static ARegionType &modifier_region()
+{
+  static ARegionType region = [] {
+    ARegionType region = {};
+    for (int type = 0; type < NUM_MODIFIER_TYPES; type++) {
+      const ModifierTypeInfo *info = BKE_modifier_get_info(ModifierType(type));
+      if (info && info->panel_register) {
+        info->panel_register(&region);
+      }
+    }
+    return region;
+  }();
+  return region;
+}
+
+/* What a modifier's panel and its sub-panels draw, as JSON, valid until the next call. */
+EXPORT(modifier_panel_draw) const char *modifier_panel_draw(Object *ob, ModifierData *md)
+{
+  static bContext *C = CTX_create();
+  static std::string json;
+  char idname[BKE_ST_MAXNAME];
+  BKE_modifier_type_panel_id(ModifierType(md->type), idname);
+  PanelType *type = static_cast<PanelType *>(
+      BLI_findstring(&modifier_region().paneltypes, idname, offsetof(PanelType, idname)));
+  ui::Node root;
+  root.kind = "panels";
+  ui::panel_ptr = RNA_pointer_create_discrete(&ob->id, *BKE_modifier_get_info(ModifierType(md->type))->srna, md);
+  if (type) {
+    ui::draw_panel(C, type, root, true);
+  }
+  std::ostringstream out;
+  ui::write(out, root);
+  json = out.str();
+  ui::nodes.clear();
+  ui::layouts.clear();
+  return json.c_str();
+}

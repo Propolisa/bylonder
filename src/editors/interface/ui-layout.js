@@ -2,7 +2,8 @@
 // drawing a menu records its entries as items for Bylonder's menus (menu.js). Arguments come as Python passes them,
 // positional and then keywords. `ui` is what Bylonder supplies:
 //   menus: menu classes by idname, context: () => bpy.context as the menus read it,
-//   run(idname, props): runs an operator, supported(idname): whether Bylonder runs it, poll(idname): whether it can now,
+//   run(idname, props): runs an operator, supported(idname, props): whether Bylonder runs it with those properties,
+//   poll(idname): whether it can now,
 //   keys(idname, props): its shortcut, if bound, enumItems(idname, prop): an enum's [identifier, name] pairs.
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 
@@ -24,6 +25,12 @@ const values = (props) => Object.fromEntries(Object.entries(props)
   .map(([key, value]) => [pythonName(key), value]));
 
 const operatorName = (idname) => rna[idname]?.name ?? idname;
+// The properties whose value names an entry in Blender's coverage ids (KEYED_PROPS in tools/blender-reference/surface.py).
+const KEYED_PROPS = ['type', 'name', 'mode', 'action', 'direction', 'axis'];
+const keyedId = (idname, props) => {
+  const key = KEYED_PROPS.find((name) => typeof props[name] === 'string');
+  return key ? `${idname}:${props[key]}` : idname;
+};
 
 export class UILayout {
   constructor(ui) {
@@ -33,11 +40,13 @@ export class UILayout {
   }
 
   // The entry reads its properties when shown and run, since the menu sets them after the operator call.
-  #entry(idname, props, label, enumValue) {
+  #entry(idname, props, label, enumValue, icon) {
     const ui = this.ui;
     return {
       label,
-      blender: enumValue === undefined ? idname : `${idname}:${enumValue}`,
+      icon: icon && icon !== 'NONE' ? icon : undefined,
+      get blender() { return enumValue === undefined ? keyedId(idname, values(props)) : `${idname}:${enumValue}`; },
+      available: () => ui.supported(idname, values(props)),
       get keys() { return ui.keys(idname, values(props)); },
       enabled: () => ui.poll(idname),
       run: () => ui.run(idname, values(props)),
@@ -45,8 +54,8 @@ export class UILayout {
   }
 
   operator(...list) {
-    const { operator: idname, text } = args(list, ['operator', 'text']), props = properties();
-    if (this.ui.supported(idname)) this.items.push(this.#entry(idname, props, text ?? operatorName(idname)));
+    const { operator: idname, text, icon } = args(list, ['operator', 'text', 'text_ctxt', 'translate', 'icon']), props = properties();
+    this.items.push(this.#entry(idname, props, text ?? operatorName(idname), undefined, icon));
     return props;
   }
 
@@ -70,9 +79,17 @@ export class UILayout {
     if (items().length) this.items.push({ label: text ?? menu.bl_label, blender: idname, keys: this.ui.keys(idname), items });
   }
 
+  // A menu's entries in place, without a submenu.
+  menu_contents(...list) {
+    const { menu: idname } = args(list, ['menu']);
+    if (this.ui.menus[idname]) this.items.push(...drawMenu(idname, this.ui));
+  }
+
   separator() { this.items.push('-'); }
   label() {}
+  // Asset menus list node group assets, which Bylonder does not have.
   template_node_operator_asset_menu_items() {}
+  template_modifier_asset_menu_items() {}
   row() { return this; }
   column() { return this; }
 }
@@ -82,5 +99,6 @@ export function drawMenu(idname, ui) {
   const menu = ui.menus[idname](), layout = new UILayout(ui);
   menu.layout = layout;
   menu.draw(ui.context());
-  return layout.items.filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && all.slice(i + 1).some((next) => next !== '-')));
+  const items = layout.items.filter((item) => item.available?.() !== false);
+  return items.filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && all.slice(i + 1).some((next) => next !== '-')));
 }

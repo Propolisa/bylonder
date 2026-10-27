@@ -16,6 +16,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -90,9 +91,20 @@ def dependencies(build, deps):
             else:
                 subprocess.run(['git', '-c', 'advice.detachedHead=false', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path],
                                check=True)
+        for target, variables in dep.get('configure', {}).items():
+            configure(os.path.join(path, target), variables)
         paths[name] = path
         includes.append(f'-I{os.path.join(path, dep.get("include", ""))}')
     return paths, includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()))
+
+
+def configure(target, variables):
+    """A header CMake would configure from target.in: ${NAME} replaced (empty when not given, as CMake leaves an unset
+    variable), `#cmakedefine NAME` lines left undefined."""
+    text = re.sub(r'\$\{(\w+)\}', lambda m: str(variables.get(m[1], '')), open(target + '.in').read())
+    text = re.sub(r'^#cmakedefine (\w+).*$', r'/* #undef \1 */', text, flags=re.M)
+    if not os.path.exists(target) or open(target).read() != text:
+        open(target, 'w').write(text)
 
 
 def flags(tree, spec):
@@ -141,6 +153,37 @@ def rna_prototypes(build, args):
     if not os.path.exists(path) or open(path).read() != text:
         open(path, 'w').write(text)
     return path
+
+
+def rna_dna_fields(build):
+    """generated/rna_dna_fields.inc: DNA_FIELD(struct type, identifier, type, array length, where it is stored) for each
+    modifier property, from src/makesrna/rna-modifiers.json (Blender's RNA) and dna-modifiers.json (its DNA fields,
+    modifier_dna.py), for the RNA getters and setters to read and write a modifier's DNA."""
+    makesrna = os.path.join(convert.REPO, 'src', 'makesrna')
+    rna = json.load(open(os.path.join(makesrna, 'rna-modifiers.json')))
+    dna = json.load(open(os.path.join(makesrna, 'dna-modifiers.json')))
+    declared = open(os.path.join(HERE, 'include', 'RNA_prototypes.hh')).read()
+    kinds = {'BOOLEAN': 'PROP_BOOLEAN', 'INT': 'PROP_INT', 'FLOAT': 'PROP_FLOAT', 'ENUM': 'PROP_ENUM', 'POINTER': 'PROP_POINTER', 'STRING': 'PROP_STRING'}
+    lines = []
+    for info in rna['types'].values():
+        struct = info['struct']
+        if f'RNA_{struct};' not in declared or struct not in dna:
+            continue
+        props, fields = {**rna['Modifier'], **info['properties']}, {**dna['Modifier']['properties'], **dna[struct]['properties']}
+        for name, prop in props.items():
+            field = fields.get(name)
+            if not field or prop['type'] not in kinds or field['kind'] == 'struct':
+                continue
+            length = len(prop['default']) if isinstance(prop.get('default'), list) and prop['type'] != 'ENUM' else 0
+            kind = 's' if prop['type'] == 'STRING' else field['kind'][0]
+            lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[prop["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
+                         f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, {str("bitset" in field).lower()}, '
+                         f'{str(field.get("negative", False)).lower()})')
+    path = os.path.join(build, 'generated', 'rna_dna_fields.inc')
+    text = '\n'.join(lines) + '\n'
+    if not os.path.exists(path) or open(path).read() != text:
+        open(path, 'w').write(text)
+    return text
 
 
 def compile_all(build, sources, args, key):
@@ -212,7 +255,7 @@ def build(root, name, spec, tag):
         print(f'{lib}: {len(built)} of {len(objects)} sources build', file=sys.stderr)
     # The module's own files also see wasm/ and the generated operator table; Blender's sources need neither.
     own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)],
-                      args + [f'-I{generated}', f'-I{WASM}'], patches + operators)
+                      args + [f'-I{generated}', f'-I{WASM}'], patches + operators + rna_dna_fields(out_dir))
     failed = [src for src, obj in own.items() if obj is None]
     if failed:
         result = subprocess.run(['clang++', *args, f'-I{generated}', f'-I{WASM}', '-c', failed[0], '-o', os.devnull], capture_output=True, text=True)

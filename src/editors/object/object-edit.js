@@ -8,7 +8,7 @@ import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLA
 import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDBM_elem_to_index_any } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
-import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, view3d_pixel_size } from '../transform/transform.js';
+import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, toBlenderView, view3d_pixel_size } from '../transform/transform.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperator, operatorPreview, editBMesh } from '../mesh/editmesh-tools.js';
@@ -21,6 +21,7 @@ import { operatorSchema } from './mesh-catalog.js';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js';
 import { objectMesh } from './object-mesh.js';
+import { viewportModifiers, evaluated } from '../../modifiers/blender.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
@@ -36,7 +37,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   let selectmode = SCE_SELECT_VERTEX;
 
   const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.text && !node.metadata?.group;
-  const reason = (node) => (node.metadata?.wbModifiers?.length ? 'Edit Mode on objects with modifiers comes with modifiers on Mesh data.' : null);
 
   // Extracts what changed of the edit mesh (`extract`, EXTRACT_*), redraws and, for an operator, records an undo step
   // (or, with `amend`, replaces the last one).
@@ -55,10 +55,27 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     world.onModeChange?.();
   }
 
-  // Draws a Mesh of the edit mesh, its active element given as { htype, index }, redrawing what changed (EXTRACT_*).
-  function draw(mesh, active, extract = EXTRACT_ALL) {
+  // The object's modifiers evaluated on an edit mesh: the final Mesh to draw shaded, or null without modifiers.
+  function final(edit) {
+    const modifiers = viewportModifiers(world.modifiers?.stack(em.object) ?? []);
+    if (!modifiers.length) return null;
+    try {
+      return evaluated(edit.evaluate(modifiers));
+    } catch (error) {
+      notify(error.message);
+      return null;
+    }
+  }
+
+  // Draws a Mesh of an edit mesh (the edit mesh, or a preview's copy of it), its active element given as
+  // { htype, index }, redrawing what changed (EXTRACT_*). With modifiers the shaded mesh is their result and the
+  // overlay the edit mesh, as Blender draws without On Cage.
+  function draw(mesh, active, extract = EXTRACT_ALL, edit = em.edit) {
     const [topology, positions, flags] = [EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS].map((what) => !!(extract & what));
-    if (topology || positions) mesh_batch_cache_apply(mesh, em.object, { topology });
+    if (topology || positions) {
+      em.final = final(edit);
+      mesh_batch_cache_apply(em.final ?? mesh, em.object, { topology: topology || !!em.final });
+    }
     em.overlay.update(mesh, { selectmode: em.edit.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: active.index }, topology, positions, flags });
   }
 
@@ -77,8 +94,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
 
   function enter(object = activeObject()) {
     if (em || !editable(object)) return false;
-    const why = reason(object);
-    if (why) { notify(why); return false; }
     editor.finish(false);
     editor.setMode('select');
     em = { object, edit: load(objectMesh(object)), overlay: createEditMeshOverlay(object) };
@@ -96,6 +111,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     freeEditMesh();
     em.object.metadata = { ...em.object.metadata, editing: false };
     em = null;
+    world.modifiers?.refresh();
     editor.reconcile();
     history.commit();
     changed();
@@ -124,7 +140,9 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       faceAt(x, y) {
         const p = views.pickPoint(view, x, y);
         const hit = scene.pick(p.x, p.y, (m) => m === object, false, camera);
-        return hit?.hit ? em.mesh.corner_tri_faces()[hit.faceId] : -1;
+        if (!hit?.hit) return -1;
+        const face = (em.final ?? em.mesh).corner_tri_faces()[hit.faceId];
+        return em.final ? (em.final.orig_index('FACE')?.[face] ?? -1) : face;
       },
     };
   }
@@ -139,24 +157,27 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     return { type: 'NORMAL', matrix: createSpaceNormal(toBlender(normal)), axis: 'Z' };
   }
   // Places the object for what operators do in world space.
-  const place = () => { em.edit.objectToWorld = toBlenderMatrix(em.object.computeWorldMatrix(true)); };
-  // An operator and then a move of its result, as Blender's *_move macros run (`normal` moves along the selection's
-  // normal): one undo step, kept when the move is cancelled.
-  function operatorMove(idname, props = {}, { normal = false } = {}) {
+  const place = () => {
+    em.edit.objectToWorld = toBlenderMatrix(em.object.computeWorldMatrix(true));
+    if (views.input?.camera) em.edit.view = toBlenderView(views.input.camera.getViewMatrix());
+  };
+  // An operator and then a transform of its result, as Blender's macros run (*_move, loopcut_slide): one undo step,
+  // kept when the transform is cancelled.
+  function operatorThen(transform, idname, props = {}, options = {}) {
     place();
     const report = meshOperator(em.edit, idname, props);
     if (report) { notify(report); return; }
     sync({ commit: false });
-    editor.start('move', { orient: normal ? 'NORMAL' : undefined, keep: true });
+    editor.start(transform, { ...options, keep: true });
     if (!editor.modal) sync();
   }
+  // An operator and then a move of its result (`normal` moves along the selection's normal).
+  const operatorMove = (idname, props = {}, { normal = false } = {}) =>
+    operatorThen('move', idname, props, { orient: normal ? 'NORMAL' : undefined });
   // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
   const extrudeMove = () => operatorMove('mesh.extrude_region', {}, { normal: em.edit.totals.totfacesel > 0 });
   // An operator and then Edge Slide (mesh.offset_edge_loops_slide).
-  function operatorSlide(idname, props) {
-    exec(idname, props);
-    editor.start('edge_slide');
-  }
+  const operatorSlide = (idname, props) => operatorThen('edge_slide', idname, props);
   // Runs an operator as one undo step; one with visible properties opens Adjust Last Operation, which re-runs it
   // from a copy of the edit mesh as it was before.
   function exec(idname, props = {}) {
@@ -203,10 +224,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     notify,
     end,
     // mesh.loopcut_slide: the cut, then Edge Slide.
-    confirm: (edge_index, number_cuts) => {
-      exec('mesh.loopcut', { object_index: 0, edge_index, number_cuts });
-      editor.start('edge_slide');
-    },
+    confirm: (edge_index, number_cuts) => operatorThen('edge_slide', 'mesh.loopcut', { object_index: 0, edge_index, number_cuts }),
   }));
   // A modal mesh tool (mesh.inset, mesh.bevel): the median point of the selection on screen, previews of the edit
   // mesh as it is, then one undo step with its redo panel.
@@ -227,7 +245,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       center: { x: screen[0], y: screen[1] },
       mouse: [editor.pointer.x, editor.pointer.y],
       pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
-      preview(props) { const { mesh, active } = run(props); draw(mesh, active); changed(); },
+      preview(props) { run(props, (copy) => draw(copy.toMesh(), copy.history.at(-1), EXTRACT_ALL, copy)); changed(); },
       confirm(props) { exec(operator, props); },
       // The previews drew other meshes, so the edit mesh is drawn anew.
       cancel() { draw(em.mesh, em.edit.history.at(-1)); changed(); },
@@ -336,6 +354,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
 
   return {
     get active() { return !!em; },
+    // Redraws the modifier result after the stack changed.
+    modifiersChanged() { if (em) draw(em.mesh, em.edit.history.at(-1), EXTRACT_POSITIONS); },
     get object() { return em?.object ?? null; },
     get selectmode() { return em?.edit.selectmode ?? selectmode; },
     // stats_object_edit: selected and total elements, and the triangle count.

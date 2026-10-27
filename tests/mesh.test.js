@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { primitiveOperators, primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../src/bmesh/intern/bmesh-mesh-convert.js';
+import { hasOperator } from '../src/bmesh/bmesh-wasm.js';
 
 const dir = 'tests/fixtures/mesh/';
 const near = (a, b, tolerance = 1e-5) => Math.abs(a - b) <= tolerance;
 let compared = 0;
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
-  if (fixture.edit || !primitiveOperators[fixture.operator]) continue;
+  if (fixture.edit || !(primitiveOperators[fixture.operator] || hasOperator(fixture.operator))) continue;
   const mesh = primitive_add(fixture.operator, fixture.props);
   const name = file.replace('.json', '');
   assert.equal(mesh.verts_num, fixture.positions.length, name + ': vertex count');
@@ -25,7 +26,7 @@ for (const file of await readdir(dir)) {
   for (const key of ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges']) assert.deepEqual(round[key], mesh[key], name + ': round trip ' + key);
   compared++;
 }
-assert.ok(compared >= 13);
+assert.ok(compared >= 18);
 console.log(`Mesh: ${compared} primitives match Blender 5.2 exactly (topology, order, positions, UVs) and round-trip through BMesh`);
 
 // Babylon sees the same outward faces: its own normals from our winding point the way ours do.

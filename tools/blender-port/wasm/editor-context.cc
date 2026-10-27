@@ -2,6 +2,7 @@
  * context finds it (the context store), and operators registered by their own MESH_OT_* functions and run by their
  * own exec. The window manager's and depsgraph's updates have nothing to update here, so they do nothing. */
 #include "BLI_listbase.h"
+#include "BLI_math_matrix.h"
 #include "BLI_math_matrix.hh"
 #include "CLG_log.h"
 #include "BLF_api.hh"
@@ -12,6 +13,9 @@
 #include "BKE_editmesh.hh"
 #include "BKE_layer.hh"
 #include "BKE_mesh_types.hh"
+#include "BKE_mesh_runtime.hh"
+#include "BKE_object.hh"
+#include "BKE_modifier.hh"
 #include "BKE_object_types.hh"
 
 #include "DEG_depsgraph.hh"
@@ -22,6 +26,7 @@
 #include "DNA_mesh_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
+#include "DNA_view3d_types.h"
 
 #include "BKE_report.hh"
 #include "BKE_screen.hh"
@@ -33,6 +38,7 @@
 #include "ED_view3d.hh"
 #include "BKE_scene.hh"
 #include "ED_select_utils.hh"
+#include "ED_transform.hh"
 
 #include "WM_api.hh"
 #include "WM_types.hh"
@@ -65,9 +71,13 @@ struct EditContext {
   Mesh mesh = {};
   /* What evaluating an edit mesh without modifiers gives: a mesh that wraps it (ME_WRAPPER_TYPE_BMESH). */
   Mesh mesh_eval = {};
-  /* The region an operator draws in; without a type, as in Blender's background mode, it draws nothing. */
+  /* The region an operator draws in; without a type, as in Blender's background mode, it draws nothing. Its view
+   * (regiondata) is set once the editor gives one. */
   ARegion region = {};
+  RegionView3D rv3d = {};
   Extraction extraction;
+  /* The edit mesh's final mesh when its object has modifiers (editbmesh_get_eval_cage). */
+  ExtractionHeader evaluated = {};
 };
 
 EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
@@ -111,6 +121,10 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
 EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
 {
   CTX_free(ctx->C);
+  BKE_object_free_derived_caches(&ctx->object);
+  while (ModifierData *md = static_cast<ModifierData *>(BLI_pophead(&ctx->object.modifiers))) {
+    BKE_modifier_free(md);
+  }
   MEM_delete(ctx->region.runtime);
   BM_mesh_free(ctx->mesh.runtime->edit_mesh->bm);
   ctx->mesh.runtime->edit_mesh.reset();
@@ -216,6 +230,34 @@ EXPORT(edit_mesh_select_pick) bool edit_mesh_select_pick(EditContext *ctx, int h
 }
 
 /* The object's matrix (column-major, Blender's axes), which operators read for world space (the 3D cursor). */
+/* The edited object, whose modifier stack modifier_add and modifier_clear (modifier-api.cc) change. */
+EXPORT(edit_context_object) Object *edit_context_object(EditContext *ctx) { return &ctx->object; }
+
+/* Evaluates the object's modifiers on the edit mesh as Blender's depsgraph does in Edit Mode and extracts the final
+ * mesh, which stays until the next evaluation; null without modifiers, when the edit mesh is the final mesh. */
+EXPORT(edit_mesh_eval) const ExtractionHeader *edit_mesh_eval(EditContext *ctx)
+{
+  Object &ob = ctx->object;
+  BKE_object_free_derived_caches(&ob);
+  if (BLI_listbase_is_empty(&ob.modifiers)) {
+    ob.runtime->data_eval = &ctx->mesh_eval.id;
+    return nullptr;
+  }
+  Depsgraph *depsgraph = BKE_scene_ensure_depsgraph(nullptr, &ctx->scene, &ctx->view_layer);
+  bke::editbmesh_get_eval_cage(depsgraph, &ctx->scene, &ob, ctx->mesh.runtime->edit_mesh.get(), &CD_MASK_BAREMESH);
+  mesh_extraction(*BKE_object_get_editmesh_eval_final(&ob), ctx->evaluated);
+  return &ctx->evaluated;
+}
+
+/* port-override: the 3D View's orientation (its view matrix, Blender's axes, column-major) for what operators do along
+ * the view (sorting by view axis); the projection stays with Babylon's camera. */
+EXPORT(edit_context_view_set) void edit_context_view_set(EditContext *ctx, const float *viewmat)
+{
+  std::copy_n(viewmat, 16, &ctx->rv3d.viewmat[0][0]);
+  invert_m4_m4(ctx->rv3d.viewinv, ctx->rv3d.viewmat);
+  ctx->region.regiondata = &ctx->rv3d;
+}
+
 EXPORT(edit_context_object_matrix_set) void edit_context_object_matrix_set(EditContext *ctx, const float *object_to_world)
 {
   bke::ObjectRuntime &runtime = *ctx->object.runtime;
@@ -231,13 +273,34 @@ struct OperatorDefinition {
   wmOperatorType *type = nullptr;
 };
 
+/* Operators registered through WM_operatortype_append (the transform operators), defined as they are appended. */
+static Vector<OperatorDefinition> &appended_operators()
+{
+  static Vector<OperatorDefinition> appended;
+  return appended;
+}
+
+void blender::WM_operatortype_append(void (*opfunc)(wmOperatorType *ot))
+{
+  wmOperatorType *type = MEM_new<wmOperatorType>(__func__);
+  type->srna = operator_properties_new("");
+  opfunc(type);
+  type->srna->identifier = type->idname;
+  appended_operators().append({type->idname, opfunc, type});
+}
+
 static Vector<OperatorDefinition> &operators()
 {
-  static Vector<OperatorDefinition> table = {
+  static Vector<OperatorDefinition> table = [] {
+    Vector<OperatorDefinition> table = {
 #define OPERATOR(define) {#define, define},
 #include "operators.inc"
 #undef OPERATOR
-  };
+    };
+    ed::transform::transform_operatortypes();
+    table.extend(appended_operators());
+    return table;
+  }();
   return table;
 }
 
@@ -392,9 +455,9 @@ bool ED_operator_editable_mesh(bContext *C) { return ED_operator_editmesh(C); }
 /* port-override: the 3D View the operator needs is the editor's own, whose picking runs in JS. */
 bool ED_operator_editmesh_region_view3d(bContext *C) { return ED_operator_editmesh(C); }
 
-/* port-override: the module has no depsgraph. The editor refuses Edit Mode on objects with modifiers, so what an
- * operator reads as evaluated is the original and nothing needs evaluating: the depsgraph is a token holding the scene
- * it was asked for, and the queries depsgraph_query.cc would answer from a graph answer from it. */
+/* port-override: the module has no depsgraph. Each ID is its own evaluated copy, and the editor evaluates modifiers
+ * itself when they change (edit_mesh_eval, modifier_object_eval): the depsgraph is a token holding the scene it was
+ * asked for, and the queries depsgraph_query.cc would answer from a graph answer from it. */
 struct NoDepsgraph {
   Main *bmain;
   Scene *scene;
@@ -418,6 +481,7 @@ ViewLayer *DEG_get_input_view_layer(const Depsgraph *graph) { return no_depsgrap
 Scene *DEG_get_evaluated_scene(const Depsgraph *graph) { return no_depsgraph(graph).scene; }
 ViewLayer *DEG_get_evaluated_view_layer(const Depsgraph *graph) { return no_depsgraph(graph).view_layer; }
 eEvaluationMode DEG_get_mode(const Depsgraph * /*graph*/) { return DAG_EVAL_VIEWPORT; }
+float DEG_get_ctime(const Depsgraph *graph) { return BKE_scene_ctime_get(no_depsgraph(graph).scene); }
 ID *DEG_get_evaluated_id(const Depsgraph * /*depsgraph*/, ID *id) { return id; }
 const ID *DEG_get_evaluated_id(const Depsgraph * /*depsgraph*/, const ID *id) { return id; }
 /* No graph, so no custom data any of its evaluations asked for. */
@@ -429,6 +493,14 @@ const ID *DEG_get_original_id(const ID *id) { return id && id->orig_id ? id->ori
 bool DEG_is_original_id(const ID *id)
 {
   return !(id->tag & (ID_TAG_COPIED_ON_EVAL | ID_TAG_COPIED_ON_EVAL_FINAL_RESULT | ID_TAG_LOCALIZED));
+}
+
+/* As view3d_context.cc defines it, for the region the context has: without its view (regiondata), sorting by view axis
+ * reports that there is none. */
+RegionView3D *ED_view3d_context_rv3d(bContext *C)
+{
+  ARegion *region = CTX_wm_region(C);
+  return region ? static_cast<RegionView3D *>(region->regiondata) : nullptr;
 }
 
 /* As view3d_select.cc defines them; the rest of the 3D View stays in JS. */

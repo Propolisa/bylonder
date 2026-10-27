@@ -25,15 +25,18 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "modifier-api.cc"],
-      "defines": ["WITH_OPENSUBDIV"],
-      "includes": ["intern/opensubdiv"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "modifier-api.cc", "panel-layout.cc"],
+      "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH", "WITH_OPENVDB"],
+      "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "intern/openvdb", "extern/bullet2/src"],
       "operators": ["source/blender/editors/mesh/mesh_intern.hh"],
       "dependencies": {
         "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
         "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
                   "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"},
-        "opensubdiv": {"url": "https://github.com/PixarAnimationStudios/OpenSubdiv.git", "tag": "v3_7_0"}
+        "opensubdiv": {"url": "https://github.com/PixarAnimationStudios/OpenSubdiv.git", "tag": "v3_7_0"},
+        "openvdb": {"url": "https://github.com/AcademySoftwareFoundation/openvdb.git", "tag": "v13.0.0", "include": "openvdb",
+                    "configure": {"openvdb/openvdb/version.h": {"OpenVDB_MAJOR_VERSION": 13, "OpenVDB_MINOR_VERSION": 0, "OpenVDB_PATCH_VERSION": 0,
+                                                                 "OPENVDB_ABI_VERSION_NUMBER": 13, "OPENVDB_PACKED_VERSION": 218103808}}}
       },
       "libraries": [
         "source/blender/editors/mesh",
@@ -47,6 +50,9 @@
         {"path": "source/blender/modifiers/intern", "exclude": ["MOD_nodes.cc"]},
         "source/blender/geometry/intern/mesh_merge_verts.cc",
         "source/blender/geometry/intern/randomize.cc",
+        "intern/dualcon/intern",
+        "intern/rigidbody/rb_convex_hull_api.cpp",
+        "extern/bullet2/src/LinearMath",
         "intern/opensubdiv/internal/base",
         "intern/opensubdiv/internal/topology",
         {"path": "intern/opensubdiv/internal/evaluator", "exclude": ["eval_output_gpu.cc", "gpu_compute_evaluator.cc", "gpu_patch_table.cc"]},
@@ -55,6 +61,11 @@
         {"dependency": "opensubdiv", "path": "opensubdiv/vtr"},
         {"dependency": "opensubdiv", "path": "opensubdiv/bfr"},
         {"dependency": "opensubdiv", "path": "opensubdiv/osd"},
+        {"dependency": "openvdb", "path": "openvdb/openvdb"},
+        {"dependency": "openvdb", "path": "openvdb/openvdb/io", "exclude": ["File.cc", "Queue.cc"]},
+        {"dependency": "openvdb", "path": "openvdb/openvdb/math"},
+        {"dependency": "openvdb", "path": "openvdb/openvdb/points"},
+        {"dependency": "openvdb", "path": "openvdb/openvdb/util"},
         "source/blender/blentranslation/intern",
         "source/blender/functions/intern",
         "source/blender/nodes/intern/geometry_nodes_bundle.cc",

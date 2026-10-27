@@ -3,8 +3,10 @@
  * evaluates them as the depsgraph would. The result's arrays are read in place through an ExtractionHeader. */
 #include "BKE_attribute.hh"
 #include "BKE_cpp_types.hh"
+#include "BKE_customdata.hh"
 #include "BKE_idtype.hh"
 #include "BKE_lib_id.hh"
+#include "BKE_mesh.h"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
 #include "BKE_mesh_wrapper.hh"
@@ -43,6 +45,14 @@ struct ModifierObject {
 
 static Mesh *&object_mesh(ModifierObject &mo) { return reinterpret_cast<Mesh *&>(mo.object.data); }
 
+/* As BKE_object_free_modifiers frees a mesh object's. */
+static void modifiers_free(Object &ob)
+{
+  while (ModifierData *md = static_cast<ModifierData *>(BLI_pophead(&ob.modifiers))) {
+    BKE_modifier_free(md);
+  }
+}
+
 static void result_free(ModifierObject &mo)
 {
   if (mo.result) {
@@ -64,7 +74,7 @@ EXPORT(modifier_object_new) ModifierObject *modifier_object_new()
 EXPORT(modifier_object_free) void modifier_object_free(ModifierObject *mo)
 {
   result_free(*mo);
-  BKE_modifiers_free(&mo->object.modifiers);
+  modifiers_free(mo->object);
   if (object_mesh(*mo)) {
     BKE_id_free(nullptr, object_mesh(*mo));
   }
@@ -96,18 +106,24 @@ void modifier_object_mesh_set(ModifierObject *mo, int verts_num, const float3 *p
   object_mesh(*mo) = mesh;
 }
 
-/* A modifier of a type (ModifierType) with Blender's defaults, last in the stack. */
-EXPORT(modifier_add) ModifierData *modifier_add(ModifierObject *mo, int type)
+EXPORT(modifier_object) Object *modifier_object(ModifierObject *mo) { return &mo->object; }
+
+/* A modifier of a type (ModifierType) with Blender's defaults, last in an object's stack. */
+EXPORT(modifier_add) ModifierData *modifier_add(Object *ob, int type)
 {
   if (!BKE_modifier_get_info(ModifierType(type))) {
     return nullptr;
   }
   ModifierData *md = BKE_modifier_new(type);
-  BLI_addtail(&mo->object.modifiers, md);
+  BLI_addtail(&ob->modifiers, md);
+  /* As ED_object_modifier_add gives a mesh its skin vertices when a Skin modifier is added. */
+  if (type == eModifierType_Skin) {
+    BKE_mesh_ensure_skin_customdata(id_cast<Mesh *>(ob->data));
+  }
   return md;
 }
 
-EXPORT(modifier_clear) void modifier_clear(ModifierObject *mo) { BKE_modifiers_free(&mo->object.modifiers); }
+EXPORT(modifier_clear) void modifier_clear(Object *ob) { modifiers_free(*ob); }
 
 /* What the modifier reported in its last evaluation (BKE_modifier_set_error), or null. */
 EXPORT(modifier_error) const char *modifier_error(const ModifierData *md) { return md->error; }
@@ -119,10 +135,15 @@ EXPORT(modifier_object_eval) const ExtractionHeader *modifier_object_eval(Modifi
   Depsgraph *depsgraph = BKE_scene_ensure_depsgraph(nullptr, &mo->scene, nullptr);
   CustomData_MeshMasks mask = CD_MASK_MESH;
   mo->result = bke::mesh_create_eval_final(depsgraph, &mo->scene, &mo->object, &mask);
-  /* Subdivision Surface last in the stack defers to the wrapper, which holds the subdivided mesh. */
-  const Mesh *mesh = BKE_mesh_wrapper_ensure_subdivision(mo->result);
+  mesh_extraction(*mo->result, mo->header);
+  return &mo->header;
+}
+
+/* Subdivision Surface last in the stack defers to the wrapper, which holds the subdivided mesh. */
+void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
+{
+  const Mesh *mesh = BKE_mesh_wrapper_ensure_subdivision(&evaluated);
   BKE_mesh_wrapper_ensure_mdata(const_cast<Mesh *>(mesh));
-  ExtractionHeader &h = mo->header;
   h = {};
   h.verts_num = mesh->verts_num;
   h.edges_num = mesh->edges_num;
@@ -138,11 +159,13 @@ EXPORT(modifier_object_eval) const ExtractionHeader *modifier_object_eval(Modifi
   h.corner_edges = const_cast<int *>(mesh->corner_edges().data());
   h.corner_tris = reinterpret_cast<int(*)[3]>(const_cast<int3 *>(mesh->corner_tris().data()));
   h.tri_faces = const_cast<int *>(mesh->corner_tri_faces().data());
+  h.orig_index[0] = static_cast<const int *>(CustomData_get_layer(&mesh->vert_data, CD_ORIGINDEX));
+  h.orig_index[1] = static_cast<const int *>(CustomData_get_layer(&mesh->edge_data, CD_ORIGINDEX));
+  h.orig_index[2] = static_cast<const int *>(CustomData_get_layer(&mesh->face_data, CD_ORIGINDEX));
   const VArray<float2> uvs = *mesh->attributes().lookup<float2>(mesh->active_or_default_uv_map_name(), bke::AttrDomain::Corner);
   if (uvs && uvs.is_span()) {
     h.uvs = reinterpret_cast<float(*)[2]>(const_cast<float2 *>(uvs.get_internal_span().data()));
   }
-  return &h;
 }
 
 /* What the modifiers reach of Blender beyond the module. */

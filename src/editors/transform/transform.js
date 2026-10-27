@@ -14,6 +14,9 @@ export const toBlender = (v) => [v.x, v.z, v.y];
 // A Babylon matrix in Blender's axes, column-major as Blender stores it (Babylon's row vectors give the same layout).
 export const toBlenderMatrix = (m) => Array.from({ length: 16 }, (_, i) => m.m[[0, 2, 1, 3][i >> 2] * 4 + [0, 2, 1, 3][i & 3]]);
 export const toBabylon = ([x, y, z]) => new Vector3(x, z, y);
+// A Babylon camera's view matrix as Blender's RegionView3D.viewmat: Blender's axes in, and a right-handed view that
+// looks along -Z out.
+export const toBlenderView = (m) => Array.from({ length: 16 }, (_, i) => ((i & 3) === 2 ? -1 : 1) * m.m[[0, 2, 1, 3][i >> 2] * 4 + (i & 3)]);
 
 const CON_AXIS0 = 1, CON_AXIS1 = 2, CON_AXIS2 = 4;
 const O_DEFAULT = 0, O_SCENE = 1, O_SET = 2;

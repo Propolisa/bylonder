@@ -308,6 +308,7 @@ const nodeEditor = mountNodeEditor({ world, host: nodeSection, header: viewportD
 nodeSection.addEventListener("node-tree", (e) => nodeEditor.setType(e.detail));
 world.openNodeEditor = (type) => { nodeEditor.setType(type); viewportDock.show("nodes"); };
 for (const source of [documentState, world.particles, world.modifiers]) source.subscribe(() => nodeEditor.refresh());
+world.modifiers.subscribe(() => world.editMode.modifiersChanged());
 viewportDock.setFactory('properties',(host,id)=>ui.create(host,id));
 const insertKeys = () => {registerObjects(animation, objects);animation.insert(objectRefs(editor.selection.roots));};
 const timelineOptions = id => ({insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();},header:viewportDock.header(id),names:ref=>world.objects.find(n=>'object:'+nodeId(n)===ref)?.name});

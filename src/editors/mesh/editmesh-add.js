@@ -7,6 +7,9 @@ import { bmo_call } from '../../bmesh/intern/bmesh-operators.js';
 import { BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { bmo_create_grid_exec, bmo_create_cube_exec, bmo_create_circle_exec, bmo_create_cone_exec } from '../../bmesh/operators/bmo-primitive.js';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
+import { EditMesh } from '../../bmesh/bmesh-wasm.js';
+import { createMesh } from '../../blenkernel/mesh/mesh.js';
+import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
 
 const FILL = { NOTHING: 0, NGON: 1, TRIFAN: 2 };
 
@@ -32,4 +35,17 @@ export const operatorProperties = (idname, props = {}) => ({
   ...props,
 });
 
-export const primitive_add = (idname, props) => primitiveOperators[idname](operatorProperties(idname, props));
+// A primitive whose builder has no JS port: Blender's operator adds it to an empty edit mesh, as in Edit Mode.
+function operator_add(idname, props) {
+  const edit = EditMesh.fromMesh(createMesh({ vert_positions: [], edges: [], face_offsets: [0], corner_verts: [], corner_edges: [] }), SCE_SELECT_VERTEX);
+  try {
+    const { report } = edit.run(idname, props);
+    if (report) throw new Error(report);
+    return edit.toMesh();
+  } finally {
+    edit.free();
+  }
+}
+
+export const primitive_add = (idname, props) =>
+  (primitiveOperators[idname] ?? ((p) => operator_add(idname, p)))(operatorProperties(idname, props));

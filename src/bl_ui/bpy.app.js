@@ -5,7 +5,7 @@ export {translations};
 var __name__ = 'bpy.app';
 export var build_options =  __class__ ('build_options', [object], {
 	__module__: __name__,
-	bullet: false,
+	bullet: true,
 	freestyle: false
 });
 

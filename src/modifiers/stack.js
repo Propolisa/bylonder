@@ -38,6 +38,8 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
       set:value=>{const m=modifierStack(node).find(m=>m.id===modifier.id);if(m)m.values[path]=valid(value,def);}
     });
   }
+  // The geometry before modifiers: the object's Mesh when it has one, else what it draws.
+  const meshBase=node=>node.metadata.wbCreation?.mesh||node.metadata.wbCreation?.operator?mesh_batch_cache_vertex_data(objectMesh(node)).serialize():VertexData.ExtractFromMesh(node).serialize();
   const base=node=>{
     if(!node.metadata.wbModifierBase)node.metadata.wbModifierBase=VertexData.ExtractFromMesh(node).serialize();
     return node.metadata.wbModifierBase;
@@ -101,13 +103,14 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
       for(const node of world.objects){
         // Files saved before Blender's Array came keep Bylonder's as ARRAY.
         for(const m of node.metadata?.wbModifiers||[])if(m.type==='ARRAY'&&'shape' in m.values)m.type='GN_ARRAY';
-        if(node.isDisposed()||deleted(node)||!node.getTotalVertices?.())continue;
+        // Edit Mode draws the object itself, with Blender's modifiers evaluated on the edit mesh.
+        if(node.isDisposed()||deleted(node)||!node.getTotalVertices?.()||node.metadata?.editing)continue;
         const stack=modifierStack(node),prior=cache.get(node);
         if(!stack.length&&!prior)continue;
         if(!stack.length&&prior&&!node.metadata.wbModifierBase){node.thinInstanceSetBuffer('matrix',null);VertexData.Parse(prior.base).applyToMesh(node);cache.delete(node);continue;}
         try{
           for(const modifier of stack)registerChannels(node,modifier);
-          if(prior&&(node.geometry!==prior.geometry||node.metadata.wbCreation!==prior.creation)&&node.metadata.wbModifierBase===prior.base){node.metadata.wbModifierBase=VertexData.ExtractFromMesh(node).serialize();cache.delete(node);}
+          if(prior&&(node.geometry!==prior.geometry||node.metadata.wbCreation!==prior.creation)&&node.metadata.wbModifierBase===prior.base){node.metadata.wbModifierBase=meshBase(node);cache.delete(node);}
           const sig=signature(node);if(cache.get(node)?.signature===sig&&cache.get(node)?.base===node.metadata.wbModifierBase)continue;
           draw(node,evaluate(node));errors.delete(nodeId(node));
         }catch(error){const text=error.message;if(errors.get(nodeId(node))!==text){errors.set(nodeId(node),text);notify(text);emit();}}

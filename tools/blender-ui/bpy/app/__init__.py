@@ -3,5 +3,5 @@ from bpy.app import translations
 
 
 class build_options:
-    bullet = False
+    bullet = True
     freestyle = False

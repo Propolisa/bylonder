@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -9,10 +10,23 @@
 
 namespace blender {
 
+/* Where a property of a DNA struct (a modifier's) is stored, as rna_modifier.cc defines it (tools/blender-port/modifier_dna.py):
+ * kind f (float), i (integer), p (pointer) or s (string); a boolean is a bit of an integer field (`bit`, shifted by the
+ * element's index for a bitset array), or the whole field without one. */
+struct DnaField {
+  int offset, size;
+  char kind;
+  bool is_signed;
+  long long bit;
+  bool bitset, negative;
+};
+
 struct PropertyRNA {
   std::string identifier;
   PropertyType type;
   int length = 0;
+  /* Set for a DNA struct's property, whose values are read from and written to PointerRNA.data. */
+  std::optional<DnaField> dna;
   std::vector<double> defaults;
   const EnumPropertyItem *items = nullptr;
   /* The items for a context (RNA_def_enum_funcs), when they depend on it. */

@@ -4,6 +4,7 @@
 
 #include "BLI_vector.hh"
 #include "bmesh.hh"
+#include "DNA_mesh_types.h"
 
 namespace blender {
 
@@ -21,6 +22,8 @@ struct ExtractionHeader {
   int (*edges)[2], *face_offsets, *corner_verts, *corner_edges, (*corner_tris)[3], *tri_faces;
   float (*uvs)[2];
   bool *flags[FLAGS_NUM];
+  /* An evaluated mesh's original vert, edge and face of each of its own (CD_ORIGINDEX, -1 for none), or null. */
+  const int *orig_index[3];
 };
 
 struct Extraction {
@@ -35,5 +38,8 @@ struct Extraction {
 
 /* Refills what changed (ExtractFlag); a change of topology refills everything. */
 void extraction_update(BMesh *bm, Extraction &extraction, int what);
+
+/* Points the header at an evaluated Mesh's own arrays (the flags stay null: they exist in Edit Mode only). */
+void mesh_extraction(const Mesh &mesh, ExtractionHeader &header);
 
 }  // namespace blender

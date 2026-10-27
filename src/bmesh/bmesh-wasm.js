@@ -62,7 +62,7 @@ export const EXTRACT_TOPOLOGY = 1, EXTRACT_POSITIONS = 2, EXTRACT_FLAGS = 4, EXT
 // The Mesh of an extraction (ExtractionHeader): counts, then buffer pointers. Its arrays are views made again when the
 // module's memory grows, which detaches the old ones.
 function extractedMesh(header) {
-  const words = Array.from(new Uint32Array(x.memory.buffer, header, 5 + 10 + FLAGS.length));
+  const words = Array.from(new Uint32Array(x.memory.buffer, header, 5 + 10 + FLAGS.length + 3));
   const [verts, edges, faces, corners, tris] = words, at = (i) => words[5 + i];
   const sizes = { POINT: verts, EDGE: edges, FACE: faces };
   const layout = {
@@ -71,6 +71,7 @@ function extractedMesh(header) {
     corner_edges: [Int32Array, at(6), corners], corner_tris: [Int32Array, at(7), tris * 3], tri_faces: [Int32Array, at(8), tris],
     UVMap: [Float32Array, at(9), corners * 2],
     ...Object.fromEntries(FLAGS.map(([name, domain], i) => [name, [Uint8Array, at(10 + i), sizes[domain]]])),
+    ...Object.fromEntries(['POINT', 'EDGE', 'FACE'].map((domain, i) => [`orig_index_${domain}`, [Int32Array, at(10 + FLAGS.length + i), sizes[domain]]])),
   };
   let buffer = null, views = {};
   const view = (name) => {
@@ -89,27 +90,44 @@ function extractedMesh(header) {
     corner_tri_faces: () => view('tri_faces'),
     face_normals: () => view('face_normals'),
     vert_normals: () => view('vert_normals'),
+    // An evaluated mesh's original element of each of its own in a domain (CD_ORIGINDEX, -1 for none), or null.
+    orig_index: (domain) => (layout[`orig_index_${domain}`][1] ? view(`orig_index_${domain}`) : null),
   });
   return mesh;
 }
 
-// Blender's modifier stack on an object's Mesh (modifier-api.cc). A modifier is its type (ModifierType) and a function
-// that writes its settings into its ModifierData, given a DataView of the module's memory and the struct's address.
-// Returns the evaluated Mesh, whose arrays are valid until the next evaluation, and each modifier's error or null.
+// Gives a module Object the modifier stack: each modifier is its type (ModifierType) and a function that writes its
+// settings into its ModifierData, given a DataView of the module's memory and the struct's address. Returns their
+// ModifierData and a function reading each one's error from its last evaluation, or null.
+function setModifiers(object, modifiers) {
+  x.modifier_clear(object);
+  const added = modifiers.map(({ type, write }) => {
+    const md = x.modifier_add(object, type) >>> 0;
+    if (!md) throw new Error(`Modifier type ${type} is not in this WebAssembly module`);
+    write(new DataView(x.memory.buffer), md);
+    return md;
+  });
+  return { added, errors: () => added.map((md) => (x.modifier_error(md) ? cString(x.modifier_error(md)) : null)) };
+}
+
+// Blender's modifier stack on an object's Mesh (modifier-api.cc), as setModifiers takes it. Returns the evaluated Mesh,
+// whose arrays are valid until the next evaluation, and each modifier's error or null.
 let modifierObject = 0;
 export function evaluateModifiers(mesh, modifiers) {
   modifierObject ||= x.modifier_object_new();
   withArrays(meshArrays(mesh), ([p, e, f, cv, ce, uv]) =>
     x.modifier_object_mesh_set(modifierObject, mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv));
-  x.modifier_clear(modifierObject);
-  const added = modifiers.map(({ type, write }) => {
-    const md = x.modifier_add(modifierObject, type) >>> 0;
-    if (!md) throw new Error(`Modifier type ${type} is not in this WebAssembly module`);
-    write(new DataView(x.memory.buffer), md);
-    return md;
-  });
-  const result = extractedMesh(x.modifier_object_eval(modifierObject) >>> 0);
-  return { mesh: result, errors: added.map((md) => (x.modifier_error(md) ? cString(x.modifier_error(md)) : null)) };
+  const { errors } = setModifiers(x.modifier_object(modifierObject), modifiers);
+  return { mesh: extractedMesh(x.modifier_object_eval(modifierObject) >>> 0), errors: errors() };
+}
+
+// What Blender's panel of a modifier (as setModifiers takes it) draws with its settings: a tree of layouts and the
+// properties, labels and sub-panels in them (panel-layout.cc).
+export function drawModifierPanel(modifier) {
+  modifierObject ||= x.modifier_object_new();
+  const object = x.modifier_object(modifierObject);
+  const { added: [md] } = setModifiers(object, [modifier]);
+  return JSON.parse(cString(x.modifier_panel_draw(object, md)));
 }
 
 const freeing = new FinalizationRegistry((context) => x.edit_context_free(context));
@@ -160,6 +178,11 @@ export class EditMesh {
     withArrays([Float32Array.from(matrix)], ([p]) => x.edit_context_object_matrix_set(this.#context, p));
   }
 
+  // The 3D View's view matrix (column-major, Blender's axes), for what operators do along the view.
+  set view(matrix) {
+    withArrays([Float32Array.from(matrix)], ([p]) => x.edit_context_view_set(this.#context, p));
+  }
+
   get totals() {
     const [totvert, totvertsel, totedge, totedgesel, totface, totfacesel, totloop] = ints(7, (p) => x.bm_totals(this.#bm, p));
     return { totvert, totvertsel, totedge, totedgesel, totface, totfacesel, totloop };
@@ -169,6 +192,14 @@ export class EditMesh {
   // Its arrays are views of buffers the edit mesh owns, so it is valid until the next extraction; toMesh() copies.
   extract(what) {
     return extractedMesh(x.edit_mesh_extract(this.#context, what) >>> 0);
+  }
+
+  // The object's modifiers evaluated on the edit mesh, as evaluateModifiers takes them: the final Mesh, valid until the
+  // next evaluation (null without modifiers), and each modifier's error or null.
+  evaluate(modifiers) {
+    const { errors } = setModifiers(x.edit_context_object(this.#context), modifiers);
+    const header = x.edit_mesh_eval(this.#context) >>> 0;
+    return { mesh: header ? extractedMesh(header) : null, errors: errors() };
   }
 
   // A Mesh of the edit mesh that is its own: arrays, UV map and flags.
