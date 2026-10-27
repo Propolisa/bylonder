@@ -5,7 +5,7 @@ import {
   bmesh_radial_loop_append, bmesh_radial_loop_remove,
 } from './bmesh-structure.js';
 import { BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_verts_in_edge, BM_face_find_double, BM_edge_face_count_is_over, BM_EDGES_OF_VERT } from './bmesh-query.js';
-import { BM_face_create_ngon } from './bmesh-construct.js';
+import { BM_face_create_ngon, BM_elem_attrs_copy } from './bmesh-construct.js';
 import { BM_select_history_remove } from './bmesh-marking.js';
 
 export const BM_CREATE_NOP = 0, BM_CREATE_NO_DOUBLE = 1 << 1, BM_CREATE_SKIP_CD = 1 << 2;
@@ -31,7 +31,7 @@ export function BM_edge_create(bm, v1, v2, e_example = -1, create_flag = BM_CREA
   e.v1[edge] = v1;
   e.v2[edge] = v2;
   e.l[edge] = -1;
-  e.v1_disk_next[edge] = e.v1_disk_prev[edge] = e.v2_disk_next[edge] = e.v2_disk_prev[edge] = -1;
+  e.v1_disk_link_next[edge] = e.v1_disk_link_prev[edge] = e.v2_disk_link_next[edge] = e.v2_disk_link_prev[edge] = -1;
   bmesh_disk_edge_append(bm, edge, v1);
   bmesh_disk_edge_append(bm, edge, v2);
   if (e_example >= 0 && !(create_flag & BM_CREATE_SKIP_CD)) BM_elem_attrs_copy(e, e_example, edge);
@@ -78,14 +78,6 @@ export function BM_face_create(bm, verts, edges, len, f_example = -1, create_fla
   bm.f.len[f] = len;
   if (f_example >= 0 && !(create_flag & BM_CREATE_SKIP_CD)) BM_elem_attrs_copy(bm.f, f_example, f);
   return f;
-}
-
-// BM_elem_attrs_copy: header flags except selection, normal, material and custom data.
-export function BM_elem_attrs_copy(pool, src, dst) {
-  pool.hflag[dst] = (pool.hflag[src] & ~BM_ELEM_SELECT) | (pool.hflag[dst] & BM_ELEM_SELECT);
-  if (pool.no) pool.no.copyWithin(dst * 3, src * 3, src * 3 + 3);
-  if (pool.mat_nr) pool.mat_nr[dst] = pool.mat_nr[src];
-  for (const layer of pool.layers) layer.data.copyWithin(dst * layer.size, src * layer.size, src * layer.size + layer.size);
 }
 
 // Freeing an element also drops it from the selection history and the selection counts.
@@ -473,3 +465,5 @@ export function bmesh_face_swap_data(bm, f_a, f_b) {
     f[name].set(a, f_b * n);
   }
 }
+
+export * from './bmesh-core.gen.js';

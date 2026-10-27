@@ -209,8 +209,12 @@ export function BM_edge_share_quad_check(bm, e1, e2) {
   return radialFaces(bm, e1).some((f) => bm.f.len[f] === 4 && BM_face_edge_share_loop(bm, f, e2) >= 0);
 }
 
-// BM_edge_at_index: the edge whose index (as Mesh conversion numbered them) is `index`, or -1.
-export function BM_edge_at_index(bm, index) {
-  for (let e = 0; e < bm.e.size; e++) if (bm.e.alive[e] && bm.e.index[e] === index) return e;
-  return -1;
+export * from './bmesh-query.gen.js';
+
+// BM_iter_as_array: up to len elements of the iterator type itype (one of the arrays above) into array.
+export function BM_iter_as_array(bm, itype, data, array, len) {
+  const elems = itype(bm, data);
+  const n = Math.min(len, elems.length);
+  for (let i = 0; i < n; i++) array[i] = elems[i];
+  return n;
 }

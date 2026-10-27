@@ -1,6 +1,6 @@
 // Disk and radial cycles (bmesh_structure.cc). A disk link is the (next, prev) pair an edge keeps for one of its
 // verts; `link(bm, e, v)` names the field pair, standing in for bmesh_disk_edge_link_from_vert.
-const V1_LINK = ['v1_disk_next', 'v1_disk_prev'], V2_LINK = ['v2_disk_next', 'v2_disk_prev'];
+const V1_LINK = ['v1_disk_link_next', 'v1_disk_link_prev'], V2_LINK = ['v2_disk_link_next', 'v2_disk_link_prev'];
 const link = (bm, e, v) => (bm.e.v1[e] === v ? V1_LINK : V2_LINK);
 
 export const bmesh_disk_edge_next = (bm, e, v) => bm.e[link(bm, e, v)[0]][e];
@@ -34,10 +34,10 @@ export function bmesh_disk_edge_remove(bm, e, v) {
 export function bmesh_disk_vert_swap(bm, e, v_dst, v_src) {
   if (bm.e.v1[e] === v_src) {
     bm.e.v1[e] = v_dst;
-    bm.e.v1_disk_next[e] = bm.e.v1_disk_prev[e] = -1;
+    bm.e.v1_disk_link_next[e] = bm.e.v1_disk_link_prev[e] = -1;
   } else if (bm.e.v2[e] === v_src) {
     bm.e.v2[e] = v_dst;
-    bm.e.v2_disk_next[e] = bm.e.v2_disk_prev[e] = -1;
+    bm.e.v2_disk_link_next[e] = bm.e.v2_disk_link_prev[e] = -1;
   }
 }
 

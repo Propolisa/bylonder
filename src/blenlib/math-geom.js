@@ -47,6 +47,8 @@ export function isect_line_line_epsilon_v3(v1, v2, v3, v4, epsilon) {
 }
 
 export const len_squared_v3 = (a) => dot_v3(a, a);
+export const madd = (a, b, f) => add_v3(a, mul_v3_fl(b, f));
+export const negate_v3 = (a) => [-a[0], -a[1], -a[2]];
 export const is_zero_v3 = (a) => a[0] === 0 && a[1] === 0 && a[2] === 0;
 export const project_v3_v3v3 = (p, v) => mul_v3_fl(v, dot_v3(p, v) / dot_v3(v, v));
 const safe_asin = (x) => Math.asin(Math.max(-1, Math.min(1, x)));
@@ -92,3 +94,5 @@ export function isect_ray_ray_v3(origin_a, direction_a, origin_b, direction_b) {
 export const angle_v3v3v3 = (v1, v2, v3) => angle_v3v3(sub_v3(v1, v2), sub_v3(v3, v2));
 export const angle_on_axis_v3v3v3_v3 = (v1, v2, v3, axis) => angle_v3v3(project_plane_normalized_v3_v3v3(sub_v3(v1, v2), axis), project_plane_normalized_v3_v3v3(sub_v3(v3, v2), axis));
 export const interpf = (target, origin, t) => t * target + (1 - t) * origin;
+
+export * from './math-geom.gen.js';

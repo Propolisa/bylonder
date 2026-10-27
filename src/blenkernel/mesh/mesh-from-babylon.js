@@ -2,8 +2,7 @@
 // along normal and UV seams; corners at the same position weld back into one vertex. Positions return to Blender's
 // axes ((x, y, z) from Babylon's (x, z, y)), triangles stay triangles, and faces Babylon shades smoothly stay smooth.
 import { BM_mesh_create, BM_ELEM_SMOOTH, poolLayerAdd, poolLayer } from '../../bmesh/intern/bmesh-class.js';
-import { BM_vert_create } from '../../bmesh/intern/bmesh-core.js';
-import { BM_face_create_verts } from '../../bmesh/intern/bmesh-construct.js';
+import { BM_vert_create, BM_face_create_verts, BM_CREATE_NOP } from '../../bmesh/intern/bmesh-core.js';
 import { BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 
 const WELD_PRECISION = 1e5;
@@ -24,7 +23,7 @@ export function mesh_from_vertex_data({ positions, indices, normals, uvs }) {
     const key = [...verts].sort((a, b) => a - b).join(',');
     if (new Set(verts).size < 3 || faceKeys.has(key)) continue;
     faceKeys.add(key);
-    const f = BM_face_create_verts(bm, verts);
+    const f = BM_face_create_verts(bm, verts, verts.length, -1, BM_CREATE_NOP, true);
     if (normals && isSmooth(normals, corners)) bm.f.hflag[f] |= BM_ELEM_SMOOTH;
     let l = bm.f.l_first[f];
     for (const c of corners) {

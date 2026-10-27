@@ -159,7 +159,7 @@ export function BMW_edgering(bm, e_start, { delimit_ngons = true, test_hidden = 
 const manifold = (bm, e) => { const r = bm.e.l[e]; return r >= 0 && bm.l.radial_next[r] !== r && bm.l.radial_next[bm.l.radial_next[r]] === r; };
 const boundary = (bm, e) => { const r = bm.e.l[e]; return r >= 0 && bm.l.radial_next[r] === r; };
 const otherVert = (bm, e, v) => (bm.e.v1[e] === v ? bm.e.v2[e] : bm.e.v1[e]);
-const diskNext = (bm, e, v) => bm.e[bm.e.v1[e] === v ? 'v1_disk_next' : 'v2_disk_next'][e];
+const diskNext = (bm, e, v) => bm.e[bm.e.v1[e] === v ? 'v1_disk_link_next' : 'v2_disk_link_next'][e];
 const diskEdges = (bm, v) => { const out = [], first = bm.v.e[v]; if (first < 0) return out; let e = first; do out.push(e); while ((e = diskNext(bm, e, v)) !== first); return out; };
 const edgeCountNonwire = (bm, v) => diskEdges(bm, v).filter((e) => bm.e.l[e] >= 0).length;
 const faceCount = (bm, v) => { let n = 0; for (const e of diskEdges(bm, v)) { const r = bm.e.l[e]; if (r < 0) continue; let l = r; do if (bm.l.v[l] === v) n++; while ((l = bm.l.radial_next[l]) !== r); } return n; };

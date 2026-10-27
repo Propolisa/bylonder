@@ -13,7 +13,8 @@ import { edbm_loopcut } from './editmesh-loopcut.js';
 import { edbm_select_loop, edbm_select_linked_exec } from './editmesh-select.js';
 import { bmo_inset_region_exec } from '../../bmesh/operators/bmo-inset.js';
 import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
-import { BM_edge_at_index, BM_EDGES_OF_VERT, BM_edge_exists, BM_edge_other_vert, BM_edge_is_wire, BM_edge_is_boundary, BM_edge_share_face_check, BM_face_vert_share_loop, BM_face_edge_share_loop } from '../../bmesh/intern/bmesh-query.js';
+import { BM_EDGES_OF_VERT, BM_edge_exists, BM_edge_other_vert, BM_edge_is_wire, BM_edge_is_boundary, BM_edge_share_face_check, BM_face_vert_share_loop, BM_face_edge_share_loop } from '../../bmesh/intern/bmesh-query.js';
+import { BM_edge_at_index } from '../../bmesh/intern/bmesh-mesh.js';
 import { bmo_contextual_create_exec } from '../../bmesh/operators/bmo-create.js';
 import { EDBM_mesh_hide, EDBM_mesh_reveal, EDBM_select_more, EDBM_select_less } from './editmesh-utils.js';
 

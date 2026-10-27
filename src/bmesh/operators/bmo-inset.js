@@ -1,8 +1,8 @@
 // Inset operators (bmo_inset.cc). UV interpolation of the inset faces (use_interpolate) is not ported yet: new
 // faces copy the loop data of the faces they border, as with use_interpolate off.
 import { BM_ITER_MESH, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
-import { BM_edge_create, BM_elem_attrs_copy, BM_vert_splice, bmesh_kernel_edge_separate, bmesh_kernel_vert_separate } from '../intern/bmesh-core.js';
-import { BM_face_create_verts } from '../intern/bmesh-construct.js';
+import { BM_edge_create, BM_vert_splice, bmesh_kernel_edge_separate, bmesh_kernel_vert_separate, BM_face_create_verts, BM_CREATE_NOP } from '../intern/bmesh-core.js';
+import { BM_elem_attrs_copy } from '../intern/bmesh-construct.js';
 import { BM_edge_is_boundary, BM_edge_other_vert, BM_edge_other_loop, BM_LOOPS_OF_VERT, BM_EDGES_OF_VERT } from '../intern/bmesh-query.js';
 import { BM_mesh_normals_update } from '../intern/bmesh-mesh-normals.js';
 import { angle_v3v3v3, sub_v3, add_v3, mul_v3_fl, dot_v3, cross_v3, len_v3, normalize_v3 } from '../../blenlib/math-geom.js';
@@ -162,7 +162,7 @@ export function bmo_inset_region_exec(bm, faces, {
     if (varr[0] === n1) { if (o2 !== n2) varr.push(o2); if (o1 !== n1) varr.push(o1); }
     else { if (o1 !== n1) varr.push(o1); if (o2 !== n2) varr.push(o2); }
     if (varr.length === 2) continue;
-    const f = BM_face_create_verts(bm, varr, l.f[es.l]);
+    const f = BM_face_create_verts(bm, varr, varr.length, l.f[es.l], BM_CREATE_NOP, true);
     BMO_flag_enable(bm.f, f, ELE_NEW);
     // Loop data from the faces beside the new one: the original face's corners on the inner side.
     let l_a = bm.f.l_first[f], l_b = l.next[l_a];

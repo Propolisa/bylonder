@@ -1,0 +1,343 @@
+{
+  "(outside source/blender)": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "MEM_new_array_uninitialized": "intern/guardedalloc/MEM_guardedalloc.h",
+      "EIG_linear_solver_matrix_add": "intern/eigen/intern/linear_solver.cc",
+      "EIG_linear_solver_right_hand_side_add": "intern/eigen/intern/linear_solver.cc",
+      "EIG_linear_least_squares_solver_new": "intern/eigen/intern/linear_solver.cc",
+      "EIG_linear_solver_variable_get": "intern/eigen/intern/linear_solver.cc",
+      "EIG_linear_solver_solve": "intern/eigen/intern/linear_solver.cc",
+      "EIG_linear_solver_delete": "intern/eigen/intern/linear_solver.cc",
+      "MEM_new_array_zeroed": "intern/guardedalloc/MEM_guardedalloc.h"
+    },
+    "missing": {}
+  },
+  "blenkernel/curveprofile.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "BKE_curveprofile_init": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet"
+    },
+    "missing": {}
+  },
+  "blenkernel/customdata.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "CustomData_get_n_offset": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_number_of_layers": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_get_layer_index": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_get_named_layer_index": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_get_offset_named": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_has_layer": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+      "CustomData_layer_has_math": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet"
+    },
+    "missing": {}
+  },
+  "blenkernel/deform.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "BKE_defvert_find_weight": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet"
+    },
+    "missing": {}
+  },
+  "blenkernel/mesh.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "BKE_lnor_space_custom_normal_to_data": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet"
+    },
+    "missing": {}
+  },
+  "blenlib/math-geom.js": {
+    "generated": [
+      "compare_v2v2",
+      "power_of_2_max_i",
+      "mul_v2_fl",
+      "add_v2_v2",
+      "is_power_of_2_i",
+      "isect_line_line_v3",
+      "safe_divide",
+      "closest_to_plane_normalized_v3",
+      "dist_squared_to_plane_v3",
+      "minmax_v3v3_v3",
+      "dist_squared_to_line_segment_v3",
+      "plane_point_side_v3",
+      "isect_point_poly_v2",
+      "interp_bilinear_quad_v3",
+      "compare_v3v3",
+      "area_poly_v2",
+      "equals_v3v3",
+      "cross_poly_v2"
+    ],
+    "shimmed": {
+      "angle_v3v3": null,
+      "angle_normalized_v3v3": null,
+      "is_zero_v3": null,
+      "angle_v3v3v3": null,
+      "isect_line_plane_v3": null,
+      "isect_line_line_epsilon_v3": null,
+      "len_squared_v3": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-class.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "BM_ELEM_CD_GET_FLOAT_P": "Custom data layers are not in Bylonder's BMesh yet",
+      "BM_ELEM_CD_GET_FLOAT": "Custom data layers are not in Bylonder's BMesh yet",
+      "BM_ELEM_CD_GET_VOID_P": "Custom data layers are not in Bylonder's BMesh yet"
+    },
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-construct.js": {
+    "generated": [],
+    "shimmed": {
+      "BM_elem_attrs_copy": null,
+      "BM_edges_from_verts_ensure": null,
+      "BM_edges_from_verts": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-core.js": {
+    "generated": [
+      "BM_face_create_verts"
+    ],
+    "shimmed": {
+      "BM_vert_kill": null,
+      "BM_face_kill": null,
+      "BM_edge_create": null,
+      "BM_vert_create": null,
+      "BM_face_create": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-interp.js": {
+    "generated": [],
+    "shimmed": {},
+    "excluded": {
+      "BM_data_layer_add_named": "Custom data layers are not in Bylonder's BMesh yet",
+      "BM_loop_interp_from_face": "UV and attribute interpolation is not ported yet"
+    },
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-mesh-normals.js": {
+    "generated": [],
+    "shimmed": {
+      "BM_mesh_normals_update": null
+    },
+    "excluded": {
+      "BM_lnorspace_update": "Harden Normals: custom split normals are not ported"
+    },
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-mesh.js": {
+    "generated": [],
+    "shimmed": {
+      "BM_mesh_elem_index_ensure": null,
+      "BM_mesh_elem_table_ensure": null,
+      "BM_face_at_index": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-mods.js": {
+    "generated": [],
+    "shimmed": {
+      "BM_face_split": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-polygon.js": {
+    "generated": [
+      "BM_face_calc_center_bounds",
+      "BM_face_point_inside_test"
+    ],
+    "shimmed": {},
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-query.js": {
+    "generated": [
+      "BM_edge_face_count",
+      "BM_edge_calc_length",
+      "BM_vert_step_fan_loop",
+      "BM_vert_face_check",
+      "BM_edge_calc_face_angle_signed_ex",
+      "BM_edge_is_convex"
+    ],
+    "shimmed": {
+      "BM_edge_other_vert": null,
+      "BM_edge_is_wire": null,
+      "BM_edge_is_manifold": null,
+      "BM_edge_exists": null,
+      "BM_face_edge_share_loop": null,
+      "BM_edge_loop_pair": null,
+      "BM_edge_other_loop": null,
+      "BM_face_vert_share_loop": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/intern/bmesh-structure.js": {
+    "generated": [],
+    "shimmed": {
+      "bmesh_disk_edge_next": null
+    },
+    "excluded": {},
+    "missing": {}
+  },
+  "bmesh/tools/bmesh-bevel.js": {
+    "generated": [
+      "BM_mesh_bevel",
+      "bevel_rebuild_existing_polygons",
+      "get_face_kind",
+      "bevel_reattach_wires",
+      "determine_uv_vert_connectivity",
+      "set_profile_spacing",
+      "uv_vert_map_init",
+      "bevel_vert_construct",
+      "bevel_set_weighted_normal_face_strength",
+      "bevel_build_edge_polygons",
+      "bevel_extend_edge_data",
+      "build_vmesh",
+      "bevel_harden_normals",
+      "find_profile_fullness",
+      "bevel_limit_offset",
+      "adjust_offsets",
+      "regularize_profile_orientation",
+      "uv_vert_map_pop",
+      "build_boundary",
+      "math_layer_info_init",
+      "find_bevvert",
+      "bevel_merge_uvs",
+      "bev_rebuild_polygon",
+      "find_even_superellipse_chords",
+      "BM_BEVEL_EDGE_TAG_ENABLE",
+      "bev_ccw_test",
+      "contig_ldata_across_edge",
+      "BM_BEVEL_EDGE_TAG_DISABLE",
+      "edge_face_angle",
+      "find_bevel_edge_order",
+      "record_face_kind",
+      "find_edge_half",
+      "choose_rep_face",
+      "bev_create_ngon",
+      "weld_cross_attrs_copy",
+      "mesh_vert",
+      "bevvert_is_weld_cross",
+      "bevel_extend_edge_data_ex",
+      "set_profile_params",
+      "calculate_vm_profiles",
+      "bevel_build_cutoff",
+      "move_weld_profile_planes",
+      "bevel_vert_two_edges",
+      "pipe_test",
+      "bevel_build_trifan",
+      "copy_mesh_vert",
+      "get_profile_point",
+      "bevel_build_poly",
+      "create_mesh_bmvert",
+      "bevel_build_rings",
+      "bevel_edges_sharp_boundary",
+      "vertex_collide_offset",
+      "geometry_collide_offset",
+      "adjust_the_cycle_or_chain",
+      "find_other_end_edge_half",
+      "next_edgehalf_bev",
+      "add_new_bound_vert",
+      "good_offset_on_edge_between",
+      "next_bev",
+      "adjust_bound_vert",
+      "build_boundary_vertex_only",
+      "offset_meet",
+      "build_boundary_terminal_edge",
+      "edges_angle_kind",
+      "set_bound_vert_seams",
+      "adjust_miter_coords",
+      "offset_on_edge_between",
+      "eh_on_plane",
+      "adjust_miter_inner_coords",
+      "swap_face_components",
+      "disable_flag_out_edge",
+      "count_ccw_edges_between",
+      "find_even_superellipse_chords_general",
+      "BM_BEVEL_EDGE_TAG_TEST",
+      "bevel_edge_order_extend",
+      "fast_bevel_edge_order",
+      "update_uv_vert_map",
+      "register_uv_face",
+      "flag_out_edge",
+      "project_to_edge",
+      "nearly_parallel",
+      "calculate_profile",
+      "frep_for_center_poly",
+      "find_closer_edge",
+      "get_incident_edges",
+      "boundvert_rep_face",
+      "find_face_internal_boundverts",
+      "flag_out_vert",
+      "adj_vmesh",
+      "build_square_in_vmesh",
+      "tri_corner_adj_vmesh",
+      "build_center_ngon",
+      "is_canon",
+      "vmesh_copy_equiv_verts",
+      "tri_corner_test",
+      "square_out_adj_vmesh",
+      "snap_edges_for_vmesh_vert",
+      "pipe_adj_vmesh",
+      "offset_meet_edge",
+      "contig_ldata_around_vert",
+      "slide_dist",
+      "offset_meet_lines_percent_or_absolute",
+      "is_outside_edge",
+      "point_between_edges",
+      "offset_in_plane",
+      "move_profile_plane",
+      "nearly_parallel_normalized",
+      "check_edge_data_seam_sharp_edges",
+      "find_superellipse_chord_endpoint",
+      "superellipse_co",
+      "edges_face_connected_at_vert",
+      "find_uv_face",
+      "calculate_profile_segments",
+      "make_unit_square_map",
+      "is_bad_uv_poly",
+      "interp_vmesh",
+      "cubic_subdiv",
+      "new_adj_vmesh",
+      "make_cube_corner_adj_vmesh",
+      "make_unit_cube_map",
+      "mesh_vert_canon",
+      "closer_v3_v3v3v3",
+      "snap_edge_for_center_vmesh_vert",
+      "snap_to_pipe_profile",
+      "edge_edge_angle_less_than_180",
+      "HASNOT_SEAMSHARP",
+      "projected_boundary_area",
+      "fill_profile_fracs",
+      "interp_range",
+      "vmesh_center",
+      "fill_vmesh_fracs",
+      "avg4",
+      "sabin_gamma",
+      "make_cube_corner_square_in",
+      "make_cube_corner_square",
+      "snap_to_superellipsoid"
+    ],
+    "shimmed": {},
+    "excluded": {
+      "contig_ldata_across_loops": "UV and attribute interpolation is not ported yet"
+    },
+    "missing": {}
+  }
+}

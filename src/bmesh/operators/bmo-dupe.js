@@ -1,6 +1,7 @@
 // Duplicate, split and delete operators (bmo_dupe.cc).
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
-import { BM_vert_create, BM_edge_create, BM_face_create, BM_elem_attrs_copy, BM_CREATE_SKIP_CD } from '../intern/bmesh-core.js';
+import { BM_vert_create, BM_edge_create, BM_face_create, BM_CREATE_SKIP_CD } from '../intern/bmesh-core.js';
+import { BM_elem_attrs_copy } from '../intern/bmesh-construct.js';
 import { BM_edge_is_boundary } from '../intern/bmesh-query.js';
 import { BM_edge_verts_swap } from '../intern/bmesh-mods.js';
 import { BMO_mesh_delete_oflag_context } from '../intern/bmesh-delete.js';
@@ -16,14 +17,14 @@ const facesOfVert = (bm, v, fn) => {
   do {
     const l0 = bm.e.l[e];
     if (l0 >= 0) { let l = l0; do if (fn(bm.l.f[l])) return true; while ((l = bm.l.radial_next[l]) !== l0); }
-  } while ((e = bm.e[bm.e.v1[e] === v ? 'v1_disk_next' : 'v2_disk_next'][e]) !== first);
+  } while ((e = bm.e[bm.e.v1[e] === v ? 'v1_disk_link_next' : 'v2_disk_link_next'][e]) !== first);
   return false;
 };
 const edgesOfVert = (bm, v, fn) => {
   const first = bm.v.e[v];
   if (first < 0) return false;
   let e = first;
-  do if (fn(e)) return true; while ((e = bm.e[bm.e.v1[e] === v ? 'v1_disk_next' : 'v2_disk_next'][e]) !== first);
+  do if (fn(e)) return true; while ((e = bm.e[bm.e.v1[e] === v ? 'v1_disk_link_next' : 'v2_disk_link_next'][e]) !== first);
   return false;
 };
 

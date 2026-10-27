@@ -1,8 +1,8 @@
 // Making faces from a selection (bmo_create.cc, bmo_edgenet.cc, bmo_fill_edgeloop.cc, bmo_fill_attribute.cc and
 // bmo_normals.cc): contextual_create and the operators it tries in turn.
 import { BM_ITER_MESH, BM_EDGE, BM_FACE, BM_ELEM_TAG, BM_ELEM_SMOOTH, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable, BMO_flag_test, BMO_flag_enable, BMO_flag_disable } from '../intern/bmesh-class.js';
-import { BM_edge_create, BM_elem_attrs_copy, BM_CREATE_NO_DOUBLE, BM_CREATE_NOP } from '../intern/bmesh-core.js';
-import { BM_face_create_ngon_verts, BM_verts_sort_radial_plane, BM_face_copy_shared } from '../intern/bmesh-construct.js';
+import { BM_edge_create, BM_CREATE_NO_DOUBLE, BM_CREATE_NOP } from '../intern/bmesh-core.js';
+import { BM_face_create_ngon_verts, BM_verts_sort_radial_plane, BM_face_copy_shared, BM_elem_attrs_copy } from '../intern/bmesh-construct.js';
 import { BM_EDGES_OF_VERT, BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_edge_share_vert_check, BM_edge_is_manifold, BM_face_exists } from '../intern/bmesh-query.js';
 import { BM_face_normal_update, BM_face_normal_flip, BM_face_calc_area, BM_face_calc_center_median_weighted } from '../intern/bmesh-polygon.js';
 import { BM_mesh_elem_hflag_disable_all } from '../intern/bmesh-marking.js';
@@ -226,7 +226,7 @@ function bmo_edgeloop_fill_exec(bm, edges, { mat_nr = 0, use_smooth = false } = 
       e_prev = e_next;
     } while (v !== f_verts[0]);
     if (BM_face_exists(bm, f_verts) < 0) {
-      const f = BM_face_create_ngon_verts(bm, f_verts, -1, BM_CREATE_NOP, true, false);
+      const f = BM_face_create_ngon_verts(bm, f_verts, f_verts.length, -1, BM_CREATE_NOP, true, false);
       BMO_flag_enable(bm.f, f, ELE_OUT);
       bm.f.mat_nr[f] = mat_nr;
       if (use_smooth) BM_elem_flag_enable(bm.f, f, BM_ELEM_SMOOTH);
@@ -278,7 +278,8 @@ export function bmo_contextual_create_exec(bm, { geom, mat_nr = 0, use_smooth = 
     if (faces.length) return { edges: [], faces };
   }
   if (totv > 2) {
-    const f = BM_face_create_ngon_verts(bm, BM_verts_sort_radial_plane(bm, geom.verts), -1, BM_CREATE_NO_DOUBLE, true, true);
+    const sorted = BM_verts_sort_radial_plane(bm, geom.verts);
+    const f = BM_face_create_ngon_verts(bm, sorted, sorted.length, -1, BM_CREATE_NO_DOUBLE, true, true);
     if (f >= 0) {
       BMO_flag_enable(bm.f, f, ELE_OUT);
       bm.f.mat_nr[f] = mat_nr;

@@ -1,6 +1,7 @@
 // Welding and merging (bmo_removedoubles.cc): weld_verts, pointmerge and collapse.
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_HIDDEN, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable, BM_elem_flag_merge_ex, BMO_flag_test, BMO_flag_enable, BMO_flag_disable } from '../intern/bmesh-class.js';
-import { BM_edge_create, BM_face_create, BM_face_kill, BM_elem_attrs_copy, bmesh_face_swap_data } from '../intern/bmesh-core.js';
+import { BM_edge_create, BM_face_create, BM_face_kill, bmesh_face_swap_data } from '../intern/bmesh-core.js';
+import { BM_elem_attrs_copy } from '../intern/bmesh-construct.js';
 import { BM_face_split } from '../intern/bmesh-mods.js';
 import { BM_edge_exists, BM_face_exists, BM_face_vert_share_loop, BM_loop_is_adjacent } from '../intern/bmesh-query.js';
 import { BM_select_history_merge_from_targetmap } from '../intern/bmesh-marking.js';

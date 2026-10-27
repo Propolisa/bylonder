@@ -2,7 +2,7 @@
 // and makes faces of them. Blender's linked lists, which prepend and pop at the head, are arrays used as stacks
 // (the end is the head); a path list is an array in head-first order.
 import { BM_ITER_MESH, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_disable, BM_elem_flag_enable } from '../intern/bmesh-class.js';
-import { BM_face_create } from '../intern/bmesh-core.js';
+import { BM_face_create, BM_CREATE_NOP } from '../intern/bmesh-core.js';
 import { BM_EDGES_OF_VERT, BM_FACES_OF_VERT, BM_edge_exists, BM_edge_other_vert } from '../intern/bmesh-query.js';
 import { BM_edges_from_verts } from '../intern/bmesh-construct.js';
 
@@ -136,7 +136,9 @@ export function BM_mesh_edgenet(bm, use_edge_tag, use_new_face_tag) {
   for (let e; (e = edge_get_next()) >= 0;) {
     const best = path_calc_best(e);
     if (!best) continue;
-    const f = BM_face_create(bm, best.path, BM_edges_from_verts(bm, best.path), best.path.length);
+    const edges = new Array(best.path.length);
+    BM_edges_from_verts(bm, edges, best.path, best.path.length);
+    const f = BM_face_create(bm, best.path, edges, best.path.length, -1, BM_CREATE_NOP);
     const first = bm.f.l_first[f];
     let it = first;
     do if (step_ok(l.e[it])) edge_queue.push(l.e[it]); while ((it = l.next[it]) !== first);

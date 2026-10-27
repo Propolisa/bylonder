@@ -89,3 +89,5 @@ export function BM_verts_calc_normal_from_cloud_ex(bm, verts) {
   }
   return { normal, center, index_tangent: co_a_index };
 }
+
+export * from './bmesh-polygon.gen.js';

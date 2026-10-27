@@ -1,7 +1,7 @@
 // Extrude operators (bmo_extrude.cc).
 import { BM_ITER_MESH, BM_VERT, BM_ELEM_HIDDEN, BM_ELEM_SEAM, BM_ELEM_SMOOTH, BMO_flag_test, BMO_flag_enable, BM_elem_flag_disable } from '../intern/bmesh-class.js';
-import { BM_vert_create, BM_edge_create, BM_face_create, BM_elem_attrs_copy, BM_CREATE_NOP, BM_CREATE_NO_DOUBLE } from '../intern/bmesh-core.js';
-import { BM_face_create_verts } from '../intern/bmesh-construct.js';
+import { BM_vert_create, BM_edge_create, BM_face_create, BM_CREATE_NOP, BM_CREATE_NO_DOUBLE, BM_face_create_verts } from '../intern/bmesh-core.js';
+import { BM_elem_attrs_copy } from '../intern/bmesh-construct.js';
 import { BM_edge_exists, BM_edge_is_boundary, BM_edge_other_loop, BM_vert_is_wire_endpoint, BM_EDGES_OF_VERT, BM_FACES_OF_EDGE } from '../intern/bmesh-query.js';
 import { BM_face_normal_flip } from '../intern/bmesh-polygon.js';
 import { BMO_op_callf } from '../intern/bmesh-operators.js';
@@ -96,7 +96,7 @@ export function bmo_extrude_edge_only_exec(bm, edges, { use_normal_flip = false,
   for (let [e, e_new] of dupe.boundary_map) {
     const flip = !(bm.e.l[e] >= 0 && bm.e.v1[e] !== bm.l.v[bm.e.l[e]]);
     const verts = flip === use_normal_flip ? [bm.e.v1[e], bm.e.v2[e], bm.e.v2[e_new], bm.e.v1[e_new]] : [bm.e.v2[e], bm.e.v1[e], bm.e.v1[e_new], bm.e.v2[e_new]];
-    const f = BM_face_create_verts(bm, verts, -1, BM_CREATE_NOP, true);
+    const f = BM_face_create_verts(bm, verts, verts.length, -1, BM_CREATE_NOP, true);
     bm_extrude_copy_face_loop_attributes(bm, f);
     if (BMO_flag_test(bm.e, e, EXT_INPUT)) e = e_new;
     BMO_flag_enable(bm.f, f, EXT_KEEP);

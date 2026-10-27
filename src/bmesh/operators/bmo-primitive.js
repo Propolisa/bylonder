@@ -1,7 +1,7 @@
 // Primitive operators (bmo_primitive.cc). Run through BMO_op_callf; `matrix` is a 4x4 of columns.
 import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable, poolLayer } from '../intern/bmesh-class.js';
-import { BM_vert_create, BM_edge_create, BM_vert_kill } from '../intern/bmesh-core.js';
-import { BM_face_create_verts, BM_face_create_quad_tri } from '../intern/bmesh-construct.js';
+import { BM_vert_create, BM_edge_create, BM_vert_kill, BM_face_create_verts, BM_CREATE_NOP } from '../intern/bmesh-core.js';
+import { BM_face_create_quad_tri } from '../intern/bmesh-construct.js';
 import { BM_edge_collapse } from '../intern/bmesh-mods.js';
 import { BM_face_normal_update } from '../intern/bmesh-polygon.js';
 import { BMO_op_callf } from '../intern/bmesh-operators.js';
@@ -33,7 +33,7 @@ export function bmo_create_grid_exec(bm, { x_segments, y_segments, size, matrix 
   const XY = (x, y) => x + y * (xtot + 1);
   for (let y = 1; y <= ytot; y++) {
     for (let x = 1; x <= xtot; x++) {
-      const f = BM_face_create_verts(bm, [varr[XY(x - 1, y - 1)], varr[XY(x, y - 1)], varr[XY(x, y)], varr[XY(x - 1, y)]]);
+      const f = BM_face_create_verts(bm, [varr[XY(x - 1, y - 1)], varr[XY(x, y - 1)], varr[XY(x, y)], varr[XY(x - 1, y)]], 4, -1, BM_CREATE_NOP, true);
       if (uv) BMO_flag_enable(bm.f, f, FACE_MARK);
     }
   }
@@ -65,7 +65,7 @@ export function bmo_create_cube_exec(bm, { size, matrix = unit_m4(), calc_uvs = 
     verts.push(BM_vert_create(bm, mul_m4_v3(matrix, [x * off, y * off, z * off])));
   }
   for (const quad of cube_faces) {
-    const f = BM_face_create_verts(bm, quad.map((i) => verts[i]));
+    const f = BM_face_create_verts(bm, quad.map((i) => verts[i]), 4, -1, BM_CREATE_NOP, true);
     if (uv) BMO_flag_enable(bm.f, f, FACE_MARK);
   }
   if (uv) BM_mesh_calc_uvs_cube(bm, FACE_MARK, uv);
@@ -103,13 +103,13 @@ export function bmo_create_circle_exec(bm, { segments: segs, radius, cap_ends, c
     v1 = BM_vert_create(bm, mul_m4_v3(matrix, [f32(s * -radius), f32(c * radius), 0]));
     verts.push(v1);
     if (lastv1 >= 0) BM_edge_create(bm, v1, lastv1);
-    if (a && cap_ends) BMO_flag_enable(bm.f, BM_face_create_quad_tri(bm, cent1, lastv1, v1), FACE_NEW);
+    if (a && cap_ends) BMO_flag_enable(bm.f, BM_face_create_quad_tri(bm, cent1, lastv1, v1, -1, -1, BM_CREATE_NOP), FACE_NEW);
     if (firstv1 < 0) firstv1 = v1;
     lastv1 = v1;
   }
   BM_edge_create(bm, firstv1, lastv1);
   if (cap_ends) {
-    BMO_flag_enable(bm.f, BM_face_create_quad_tri(bm, cent1, v1, firstv1), FACE_NEW);
+    BMO_flag_enable(bm.f, BM_face_create_quad_tri(bm, cent1, v1, firstv1, -1, -1, BM_CREATE_NOP), FACE_NEW);
     if (uv) BM_mesh_calc_uvs_circle(bm, matrix, radius, FACE_NEW, uv);
   }
   if (!cap_tris) dissolveMarked(bm, FACE_NEW);
@@ -150,10 +150,10 @@ export function bmo_create_cone_exec(bm, { segments: segs, radius1: rad1, radius
     verts.push(v1, v2);
     if (i) {
       if (cap_ends) {
-        BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent1, lastv1, v1)), FACE_NEW);
-        BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent2, v2, lastv2)), FACE_NEW);
+        BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent1, lastv1, v1, -1, -1, BM_CREATE_NOP)), FACE_NEW);
+        BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent2, v2, lastv2, -1, -1, BM_CREATE_NOP)), FACE_NEW);
       }
-      side_faces.push(markUV(BM_face_create_quad_tri(bm, lastv1, lastv2, v2, v1)));
+      side_faces.push(markUV(BM_face_create_quad_tri(bm, lastv1, lastv2, v2, v1, -1, BM_CREATE_NOP)));
     } else {
       firstv1 = v1;
       firstv2 = v2;
@@ -162,10 +162,10 @@ export function bmo_create_cone_exec(bm, { segments: segs, radius1: rad1, radius
     lastv2 = v2;
   }
   if (cap_ends) {
-    BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent1, v1, firstv1)), FACE_NEW);
-    BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent2, firstv2, v2)), FACE_NEW);
+    BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent1, v1, firstv1, -1, -1, BM_CREATE_NOP)), FACE_NEW);
+    BMO_flag_enable(bm.f, markUV(BM_face_create_quad_tri(bm, cent2, firstv2, v2, -1, -1, BM_CREATE_NOP)), FACE_NEW);
   }
-  markUV(BM_face_create_quad_tri(bm, v1, v2, firstv2, firstv1));
+  markUV(BM_face_create_quad_tri(bm, v1, v2, firstv2, firstv1, -1, BM_CREATE_NOP));
   if (uv) BM_mesh_calc_uvs_cone(bm, matrix, rad2, rad1, segs, cap_ends, FACE_MARK, uv);
   const { l } = bm;
   if (rad1 === 0) {

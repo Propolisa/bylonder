@@ -1,6 +1,7 @@
 /* Included after a ported file's own includes: turns the macros the port keeps into declarations, so they reach
  * the AST as calls instead of expansions. */
 #pragma once
+#include <type_traits>
 #include <utility>
 
 #undef ELEM
@@ -99,12 +100,14 @@ template<class B, class E, class F, class V> void BMO_face_flag_set(B bm, E e, F
 #undef BM_ELEM_CD_GET_INT
 #undef BM_ELEM_CD_SET_FLOAT
 #undef BM_DISK_EDGE_NEXT
-#undef BM_FACE_FIRST_LOOP
+#undef BM_DISK_EDGE_PREV
 #undef BLI_ASSERT_UNIT_V3
 #undef MEM_SIZE_OPTIMAL
 #undef BM_ELEM_API_FLAG_ENABLE
 #undef BM_ELEM_API_FLAG_DISABLE
 #undef BM_ELEM_API_FLAG_TEST
+#undef INIT_MINMAX
+#undef INIT_MINMAX2
 template<class T, class N> T bl_port_alloca(T, N) { return {}; }
 #define BLI_array_alloca(arr, realsize) bl_port_alloca(arr, realsize)
 template<class E, class O> float BM_ELEM_CD_GET_FLOAT(E, O) { return {}; }
@@ -112,10 +115,12 @@ template<class E, class O> float *BM_ELEM_CD_GET_FLOAT_P(E, O) { return {}; }
 template<class E, class O> void *BM_ELEM_CD_GET_VOID_P(E, O) { return {}; }
 template<class E, class O> int BM_ELEM_CD_GET_INT(E, O) { return {}; }
 template<class E, class O, class V> void BM_ELEM_CD_SET_FLOAT(E, O, V) {}
-template<class E, class V> E BM_DISK_EDGE_NEXT(E, V) { return {}; }
-template<class F> blender::BMLoop *BM_FACE_FIRST_LOOP(F) { return {}; }
+template<class E, class V> std::remove_const_t<std::remove_pointer_t<E>> *BM_DISK_EDGE_NEXT(E, V) { return {}; }
+template<class E, class V> std::remove_const_t<std::remove_pointer_t<E>> *BM_DISK_EDGE_PREV(E, V) { return {}; }
 template<class V> void BLI_ASSERT_UNIT_V3(V) {}
 template<class S> S MEM_SIZE_OPTIMAL(S) { return {}; }
 template<class E, class F> void BM_ELEM_API_FLAG_ENABLE(E, F) {}
 template<class E, class F> void BM_ELEM_API_FLAG_DISABLE(E, F) {}
 template<class E, class F> int BM_ELEM_API_FLAG_TEST(E, F) { return {}; }
+template<class A, class B> void INIT_MINMAX(A &, B &) {}
+template<class A, class B> void INIT_MINMAX2(A &, B &) {}

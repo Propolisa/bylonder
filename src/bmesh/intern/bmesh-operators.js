@@ -16,3 +16,5 @@ export function BMO_op_callf(bm, exec, ...args) {
     });
   }
 }
+
+export * from './bmesh-operators.gen.js';

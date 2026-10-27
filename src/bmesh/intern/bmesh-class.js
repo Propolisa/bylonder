@@ -13,7 +13,7 @@ export const _FLAG_JF = 1 << 0, _FLAG_MF = 1 << 1, _FLAG_MV = 1 << 1, _FLAG_OVER
 
 const FIELDS = {
   v: { co: [Float32Array, 3], no: [Float32Array, 3], e: [Int32Array, 1], hflag: [Uint8Array, 1], api_flag: [Uint8Array, 1], oflag: [Uint16Array, 1], index: [Int32Array, 1] },
-  e: { v1: [Int32Array, 1], v2: [Int32Array, 1], l: [Int32Array, 1], v1_disk_next: [Int32Array, 1], v1_disk_prev: [Int32Array, 1], v2_disk_next: [Int32Array, 1], v2_disk_prev: [Int32Array, 1], hflag: [Uint8Array, 1], api_flag: [Uint8Array, 1], oflag: [Uint16Array, 1], index: [Int32Array, 1] },
+  e: { v1: [Int32Array, 1], v2: [Int32Array, 1], l: [Int32Array, 1], v1_disk_link_next: [Int32Array, 1], v1_disk_link_prev: [Int32Array, 1], v2_disk_link_next: [Int32Array, 1], v2_disk_link_prev: [Int32Array, 1], hflag: [Uint8Array, 1], api_flag: [Uint8Array, 1], oflag: [Uint16Array, 1], index: [Int32Array, 1] },
   l: { v: [Int32Array, 1], e: [Int32Array, 1], f: [Int32Array, 1], next: [Int32Array, 1], prev: [Int32Array, 1], radial_next: [Int32Array, 1], radial_prev: [Int32Array, 1], hflag: [Uint8Array, 1], api_flag: [Uint8Array, 1], index: [Int32Array, 1] },
   f: { l_first: [Int32Array, 1], len: [Int32Array, 1], no: [Float32Array, 3], mat_nr: [Int16Array, 1], hflag: [Uint8Array, 1], api_flag: [Uint8Array, 1], oflag: [Uint16Array, 1], index: [Int32Array, 1] },
 };
@@ -82,9 +82,19 @@ export function BM_ITER_MESH(pool, fn) {
   for (let i = 0, n = pool.size; i < n; i++) if (pool.alive[i]) fn(i);
 }
 
+// BM_DISK_EDGE_NEXT and BM_DISK_EDGE_PREV: around v's disk cycle from e.
+export const BM_DISK_EDGE_NEXT = (bm, e, v) => (v === bm.e.v2[e] ? bm.e.v2_disk_link_next : bm.e.v1_disk_link_next)[e];
+export const BM_DISK_EDGE_PREV = (bm, e, v) => (v === bm.e.v2[e] ? bm.e.v2_disk_link_prev : bm.e.v1_disk_link_prev)[e];
+
+// v->co, v->no and f->no as [x, y, z] values.
+export const vco = (bm, v) => [bm.v.co[v * 3], bm.v.co[v * 3 + 1], bm.v.co[v * 3 + 2]];
+export const vno = (bm, v) => [bm.v.no[v * 3], bm.v.no[v * 3 + 1], bm.v.no[v * 3 + 2]];
+export const fno = (bm, f) => [bm.f.no[f * 3], bm.f.no[f * 3 + 1], bm.f.no[f * 3 + 2]];
+
 export const BM_elem_flag_test = (pool, i, flag) => (pool.hflag[i] & flag) !== 0;
 export const BM_elem_flag_enable = (pool, i, flag) => { pool.hflag[i] |= flag; };
 export const BM_elem_flag_disable = (pool, i, flag) => { pool.hflag[i] &= ~flag; };
+export const BM_elem_flag_set = (pool, i, flag, value) => (value ? BM_elem_flag_enable : BM_elem_flag_disable)(pool, i, flag);
 export const BM_ELEM_API_FLAG_TEST = (pool, i, flag) => (pool.api_flag[i] & flag) !== 0;
 export const BM_ELEM_API_FLAG_ENABLE = (pool, i, flag) => { pool.api_flag[i] |= flag; };
 export const BM_ELEM_API_FLAG_DISABLE = (pool, i, flag) => { pool.api_flag[i] &= ~flag; };
@@ -98,3 +108,6 @@ export function BM_elem_flag_merge_ex(pool_a, a, pool_b, b, hflag_and) {
 export const BMO_flag_test = (pool, i, flag) => (pool.oflag[i] & flag) !== 0;
 export const BMO_flag_enable = (pool, i, flag) => { pool.oflag[i] |= flag; };
 export const BMO_flag_disable = (pool, i, flag) => { pool.oflag[i] &= ~flag; };
+export const BMO_flag_set = (pool, i, flag, value) => (value ? BMO_flag_enable : BMO_flag_disable)(pool, i, flag);
+
+export * from './bmesh-class.gen.js';

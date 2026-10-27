@@ -56,3 +56,5 @@ export function BM_mesh_normals_update(bm) {
     bm.v.no.set(no, v * 3);
   });
 }
+
+export * from './bmesh-mesh-normals.gen.js';

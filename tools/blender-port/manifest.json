@@ -1,0 +1,25 @@
+{
+  "blender": "v5.2.3",
+  "roots": [
+    {
+      "source": "source/blender/bmesh/tools/bmesh_bevel.cc",
+      "functions": [
+        "BM_mesh_bevel"
+      ]
+    }
+  ],
+  "exclude_modules": {
+    "blenkernel/": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+    "blenlib/memarena": "JS allocates with the garbage collector",
+    "blenlib/time": "Debug timing"
+  },
+  "exclude": {
+    "BM_lnorspace_update": "Harden Normals: custom split normals are not ported",
+    "BM_data_layer_add_named": "Custom data layers are not in Bylonder's BMesh yet",
+    "BM_loop_interp_from_face": "UV and attribute interpolation is not ported yet",
+    "BM_ELEM_CD_GET_FLOAT": "Custom data layers are not in Bylonder's BMesh yet",
+    "BM_ELEM_CD_GET_FLOAT_P": "Custom data layers are not in Bylonder's BMesh yet",
+    "BM_ELEM_CD_GET_VOID_P": "Custom data layers are not in Bylonder's BMesh yet",
+    "contig_ldata_across_loops": "UV and attribute interpolation is not ported yet"
+  }
+}

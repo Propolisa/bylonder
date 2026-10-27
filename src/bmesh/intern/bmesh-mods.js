@@ -1,5 +1,6 @@
 // Mid-level topology changes (bmesh_mods.cc).
-import { bmesh_kernel_join_edge_kill_vert, bmesh_kernel_loop_reverse, BM_faces_join, bmesh_kernel_join_vert_kill_edge, bmesh_kernel_split_edge_make_vert, bmesh_kernel_split_face_make_edge, BM_elem_attrs_copy } from './bmesh-core.js';
+import { bmesh_kernel_join_edge_kill_vert, bmesh_kernel_loop_reverse, BM_faces_join, bmesh_kernel_join_vert_kill_edge, bmesh_kernel_split_edge_make_vert, bmesh_kernel_split_face_make_edge } from './bmesh-core.js';
+import { BM_elem_attrs_copy } from './bmesh-construct.js';
 import { BM_edge_other_vert, BM_loop_is_adjacent } from './bmesh-query.js';
 
 export const BM_edge_collapse = (bm, e_kill, v_kill, do_del, kill_degenerate_faces) =>
@@ -8,8 +9,8 @@ export const BM_edge_collapse = (bm, e_kill, v_kill, do_del, kill_degenerate_fac
 export function BM_edge_verts_swap(bm, e) {
   const { e: E } = bm;
   [E.v1[e], E.v2[e]] = [E.v2[e], E.v1[e]];
-  [E.v1_disk_next[e], E.v2_disk_next[e]] = [E.v2_disk_next[e], E.v1_disk_next[e]];
-  [E.v1_disk_prev[e], E.v2_disk_prev[e]] = [E.v2_disk_prev[e], E.v1_disk_prev[e]];
+  [E.v1_disk_link_next[e], E.v2_disk_link_next[e]] = [E.v2_disk_link_next[e], E.v1_disk_link_next[e]];
+  [E.v1_disk_link_prev[e], E.v2_disk_link_prev[e]] = [E.v2_disk_link_prev[e], E.v1_disk_link_prev[e]];
 }
 
 // Loop custom data of `dst` as src[0] * w[0] + src[1] * w[1] (CustomData_bmesh_interp for two sources).
