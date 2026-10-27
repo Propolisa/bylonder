@@ -107,7 +107,7 @@ def zero_of(t):
     if t.kind == T.RECORD:
         # Every field set, so objects of one struct share a shape.
         fields = [f'{f.spelling}: {zero_of(f.type) or "null"}' for f in t.get_fields() if f.spelling]
-        return '{ ' + ', '.join(fields + ['$a: null', '$i: 0']) + ' }'
+        return '{ ' + ', '.join(fields) + ' }'
     return None
 
 
@@ -116,16 +116,14 @@ TYPED_ARRAYS = {T.FLOAT: 'Float32Array', T.DOUBLE: 'Float64Array', T.INT: 'Int32
                 T.LONG: 'Int32Array', T.ULONG: 'Uint32Array'}
 
 
-def buffer_of(elem, count, helper):
+def buffer_of(elem, count):
     """A heap buffer of count elements of type elem: a typed array for numbers, objects of one shape for structs."""
     t = canon(elem)
     if t.kind in TYPED_ARRAYS:
         return f'new {TYPED_ARRAYS[t.kind]}({count})'
     zero = zero_of(t)
-    if t.kind == T.RECORD:
-        return f'{helper("structs")}({count}, () => ({zero}))'
-    if t.kind == T.CONSTANTARRAY and zero is not None:
-        return f'Array.from({{ length: {count} }}, () => {zero})'
+    if t.kind in (T.RECORD, T.CONSTANTARRAY) and zero is not None:
+        return f'Array.from({{ length: {count} }}, () => ({zero}))'
     return f'new Array({count}).fill({zero})' if zero is not None else f'new Array({count})'
 
 
@@ -163,11 +161,6 @@ def arguments(call):
 
 UNSIGNED = (T.UINT, T.ULONG, T.USHORT, T.UCHAR, T.CHAR_U)
 
-
-def unsigned(t, js):
-    """js wrapped around to the unsigned type t, as C converts and subtracts."""
-    bits = canon(t).get_size() * 8
-    return f'(({js}) >>> 0)' if bits == 32 else f'(({js}) & {(1 << bits) - 1})'
 
 
 def is_struct_value(t):
@@ -686,17 +679,6 @@ class FunctionPort:
         inc_js = self.expr(inc) if inc is not None else ''
         return f'for ({init_js}; {cond_js}; {inc_js}) {self.body(body)}'
 
-    def element(self, pointer, offset):
-        """The struct `offset` elements from where pointer points: struct arrays are objects that know their array
-        and index (`$a`, `$i`, set by structs() in src/port/c.js)."""
-        p = self.expr(pointer)
-        if offset == '0':
-            return p
-        if strip_parens_casts(pointer).kind in (K.DECL_REF_EXPR, K.MEMBER_REF_EXPR) and all(
-                x.kind in (K.DECL_REF_EXPR, K.MEMBER_REF_EXPR, K.UNEXPOSED_EXPR, K.PAREN_EXPR) for x in pointer.walk_preorder()):
-            return f'{p}.$a[{p}.$i + {offset}]'
-        return f'{self.helper("element_at")}({p}, {offset})'
-
     def iter_loop(self, var, cond, inc, body):
         ctor = strip(clangx.var_init(var))
         data, itype = (arguments(ctor) + [None, None])[:2]
@@ -733,7 +715,7 @@ class FunctionPort:
             elif is_struct_value(t) and si.kind in (K.DECL_REF_EXPR, K.MEMBER_REF_EXPR, K.UNARY_OPERATOR, K.ARRAY_SUBSCRIPT_EXPR):
                 # A struct initialized from another is a copy of its fields.
                 source, tmp = self.expr(init), self.temp()
-                value = f'(({tmp} = {source}), {{ ' + ', '.join([f'{f}: {tmp}.{f}' for f in record_fields(t)] + ['$a: null', '$i: 0']) + ' })'
+                value = f'(({tmp} = {source}), {{ ' + ', '.join(f'{f}: {tmp}.{f}' for f in record_fields(t)) + ' })'
             else:
                 value = self.expr(init, t)
         return f'let {v.spelling}{" = " + value if value is not None else ""};'
@@ -782,9 +764,8 @@ class FunctionPort:
                 return f'Math.fround({self.expr(inner)})'
             if is_int(c.type) and canon(c.type).kind != T.BOOL and canon(inner.type).kind == T.BOOL:
                 return f'Number({self.expr(inner)})'
-            if canon(c.type).kind in UNSIGNED and is_int(inner.type) and canon(inner.type).kind not in UNSIGNED and canon(inner.type).kind != T.BOOL:
-                value = clangx.evaluate(c)
-                return str(value) if value is not None else unsigned(c.type, self.expr(inner))
+            if canon(c.type).kind in UNSIGNED and is_int(inner.type) and canon(inner.type).kind not in UNSIGNED and clangx.evaluate(c) is not None:
+                return str(clangx.evaluate(c))  # A constant converted to unsigned, as C computes it: uint32_t(-1).
             # An explicit cast states the type a value is used as: static_cast<T *>(BLI_memarena_alloc(...)) allocates T.
             return self.expr(inner, want if k == K.UNEXPOSED_EXPR else c.type)
         if k in NULLS:
@@ -801,8 +782,6 @@ class FunctionPort:
         if k == K.MEMBER_REF_EXPR:
             return self.member(c)
         if k == K.ARRAY_SUBSCRIPT_EXPR:
-            if is_record_pointer(ch[0].type):
-                return self.element(ch[0], self.expr(ch[1]))
             return f'{self.expr(ch[0])}[{self.expr(ch[1])}]'
         if k == K.CALL_EXPR:
             return self.call(c, want)
@@ -877,22 +856,8 @@ class FunctionPort:
         if op == '*':
             return self.expr(operand, want)
         a = self.expr(operand)
-        if op in ('++', '--') and canon(operand.type).kind in UNSIGNED:
-            # C's unsigned integers wrap around.
-            step = f'{a} = {unsigned(operand.type, f"{a} {op[0]} 1")}'
-            if not postfix:
-                return f'({step})'
-            t = f'_r{self.temps}'
-            self.temps += 1
-            return f'(({t} = {a}), ({step}), {t})'
         if op in ('++', '--') and is_record_pointer(operand.type):
-            # Stepping a struct pointer: the neighbouring element of its array; a step's value is the pointer after it.
-            step = f'{a} = {self.element(operand, "1" if op == "++" else "-1")}'
-            if not postfix:
-                return f'({step})'
-            t = f'_r{self.temps}'
-            self.temps += 1
-            return f'(({t} = {a}), ({step}), {t})'
+            return fix(MEMORY, self.p.text(c))
         return f'{a}{op}' if postfix else f'{op}({a})'
 
     def note_ref(self, ref, name):
@@ -956,12 +921,8 @@ class FunctionPort:
             return f'({self.cond(lhs)} {op} {self.cond(rhs)})'
         if op == '=':
             return self.assign(lhs, self.expr(rhs, lhs.type))
-        if is_record_pointer(lhs.type) and is_record_pointer(rhs.type) and op in ('<', '>', '<=', '>='):
-            return f'({self.expr(lhs)}.$i {op} {self.expr(rhs)}.$i)'
-        if is_record_pointer(lhs.type) and is_record_pointer(rhs.type) and op == '-':
-            return f'({self.expr(lhs)}.$i - {self.expr(rhs)}.$i)'
-        if op in ('+=', '-=') and is_record_pointer(lhs.type):
-            return f'{self.expr(lhs)} = {self.element(lhs, self.expr(rhs) if op == "+=" else f"-({self.expr(rhs)})")}'
+        if is_record_pointer(lhs.type) and (op in ('+=', '-=') or (is_record_pointer(rhs.type) and op in ('<', '>', '<=', '>=', '-'))):
+            return fix(MEMORY, self.p.text(c))
         if self.p.float32 and canon(c.type).kind == T.FLOAT and op in ('+=', '-=', '*=', '/='):
             return self.assign(lhs, f'Math.fround({self.expr(lhs)} {op[0]} {self.expr(rhs)})')
         if op in ('==', '!='):
@@ -971,15 +932,13 @@ class FunctionPort:
                         return f'({self.expr(a)} {"<" if op == "==" else ">="} 0)'
                     return f'({self.expr(a)} {op}= null)'
         if op in ('+', '-') and is_record_pointer(lhs.type):
-            return self.element(lhs, self.expr(rhs) if op == '+' else f'-({self.expr(rhs)})')
+            return fix(MEMORY, self.p.text(c))
         if op == '+' and pointee(lhs.type) is not None and is_float(pointee(lhs.type)):
             off = self.expr(rhs)
             return f'{self.expr(lhs)}.slice({off}, {off} + 3)'
         s = f'({self.expr(lhs)} {OPS.get(op, op)} {self.expr(rhs)})'
         if op == '/' and is_int(lhs.type) and is_int(rhs.type) and is_int(c.type):
             return f'Math.trunc{s}'
-        if op == '-' and canon(c.type).kind in UNSIGNED:
-            return unsigned(c.type, s)
         if self.p.float32 and canon(c.type).kind == T.FLOAT and op in ('+', '-', '*', '/'):
             return f'Math.fround{s}'
         return s
@@ -994,7 +953,7 @@ class FunctionPort:
             # A write through `p + offset` into a float array.
             return f'{self.expr(kids(s)[0])}.splice({self.expr(kids(s)[1])}, {size}, ...{value})'
         if is_struct_value(s.type):
-            # A struct assigned by value: its fields copy, the element keeps its place in its array.
+            # A struct assigned by value: its fields copy.
             target, t = self.expr(lhs), self.temp()
             return f'(({t} = {value}), ' + ', '.join(f'({target}.{f} = {t}.{f})' for f in record_fields(s.type)) + ')'
         if s.kind == K.MEMBER_REF_EXPR and kids(s):
@@ -1126,9 +1085,9 @@ class FunctionPort:
                 return f'new Array({" * ".join(self.expr(f) for f in count)})' if count else '{}'
             if not count:
                 return zero_of(elem) or '{}'
-            return buffer_of(elem, ' * '.join(self.expr(f) for f in count), self.helper)
+            return buffer_of(elem, ' * '.join(self.expr(f) for f in count))
         if name == 'bl_port_alloca':
-            return buffer_of(pointee(args[0].type), self.expr(args[1]), self.helper)
+            return buffer_of(pointee(args[0].type), self.expr(args[1]))
         if name == 'memset':
             dst, byte = args[0], clangx.evaluate(args[1])
             elem = pointee(strip_parens_casts(dst).type)
@@ -1239,6 +1198,11 @@ class FunctionPort:
             setlike = base is not None and canon(base.type).get_declaration().spelling == 'Set'
             return f'{b}.{"add" if setlike else "set"}({", ".join(a)})'
         return f'{b}.{METHODS.get(name, name)}({", ".join(a)})'
+
+
+# Pointer arithmetic on structs: the port does not emulate C memory, so a function needing it is a port-override shim
+# or, when self-contained, part of a WebAssembly unit.
+MEMORY = 'pointer arithmetic on structs (needs a port-override shim)'
 
 
 def fix(what, source):

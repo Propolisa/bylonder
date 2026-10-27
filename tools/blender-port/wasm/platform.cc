@@ -1,11 +1,9 @@
-/* What Blender's code needs from the platform in a single-threaded WebAssembly build: allocation without the
- * exception runtime, and guardedalloc's thread-based bookkeeping as no-ops. */
+/* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime. */
 #include <cstddef>
 #include <cstdlib>
 #include <new>
 
-#include "MEM_guardedalloc.h"
-#include "mallocn_intern.hh"
+#include "BLI_task.hh"
 
 void *operator new(std::size_t n)
 {
@@ -39,9 +37,16 @@ void operator delete[](void *p, std::size_t, std::align_val_t) noexcept { std::f
 extern "C" void *__cxa_allocate_exception(std::size_t) { std::abort(); }
 extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { std::abort(); }
 
-/* port-override: guardedalloc's leak detector and memory statistics use std::mutex, which WASI lacks. */
-bool leak_detector_has_run = false;
-char free_after_leak_detection_message[] = "";
-void memory_usage_block_alloc(size_t) {}
-void memory_usage_block_free(size_t) {}
-size_t memory_usage_current() { return 0; }
+/* thread_local destructors: a reactor module never exits its one thread. */
+extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0; }
+
+/* port-override: WASI has no threads, so parallel_for runs its range in one call, as Blender does without TBB. */
+namespace blender::threading::detail {
+void parallel_for_impl(const IndexRange range,
+                       const int64_t /*grain_size*/,
+                       const FunctionRef<void(IndexRange)> function,
+                       const TaskSizeHints & /*size_hints*/)
+{
+  function(range);
+}
+}  // namespace blender::threading::detail

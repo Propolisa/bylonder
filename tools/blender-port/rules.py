@@ -55,7 +55,6 @@ METHODS = {'append': 'push', 'remove_last': 'pop', 'lookup': 'get', 'contains': 
 
 # The JS module of each helper the rules above emit.
 HELPER_MODULES = {
-    'port/c.js': {'structs', 'element_at'},
     'blenlib/math-geom.js': {'add_v3', 'sub_v3', 'mul_v3_fl', 'madd', 'cross_v3', 'dot_v3', 'len_v3', 'len_squared_v3', 'interp_v3', 'mid_v3',
                              'negate_v3', 'normalize_v3', 'saacos', 'project_v3_v3v3', 'project_plane_normalized_v3_v3v3'},
     'blenlib/math-matrix.js': {'unit_m4', 'unit_m3', 'mul_m4_v3', 'mul_m4_v4', 'mul_m3_v3', 'invert_m4_m4', 'mul_m4_m4m4', 'mul_m3_m3m3'},

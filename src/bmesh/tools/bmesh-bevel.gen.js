@@ -133,7 +133,6 @@ import {
 } from '../intern/bmesh-query.js';
 import { CD_PROP_FLOAT2, CD_PROP_INT16_2D, CD_PROP_INT32 } from '../../makesdna/customdata-types.js';
 import { MOD_WEIGHTEDNORMALS_FACEWEIGHT_CDLAYER_ID } from '../../makesdna/modifier-types.js';
-import { structs } from '../../port/c.js';
 
 const BEVEL_EPSILON_D = Math.fround(1e-6);
 const BEVEL_EPSILON = 9.999999974752427e-7;
@@ -217,7 +216,7 @@ function add_new_bound_vert(mem_arena, vm, co) {
   const ans = {
     next: null,
     prev: null,
-    nv: { v: -1, co: [0, 0, 0], _pad: [0, 0, 0, 0], $a: null, $i: 0 },
+    nv: { v: -1, co: [0, 0, 0], _pad: [0, 0, 0, 0] },
     efirst: null,
     elast: null,
     eon: null,
@@ -237,8 +236,6 @@ function add_new_bound_vert(mem_arena, vm, co) {
       prof_co: null,
       prof_co_2: null,
       special_params: false,
-      $a: null,
-      $i: 0,
     },
     any_seam: false,
     visited: false,
@@ -248,8 +245,6 @@ function add_new_bound_vert(mem_arena, vm, co) {
     _pad: [0, 0, 0],
     seam_len: 0,
     sharp_len: 0,
-    $a: null,
-    $i: 0,
   };
   ans.nv.co = [...co];
   if (!vm.boundstart) {
@@ -283,7 +278,7 @@ function adjust_bound_vert(bv, co) {
 function mesh_vert(vm, i, j, k) {
   const nj = Math.trunc(vm.seg / 2) + 1;
   const nk = vm.seg + 1;
-  return vm.mesh.$a[vm.mesh.$i + (i * nk * nj + j * nk + k)];
+  return vm.mesh[i * nk * nj + j * nk + k];
 }
 
 function create_mesh_bmvert(bm, vm, i, j, k, eg) {
@@ -302,8 +297,8 @@ function copy_mesh_vert(vm, ito, jto, kto, ifrom, jfrom, kfrom) {
 
 function find_edge_half(bv, bme) {
   for (let i = 0; i < bv.edgecount; i++) {
-    if (bv.edges.$a[bv.edges.$i + i].e === bme) {
-      return bv.edges.$a[bv.edges.$i + i];
+    if (bv.edges[i].e === bme) {
+      return bv.edges[i];
     }
   }
   return null;
@@ -332,7 +327,7 @@ function find_other_end_edge_half(bp, e) {
 
 function next_bev(bv, from_e) {
   if (from_e === null) {
-    from_e = bv.edges.$a[bv.edges.$i + (bv.edgecount - 1)];
+    from_e = bv.edges[bv.edgecount - 1];
   }
   let e = from_e;
   do {
@@ -370,7 +365,7 @@ function register_uv_face(bp, fnew, frep, frep_arr) {
   if (fnew < 0) {
     return null;
   }
-  const uv_face = { f: -1, attached_frep: -1, $a: null, $i: 0 };
+  const uv_face = { f: -1, attached_frep: -1 };
   uv_face.f = fnew;
   uv_face.attached_frep = -1;
   if (frep_arr && frep_arr[0] >= 0) {
@@ -684,10 +679,10 @@ function math_layer_info_init(bp, bm) {
   BM_mesh_elem_index_ensure(bm, BM_FACE);
   BM_mesh_elem_table_ensure(bm, BM_FACE);
   const totface = bm.totface;
-  const face_component = new Int32Array(totface & 18446744073709551615);
+  const face_component = new Int32Array(totface);
   bp.math_layer_info.face_component = face_component;
-  const stack = MEM_new_array_uninitialized(totface & 18446744073709551615, 'math_layer_info_init');
-  const in_stack = MEM_new_array_uninitialized(totface & 18446744073709551615, 'math_layer_info_init');
+  const stack = MEM_new_array_uninitialized(totface, 'math_layer_info_init');
+  const in_stack = MEM_new_array_uninitialized(totface, 'math_layer_info_init');
   for (f = 0; f < totface; f++) {
     face_component[f] = -1;
     in_stack[f] = false;
@@ -950,8 +945,6 @@ function offset_meet_lines_percent_or_absolute(bp, e1, e2, v) {
     is_seam: false,
     visited_rpo: false,
     _pad: [0, 0, 0, 0],
-    $a: null,
-    $i: 0,
   };
   const e3 = {
     next: null,
@@ -972,8 +965,6 @@ function offset_meet_lines_percent_or_absolute(bp, e1, e2, v) {
     is_seam: false,
     visited_rpo: false,
     _pad: [0, 0, 0, 0],
-    $a: null,
-    $i: 0,
   };
   const e4 = {
     next: null,
@@ -994,8 +985,6 @@ function offset_meet_lines_percent_or_absolute(bp, e1, e2, v) {
     is_seam: false,
     visited_rpo: false,
     _pad: [0, 0, 0, 0],
-    $a: null,
-    $i: 0,
   };
   const e5 = {
     next: null,
@@ -1016,8 +1005,6 @@ function offset_meet_lines_percent_or_absolute(bp, e1, e2, v) {
     is_seam: false,
     visited_rpo: false,
     _pad: [0, 0, 0, 0],
-    $a: null,
-    $i: 0,
   };
   let d0 = 0;
   let d3 = 0;
@@ -1625,9 +1612,9 @@ function calculate_profile(bp, bndv, reversed, miter) {
   }
   const need_2 = bp.seg !== bp.pro_spacing.seg_2;
   if (pro.prof_co === null) {
-    pro.prof_co = new Float32Array((bp.seg + 1) & 18446744073709551615);
+    pro.prof_co = new Float32Array(bp.seg + 1);
     if (need_2) {
-      pro.prof_co_2 = new Float32Array((bp.pro_spacing.seg_2 + 1) & 18446744073709551615);
+      pro.prof_co_2 = new Float32Array(bp.pro_spacing.seg_2 + 1);
     } else {
       pro.prof_co_2 = pro.prof_co;
     }
@@ -1741,8 +1728,8 @@ export function HASNOT_SEAMSHARP(bm, eh, flag) {
 }
 
 function check_edge_data_seam_sharp_edges(bm, bv, flag) {
-  let e = bv.edges;
-  let efirst = bv.edges;
+  let e = bv.edges[0];
+  let efirst = bv.edges[0];
   while (HASNOT_SEAMSHARP(bm, e, flag)) {
     e = e.next;
     if (e === efirst) {
@@ -1994,12 +1981,12 @@ function set_bound_vert_seams(bm, bv, mark_seam, mark_sharp) {
   do {
     v.any_seam = false;
     for (let e = v.efirst; e; e = e.next) {
-      v.any_seam |= e.is_seam;
+      v.any_seam |= Number(e.is_seam);
       if (e === v.elast) {
         break;
       }
     }
-    bv.any_seam |= v.any_seam;
+    bv.any_seam |= Number(v.any_seam);
   } while ((v = v.next) !== bv.vmesh.boundstart);
   if (mark_seam) {
     check_edge_data_seam_sharp_edges(bm, bv, BM_ELEM_SEAM);
@@ -2041,7 +2028,7 @@ function calculate_vm_profiles(bp, bv, vm) {
 function build_boundary_vertex_only(bp, bv, construct) {
   const { bm } = bp;
   const vm = bv.vmesh;
-  const efirst = bv.edges;
+  const efirst = bv.edges[0];
   let e = efirst;
   do {
     const co = slide_dist(bm, e, bv.v, e.offset_l);
@@ -2507,9 +2494,9 @@ function regularize_profile_orientation(bp, bme) {
     edgehalf = (([_r0, bv] = next_edgehalf_bev(bp, edgehalf, toward_bv)), _r0);
     while (edgehalf && !edgehalf.visited_rpo) {
       if (i === 0) {
-        edgehalf.leftv.is_profile_start = toward_bv ^ right_highest;
+        edgehalf.leftv.is_profile_start = Number(toward_bv) ^ Number(right_highest);
       } else {
-        edgehalf.leftv.is_profile_start = !toward_bv ^ right_highest;
+        edgehalf.leftv.is_profile_start = Number(!toward_bv) ^ Number(right_highest);
       }
       toward_bv = !toward_bv;
       edgehalf.visited_rpo = true;
@@ -2662,7 +2649,6 @@ function adjust_offsets(bp, bm) {
 }
 
 function pipe_test(bm, bv) {
-  let _r0;
   const vm = bv.vmesh;
   if (vm.count < 3 || vm.count > 4 || bv.selcount < 3 || bv.selcount > 4) {
     return null;
@@ -2688,7 +2674,11 @@ function pipe_test(bm, bv) {
   if (!epipe) {
     return null;
   }
-  for (let e = bv.edges; e !== bv.edges.$a[bv.edges.$i + bv.edgecount]; _r0 = e, e = e.$a[e.$i + 1], _r0) {
+  for (
+    let e = bv.edges[0];
+    e !== bv.edges[bv.edgecount];
+    undefined /*FIX pointer arithmetic on structs (needs a port-override shim): e++*/
+  ) {
     if (e.fnext >= 0) {
       if (Math.fround(Math.abs(dot_v3(dir1, fno(bm, e.fnext)))) > BEVEL_EPSILON_BIG) {
         return null;
@@ -2699,16 +2689,15 @@ function pipe_test(bm, bv) {
 }
 
 function new_adj_vmesh(mem_arena, count, seg, bounds) {
-  const vm = { mesh: null, boundstart: null, count: 0, seg: 0, mesh_kind: 0, _pad: 0, $a: null, $i: 0 };
+  const vm = { mesh: null, boundstart: null, count: 0, seg: 0, mesh_kind: 0, _pad: 0 };
   vm.count = count;
   vm.seg = seg;
   vm.boundstart = bounds;
-  vm.mesh = structs(
-    (count & 18446744073709551615) *
-      ((1 + Math.trunc(seg / 2)) & 18446744073709551615) *
-      ((1 + seg) & 18446744073709551615),
-    () => ({ v: -1, co: [0, 0, 0], _pad: [0, 0, 0, 0], $a: null, $i: 0 }),
-  );
+  vm.mesh = Array.from({ length: count * (1 + Math.trunc(seg / 2)) * (1 + seg) }, () => ({
+    v: -1,
+    co: [0, 0, 0],
+    _pad: [0, 0, 0, 0],
+  }));
   vm.mesh_kind = M_ADJ;
   return vm;
 }
@@ -2915,8 +2904,8 @@ function interp_vmesh(bp, vm_in, nseg) {
       }
     }
     bndv = bndv.next;
-    prev_frac.set(frac.subarray(0, (ns_in + 1) & 18446744073709551615));
-    prev_new_frac.set(new_frac.subarray(0, (nseg + 1) & 18446744073709551615));
+    prev_frac.set(frac.subarray(0, ns_in + 1));
+    prev_new_frac.set(new_frac.subarray(0, nseg + 1));
   }
   if (!odd) {
     const center = vmesh_center(vm_in);
@@ -3198,10 +3187,10 @@ function tri_corner_test(bp, bv) {
   if (bv.vmesh.count !== 3) {
     return 0;
   }
-  const offset = bv.edges.offset_l;
+  const offset = bv.edges[0].offset_l;
   let totang = 0.0;
   for (let i = 0; i < bv.edgecount; i++) {
-    const e = bv.edges.$a[bv.edges.$i + i];
+    const e = bv.edges[i];
     const ang = BM_edge_calc_face_angle_signed_ex(bm, e.e, 0.0);
     const absang = Math.fround(Math.abs(ang));
     if (absang <= Math.PI / 4) {
@@ -3448,7 +3437,7 @@ function projected_boundary_area(bm, bv, f) {
     }
     ++i;
   } while ((v = v.next) !== vm.boundstart);
-  const area = area_poly_v2(proj_co, vm.count >>> 0);
+  const area = area_poly_v2(proj_co, vm.count);
   return area;
 }
 
@@ -3464,11 +3453,11 @@ function frep_for_center_poly(bp, bv) {
   const consider_all_faces = bv.selcount === 1 || bp.affect_vertices_odd;
   const fchoices = new Array(bv.edgecount).fill(-1);
   for (let i = 0; i < bv.edgecount; i++) {
-    if (!bv.edges.$a[bv.edges.$i + i].is_bev && !consider_all_faces) {
+    if (!bv.edges[i].is_bev && !consider_all_faces) {
       continue;
     }
-    const bmf1 = bv.edges.$a[bv.edges.$i + i].fprev;
-    const bmf2 = bv.edges.$a[bv.edges.$i + i].fnext;
+    const bmf1 = bv.edges[i].fprev;
+    const bmf2 = bv.edges[i].fnext;
     const ftwo = [bmf1, bmf2];
     const bmf = choose_rep_face(bp, ftwo, 2);
     if (bmf >= 0) {
@@ -3583,8 +3572,8 @@ function square_out_adj_vmesh(bp, bv) {
   let ns2inv = Math.fround(1.0 / ns2);
   const vm = new_adj_vmesh(bp.mem_arena, n_bndv, ns, bv.vmesh.boundstart);
   const clstride = 3 * (ns2 + 1);
-  const centerline = MEM_new_array_uninitialized((clstride * n_bndv) & 18446744073709551615, 'bevel');
-  const cset = MEM_new_array_zeroed(n_bndv & 18446744073709551615, 'bevel');
+  const centerline = MEM_new_array_uninitialized(clstride * n_bndv, 'bevel');
+  const cset = MEM_new_array_zeroed(n_bndv, 'bevel');
   let bndv = vm.boundstart;
   for (let i = 0; i < n_bndv; i++) {
     const bndco = [...bndv.nv.co];
@@ -4047,12 +4036,15 @@ function bevel_build_cutoff(bp, bm, bv) {
   } while ((bndv = bndv.next) !== bv.vmesh.boundstart);
   let build_center_face = true;
   if (n_bndv === 3) {
-    build_center_face &=
-      len_squared_v3(sub_v3(mesh_vert(bv.vmesh, 0, 1, 0).co, mesh_vert(bv.vmesh, 1, 1, 0).co)) > BEVEL_EPSILON;
-    build_center_face &=
-      len_squared_v3(sub_v3(mesh_vert(bv.vmesh, 0, 1, 0).co, mesh_vert(bv.vmesh, 2, 1, 0).co)) > BEVEL_EPSILON;
-    build_center_face &=
-      len_squared_v3(sub_v3(mesh_vert(bv.vmesh, 1, 1, 0).co, mesh_vert(bv.vmesh, 2, 1, 0).co)) > BEVEL_EPSILON;
+    build_center_face &= Number(
+      len_squared_v3(sub_v3(mesh_vert(bv.vmesh, 0, 1, 0).co, mesh_vert(bv.vmesh, 1, 1, 0).co)) > BEVEL_EPSILON,
+    );
+    build_center_face &= Number(
+      len_squared_v3(sub_v3(mesh_vert(bv.vmesh, 0, 1, 0).co, mesh_vert(bv.vmesh, 2, 1, 0).co)) > BEVEL_EPSILON,
+    );
+    build_center_face &= Number(
+      len_squared_v3(sub_v3(mesh_vert(bv.vmesh, 1, 1, 0).co, mesh_vert(bv.vmesh, 2, 1, 0).co)) > BEVEL_EPSILON,
+    );
   }
   if (build_center_face) {
     do {
@@ -4066,7 +4058,7 @@ function bevel_build_cutoff(bp, bm, bv) {
       mesh_vert(bv.vmesh, i, 1, 0).v = mesh_vert(bv.vmesh, 0, 1, 0).v;
     }
   }
-  const face_bmverts = new Array(Math.max(bp.seg + 2 + build_center_face, n_bndv) & 18446744073709551615).fill(-1);
+  const face_bmverts = new Array(Math.max(bp.seg + 2 + Number(build_center_face), n_bndv)).fill(-1);
   bndv = bv.vmesh.boundstart;
   do {
     const i = bndv.index;
@@ -4077,7 +4069,19 @@ function bevel_build_cutoff(bp, bm, bv) {
     if (build_center_face) {
       face_bmverts[bp.seg + 2] = mesh_vert(bv.vmesh, i, 1, 1).v;
     }
-    bev_create_ngon(bp, bm, face_bmverts, bp.seg + 2 + build_center_face, null, -1, null, bv.v, null, bp.mat_nr, true);
+    bev_create_ngon(
+      bp,
+      bm,
+      face_bmverts,
+      bp.seg + 2 + Number(build_center_face),
+      null,
+      -1,
+      null,
+      bv.v,
+      null,
+      bp.mat_nr,
+      true,
+    );
   } while ((bndv = bndv.next) !== bv.vmesh.boundstart);
   if (build_center_face) {
     for (let i = 0; i < n_bndv; i++) {
@@ -4203,11 +4207,11 @@ function bevel_vert_two_edges(bp, bm, bv) {
     }
     mesh_vert(vm, 0, 0, ns).co = [...vco(bm, v2)];
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(vm, 1, 0, ns - k, 0, 0, k);
+      copy_mesh_vert(bm, vm, 1, 0, ns - k, 0, 0, k);
     }
   }
-  if (BM_vert_face_check(bm, bv.v) === false) {
-    const e_eg = bv.edges.e;
+  if (Number(BM_vert_face_check(bm, bv.v)) === Number(false)) {
+    const e_eg = bv.edges[0].e;
     for (let k = 0; k < ns; k++) {
       v1 = mesh_vert(vm, 0, 0, k).v;
       v2 = mesh_vert(vm, 0, 0, k + 1).v;
@@ -4225,10 +4229,7 @@ function build_vmesh(bp, bm, bv) {
   const n = vm.count;
   const ns = vm.seg;
   const ns2 = Math.trunc(ns / 2);
-  vm.mesh = structs(
-    (n & 18446744073709551615) * ((ns2 + 1) & 18446744073709551615) * ((ns + 1) & 18446744073709551615),
-    () => ({ v: -1, co: [0, 0, 0], _pad: [0, 0, 0, 0], $a: null, $i: 0 }),
-  );
+  vm.mesh = Array.from({ length: n * (ns2 + 1) * (ns + 1) }, () => ({ v: -1, co: [0, 0, 0], _pad: [0, 0, 0, 0] }));
   const weld = bv.selcount === 2 && vm.count === 2;
   let weld1 = null;
   let weld2 = null;
@@ -4253,7 +4254,7 @@ function build_vmesh(bp, bm, bv) {
   bndv = vm.boundstart;
   do {
     const i = bndv.index;
-    copy_mesh_vert(vm, i, 0, ns, bndv.next.index, 0, 0);
+    copy_mesh_vert(bm, vm, i, 0, ns, bndv.next.index, 0, 0);
     if (vm.mesh_kind !== M_ADJ) {
       for (let k = 1; k < ns; k++) {
         if (bndv.ebev) {
@@ -4263,7 +4264,7 @@ function build_vmesh(bp, bm, bv) {
             create_mesh_bmvert(bm, vm, i, 0, k, bv.v);
           }
         } else if (n === 2 && !bndv.ebev) {
-          copy_mesh_vert(bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
+          copy_mesh_vert(bm, bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
         }
       }
     }
@@ -4288,7 +4289,7 @@ function build_vmesh(bp, bm, bv) {
       create_mesh_bmvert(bm, bv.vmesh, weld1.index, 0, k, bv.v);
     }
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
+      copy_mesh_vert(bm, bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
     }
   }
   let vpipe = null;
@@ -4340,7 +4341,7 @@ export function BM_BEVEL_EDGE_TAG_TEST(bm, bme) {
 function bevel_edge_order_extend(bm, bv, i) {
   const sucs = [];
   const save_path = [];
-  const bme = bv.edges.$a[bv.edges.$i + i].e;
+  const bme = bv.edges[i].e;
   let l = -1;
   for (l of BM_LOOPS_OF_EDGE(bm, bme)) {
     const bme2 = bm.l.v[l] === bv.v ? bm.l.e[bm.l.prev[l]] : bm.l.e[bm.l.next[l]];
@@ -4353,28 +4354,25 @@ function bevel_edge_order_extend(bm, bv, i) {
   const j = i;
   for (let sucindex = 0; sucindex < nsucs; sucindex++) {
     const nextbme = sucs[sucindex];
-    bv.edges.$a[bv.edges.$i + (j + 1)].e = nextbme;
+    bv.edges[j + 1].e = nextbme;
     BM_BEVEL_EDGE_TAG_ENABLE(bm, nextbme);
     const tryj = bevel_edge_order_extend(bm, bv, j + 1);
-    if (
-      tryj > bestj ||
-      (tryj === bestj && edges_face_connected_at_vert(bm, bv.edges.$a[bv.edges.$i + tryj].e, bv.edges.e))
-    ) {
+    if (tryj > bestj || (tryj === bestj && edges_face_connected_at_vert(bm, bv.edges[tryj].e, bv.edges[0].e))) {
       bestj = tryj;
       save_path.length = 0;
       for (let k = j + 1; k <= bestj; k++) {
-        save_path.push(bv.edges.$a[bv.edges.$i + k].e);
+        save_path.push(bv.edges[k].e);
       }
     }
     for (let k = j + 1; k <= tryj; k++) {
-      BM_BEVEL_EDGE_TAG_DISABLE(bm, bv.edges.$a[bv.edges.$i + k].e);
-      bv.edges.$a[bv.edges.$i + k].e = -1;
+      BM_BEVEL_EDGE_TAG_DISABLE(bm, bv.edges[k].e);
+      bv.edges[k].e = -1;
     }
   }
   if (bestj > j) {
     for (let k = j + 1; k <= bestj; k++) {
-      bv.edges.$a[bv.edges.$i + k].e = save_path[k - (j + 1)];
-      BM_BEVEL_EDGE_TAG_ENABLE(bm, bv.edges.$a[bv.edges.$i + k].e);
+      bv.edges[k].e = save_path[k - (j + 1)];
+      BM_BEVEL_EDGE_TAG_ENABLE(bm, bv.edges[k].e);
     }
   }
   return bestj;
@@ -4382,7 +4380,7 @@ function bevel_edge_order_extend(bm, bv, i) {
 
 function fast_bevel_edge_order(bm, bv) {
   const ntot = bv.edgecount;
-  let e = bv.edges;
+  let e = bv.edges[0];
   let bme = e.e;
   if (bm.e.l[bme] < 0) {
     return false;
@@ -4409,13 +4407,13 @@ function fast_bevel_edge_order(bm, bv) {
       }
     }
     if (num_shared_face === 1 || (i === 1 && num_shared_face === 2)) {
-      e = bv.edges.$a[bv.edges.$i + i];
+      e = bv.edges[i];
       e.e = bme = first_suc;
       BM_BEVEL_EDGE_TAG_ENABLE(bm, bme);
     } else {
       for (let k = 1; k < i; k++) {
-        BM_BEVEL_EDGE_TAG_DISABLE(bm, bv.edges.$a[bv.edges.$i + k].e);
-        bv.edges.$a[bv.edges.$i + k].e = -1;
+        BM_BEVEL_EDGE_TAG_DISABLE(bm, bv.edges[k].e);
+        bv.edges[k].e = -1;
       }
       return false;
     }
@@ -4426,7 +4424,7 @@ function fast_bevel_edge_order(bm, bv) {
 function find_bevel_edge_order(bm, bv, first_bme) {
   const ntot = bv.edgecount;
   for (let i = 0; ; ) {
-    bv.edges.$a[bv.edges.$i + i].e = first_bme;
+    bv.edges[i].e = first_bme;
     BM_BEVEL_EDGE_TAG_ENABLE(bm, first_bme);
     if (i === 0 && fast_bevel_edge_order(bm, bv)) {
       break;
@@ -4452,8 +4450,8 @@ function find_bevel_edge_order(bm, bv, first_bme) {
     }
   }
   for (let i = 0; i < ntot; i++) {
-    const e = bv.edges.$a[bv.edges.$i + i];
-    const e2 = i === bv.edgecount - 1 ? bv.edges : bv.edges.$a[bv.edges.$i + (i + 1)];
+    const e = bv.edges[i];
+    const e2 = i === bv.edgecount - 1 ? bv.edges[0] : bv.edges[i + 1];
     const bme = e.e;
     const bme2 = e2.e;
     if (e.fnext >= 0 || e2.fprev >= 0) {
@@ -4476,7 +4474,6 @@ function find_bevel_edge_order(bm, bv, first_bme) {
 }
 
 function bevel_vert_construct(bm, bp, v) {
-  let _r0, _r1;
   let nsel = 0;
   let tot_edges = 0;
   let tot_wire = 0;
@@ -4526,15 +4523,13 @@ function bevel_vert_construct(bm, bp, v) {
     edges: null,
     wire_edges: null,
     vmesh: null,
-    $a: null,
-    $i: 0,
   };
   bv.v = v;
   bv.edgecount = tot_edges;
   bv.selcount = nsel;
   bv.wirecount = tot_wire;
   bv.offset = bp.offset;
-  bv.edges = structs(tot_edges & 18446744073709551615, () => ({
+  bv.edges = Array.from({ length: tot_edges }, () => ({
     next: null,
     prev: null,
     e: -1,
@@ -4553,20 +4548,18 @@ function bevel_vert_construct(bm, bp, v) {
     is_seam: false,
     visited_rpo: false,
     _pad: [0, 0, 0, 0],
-    $a: null,
-    $i: 0,
   }));
   if (tot_wire) {
-    bv.wire_edges = new Array(tot_wire & 18446744073709551615).fill(-1);
+    bv.wire_edges = new Array(tot_wire).fill(-1);
   } else {
     bv.wire_edges = null;
   }
-  bv.vmesh = { mesh: null, boundstart: null, count: 0, seg: 0, mesh_kind: 0, _pad: 0, $a: null, $i: 0 };
+  bv.vmesh = { mesh: null, boundstart: null, count: 0, seg: 0, mesh_kind: 0, _pad: 0 };
   bv.vmesh.seg = bp.seg;
   bp.vert_hash.set(v, bv);
   find_bevel_edge_order(bm, bv, first_bme);
   for (let i = 0; i < tot_edges; i++) {
-    const e = bv.edges.$a[bv.edges.$i + i];
+    const e = bv.edges[i];
     bme = e.e;
     if (BM_elem_flag_test(bm.e, bme, BM_ELEM_TAG) && bp.affect_type !== BEVEL_AFFECT_VERTICES) {
       e.is_bev = true;
@@ -4585,34 +4578,67 @@ function bevel_vert_construct(bm, bp, v) {
   if (tot_edges > 1) {
     let ccw_test_sum = 0;
     for (let i = 0; i < tot_edges; i++) {
-      ccw_test_sum += bev_ccw_test(
-        bm,
-        bv.edges.$a[bv.edges.$i + i].e,
-        bv.edges.$a[bv.edges.$i + ((i + 1) % tot_edges)].e,
-        bv.edges.$a[bv.edges.$i + i].fnext,
-      );
+      ccw_test_sum += bev_ccw_test(bm, bv.edges[i].e, bv.edges[(i + 1) % tot_edges].e, bv.edges[i].fnext);
     }
     if (ccw_test_sum < 0) {
       for (let i = 0; i <= Math.trunc(tot_edges / 2) - 1; i++) {
-        [bv.edges.$a[bv.edges.$i + i], bv.edges.$a[bv.edges.$i + (tot_edges - i - 1)]] = [
-          bv.edges.$a[bv.edges.$i + (tot_edges - i - 1)],
-          bv.edges.$a[bv.edges.$i + i],
+        [bv.edges[i].next, bv.edges[tot_edges - i - 1].next] = [bv.edges[tot_edges - i - 1].next, bv.edges[i].next];
+        [bv.edges[i].prev, bv.edges[tot_edges - i - 1].prev] = [bv.edges[tot_edges - i - 1].prev, bv.edges[i].prev];
+        [bv.edges[i].e, bv.edges[tot_edges - i - 1].e] = [bv.edges[tot_edges - i - 1].e, bv.edges[i].e];
+        [bv.edges[i].fprev, bv.edges[tot_edges - i - 1].fprev] = [bv.edges[tot_edges - i - 1].fprev, bv.edges[i].fprev];
+        [bv.edges[i].fnext, bv.edges[tot_edges - i - 1].fnext] = [bv.edges[tot_edges - i - 1].fnext, bv.edges[i].fnext];
+        [bv.edges[i].leftv, bv.edges[tot_edges - i - 1].leftv] = [bv.edges[tot_edges - i - 1].leftv, bv.edges[i].leftv];
+        [bv.edges[i].rightv, bv.edges[tot_edges - i - 1].rightv] = [
+          bv.edges[tot_edges - i - 1].rightv,
+          bv.edges[i].rightv,
         ];
-        [bv.edges.$a[bv.edges.$i + i].fprev, bv.edges.$a[bv.edges.$i + i].fnext] = [
-          bv.edges.$a[bv.edges.$i + i].fnext,
-          bv.edges.$a[bv.edges.$i + i].fprev,
+        [bv.edges[i].profile_index, bv.edges[tot_edges - i - 1].profile_index] = [
+          bv.edges[tot_edges - i - 1].profile_index,
+          bv.edges[i].profile_index,
         ];
-        [bv.edges.$a[bv.edges.$i + (tot_edges - i - 1)].fprev, bv.edges.$a[bv.edges.$i + (tot_edges - i - 1)].fnext] = [
-          bv.edges.$a[bv.edges.$i + (tot_edges - i - 1)].fnext,
-          bv.edges.$a[bv.edges.$i + (tot_edges - i - 1)].fprev,
+        [bv.edges[i].seg, bv.edges[tot_edges - i - 1].seg] = [bv.edges[tot_edges - i - 1].seg, bv.edges[i].seg];
+        [bv.edges[i].offset_l, bv.edges[tot_edges - i - 1].offset_l] = [
+          bv.edges[tot_edges - i - 1].offset_l,
+          bv.edges[i].offset_l,
+        ];
+        [bv.edges[i].offset_r, bv.edges[tot_edges - i - 1].offset_r] = [
+          bv.edges[tot_edges - i - 1].offset_r,
+          bv.edges[i].offset_r,
+        ];
+        [bv.edges[i].offset_l_spec, bv.edges[tot_edges - i - 1].offset_l_spec] = [
+          bv.edges[tot_edges - i - 1].offset_l_spec,
+          bv.edges[i].offset_l_spec,
+        ];
+        [bv.edges[i].offset_r_spec, bv.edges[tot_edges - i - 1].offset_r_spec] = [
+          bv.edges[tot_edges - i - 1].offset_r_spec,
+          bv.edges[i].offset_r_spec,
+        ];
+        [bv.edges[i].is_bev, bv.edges[tot_edges - i - 1].is_bev] = [
+          bv.edges[tot_edges - i - 1].is_bev,
+          bv.edges[i].is_bev,
+        ];
+        [bv.edges[i].is_rev, bv.edges[tot_edges - i - 1].is_rev] = [
+          bv.edges[tot_edges - i - 1].is_rev,
+          bv.edges[i].is_rev,
+        ];
+        [bv.edges[i].is_seam, bv.edges[tot_edges - i - 1].is_seam] = [
+          bv.edges[tot_edges - i - 1].is_seam,
+          bv.edges[i].is_seam,
+        ];
+        [bv.edges[i].visited_rpo, bv.edges[tot_edges - i - 1].visited_rpo] = [
+          bv.edges[tot_edges - i - 1].visited_rpo,
+          bv.edges[i].visited_rpo,
+        ];
+        [bv.edges[i]._pad, bv.edges[tot_edges - i - 1]._pad] = [bv.edges[tot_edges - i - 1]._pad, bv.edges[i]._pad];
+        [bv.edges[i].fprev, bv.edges[i].fnext] = [bv.edges[i].fnext, bv.edges[i].fprev];
+        [bv.edges[tot_edges - i - 1].fprev, bv.edges[tot_edges - i - 1].fnext] = [
+          bv.edges[tot_edges - i - 1].fnext,
+          bv.edges[tot_edges - i - 1].fprev,
         ];
       }
       if (tot_edges % 2 === 1) {
         const i = Math.trunc(tot_edges / 2);
-        [bv.edges.$a[bv.edges.$i + i].fprev, bv.edges.$a[bv.edges.$i + i].fnext] = [
-          bv.edges.$a[bv.edges.$i + i].fnext,
-          bv.edges.$a[bv.edges.$i + i].fprev,
-        ];
+        [bv.edges[i].fprev, bv.edges[i].fnext] = [bv.edges[i].fnext, bv.edges[i].fprev];
       }
     }
   }
@@ -4620,7 +4646,10 @@ function bevel_vert_construct(bm, bp, v) {
   let vert_axis = [0, 0, 0];
   if (bp.affect_type === BEVEL_AFFECT_VERTICES) {
     if (bp.dvert !== null && bp.vertex_group !== -1) {
-      weight = BKE_defvert_find_weight(bp.dvert.$a[bp.dvert.$i + bm.v.index[v]], bp.vertex_group);
+      weight = BKE_defvert_find_weight(
+        undefined /*FIX pointer arithmetic on structs (needs a port-override shim): bp->dvert + BM_elem_index_get(v)*/,
+        bp.vertex_group,
+      );
       bv.offset = Math.fround(bv.offset * weight);
     } else if (bp.use_weights) {
       weight = bp.bweight_offset_vert === -1 ? 0.0 : BM_ELEM_CD_GET_FLOAT(v, bp.bweight_offset_vert);
@@ -4628,8 +4657,12 @@ function bevel_vert_construct(bm, bp, v) {
     }
     if (bp.offset_type === BEVEL_AMT_WIDTH || bp.offset_type === BEVEL_AMT_DEPTH) {
       let edge_dir = [0, 0, 0];
-      let e = bv.edges;
-      for (let i = 0; i < tot_edges; i++, ((_r0 = e), (e = e.$a[e.$i + 1]), _r0)) {
+      const e = bv.edges;
+      for (
+        let i = 0;
+        i < tot_edges;
+        i++, undefined /*FIX pointer arithmetic on structs (needs a port-override shim): e++*/
+      ) {
         const v2 = BM_edge_other_vert(bm, e.e, bv.v);
         edge_dir = sub_v3(vco(bm, bv.v), vco(bm, v2));
         edge_dir = normalize_v3(edge_dir);
@@ -4637,10 +4670,14 @@ function bevel_vert_construct(bm, bp, v) {
       }
     }
   }
-  let e = bv.edges;
-  for (let i = 0; i < tot_edges; i++, ((_r1 = e), (e = e.$a[e.$i + 1]), _r1)) {
-    e.next = bv.edges.$a[bv.edges.$i + ((i + 1) % tot_edges)];
-    e.prev = bv.edges.$a[bv.edges.$i + ((i + tot_edges - 1) % tot_edges)];
+  const e = bv.edges;
+  for (
+    let i = 0;
+    i < tot_edges;
+    i++, undefined /*FIX pointer arithmetic on structs (needs a port-override shim): e++*/
+  ) {
+    e.next = bv.edges[(i + 1) % tot_edges];
+    e.prev = bv.edges[(i + tot_edges - 1) % tot_edges];
     if (e.is_bev) {
       switch (bp.offset_type) {
         case BEVEL_AMT_OFFSET: {
@@ -4973,8 +5010,7 @@ function bevvert_is_weld_cross(bv) {
   return (
     bv.edgecount === 4 &&
     bv.selcount === 2 &&
-    ((bv.edges.is_bev && bv.edges.$a[bv.edges.$i + 2].is_bev) ||
-      (bv.edges.$a[bv.edges.$i + 1].is_bev && bv.edges.$a[bv.edges.$i + 3].is_bev))
+    ((bv.edges[0].is_bev && bv.edges[2].is_bev) || (bv.edges[1].is_bev && bv.edges[3].is_bev))
   );
 }
 
@@ -4982,9 +5018,9 @@ function weld_cross_attrs_copy(bm, bv, vm, vmindex, e) {
   let bme_prev = -1;
   let bme_next = -1;
   for (let i = 0; i < 4; i++) {
-    if (bv.edges.$a[bv.edges.$i + i] === e) {
-      bme_prev = bv.edges.$a[bv.edges.$i + ((i + 3) % 4)].e;
-      bme_next = bv.edges.$a[bv.edges.$i + ((i + 1) % 4)].e;
+    if (bv.edges[i] === e) {
+      bme_prev = bv.edges[(i + 3) % 4].e;
+      bme_next = bv.edges[(i + 1) % 4].e;
       break;
     }
   }
@@ -5335,27 +5371,27 @@ function set_profile_spacing(bp, pro_spacing, custom) {
     pro_spacing.xvals_2 = pro_spacing.xvals;
     pro_spacing.yvals_2 = pro_spacing.yvals;
   } else {
-    pro_spacing.xvals_2 = new Float64Array((seg_2 + 1) & 18446744073709551615);
-    pro_spacing.yvals_2 = new Float64Array((seg_2 + 1) & 18446744073709551615);
+    pro_spacing.xvals_2 = new Float64Array(seg_2 + 1);
+    pro_spacing.yvals_2 = new Float64Array(seg_2 + 1);
     if (custom) {
       BKE_curveprofile_init(bp.custom_profile, seg_2);
       for (let i = 0; i < seg_2 + 1; i++) {
-        pro_spacing.xvals_2[i] = bp.custom_profile.segments.$a[bp.custom_profile.segments.$i + i].y;
-        pro_spacing.yvals_2[i] = bp.custom_profile.segments.$a[bp.custom_profile.segments.$i + i].x;
+        pro_spacing.xvals_2[i] = bp.custom_profile.segments[i].y;
+        pro_spacing.yvals_2[i] = bp.custom_profile.segments[i].x;
       }
     } else {
       find_even_superellipse_chords(bm, seg_2, bp.pro_super_r, pro_spacing.xvals_2, pro_spacing.yvals_2);
     }
   }
-  pro_spacing.xvals = new Float64Array((seg + 1) & 18446744073709551615);
-  pro_spacing.yvals = new Float64Array((seg + 1) & 18446744073709551615);
+  pro_spacing.xvals = new Float64Array(seg + 1);
+  pro_spacing.yvals = new Float64Array(seg + 1);
   if (custom) {
     if (bp.custom_profile.segments_len !== seg || !bp.custom_profile.segments) {
       BKE_curveprofile_init(bp.custom_profile, seg);
     }
     for (let i = 0; i < seg + 1; i++) {
-      pro_spacing.xvals[i] = bp.custom_profile.segments.$a[bp.custom_profile.segments.$i + i].y;
-      pro_spacing.yvals[i] = bp.custom_profile.segments.$a[bp.custom_profile.segments.$i + i].x;
+      pro_spacing.xvals[i] = bp.custom_profile.segments[i].y;
+      pro_spacing.yvals[i] = bp.custom_profile.segments[i].x;
     }
   } else {
     find_even_superellipse_chords(bm, seg, bp.pro_super_r, pro_spacing.xvals, pro_spacing.yvals);
@@ -5536,7 +5572,7 @@ function bevel_limit_offset(bp, bm) {
       continue;
     }
     for (let i = 0; i < bv.edgecount; i++) {
-      const eh = bv.edges.$a[bv.edges.$i + i];
+      const eh = bv.edges[i];
       if (bp.affect_type === BEVEL_AFFECT_VERTICES) {
         const collision_offset = vertex_collide_offset(bp, eh);
         limited_offset = Math.fround(Math.min(collision_offset, limited_offset));
@@ -5557,7 +5593,7 @@ function bevel_limit_offset(bp, bm) {
         continue;
       }
       for (let i = 0; i < bv.edgecount; i++) {
-        const eh = bv.edges.$a[bv.edges.$i + i];
+        const eh = bv.edges[i];
         eh.offset_l_spec = Math.fround(eh.offset_l_spec * offset_factor);
         eh.offset_r_spec = Math.fround(eh.offset_r_spec * offset_factor);
         eh.offset_l = Math.fround(eh.offset_l * offset_factor);
@@ -5609,8 +5645,8 @@ export function BM_mesh_bevel(
   bp.pro_super_r = Math.fround(
     -Math.fround(Math.log(Math.fround(2.0))) / Math.fround(Math.log(Math.fround(Math.sqrt(profile)))),
   );
-  bp.affect_type = affect_type;
-  bp.affect_vertices_odd = affect_type === BEVEL_AFFECT_VERTICES && bp.seg % 2 === 1;
+  bp.affect_type = Number(affect_type);
+  bp.affect_vertices_odd = Number(affect_type) === BEVEL_AFFECT_VERTICES && bp.seg % 2 === 1;
   bp.use_weights = use_weights;
   bp.bweight_offset_vert = bweight_offset_vert;
   bp.bweight_offset_edge = bweight_offset_edge;

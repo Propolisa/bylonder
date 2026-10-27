@@ -3,7 +3,7 @@
 import { add_v3, dot_v3, isect_line_line_epsilon_v3, len_squared_v3, madd, mul_v3_fl, sub_v3 } from './math-geom.js';
 
 export function is_power_of_2_i(n) {
-  return (n & (n - 1)) === 0;
+  return Number((n & (n - 1)) === 0);
 }
 
 export function power_of_2_max_i(n) {
@@ -22,7 +22,7 @@ export function safe_divide(a, b) {
 
 export function cross_poly_v2(verts, nr) {
   let a = 0;
-  let co_prev = verts[(nr - 1) >>> 0];
+  let co_prev = verts[nr - 1];
   let co_curr = verts[0];
   let cross = 0.0;
   for (a = 0; a < nr; a++) {
@@ -61,9 +61,9 @@ export function isect_point_poly_v2(pt, verts, nr) {
   let i = 0;
   let j = 0;
   let isect = false;
-  for (i = 0, j = (nr - 1) >>> 0; i < nr; j = i++) {
+  for (i = 0, j = nr - 1; i < nr; j = i++) {
     if (
-      verts[i][1] > pt[1] !== verts[j][1] > pt[1] &&
+      Number(verts[i][1] > pt[1]) !== Number(verts[j][1] > pt[1]) &&
       pt[0] <
         Math.fround(
           Math.fround(
@@ -120,13 +120,6 @@ export function minmax_v3v3_v3(vec) {
 export function add_v2_v2(r, a) {
   r[0] = Math.fround(r[0] + a[0]);
   r[1] = Math.fround(r[1] + a[1]);
-}
-
-export function sub_v2_v2v2(a, b) {
-  const r = [0, 0];
-  r[0] = Math.fround(a[0] - b[0]);
-  r[1] = Math.fround(a[1] - b[1]);
-  return r;
 }
 
 export function mul_v2_fl(r, f) {

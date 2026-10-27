@@ -1,6 +1,6 @@
 // Mesh (DNA_mesh_types.h, BKE_mesh.hh): struct-of-arrays geometry in Blender's axes and element order.
 // Derived data is computed on first use and cached until a tag_*_changed call.
-import { mesh_corner_tris_calc } from './mesh-tessellate.js';
+import { corner_tris_calc } from './mesh-tessellate.js';
 import { mesh_face_normals_calc, mesh_vert_normals_calc } from './mesh-normals.js';
 
 export const ATTR_DOMAIN = { POINT: 'POINT', EDGE: 'EDGE', FACE: 'FACE', CORNER: 'CORNER' };
@@ -17,7 +17,13 @@ export function createMesh({ vert_positions, edges, face_offsets, corner_verts, 
     get corners_num() { return mesh.corner_verts.length; },
     face_size: (f) => mesh.face_offsets[f + 1] - mesh.face_offsets[f],
     attribute: (name) => mesh.attributes.get(name)?.data,
-    corner_tris: () => (cache.corner_tris ??= mesh_corner_tris_calc(mesh)),
+    // Corner indices, three per triangle, in face order.
+    corner_tris() {
+      if (cache.corner_tris) return cache.corner_tris;
+      const tris = new Int32Array((mesh.corners_num - 2 * mesh.faces_num) * 3);
+      corner_tris_calc(mesh.vert_positions, mesh.face_offsets, mesh.corner_verts, tris);
+      return (cache.corner_tris = tris);
+    },
     // The face of each corner triangle.
     corner_tri_faces() {
       if (cache.corner_tri_faces) return cache.corner_tri_faces;
@@ -40,7 +46,7 @@ export function createMesh({ vert_positions, edges, face_offsets, corner_verts, 
       for (let i = 0; i < p.length; i += 3) for (let a = 0; a < 3; a++) { min[a] = Math.min(min[a], p[i + a]); max[a] = Math.max(max[a], p[i + a]); }
       return (cache.bounds = mesh.verts_num ? { min, max } : null);
     },
-    tag_positions_changed() { cache = { corner_tris: cache.corner_tris, corner_tri_faces: cache.corner_tri_faces }; },
+    tag_positions_changed() { cache = { corner_tri_faces: cache.corner_tri_faces }; },
     tag_topology_changed() { cache = {}; },
   };
   return mesh;

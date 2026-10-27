@@ -8,7 +8,7 @@ export function BM_face_create_verts(bm, vert_arr, len, f_example, create_flag, 
   if (create_edges) {
     BM_edges_from_verts_ensure(bm, edge_arr, vert_arr, len);
   } else {
-    if (BM_edges_from_verts(bm, edge_arr, vert_arr, len) === false) {
+    if (Number(BM_edges_from_verts(bm, edge_arr, vert_arr, len)) === Number(false)) {
       return -1;
     }
   }

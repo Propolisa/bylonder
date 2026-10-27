@@ -3,7 +3,7 @@
 # usage: blender -b --factory-startup --python tools/blender-reference/mesh-fixtures.py -- OUT_DIR
 # Run it with Blender 5.2.3 and port from the v5.2.3 source tag: some algorithms (find_doubles, constrained typed
 # moves) differ in later versions.
-import bpy, json, os, sys
+import bpy, json, math, os, sys
 
 out_dir = sys.argv[sys.argv.index("--") + 1]
 os.makedirs(out_dir, exist_ok=True)
@@ -139,6 +139,15 @@ EDIT_CASES = {
 }
 
 
+def corner_tris(me, rounded=None):
+    """Blender's corner triangles of the positions the fixture stores, so a port gets the same input."""
+    if rounded:
+        me.vertices.foreach_set("co", [x for co in rounded for x in co])
+        me.update()
+    me.calc_loop_triangles()
+    return [list(t.loops) for t in me.loop_triangles]
+
+
 def mark_seams(x):
     import bmesh
     bm = bmesh.from_edit_mesh(bpy.context.object.data)
@@ -222,7 +231,22 @@ for name, case in {**CASES, **EDIT_CASES}.items():
         "uv": [r(d.uv) for d in uv.data] if uv else None,
         "sharp_face": [not p.use_smooth for p in me.polygons],
         "selection": [[i for i, x in enumerate(seq) if x.select] for seq in (me.vertices, me.edges, me.polygons)],
+        "corner_tris": corner_tris(me, [r(v.co) for v in me.vertices]),
     }
     with open(os.path.join(out_dir, name + ".json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))
-print("fixtures written", len(CASES) + len(EDIT_CASES))
+
+# Tessellation of hand-made faces: concave and non-planar ones, where fan triangulation is wrong.
+TESS_CASES = {
+    "tess-star": ([(math.cos(i * math.pi / 5) * (1 if i % 2 else 0.4), math.sin(i * math.pi / 5) * (1 if i % 2 else 0.4), 0) for i in range(10)], [list(range(10))]),
+    "tess-nonplanar-quads": ([(0, 0, 0), (1, 0, 0.7), (1, 1, 0), (0, 1, 0.7), (2, 0, 0), (2, 1, 0.9)], [[0, 1, 2, 3], [1, 4, 5, 2]]),
+    "tess-concave-quad": ([(0, 0, 0), (2, 0, 0), (0.5, 0.5, 0), (0, 2, 0)], [[0, 1, 2, 3]]),
+    "tess-l-shape": ([(0, 0, 0), (2, 0, 0), (2, 1, 0), (1, 1, 0.2), (1, 2, 0), (0, 2, 0.1)], [[0, 1, 2, 3, 4, 5]]),
+}
+for name, (verts, faces) in TESS_CASES.items():
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(verts, [], faces)
+    with open(os.path.join(out_dir, name + ".json"), "w") as f:
+        json.dump({"positions": [list(v.co) for v in me.vertices], "face_offsets": [p.loop_start for p in me.polygons] + [len(me.loops)],
+                   "corner_verts": [l.vertex_index for l in me.loops], "corner_tris": corner_tris(me)}, f, separators=(",", ":"))
+print("fixtures written", len(CASES) + len(EDIT_CASES) + len(TESS_CASES))

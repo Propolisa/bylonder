@@ -10,23 +10,22 @@
     }
   ],
   "units": {
-    "blenlib/polyfill-2d.js": {
-      "source": "source/blender/blenlib/intern/polyfill_2d.cc",
-      "api": [
-        "BLI_polyfill_calc"
-      ],
-      "buffers": {
-        "BLI_polyfill_calc": {
-          "coords": "coords_num",
-          "r_tris": "coords_num - 2"
-        }
+    "blenkernel/mesh/mesh-tessellate.js": {
+      "api": {
+        "corner_tris_calc": "source/blender/blenkernel/intern/mesh_tessellate.cc",
+        "BLI_polyfill_calc": "source/blender/blenlib/intern/polyfill_2d.cc"
       },
-      "wasm": [
-        "source/blender/blenlib/intern/polyfill_2d.cc",
+      "sources": [
+        "source/blender/blenlib/intern/BLI_heap.cc",
         "source/blender/blenlib/intern/BLI_memarena.cc",
         "source/blender/blenlib/intern/math_geom.cc",
+        "source/blender/blenlib/intern/math_matrix_c.cc",
+        "source/blender/blenlib/intern/math_vector.cc",
+        "source/blender/blenlib/intern/polyfill_2d_beautify.cc",
+        "intern/guardedalloc/intern/leak_detector.cc",
         "intern/guardedalloc/intern/mallocn.cc",
-        "intern/guardedalloc/intern/mallocn_lockfree_impl.cc"
+        "intern/guardedalloc/intern/mallocn_lockfree_impl.cc",
+        "intern/guardedalloc/intern/memory_usage.cc"
       ]
     }
   },
