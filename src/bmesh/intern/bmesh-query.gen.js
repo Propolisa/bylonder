@@ -12,6 +12,7 @@ import {
 } from '../../blenlib/math-geom.js';
 import { BLI_mempool_iternew, BLI_mempool_iterstep } from '../../blenlib/mempool.js';
 import {
+  BM_DISK_EDGE_NEXT,
   BM_EDGE,
   BM_ELEM_CD_GET_VOID_P,
   BM_ELEM_TAG,
@@ -368,7 +369,7 @@ export function BM_iter_init(iter, bm, itype, data) {
 }
 
 export function BM_iter_new(iter, bm, itype, data) {
-  if (__builtin_expect(Number(!!BM_iter_init(null, bm, itype, data)), 1)) {
+  if (Number(!!BM_iter_init(null, bm, itype, data))) {
     return BM_iter_step(null);
   } else {
     return null;
@@ -489,6 +490,43 @@ export function BM_face_find_longest_loop(bm, f) {
     }
   } while ((l_iter = bm.l.next[l_iter]) !== l_first);
   return longest_loop;
+}
+
+export function BM_face_exists(bm, varr, len) {
+  if (bm.v.e[varr[0]] >= 0) {
+    let e_first = -1;
+    let e_iter = (e_first = bm.v.e[varr[0]]);
+    do {
+      if (bm.e.l[e_iter] >= 0) {
+        let l_first_radial = -1;
+        let l_iter_radial = (l_first_radial = bm.e.l[e_iter]);
+        do {
+          if (bm.l.v[l_iter_radial] === varr[0] && bm.f.len[bm.l.f[l_iter_radial]] === len) {
+            let i_walk = 2;
+            if (bm.l.v[bm.l.next[l_iter_radial]] === varr[1]) {
+              let l_walk = bm.l.next[bm.l.next[l_iter_radial]];
+              do {
+                if (bm.l.v[l_walk] !== varr[i_walk]) {
+                  break;
+                }
+              } while (((l_walk = bm.l.next[l_walk]), ++i_walk !== len));
+            } else if (bm.l.v[bm.l.prev[l_iter_radial]] === varr[1]) {
+              let l_walk = bm.l.prev[bm.l.prev[l_iter_radial]];
+              do {
+                if (bm.l.v[l_walk] !== varr[i_walk]) {
+                  break;
+                }
+              } while (((l_walk = bm.l.prev[l_walk]), ++i_walk !== len));
+            }
+            if (i_walk === len) {
+              return bm.l.f[l_iter_radial];
+            }
+          }
+        } while ((l_iter_radial = bm.l.radial_next[l_iter_radial]) !== l_first_radial);
+      }
+    } while ((e_iter = BM_DISK_EDGE_NEXT(bm, e_iter, varr[0])) !== e_first);
+  }
+  return -1;
 }
 
 export function BM_mesh_calc_face_groups(

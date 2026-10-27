@@ -239,7 +239,7 @@ export function BLI_polyfill_beautify(coords, coords_num, tris, arena, eheap) {
     }
   }
   0;
-  qsort(order_edges, order_edges_len, 12, oedge_cmp);
+  order_edges.splice(0, order_edges_len, ...order_edges.slice(0, order_edges_len).sort(oedge_cmp));
   for (let i = 0, base_index = 0; i < order_edges_len; base_index++) {
     const oe_a = order_edges[i++];
     const oe_b = order_edges[i++];
