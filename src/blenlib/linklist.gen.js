@@ -2,29 +2,27 @@
 // exporting the same name from linklist.js.
 import { BLI_mempool_alloc, BLI_mempool_free } from './mempool.js';
 
-
-
 export function BLI_linklist_prepend_nlink(listp, ptr, nlink) {
-nlink.link = ptr;
-nlink.next = listp;
-listp = nlink;
-return listp;
+  nlink.link = ptr;
+  nlink.next = listp;
+  listp = nlink;
+  return listp;
 }
 
 export function BLI_linklist_prepend(listp, ptr) {
-let nlink = MEM_new_uninitialized("BLI_linklist_prepend");
-listp = BLI_linklist_prepend_nlink(listp, ptr, nlink);
+  const nlink = MEM_new_uninitialized('BLI_linklist_prepend');
+  listp = BLI_linklist_prepend_nlink(listp, ptr, nlink);
 }
 
 export function BLI_linklist_prepend_pool(listp, ptr, mempool) {
-let nlink = BLI_mempool_alloc(mempool);
-listp = BLI_linklist_prepend_nlink(listp, ptr, nlink);
+  const nlink = BLI_mempool_alloc(mempool);
+  listp = BLI_linklist_prepend_nlink(listp, ptr, nlink);
 }
 
 export function BLI_linklist_pop_pool(listp, mempool) {
-let link = (listp).link;
-let next = (listp).next;
-(listp) = BLI_mempool_free(mempool, (listp));
-listp = next;
-return [link, listp];
+  const link = listp.link;
+  const next = listp.next;
+  listp = BLI_mempool_free(mempool, listp);
+  listp = next;
+  return [link, listp];
 }

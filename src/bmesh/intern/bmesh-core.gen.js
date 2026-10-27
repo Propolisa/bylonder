@@ -3,16 +3,14 @@
 import { BM_edges_from_verts, BM_edges_from_verts_ensure } from './bmesh-construct.js';
 import { BM_face_create } from './bmesh-core.js';
 
-
-
 export function BM_face_create_verts(bm, vert_arr, len, f_example, create_flag, create_edges) {
-let edge_arr = new Array(len);
-if (create_edges) {
-BM_edges_from_verts_ensure(bm, edge_arr, vert_arr, len);
-} else {
-if ((Number(BM_edges_from_verts(bm, edge_arr, vert_arr, len)) === Number(false))) {
-return -1;
-}
-}
-return BM_face_create(bm, vert_arr, edge_arr, len, f_example, create_flag);
+  const edge_arr = new Array(len);
+  if (create_edges) {
+    BM_edges_from_verts_ensure(bm, edge_arr, vert_arr, len);
+  } else {
+    if (Number(BM_edges_from_verts(bm, edge_arr, vert_arr, len)) === Number(false)) {
+      return -1;
+    }
+  }
+  return BM_face_create(bm, vert_arr, edge_arr, len, f_example, create_flag);
 }

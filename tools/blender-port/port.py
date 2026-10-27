@@ -48,10 +48,13 @@ def gen_path(module):
     return public_path(module).removesuffix('.js') + '.gen.js'
 
 
-def node(*args):
+def node(*args, strict=True):
+    """js.mjs's output; a failure stops the run unless not strict, when its errors are reported and the run goes on."""
     result = subprocess.run(['node', os.path.join(HERE, 'js.mjs'), *args], capture_output=True, text=True)
     if result.returncode:
-        sys.exit(f'js.mjs {args[0]} failed:\n{result.stderr}')
+        if strict:
+            sys.exit(f'js.mjs {args[0]} failed:\n{result.stderr}')
+        print(f'js.mjs {args[0]} failed:\n{result.stderr}', file=sys.stderr)
     return result.stdout
 
 
@@ -337,7 +340,7 @@ class Driver:
             open(gen_path(module), 'w').write(header + '\n'.join(lines) + '\n\n' + '\n'.join(constants) + '\n\n' + '\n\n'.join(functions) + '\n')
             self.link(module, gen_path(module))
         self.prune()
-        node('format', *[gen_path(m) for m in sorted(self.modules)])
+        node('format', *[gen_path(m) for m in sorted(self.modules)], strict=False)
         status = {m: self.status[m] for m in sorted(self.status)}
         open(os.path.join(HERE, 'status.json'), 'w').write(json.dumps(status, indent=2) + '\n')
 

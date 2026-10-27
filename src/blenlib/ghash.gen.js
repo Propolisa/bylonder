@@ -2,106 +2,108 @@
 // exporting the same name from ghash.js.
 import { BLI_mempool_alloc } from './mempool.js';
 
-const hashsizes = [5, 11, 17, 37, 67, 131, 257, 521, 1031, 2053, 4099, 8209, 16411, 32771, 65537, 131101, 262147, 524309, 1048583, 2097169, 4194319, 8388617, 16777259, 33554467, 67108879, 134217757, 268435459];
+const hashsizes = [
+  5, 11, 17, 37, 67, 131, 257, 521, 1031, 2053, 4099, 8209, 16411, 32771, 65537, 131101, 262147, 524309, 1048583,
+  2097169, 4194319, 8388617, 16777259, 33554467, 67108879, 134217757, 268435459,
+];
 
 export function BLI_ghashIterator_getKey(ghi) {
-return (ghi.curEntry).key;
+  return ghi.curEntry.key;
 }
 
 export function BLI_ghashIterator_getValue(ghi) {
-return (ghi.curEntry).val;
+  return ghi.curEntry.val;
 }
 
 export function GHASH_LIMIT_GROW(_nbkt) {
-return ((Math.trunc((((_nbkt) * 3)) / 4)));
+  return Math.trunc((_nbkt * 3) / 4);
 }
 
 export function GHASH_LIMIT_SHRINK(_nbkt) {
-return ((Math.trunc((((_nbkt) * 3)) / 16)));
+  return Math.trunc((_nbkt * 3) / 16);
 }
 
 function ghash_keyhash(gh, key) {
-return gh.hashfp(key);
+  return gh.hashfp(key);
 }
 
 function ghash_entryhash(gh, e) {
-return gh.hashfp(e.key);
+  return gh.hashfp(e.key);
 }
 
 function ghash_bucket_index(gh, hash) {
-return (hash % gh.nbuckets);
+  return hash % gh.nbuckets;
 }
 
 function ghash_buckets_resize(gh, nbuckets) {
-let buckets_old = gh.buckets;
-let nbuckets_old = gh.nbuckets;
-let i = 0;
-gh.nbuckets = nbuckets;
-let buckets_new = MEM_new_array_zeroed(gh.nbuckets, "ghash_buckets_resize");
-if (buckets_old) {
-if ((nbuckets > nbuckets_old)) {
-for (i = 0; (i < nbuckets_old); i++) {
-for (let e = buckets_old[i], e_next = null; e; e = e_next) {
-let hash = ghash_entryhash(gh, e);
-let bucket_index = ghash_bucket_index(gh, hash);
-e_next = e.next;
-e.next = buckets_new[bucket_index];
-buckets_new[bucket_index] = e;
-}
-}
-} else {
-for (i = 0; (i < nbuckets_old); i++) {
-for (let e = buckets_old[i], e_next = null; e; e = e_next) {
-let hash = ghash_entryhash(gh, e);
-let bucket_index = ghash_bucket_index(gh, hash);
-e_next = e.next;
-e.next = buckets_new[bucket_index];
-buckets_new[bucket_index] = e;
-}
-}
-}
-}
-gh.buckets = buckets_new;
-if (buckets_old) {
-
-}
+  const buckets_old = gh.buckets;
+  const nbuckets_old = gh.nbuckets;
+  let i = 0;
+  gh.nbuckets = nbuckets;
+  const buckets_new = MEM_new_array_zeroed(gh.nbuckets, 'ghash_buckets_resize');
+  if (buckets_old) {
+    if (nbuckets > nbuckets_old) {
+      for (i = 0; i < nbuckets_old; i++) {
+        for (let e = buckets_old[i], e_next = null; e; e = e_next) {
+          const hash = ghash_entryhash(gh, e);
+          const bucket_index = ghash_bucket_index(gh, hash);
+          e_next = e.next;
+          e.next = buckets_new[bucket_index];
+          buckets_new[bucket_index] = e;
+        }
+      }
+    } else {
+      for (i = 0; i < nbuckets_old; i++) {
+        for (let e = buckets_old[i], e_next = null; e; e = e_next) {
+          const hash = ghash_entryhash(gh, e);
+          const bucket_index = ghash_bucket_index(gh, hash);
+          e_next = e.next;
+          e.next = buckets_new[bucket_index];
+          buckets_new[bucket_index] = e;
+        }
+      }
+    }
+  }
+  gh.buckets = buckets_new;
+  if (buckets_old) {
+  }
 }
 
 function ghash_buckets_expand(gh, nentries, user_defined) {
-if (((gh.buckets && ((nentries < gh.limit_grow))))) {
-return;
-}
-let new_nbuckets = gh.nbuckets;
-while ((((nentries > gh.limit_grow)) && ((gh.cursize < 26)))) {
-new_nbuckets = hashsizes[++(gh.cursize)];
-gh.limit_grow = GHASH_LIMIT_GROW(new_nbuckets);
-}
-if (user_defined) {
-gh.size_min = gh.cursize;
-}
-if ((((new_nbuckets === gh.nbuckets)) && gh.buckets)) {
-return;
-}
-gh.limit_grow = GHASH_LIMIT_GROW(new_nbuckets);
-gh.limit_shrink = GHASH_LIMIT_SHRINK(new_nbuckets);
-ghash_buckets_resize(gh, new_nbuckets);
+  if (gh.buckets && nentries < gh.limit_grow) {
+    return;
+  }
+  let new_nbuckets = gh.nbuckets;
+  while (nentries > gh.limit_grow && gh.cursize < 26) {
+    new_nbuckets = hashsizes[++gh.cursize];
+    gh.limit_grow = GHASH_LIMIT_GROW(new_nbuckets);
+  }
+  if (user_defined) {
+    gh.size_min = gh.cursize;
+  }
+  if (new_nbuckets === gh.nbuckets && gh.buckets) {
+    return;
+  }
+  gh.limit_grow = GHASH_LIMIT_GROW(new_nbuckets);
+  gh.limit_shrink = GHASH_LIMIT_SHRINK(new_nbuckets);
+  ghash_buckets_resize(gh, new_nbuckets);
 }
 
 function ghash_insert_ex(gh, key, val, bucket_index) {
-let e = BLI_mempool_alloc(gh.entrypool);
-e.e.next = gh.buckets[bucket_index];
-e.e.key = key;
-e.val = val;
-gh.buckets[bucket_index] = e;
-ghash_buckets_expand(gh, ++(gh.nentries), false);
+  const e = BLI_mempool_alloc(gh.entrypool);
+  e.e.next = gh.buckets[bucket_index];
+  e.e.key = key;
+  e.val = val;
+  gh.buckets[bucket_index] = e;
+  ghash_buckets_expand(gh, ++gh.nentries, false);
 }
 
 function ghash_insert(gh, key, val) {
-let hash = ghash_keyhash(gh, key);
-let bucket_index = ghash_bucket_index(gh, hash);
-ghash_insert_ex(gh, key, val, bucket_index);
+  const hash = ghash_keyhash(gh, key);
+  const bucket_index = ghash_bucket_index(gh, hash);
+  ghash_insert_ex(gh, key, val, bucket_index);
 }
 
 export function BLI_ghash_insert(gh, key, val) {
-ghash_insert(gh, key, val);
+  ghash_insert(gh, key, val);
 }

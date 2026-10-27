@@ -911,7 +911,8 @@ class FunctionPort:
             elif is_struct_value(t) and si.kind in (K.DECL_REF_EXPR, K.MEMBER_REF_EXPR, K.UNARY_OPERATOR, K.ARRAY_SUBSCRIPT_EXPR):
                 # A struct initialized from another is a copy of its fields.
                 source, tmp = self.expr(init), self.temp()
-                value = f'(({tmp} = {source}), {{ ' + ', '.join(f'{f}: {tmp}.{f}' for f in record_fields(t)) + ' })'
+                fields = record_fields(t)
+                value = f'(({tmp} = {source}), {{ ' + ', '.join(f'{f}: {tmp}.{f}' for f in fields) + ' })' if fields else f'{{ ...{source} }}'
             else:
                 value = self.expr(init, t)
         return f'let {js_local(v.spelling)}{" = " + value if value is not None else ""};'
@@ -1196,7 +1197,10 @@ class FunctionPort:
         if is_struct_value(s.type):
             # A struct assigned by value: its fields copy.
             target, t = self.expr(lhs), self.temp()
-            return f'(({t} = {value}), ' + ', '.join(f'({target}.{f} = {t}.{f})' for f in record_fields(s.type)) + ')'
+            fields = record_fields(s.type)
+            if not fields:  # A template Clang lists no fields of: its own properties are its fields.
+                return f'Object.assign({target}, {value})'
+            return f'(({t} = {value}), ' + ', '.join(f'({target}.{f} = {t}.{f})' for f in fields) + ')'
         if s.kind == K.MEMBER_REF_EXPR and kids(s):
             pool = self.element_pool(kids(s)[0])
             if pool and (pool, s.spelling) in VEC_FIELDS:
@@ -1380,7 +1384,11 @@ class FunctionPort:
         if name in ('SWAP_', 'swap'):
             a, b = js(args)
             if canon(args[0].type).kind == T.RECORD:
-                return '; '.join(f'[{a}.{f}, {b}.{f}] = [{b}.{f}, {a}.{f}]' for f in record_fields(args[0].type))
+                fields = record_fields(args[0].type)
+                if not fields:
+                    t = self.temp()
+                    return f'({t} = {{ ...{a} }}), Object.assign({a}, {b}), Object.assign({b}, {t})'
+                return '; '.join(f'[{a}.{f}, {b}.{f}] = [{b}.{f}, {a}.{f}]' for f in fields)
             return f'[{a}, {b}] = [{b}, {a}]'
         if name in ('len_v3v3', 'len_squared_v3v3'):
             a, b = js(args)
