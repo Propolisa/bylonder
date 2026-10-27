@@ -328,3 +328,16 @@ EXPORT(bm_select_clear) void bm_select_clear(BMesh *bm, int selectmode)
   BM_select_history_clear(bm);
   bm->selectmode = selectmode;
 }
+
+/* Moves the selected vertices by an offset, as the fixtures' follow-up translate does. */
+EXPORT(bm_translate_selected) void bm_translate_selected(BMesh *bm, float x, float y, float z)
+{
+  const float offset[3] = {x, y, z};
+  BMIter iter;
+  BMVert *v;
+  BM_ITER_MESH (v, &iter, bm, BM_VERTS_OF_MESH) {
+    if (BM_elem_flag_test(v, BM_ELEM_SELECT)) {
+      add_v3_v3(v->co, offset);
+    }
+  }
+}

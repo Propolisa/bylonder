@@ -42,4 +42,5 @@ extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0;
 namespace blender {
 /* port-override: WASI has no threads; Blender's own task_range.cc runs ranges serially without TBB. */
 int BLI_system_thread_count() { return 1; }
+int BLI_thread_is_main() { return 1; }
 }  // namespace blender

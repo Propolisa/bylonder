@@ -2,15 +2,35 @@
 // with C-layout typed arrays. Each unit call copies its arguments into one grow-only scratch block of the module's
 // memory and its outputs back out.
 
-// WASI calls the module may import; the ported code does no I/O, so they have no effect.
-const wasi = new Proxy({}, { get: (_, name) => (name === 'proc_exit' ? (code) => { throw new Error(`WebAssembly exit ${code}`); } : () => 0) });
+// WASI calls the module may import. Output (Blender's messages and logs) goes to stderr or the console; the rest of I/O
+// does not happen, so those calls have no effect.
+function wasiFor(memory) {
+  const decoder = new TextDecoder();
+  const write = (text) => (globalThis.process?.stderr ? process.stderr.write(text) : console.warn(text));
+  return new Proxy({
+    proc_exit: (code) => { throw new Error(`WebAssembly exit ${code}`); },
+    fd_write(_fd, iovs, iovsLength, nwritten) {
+      const view = new DataView(memory().buffer);
+      let total = 0;
+      for (let i = 0; i < iovsLength; i++) {
+        const pointer = view.getUint32(iovs + i * 8, true), length = view.getUint32(iovs + i * 8 + 4, true);
+        write(decoder.decode(new Uint8Array(memory().buffer, pointer, length)));
+        total += length;
+      }
+      view.setUint32(nwritten, total, true);
+      return 0;
+    },
+  }, { get: (calls, name) => calls[name] ?? (() => 0) });
+}
 
 // Blender symbols a module still lacks (tools/blender-port/wasm_module.py lists them): reaching one is a gap to port.
 const missing = new Proxy({}, { get: (_, name) => () => { throw new Error(`Blender's ${name} is not in this WebAssembly module`); } });
 
 export async function instantiate(url) {
   const bytes = url.protocol === 'file:' ? await process.getBuiltinModule('fs/promises').readFile(url) : await (await fetch(url)).arrayBuffer();
-  const { instance } = await WebAssembly.instantiate(bytes, { wasi_snapshot_preview1: wasi, env: missing });
+  let memory;
+  const { instance } = await WebAssembly.instantiate(bytes, { wasi_snapshot_preview1: wasiFor(() => memory), env: missing });
+  memory = instance.exports.memory;
   instance.exports._initialize?.();
   return new Heap(instance.exports);
 }
