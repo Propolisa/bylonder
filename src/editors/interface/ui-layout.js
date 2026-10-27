@@ -4,8 +4,8 @@
 //   menus: menu classes by idname, context: () => bpy.context as the menus read it,
 //   run(idname, props): runs an operator, supported(idname, props): whether Bylonder runs it with those properties,
 //   poll(idname): whether it can now,
-//   keys(idname, props): its shortcut, if bound, enumItems(idname, prop): an enum's [identifier, name] pairs.
-import names from '../../makesrna/operator-names.json' with { type: 'json' };
+//   keys(idname, props): its shortcut, if bound, enumItems(idname, prop): an enum's items as [identifier, name, description, icon].
+import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js';
 
 // Python's keyword arguments: Transcrypt passes them as a last object marked __kwargtrans__.
@@ -28,7 +28,7 @@ const values = (props) => Object.fromEntries(Object.entries(props)
   .filter(([key, value]) => !MACRO_PART.test(key) && !(Array.isArray(value) && !value.length))
   .map(([key, value]) => [pythonName(key), value]));
 
-const operatorName = (idname) => names[idname] ?? idname;
+const operatorName = (idname) => operators[idname]?.name ?? idname;
 // The properties whose value names an entry in Blender's coverage ids (KEYED_PROPS in tools/blender-reference/surface.py).
 const KEYED_PROPS = ['type', 'name', 'mode', 'action', 'direction', 'axis'];
 const keyedId = (idname, props) => {
@@ -72,12 +72,12 @@ export class UILayout {
 
   operator_enum(...list) {
     const { operator: idname, property } = args(list, ['operator', 'property']);
-    for (const [value, label] of this.ui.enumItems(idname, property)) this.items.push(this.#entry(idname, { [property]: value }, label, value));
+    for (const [value, label, , icon] of this.ui.enumItems(idname, property)) this.items.push(this.#entry(idname, { [property]: value }, label, value, icon));
   }
 
   operator_menu_enum(...list) {
     const { operator: idname, property, text } = args(list, ['operator', 'property', 'text']);
-    const items = this.ui.enumItems(idname, property).map(([value, label]) => this.#entry(idname, { [property]: value }, label, value));
+    const items = this.ui.enumItems(idname, property).map(([value, label, , icon]) => this.#entry(idname, { [property]: value }, label, value, icon));
     this.items.push({ label: text ?? operatorName(idname), blender: idname, items });
   }
 

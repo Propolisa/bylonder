@@ -4,11 +4,13 @@
 // menus with appendMenu, as add-ons extend Blender.
 import { operatorKeys } from './input/keymap.js';
 import { blenderKeys } from './keyconfig.js';
+import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
 
 const operators = new Map(), extensions = new Map();
 
 // An operator: run(props), optionally poll(props), keys(props) for its shortcut when no keymap binds it, supports(props) when Bylonder runs it
-// with some properties only and enumItems(prop) for its enum properties' [identifier, name] pairs.
+// with some properties only and enumItems(prop) for its enum properties' items where they differ from Blender's
+// (src/makesrna/rna-operators.json), as [identifier, name, description, icon].
 export function registerOperator(idname, operator) {
   operators.set(idname, operator);
 }
@@ -39,7 +41,7 @@ export const menuUI = ({ menus, context, prop, keymaps = () => ['Window', 'Scree
   poll: (idname, props) => operators.get(idname)?.poll?.(props) ?? true,
   run: runOperator,
   keys: (idname, props) => operators.get(idname)?.keys?.(props) ?? operatorKeys(idname, props) ?? blenderKeys(keymaps(), idname, props),
-  enumItems: (idname, prop) => operators.get(idname)?.enumItems?.(prop) ?? [],
+  enumItems: (idname, prop) => operators.get(idname)?.enumItems?.(prop) ?? rnaOperators[idname]?.properties[prop]?.items ?? [],
 });
 
 // A script's menu classes by idname (the module's exports named *_MT_*).

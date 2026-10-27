@@ -10,10 +10,10 @@ const BY_PROPS = {
   'object.parent_clear': ({ type = 'CLEAR' }) => type === 'CLEAR' && 'unparent',
   'object.delete': ({ use_global }) => !use_global && 'delete',
 };
-// The enum items (rna_object.cc, object_relations.cc) of what Bylonder runs.
+// Enum items Blender makes from the context (parent_set_enum_itemf in object_relations.cc); the rest are Blender's
+// static items (rna-operators.json).
 const ENUMS = {
   'object.parent_set': { type: [['OBJECT', 'Object']] },
-  'object.parent_clear': { type: [['CLEAR', 'Clear Parent']] },
 };
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 const keyLabel = (keys) => keys?.replace(/\+/g, ' ');
@@ -28,7 +28,7 @@ export function registerObjectOperators(registry) {
       supports: (props) => !!action(props),
       poll: (props) => action(props)?.enabled?.() ?? true,
       keys: (props) => keyLabel(action(props)?.keys[0]),
-      enumItems: (prop) => ENUMS[idname]?.[prop] ?? [],
+      enumItems: (prop) => ENUMS[idname]?.[prop],
       run: (props) => registry.invoke(action(props).id),
     });
   }

@@ -1,6 +1,7 @@
-# Writes the RNA definition of operators (name, description, properties with defaults, limits, enum items)
-# to src/makesrna/rna-operators.json, so Bylonder's operator panels show Blender's fields.
-# usage: blender -b --factory-startup --python tools/blender-reference/operators.py -- OUT.json PREFIX...
+# Writes the RNA definition of every operator (name, description, properties with defaults, limits, enum items as
+# [identifier, name, description, icon]) to src/makesrna/rna-operators.json, for the labels and enum entries Blender's
+# menus show and the fields of Bylonder's operator panels.
+# usage: blender -b --factory-startup --python tools/blender-reference/operators.py -- OUT.json
 import bpy, json, sys
 
 def prop(p):
@@ -19,7 +20,7 @@ def prop(p):
     elif p.type == "BOOLEAN":
         d["default"] = list(p.default_array) if p.is_array else p.default
     elif p.type == "ENUM":
-        d["items"] = [[i.identifier, i.name, i.description] for i in p.enum_items]
+        d["items"] = [[i.identifier, i.name, i.description, i.icon] for i in p.enum_items]
         d["default"] = sorted(p.default_flag) if p.is_enum_flag else p.default
     elif p.type == "STRING":
         d["default"] = p.default
@@ -34,16 +35,14 @@ def prop(p):
 
 if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:]
-    out_path, prefixes = args[0], args[1:]
+    out_path = args[0]
     out = {}
     for module in dir(bpy.ops):
         for name in dir(getattr(bpy.ops, module)):
             idname = module + "." + name
-            if not any(idname.startswith(p) for p in prefixes):
-                continue
             rna = getattr(getattr(bpy.ops, module), name).get_rna_type()
             out[idname] = {"name": rna.name, "description": rna.description,
                            "properties": {p.identifier: prop(p) for p in rna.properties if p.identifier != "rna_type"}}
     with open(out_path, "w") as f:
-        json.dump(out, f, indent=1)
+        json.dump(out, f, separators=(",", ":"), sort_keys=True)
     print("operators written", len(out))
