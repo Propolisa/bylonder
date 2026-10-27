@@ -20,8 +20,9 @@ const expanded = ref([]);
 const selected = ref(null);
 const logo = import.meta.env.BASE_URL + "logo/bylonder.svg";
 
-Promise.all([import("./blender-surface.json"), import("virtual:blender-coverage"), import("../../docs/blender-coverage.md?raw")])
-  .then(([surface, implemented, notes]) => (data.value = computeCoverage(surface.default, implemented.default, notes.default)));
+// Menus drawn from Blender's scripts count by what they show, found by drawing them.
+Promise.all([import("./blender-surface.json"), import("virtual:blender-coverage"), import("../../docs/blender-coverage.md?raw"), import("../editors/space_view3d/view3d-menus-edit-mesh.js")])
+  .then(([surface, implemented, notes, menus]) => (data.value = computeCoverage(surface.default, [...implemented.default, ...menus.editMeshMenuCoverage()], notes.default)));
 
 const FILTERS = {
   all: { label: "All", test: () => true },

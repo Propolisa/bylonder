@@ -1,0 +1,100 @@
+"""Blender's UI scripts as JS modules: the classes manifest.json names (a trailing * matches a prefix), with the base
+classes and module-level functions they use, taken from Blender's scripts at the port's tag and transpiled by
+Transcrypt against Bylonder's bpy (bpy/ here) into src/bl_ui/.
+
+usage: python3 tools/blender-ui/transpile.py   (needs `pip install transcrypt`)
+"""
+import ast
+import fnmatch
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import urllib.parse
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(os.path.dirname(HERE))
+OUT = os.path.join(REPO, 'src', 'bl_ui')
+BLENDER = 'https://projects.blender.org/api/v1/repos/blender/blender'
+TAG = json.load(open(os.path.join(REPO, 'tools', 'blender-port', 'manifest.json')))['blender']
+
+
+# Where Transcrypt's Python differs from what Blender's scripts use: (generated file, text, replacement, reason).
+FORMAT = "str.format with a format spec ('{:s}', '{:.2f}'), which Transcrypt leaves unformatted"
+PATCHES = [
+    ('org.transcrypt.__runtime__.js', "return self.replace (/\\{(\\w*)\\}/g, function (match, key) {",
+     "return self.replace (/\\{(\\w*)(?::([^}]*))?\\}/g, function (match, key, spec) {", FORMAT),
+    ('org.transcrypt.__runtime__.js', "return args [key] === undefined ? match : str (args [key]);",
+     "return args [key] === undefined ? match : __format_spec__ (args [key], spec);", FORMAT),
+    ('org.transcrypt.__runtime__.js', "return str (args [index][key]);", "return __format_spec__ (args [index][key], spec);", FORMAT),
+    ('org.transcrypt.__runtime__.js', "__setproperty__ (String.prototype, 'format', {",
+     "var __format_spec__ = function (value, spec) {\n"
+     "    var fixed = spec && /^\\.(\\d+)f$/.exec (spec);\n"
+     "    return fixed ? Number (value).toFixed (+fixed [1]) : str (value);\n"
+     "};\n"
+     "__setproperty__ (String.prototype, 'format', {", FORMAT),
+]
+
+
+def fetch(path):
+    """A Blender file at the tag, cached."""
+    cache = os.path.join(os.path.expanduser('~/.cache/bylonder/blender'), TAG, path)
+    if not os.path.exists(cache):
+        os.makedirs(os.path.dirname(cache), exist_ok=True)
+        url = f'{BLENDER}/raw/{urllib.parse.quote(path, safe="")}?ref={TAG}'
+        open(cache, 'wb').write(subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout)
+    return open(cache).read()
+
+
+def extract(source, patterns):
+    """The module's bpy imports, then the classes matching patterns with what they use from the module, in its order."""
+    tree = ast.parse(source)
+    defined = {node.name: node for node in tree.body if isinstance(node, (ast.ClassDef, ast.FunctionDef))}
+    wanted, todo = set(), [name for name in defined if any(fnmatch.fnmatchcase(name, p) for p in patterns)]
+    while todo:
+        name = todo.pop()
+        if name in wanted:
+            continue
+        wanted.add(name)
+        todo += [n.id for n in ast.walk(defined[name]) if isinstance(n, ast.Name) and n.id in defined]
+    imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
+               and all(alias.name.split('.')[0] == 'bpy' for alias in node.names if isinstance(node, ast.Import))
+               and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] == 'bpy')]
+    body = imports + [node for node in tree.body if getattr(node, 'name', None) in wanted]
+    return ast.unparse(ast.Module(body=body, type_ignores=[]))
+
+
+def main():
+    manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
+    with tempfile.TemporaryDirectory() as build:
+        shutil.copytree(os.path.join(HERE, 'bpy'), os.path.join(build, 'bpy'))
+        modules = []
+        for path, patterns in manifest['scripts'].items():
+            module = os.path.basename(path)
+            open(os.path.join(build, module), 'w').write(extract(fetch(path), patterns))
+            modules.append(module)
+        for module in modules:
+            result = subprocess.run([sys.executable, '-I', '-m', 'transcrypt', '-b', '-n', '-k', '-m', module], cwd=build,
+                                    capture_output=True, text=True)
+            if result.returncode:
+                sys.exit(result.stdout + result.stderr)
+        os.makedirs(OUT, exist_ok=True)
+        for name in os.listdir(os.path.join(build, '__target__')):
+            if name.endswith('.js'):
+                script = open(os.path.join(build, '__target__', name)).read()
+                for target, text, replacement, reason in PATCHES:
+                    if target == name:
+                        assert text in script, f'{name}: the patch for {reason} no longer applies'
+                        script = script.replace(text, replacement)
+                # Transcrypt dates its output; without the date a rerun gives the same files.
+                script = re.sub(r"^// Transcrypt'ed from Python, .*\n", '', script, flags=re.M)
+                header = f'// Generated by tools/blender-ui/transpile.py from Blender {TAG}; do not edit.\n'
+                open(os.path.join(OUT, name), 'w').write(header + script)
+                print('wrote', os.path.relpath(os.path.join(OUT, name), REPO))
+
+
+if __name__ == '__main__':
+    main()

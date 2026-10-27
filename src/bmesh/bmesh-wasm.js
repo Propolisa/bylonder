@@ -179,6 +179,16 @@ export class EditMesh {
     }
   }
 
+  // Whether an operator polls for this edit mesh.
+  poll(idname) { return !!x.operator_poll(this.#context, operatorTypes.get(idname)); }
+
+  // An enum property's items as the operator's UI lists them for this edit mesh (its item function, as Blender's
+  // menus call it): [identifier, name] pairs.
+  enumItems(idname, prop) {
+    const text = withString(prop, (name) => cString(x.operator_enum_items(this.#context, operatorTypes.get(idname), name)));
+    return text.split('\n').filter(Boolean).map((line) => line.split('\t'));
+  }
+
   // The selection history (BMesh.selected), oldest first, as { htype, index }.
   get history() {
     const bm = this.#bm;

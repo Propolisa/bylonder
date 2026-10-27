@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "scripts/startup/bl_ui/space_view3d.py": ["VIEW3D_MT_select_edit_mesh", "VIEW3D_MT_edit_mesh*", "VIEW3D_MT_transform"]
+  }
+}

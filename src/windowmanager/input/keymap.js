@@ -35,6 +35,12 @@ export function parseKeys(keys) {
 // The combo as the Coverage view compares it with Blender's key text.
 export const normalizeKeys = (keys) => parseKeys(keys).combo;
 
+// A binding as Blender's menus show it: "Ctrl Numpad +" for "Ctrl NUMPAD_PLUS", the first of several.
+const KEY_LABELS = { NUMPAD_PLUS: 'Numpad +', NUMPAD_MINUS: 'Numpad -', NUMPAD_PERIOD: 'Numpad .', RET: 'Return', ESC: 'Esc', DEL: 'Delete' };
+export const keysLabel = (keys) => [keys].flat()[0]?.split(' ')
+  .map((token) => KEY_LABELS[token] ?? (/^[A-Z][A-Z_]+$/.test(token) ? token.split('_').map((w) => w[0] + w.slice(1).toLowerCase()).join(' ') : token))
+  .join(' ') ?? '';
+
 const CODES = {
   NumpadDecimal: 'numpad_period', NumpadAdd: 'numpad_plus', NumpadSubtract: 'numpad_minus', NumpadDivide: 'numpad_slash', NumpadMultiply: 'numpad_asterix',
   NumpadEnter: 'numpad_enter', Space: 'spacebar', Enter: 'ret', Escape: 'esc', Delete: 'del', Backspace: 'back_space', PageUp: 'page_up', PageDown: 'page_down',

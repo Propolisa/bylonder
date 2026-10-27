@@ -15,6 +15,8 @@ struct PropertyRNA {
   int length = 0;
   std::vector<double> defaults;
   const EnumPropertyItem *items = nullptr;
+  /* The items for a context (RNA_def_enum_funcs), when they depend on it. */
+  EnumPropertyItemFunc itemf = nullptr;
 };
 
 /* An operator's properties, or (for the RNA_* type pointers code compares and stores) just a named type. */

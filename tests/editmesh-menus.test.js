@@ -1,30 +1,24 @@
-// Every operator the 3D View's Edit Mode menus run (view3d-menus-edit-mesh.js) runs Blender's own code to the end:
+// Every operator the 3D View's Edit Mode menus (Blender's own, view3d-menus-edit-mesh.js) run runs Blender's code:
 // each is called with its menu's properties on a cube and a grid in each select mode its menu offers it in, with
 // everything selected, and must finish or cancel as Blender's operator decides, never reach code the module lacks.
 import assert from 'node:assert/strict';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { EditMesh, OPERATOR_FINISHED, OPERATOR_CANCELLED } from '../src/bmesh/bmesh-wasm.js';
-import { editMeshMenus } from '../src/editors/space_view3d/view3d-menus-edit-mesh.js';
+import { idleApi, visitEditMeshMenus } from '../src/editors/space_view3d/view3d-menus-edit-mesh.js';
 import { hasMeshOperator } from '../src/editors/mesh/editmesh-tools.js';
 
 // What the menus call, as [idname, props, the select modes the menus offer it in]; transforms and modal tools are the
 // editor's own.
 const calls = new Map();
+let selectmode;
 const record = (idname, props = {}) => {
   const key = idname + JSON.stringify(props);
   calls.set(key, [idname, props, [...(calls.get(key)?.[2] ?? []), selectmode]]);
 };
-let selectmode = 1;
-const menus = editMeshMenus({
-  exec: record, move: record, slide: record, start() {}, extrudeMove() {}, inset() {}, bevel() {}, loopcut() {}, selectBox() {},
-  mergeMenu: () => [], selectmode: () => selectmode, totals: () => ({ totvertsel: 1, totedgesel: 1, totfacesel: 1 }),
+visitEditMeshMenus(idleApi(record), (item, mode) => {
+  selectmode = mode;
+  if (!item.items && item.enabled()) item.run();
 });
-const visit = (items) => (typeof items === 'function' ? items() : items).forEach((item) => {
-  if (item === '-') return;
-  if (item.items) visit(item.items);
-  else item.run();
-});
-for (selectmode of [1, 2, 4]) for (const name of ['select', 'mesh', 'vertex', 'edge', 'face']) visit(menus[name]);
 
 const MESHES = [['mesh.primitive_cube_add', {}], ['mesh.primitive_grid_add', { x_subdivisions: 4, y_subdivisions: 4 }]];
 const failures = [], finished = new Set();

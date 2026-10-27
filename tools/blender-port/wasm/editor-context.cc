@@ -35,6 +35,8 @@
 
 #include "bmesh.hh"
 #include "mesh_intern.hh"
+#include "MEM_guardedalloc.h"
+#include "RNA_access.hh"
 #include "operator-properties.hh"
 #include "extraction.hh"
 
@@ -267,6 +269,36 @@ EXPORT(operator_report) const char *operator_report(wmOperator *op)
 {
   const Report *report = BKE_reports_last_displayable(op->reports);
   return report ? report->message : nullptr;
+}
+
+/* An enum property's items as the operator's UI lists them in this context (its item function, when it has one), as
+ * "identifier\tname" lines; separators and headings are left out. */
+EXPORT(operator_enum_items) const char *operator_enum_items(EditContext *ctx, int type, const char *name)
+{
+  static std::string text;
+  wmOperatorType *ot = operator_type(type);
+  PointerRNA ptr = {nullptr, ot->srna, operator_values_new()};
+  PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
+  bool free = false;
+  const EnumPropertyItem *items = prop->itemf ? prop->itemf(ctx->C, &ptr, prop, &free) : prop->items;
+  text.clear();
+  for (const EnumPropertyItem *item = items; item && item->identifier; item++) {
+    if (item->identifier[0]) {
+      text += std::string(item->identifier) + '\t' + item->name + '\n';
+    }
+  }
+  if (free) {
+    MEM_delete(items);
+  }
+  operator_values_free(ptr.data);
+  return text.c_str();
+}
+
+/* Whether an operator polls, as Blender greys out a menu entry that does not. */
+EXPORT(operator_poll) bool operator_poll(EditContext *ctx, int type)
+{
+  wmOperatorType *ot = operator_type(type);
+  return !ot->poll || ot->poll(ctx->C);
 }
 
 /* Polls and runs an operator's exec: its wmOperatorStatus flags, or 0 when it does not poll or has no exec. */

@@ -166,7 +166,7 @@ void RNA_def_property_enum_default(PropertyRNA *prop, int value) { prop->default
 void RNA_def_property_float_default(PropertyRNA *prop, float value) { prop->defaults = {double(value)}; }
 
 /* What only Blender's UI and file storage use of a property. */
-void RNA_def_enum_funcs(PropertyRNA *, EnumPropertyItemFunc) {}
+void RNA_def_enum_funcs(PropertyRNA *prop, EnumPropertyItemFunc itemf) { prop->itemf = itemf; }
 void RNA_def_property_flag(PropertyRNA *, PropertyFlag) {}
 void RNA_def_property_range(PropertyRNA *, double, double) {}
 void RNA_def_property_subtype(PropertyRNA *, PropertySubType) {}

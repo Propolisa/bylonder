@@ -1,3 +1,4 @@
+import { keysLabel } from '../../windowmanager/input/keymap.js';
 import { iconEl } from './icon.js';
 
 const stack = [];
@@ -42,7 +43,7 @@ function render(items, rect, level, side = false, title) {
     b.append(
       checked === undefined ? item.icon ? iconEl(item.icon) : Object.assign(document.createElement('span'), { className: 'bl-icon blank' }) : iconEl(checked ? 'checkbox_hlt' : 'checkbox_dehlt'),
       Object.assign(document.createElement('span'), { className: 'bl-menu-label', textContent: item.label }),
-      Object.assign(document.createElement('kbd'), { textContent: item.items ? '' : item.keys || '' }),
+      Object.assign(document.createElement('kbd'), { textContent: item.items ? '' : keysLabel(item.keys) }),
     );
     if (item.items) b.append(iconEl('disclosure_tri_right', 'bl-menu-arrow'));
     b.disabled = item.enabled ? !item.enabled() : false;

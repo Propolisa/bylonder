@@ -30,6 +30,27 @@ const PORTED = {
 
 export const hasMeshOperator = (idname) => idname in PORTED || hasOperator(idname);
 
+// Blender's operators the module registers but does not run yet, by what they reach that it lacks; menus leave them
+// out (tests/editmesh-menus.test.js checks the rest run).
+const lacking = (reason, idnames) => idnames.map((idname) => [idname, reason]);
+const NOT_YET = Object.fromEntries([
+  ...lacking("Blender's object data functions", [
+    'mesh.uv_texture_add', 'mesh.uv_texture_remove', 'mesh.customdata_mask_clear', 'mesh.customdata_face_sets_clear',
+    'mesh.customdata_skin_add', 'mesh.customdata_skin_clear', 'mesh.customdata_custom_splitnormals_add',
+    'mesh.customdata_custom_splitnormals_clear', 'mesh.reorder_vertices_spatial', 'mesh.colors_rotate', 'mesh.colors_reverse',
+    'mesh.attribute_set', 'mesh.separate', 'mesh.sort_elements', 'mesh.circularize', 'mesh.shape_propagate_to_all',
+  ]),
+  ...lacking("Blender's gizmos", ['mesh.bisect', 'mesh.spin']),
+  ...lacking("Blender's live UV unwrap", ['mesh.mark_seam']),
+  ...lacking('Bullet, which the module is built without', ['mesh.convex_hull']),
+  ...lacking("the 3D View's interactive tools", [
+    'mesh.knife_tool', 'mesh.knife_project', 'mesh.rip', 'mesh.rip_edge', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_face_at_cursor',
+    'mesh.polybuild_split_at_cursor', 'mesh.polybuild_dissolve_at_cursor', 'mesh.polybuild_transform_at_cursor',
+    'mesh.polybuild_delete_at_cursor',
+  ]),
+]);
+export const runsMeshOperator = (idname) => hasMeshOperator(idname) && !NOT_YET[idname];
+
 // Runs an Edit Mode operator; returns its report, if it made one.
 export function meshOperator(edit, idname, props = {}) {
   if (!PORTED[idname]) return edit.run(idname, props).report;

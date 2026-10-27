@@ -27,8 +27,6 @@ import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { editMeshMenus } from '../space_view3d/view3d-menus-edit-mesh.js';
 
-// VIEW3D_MT_edit_mesh_delete, as far as its operators are ported.
-const MERGE_ITEMS = [['CENTER', 'At Center'], ['CURSOR', 'At Cursor'], ['COLLAPSE', 'Collapse'], ['FIRST', 'At First'], ['LAST', 'At Last']];
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
 
 // The Mesh an object's geometry comes from: its saved Mesh, its Blender primitive, or its Babylon geometry welded.
@@ -261,24 +259,22 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     const edge_index = EDBM_edge_find_nearest(em.mesh, viewAdapter(event.view), [event.x, event.y]);
     if (edge_index >= 0) run(idname, { object_index: 0, edge_index, ...props })();
   };
-  // VIEW3D_MT_edit_mesh_merge: At First and At Last only when the selection history starts or ends with a vert.
-  const mergeMenu = () => {
-    const history = em.edit.history, vert = (ese) => ese?.htype === BM_VERT && em.edit.selectmode & SCE_SELECT_VERTEX;
-    return [
-      ...MERGE_ITEMS.filter(([type]) => (type !== 'FIRST' || vert(history[0])) && (type !== 'LAST' || vert(history.at(-1))))
-        .map(([type, label]) => ({ label, blender: 'mesh.merge:' + type, run: () => exec('mesh.merge', { type }) })),
-      '-',
-      { label: 'By Distance', blender: 'mesh.remove_doubles', run: () => exec('mesh.remove_doubles') },
-    ];
-  };
   const linkedPick = (event, deselect) => {
     const hit = EDBM_unified_findnearest(em.mesh, viewAdapter(event.view), [event.x, event.y], em.edit.selectmode);
     if (hit) run('mesh.select_linked_pick', { object_index: 0, index: EDBM_elem_to_index_any(em.mesh, hit), deselect })();
   };
   const inView = (event) => !!event.view;
+  // An operator's shortcut in Edit Mode's keymaps: the binding with its properties, else its plain one.
+  function keysOf(idname, props = {}) {
+    const values = Object.values(props).filter((value) => typeof value === 'string');
+    const bindings = [keymap, viewKeymap, toolKeymap].flatMap((map) => map.items)
+      .filter((item) => [item.blender].flat().some((id) => id === idname || values.some((value) => id === `${idname}:${value}`)));
+    const exact = bindings.find((item) => item.props && Object.entries(item.props).every(([key, value]) => props[key] === value));
+    return (exact ?? bindings.find((item) => !item.props))?.keys;
+  }
   const menus = editMeshMenus({
-    exec, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type), extrudeMove, inset, bevel, loopcut, mergeMenu,
-    selectmode: () => em.edit.selectmode, totals: () => em.edit.totals, selectBox: () => selectBox(editor.pointer, 'SET', false),
+    edit: () => em.edit, exec, keys: keysOf, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type),
+    extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
   });
   const keymap = createKeymap([
     { blender: 'mesh.select_mode', keys: '1', run: run('mesh.select_mode', { type: 'VERT' }) },
@@ -297,16 +293,16 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.select_linked_pick', keys: 'Shift L', poll: inView, run: (event) => linkedPick(event, true) },
     { blender: 'mesh.dissolve_mode', keys: 'Ctrl X', run: () => exec('mesh.dissolve_mode') },
     { blender: 'mesh.edge_face_add', keys: 'F', run: () => exec('mesh.edge_face_add') },
-    { blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', run: () => openMenu(mergeMenu(), editor.pointer, 'Merge') },
+    { blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', run: () => openMenu(menus.merge(), editor.pointer, 'Merge') },
     { blender: 'mesh.hide', keys: 'H', run: () => exec('mesh.hide') },
-    { blender: 'mesh.hide', keys: 'Shift H', run: () => exec('mesh.hide', { unselected: true }) },
+    { blender: 'mesh.hide', keys: 'Shift H', props: { unselected: true }, run: () => exec('mesh.hide', { unselected: true }) },
     { blender: 'mesh.reveal', keys: 'Alt H', run: () => exec('mesh.reveal') },
     { blender: 'VIEW3D_MT_edit_mesh_delete', keys: ['X', 'Delete'], run: () => openMenu(menus.delete(), editor.pointer, 'Delete') },
     { blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: extrudeMove },
     { blender: 'mesh.duplicate_move', keys: 'Shift D', run: () => operatorMove('mesh.duplicate') },
     { blender: 'VIEW3D_MT_edit_mesh_extrude', keys: 'Alt E', run: () => openMenu(menus.extrude(), editor.pointer, 'Extrude') },
     { blender: 'VIEW3D_MT_edit_mesh_select_similar', keys: 'Shift G', run: () => openMenu(menus.similar(), editor.pointer, 'Select Similar') },
-    { blender: 'VIEW3D_MT_edit_mesh_split', keys: 'Alt M', run: () => openMenu(menus.split, editor.pointer, 'Split') },
+    { blender: 'VIEW3D_MT_edit_mesh_split', keys: 'Alt M', run: () => openMenu(menus.split(), editor.pointer, 'Split') },
     { blender: 'VIEW3D_MT_edit_mesh_vertices', keys: 'Ctrl V', run: () => openMenu(menus.vertex(), editor.pointer, 'Vertex') },
     { blender: 'VIEW3D_MT_edit_mesh_edges', keys: 'Ctrl E', run: () => openMenu(menus.edge(), editor.pointer, 'Edge') },
     { blender: 'VIEW3D_MT_edit_mesh_faces', keys: 'Ctrl F', run: () => openMenu(menus.face(), editor.pointer, 'Face') },
@@ -316,14 +312,14 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.beautify_fill', keys: 'Shift Alt F', run: () => exec('mesh.beautify_fill') },
     { blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: loopcut },
     { blender: 'mesh.inset', keys: 'I', run: inset },
-    { blender: 'mesh.bevel', keys: 'Ctrl B', run: () => bevel('EDGES') },
+    { blender: 'mesh.bevel', keys: 'Ctrl B', props: { affect: 'EDGES' }, run: () => bevel('EDGES') },
     { blender: 'mesh.quads_convert_to_tris', keys: 'Ctrl T', run: () => exec('mesh.quads_convert_to_tris', { quad_method: 'BEAUTY', ngon_method: 'BEAUTY' }) },
     { blender: 'mesh.quads_convert_to_tris', keys: 'Shift Ctrl T', run: () => exec('mesh.quads_convert_to_tris', { quad_method: 'FIXED', ngon_method: 'CLIP' }) },
     { blender: 'mesh.tris_convert_to_quads', keys: 'Alt J', run: () => exec('mesh.tris_convert_to_quads') },
-    { blender: 'mesh.normals_make_consistent', keys: 'Shift N', run: () => exec('mesh.normals_make_consistent', { inside: false }) },
-    { blender: 'mesh.normals_make_consistent', keys: 'Shift Ctrl N', run: () => exec('mesh.normals_make_consistent', { inside: true }) },
+    { blender: 'mesh.normals_make_consistent', keys: 'Shift N', props: { inside: false }, run: () => exec('mesh.normals_make_consistent', { inside: false }) },
+    { blender: 'mesh.normals_make_consistent', keys: 'Shift Ctrl N', props: { inside: true }, run: () => exec('mesh.normals_make_consistent', { inside: true }) },
     { blender: 'VIEW3D_MT_edit_mesh_normals', keys: 'Alt N', run: () => openMenu(menus.normals(), editor.pointer, 'Normals') },
-    { blender: 'mesh.bevel', keys: 'Shift Ctrl B', run: () => bevel('VERTICES') },
+    { blender: 'mesh.bevel', keys: 'Shift Ctrl B', props: { affect: 'VERTICES' }, run: () => bevel('VERTICES') },
     { blender: 'mesh.loop_select', keys: 'Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.loop_select', {}) },
     { blender: 'mesh.loop_select', keys: 'Shift Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.loop_select', { toggle: true }) },
     { blender: 'mesh.edgering_select', keys: 'Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.edgering_select', {}) },
@@ -333,6 +329,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
   ], ['Mesh']);
   const viewKeymap = createKeymap([
+    { blender: 'VIEW3D_MT_edit_mesh_context_menu', keys: 'RIGHTMOUSE', poll: inView, run: (event) => openMenu(menus.context(), { x: event.x, y: event.y }, '') },
     { blender: 'view3d.select', keys: 'LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, false) },
     { blender: 'view3d.select', keys: 'Shift LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, true) },
     { blender: 'view3d.select_box', keys: 'B', run: (event) => selectBox(event, 'SET', false) },
