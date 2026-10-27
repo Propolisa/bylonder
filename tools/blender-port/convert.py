@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 PRELUDE = os.path.join(HERE, 'prelude.hh')
 INCLUDES = ['blenlib', 'bmesh', 'makesdna', 'blenkernel', 'blentranslation', 'makesrna', 'imbuf', 'gpu', 'geometry',
-            'functions', 'editors/include', '']
+            'functions', 'editors/include', 'depsgraph', 'windowmanager', 'blenfont', '']
 NULLS = (K.CXX_NULL_PTR_LITERAL_EXPR, K.GNU_NULL_EXPR)
 NESTING = (K.IF_STMT, K.FOR_STMT, K.WHILE_STMT, K.DO_STMT, K.SWITCH_STMT, K.CONDITIONAL_OPERATOR, K.CXX_FOR_RANGE_STMT)
 OPS = {'==': '===', '!=': '!=='}
@@ -277,8 +277,8 @@ class Source:
         resource = subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
         self.args = ['-std=c++20', '-x', 'c++', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
         self.args += [f'-I{os.path.join(self.root, "source/blender", d)}' for d in INCLUDES]
-        self.args += [f'-I{os.path.join(self.root, d)}' for d in ('intern/guardedalloc', 'intern/atomic', 'intern/eigen', 'intern/profile', 'extern/fast_float', 'extern/xxhash')]
-        plain = self.parse(self.original)
+        self.args += [f'-I{os.path.join(self.root, d)}' for d in ('intern/guardedalloc', 'intern/atomic', 'intern/eigen', 'intern/profile', 'intern/clog', 'extern/fast_float', 'extern/xxhash', 'extern/rangetree')]
+        plain = self.parse(self.original, outline=True)
         includes = [c for c in plain.cursor.get_children() if c.kind == K.INCLUSION_DIRECTIVE and self.in_main(c)]
         self.prelude_line = max((c.extent.end.line for c in includes), default=0)
         bodies = [(f.extent.start.offset, f.extent.end.offset) for f in plain.cursor.walk_preorder()
@@ -315,10 +315,12 @@ class Source:
             self.sigs[f.spelling] = self.signature(f)
             self.registry[f.spelling] = self.sigs[f.spelling]
 
-    def parse(self, text):
+    def parse(self, text, outline=False):
+        """The translation unit of text; an outline (includes, macros, function extents) skips function bodies."""
         self.text_of_tu = text
         open(self.tmp, 'w').write(text)
-        return ci.Index.create().parse(self.tmp, args=self.args, options=ci.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        options = ci.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD | (ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES if outline else 0)
+        return ci.Index.create().parse(self.tmp, args=self.args, options=options)
 
     def macro_parts(self, m):
         """(lines, parameters, body) of an expression-like macro definition, or None."""
@@ -1213,8 +1215,23 @@ class FunctionPort:
         base = kids(callee)[0] if kids(callee) else None
         b = self.expr(base) if base is not None else 'this'
         a = [self.expr(x) for x in args]
-        container = canon(base.type).get_declaration().spelling if base is not None else ''
+        held = canon(base.type) if base is not None else None
+        if held is not None and held.kind == T.POINTER:
+            held = canon(held.get_pointee())
+        container = held.get_declaration().spelling if held is not None else ''
         keyed = container in ('Map', 'Set')
+        if container in ARRAY_TYPES:
+            # New elements of a Vector or Array are default-constructed.
+            element = zero_of(held.get_template_argument_type(0)) or 'null'
+            fill = lambda n: f'Array.from({{ length: {n} }}, () => {element})'
+            if name == 'resize':
+                return f'({b}.length = Math.min({b}.length, {a[0]}), {b}.push(...{fill(f"{a[0]} - {b}.length")}))'
+            if name == 'reinitialize':
+                return f'({b} = {fill(a[0])})'
+            if name == 'reserve':
+                return 'undefined'
+            if name == 'contains':
+                return f'{b}.includes({a[0]})'
         if container == 'optional':
             # std::optional<T> is T or null.
             value = {'emplace': zero_of(canon(base.type).get_template_argument_type(0)) or '{}', 'reset': 'null'}
@@ -1239,7 +1256,7 @@ class FunctionPort:
         if name == 'lookup_default':
             return f'({b}.get({a[0]}) ?? {a[1]})'
         if name in ('add', 'add_new', 'add_overwrite'):
-            setlike = base is not None and canon(base.type).get_declaration().spelling == 'Set'
+            setlike = container == 'Set'
             return f'{b}.{"add" if setlike else "set"}({", ".join(a)})'
         return f'{b}.{METHODS.get(name, name)}({", ".join(a)})'
 
