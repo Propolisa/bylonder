@@ -6,7 +6,7 @@ import { bmo_extrude_face_region_exec, bmo_extrude_edge_only_exec, bmo_extrude_v
 import { BMO_op_callf } from '../../bmesh/intern/bmesh-operators.js';
 import { DEL_VERTS, DEL_EDGES, DEL_FACES, DEL_EDGESFACES, DEL_ONLYFACES } from '../../bmesh/intern/bmesh-delete.js';
 import { bmo_delete_exec } from '../../bmesh/operators/bmo-dupe.js';
-import { bmo_dissolve_faces_exec } from '../../bmesh/operators/bmo-dissolve.js';
+import { bmo_dissolve_faces_exec, bmo_dissolve_verts_exec, bmo_dissolve_edges_exec } from '../../bmesh/operators/bmo-dissolve.js';
 import { BM_mesh_elem_hflag_disable_all, BM_mesh_elem_hflag_enable_test, BM_mesh_select_mode_flush_ex, BM_face_select_set, BM_edge_select_set, BM_vert_select_set, BM_elem_select_set, BM_select_history_clear, BM_select_history_store, SCE_SELECT_VERTEX, SCE_SELECT_EDGE } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_mesh_esubdivide, SUBD_CORNER_INNERVERT, SUBD_CORNER_PATH, SUBD_CORNER_FAN, SUBD_CORNER_STRAIGHT_CUT, SUBDIV_SELECT_ORIG } from '../../bmesh/operators/bmo-subdivide.js';
 import { edbm_loopcut } from './editmesh-loopcut.js';
@@ -221,6 +221,25 @@ export function edbm_add_edge_face_exec(bm) {
   return true;
 }
 
+const selectedEdges = (bm) => BMO_slot_buffer_from_hflag(bm, 'e', BM_ELEM_SELECT).e;
+
+// mesh.dissolve_verts, mesh.dissolve_edges and mesh.edge_collapse.
+export const edbm_dissolve_verts_exec = (bm, props = {}) => bm.totvertsel && BMO_op_callf(bm, bmo_dissolve_verts_exec, selectedVerts(bm), props);
+export function edbm_dissolve_edges_exec(bm, props = {}) {
+  if (!bm.totedgesel) return undefined;
+  const before = [bm.totvert, bm.totedge, bm.totface];
+  BMO_op_callf(bm, bmo_dissolve_edges_exec, selectedEdges(bm), { use_verts: true, use_preserve_quads: true, ...props });
+  return before.join() === [bm.totvert, bm.totedge, bm.totface].join() ? 'No edges dissolved' : undefined;
+}
+export const edbm_collapse_edge_exec = (bm) => bm.totedgesel && BMO_op_callf(bm, bmo_collapse_exec, { edges: selectedEdges(bm) });
+
+// mesh.dissolve_mode (Ctrl X): dissolves by the select mode, using verts unless in face mode.
+export function edbm_dissolve_mode_exec(bm, props = {}) {
+  if (bm.selectmode & SCE_SELECT_VERTEX) return edbm_dissolve_verts_exec(bm, props);
+  if (bm.selectmode & SCE_SELECT_EDGE) return edbm_dissolve_edges_exec(bm, { use_verts: true, ...props });
+  return edbm_dissolve_faces_exec(bm, props);
+}
+
 // Edit Mode operators by Blender idname, as (bm, props) for fixtures and keymaps.
 export const meshOperators = {
   'mesh.delete': (bm, props) => edbm_delete_exec(bm, props.type),
@@ -231,6 +250,10 @@ export const meshOperators = {
   'mesh.inset': (bm, props) => edbm_inset_exec(bm, props),
   'mesh.subdivide': (bm, props) => edbm_subdivide_exec(bm, props),
   'mesh.dissolve_faces': (bm) => edbm_dissolve_faces_exec(bm),
+  'mesh.dissolve_verts': (bm, props) => { edbm_dissolve_verts_exec(bm, props); },
+  'mesh.dissolve_edges': (bm, props) => edbm_dissolve_edges_exec(bm, props),
+  'mesh.dissolve_mode': (bm, props) => edbm_dissolve_mode_exec(bm, props) || undefined,
+  'mesh.edge_collapse': (bm) => { edbm_collapse_edge_exec(bm); },
   'mesh.hide': (bm, props) => EDBM_mesh_hide(bm, bm.selectmode, !!props.unselected),
   'mesh.reveal': (bm) => EDBM_mesh_reveal(bm, bm.selectmode),
   'mesh.select_more': (bm, props) => EDBM_select_more(bm, bm.selectmode, props.use_face_step ?? true),

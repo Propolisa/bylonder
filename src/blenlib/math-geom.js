@@ -87,3 +87,8 @@ export function isect_ray_ray_v3(origin_a, direction_a, origin_b, direction_b) {
   const c = sub_v3(n, sub_v3(origin_b, origin_a));
   return dot_v3(cross_v3(c, direction_b), n) / nlen;
 }
+
+// The angle at v2 between v1 and v3; angle_on_axis measures it projected on the plane across `axis`.
+export const angle_v3v3v3 = (v1, v2, v3) => angle_v3v3(sub_v3(v1, v2), sub_v3(v3, v2));
+export const angle_on_axis_v3v3v3_v3 = (v1, v2, v3, axis) => angle_v3v3(project_plane_normalized_v3_v3v3(sub_v3(v1, v2), axis), project_plane_normalized_v3_v3v3(sub_v3(v3, v2), axis));
+export const interpf = (target, origin, t) => t * target + (1 - t) * origin;

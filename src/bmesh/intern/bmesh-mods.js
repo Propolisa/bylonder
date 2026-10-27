@@ -1,5 +1,5 @@
 // Mid-level topology changes (bmesh_mods.cc).
-import { bmesh_kernel_join_vert_kill_edge, bmesh_kernel_split_edge_make_vert, bmesh_kernel_split_face_make_edge, BM_elem_attrs_copy } from './bmesh-core.js';
+import { bmesh_kernel_join_edge_kill_vert, bmesh_kernel_loop_reverse, BM_faces_join, bmesh_kernel_join_vert_kill_edge, bmesh_kernel_split_edge_make_vert, bmesh_kernel_split_face_make_edge, BM_elem_attrs_copy } from './bmesh-core.js';
 import { BM_edge_other_vert, BM_loop_is_adjacent } from './bmesh-query.js';
 
 export const BM_edge_collapse = (bm, e_kill, v_kill, do_del, kill_degenerate_faces) =>
@@ -50,4 +50,24 @@ export function BM_edge_split(bm, e, v, fac) {
 export function BM_face_split(bm, f, l_a, l_b, example = -1, no_double = false) {
   if (BM_loop_is_adjacent(bm, l_a, l_b) || bm.l.f[l_a] !== f || bm.l.f[l_b] !== f) return null;
   return bmesh_kernel_split_face_make_edge(bm, f, l_a, l_b, example, no_double);
+}
+
+// BM_faces_join_pair: joins the two faces of an edge, first turning one so their windings agree.
+export function BM_faces_join_pair(bm, l_a, l_b, do_del) {
+  if (bm.l.v[l_a] === bm.l.v[l_b]) bmesh_kernel_loop_reverse(bm, bm.l.f[l_b]);
+  return BM_faces_join(bm, [bm.l.f[l_a], bm.l.f[l_b]], do_del, false)[0];
+}
+
+// BM_vert_collapse_edge: removes a vert with two edges, keeping faces; the corners on e_kill take the data of the
+// corner they collapse onto.
+export function BM_vert_collapse_edge(bm, e_kill, v_kill, do_del, kill_degenerate_faces, kill_duplicate_faces) {
+  const { l } = bm, tv = BM_edge_other_vert(bm, e_kill, v_kill), first = bm.e.l[e_kill];
+  if (first >= 0) {
+    let it = first;
+    do {
+      const kv = l.next[it];
+      if (l.v[it] === tv && l.v[kv] === v_kill) for (const layer of l.layers) layer.data.copyWithin(kv * layer.size, it * layer.size, it * layer.size + layer.size);
+    } while ((it = l.radial_next[it]) !== first);
+  }
+  return bmesh_kernel_join_edge_kill_vert(bm, e_kill, v_kill, do_del, true, kill_degenerate_faces, kill_duplicate_faces);
 }

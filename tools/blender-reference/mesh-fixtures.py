@@ -122,6 +122,20 @@ EDIT_CASES = {
     "fill-grid-hole-verts": (("primitive_grid_add", GRID4, HOLE5), "VERT", [6, 7, 11, 12], "edge_face_add", {}),
     "fill-tricky-vert": (("primitive_grid_add", GRID4, CORNER0), "VERT", [5], "edge_face_add", {}),
     "fill-faces-dissolve": (("primitive_grid_add", GRID4), "FACE", [0, 1], "edge_face_add", {}),
+    "dissolve-verts-center": (("primitive_grid_add", GRID4), "VERT", [12], "dissolve_verts", {}),
+    "dissolve-verts-row": (("primitive_grid_add", GRID4), "VERT", [6, 7, 8], "dissolve_verts", {}),
+    "dissolve-verts-boundary": (("primitive_grid_add", GRID4), "VERT", [1, 2], "dissolve_verts", {}),
+    "dissolve-verts-cube": (("primitive_cube_add", {}), "VERT", [0], "dissolve_verts", {}),
+    "dissolve-verts-tear": (("primitive_grid_add", GRID4), "VERT", [1, 12], "dissolve_verts", {"use_boundary_tear": True}),
+    "dissolve-verts-face-split": (("primitive_grid_add", GRID4), "VERT", [6, 12], "dissolve_verts", {"use_face_split": True}),
+    "dissolve-edges-one": (("primitive_grid_add", GRID4), "EDGE", [16], "dissolve_edges", {}),
+    "dissolve-edges-cross": (("primitive_grid_add", GRID4), "EDGE", [15, 16, 21, 24], "dissolve_edges", {}),
+    "dissolve-edges-no-verts": (("primitive_grid_add", GRID4), "EDGE", [15, 16, 21, 24], "dissolve_edges", {"use_verts": False}),
+    "dissolve-edges-angle": (("primitive_cylinder_add", {"vertices": 8}), "EDGE", [1, 4, 7, 10], "dissolve_edges", {"angle_threshold": 0.5}),
+    "dissolve-edges-face-split": (("primitive_grid_add", GRID4), "EDGE", [15, 16], "dissolve_edges", {"use_face_split": True}),
+    "dissolve-edges-cube": (("primitive_cube_add", {}), "EDGE", [0, 1], "dissolve_edges", {}),
+    "dissolve-mode-edge": (("primitive_grid_add", GRID4), "EDGE", [16, 17], "dissolve_mode", {}),
+    "edge-collapse": (("primitive_grid_add", GRID4), "EDGE", [5, 20], "edge_collapse", {}),
 }
 
 

@@ -4,7 +4,7 @@ import {
   bmesh_disk_edge_append, bmesh_disk_edge_remove, bmesh_disk_edge_next, bmesh_edge_vert_swap, bmesh_disk_vert_replace,
   bmesh_radial_loop_append, bmesh_radial_loop_remove,
 } from './bmesh-structure.js';
-import { BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_verts_in_edge, BM_face_find_double, BM_edge_face_count_is_over } from './bmesh-query.js';
+import { BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_verts_in_edge, BM_face_find_double, BM_edge_face_count_is_over, BM_EDGES_OF_VERT } from './bmesh-query.js';
 import { BM_face_create_ngon } from './bmesh-construct.js';
 import { BM_select_history_remove } from './bmesh-marking.js';
 
@@ -172,6 +172,45 @@ export function bmesh_kernel_join_vert_kill_edge(bm, e_kill, v_kill, do_del, che
   if (kill_degenerate_faces) while (degenerate.length) BM_face_kill(bm, degenerate.pop());
   if (do_del) bm_kill_only_vert(bm, v_kill);
   return v_target;
+}
+
+const bmesh_disk_count_at_most = (bm, v, n) => Math.min(BM_EDGES_OF_VERT(bm, v).length, n);
+
+// bmesh_kernel_join_edge_kill_vert: removes a vert with two edges, e_kill going and its other edge stretching to
+// e_kill's far vert. Returns that edge, or -1.
+export function bmesh_kernel_join_edge_kill_vert(bm, e_kill, v_kill, do_del, check_edge_exists, kill_degenerate_faces, kill_duplicate_faces) {
+  const { l } = bm;
+  if (!BM_vert_in_edge(bm, e_kill, v_kill) || bmesh_disk_count_at_most(bm, v_kill, 3) !== 2) return -1;
+  const e_old = bmesh_disk_edge_next(bm, e_kill, v_kill);
+  const v_target = BM_edge_other_vert(bm, e_kill, v_kill), v_old = BM_edge_other_vert(bm, e_old, v_kill);
+  if (BM_verts_in_edge(bm, v_kill, v_target, e_old)) return -1;
+  const degenerate = [], duplicate = [];
+  const e_splice = check_edge_exists ? BM_edge_exists(bm, v_target, v_old) : -1;
+  bmesh_disk_vert_replace(bm, e_old, v_target, v_kill);
+  bmesh_disk_edge_remove(bm, e_kill, v_target);
+  const first = bm.e.l[e_kill];
+  if (first >= 0) {
+    let l_kill = first, l_kill_next;
+    do {
+      if (l.v[l.next[l_kill]] === v_kill) l.v[l.next[l_kill]] = v_target;
+      l.prev[l.next[l_kill]] = l.prev[l_kill];
+      l.next[l.prev[l_kill]] = l.next[l_kill];
+      const f = l.f[l_kill];
+      if (bm.f.l_first[f] === l_kill) bm.f.l_first[f] = l.next[l_kill];
+      bm.f.len[f]--;
+      if (kill_degenerate_faces && bm.f.len[f] < 3) degenerate.push(f);
+      else if (kill_duplicate_faces) duplicate.push(f);
+      l_kill_next = l.radial_next[l_kill];
+      bm_kill_only_loop(bm, l_kill);
+    } while ((l_kill = l_kill_next) !== first);
+  }
+  bm_kill_only_edge(bm, e_kill);
+  if (do_del) bm_kill_only_vert(bm, v_kill);
+  else bm.v.e[v_kill] = -1;
+  if (e_splice >= 0) BM_edge_splice(bm, e_old, e_splice);
+  while (degenerate.length) BM_face_kill(bm, degenerate.pop());
+  while (duplicate.length) { const f = duplicate.pop(); if (BM_face_find_double(bm, f) >= 0) BM_face_kill(bm, f); }
+  return e_old;
 }
 
 function bm_loop_systag_count_radial(bm, l, flag) {

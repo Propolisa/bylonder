@@ -5,7 +5,7 @@ import { BM_edge_create, BM_elem_attrs_copy, BM_vert_splice, bmesh_kernel_edge_s
 import { BM_face_create_verts } from '../intern/bmesh-construct.js';
 import { BM_edge_is_boundary, BM_edge_other_vert, BM_edge_other_loop, BM_ITER_LOOPS_OF_VERT, BM_EDGES_OF_VERT } from '../intern/bmesh-query.js';
 import { BM_mesh_normals_update } from '../intern/bmesh-mesh-normals.js';
-import { sub_v3, add_v3, mul_v3_fl, dot_v3, cross_v3, len_v3, normalize_v3 } from '../../blenlib/math-geom.js';
+import { angle_v3v3v3, sub_v3, add_v3, mul_v3_fl, dot_v3, cross_v3, len_v3, normalize_v3 } from '../../blenlib/math-geom.js';
 
 const ELE_NEW = 1;
 const SMALL_NUMBER = 1e-8;
@@ -16,10 +16,6 @@ function shell_v3v3_mid_normalized_to_dist(a, b) {
   const ab = add_v3(a, b), len = len_v3(ab);
   const c = len ? Math.abs(dot_v3(a, mul_v3_fl(ab, 1 / len))) : 0;
   return c < SMALL_NUMBER ? 1 : 1 / c;
-}
-function angle_v3v3v3(a, b, c) {
-  const u = normalize_v3(sub_v3(a, b)), w = normalize_v3(sub_v3(c, b));
-  return Math.acos(Math.max(-1, Math.min(1, dot_v3(u, w))));
 }
 function BM_vert_calc_shell_factor(bm, v) {
   const { l } = bm, no = Array.from(bm.v.no.subarray(v * 3, v * 3 + 3));

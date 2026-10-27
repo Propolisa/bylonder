@@ -252,7 +252,11 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
     '-',
+    { label: 'Dissolve Vertices', blender: 'mesh.dissolve_verts', run: () => exec('mesh.dissolve_verts') },
+    { label: 'Dissolve Edges', blender: 'mesh.dissolve_edges', run: () => exec('mesh.dissolve_edges') },
     { label: 'Dissolve Faces', blender: 'mesh.dissolve_faces', run: () => exec('mesh.dissolve_faces') },
+    '-',
+    { label: 'Edge Collapse', blender: 'mesh.edge_collapse', run: () => exec('mesh.edge_collapse') },
   ];
   const keymap = createKeymap([
     { blender: 'mesh.select_mode', keys: '1', run: run((bm) => (selectmode = mesh_select_mode(bm, 'VERT'))) },
@@ -269,6 +273,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => exec('mesh.select_linked') },
     { blender: 'mesh.select_linked_pick', keys: 'L', poll: inView, run: (event) => linkedPick(event, false) },
     { blender: 'mesh.select_linked_pick', keys: 'Shift L', poll: inView, run: (event) => linkedPick(event, true) },
+    { blender: 'mesh.dissolve_mode', keys: 'Ctrl X', run: () => exec('mesh.dissolve_mode') },
     { blender: 'mesh.edge_face_add', keys: 'F', run: () => exec('mesh.edge_face_add') },
     { blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', run: () => openMenu(mergeMenu(), editor.pointer, 'Merge') },
     { blender: 'mesh.hide', keys: 'H', run: () => exec('mesh.hide') },

@@ -121,6 +121,24 @@ export function BM_face_exists(bm, verts) {
   return -1;
 }
 
+// The two loops (BM_edge_loop_pair) or faces (BM_edge_face_pair) of a manifold edge, or null.
+export function BM_edge_loop_pair(bm, e) {
+  const la = bm.e.l[e];
+  if (la < 0) return null;
+  const lb = bm.l.radial_next[la];
+  return la !== lb && bm.l.radial_next[lb] === la ? [la, lb] : null;
+}
+export const BM_edge_face_pair = (bm, e) => BM_edge_loop_pair(bm, e)?.map((lp) => bm.l.f[lp]) ?? null;
+// The two edges of a vert with exactly two, or null.
+export function BM_vert_edge_pair(bm, v) {
+  const e_a = bm.v.e[v];
+  if (e_a < 0) return null;
+  const e_b = bmesh_disk_edge_next(bm, e_a, v);
+  return e_b !== e_a && bmesh_disk_edge_next(bm, e_b, v) === e_a ? [e_a, e_b] : null;
+}
+// The loop of l's face on the other edge at v.
+export const BM_loop_other_edge_loop = (bm, lp, v) => (bm.l.v[lp] === v ? bm.l.prev[lp] : bm.l.next[lp]);
+
 // Whether some face uses both edges.
 export const BM_edge_share_face_check = (bm, e1, e2) => bm.e.l[e2] >= 0 && BM_FACES_OF_EDGE(bm, e1).some((f) => BM_face_edge_share_loop(bm, f, e2) >= 0);
 

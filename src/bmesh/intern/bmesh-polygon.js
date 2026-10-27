@@ -2,7 +2,14 @@
 import { bmesh_kernel_loop_reverse } from './bmesh-core.js';
 import { add_v3, sub_v3, mul_v3_fl, dot_v3, len_v3, len_squared_v3, normalize_v3, is_zero_v3, project_plane_normalized_v3_v3v3, angle_signed_on_axis_v3v3_v3, normal_tri_v3, normal_quad_v3, add_newell_cross_v3_v3v3 } from '../../blenlib/math-geom.js';
 
-// BM_face_calc_normal (Newell's method) into f->no; returns the face area times two before normalizing.
+// BM_face_calc_normal: the unit normal by Newell's method.
+export function BM_face_calc_normal(bm, f) {
+  let n = [0, 0, 0];
+  for (const lp of loopsOf(bm, f)) n = add_newell_cross_v3_v3v3(n, coOf(bm, bm.l.v[lp]), coOf(bm, bm.l.v[bm.l.next[lp]]));
+  return normalize_v3(n);
+}
+
+// BM_face_calc_normal into f->no; returns the face area times two before normalizing.
 export function BM_face_normal_update(bm, f) {
   const { l } = bm, co = bm.v.co;
   const first = bm.f.l_first[f];
