@@ -17,11 +17,7 @@ OUT_FIRST = {
     'copy_m4_m4': lambda a: f'{a[0]}.map((c) => [...c])',
     'add_v3_v3v3': 'add_v3', 'sub_v3_v3v3': 'sub_v3', 'mul_v3_v3fl': 'mul_v3_fl', 'madd_v3_v3v3fl': 'madd', 'cross_v3_v3v3': 'cross_v3',
     'interp_v3_v3v3': 'interp_v3', 'mid_v3_v3v3': 'mid_v3', 'negate_v3_v3': 'negate_v3', 'normalize_v3_v3': 'normalize_v3',
-    'closest_to_line_segment_v3': 'closest_to_line_segment_v3', 'closest_to_plane_v3': 'closest_to_plane_v3',
-    'closest_to_line_v3': 'closest_to_line_v3', 'plane_from_point_normal_v3': 'plane_from_point_normal_v3',
-    'mul_v3_m4v3': 'mul_m4_v3', 'mul_v2_m3v3': 'mul_v2_m3v3', 'mul_v3_m3v3': 'mul_m3_v3', 'axis_dominant_v3_to_m3': 'axis_dominant_v3_to_m3',
-    'project_v3_v3v3': 'project_v3_v3v3', 'project_plane_normalized_v3_v3v3': 'project_plane_normalized_v3_v3v3',
-    'invert_m4_m4': 'invert_m4_m4', 'mul_m4_m4m4': 'mul_m4_m4m4', 'mul_m3_m3m3': 'mul_m3_m3m3',
+    'mul_v3_m4v3': 'mul_m4_v3', 'mul_v3_m3v3': 'mul_m3_v3',
 }
 # Functions updating their first argument in place: fn(inout, ...args) is `inout = js(inout, ...args)`.
 IN_OUT = {'add_v3_v3': 'add_v3', 'sub_v3_v3': 'sub_v3', 'mul_v3_fl': 'mul_v3_fl', 'madd_v3_v3fl': 'madd', 'negate_v3': 'negate_v3',
@@ -56,8 +52,8 @@ METHODS = {'append': 'push', 'remove_last': 'pop', 'lookup': 'get', 'contains': 
 # The JS module of each helper the rules above emit.
 HELPER_MODULES = {
     'blenlib/math-geom.js': {'add_v3', 'sub_v3', 'mul_v3_fl', 'madd', 'cross_v3', 'dot_v3', 'len_v3', 'len_squared_v3', 'interp_v3', 'mid_v3',
-                             'negate_v3', 'normalize_v3', 'saacos', 'project_v3_v3v3', 'project_plane_normalized_v3_v3v3'},
-    'blenlib/math-matrix.js': {'unit_m4', 'unit_m3', 'mul_m4_v3', 'mul_m4_v4', 'mul_m3_v3', 'invert_m4_m4', 'mul_m4_m4m4', 'mul_m3_m3m3'},
+                             'negate_v3', 'normalize_v3', 'saacos'},
+    'blenlib/math-matrix.js': {'unit_m4', 'unit_m3', 'mul_m4_v3', 'mul_m4_v4', 'mul_m3_v3'},
     'bmesh/intern/bmesh-class.js': {'vco', 'vno', 'fno', 'BM_ELEM_API_FLAG_ENABLE', 'BM_ELEM_API_FLAG_DISABLE', 'BM_ELEM_API_FLAG_TEST',
                                     'BM_elem_flag_test', 'BM_elem_flag_enable', 'BM_elem_flag_disable', 'BM_elem_flag_set',
                                     'BMO_flag_test', 'BMO_flag_enable', 'BMO_flag_disable', 'BMO_flag_set', 'BM_ELEM_CD_GET_FLOAT',

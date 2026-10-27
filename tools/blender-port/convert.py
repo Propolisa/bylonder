@@ -276,6 +276,8 @@ class Source:
         self.tmp = os.path.join(os.path.dirname(path), f'{TMP_PREFIX}{os.path.basename(path)}')
         resource = subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
         self.args = ['-std=c++20', '-x', 'c++', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
+        # Headers Blender's build generates (tools/blender-reference/rna-prototypes.py).
+        self.args += [f'-I{os.path.join(os.path.dirname(os.path.abspath(__file__)), "include")}']
         self.args += [f'-I{os.path.join(self.root, "source/blender", d)}' for d in INCLUDES]
         self.args += [f'-I{os.path.join(self.root, d)}' for d in ('intern/guardedalloc', 'intern/atomic', 'intern/eigen', 'intern/profile', 'intern/clog', 'extern/fast_float', 'extern/xxhash', 'extern/rangetree')]
         plain = self.parse(self.original, outline=True)
@@ -1148,6 +1150,8 @@ class FunctionPort:
                 return '[' + ', '.join(js(args)) + ']'
             if not args:
                 return zero_of(c.type) or '{}'
+            if decl_name(c.type) in ('Map', 'Set') and len(args) == 1:
+                return f'new {decl_name(c.type)}({self.expr(args[0])})'
             if decl_name(c.type) in ARRAY_TYPES and is_int(args[0].type) and len(args) <= 2:
                 return f'new Array({self.expr(args[0])})' + (f'.fill({self.expr(args[1])})' if len(args) == 2 else '')
             if len(args) == 1:
@@ -1315,7 +1319,7 @@ class FunctionPort:
         b = self.expr(base) if base is not None else 'this'
         a = [self.expr(x) for x in args]
         held = canon(base.type) if base is not None else None
-        if held is not None and held.kind == T.POINTER:
+        if held is not None and held.kind in (T.POINTER, T.LVALUEREFERENCE, T.RVALUEREFERENCE):
             held = canon(held.get_pointee())
         container = held.get_declaration().spelling if held is not None else ''
         keyed = container in ('Map', 'Set')
@@ -1352,6 +1356,10 @@ class FunctionPort:
             return f'{b}.clear()' if keyed else f'{b}.length = 0'
         if name in ('data', 'as_span', 'as_mutable_span'):
             return b
+        if name == 'lookup_ptr':
+            return f'({b}.get({a[0]}) ?? null)'
+        if name == 'pop_try':
+            return f'({b}.length ? {b}.pop() : null)'
         if name == 'lookup_default':
             return f'({b}.get({a[0]}) ?? {a[1]})'
         if name in ('add', 'add_new', 'add_overwrite'):
