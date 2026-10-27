@@ -152,6 +152,10 @@ def zero_of(t):
         return 'null'
     if name in ('Map', 'Set'):
         return f'new {name}()'
+    if name == 'array' and t.get_num_template_arguments() == 2:  # std::array<T, N>, a fixed array of N = sizes' ratio.
+        elem = t.get_template_argument_type(0)
+        inner = zero_of(elem)
+        return f'[{", ".join([inner] * (t.get_size() // canon(elem).get_size()))}]' if inner else None
     if t.kind == T.RECORD:
         # Every field set, so objects of one struct share a shape.
         fields = [f'{f.spelling}: {zero_of(f.type) or "null"}' for f in t.get_fields() if f.spelling]
@@ -366,6 +370,13 @@ class Source:
             if c.kind == K.MACRO_INSTANTIATION and self.in_main(c):
                 self.macros[(c.extent.start.offset, c.extent.end.offset)] = (c.spelling, c.referenced)
         self.functions = [c for c in self.tu.cursor.walk_preorder() if c.kind in (K.FUNCTION_DECL, K.FUNCTION_TEMPLATE) and c.is_definition() and self.in_main(c)]
+        # Variables and fields the file subscripts: what they point at is a buffer, not one element.
+        self.subscripted = {strip_parens_casts(kids(c)[0]).referenced.hash for c in self.tu.cursor.walk_preorder()
+                            if c.kind == K.ARRAY_SUBSCRIPT_EXPR and self.in_main(c) and strip_parens_casts(kids(c)[0]).referenced is not None}
+        # ...and what initializes such a variable: `PolyIndex *indices = r_indices;` makes r_indices a buffer too.
+        self.subscripted |= {strip_parens_casts(clangx.var_init(c)).referenced.hash for c in self.tu.cursor.walk_preorder()
+                             if c.kind == K.VAR_DECL and c.hash in self.subscripted and self.in_main(c) and clangx.var_init(c) is not None
+                             and strip_parens_casts(clangx.var_init(c)).referenced is not None}
         self.sigs, self.computing = {}, set()
         for f in self.functions:
             self.signature_of(f)
@@ -414,6 +425,10 @@ class Source:
 
     def sig_of(self, name):
         return self.sigs.get(name) or self.registry.get(name)
+
+    def is_buffer(self, c):
+        ref = strip_parens_casts(c).referenced
+        return ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL, K.FIELD_DECL) and ref.hash in self.subscripted
 
     def signature_of(self, ref):
         """The signature of the function ref names, computed on first use when this file defines it, so a callee defined
@@ -1056,6 +1071,12 @@ class FunctionPort:
         if k == K.MEMBER_REF_EXPR:
             return self.member(c)
         if k == K.ARRAY_SUBSCRIPT_EXPR:
+            base = strip(ch[0])
+            if base.kind == K.MEMBER_REF_EXPR and kids(base):
+                pool = self.element_pool(kids(base)[0])
+                if pool and (pool, base.spelling) in VEC_FIELDS:
+                    # `v->co[i]` is the pool's own component, written or read in place.
+                    return f'{self.bm}.{pool}.{base.spelling}[{self.expr(kids(base)[0])} * 3 + {self.expr(ch[1])}]'
             return f'{self.expr(ch[0])}[{self.expr(ch[1])}]'
         if k == K.CALL_EXPR:
             return self.call(c, want)
@@ -1238,7 +1259,10 @@ class FunctionPort:
             if op in ('==', '!=', '<', '>', '<=', '>=', '-'):
                 return f'({self.cursor_index(lhs)} {OPS.get(op, op)} {self.cursor_index(rhs)})'
         if op == '=':
-            return self.assign(lhs, self.expr(rhs, lhs.type))
+            value = self.expr(rhs, lhs.type)
+            if is_record_pointer(lhs.type) and self.p.is_buffer(rhs) and not self.p.is_buffer(lhs):
+                value += '[0]'  # A buffer stored where one element is used, as `pf->indices = r_indices` points at its first.
+            return self.assign(lhs, value)
         if is_record_pointer(lhs.type) and (op in ('+=', '-=') or (is_record_pointer(rhs.type) and op in ('<', '>', '<=', '>=', '-'))):
             return fix(MEMORY, self.p.text(c))
         if self.p.float32 and canon(c.type).kind == T.FLOAT and op in ('+=', '-=', '*=', '/='):
@@ -1374,7 +1398,14 @@ class FunctionPort:
             if decl_name(c.type) in ('Map', 'Set') and len(args) == 1:
                 return f'new {decl_name(c.type)}({self.expr(args[0])})'
             if decl_name(c.type) in ARRAY_TYPES and is_int(args[0].type) and len(args) <= 2:
-                return f'new Array({self.expr(args[0])})' + (f'.fill({self.expr(args[1])})' if len(args) == 2 else '')
+                # Array<T>(n) and Vector<T>(n) hold n default-constructed elements, or n copies of the second argument.
+                n = self.expr(args[0])
+                if len(args) == 2:
+                    return f'new Array({n}).fill({self.expr(args[1])})'
+                zero = zero_of(canon(c.type).get_template_argument_type(0))
+                if zero is None:
+                    return f'new Array({n})'
+                return f'Array.from({{ length: {n} }}, () => {zero})' if zero.startswith(('[', '{', 'new ')) else f'new Array({n}).fill({zero})'
             if len(args) == 1:
                 return self.expr(args[0], want)
             return fix(f'constructor {name}', self.p.text(c))

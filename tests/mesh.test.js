@@ -60,10 +60,21 @@ function geometry(positions, edges, face_offsets, corner_verts) {
 // Operators whose resulting selection is compared with Blender's too.
 const SELECTION_CHECKED = /select/;
 let edited = 0, geometric = 0;
+// Every fixture runs, so one test run reports every operator that differs from Blender.
+const failures = [];
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(dir + file, 'utf8'));
   if (!fixture.edit) continue;
-  const name = file.replace('.json', ''), { select_mode, select, operator, props, move, seams = [] } = fixture.edit;
+  try {
+    checkEdit(file.replace('.json', ''), fixture);
+  } catch (error) {
+    failures.push(`${file}: ${error.message.split('\n')[0]}`);
+  }
+}
+assert.deepEqual(failures, [], `${failures.length} Edit Mode fixtures differ from Blender:\n${failures.join('\n')}`);
+
+function checkEdit(name, fixture) {
+  const { select_mode, select, operator, props, move, seams = [] } = fixture.edit;
   const bm = BM_mesh_bm_from_me(primitive_add(fixture.operator, fixture.props));
   for (const e of seams) bm.e.hflag[e] |= BM_ELEM_SEAM;
   // Selects by index as Blender's lookup tables count: the i-th live element.
@@ -88,7 +99,7 @@ for (const file of await readdir(dir)) {
   if (move) {
     assert.deepEqual(geometry(mesh.vert_positions, mesh.edges, mesh.face_offsets, mesh.corner_verts), geometry(fixture.positions.flat(), fixture.edges.flat(), fixture.face_offsets, fixture.corner_verts), name + ': geometry');
     geometric++;
-    continue;
+    return;
   }
   fixture.positions.forEach((p, v) => p.forEach((x, a) => assert.ok(near(mesh.vert_positions[v * 3 + a], x), `${name}: vertex ${v}`)));
   assert.deepEqual(Array.from(mesh.edges), fixture.edges.flat(), name + ': edges');

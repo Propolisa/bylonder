@@ -187,7 +187,7 @@ class Driver:
                     decl = source.declaration(need) if constant is None else None
                     where = self.definition_file(decl, source) if decl is not None else None
                     if constant is not None:
-                        self.constant(source, module, need, constant)
+                        self.constant(source, module, need, constant, root=True)  # Exported, for the shim.
                     elif where:
                         queue.append((where[0], need, where[1]))
                     else:

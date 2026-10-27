@@ -201,7 +201,7 @@ export function bmo_subdivide_edges_exec(bm, edges, {
   BM_ITER_MESH(bm.f, (face) => {
     if (use_only_quads && bm.f.len[face] !== 4) return;
     const loops = faceLoops(bm, face), fedges = loops.map((l) => bm.l.e[l]), fverts = loops.map((l) => bm.l.v[l]);
-    const split = fedges.map((e) => BMO_flag_test(bm.e, e, SUBD_SPLIT));
+    const split = fedges.map((e) => BMO_flag_test(bm.e, e, SUBD_SPLIT) !== 0);
     const selected = fedges.filter((e, i) => split[i]);
     let totesel = selected.length;
     if (totesel === 2 && BM_edge_share_vert_check(bm, selected[0], selected[1])) {
