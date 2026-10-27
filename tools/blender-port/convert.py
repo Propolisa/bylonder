@@ -457,7 +457,11 @@ class Source:
     # --- out parameters
 
     def signature(self, f):
-        params = [{'name': js_local(p.spelling) or f'_unused{i}', 'type': p.type, 'cursor': p} for i, p in enumerate(f.get_arguments())]
+        args = list(f.get_arguments())
+        # An unnamed mesh parameter is still the mesh, as `BMesh * /*bm*/` of an operator's exec.
+        is_mesh = lambda p: pointee(p.type) is not None and canon(pointee(p.type)).get_declaration().spelling == 'BMesh'
+        unnamed = lambda i, p: 'bm' if is_mesh(p) and not any(a.spelling == 'bm' for a in args) else f'_unused{i}'
+        params = [{'name': js_local(p.spelling) or unnamed(i, p), 'type': p.type, 'cursor': p} for i, p in enumerate(args)]
         body = next((k for k in f.get_children() if k.kind == K.COMPOUND_STMT), None)
         for p in params:
             p['out'] = self.out_kind(p, body) if body is not None else None
@@ -1016,7 +1020,7 @@ class FunctionPort:
             self.note_ref(ref, c.spelling)
             if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL):
                 return js_local(c.spelling)
-            if ref is not None and ref.kind == K.FUNCTION_DECL and (self.p.sig_of(c.spelling) or {}).get('needs_bm'):
+            if self.f is not None and ref is not None and ref.kind == K.FUNCTION_DECL and (self.p.sig_of(c.spelling) or {}).get('needs_bm'):
                 # A function passed as a callback is called without bm, so it takes this caller's.
                 return f'(...args) => {c.spelling}({self.bm}, ...args)'
             return CONSTANTS.get(c.spelling, c.spelling)
