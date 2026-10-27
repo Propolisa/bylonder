@@ -64,7 +64,7 @@ function bm_face_calc_tangent_from_quad_edge_pair(bm, f) {
   vec_b = sub_v3(vco(bm, verts[1]), vco(bm, verts[2]));
   const vec = add_v3(vec_a, vec_b);
   if (len_squared_v3(r_tangent) < len_squared_v3(vec)) {
-    r_tangent = [...vec];
+    r_tangent = vec.slice(0, 3);
   }
   r_tangent = normalize_v3(r_tangent);
   return r_tangent;
@@ -114,7 +114,7 @@ export function poly_rotate_plane(normal, verts, nverts) {
   const mat = axis_dominant_v3_to_m3(normal);
   for (i = 0; i < nverts; i++) {
     co = mul_v2_m3v3(mat, verts[i]);
-    verts[i] = [...co];
+    verts[i] = co.slice(0, 3);
   }
 }
 

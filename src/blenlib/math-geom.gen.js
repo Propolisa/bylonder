@@ -69,7 +69,7 @@ export function area_poly_v2(verts, nr) {
 }
 
 export function plane_from_point_normal_v3(plane_co, plane_no) {
-  const r_plane = [...plane_no];
+  const r_plane = plane_no.slice(0, 3);
   r_plane[3] = -dot_v3(r_plane, plane_co);
   return r_plane;
 }
@@ -86,14 +86,14 @@ export function closest_to_line_segment_v2(p, l1, l2) {
   let cp = [0, 0];
   const lambda = (([_r0, cp] = closest_to_line_v2(p, l1, l2)), _r0);
   if (lambda <= 0.0) {
-    r_close = [...l1];
+    r_close = l1.slice(0, 2);
     return [0.0, r_close];
   }
   if (lambda >= 1.0) {
-    r_close = [...l2];
+    r_close = l2.slice(0, 2);
     return [1.0, r_close];
   }
-  r_close = [...cp];
+  r_close = cp.slice(0, 2);
   return [lambda, r_close];
 }
 
@@ -103,14 +103,14 @@ export function closest_to_line_segment_v3(p, l1, l2) {
   let cp = [0, 0, 0];
   const lambda = (([_r0, cp] = closest_to_line_v3(p, l1, l2)), _r0);
   if (lambda <= 0.0) {
-    r_close = [...l1];
+    r_close = l1.slice(0, 3);
     return [0.0, r_close];
   }
   if (lambda >= 1.0) {
-    r_close = [...l2];
+    r_close = l2.slice(0, 3);
     return [1.0, r_close];
   }
-  r_close = [...cp];
+  r_close = cp.slice(0, 3);
   return [lambda, r_close];
 }
 
@@ -188,7 +188,7 @@ export function closest_to_ray_v3(p, ray_orig, ray_dir) {
   let lambda = 0;
   if (is_zero_v3(ray_dir)) {
     lambda = 0.0;
-    r_close = [...ray_orig];
+    r_close = ray_orig.slice(0, 3);
     return [lambda, r_close];
   }
   const h = sub_v3(p, ray_orig);
@@ -233,7 +233,7 @@ export function line_point_factor_v2(p, l1, l2) {
 
 export function axis_dominant_v3_to_m3(normal) {
   let r_mat = Array.from({ length: 3 }, () => [0, 0, 0]);
-  r_mat[2] = [...normal];
+  r_mat[2] = normal.slice(0, 3);
   [r_mat[0], r_mat[1]] = ortho_basis_v3v3_v3(r_mat[2]);
   r_mat = transpose_m3(r_mat);
   return r_mat;
@@ -331,15 +331,15 @@ export function resolve_quad_uv_v2_deriv(r_uv, r_deriv, st, st0, st1, st2, st3) 
 }
 
 export function interp_bilinear_quad_v3(data, u, v) {
-  let res = [...data[0]];
+  let res = data[0].slice(0, 3);
   res = mul_v3_fl(res, Math.fround(Math.fround(1 - u) * Math.fround(1 - v)));
-  let vec = [...data[1]];
+  let vec = data[1].slice(0, 3);
   vec = mul_v3_fl(vec, Math.fround(u * Math.fround(1 - v)));
   res = add_v3(res, vec);
-  vec = [...data[2]];
+  vec = data[2].slice(0, 3);
   vec = mul_v3_fl(vec, Math.fround(u * v));
   res = add_v3(res, vec);
-  vec = [...data[3]];
+  vec = data[3].slice(0, 3);
   vec = mul_v3_fl(vec, Math.fround(Math.fround(1 - u) * v));
   res = add_v3(res, vec);
   return res;
@@ -428,7 +428,7 @@ export function minmax_v3v3_v3(vec) {
 }
 
 export function axis_sort_v3(axis_values, r_axis_order) {
-  const v = [...axis_values];
+  const v = axis_values.slice(0, 3);
   if (v[0] < v[1]) {
     if (v[2] < v[0]) {
       {

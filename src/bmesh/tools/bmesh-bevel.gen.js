@@ -259,7 +259,7 @@ function add_new_bound_vert(mem_arena, vm, co) {
     seam_len: 0,
     sharp_len: 0,
   };
-  ans.nv.co = [...co];
+  ans.nv.co = co.slice(0, 3);
   if (!vm.boundstart) {
     ans.index = 0;
     vm.boundstart = ans;
@@ -285,7 +285,7 @@ function add_new_bound_vert(mem_arena, vm, co) {
 }
 
 function adjust_bound_vert(bv, co) {
-  bv.nv.co = [...co];
+  bv.nv.co = co.slice(0, 3);
 }
 
 function mesh_vert(vm, i, j, k) {
@@ -305,7 +305,7 @@ function copy_mesh_vert(vm, ito, jto, kto, ifrom, jfrom, kfrom) {
   const nvto = mesh_vert(vm, ito, jto, kto);
   const nvfrom = mesh_vert(vm, ifrom, jfrom, kfrom);
   nvto.v = nvfrom.v;
-  nvto.co = [...nvfrom.co];
+  nvto.co = nvfrom.co.slice(0, 3);
 }
 
 function find_edge_half(bv, bme) {
@@ -492,7 +492,7 @@ function bevel_merge_uvs(bp, bm) {
         mul_v2_fl(uv, Math.fround(1.0 / num_uv_verts));
         for (const l of uv_vert_bucket) {
           let luv = BM_ELEM_CD_GET_FLOAT_P(bm.l, l, uv_data_offset);
-          luv = [...uv];
+          luv = uv.slice(0, 2);
         }
       }
     }
@@ -567,13 +567,13 @@ function bev_create_ngon(bp, bm, vert_arr, totv, face_arr, facerep, snap_edge_ar
           }
           let save_co = [0, 0, 0];
           if (bme >= 0) {
-            save_co = [...vco(bm, bm.l.v[l])];
+            save_co = vco(bm, bm.l.v[l]).slice(0, 3);
             ([, _r0] = closest_to_line_segment_v3(save_co, vco(bm, bm.e.v1[bme]), vco(bm, bm.e.v2[bme]))),
               bm.v.co.set(_r0, bm.l.v[l] * 3);
           }
           BM_loop_interp_from_face(bm, l, interp_f, true, true);
           if (bme >= 0) {
-            bm.v.co.set([...save_co], bm.l.v[l] * 3);
+            bm.v.co.set(save_co.slice(0, 3), bm.l.v[l] * 3);
           }
         }
         i++;
@@ -838,7 +838,7 @@ function slide_dist(bm, e, v, d) {
   if (d > len) {
     d = Math.fround(len - Math.fround(50.0 * BEVEL_EPSILON_D));
   }
-  let r_slideco = [...vco(bm, v)];
+  let r_slideco = vco(bm, v).slice(0, 3);
   r_slideco = madd(r_slideco, dir, -d);
   return r_slideco;
 }
@@ -1073,10 +1073,10 @@ function offset_meet_lines_percent_or_absolute(bp, e1, e2, v) {
     }
   }
   if (no_offsets) {
-    r_l1a = [...vco(bm, v)];
-    r_l1b = [...vco(bm, v1)];
-    r_l2a = [...vco(bm, v)];
-    r_l2b = [...vco(bm, v2)];
+    r_l1a = vco(bm, v).slice(0, 3);
+    r_l1b = vco(bm, v1).slice(0, 3);
+    r_l2a = vco(bm, v).slice(0, 3);
+    r_l2b = vco(bm, v2).slice(0, 3);
   }
   return [r_l1a, r_l1b, r_l2a, r_l2b];
 }
@@ -1102,7 +1102,7 @@ function offset_meet(bp, e1, e2, v, f, edges_between, meetco, e_in_plane) {
   if (ang < BEVEL_EPSILON_ANG) {
     let norm_v = [0, 0, 0];
     if (f >= 0) {
-      norm_v = [...fno(bm, f)];
+      norm_v = fno(bm, f).slice(0, 3);
     } else {
       let fcount = 0;
       norm_v = [0, 0, 0];
@@ -1113,7 +1113,7 @@ function offset_meet(bp, e1, e2, v, f, edges_between, meetco, e_in_plane) {
         }
       }
       if (fcount === 0) {
-        norm_v = [...vno(bm, v)];
+        norm_v = vno(bm, v).slice(0, 3);
       } else {
         norm_v = mul_v3_fl(norm_v, Math.fround(1.0 / fcount));
       }
@@ -1121,11 +1121,11 @@ function offset_meet(bp, e1, e2, v, f, edges_between, meetco, e_in_plane) {
     dir1 = add_v3(dir1, dir2);
     norm_perp1 = cross_v3(dir1, norm_v);
     norm_perp1 = normalize_v3(norm_perp1);
-    let off1a = [...vco(bm, v)];
+    let off1a = vco(bm, v).slice(0, 3);
     let d = Math.fround(Math.max(e1.offset_r, e2.offset_l));
     d = Math.fround(d / Math.fround(Math.cos(Math.fround(ang / 2.0))));
     off1a = madd(off1a, norm_perp1, d);
-    meetco = [...off1a];
+    meetco = off1a.slice(0, 3);
   } else if (Math.fround(Math.abs(Math.fround(ang - Math.PI))) < BEVEL_EPSILON_ANG) {
     const d = Math.fround(Math.max(e1.offset_r, e2.offset_l));
     meetco = slide_dist(bm, e2, v, d);
@@ -1133,15 +1133,15 @@ function offset_meet(bp, e1, e2, v, f, edges_between, meetco, e_in_plane) {
     let norm_v1 = [0, 0, 0];
     let norm_v2 = [0, 0, 0];
     if (f >= 0 && ang < BEVEL_SMALL_ANG) {
-      norm_v1 = [...fno(bm, f)];
-      norm_v2 = [...fno(bm, f)];
+      norm_v1 = fno(bm, f).slice(0, 3);
+      norm_v2 = fno(bm, f).slice(0, 3);
     } else if (!edges_between) {
       norm_v1 = cross_v3(dir2, dir1);
       norm_v1 = normalize_v3(norm_v1);
       if (dot_v3(norm_v1, f >= 0 ? fno(bm, f) : vno(bm, v)) < 0.0) {
         norm_v1 = negate_v3(norm_v1);
       }
-      norm_v2 = [...norm_v1];
+      norm_v2 = norm_v1.slice(0, 3);
     } else {
       norm_v1 = cross_v3(dir1n, dir1);
       norm_v1 = normalize_v3(norm_v1);
@@ -1167,24 +1167,24 @@ function offset_meet(bp, e1, e2, v, f, edges_between, meetco, e_in_plane) {
     if (bp.offset_type === BEVEL_AMT_PERCENT || bp.offset_type === BEVEL_AMT_ABSOLUTE) {
       [off1a, off1b, off2a, off2b] = offset_meet_lines_percent_or_absolute(bp, e1, e2, v);
     } else {
-      off1a = [...vco(bm, v)];
+      off1a = vco(bm, v).slice(0, 3);
       off1a = madd(off1a, norm_perp1, e1.offset_r);
       off1b = add_v3(off1a, dir1);
-      off2a = [...vco(bm, v)];
+      off2a = vco(bm, v).slice(0, 3);
       off2a = madd(off2a, norm_perp2, e2.offset_l);
       off2b = add_v3(off2a, dir2);
     }
     let isect2 = [0, 0, 0];
     const isect_kind = (([_r0, meetco, isect2] = isect_line_line_v3(off1a, off1b, off2a, off2b)), _r0);
     if (isect_kind === 0) {
-      meetco = [...off1a];
+      meetco = off1a.slice(0, 3);
     } else {
       let closer_v = -1;
       if (e1.offset_r === 0.0 && (closer_v = is_outside_edge(bm, e1, meetco)) != null) {
-        meetco = [...vco(bm, closer_v)];
+        meetco = vco(bm, closer_v).slice(0, 3);
       }
       if (e2.offset_l === 0.0 && (closer_v = is_outside_edge(bm, e2, meetco)) != null) {
-        meetco = [...vco(bm, closer_v)];
+        meetco = vco(bm, closer_v).slice(0, 3);
       }
       if (edges_between && e1.offset_r > 0.0 && e2.offset_l > 0.0) {
         if (isect_kind === 2) {
@@ -1207,7 +1207,7 @@ function offset_meet(bp, e1, e2, v, f, edges_between, meetco, e_in_plane) {
             }
           }
           if (point_between_edges(bm, dropco, v, fnext, e, e.next)) {
-            meetco = [...dropco];
+            meetco = dropco.slice(0, 3);
             break;
           }
         }
@@ -1239,7 +1239,7 @@ function offset_meet_edge(bm, e1, e2, v) {
     return [false, meetco, r_angle];
   }
   const sinang = Math.fround(Math.sin(ang));
-  let meetco = [...vco(bm, v)];
+  let meetco = vco(bm, v).slice(0, 3);
   if (e1.offset_r === 0.0) {
     meetco = madd(meetco, dir1, Math.fround(e2.offset_l / sinang));
   } else {
@@ -1300,9 +1300,9 @@ function offset_on_edge_between(bp, e1, e2, emid, v) {
     r_sinratio = ang1 === 0.0 ? 1.0 : Math.fround(Math.fround(Math.sin(ang2)) / Math.fround(Math.sin(ang1)));
     retval = true;
   } else if (ok1 && !ok2) {
-    meetco = [...meet1];
+    meetco = meet1.slice(0, 3);
   } else if (!ok1 && ok2) {
-    meetco = [...meet2];
+    meetco = meet2.slice(0, 3);
   } else {
     meetco = slide_dist(bm, emid, v, e1.offset_r);
   }
@@ -1315,7 +1315,7 @@ function offset_in_plane(bm, e, plane_no, left) {
   let dir = sub_v3(vco(bm, BM_edge_other_vert(bm, e.e, v)), vco(bm, v));
   dir = normalize_v3(dir);
   if (plane_no) {
-    no = [...plane_no];
+    no = plane_no.slice(0, 3);
   } else {
     no = [0, 0, 0];
     if (Math.fround(Math.abs(dir[0])) < Math.fround(Math.abs(dir[1]))) {
@@ -1331,7 +1331,7 @@ function offset_in_plane(bm, e, plane_no, left) {
     fdir = cross_v3(no, dir);
   }
   fdir = normalize_v3(fdir);
-  let r_co = [...vco(bm, v)];
+  let r_co = vco(bm, v).slice(0, 3);
   r_co = madd(r_co, fdir, left ? e.offset_l : e.offset_r);
   return r_co;
 }
@@ -1340,7 +1340,7 @@ function project_to_edge(bm, e, co_a, co_b, projco) {
   let _r0;
   let otherco = [0, 0, 0];
   if (!(([_r0, projco, otherco] = isect_line_line_v3(vco(bm, bm.e.v1[e]), vco(bm, bm.e.v2[e]), co_a, co_b)), _r0)) {
-    projco = [...vco(bm, bm.e.v1[e])];
+    projco = vco(bm, bm.e.v1[e]).slice(0, 3);
   }
   return projco;
 }
@@ -1351,8 +1351,8 @@ function set_profile_params(bp, bv, bndv) {
   let do_linear_interp = true;
   const e = bndv.ebev;
   const pro = bndv.profile;
-  const start = [...bndv.nv.co];
-  const end = [...bndv.next.nv.co];
+  const start = bndv.nv.co.slice(0, 3);
+  const end = bndv.next.nv.co.slice(0, 3);
   if (e) {
     do_linear_interp = false;
     pro.super_r = bp.pro_super_r;
@@ -1362,8 +1362,8 @@ function set_profile_params(bp, bv, bndv) {
     }
     pro.proj_dir = normalize_v3(pro.proj_dir);
     pro.middle = project_to_edge(bm, e.e, start, end, pro.middle);
-    pro.start = [...start];
-    pro.end = [...end];
+    pro.start = start.slice(0, 3);
+    pro.end = end.slice(0, 3);
     let d1 = sub_v3(pro.middle, start);
     let d2 = sub_v3(pro.middle, end);
     d1 = normalize_v3(d1);
@@ -1371,7 +1371,7 @@ function set_profile_params(bp, bv, bndv) {
     pro.plane_no = cross_v3(d1, d2);
     pro.plane_no = normalize_v3(pro.plane_no);
     if (nearly_parallel(d1, d2)) {
-      pro.middle = [...vco(bm, bv.v)];
+      pro.middle = vco(bm, bv.v).slice(0, 3);
       if (e.prev.is_bev && e.next.is_bev && bv.selcount >= 3) {
         let co4 = [0, 0, 0];
         let meetco = [0, 0, 0];
@@ -1389,14 +1389,14 @@ function set_profile_params(bp, bv, bndv) {
           co4 = add_v3(end, d4);
           isect_kind = (([_r0, meetco, isect2] = isect_line_line_v3(start, co3, end, co4)), _r0);
           if (isect_kind !== 0) {
-            pro.middle = [...meetco];
+            pro.middle = meetco.slice(0, 3);
           } else {
             pro.middle = mid_v3(start, end);
             do_linear_interp = true;
           }
         }
       }
-      pro.end = [...end];
+      pro.end = end.slice(0, 3);
       d1 = sub_v3(pro.middle, start);
       d1 = normalize_v3(d1);
       d2 = sub_v3(pro.middle, end);
@@ -1406,23 +1406,23 @@ function set_profile_params(bp, bv, bndv) {
       if (nearly_parallel(d1, d2)) {
         do_linear_interp = true;
       } else {
-        pro.plane_co = [...vco(bm, bv.v)];
-        pro.proj_dir = [...pro.plane_no];
+        pro.plane_co = vco(bm, bv.v).slice(0, 3);
+        pro.proj_dir = pro.plane_no.slice(0, 3);
       }
     }
-    pro.plane_co = [...start];
+    pro.plane_co = start.slice(0, 3);
   } else if (bndv.is_arc_start) {
-    pro.start = [...start];
-    pro.end = [...end];
+    pro.start = start.slice(0, 3);
+    pro.end = end.slice(0, 3);
     pro.super_r = PRO_CIRCLE_R;
     pro.plane_co = [0, 0, 0];
     pro.plane_no = [0, 0, 0];
     pro.proj_dir = [0, 0, 0];
     do_linear_interp = false;
   } else if (bp.affect_type === BEVEL_AFFECT_VERTICES) {
-    pro.start = [...start];
-    pro.middle = [...vco(bm, bv.v)];
-    pro.end = [...end];
+    pro.start = start.slice(0, 3);
+    pro.middle = vco(bm, bv.v).slice(0, 3);
+    pro.end = end.slice(0, 3);
     pro.super_r = bp.pro_super_r;
     pro.plane_co = [0, 0, 0];
     pro.plane_no = [0, 0, 0];
@@ -1431,8 +1431,8 @@ function set_profile_params(bp, bv, bndv) {
   }
   if (do_linear_interp) {
     pro.super_r = PRO_LINE_R;
-    pro.start = [...start];
-    pro.end = [...end];
+    pro.start = start.slice(0, 3);
+    pro.end = end.slice(0, 3);
     pro.middle = mid_v3(start, end);
     pro.plane_co = [0, 0, 0];
     pro.plane_no = [0, 0, 0];
@@ -1464,7 +1464,7 @@ function move_profile_plane(bm, bndv, bmvert) {
       Math.fround(Math.abs(dot2)) < Math.fround(1 - BEVEL_EPSILON_BIG) &&
       Math.fround(Math.abs(dot3)) < Math.fround(1 - BEVEL_EPSILON_BIG)
     ) {
-      bndv.profile.plane_no = [...no];
+      bndv.profile.plane_no = no.slice(0, 3);
     }
   }
   pro.special_params = true;
@@ -1487,10 +1487,10 @@ function move_weld_profile_planes(bm, bv, bndv1, bndv2) {
     const dot1 = Math.fround(Math.abs(dot_v3(no, no2)));
     const dot2 = Math.fround(Math.abs(dot_v3(no, no3)));
     if (Math.fround(Math.abs(Math.fround(dot1 - 1.0))) > BEVEL_EPSILON) {
-      bndv1.profile.plane_no = [...no];
+      bndv1.profile.plane_no = no.slice(0, 3);
     }
     if (Math.fround(Math.abs(Math.fround(dot2 - 1.0))) > BEVEL_EPSILON) {
-      bndv2.profile.plane_no = [...no];
+      bndv2.profile.plane_no = no.slice(0, 3);
     }
   }
   bndv1.profile.special_params = true;
@@ -1539,25 +1539,25 @@ function make_unit_square_map(va, vmid, vb) {
 
 function make_unit_cube_map(va, vb, vc, vd) {
   const r_mat = Array.from({ length: 4 }, () => [0, 0, 0, 0]);
-  r_mat[0] = [...va];
+  r_mat[0] = va.slice(0, 3);
   r_mat[0] = sub_v3(r_mat[0], vb);
   r_mat[0] = sub_v3(r_mat[0], vc);
   r_mat[0] = add_v3(r_mat[0], vd);
   r_mat[0] = mul_v3_fl(r_mat[0], 0.5);
   r_mat[0][3] = 0.0;
-  r_mat[1] = [...vb];
+  r_mat[1] = vb.slice(0, 3);
   r_mat[1] = sub_v3(r_mat[1], va);
   r_mat[1] = sub_v3(r_mat[1], vc);
   r_mat[1] = add_v3(r_mat[1], vd);
   r_mat[1] = mul_v3_fl(r_mat[1], 0.5);
   r_mat[1][3] = 0.0;
-  r_mat[2] = [...vc];
+  r_mat[2] = vc.slice(0, 3);
   r_mat[2] = sub_v3(r_mat[2], va);
   r_mat[2] = sub_v3(r_mat[2], vb);
   r_mat[2] = add_v3(r_mat[2], vd);
   r_mat[2] = mul_v3_fl(r_mat[2], 0.5);
   r_mat[2][3] = 0.0;
-  r_mat[3] = [...va];
+  r_mat[3] = va.slice(0, 3);
   r_mat[3] = add_v3(r_mat[3], vb);
   r_mat[3] = add_v3(r_mat[3], vc);
   r_mat[3] = sub_v3(r_mat[3], vd);
@@ -1577,28 +1577,29 @@ function get_profile_point(bp, pro, i, nseg) {
   let r_co = [0, 0, 0];
   if (bp.seg === 1) {
     if (i === 0) {
-      r_co = [...pro.start];
+      r_co = pro.start.slice(0, 3);
     } else {
-      r_co = [...pro.end];
+      r_co = pro.end.slice(0, 3);
     }
   } else {
     if (nseg === bp.seg) {
-      r_co = [...pro.prof_co.slice(3 * i, 3 * i + 3)];
+      r_co = pro.prof_co.slice(3 * i, 3 * i + 3).slice(0, 3);
     } else {
       const subsample_spacing = Math.trunc(bp.pro_spacing.seg_2 / nseg);
-      r_co = [...pro.prof_co_2.slice(3 * i * subsample_spacing, 3 * i * subsample_spacing + 3)];
+      r_co = pro.prof_co_2.slice(3 * i * subsample_spacing, 3 * i * subsample_spacing + 3).slice(0, 3);
     }
   }
   return r_co;
 }
 
 function calculate_profile_segments(profile, map, use_map, reversed, ns, xvals, yvals, r_prof_co) {
+  let _r0;
   for (let k = 0; k <= ns; k++) {
     let co = [0, 0, 0];
     if (k === 0) {
-      co = [...profile.start];
+      co = profile.start.slice(0, 3);
     } else if (k === ns) {
-      co = [...profile.end];
+      co = profile.end.slice(0, 3);
     } else {
       if (use_map) {
         const p = [
@@ -1611,14 +1612,18 @@ function calculate_profile_segments(profile, map, use_map, reversed, ns, xvals, 
         co = interp_v3(profile.start, profile.end, Math.fround(k / ns));
       }
     }
-    let prof_co_k = r_prof_co.slice(3 * k, 3 * k + 3);
+    const prof_co_k = r_prof_co.subarray(3 * k);
     if (!is_zero_v3(profile.proj_dir)) {
       const co2 = add_v3(co, profile.proj_dir);
-      if (!((prof_co_k = isect_line_plane_v3(co, co2, profile.plane_co, profile.plane_no)) != null)) {
-        prof_co_k = [...co];
+      if (
+        !((_r0 = isect_line_plane_v3(co, co2, profile.plane_co, profile.plane_no)) != null
+          ? (prof_co_k.set(_r0), true)
+          : false)
+      ) {
+        prof_co_k.set(co.slice(0, 3));
       }
     } else {
-      prof_co_k = [...co];
+      prof_co_k.set(co.slice(0, 3));
     }
   }
 }
@@ -1631,9 +1636,9 @@ function calculate_profile(bp, bndv, reversed, miter) {
   }
   const need_2 = bp.seg !== bp.pro_spacing.seg_2;
   if (pro.prof_co === null) {
-    pro.prof_co = new Float32Array(bp.seg + 1);
+    pro.prof_co = new Float32Array(3 * (bp.seg + 1));
     if (need_2) {
-      pro.prof_co_2 = new Float32Array(bp.pro_spacing.seg_2 + 1);
+      pro.prof_co_2 = new Float32Array(3 * (bp.pro_spacing.seg_2 + 1));
     } else {
       pro.prof_co_2 = pro.prof_co;
     }
@@ -2196,9 +2201,9 @@ function adjust_miter_coords(bp, bv, emiter) {
   }
   const v1prev = v1.prev;
   const v3next = v3.next;
-  const co2 = [...v1.nv.co];
+  const co2 = v1.nv.co.slice(0, 3);
   if (v1.is_arc_start) {
-    v1.profile.middle = [...co2];
+    v1.profile.middle = co2.slice(0, 3);
   }
   let co1 = [0, 0, 0];
   let vother = BM_edge_other_vert(bm, emiter.e, bv.v);
@@ -2207,7 +2212,7 @@ function adjust_miter_coords(bp, bv, emiter) {
   const d = Math.fround(bp.offset / Math.fround(bp.seg / 2.0));
   let line_p = madd(co2, edge_dir, d);
   if (!((co1 = isect_line_plane_v3(co2, line_p, v1prev.nv.co, edge_dir)) != null)) {
-    co1 = [...line_p];
+    co1 = line_p.slice(0, 3);
   }
   adjust_bound_vert(v1, co1);
   let co3 = [0, 0, 0];
@@ -2217,7 +2222,7 @@ function adjust_miter_coords(bp, bv, emiter) {
   edge_dir = normalize_v3(edge_dir);
   line_p = madd(co2, edge_dir, d);
   if (!((co3 = isect_line_plane_v3(co2, line_p, v3next.nv.co, edge_dir)) != null)) {
-    co1 = [...line_p];
+    co1 = line_p.slice(0, 3);
   }
   adjust_bound_vert(v3, co3);
 }
@@ -2231,7 +2236,7 @@ function adjust_miter_inner_coords(bp, bv, emiter) {
       const v3 = v.next;
       let e = v.efirst;
       if (e !== emiter) {
-        const co = [...v.nv.co];
+        const co = v.nv.co.slice(0, 3);
         let vother = BM_edge_other_vert(bm, e.e, bv.v);
         let edge_dir = sub_v3(vco(bm, vother), vco(bm, bv.v));
         edge_dir = normalize_v3(edge_dir);
@@ -2362,7 +2367,7 @@ function build_boundary(bp, bv, construct) {
           }
         } else {
           v1.is_arc_start = true;
-          v1.profile.middle = [...co];
+          v1.profile.middle = co.slice(0, 3);
           if (e.next === e2) {
             v1.elast = v1.efirst;
           } else {
@@ -2754,7 +2759,7 @@ function vmesh_copy_equiv_verts(vm) {
         }
         const v1 = mesh_vert(vm, i, j, k);
         const v0 = mesh_vert_canon(vm, i, j, k);
-        v1.co = [...v0.co];
+        v1.co = v0.co.slice(0, 3);
         v1.v = v0.v;
       }
     }
@@ -2772,7 +2777,7 @@ function vmesh_center(vm) {
     }
     r_cent = mul_v3_fl(r_cent, Math.fround(1.0 / n));
   } else {
-    r_cent = [...mesh_vert(vm, 0, ns2, ns2).co];
+    r_cent = mesh_vert(vm, 0, ns2, ns2).co.slice(0, 3);
   }
   return r_cent;
 }
@@ -2831,12 +2836,12 @@ function fill_profile_fracs(bp, bndv, frac, ns) {
   let nextco = [0, 0, 0];
   let total = 0.0;
   frac[0] = 0.0;
-  let co = [...bndv.nv.co];
+  let co = bndv.nv.co.slice(0, 3);
   for (let k = 0; k < ns; k++) {
     nextco = get_profile_point(bp, bndv.profile, k + 1, ns);
     total = Math.fround(total + len_v3(sub_v3(co, nextco)));
     frac[k + 1] = total;
-    co = [...nextco];
+    co = nextco.slice(0, 3);
   }
   if (total > 0.0) {
     for (let k = 1; k <= ns; k++) {
@@ -2904,18 +2909,18 @@ function interp_vmesh(bp, vm_in, nseg) {
         }
         let co = [0, 0, 0];
         if (restj < BEVEL_EPSILON && restk < BEVEL_EPSILON) {
-          co = [...mesh_vert_canon(vm_in, i, j_in, k_in).co];
+          co = mesh_vert_canon(vm_in, i, j_in, k_in).co.slice(0, 3);
         } else {
           const j0inc = restj < BEVEL_EPSILON || j_in === ns_in ? 0 : 1;
           const k0inc = restk < BEVEL_EPSILON || k_in === ns_in ? 0 : 1;
           const quad = Array.from({ length: 4 }, () => [0, 0, 0]);
-          quad[0] = [...mesh_vert_canon(vm_in, i, j_in, k_in).co];
-          quad[1] = [...mesh_vert_canon(vm_in, i, j_in, k_in + k0inc).co];
-          quad[2] = [...mesh_vert_canon(vm_in, i, j_in + j0inc, k_in + k0inc).co];
-          quad[3] = [...mesh_vert_canon(vm_in, i, j_in + j0inc, k_in).co];
+          quad[0] = mesh_vert_canon(vm_in, i, j_in, k_in).co.slice(0, 3);
+          quad[1] = mesh_vert_canon(vm_in, i, j_in, k_in + k0inc).co.slice(0, 3);
+          quad[2] = mesh_vert_canon(vm_in, i, j_in + j0inc, k_in + k0inc).co.slice(0, 3);
+          quad[3] = mesh_vert_canon(vm_in, i, j_in + j0inc, k_in).co.slice(0, 3);
           co = interp_bilinear_quad_v3(quad, restk, restj);
         }
-        mesh_vert(vm_out, i, j, k).co = [...co];
+        mesh_vert(vm_out, i, j, k).co = co.slice(0, 3);
       }
     }
     bndv = bndv.next;
@@ -2924,7 +2929,7 @@ function interp_vmesh(bp, vm_in, nseg) {
   }
   if (!odd) {
     const center = vmesh_center(vm_in);
-    mesh_vert(vm_out, 0, nseg2, nseg2).co = [...center];
+    mesh_vert(vm_out, 0, nseg2, nseg2).co = center.slice(0, 3);
   }
   vmesh_copy_equiv_verts(bm, vm_out);
   return vm_out;
@@ -2939,17 +2944,17 @@ function cubic_subdiv(bp, vm_in) {
   const ns_out = 2 * ns_in;
   const vm_out = new_adj_vmesh(bp.mem_arena, n_boundary, ns_out, vm_in.boundstart);
   for (let i = 0; i < n_boundary; i++) {
-    mesh_vert(vm_out, i, 0, 0).co = [...mesh_vert(vm_in, i, 0, 0).co];
+    mesh_vert(vm_out, i, 0, 0).co = mesh_vert(vm_in, i, 0, 0).co.slice(0, 3);
     for (let k = 1; k < ns_in; k++) {
-      co = [...mesh_vert(vm_in, i, 0, k).co];
+      co = mesh_vert(vm_in, i, 0, k).co.slice(0, 3);
       if (bp.profile_type !== BEVEL_PROFILE_CUSTOM) {
-        const co1 = [...mesh_vert(vm_in, i, 0, k - 1).co];
-        const co2 = [...mesh_vert(vm_in, i, 0, k + 1).co];
+        const co1 = mesh_vert(vm_in, i, 0, k - 1).co.slice(0, 3);
+        const co2 = mesh_vert(vm_in, i, 0, k + 1).co.slice(0, 3);
         let acc = add_v3(co1, co2);
         acc = madd(acc, co, -2.0);
         co = madd(co, acc, Math.fround(-1.0 / 6.0));
       }
-      mesh_vert_canon(vm_out, i, 0, 2 * k).co = [...co];
+      mesh_vert_canon(vm_out, i, 0, 2 * k).co = co.slice(0, 3);
     }
   }
   let bndv = vm_out.boundstart;
@@ -2957,20 +2962,20 @@ function cubic_subdiv(bp, vm_in) {
     for (let k = 1; k < ns_out; k += 2) {
       co = get_profile_point(bp, bndv.profile, k, ns_out);
       if (bp.profile_type !== BEVEL_PROFILE_CUSTOM) {
-        const co1 = [...mesh_vert_canon(vm_out, i, 0, k - 1).co];
-        const co2 = [...mesh_vert_canon(vm_out, i, 0, k + 1).co];
+        const co1 = mesh_vert_canon(vm_out, i, 0, k - 1).co.slice(0, 3);
+        const co2 = mesh_vert_canon(vm_out, i, 0, k + 1).co.slice(0, 3);
         let acc = add_v3(co1, co2);
         acc = madd(acc, co, -2.0);
         co = madd(co, acc, Math.fround(-1.0 / 6.0));
       }
-      mesh_vert_canon(vm_out, i, 0, k).co = [...co];
+      mesh_vert_canon(vm_out, i, 0, k).co = co.slice(0, 3);
     }
     bndv = bndv.next;
   }
   vmesh_copy_equiv_verts(bm, vm_out);
   for (let i = 0; i < n_boundary; i++) {
     for (let k = 0; k < ns_in; k++) {
-      mesh_vert(vm_in, i, 0, k).co = [...mesh_vert(vm_out, i, 0, 2 * k).co];
+      mesh_vert(vm_in, i, 0, k).co = mesh_vert(vm_out, i, 0, 2 * k).co.slice(0, 3);
     }
   }
   vmesh_copy_equiv_verts(bm, vm_in);
@@ -2983,7 +2988,7 @@ function cubic_subdiv(bp, vm_in) {
           mesh_vert(vm_in, i, j + 1, k),
           mesh_vert(vm_in, i, j + 1, k + 1),
         );
-        mesh_vert(vm_out, i, 2 * j + 1, 2 * k + 1).co = [...co];
+        mesh_vert(vm_out, i, 2 * j + 1, 2 * k + 1).co = co.slice(0, 3);
       }
     }
   }
@@ -2996,7 +3001,7 @@ function cubic_subdiv(bp, vm_in) {
           mesh_vert_canon(vm_out, i, 2 * j + 1, 2 * k - 1),
           mesh_vert_canon(vm_out, i, 2 * j + 1, 2 * k + 1),
         );
-        mesh_vert(vm_out, i, 2 * j + 1, 2 * k).co = [...co];
+        mesh_vert(vm_out, i, 2 * j + 1, 2 * k).co = co.slice(0, 3);
       }
     }
   }
@@ -3009,7 +3014,7 @@ function cubic_subdiv(bp, vm_in) {
           mesh_vert_canon(vm_out, i, 2 * j - 1, 2 * k + 1),
           mesh_vert_canon(vm_out, i, 2 * j + 1, 2 * k + 1),
         );
-        mesh_vert(vm_out, i, 2 * j, 2 * k + 1).co = [...co];
+        mesh_vert(vm_out, i, 2 * j, 2 * k + 1).co = co.slice(0, 3);
       }
     }
   }
@@ -3030,10 +3035,10 @@ function cubic_subdiv(bp, vm_in) {
           mesh_vert_canon(vm_out, i, 2 * j - 1, 2 * k + 1),
           mesh_vert_canon(vm_out, i, 2 * j + 1, 2 * k + 1),
         );
-        co = [...co1];
+        co = co1.slice(0, 3);
         co = madd(co, co2, beta);
         co = madd(co, mesh_vert(vm_in, i, j, k).co, gamma);
-        mesh_vert(vm_out, i, 2 * j, 2 * k).co = [...co];
+        mesh_vert(vm_out, i, 2 * j, 2 * k).co = co.slice(0, 3);
       }
     }
   }
@@ -3047,21 +3052,21 @@ function cubic_subdiv(bp, vm_in) {
     co2 = add_v3(co2, mesh_vert(vm_out, i, ns_in - 1, ns_in - 1).co);
     co2 = add_v3(co2, mesh_vert(vm_out, i, ns_in - 1, ns_in + 1).co);
   }
-  co = [...co1];
+  co = co1.slice(0, 3);
   co = mul_v3_fl(co, Math.fround(1.0 / n_boundary));
   co = madd(co, co2, Math.fround(beta / Math.fround(2.0 * n_boundary)));
   co = madd(co, mesh_vert(vm_in, 0, ns_in2, ns_in2).co, gamma);
   for (let i = 0; i < n_boundary; i++) {
-    mesh_vert(vm_out, i, ns_in, ns_in).co = [...co];
+    mesh_vert(vm_out, i, ns_in, ns_in).co = co.slice(0, 3);
   }
   bndv = vm_out.boundstart;
   for (let i = 0; i < n_boundary; i++) {
     const inext = (i + 1) % n_boundary;
     for (let k = 0; k <= ns_out; k++) {
       co = get_profile_point(bp, bndv.profile, k, ns_out);
-      mesh_vert(vm_out, i, 0, k).co = [...co];
+      mesh_vert(vm_out, i, 0, k).co = co.slice(0, 3);
       if (k >= ns_in && k < ns_out) {
-        mesh_vert(vm_out, inext, ns_out - k, 0).co = [...co];
+        mesh_vert(vm_out, inext, ns_out - k, 0).co = co.slice(0, 3);
       }
     }
     bndv = bndv.next;
@@ -3088,7 +3093,7 @@ function make_cube_corner_square(bm, mem_arena, nseg) {
         co[i] = 1.0;
         co[(i + 1) % 3] = Math.fround(Math.fround(k * 2.0) / nseg);
         co[(i + 2) % 3] = Math.fround(Math.fround(j * 2.0) / nseg);
-        mesh_vert(vm, i, j, k).co = [...co];
+        mesh_vert(vm, i, j, k).co = co.slice(0, 3);
       }
     }
   }
@@ -3118,11 +3123,11 @@ function make_cube_corner_square_in(mem_arena, nseg) {
       co[i] = Math.fround(1.0 - Math.fround(k * b));
       co[(i + 1) % 3] = 0.0;
       co[(i + 2) % 3] = 0.0;
-      mesh_vert(vm, i, 0, k).co = [...co];
+      mesh_vert(vm, i, 0, k).co = co.slice(0, 3);
       co[(i + 1) % 3] = Math.fround(1.0 - Math.fround(k * b));
       co[(i + 2) % 3] = 0.0;
       co[i] = 0.0;
-      mesh_vert(vm, i, 0, nseg - k).co = [...co];
+      mesh_vert(vm, i, 0, nseg - k).co = co.slice(0, 3);
     }
   }
   return vm;
@@ -3154,13 +3159,13 @@ function make_cube_corner_adj_vmesh(bp) {
     coc[(i + 1) % 3] = 1.0;
     coc[(i + 2) % 3] = 0.0;
     bndv.profile.super_r = r;
-    bndv.profile.start = [...bndv.nv.co];
-    bndv.profile.end = [...bndv.next.nv.co];
-    bndv.profile.middle = [...coc];
-    mesh_vert(vm0, i, 0, 0).co = [...bndv.profile.start];
-    bndv.profile.plane_co = [...bndv.profile.start];
+    bndv.profile.start = bndv.nv.co.slice(0, 3);
+    bndv.profile.end = bndv.next.nv.co.slice(0, 3);
+    bndv.profile.middle = coc.slice(0, 3);
+    mesh_vert(vm0, i, 0, 0).co = bndv.profile.start.slice(0, 3);
+    bndv.profile.plane_co = bndv.profile.start.slice(0, 3);
     bndv.profile.plane_no = cross_v3(bndv.profile.start, bndv.profile.end);
-    bndv.profile.proj_dir = [...bndv.profile.plane_no];
+    bndv.profile.proj_dir = bndv.profile.plane_no.slice(0, 3);
     calculate_profile(bp, bndv, false, false);
     mesh_vert(vm0, i, 0, 1).co = get_profile_point(bp, bndv.profile, 1, 2);
     bndv = bndv.next;
@@ -3173,7 +3178,7 @@ function make_cube_corner_adj_vmesh(bp) {
       co = mul_v3_fl(co, 0.6000000238418579);
     }
   }
-  mesh_vert(vm0, 0, 1, 1).co = [...co];
+  mesh_vert(vm0, 0, 1, 1).co = co.slice(0, 3);
   vmesh_copy_equiv_verts(bm, vm0);
   let vm1 = vm0;
   while (vm1.seg < nseg) {
@@ -3234,11 +3239,11 @@ function tri_corner_test(bp, bv) {
 function tri_corner_adj_vmesh(bp, bv) {
   const { bm } = bp;
   let bndv = bv.vmesh.boundstart;
-  const co0 = [...bndv.nv.co];
+  const co0 = bndv.nv.co.slice(0, 3);
   bndv = bndv.next;
-  const co1 = [...bndv.nv.co];
+  const co1 = bndv.nv.co.slice(0, 3);
   bndv = bndv.next;
-  const co2 = [...bndv.nv.co];
+  const co2 = bndv.nv.co.slice(0, 3);
   let mat = make_unit_cube_map(co0, co1, co2, vco(bm, bv.v));
   const ns = bp.seg;
   const ns2 = Math.trunc(ns / 2);
@@ -3246,10 +3251,10 @@ function tri_corner_adj_vmesh(bp, bv) {
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j <= ns2; j++) {
       for (let k = 0; k <= ns; k++) {
-        const v = [...mesh_vert(vm, i, j, k).co];
+        const v = mesh_vert(vm, i, j, k).co.slice(0, 3);
         v[3] = 1.0;
         mat = mul_m4_v4(mat, v);
-        mesh_vert(vm, i, j, k).co = [...v];
+        mesh_vert(vm, i, j, k).co = v.slice(0, 3);
       }
     }
   }
@@ -3267,13 +3272,13 @@ function adj_vmesh(bp, bv) {
   let bndv = vm0.boundstart;
   let boundverts_center = [0, 0, 0];
   for (let i = 0; i < n_bndv; i++) {
-    mesh_vert(vm0, i, 0, 0).co = [...bndv.nv.co];
+    mesh_vert(vm0, i, 0, 0).co = bndv.nv.co.slice(0, 3);
     mesh_vert(vm0, i, 0, 1).co = get_profile_point(bp, bndv.profile, 1, 2);
     boundverts_center = add_v3(boundverts_center, bndv.nv.co);
     bndv = bndv.next;
   }
   boundverts_center = mul_v3_fl(boundverts_center, Math.fround(1.0 / n_bndv));
-  const original_vertex = [...vco(bm, bv.v)];
+  const original_vertex = vco(bm, bv.v).slice(0, 3);
   let negative_fullest = sub_v3(boundverts_center, original_vertex);
   negative_fullest = add_v3(negative_fullest, boundverts_center);
   let fullness = bp.pro_spacing.fullness;
@@ -3286,7 +3291,7 @@ function adj_vmesh(bp, bv) {
       mesh_vert(vm0, 0, 1, 1).co = madd(boundverts_center, center_direction, fullness);
     }
   } else {
-    mesh_vert(vm0, 0, 1, 1).co = [...boundverts_center];
+    mesh_vert(vm0, 0, 1, 1).co = boundverts_center.slice(0, 3);
   }
   vmesh_copy_equiv_verts(bm, vm0);
   let vm1 = vm0;
@@ -3303,7 +3308,7 @@ function snap_to_pipe_profile(bm, vpipe, midline, co) {
   const pro = vpipe.profile;
   const e = vpipe.ebev;
   if (compare_v3v3(pro.start, pro.end, BEVEL_EPSILON_D)) {
-    co = [...pro.start];
+    co = pro.start.slice(0, 3);
     return co;
   }
   const edir = sub_v3(vco(bm, bm.e.v1[e.e]), vco(bm, bm.e.v2[e.e]));
@@ -3317,11 +3322,11 @@ function snap_to_pipe_profile(bm, vpipe, midline, co) {
     let p = mul_m4_v3(minv, co);
     p = snap_to_superellipsoid(p, pro.super_r, midline);
     const snap = mul_m4_v3(m, p);
-    co = [...snap];
+    co = snap.slice(0, 3);
   } else {
     let p = [0, 0, 0];
     [, p] = closest_to_line_segment_v3(co, start_plane, end_plane);
-    co = [...p];
+    co = p.slice(0, 3);
   }
   return co;
 }
@@ -3552,7 +3557,7 @@ function build_square_in_vmesh(bp, bm, bv, vm1) {
   const odd = ns % 2;
   for (let i = 0; i < n; i++) {
     for (let k = 1; k < ns; k++) {
-      mesh_vert(vm, i, 0, k).co = [...mesh_vert(vm1, i, 0, k).co];
+      mesh_vert(vm, i, 0, k).co = mesh_vert(vm1, i, 0, k).co.slice(0, 3);
       if (i > 0 && k <= ns2) {
         mesh_vert(vm, i, 0, k).v = mesh_vert(vm, i - 1, 0, ns - k).v;
       } else if (i === n - 1 && k > ns2) {
@@ -3573,16 +3578,16 @@ function build_square_in_vmesh(bp, bm, bv, vm1) {
 function closer_v3_v3v3v3(a, b, v) {
   let r = [0, 0, 0];
   if (len_squared_v3(sub_v3(a, v)) <= len_squared_v3(sub_v3(b, v))) {
-    r = [...a];
+    r = a.slice(0, 3);
   } else {
-    r = [...b];
+    r = b.slice(0, 3);
   }
   return r;
 }
 
 function square_out_adj_vmesh(bp, bv) {
   const { bm } = bp;
-  let _r0, _r1, _r2, _r3;
+  let _r0, _r1, _r2, _r3, _r4, _r5;
   const n_bndv = bv.vmesh.count;
   const ns = bv.vmesh.seg;
   const ns2 = Math.trunc(ns / 2);
@@ -3594,7 +3599,7 @@ function square_out_adj_vmesh(bp, bv) {
   const cset = MEM_new_array_zeroed(n_bndv, 'bevel');
   let bndv = vm.boundstart;
   for (let i = 0; i < n_bndv; i++) {
-    const bndco = [...bndv.nv.co];
+    const bndco = bndv.nv.co.slice(0, 3);
     let e1 = bndv.efirst;
     let e2 = bndv.elast;
     let ang_kind = ANGLE_STRAIGHT;
@@ -3613,7 +3618,7 @@ function square_out_adj_vmesh(bp, bv) {
     } else if (bndv.is_arc_start) {
       e1 = bndv.efirst;
       e2 = bndv.next.efirst;
-      centerline.splice(clstride * i, 3, ...[...bndv.profile.middle]);
+      centerline.splice(clstride * i, 3, ...bndv.profile.middle.slice(0, 3));
       bndv = bndv.next;
       cset[i] = true;
       i++;
@@ -3631,7 +3636,7 @@ function square_out_adj_vmesh(bp, bv) {
       if (ikind === 0) {
         v1set = false;
       } else {
-        v1co = [...meet1];
+        v1co = meet1.slice(0, 3);
         v1set = true;
       }
       ikind =
@@ -3642,24 +3647,24 @@ function square_out_adj_vmesh(bp, bv) {
         v2set = false;
       } else {
         v2set = true;
-        v2co = [...meet1];
+        v2co = meet1.slice(0, 3);
       }
-      let on_edge_cur = centerline.slice(clstride * i, clstride * i + 3);
+      const on_edge_cur = centerline.subarray(clstride * i);
       const iprev = i === 0 ? n_bndv - 1 : i - 1;
-      let on_edge_prev = centerline.slice(clstride * iprev, clstride * iprev + 3);
+      const on_edge_prev = centerline.subarray(clstride * iprev);
       if (v2set) {
         if (cset[i]) {
-          on_edge_cur = closer_v3_v3v3v3(on_edge_cur, v2co, vco(bm, bv.v));
+          on_edge_cur.set(closer_v3_v3v3v3(on_edge_cur, v2co, vco(bm, bv.v)));
         } else {
-          on_edge_cur = [...v2co];
+          on_edge_cur.set(v2co.slice(0, 3));
           cset[i] = true;
         }
       }
       if (v1set) {
         if (cset[iprev]) {
-          on_edge_prev = closer_v3_v3v3v3(on_edge_prev, v1co, vco(bm, bv.v));
+          on_edge_prev.set(closer_v3_v3v3v3(on_edge_prev, v1co, vco(bm, bv.v)));
         } else {
-          on_edge_prev = [...v1co];
+          on_edge_prev.set(v1co.slice(0, 3));
           cset[iprev] = true;
         }
       }
@@ -3669,10 +3674,10 @@ function square_out_adj_vmesh(bp, bv) {
   bndv = vm.boundstart;
   for (let i = 0; i < n_bndv; i++) {
     if (!cset[i]) {
-      let on_edge_cur = centerline.slice(clstride * i, clstride * i + 3);
+      const on_edge_cur = centerline.subarray(clstride * i);
       const e1 = bndv.next.efirst;
-      const co1 = [...bndv.nv.co];
-      const co2 = [...bndv.next.nv.co];
+      const co1 = bndv.nv.co.slice(0, 3);
+      const co2 = bndv.next.nv.co.slice(0, 3);
       if (e1) {
         if (bndv.prev.is_arc_start && bndv.next.is_arc_start) {
           let meet1 = [0, 0, 0];
@@ -3680,27 +3685,29 @@ function square_out_adj_vmesh(bp, bv) {
           const ikind =
             (([_r2, meet1, meet2] = isect_line_line_v3(vco(bm, bm.e.v1[e1.e]), vco(bm, bm.e.v2[e1.e]), co1, co2)), _r2);
           if (ikind !== 0) {
-            on_edge_cur = [...meet1];
+            on_edge_cur.set(meet1.slice(0, 3));
             cset[i] = true;
           }
         } else {
           if (bndv.prev.is_arc_start) {
-            [, on_edge_cur] = closest_to_line_segment_v3(co1, vco(bm, bm.e.v1[e1.e]), vco(bm, bm.e.v2[e1.e]));
+            ([, _r3] = closest_to_line_segment_v3(co1, vco(bm, bm.e.v1[e1.e]), vco(bm, bm.e.v2[e1.e]))),
+              on_edge_cur.set(_r3);
           } else {
-            [, on_edge_cur] = closest_to_line_segment_v3(co2, vco(bm, bm.e.v1[e1.e]), vco(bm, bm.e.v2[e1.e]));
+            ([, _r4] = closest_to_line_segment_v3(co2, vco(bm, bm.e.v1[e1.e]), vco(bm, bm.e.v2[e1.e]))),
+              on_edge_cur.set(_r4);
           }
           cset[i] = true;
         }
       }
       if (!cset[i]) {
-        on_edge_cur = mid_v3(co1, co2);
+        on_edge_cur.set(mid_v3(co1, co2));
         cset[i] = true;
       }
     }
     bndv = bndv.next;
   }
   let co1 = [0, 0, 0];
-  let co2 = [...vco(bm, bv.v)];
+  let co2 = vco(bm, bv.v).slice(0, 3);
   bndv = vm.boundstart;
   for (let i = 0; i < n_bndv; i++) {
     if (odd) {
@@ -3715,7 +3722,7 @@ function square_out_adj_vmesh(bp, bv) {
       ns2inv = Math.fround(1.0 / Math.fround(ns2 + finalfrac));
     }
     let p = centerline.slice(clstride * i, clstride * i + 3);
-    co1 = [...p];
+    co1 = p.slice(0, 3);
     p += 3;
     for (let j = 1; j <= ns2; j++) {
       p = interp_v3(co1, co2, Math.fround(j * ns2inv));
@@ -3725,21 +3732,21 @@ function square_out_adj_vmesh(bp, bv) {
   }
   bndv = vm.boundstart;
   for (let i = 0; i < n_bndv; i++) {
-    co1 = [...bndv.nv.co];
-    co2 = [
-      ...centerline.slice(clstride * (i === 0 ? n_bndv - 1 : i - 1), clstride * (i === 0 ? n_bndv - 1 : i - 1) + 3),
-    ];
+    co1 = bndv.nv.co.slice(0, 3);
+    co2 = centerline
+      .slice(clstride * (i === 0 ? n_bndv - 1 : i - 1), clstride * (i === 0 ? n_bndv - 1 : i - 1) + 3)
+      .slice(0, 3);
     for (let j = 0; j < ns2 + odd; j++) {
       mesh_vert(vm, i, j, 0).co = interp_v3(co1, co2, Math.fround(j * ns2inv));
     }
-    co2 = [...centerline.slice(clstride * i, clstride * i + 3)];
+    co2 = centerline.slice(clstride * i, clstride * i + 3).slice(0, 3);
     for (let k = 1; k <= ns2; k++) {
       mesh_vert(vm, i, 0, k).co = interp_v3(co1, co2, Math.fround(k * ns2inv));
     }
     bndv = bndv.next;
   }
   if (!odd) {
-    mesh_vert(vm, 0, ns2, ns2).co = [...vco(bm, bv.v)];
+    mesh_vert(vm, 0, ns2, ns2).co = vco(bm, bv.v).slice(0, 3);
   }
   vmesh_copy_equiv_verts(bm, vm);
   bndv = vm.boundstart;
@@ -3750,13 +3757,13 @@ function square_out_adj_vmesh(bp, bv) {
         let meet1 = [0, 0, 0];
         let meet2 = [0, 0, 0];
         const ikind =
-          (([_r3, meet1, meet2] = isect_line_line_v3(
+          (([_r5, meet1, meet2] = isect_line_line_v3(
             mesh_vert(vm, i, 0, k).co,
             centerline.slice(clstride * im1, clstride * im1 + 3).slice(3 * k, 3 * k + 3),
             mesh_vert(vm, i, j, 0).co,
             centerline.slice(clstride * i, clstride * i + 3).slice(3 * j, 3 * j + 3),
           )),
-          _r3);
+          _r5);
         if (ikind === 0) {
           mesh_vert(vm, i, j, k).co = interp_v3(
             mesh_vert(vm, i, 0, k).co,
@@ -3764,7 +3771,7 @@ function square_out_adj_vmesh(bp, bv) {
             Math.fround(j * ns2inv),
           );
         } else if (ikind === 1) {
-          mesh_vert(vm, i, j, k).co = [...meet1];
+          mesh_vert(vm, i, j, k).co = meet1.slice(0, 3);
         } else {
           mesh_vert(vm, i, j, k).co = mid_v3(meet1, meet2);
         }
@@ -3880,7 +3887,7 @@ function bevel_build_rings(bp, bm, bv, vpipe) {
         if (!is_canon(vm, i, j, k)) {
           continue;
         }
-        mesh_vert(vm, i, j, k).co = [...mesh_vert(vm1, i, j, k).co];
+        mesh_vert(vm, i, j, k).co = mesh_vert(vm1, i, j, k).co.slice(0, 3);
         create_mesh_bmvert(bm, vm, i, j, k, bv.v);
       }
     }
@@ -4049,8 +4056,8 @@ function bevel_build_cutoff(bp, bm, bv) {
       ) / 2,
     );
     const new_vert = madd(bndv.nv.co, down_direction, length);
-    mesh_vert(bv.vmesh, i, 1, 0).co = [...new_vert];
-    mesh_vert(bv.vmesh, bndv.prev.index, 1, 1).co = [...new_vert];
+    mesh_vert(bv.vmesh, i, 1, 0).co = new_vert.slice(0, 3);
+    mesh_vert(bv.vmesh, bndv.prev.index, 1, 1).co = new_vert.slice(0, 3);
   } while ((bndv = bndv.next) !== bv.vmesh.boundstart);
   let build_center_face = true;
   if (n_bndv === 3) {
@@ -4212,18 +4219,18 @@ function bevel_vert_two_edges(bp, bm, bv) {
     const bndv = vm.boundstart;
     const pro = bndv.profile;
     pro.super_r = bp.pro_super_r;
-    pro.start = [...vco(bm, v1)];
-    pro.end = [...vco(bm, v2)];
-    pro.middle = [...vco(bm, bv.v)];
+    pro.start = vco(bm, v1).slice(0, 3);
+    pro.end = vco(bm, v2).slice(0, 3);
+    pro.middle = vco(bm, bv.v).slice(0, 3);
     pro.plane_co = [0, 0, 0];
     pro.plane_no = [0, 0, 0];
     pro.proj_dir = [0, 0, 0];
     for (let k = 1; k < ns; k++) {
       const co = get_profile_point(bp, pro, k, ns);
-      mesh_vert(vm, 0, 0, k).co = [...co];
+      mesh_vert(vm, 0, 0, k).co = co.slice(0, 3);
       create_mesh_bmvert(bm, vm, 0, 0, k, bv.v);
     }
-    mesh_vert(vm, 0, 0, ns).co = [...vco(bm, v2)];
+    mesh_vert(vm, 0, 0, ns).co = vco(bm, v2).slice(0, 3);
     for (let k = 1; k < ns; k++) {
       copy_mesh_vert(vm, 1, 0, ns - k, 0, 0, k);
     }
@@ -4254,7 +4261,7 @@ function build_vmesh(bp, bm, bv) {
   let bndv = vm.boundstart;
   do {
     const i = bndv.index;
-    mesh_vert(vm, i, 0, 0).co = [...bndv.nv.co];
+    mesh_vert(vm, i, 0, 0).co = bndv.nv.co.slice(0, 3);
     create_mesh_bmvert(bm, vm, i, 0, 0, bv.v);
     bndv.nv.v = mesh_vert(vm, i, 0, 0).v;
     if (weld && bndv.ebev) {
@@ -4277,7 +4284,7 @@ function build_vmesh(bp, bm, bv) {
       for (let k = 1; k < ns; k++) {
         if (bndv.ebev) {
           co = get_profile_point(bp, bndv.profile, k, ns);
-          mesh_vert(vm, i, 0, k).co = [...co];
+          mesh_vert(vm, i, 0, k).co = co.slice(0, 3);
           if (!weld) {
             create_mesh_bmvert(bm, vm, i, 0, k, bv.v);
           }
@@ -4296,14 +4303,14 @@ function build_vmesh(bp, bm, bv) {
         co = mid_v3(v_weld1, v_weld2);
       } else {
         if (weld1.profile.super_r === PRO_LINE_R && weld2.profile.super_r !== PRO_LINE_R) {
-          co = [...v_weld2];
+          co = v_weld2.slice(0, 3);
         } else if (weld2.profile.super_r === PRO_LINE_R && weld1.profile.super_r !== PRO_LINE_R) {
-          co = [...v_weld1];
+          co = v_weld1.slice(0, 3);
         } else {
           co = mid_v3(v_weld1, v_weld2);
         }
       }
-      mesh_vert(bv.vmesh, weld1.index, 0, k).co = [...co];
+      mesh_vert(bv.vmesh, weld1.index, 0, k).co = co.slice(0, 3);
       create_mesh_bmvert(bm, bv.vmesh, weld1.index, 0, k, bv.v);
     }
     for (let k = 1; k < ns; k++) {

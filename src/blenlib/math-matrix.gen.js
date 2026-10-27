@@ -3,7 +3,7 @@
 
 export function mul_v2_m3v3(M, a) {
   const r = [0, 0];
-  const t = [...a];
+  const t = a.slice(0, 3);
   r[0] = Math.fround(
     Math.fround(Math.fround(M[0][0] * t[0]) + Math.fround(M[1][0] * t[1])) + Math.fround(M[2][0] * t[2]),
   );

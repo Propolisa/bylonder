@@ -149,8 +149,14 @@ class Driver:
             self.home.setdefault(name, module)
             if name in self.exports.of(module):
                 self.note(module, 'shimmed', name, self.check_shim(provider, rel, module, name))
-                # What the shim calls of Blender's, looked for in the same file first.
-                queue += [(rel, need, rel) for need in self.exports.needs(module)]
+                # What the shim calls of Blender's, found from its declaration like any call.
+                for need in self.exports.needs(module):
+                    decl = self.source(provider).declaration(need)
+                    where = self.definition_file(decl, self.source(provider)) if decl is not None else None
+                    if where:
+                        queue.append((where[0], need, where[1]))
+                    else:
+                        self.note(module, 'missing', need, 'a shim calls it; no definition found')
                 continue
             reason = self.excluded(module, name)
             if reason:

@@ -366,6 +366,10 @@ class Source:
     def find(self, name):
         return next((f for f in self.functions if f.spelling == name), None)
 
+    def declaration(self, name):
+        """A declaration of the function name anywhere in the translation unit (its own file or a header), or None."""
+        return next((c for c in self.tu.cursor.walk_preorder() if c.kind == K.FUNCTION_DECL and c.spelling == name), None)
+
     def definition(self, name, rel):
         """The definition of name in the file rel (this file or a header it includes), with its signature known."""
         if not hasattr(self, 'definitions'):

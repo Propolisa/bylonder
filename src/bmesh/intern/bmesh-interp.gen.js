@@ -43,10 +43,10 @@ function compute_mdisp_quad(bm, l, l_f_center) {
   }
   const p = mid_v3(vco(bm, bm.l.v[bm.l.prev[l]]), vco(bm, bm.l.v[l]));
   const n = mid_v3(vco(bm, bm.l.v[bm.l.next[l]]), vco(bm, bm.l.v[l]));
-  const v1 = [...l_f_center];
-  const v2 = [...p];
-  const v3 = [...vco(bm, bm.l.v[l])];
-  const v4 = [...n];
+  const v1 = l_f_center.slice(0, 3);
+  const v2 = p.slice(0, 3);
+  const v3 = vco(bm, bm.l.v[l]).slice(0, 3);
+  const v4 = n.slice(0, 3);
   const e1 = sub_v3(v2, v1);
   const e2 = sub_v3(v3, v4);
   return [1, v1, v2, v3, v4, e1, e2];
@@ -57,11 +57,11 @@ function quad_co(v1, v2, v3, v4, p, n, r_uv) {
   let n2 = [0, 0, 0];
   const origin = [0, 0];
   let i = 0;
-  projverts[0] = [...v1];
-  projverts[1] = [...v2];
-  projverts[2] = [...v3];
-  projverts[3] = [...v4];
-  projverts[4] = [...p];
+  projverts[0] = v1.slice(0, 3);
+  projverts[1] = v2.slice(0, 3);
+  projverts[2] = v3.slice(0, 3);
+  projverts[3] = v4.slice(0, 3);
+  projverts[4] = p.slice(0, 3);
   [, n2] = normal_quad_v3(projverts[0], projverts[1], projverts[2], projverts[3]);
   if (dot_v3(n, n2) < -1.1920929e-7) {
     return false;
@@ -298,7 +298,7 @@ export function BM_loop_interp_from_face(bm, l_dst, f_src, do_vertex, do_multire
   const cos_2d = cos_2d_buf;
   let axis_dominant = [0, 0, 0];
   if (!is_zero_v3(fno(bm, f_src))) {
-    axis_dominant = [...fno(bm, f_src)];
+    axis_dominant = fno(bm, f_src).slice(0, 3);
   } else {
     const vec = BM_face_calc_tangent_auto(bm, f_src);
     axis_dominant = ortho_v3_v3(axis_dominant, vec);
