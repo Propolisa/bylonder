@@ -2,6 +2,30 @@
 // exporting the same name from math-geom.js.
 import { add_v3, dot_v3, isect_line_line_epsilon_v3, len_squared_v3, madd, mul_v3_fl, sub_v3 } from './math-geom.js';
 
+const IS_POINT_IX = 1 << 0;
+const IS_SEGMENT_IX = 1 << 1;
+const DIR_V2_SET = 0;
+const SWAP_AXIS = 0;
+
+export function safe_acos_approx(x) {
+  const f = Math.fround(Math.abs(x));
+  const m = f < 1.0 ? Math.fround(1.0 - Math.fround(1.0 - f)) : 1.0;
+  const a = Math.fround(
+    Math.fround(Math.sqrt(Math.fround(1.0 - m))) *
+      Math.fround(
+        1.5707963705062866 +
+          Math.fround(
+            m *
+              Math.fround(
+                -0.21330098807811737 +
+                  Math.fround(m * Math.fround(0.07798048108816147 + Math.fround(m * -0.021640950813889503))),
+              ),
+          ),
+      ),
+  );
+  return x < 0.0 ? Math.fround(Math.fround(pi) - a) : a;
+}
+
 export function is_power_of_2_i(n) {
   return Number((n & (n - 1)) === 0);
 }
@@ -37,6 +61,29 @@ export function cross_poly_v2(verts, nr) {
 
 export function area_poly_v2(verts, nr) {
   return Math.fround(Math.abs(Math.fround(0.5 * cross_poly_v2(verts, nr))));
+}
+
+export function dist_squared_to_line_segment_v2(p, l1, l2) {
+  let closest = [0, 0];
+  [, closest] = closest_to_line_segment_v2(p, l1, l2);
+  return len_squared_v2v2(closest, p);
+}
+
+export function closest_to_line_segment_v2(p, l1, l2) {
+  let _r0;
+  let r_close = [0, 0];
+  let cp = [0, 0];
+  const lambda = (([_r0, cp] = closest_to_line_v2(p, l1, l2)), _r0);
+  if (lambda <= 0.0) {
+    r_close = [...l1];
+    return [0.0, r_close];
+  }
+  if (lambda >= 1.0) {
+    r_close = [...l2];
+    return [1.0, r_close];
+  }
+  r_close = [...cp];
+  return [lambda, r_close];
 }
 
 export function closest_to_plane_normalized_v3(plane, pt) {
@@ -78,12 +125,235 @@ export function isect_point_poly_v2(pt, verts, nr) {
   return isect;
 }
 
+export function isect_point_quad_v2(p, v1, v2, v3, v4) {
+  const side12 = line_point_side_v2(v1, v2, p);
+  const side23 = line_point_side_v2(v2, v3, p);
+  const side34 = line_point_side_v2(v3, v4, p);
+  const side41 = line_point_side_v2(v4, v1, p);
+  if (side12 >= 0.0 && side23 >= 0.0 && side34 >= 0.0 && side41 >= 0.0) {
+    return 1;
+  }
+  if (side12 <= 0.0 && side23 <= 0.0 && side34 <= 0.0 && side41 <= 0.0) {
+    return -1;
+  }
+  return 0;
+}
+
 export function isect_line_line_v3(v1, v2, v3, v4) {
   let _r0;
   let r_i1 = [0, 0, 0];
   let r_i2 = [0, 0, 0];
   const epsilon = 9.999999974752427e-7;
   return [(([_r0, r_i1, r_i2] = isect_line_line_epsilon_v3(v1, v2, v3, v4, epsilon)), _r0), r_i1, r_i2];
+}
+
+export function closest_to_line_v2(p, l1, l2) {
+  const r_close = [0, 0];
+  const u = sub_v2_v2v2(l2, l1);
+  const h = sub_v2_v2v2(p, l1);
+  const denom = dot_v2v2(u, u);
+  if (denom === 0.0) {
+    r_close[0] = l1[0];
+    r_close[1] = l1[1];
+    return [0.0, r_close];
+  }
+  const lambda = Math.fround(dot_v2v2(u, h) / denom);
+  r_close[0] = Math.fround(l1[0] + Math.fround(u[0] * lambda));
+  r_close[1] = Math.fround(l1[1] + Math.fround(u[1] * lambda));
+  return [lambda, r_close];
+}
+
+export function line_point_factor_v2_ex(p, l1, l2, epsilon, fallback) {
+  const u = sub_v2_v2v2(l2, l1);
+  const h = sub_v2_v2v2(p, l1);
+  const dot = len_squared_v2(u);
+  return dot > epsilon ? Math.fround(dot_v2v2(u, h) / dot) : fallback;
+}
+
+export function line_point_factor_v2(p, l1, l2) {
+  return line_point_factor_v2_ex(p, l1, l2, 0.0, 0.0);
+}
+
+function mean_value_half_tan_v2_db(d_curr, d_next) {
+  const area = cross_v2v2_db(d_curr.dir, d_next.dir);
+  if (area !== 0.0) {
+    const dot = dot_v2v2_db(d_curr.dir, d_next.dir);
+    const len = d_curr.len * d_next.len;
+    const result = (len - dot) / area;
+    if (isfinite(result)) {
+      return result;
+    }
+  }
+  return 0.0;
+}
+
+export function interp_weights_poly_v2(w, v, n, co) {
+  let _r0;
+  let max_value = 0;
+  for (let i = 0; i < n; i++) {
+    max_value = Math.fround(Math.max(max_value, Math.fround(Math.abs(Math.fround(v[i][0] - co[0])))));
+    max_value = Math.fround(Math.max(max_value, Math.fround(Math.abs(Math.fround(v[i][1] - co[1])))));
+  }
+  const eps = Math.fround(Math.fround(16.0 * 1.1920929e-7) * max_value);
+  const eps_sq = Math.fround(eps * eps);
+  let ht = 0;
+  let totweight = 0.0;
+  let ix_flag = 0;
+  const d_curr = { dir: [0, 0], len: 0 };
+  const d_next = { dir: [0, 0], len: 0 };
+  let i_curr = n - 1;
+  let i_next = 0;
+  let v_curr = v[i_curr];
+  let v_next = v[i_next];
+  {
+    d_curr.dir = sub_v2db_v2fl_v2fl(v_curr - 2, co);
+    d_curr.len = len_v2_db(d_curr.dir);
+  }
+  DIR_V2_SET;
+  {
+    d_next.dir = sub_v2db_v2fl_v2fl(v_curr, co);
+    d_next.len = len_v2_db(d_next.dir);
+  }
+  DIR_V2_SET;
+  let ht_prev = mean_value_half_tan_v2_db(d_curr, d_next);
+  while (i_next < n) {
+    if (d_next.len < eps) {
+      ix_flag = IS_POINT_IX;
+      break;
+    }
+    if (dist_squared_to_line_segment_v2(co, v_curr, v_next) < eps_sq) {
+      ix_flag = IS_SEGMENT_IX;
+      break;
+    }
+    (_r0 = d_next), (d_curr.dir = _r0.dir), (d_curr.len = _r0.len);
+    {
+      d_next.dir = sub_v2db_v2fl_v2fl(v_next, co);
+      d_next.len = len_v2_db(d_next.dir);
+    }
+    DIR_V2_SET;
+    ht = mean_value_half_tan_v2_db(d_curr, d_next);
+    w[i_curr] = d_curr.len === 0.0 ? 0.0 : Math.fround((ht_prev + ht) / d_curr.len);
+    totweight = Math.fround(totweight + w[i_curr]);
+    i_curr = i_next++;
+    v_curr = v_next;
+    v_next = v[i_next];
+    ht_prev = ht;
+  }
+  if (ix_flag) {
+    w.fill(0);
+    if (ix_flag & IS_POINT_IX) {
+      w[i_curr] = 1.0;
+    } else {
+      let fac = line_point_factor_v2(co, v_curr, v_next);
+      {
+        if (fac < 0.0) {
+          fac = 0.0;
+        } else if (fac > 1.0) {
+          fac = 1.0;
+        }
+      }
+      0;
+      w[i_curr] = Math.fround(1.0 - fac);
+      w[i_next] = fac;
+    }
+  } else {
+    if (totweight !== 0.0) {
+      for (i_curr = 0; i_curr < n; i_curr++) {
+        w[i_curr] = Math.fround(w[i_curr] / totweight);
+      }
+    }
+  }
+}
+
+export function resolve_quad_uv_v2(r_uv, st, st0, st1, st2, st3) {
+  [r_uv] = resolve_quad_uv_v2_deriv(r_uv, null, st, st0, st1, st2, st3);
+}
+
+export function resolve_quad_uv_v2_deriv(r_uv, r_deriv, st, st0, st1, st2, st3) {
+  const signed_area = Math.fround(
+    Math.fround(
+      Math.fround(
+        Math.fround(Math.fround(st0[0] * st1[1]) - Math.fround(st0[1] * st1[0])) +
+          Math.fround(Math.fround(st1[0] * st2[1]) - Math.fround(st1[1] * st2[0])),
+      ) + Math.fround(Math.fround(st2[0] * st3[1]) - Math.fround(st2[1] * st3[0])),
+    ) + Math.fround(Math.fround(st3[0] * st0[1]) - Math.fround(st3[1] * st0[0])),
+  );
+  const a = Math.fround(
+    Math.fround(Math.fround(st0[0] - st[0]) * Math.fround(st0[1] - st3[1])) -
+      Math.fround(Math.fround(st0[1] - st[1]) * Math.fround(st0[0] - st3[0])),
+  );
+  const b =
+    0.5 *
+    Math.fround(
+      Math.fround(
+        Math.fround(Math.fround(st0[0] - st[0]) * Math.fround(st1[1] - st2[1])) -
+          Math.fround(Math.fround(st0[1] - st[1]) * Math.fround(st1[0] - st2[0])),
+      ) +
+        Math.fround(
+          Math.fround(Math.fround(st1[0] - st[0]) * Math.fround(st0[1] - st3[1])) -
+            Math.fround(Math.fround(st1[1] - st[1]) * Math.fround(st0[0] - st3[0])),
+        ),
+    );
+  const fC = Math.fround(
+    Math.fround(Math.fround(st1[0] - st[0]) * Math.fround(st1[1] - st2[1])) -
+      Math.fround(Math.fround(st1[1] - st[1]) * Math.fround(st1[0] - st2[0])),
+  );
+  let denom = a - 2 * b + fC;
+  r_uv = zero_v2();
+  if ((denom > -2.220446049250313e-16 && denom < 2.220446049250313e-16 ? 1 : 0) !== 0) {
+    const fDen = a - fC;
+    if ((fDen > -2.220446049250313e-16 && fDen < 2.220446049250313e-16 ? 1 : 0) === 0) {
+      r_uv[0] = Math.fround(a / fDen);
+    }
+  } else {
+    const desc_sq = b * b - a * fC;
+    const desc = Math.sqrt(desc_sq < 0.0 ? 0.0 : desc_sq);
+    const s = signed_area > 0 ? -1.0 : 1.0;
+    r_uv[0] = Math.fround((a - b + s * desc) / denom);
+  }
+  {
+    const denom_s = Math.fround(
+      Math.fround(Math.fround(1 - r_uv[0]) * Math.fround(st0[0] - st3[0])) +
+        Math.fround(r_uv[0] * Math.fround(st1[0] - st2[0])),
+    );
+    const denom_t = Math.fround(
+      Math.fround(Math.fround(1 - r_uv[0]) * Math.fround(st0[1] - st3[1])) +
+        Math.fround(r_uv[0] * Math.fround(st1[1] - st2[1])),
+    );
+    let i = 0;
+    denom = denom_s;
+    if (Math.abs(denom_s) < Math.abs(denom_t)) {
+      i = 1;
+      denom = denom_t;
+    }
+    if ((denom > -2.220446049250313e-16 && denom < 2.220446049250313e-16 ? 1 : 0) === 0) {
+      r_uv[1] = Math.fround(
+        Math.fround(
+          Math.fround(Math.fround(1.0 - r_uv[0]) * Math.fround(st0[i] - st[i])) +
+            Math.fround(r_uv[0] * Math.fround(st1[i] - st[i])),
+        ) / denom,
+      );
+    }
+  }
+  if (r_deriv) {
+    r_deriv[0] = zero_v2();
+    r_deriv[1] = zero_v2();
+    let tmp1 = sub_v2_v2v2(st1, st0);
+    let tmp2 = sub_v2_v2v2(st2, st3);
+    const s = interp_v2_v2v2(tmp1, tmp2, r_uv[1]);
+    tmp1 = sub_v2_v2v2(st3, st0);
+    tmp2 = sub_v2_v2v2(st2, st1);
+    const t = interp_v2_v2v2(tmp1, tmp2, r_uv[0]);
+    denom = Math.fround(Math.fround(t[0] * s[1]) - Math.fround(t[1] * s[0]));
+    if (!(denom > -2.220446049250313e-16 && denom < 2.220446049250313e-16 ? 1 : 0)) {
+      const inv_denom = 1.0 / denom;
+      r_deriv[0][0] = Math.fround(-t[1] * inv_denom);
+      r_deriv[0][1] = Math.fround(t[0] * inv_denom);
+      r_deriv[1][0] = Math.fround(s[1] * inv_denom);
+      r_deriv[1][1] = Math.fround(-s[0] * inv_denom);
+    }
+  }
+  return [r_uv, r_deriv];
 }
 
 export function interp_bilinear_quad_v3(data, u, v) {
@@ -101,8 +371,53 @@ export function interp_bilinear_quad_v3(data, u, v) {
   return res;
 }
 
+export function axis_dominant_v3_single(vec) {
+  const x = Math.fround(Math.abs(vec[0]));
+  const y = Math.fround(Math.abs(vec[1]));
+  const z = Math.fround(Math.abs(vec[2]));
+  return x > y ? (x > z ? 0 : 2) : y > z ? 1 : 2;
+}
+
 export function plane_point_side_v3(plane, co) {
   return Math.fround(dot_v3(co, plane) + plane[3]);
+}
+
+export function interp_v2_v2v2(a, b, t) {
+  const r = [0, 0];
+  const s = Math.fround(1.0 - t);
+  r[0] = Math.fround(Math.fround(s * a[0]) + Math.fround(t * b[0]));
+  r[1] = Math.fround(Math.fround(s * a[1]) + Math.fround(t * b[1]));
+  return r;
+}
+
+export function mid_v3_v3v3v3v3(v1, v2, v3, v4) {
+  const v = [0, 0, 0];
+  v[0] = Math.fround(Math.fround(Math.fround(Math.fround(v1[0] + v2[0]) + v3[0]) + v4[0]) / 4.0);
+  v[1] = Math.fround(Math.fround(Math.fround(Math.fround(v1[1] + v2[1]) + v3[1]) + v4[1]) / 4.0);
+  v[2] = Math.fround(Math.fround(Math.fround(Math.fround(v1[2] + v2[2]) + v3[2]) + v4[2]) / 4.0);
+  return v;
+}
+
+export function ortho_v3_v3(out, v) {
+  const axis = axis_dominant_v3_single(v);
+  switch (axis) {
+    case 0:
+      out[0] = Math.fround(-v[1] - v[2]);
+      out[1] = v[0];
+      out[2] = v[0];
+      break;
+    case 1:
+      out[0] = v[1];
+      out[1] = Math.fround(-v[0] - v[2]);
+      out[2] = v[1];
+      break;
+    case 2:
+      out[0] = v[2];
+      out[1] = v[2];
+      out[2] = Math.fround(-v[0] - v[1]);
+      break;
+  }
+  return out;
 }
 
 export function minmax_v3v3_v3(vec) {
@@ -117,14 +432,103 @@ export function minmax_v3v3_v3(vec) {
   return [min, max];
 }
 
+export function axis_sort_v3(axis_values, r_axis_order) {
+  const v = [...axis_values];
+  if (v[0] < v[1]) {
+    if (v[2] < v[0]) {
+      {
+        [v[0], v[2]] = [v[2], v[0]];
+        [r_axis_order[0], r_axis_order[2]] = [r_axis_order[2], r_axis_order[0]];
+      }
+      SWAP_AXIS;
+    }
+  } else {
+    if (v[1] < v[2]) {
+      {
+        [v[0], v[1]] = [v[1], v[0]];
+        [r_axis_order[0], r_axis_order[1]] = [r_axis_order[1], r_axis_order[0]];
+      }
+      SWAP_AXIS;
+    } else {
+      {
+        [v[0], v[2]] = [v[2], v[0]];
+        [r_axis_order[0], r_axis_order[2]] = [r_axis_order[2], r_axis_order[0]];
+      }
+      SWAP_AXIS;
+    }
+  }
+  if (v[2] < v[1]) {
+    {
+      [v[1], v[2]] = [v[2], v[1]];
+      [r_axis_order[1], r_axis_order[2]] = [r_axis_order[2], r_axis_order[1]];
+    }
+    SWAP_AXIS;
+  }
+}
+
+export function zero_v2() {
+  const r = [0, 0];
+  r[0] = 0.0;
+  r[1] = 0.0;
+  return r;
+}
+
 export function add_v2_v2(r, a) {
   r[0] = Math.fround(r[0] + a[0]);
   r[1] = Math.fround(r[1] + a[1]);
 }
 
+export function sub_v2_v2(r, a) {
+  r[0] = Math.fround(r[0] - a[0]);
+  r[1] = Math.fround(r[1] - a[1]);
+}
+
+export function sub_v2_v2v2(a, b) {
+  const r = [0, 0];
+  r[0] = Math.fround(a[0] - b[0]);
+  r[1] = Math.fround(a[1] - b[1]);
+  return r;
+}
+
+export function sub_v2db_v2fl_v2fl(a, b) {
+  const r = [0, 0];
+  r[0] = a[0] - b[0];
+  r[1] = a[1] - b[1];
+  return r;
+}
+
 export function mul_v2_fl(r, f) {
   r[0] = Math.fround(r[0] * f);
   r[1] = Math.fround(r[1] * f);
+}
+
+export function dot_v2v2(a, b) {
+  return Math.fround(Math.fround(a[0] * b[0]) + Math.fround(a[1] * b[1]));
+}
+
+export function dot_v2v2_db(a, b) {
+  return a[0] * b[0] + a[1] * b[1];
+}
+
+export function cross_v2v2(a, b) {
+  return Math.fround(Math.fround(a[0] * b[1]) - Math.fround(a[1] * b[0]));
+}
+
+export function cross_v2v2_db(a, b) {
+  return a[0] * b[1] - a[1] * b[0];
+}
+
+export function len_squared_v2(v) {
+  return Math.fround(Math.fround(v[0] * v[0]) + Math.fround(v[1] * v[1]));
+}
+
+export function len_v2_db(v) {
+  return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+}
+
+export function len_squared_v2v2(a, b) {
+  const d = sub_v2_v2v2(b, a);
+  return dot_v2v2(d, d);
 }
 
 export function equals_v3v3(v1, v2) {
@@ -137,4 +541,11 @@ export function compare_v2v2(v1, v2, limit) {
 
 export function compare_v3v3(v1, v2, limit) {
   return Math.abs(v1[0] - v2[0]) <= limit && Math.abs(v1[1] - v2[1]) <= limit && Math.abs(v1[2] - v2[2]) <= limit;
+}
+
+export function line_point_side_v2(l1, l2, pt) {
+  return Math.fround(
+    Math.fround(Math.fround(l1[0] - pt[0]) * Math.fround(l2[1] - pt[1])) -
+      Math.fround(Math.fround(l2[0] - pt[0]) * Math.fround(l1[1] - pt[1])),
+  );
 }
