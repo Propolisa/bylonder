@@ -1,5 +1,5 @@
 // Edit Mode helpers (editmesh_utils.cc).
-import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable } from '../../bmesh/intern/bmesh-class.js';
+import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_test_bool, BM_elem_flag_enable, BM_elem_flag_disable } from '../../bmesh/intern/bmesh-class.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_hide_set, BM_elem_select_set, BM_mesh_select_mode_flush_ex, BM_mesh_elem_hflag_disable_all, BM_vert_select_set, BM_edge_select_set, BM_edge_select_set_noflush, BM_face_select_set, BM_face_select_set_noflush, BM_mesh_select_mode_clean_ex } from '../../bmesh/intern/bmesh-marking.js';
 import { bmo_call, BMO_op_vinitf, BMO_op_exec, BMO_op_finish, BMO_slot_get, BMO_slot_buffer_hflag_enable, BMO_error_pop, BMO_FLAG_DEFAULTS } from '../../bmesh/intern/bmesh-operators.js';
 import { BMO_ERROR_CANCEL } from '../../bmesh/intern/bmesh-error.js';
@@ -13,7 +13,7 @@ export function EDBM_mesh_hide(bm, selectmode, swap) {
   const [pool, htype] = selectmode & SCE_SELECT_VERTEX ? TYPES[0] : selectmode & SCE_SELECT_EDGE ? TYPES[1] : TYPES[2];
   let changed = false;
   BM_ITER_MESH(bm[pool], (i) => {
-    if (!BM_elem_flag_test(bm[pool], i, BM_ELEM_HIDDEN) && BM_elem_flag_test(bm[pool], i, BM_ELEM_SELECT) !== swap) {
+    if (!BM_elem_flag_test(bm[pool], i, BM_ELEM_HIDDEN) && BM_elem_flag_test_bool(bm[pool], i, BM_ELEM_SELECT) !== swap) {
       BM_elem_hide_set(bm, htype, i, true);
       changed = true;
     }

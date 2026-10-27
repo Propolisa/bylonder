@@ -34,6 +34,13 @@ export function editMeshFromMesh(mesh, selectmode) {
     withArrays([Int32Array.from(flagPointers)], ([table]) => x.bm_from_arrays(mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv, table, selectmode)));
 }
 
+// Writes a Mesh's positions, UV map and flags into an edit BMesh of the same topology, in place.
+export function editMeshSync(bm, mesh) {
+  const flags = FLAGS.map(([name]) => bytes(mesh.attribute(name)));
+  withArrays([Float32Array.from(mesh.vert_positions), mesh.attribute('UVMap') && Float32Array.from(mesh.attribute('UVMap')), ...flags],
+    ([p, uv, ...flagPointers]) => withArrays([Int32Array.from(flagPointers)], ([table]) => x.bm_sync(bm, p, uv, table)));
+}
+
 export function editMeshFree(bm) {
   editMeshFreeContext(bm);
   x.bm_free(bm);
@@ -60,6 +67,10 @@ export function meshFromEditMesh(bm) {
 export const select = (bm, htype, index) => x.bm_select(bm, htype, index);
 export const selectFlush = (bm) => x.bm_select_flush(bm);
 export const translateSelected = (bm, [dx, dy, dz]) => x.bm_translate_selected(bm, dx, dy, dz);
+export function selectModeSet(bm, selectmode) {
+  x.edit_context_selectmode_set(contextOf(bm), selectmode);
+}
+
 export function selectClear(bm, selectmode) {
   x.bm_select_clear(bm, selectmode);
   x.edit_context_selectmode_set(contextOf(bm), selectmode);

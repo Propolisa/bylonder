@@ -3,7 +3,7 @@
 // mesh: { project(co) -> [x, y, depth] | null, occluded(co) -> bool, faceAt(x, y) -> face | -1, xray }.
 import { BMW_edgeloop, BMW_edgering, BMW_faceloop, BMW_edgeboundary, BMW_island, BMW_vert_shell, BMW_loop_shell_wire } from '../../bmesh/intern/bmesh-walkers.js';
 import { BM_edge_is_boundary, BM_edge_is_contiguous, BM_FACES_OF_EDGE } from '../../bmesh/intern/bmesh-query.js';
-import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_SEAM, BM_ELEM_SMOOTH, BM_elem_flag_test, BMO_flag_test, BMO_flag_enable } from '../../bmesh/intern/bmesh-class.js';
+import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_SEAM, BM_ELEM_SMOOTH, BM_elem_flag_test, BM_elem_flag_test_bool, BMO_flag_test, BMO_flag_enable } from '../../bmesh/intern/bmesh-class.js';
 import { bmo_call } from '../../bmesh/intern/bmesh-operators.js';
 import {
   SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE, BM_elem_select_set, BM_mesh_select_mode_flush, BM_mesh_select_mode_set,
@@ -159,7 +159,7 @@ export function edbm_select_loop(bm, eed, { extend = false, deselect = false, to
     const delimit = { outer_corners: true, ngons: true };
     let full_boundary = false;
     if (select_cycle && BM_edge_is_boundary(bm, eed)) {
-      const counts = (edges) => edges.filter((e) => BM_elem_flag_test(bm.e, e, BM_ELEM_SELECT) !== select).length;
+      const counts = (edges) => edges.filter((e) => BM_elem_flag_test_bool(bm.e, e, BM_ELEM_SELECT) !== select).length;
       if (counts(BMW_edgeloop(bm, eed, delimit)) === 0) full_boundary = counts(BMW_edgeboundary(bm, eed)) !== 0;
     }
     if (select_clear) BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT);

@@ -341,3 +341,53 @@ EXPORT(bm_translate_selected) void bm_translate_selected(BMesh *bm, float x, flo
     }
   }
 }
+
+/* Writes positions, the UV map and flags into a BMesh of the same topology, by the index order bm_to_arrays reads in:
+ * what JS changed (selection, hiding, a move) reaches the BMesh an operator chain keeps, rather than a rebuilt one.
+ * Selection is set as BM_mesh_bm_from_me sets it, so the selection counts stay right. */
+EXPORT(bm_sync)
+void bm_sync(BMesh *bm, const float (*positions)[3], const float (*uvs)[2], const bool *const *flags)
+{
+  auto flag = [&](MeshFlag f, int i) { return flags[f] && flags[f][i]; };
+  auto set = [](BMHeader &head, char hflag, bool value) { head.hflag = value ? (head.hflag | hflag) : (head.hflag & ~hflag); };
+  BM_mesh_elem_index_ensure(bm, BM_VERT | BM_EDGE | BM_FACE | BM_LOOP);
+  BM_mesh_elem_hflag_disable_all(bm, BM_VERT | BM_EDGE | BM_FACE, BM_ELEM_SELECT, false);
+  const int cd_uv = CustomData_get_offset_named(&bm->ldata, CD_PROP_FLOAT2, "UVMap");
+  BMIter iter;
+  BMVert *v;
+  int i;
+  BM_ITER_MESH_INDEX (v, &iter, bm, BM_VERTS_OF_MESH, i) {
+    copy_v3_v3(v->co, positions[i]);
+    set(v->head, BM_ELEM_HIDDEN, flag(HIDE_VERT, i));
+    if (flag(SELECT_VERT, i)) {
+      BM_vert_select_set(bm, v, true);
+    }
+  }
+  BMEdge *e;
+  BM_ITER_MESH_INDEX (e, &iter, bm, BM_EDGES_OF_MESH, i) {
+    set(e->head, BM_ELEM_SEAM, flag(UV_SEAM, i));
+    set(e->head, BM_ELEM_HIDDEN, flag(HIDE_EDGE, i));
+    set(e->head, BM_ELEM_SMOOTH, !flag(SHARP_EDGE, i));
+    if (flag(SELECT_EDGE, i)) {
+      BM_edge_select_set(bm, e, true);
+    }
+  }
+  BMFace *f;
+  int corner = 0;
+  BM_ITER_MESH_INDEX (f, &iter, bm, BM_FACES_OF_MESH, i) {
+    set(f->head, BM_ELEM_SMOOTH, !flag(SHARP_FACE, i));
+    set(f->head, BM_ELEM_HIDDEN, flag(HIDE_POLY, i));
+    if (flag(SELECT_POLY, i)) {
+      BM_face_select_set(bm, f, true);
+    }
+    BMLoop *l_iter, *l_first;
+    l_iter = l_first = BM_FACE_FIRST_LOOP(f);
+    do {
+      if (cd_uv != -1 && uvs) {
+        copy_v2_v2(BM_ELEM_CD_GET_FLOAT_P(l_iter, cd_uv), uvs[corner]);
+      }
+      corner++;
+    } while ((l_iter = l_iter->next) != l_first);
+  }
+  BM_mesh_normals_update(bm);
+}

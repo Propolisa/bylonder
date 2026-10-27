@@ -19,7 +19,7 @@ import { bmo_contextual_create_exec } from '../../bmesh/operators/bmo-create.js'
 import { EDBM_mesh_hide, EDBM_mesh_reveal, EDBM_select_more, EDBM_select_less } from './editmesh-utils.js';
 import { edbm_bevel_exec } from './editmesh-bevel.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
-import { editMeshFromMesh, editMeshFree, meshFromEditMesh, runOperator } from '../../bmesh/bmesh-wasm.js';
+import { editMeshFromMesh, editMeshFree, editMeshSync, meshFromEditMesh, runOperator, selectModeSet } from '../../bmesh/bmesh-wasm.js';
 
 // The %hv, %he and %hf operator slots: elements with a header flag.
 export function BMO_slot_buffer_from_hflag(bm, pool, hflag) {
@@ -102,19 +102,38 @@ export function edbm_extrude_mesh(bm, props = {}) {
   return nr !== 'NONE';
 }
 
-// Runs Blender's own operator (src/bmesh/bmesh-wasm.js) on the edit mesh: it goes into WebAssembly with its UV map and
-// flags, the operator runs as Blender runs it, and the result replaces the edit mesh.
+// The BMesh Blender's operators run on (src/bmesh/bmesh-wasm.js) is kept with the edit mesh between operators, as
+// Blender keeps its own: a chain of operators then visits elements in Blender's order. What JS changed in between
+// (selection, hiding, a move) is written into it; a change of topology by an operator still in JS rebuilds it.
+const BLENDER_EDIT_MESH = Symbol('Blender edit mesh');
+const freeing = new FinalizationRegistry(editMeshFree);
+const sameTopology = (a, b) => ['edges', 'face_offsets', 'corner_verts', 'corner_edges']
+  .every((key) => a[key].length === b[key].length && a[key].every((value, i) => value === b[key][i]));
+
+function blenderEditMesh(bm) {
+  const mesh = BM_mesh_bm_to_me(bm), kept = bm[BLENDER_EDIT_MESH];
+  if (kept && sameTopology(kept.mesh, mesh)) {
+    editMeshSync(kept.handle, mesh);
+    selectModeSet(kept.handle, bm.selectmode);
+    return kept.handle;
+  }
+  if (kept) {
+    freeing.unregister(bm);
+    editMeshFree(kept.handle);
+  }
+  return editMeshFromMesh(mesh, bm.selectmode);
+}
+
+// Runs Blender's own operator on the edit mesh and takes its result back.
 function blenderOperator(idname) {
   return (bm, props) => {
-    const edit = editMeshFromMesh(BM_mesh_bm_to_me(bm), bm.selectmode);
-    try {
-      runOperator(edit, idname, props);
-      const { selectmode } = bm;
-      Object.defineProperties(bm, Object.getOwnPropertyDescriptors(BM_mesh_bm_from_me(meshFromEditMesh(edit))));
-      bm.selectmode = selectmode;
-    } finally {
-      editMeshFree(edit);
-    }
+    const handle = blenderEditMesh(bm), { selectmode } = bm;
+    runOperator(handle, idname, props);
+    const mesh = meshFromEditMesh(handle);
+    Object.defineProperties(bm, Object.getOwnPropertyDescriptors(BM_mesh_bm_from_me(mesh)));
+    bm.selectmode = selectmode;
+    bm[BLENDER_EDIT_MESH] = { handle, mesh };
+    freeing.register(bm, handle, bm);
   };
 }
 
