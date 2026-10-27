@@ -661,7 +661,8 @@ function swap_face_components(face_component, totface, c1, c2) {
 function uv_vert_map_init(bp, bm) {
   const num_uv_layers = CustomData_number_of_layers(bm.ldata, CD_PROP_FLOAT2);
   bp.uv_vert_maps.length = 0;
-  bp.uv_vert_maps.resize(num_uv_layers);
+  (bp.uv_vert_maps.length = Math.min(bp.uv_vert_maps.length, num_uv_layers)),
+    bp.uv_vert_maps.push(...Array.from({ length: num_uv_layers - bp.uv_vert_maps.length }, () => new Map()));
 }
 
 function uv_vert_map_pop(bp, v) {
@@ -4214,7 +4215,7 @@ function bevel_vert_two_edges(bp, bm, bv) {
     }
     mesh_vert(vm, 0, 0, ns).co = [...vco(bm, v2)];
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(vm, 1, 0, ns - k, 0, 0, k);
+      copy_mesh_vert(bm, vm, 1, 0, ns - k, 0, 0, k);
     }
   }
   if (Number(BM_vert_face_check(bm, bv.v)) === Number(false)) {
@@ -4261,7 +4262,7 @@ function build_vmesh(bp, bm, bv) {
   bndv = vm.boundstart;
   do {
     const i = bndv.index;
-    copy_mesh_vert(vm, i, 0, ns, bndv.next.index, 0, 0);
+    copy_mesh_vert(bm, vm, i, 0, ns, bndv.next.index, 0, 0);
     if (vm.mesh_kind !== M_ADJ) {
       for (let k = 1; k < ns; k++) {
         if (bndv.ebev) {
@@ -4271,7 +4272,7 @@ function build_vmesh(bp, bm, bv) {
             create_mesh_bmvert(bm, vm, i, 0, k, bv.v);
           }
         } else if (n === 2 && !bndv.ebev) {
-          copy_mesh_vert(bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
+          copy_mesh_vert(bm, bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
         }
       }
     }
@@ -4296,7 +4297,7 @@ function build_vmesh(bp, bm, bv) {
       create_mesh_bmvert(bm, bv.vmesh, weld1.index, 0, k, bv.v);
     }
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
+      copy_mesh_vert(bm, bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
     }
   }
   let vpipe = null;
@@ -5196,7 +5197,7 @@ function find_superellipse_chord_endpoint(x0, dtarget, r, rbig) {
   return xnew;
 }
 
-function find_even_superellipse_chords_general(bm, seg, r, xvals, yvals) {
+function find_even_superellipse_chords_general(seg, r, xvals, yvals) {
   const smoothitermax = 10;
   const error_tol = 1e-7;
   const imax = Math.trunc((seg + 1) / 2) - 1;
@@ -5244,7 +5245,7 @@ function find_even_superellipse_chords_general(bm, seg, r, xvals, yvals) {
       break;
     }
     for (let i = 1; i <= imax; i++) {
-      xvals[i] = find_superellipse_chord_endpoint(bm, xvals[i - 1], davg, r, rbig);
+      xvals[i] = find_superellipse_chord_endpoint(xvals[i - 1], davg, r, rbig);
       yvals[i] = superellipse_co(xvals[i], r, rbig);
     }
   }
