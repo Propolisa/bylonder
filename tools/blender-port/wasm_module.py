@@ -22,6 +22,9 @@ import convert
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WASM = os.path.join(HERE, 'wasm')
+# Header directories the editors' sources include beyond those the converter parses with.
+EDITOR_INCLUDES = ('blenloader', 'editors/include', 'editors/mesh', 'windowmanager', 'gpu', 'imbuf', 'blenfont', 'render', 'animrig', 'nodes',
+                   'asset_system', 'draw')
 
 
 def patched_tree(root):
@@ -51,7 +54,7 @@ def flags(tree):
     return ['--target=wasm32-wasi', '-std=c++20', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
             '-Wno-c++11-narrowing', '-D_WASI_EMULATED_PROCESS_CLOCKS', '-isystem', os.path.join(WASM, 'include'),
             '-include', os.path.join(WASM, 'compat.h'), *convert.include_args(tree),
-            f'-I{os.path.join(tree, "source/blender/blenloader")}', f'-I{os.path.join(tree, "intern/guardedalloc/intern")}',
+            *(f'-I{os.path.join(tree, "source/blender", d)}' for d in EDITOR_INCLUDES), f'-I{os.path.join(tree, "intern/guardedalloc/intern")}',
             f'-I{os.path.join(tree, ".port-wasm/include")}']
 
 

@@ -27,6 +27,7 @@
     "bmesh/bmesh.wasm": {
       "api": "bmesh-api.cc",
       "libraries": [
+        "source/blender/editors/mesh",
         "source/blender/bmesh/intern",
         "source/blender/bmesh/operators",
         "source/blender/bmesh/tools",

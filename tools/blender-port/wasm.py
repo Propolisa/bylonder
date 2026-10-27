@@ -100,7 +100,7 @@ class UnitBuild:
             self.api.append((f, [Param(p) for p in f.get_arguments()]))
         source = driver.source(next(iter(unit['api'].values())))
         self.flags = ['--target=wasm32-wasi', '-std=c++20', '-O3', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
-                      '-include', os.path.join(HERE, 'wasm', 'compat.h')]
+                      '-isystem', os.path.join(HERE, 'wasm', 'include'), '-include', os.path.join(HERE, 'wasm', 'compat.h')]
         self.flags += [a for a in source.args if a.startswith('-I')]
         self.flags += [f'-I{os.path.join(self.root, "intern/guardedalloc/intern")}', f'-I{os.path.join(self.build, "include")}']
 
