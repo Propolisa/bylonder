@@ -685,7 +685,11 @@ class FunctionPort:
             var = next(v for v in kids(it) if v.spelling == 'bl_port_it')
             return self.iter_loop(var, nexts[0] if nexts else None, incs[0] if incs else None, body)
         init, cond, inc = self.for_slots(c)
-        init_js = '' if init is None else ' '.join(self.declaration(init)).rstrip(';') if init.kind == K.DECL_STMT else self.expr_statement(init)
+        if init is not None and init.kind == K.DECL_STMT:
+            # One `let` for every variable the header declares.
+            init_js = 'let ' + ', '.join(re.sub(r'^(let|const) ', '', d).rstrip(';') for d in self.declaration(init))
+        else:
+            init_js = '' if init is None else self.expr_statement(init)
         cond_js = self.cond(cond) if cond is not None else ''
         inc_js = self.expr(inc) if inc is not None else ''
         return f'for ({init_js}; {cond_js}; {inc_js}) {self.body(body)}'
