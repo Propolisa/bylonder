@@ -40,6 +40,7 @@
 #include "mesh_intern.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
+#include "RNA_prototypes.hh"
 #include "operator-properties.hh"
 #include "extraction.hh"
 
@@ -61,6 +62,8 @@ struct EditContext {
   Base base = {};
   Object object = {};
   Mesh mesh = {};
+  /* What evaluating an edit mesh without modifiers gives: a mesh that wraps it (ME_WRAPPER_TYPE_BMESH). */
+  Mesh mesh_eval = {};
   /* The region an operator draws in; without a type, as in Blender's background mode, it draws nothing. */
   ARegion region = {};
   Extraction extraction;
@@ -74,7 +77,11 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
   ctx->mesh.runtime->edit_mesh->bm = bm;
   ctx->mesh.runtime->edit_mesh->selectmode = bm->selectmode;
   STRNCPY(ctx->mesh.id.name, "MEMesh");
+  ctx->mesh_eval.runtime = MEM_new<bke::MeshRuntime>(__func__);
+  ctx->mesh_eval.runtime->wrapper_type = ME_WRAPPER_TYPE_BMESH;
+  ctx->mesh_eval.runtime->edit_mesh = ctx->mesh.runtime->edit_mesh;
   ctx->object.runtime = MEM_new<bke::ObjectRuntime>(__func__);
+  ctx->object.runtime->data_eval = &ctx->mesh_eval.id;
   ctx->object.type = OB_MESH;
   ctx->object.mode = OB_MODE_EDIT;
   ctx->object.data = &ctx->mesh.id;
@@ -92,7 +99,7 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
   ctx->C = CTX_create();
   CTX_wm_region_set(ctx->C, &ctx->region);
   CTX_data_scene_set(ctx->C, &ctx->scene);
-  PointerRNA object_ptr = {&ctx->object.id, nullptr, &ctx->object};
+  PointerRNA object_ptr = {&ctx->object.id, RNA_Object, &ctx->object};
   CTX_store_add(ctx->stores, "edit_object", &object_ptr);
   CTX_store_add(ctx->stores, "active_object", &object_ptr);
   bContextStore *store = CTX_store_add(ctx->stores, "object", &object_ptr);
@@ -107,6 +114,7 @@ EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
   BM_mesh_free(ctx->mesh.runtime->edit_mesh->bm);
   ctx->mesh.runtime->edit_mesh.reset();
   MEM_delete(ctx->mesh.runtime);
+  MEM_delete(ctx->mesh_eval.runtime);
   MEM_delete(ctx->object.runtime);
   MEM_delete(ctx);
 }
@@ -344,6 +352,36 @@ void BKE_view_layer_synced_ensure(const Scene * /*scene*/, ViewLayer * /*view_la
 void _BKE_view_layer_synced_ensure_or_assert(const Main * /*bmain*/, const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
 
 /* As object.cc defines them; object.cc comes with the rest of Blender's object handling. */
+const Mesh *BKE_object_get_editmesh_eval_final(const Object *object)
+{
+  const Mesh *mesh = id_cast<const Mesh *>(object->data);
+  if (mesh->runtime->edit_mesh == nullptr) {
+    return nullptr;
+  }
+  return reinterpret_cast<Mesh *>(object->runtime->data_eval);
+}
+const Mesh *BKE_object_get_editmesh_eval_cage(const Object *object) { return object->runtime->editmesh_eval_cage; }
+Mesh *BKE_object_get_original_mesh(const Object *object)
+{
+  return id_cast<Mesh *>(object->id.orig_id == nullptr ? object->data : id_cast<Object *>(object->id.orig_id)->data);
+}
+
+/* As object_edit.cc defines them; object_edit.cc comes with the rest of Blender's object editing. */
+Object *ed::object::context_object(const bContext *C)
+{
+  return static_cast<Object *>(CTX_data_pointer_get_type(C, "object", RNA_Object).data);
+}
+Object *ed::object::context_active_object(const bContext *C)
+{
+  Object *ob = nullptr;
+  if (C) {
+    ob = context_object(C);
+    if (!ob) {
+      ob = CTX_data_active_object(C);
+    }
+  }
+  return ob;
+}
 const float4x4 &Object::object_to_world() const { return this->runtime->object_to_world; }
 const float4x4 &Object::world_to_object() const { return this->runtime->world_to_object; }
 
