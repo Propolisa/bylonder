@@ -2,6 +2,7 @@
  * context finds it (the context store), and operators registered by their own MESH_OT_* functions and run by their
  * own exec. The window manager's and depsgraph's updates have nothing to update here, so they do nothing. */
 #include "BLI_listbase.h"
+#include "CLG_log.h"
 #include "BLF_api.hh"
 #include "BKE_global.hh"
 #include "BLI_string.h"
@@ -32,6 +33,9 @@ using namespace blender;
 using namespace blender::ed::mesh;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
+
+/* Logging is set up first, as Blender's main sets it up. */
+static const bool logging = (CLG_init(), true);
 
 /* A scene holding one mesh object in Edit Mode, whose edit mesh is a BMesh made by bm_from_arrays. */
 struct EditContext {
@@ -182,6 +186,10 @@ Base *BKE_view_layer_base_find(ViewLayer *view_layer, Object *ob)
 void BKE_view_layer_synced_ensure(const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
 void _BKE_view_layer_synced_ensure_or_assert(const Main * /*bmain*/, const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
 
+/* As object.cc defines them; object.cc comes with the rest of Blender's object handling. */
+const float4x4 &Object::object_to_world() const { return this->runtime->object_to_world; }
+const float4x4 &Object::world_to_object() const { return this->runtime->world_to_object; }
+
 /* port-override: Blender's poll (screen_ops.cc), which comes with Blender's screens. */
 bool ED_operator_editmesh(bContext *C)
 {
@@ -199,6 +207,8 @@ extern const PointerRNA PointerRNA_NULL = {};
 
 /* Marks the properties after it as advanced in Blender's UI. */
 void WM_operatortype_props_advanced_begin(wmOperatorType * /*ot*/) {}
+/* Gives an operator a modal variant for adjusting it interactively in Blender's UI; its exec is unchanged. */
+void WM_operator_type_modal_from_exec_for_object_edit_coords(wmOperatorType * /*ot*/) {}
 
 /* No window, depsgraph or view to update. */
 void DEG_id_tag_update(ID * /*id*/, unsigned int /*flags*/) {}

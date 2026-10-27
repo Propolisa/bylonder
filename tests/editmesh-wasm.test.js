@@ -14,21 +14,23 @@ const selected = (mesh, name) => Array.from(mesh.attribute(name), Boolean).flatM
 
 const failures = [];
 let matched = 0;
-for (const file of await readdir(dir)) {
-  const fixture = JSON.parse(await readFile(new URL(file, dir), 'utf8'));
-  if (process.env.ONLY && !file.startsWith(process.env.ONLY)) continue;
-  if (!fixture.edit || !hasOperator(fixture.edit.operator) || (fixture.edit.pre && !hasOperator(fixture.edit.pre.operator))) continue;
+// What of a fixture's result differs from Blender's; an error (a Blender function not in the module) is its difference.
+function differences(fixture) {
   const bm = editMeshFromMesh(primitive_add(fixture.operator, fixture.props), SELECT[fixture.edit.select_mode][0]);
-  for (const step of [fixture.edit.pre, fixture.edit].filter(Boolean)) {
-    const [mode, htype] = SELECT[step.select_mode];
-    selectClear(bm, mode);
-    for (const i of step.select) select(bm, htype, i);
-    selectFlush(bm);
-    runOperator(bm, step.operator, step.props);
+  try {
+    for (const step of [fixture.edit.pre, fixture.edit].filter(Boolean)) {
+      const [mode, htype] = SELECT[step.select_mode];
+      selectClear(bm, mode);
+      for (const i of step.select) select(bm, htype, i);
+      selectFlush(bm);
+      runOperator(bm, step.operator, step.props);
+    }
+  } catch (error) {
+    return [error.message.split('\n')[0]];
   }
   const mesh = meshFromEditMesh(bm);
   editMeshFree(bm);
-  const differs = [
+  return [
     !(mesh.vert_positions.length === fixture.positions.length * 3 && fixture.positions.flat().every((x, i) => near(mesh.vert_positions[i], x))) && 'positions',
     JSON.stringify(Array.from(mesh.edges)) !== JSON.stringify(fixture.edges.flat()) && 'edges',
     JSON.stringify(Array.from(mesh.face_offsets)) !== JSON.stringify(fixture.face_offsets) && 'face offsets',
@@ -38,9 +40,16 @@ for (const file of await readdir(dir)) {
     fixture.sharp_face && fixture.sharp_face.some((sharp, i) => sharp !== Boolean(mesh.attribute('sharp_face')[i])) && 'sharp faces',
     fixture.selection && JSON.stringify(['.select_vert', '.select_edge', '.select_poly'].map((name) => selected(mesh, name))) !== JSON.stringify(fixture.selection) && 'selection',
   ].filter(Boolean);
+}
+
+for (const file of await readdir(dir)) {
+  const fixture = JSON.parse(await readFile(new URL(file, dir), 'utf8'));
+  if (process.env.ONLY && !file.startsWith(process.env.ONLY)) continue;
+  if (!fixture.edit || !hasOperator(fixture.edit.operator) || (fixture.edit.pre && !hasOperator(fixture.edit.pre.operator))) continue;
+  const differs = differences(fixture);
   if (differs.length) failures.push(`${file}: ${differs.join(', ')}`);
   else matched++;
 }
 assert.deepEqual(failures, [], `Edit Mode fixtures differ from Blender:\n${failures.join('\n')}`);
-assert.ok(matched >= 8);
+assert.ok(process.env.ONLY || matched >= 8);
 console.log(`Edit Mode in WebAssembly: ${matched} operator results match Blender 5.2 exactly, run by Blender's own operators`);

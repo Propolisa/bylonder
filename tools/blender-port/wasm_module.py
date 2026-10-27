@@ -27,7 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 WASM = os.path.join(HERE, 'wasm')
 # Header directories the editors' and RNA's sources include beyond those the converter parses with.
 EDITOR_INCLUDES = ('blenloader', 'editors/include', 'editors/mesh', 'windowmanager', 'gpu', 'imbuf', 'blenfont', 'render', 'animrig', 'nodes',
-                   'asset_system', 'draw', 'makesdna/intern', 'makesrna/intern', 'imbuf/movie')
+                   'asset_system', 'draw', 'makesdna/intern', 'makesrna/intern', 'imbuf/movie', 'editors/transform')
 BLENDER = 'https://projects.blender.org/api/v1/repos/blender/blender'
 
 
@@ -192,7 +192,10 @@ def build(root, name, spec, tag):
     generated, operators = operator_table(tree, out_dir, args, spec)
     archives, members = [], []
     for lib in spec['libraries']:
+        # A library is a directory or a file, or {path, exclude}: a directory without some of its files.
+        lib, exclude = (lib['path'], set(lib['exclude'])) if isinstance(lib, dict) else (lib, set())
         sources = sorted(glob.glob(os.path.join(tree, lib, '*.c*'))) if os.path.isdir(os.path.join(tree, lib)) else [os.path.join(tree, lib)]
+        sources = [s for s in sources if os.path.basename(s) not in exclude]
         objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args, patches)
         built = [o for o in objects.values() if o]
         archive = os.path.join(out_dir, lib.replace('/', '_') + '.a')
@@ -211,16 +214,19 @@ def build(root, name, spec, tag):
         sys.exit(f'{os.path.relpath(failed[0], convert.REPO)} does not build:\n{result.stderr}')
     out = os.path.join(convert.REPO, 'src', name)
     # Archives twice: a member one archive pulls in may need members of an archive listed before it.
-    result = subprocess.run(['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--strip-all',
-                             '-Wl,--warn-unresolved-symbols', '-Wl,--error-limit=0', '-Wl,--export=malloc', '-Wl,--export=free', '-o', out,
-                             *own.values(), *archives, *archives, '-lwasi-emulated-process-clocks'], capture_output=True, text=True)
-    if result.returncode:
-        sys.exit(f'{name}: link failed\n{result.stderr}')
-    unresolved = {line.split('undefined symbol: ')[-1] for line in result.stderr.splitlines() if 'undefined symbol: ' in line}
+    # WASM_NAMES=1 keeps function names, for profiles and stacks while debugging.
+    strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
+    link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
+            '-Wl,--export=malloc', '-Wl,--export=free', *own.values(), *archives, *archives, '-lwasi-emulated-process-clocks']
+    # A dry link names every unresolved symbol, for the data check; the module itself imports missing functions by name.
+    check = subprocess.run([*link, '-Wl,--warn-unresolved-symbols', '-o', os.devnull], capture_output=True, text=True)
+    unresolved = {line.split('undefined symbol: ')[-1] for line in check.stderr.splitlines() if 'undefined symbol: ' in line}
     data = undefined_data(unresolved, [*own.values(), *members])
     if data:
-        os.remove(out)
         sys.exit(f'{name}: data nothing defines, which would read as zeros:\n  ' + '\n  '.join(demangle(data)))
+    result = subprocess.run([*link, '-Wl,--allow-undefined', '-o', out], capture_output=True, text=True)
+    if result.returncode:
+        sys.exit(f'{name}: link failed\n{result.stderr}')
     missing = live_imports(out)
     print(f'built src/{name}: {os.path.getsize(out)} bytes, {operators.count(chr(10))} operators; {len(missing)} imports, which throw when '
           f'called:\n  ' + '\n  '.join(missing), file=sys.stderr)
