@@ -639,9 +639,9 @@ class FunctionPort:
         if self.outs() and canon(sig['ret']).kind == T.VOID and not (statements and statements[-1].kind == K.RETURN_STMT):
             lines.append(f'{self.return_outs(None)};')
         prologue = []
-        if self.uses_bm and not {'bm', 'bp'} & {p['name'] for p in sig['params']}:
+        sig['needs_bm'] = self.uses_bm and not {'bm', 'bp'} & {p['name'] for p in sig['params']}
+        if sig['needs_bm']:
             params.insert(0, 'bm')
-            sig['needs_bm'] = True
         elif self.uses_bm and 'bm' not in params:
             prologue.append('const { bm } = bp;')
         sig['emitted'] = True

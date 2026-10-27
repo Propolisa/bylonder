@@ -172,14 +172,19 @@ class Driver:
                                                      'exported': f.linkage != ci.LinkageKind.INTERNAL or rel.endswith(('.hh', '.h')),
                                                      'source': provider, 'file': rel}
             queue += self.follow(source, rel, module, deps)
-        # Again, now that every signature is known: out parameters and `bm` across files.
-        for module, entry in self.modules.items():
-            for name, item in entry['functions'].items():
-                if 'source' in item:
-                    source = self.sources[item['source']]
-                    item['js'], item['deps'] = source.emit(source.definition(name, item['file']))
-                    self.follow(source, item['source'], module, item['deps'])
-                    self.note(module, 'generated', name)
+        # Again, now that every signature is known: out parameters and `bm` across files, until whether each function
+        # takes `bm` settles (a caller passes it only to callees that use it).
+        items = [(module, name, item) for module, entry in self.modules.items() for name, item in entry['functions'].items() if 'source' in item]
+        for _ in range(len(items)):
+            before = {name: self.sources[item['source']].sigs[name].get('needs_bm') for _, name, item in items}
+            for module, name, item in items:
+                source = self.sources[item['source']]
+                item['js'], item['deps'] = source.emit(source.definition(name, item['file']))
+            if all(self.sources[item['source']].sigs[name].get('needs_bm') == before[name] for _, name, item in items):
+                break
+        for module, name, item in items:
+            self.follow(self.sources[item['source']], item['source'], module, item['deps'])
+            self.note(module, 'generated', name)
 
     def follow(self, source, rel, module, deps):
         """The functions deps reach, to port next. Constants are placed and helpers checked on the way."""
