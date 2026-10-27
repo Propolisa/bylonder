@@ -9,7 +9,7 @@ const { exports: x } = await instantiate(new URL('./bmesh.wasm', import.meta.url
 function withArrays(arrays, fn) {
   const pointers = arrays.map((a) => {
     if (!a) return 0;
-    const p = x.malloc(a.byteLength);
+    const p = x.malloc(a.byteLength) >>> 0;
     new a.constructor(x.memory.buffer, p, a.length).set(a);
     return p;
   });
@@ -85,7 +85,11 @@ export function selectClear(bm, selectmode) {
   x.edit_context_selectmode_set(contextOf(bm), selectmode);
 }
 
-const cString = (pointer) => new TextDecoder().decode(new Uint8Array(x.memory.buffer, pointer, new Uint8Array(x.memory.buffer, pointer).indexOf(0)));
+// A WebAssembly pointer is an unsigned 32-bit address; exports return it as a signed int.
+const cString = (pointer) => {
+  const bytes = new Uint8Array(x.memory.buffer, pointer >>> 0);
+  return new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)));
+};
 const withString = (text, fn) => withArrays([new TextEncoder().encode(text + '\0')], ([pointer]) => fn(pointer));
 
 // Blender's mesh operators by Python idname (mesh.subdivide for MESH_OT_subdivide), registered by their own functions.

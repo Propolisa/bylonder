@@ -24,11 +24,12 @@ function grow(pool) {
   pool.capacity = capacity;
 }
 
-// BLI_mempool_alloc: a freed slot if there is one, else the next new slot. Fields are reset to their defaults.
+// BLI_mempool_alloc: a freed slot if there is one, else the next new slot. Fields are reset to their defaults; a slot
+// past `size` was never used, so its fields are still zero.
 export function poolAlloc(pool) {
-  const i = pool.free.length ? pool.free.pop() : pool.size++;
+  const reused = pool.free.length > 0, i = reused ? pool.free.pop() : pool.size++;
   if (i >= pool.capacity) grow(pool);
-  for (const [name, n] of pool.fields) pool[name].fill(0, i * n, i * n + n);
+  if (reused) for (const [name, n] of pool.fields) pool[name].fill(0, i * n, i * n + n);
   for (const layer of pool.layers) layer.data.set(layer.default, i * layer.size);
   pool.alive[i] = 1;
   pool.tot++;

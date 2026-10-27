@@ -53,7 +53,7 @@ class Heap {
     if (bytes > this.capacity) {
       if (this.scratch) this.exports.free(this.scratch);
       this.capacity = Math.max(bytes, this.capacity * 2);
-      this.scratch = this.exports.malloc(this.capacity);
+      this.scratch = this.exports.malloc(this.capacity) >>> 0;
     }
     this.top = this.scratch;
   }
