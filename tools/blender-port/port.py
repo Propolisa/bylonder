@@ -228,14 +228,22 @@ class Driver:
         source = self.source(provider)
         f = source.definition(name, rel)
         if f is not None and shim['params'] is not None:
-            fp = convert.FunctionPort(source, f)
-            fp.emit()
-            want = [p['name'] for p in fp.sig['params'] if p['out'] != 'out']
-            if fp.sig.get('needs_bm'):
-                want.insert(0, 'bm')
-            if len(want) != len(shim['params']):
-                detail['signature'] = f'Blender ({", ".join(want)}), shim ({", ".join(shim["params"])})'
+            # Blender's overloads of the name are one JS function: the shim conforms when it takes any of them.
+            overloads = [g for g in source.functions if g.spelling == name] or [f]
+            wants = [self.ported_params(source, g) for g in overloads]
+            if all(len(want) != len(shim['params']) for want in wants):
+                detail['signature'] = f'Blender ({", ".join(wants[0])}), shim ({", ".join(shim["params"])})'
         return detail or None
+
+    @staticmethod
+    def ported_params(source, f):
+        """The JS parameters the conventions make of f's signature."""
+        fp = convert.FunctionPort(source, f, source.signature(f))
+        fp.emit()
+        want = [p['name'] for p in fp.sig['params'] if p['out'] != 'out']
+        if fp.sig.get('needs_bm'):
+            want.insert(0, 'bm')
+        return want
 
     def constant(self, source, module, name, ref):
         """An enum, file-scope variable or macro constant, written in the module of the file that defines it."""

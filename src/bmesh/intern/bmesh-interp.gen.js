@@ -211,6 +211,7 @@ export function BM_loop_interp_multires_ex(
   f_src_center,
   cd_loop_mdisp_offset,
 ) {
+  let _r0;
   let v1 = [0, 0, 0];
   let v2 = [0, 0, 0];
   let v3 = [0, 0, 0];
@@ -273,7 +274,14 @@ export function BM_loop_interp_multires_ex(
     func_free: null,
     min_iter_per_thread: 0,
   };
-  BLI_parallel_range_settings_defaults(settings);
+  (_r0 = BLI_parallel_range_settings_defaults()),
+    (settings.use_threading = _r0.use_threading),
+    (settings.userdata_chunk = _r0.userdata_chunk),
+    (settings.userdata_chunk_size = _r0.userdata_chunk_size),
+    (settings.func_init = _r0.func_init),
+    (settings.func_reduce = _r0.func_reduce),
+    (settings.func_free = _r0.func_free),
+    (settings.min_iter_per_thread = _r0.min_iter_per_thread);
   settings.use_threading = res > 5;
   BLI_task_parallel_range(0, res, data, loop_interp_multires_cb, settings);
 }
@@ -292,7 +300,7 @@ export function BM_loop_interp_from_face(bm, l_dst, f_src, do_vertex, do_multire
   const vblocks_buf = new Array(do_vertex ? bm.f.len[f_src] : 0);
   const blocks_buf = new Array(bm.f.len[f_src]);
   const cos_2d_buf = new Array(bm.f.len[f_src]);
-  const w = new Array(bm.f.len[f_src]);
+  let w = new Array(bm.f.len[f_src]);
   const vblocks = do_vertex ? vblocks_buf : null;
   const blocks = blocks_buf;
   const cos_2d = cos_2d_buf;
@@ -315,7 +323,7 @@ export function BM_loop_interp_from_face(bm, l_dst, f_src, do_vertex, do_multire
     }
   } while ((i++, (l_iter = bm.l.next[l_iter]) !== l_first));
   const co = mul_v2_m3v3(axis_mat, vco(bm, bm.l.v[l_dst]));
-  interp_weights_poly_v2(w, cos_2d, bm.f.len[f_src], co);
+  w = interp_weights_poly_v2(w, cos_2d, bm.f.len[f_src], co);
   CustomData_bmesh_interp(bm.ldata, blocks, w, bm.f.len[f_src], l_dst);
   if (do_vertex) {
     CustomData_bmesh_interp(bm.vdata, vblocks, w, bm.f.len[f_src], bm.l.v[l_dst]);
