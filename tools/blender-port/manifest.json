@@ -43,6 +43,7 @@
         "source/blender/editors/util",
         "source/blender/editors/transform",
         "source/blender/editors/uvedit/uvedit_select.cc",
+        "source/blender/editors/object/object_add.cc",
         "source/blender/bmesh/intern",
         "source/blender/bmesh/operators",
         "source/blender/bmesh/tools",

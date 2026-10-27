@@ -2,6 +2,7 @@
  * records what a panel draws as a tree, which JS reads as JSON and draws with its own widgets. The panels read and
  * write the modifier through RNA, which reads and writes its DNA (operator-properties.cc). */
 #include <map>
+#include <set>
 #include <sstream>
 
 #include "BKE_context.hh"
@@ -14,6 +15,8 @@
 #include "RNA_access.hh"
 #include "UI_interface_c.hh"
 #include "UI_interface_layout.hh"
+#include "WM_api.hh"
+#include "RE_engine.h"
 
 #include "operator-properties.hh"
 
@@ -177,6 +180,33 @@ PanelLayout Layout::panel_prop_with_bool_header(const bContext *C, PointerRNA *o
   return panel;
 }
 
+/* Blender's template widgets (a data-block selector, a curve editor), recorded by name and property for JS to draw. */
+static void template_node(Layout *layout, const char *name, PointerRNA *ptr, StringRefNull propname)
+{
+  Node &node = add(layout, "template");
+  node.text = name;
+  node.prop = propname;
+  node.owner = owner(ptr);
+}
+void template_id(Layout *layout, const bContext * /*C*/, PointerRNA *ptr, StringRefNull propname, const char * /*newop*/,
+                 const char * /*openop*/, const char * /*unlinkop*/, int /*filter*/, bool /*live_icon*/, std::optional<StringRef> /*text*/)
+{
+  template_node(layout, "template_id", ptr, propname);
+}
+void template_curve_profile(Layout *layout, PointerRNA *ptr, StringRefNull propname)
+{
+  template_node(layout, "template_curve_profile", ptr, propname);
+}
+void template_curve_mapping(Layout *layout, PointerRNA *ptr, StringRefNull propname, int /*type*/, bool /*levels*/, bool /*brush*/,
+                            bool /*neg_slope*/, bool /*tone*/, bool /*presets*/)
+{
+  template_node(layout, "template_curve_mapping", ptr, propname);
+}
+void template_color_ramp(Layout *layout, PointerRNA *ptr, StringRefNull propname, bool /*expand*/)
+{
+  template_node(layout, "template_color_ramp", ptr, propname);
+}
+
 /* The panel being drawn and the modifier it draws. */
 static PointerRNA panel_ptr;
 PointerRNA *panel_custom_data_get(const Panel * /*panel*/) { return &panel_ptr; }
@@ -256,21 +286,28 @@ static void draw_panel(const bContext *C, PanelType *type, Node &parent, bool ro
 
 }  // namespace blender::ui
 
-/* The modifier panels' types, as the Properties editor's region registers them. */
-static ARegionType &modifier_region()
+/* The modifier panels' types, as the Properties editor's region registers them, each type's when first drawn. */
+static ARegionType &modifier_region(ModifierType type)
 {
-  static ARegionType region = [] {
-    ARegionType region = {};
-    for (int type = 0; type < NUM_MODIFIER_TYPES; type++) {
-      const ModifierTypeInfo *info = BKE_modifier_get_info(ModifierType(type));
-      if (info && info->panel_register) {
-        info->panel_register(&region);
-      }
-    }
-    return region;
-  }();
+  static ARegionType region = {};
+  static std::set<int> registered;
+  const ModifierTypeInfo *info = BKE_modifier_get_info(type);
+  if (info && info->panel_register && registered.insert(type).second) {
+    info->panel_register(&region);
+  }
   return region;
 }
+
+/* port-override: Bylonder renders with its own engine, which has none of Blender's engine flags, so panels that ask
+ * (Subdivision Surface's adaptive subdivision for Cycles) show what they show for any other engine. */
+RenderEngineType *blender::RE_engines_find(const char * /*idname*/)
+{
+  static RenderEngineType engine = {};
+  return &engine;
+}
+
+/* port-override: UI lists and gizmos are drawn by Bylonder, so their types are not kept. */
+bool blender::WM_uilisttype_add(uiListType * /*ult*/) { return true; }
 
 /* What a modifier's panel and its sub-panels draw, as JSON, valid until the next call. */
 EXPORT(modifier_panel_draw) const char *modifier_panel_draw(Object *ob, ModifierData *md)
@@ -280,7 +317,7 @@ EXPORT(modifier_panel_draw) const char *modifier_panel_draw(Object *ob, Modifier
   char idname[BKE_ST_MAXNAME];
   BKE_modifier_type_panel_id(ModifierType(md->type), idname);
   PanelType *type = static_cast<PanelType *>(
-      BLI_findstring(&modifier_region().paneltypes, idname, offsetof(PanelType, idname)));
+      BLI_findstring(&modifier_region(ModifierType(md->type)).paneltypes, idname, offsetof(PanelType, idname)));
   ui::Node root;
   root.kind = "panels";
   ui::panel_ptr = RNA_pointer_create_discrete(&ob->id, *BKE_modifier_get_info(ModifierType(md->type))->srna, md);
@@ -288,6 +325,7 @@ EXPORT(modifier_panel_draw) const char *modifier_panel_draw(Object *ob, Modifier
     ui::draw_panel(C, type, root, true);
   }
   std::ostringstream out;
+  out << std::boolalpha;
   ui::write(out, root);
   json = out.str();
   ui::nodes.clear();

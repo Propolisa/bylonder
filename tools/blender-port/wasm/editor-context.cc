@@ -8,10 +8,15 @@
 #include "BLF_api.hh"
 #include "BKE_global.hh"
 #include "BLI_string.h"
+#include "BLI_rect.h"
+#include "UI_view2d.hh"
 
 #include "BKE_context.hh"
 #include "BKE_editmesh.hh"
 #include "BKE_layer.hh"
+#include "BKE_lib_id.hh"
+#include "BKE_unit.hh"
+#include "BLT_translation.hh"
 #include "BKE_mesh_types.hh"
 #include "BKE_mesh_runtime.hh"
 #include "BKE_object.hh"
@@ -41,6 +46,8 @@
 #include "ED_transform.hh"
 
 #include "WM_api.hh"
+#include "gizmo/WM_gizmo_api.hh"
+#include "gizmo/WM_gizmo_types.hh"
 #include "WM_types.hh"
 
 #include "bmesh.hh"
@@ -412,7 +419,7 @@ Base *BKE_view_layer_base_find(ViewLayer *view_layer, Object *ob)
 {
   return static_cast<Base *>(BLI_findptr(&view_layer->object_bases, ob, offsetof(Base, object)));
 }
-void BKE_view_layer_synced_ensure(const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
+bool BKE_view_layer_synced_ensure(const Main & /*bmain*/, const Scene * /*scene*/, ViewLayer * /*view_layer*/) { return true; }
 void _BKE_view_layer_synced_ensure_or_assert(const Main * /*bmain*/, const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
 
 /* As object_edit.cc defines them; object_edit.cc comes with the rest of Blender's object editing. */
@@ -452,6 +459,55 @@ bool ED_operator_editmesh(bContext *C)
   return obedit && obedit->type == OB_MESH && BKE_editmesh_from_object(obedit);
 }
 bool ED_operator_editable_mesh(bContext *C) { return ED_operator_editmesh(C); }
+/* As wm_operators.cc defines it, for operators run by their exec, which is how the editor runs them: the grid scale
+ * applies to an invoked operator's distances only. */
+void WM_operator_view3d_unit_defaults(bContext * /*C*/, wmOperator *op) { BLI_assert(!(op->flag & OP_IS_INVOKE)); }
+
+/* As view3d_draw.cc defines it. */
+float ED_scene_grid_scale(const Scene *scene, const char **r_grid_unit)
+{
+  if (scene->unit.system) {
+    const void *usys;
+    int len;
+    BKE_unit_system_get(scene->unit.system, B_UNIT_LENGTH, &usys, &len);
+    if (usys) {
+      int i = BKE_unit_base_get(usys);
+      if (r_grid_unit) {
+        *r_grid_unit = IFACE_(BKE_unit_display_name_get(usys, i));
+      }
+      return float(BKE_unit_scalar_get(usys, i)) / scene->unit.scale_length;
+    }
+  }
+  return 1.0f;
+}
+
+/* As view2d.cc defines it: transform reads the region's 2D view when the context has no 3D View. */
+void ui::view2d_view_to_region_m4(const View2D *v2d, float matrix[4][4])
+{
+  rctf mask;
+  unit_m4(matrix);
+  BLI_rctf_rcti_copy(&mask, &v2d->mask);
+  BLI_rctf_transform_calc_m4_pivot_min(&v2d->cur, &mask, matrix);
+}
+
+/* As area.cc defines it for no area, as when transform runs in Blender's background mode; the editor shows the
+ * header text itself. */
+void ED_area_status_text(ScrArea *area, const char * /*str*/) { BLI_assert(area == nullptr); }
+
+/* port-override: the editor draws its own status bar for its tools, so what operators put there goes nowhere. */
+WorkspaceStatus::WorkspaceStatus(bContext * /*C*/) : workspace_(nullptr), wm_(nullptr) {}
+void WorkspaceStatus::item(std::string /*text*/, int /*icon1*/, int /*icon2*/) {}
+void WorkspaceStatus::separator(float /*factor*/) {}
+void WorkspaceStatus::item_bool(std::string /*text*/, bool /*inverted*/, int /*icon1*/, int /*icon2*/) {}
+void WorkspaceStatus::range(std::string /*text*/, int /*icon1*/, int /*icon2*/) {}
+void WorkspaceStatus::opmodal(std::string /*text*/, const wmOperatorType * /*ot*/, int /*propvalue*/, bool /*inverted*/) {}
+
+/* As screen_ops.cc defines it. */
+bool ED_operator_scene_editable(bContext *C)
+{
+  Scene *scene = CTX_data_scene(C);
+  return scene && BKE_id_is_editable(CTX_data_main(C), &scene->id);
+}
 /* port-override: the 3D View the operator needs is the editor's own, whose picking runs in JS. */
 bool ED_operator_editmesh_region_view3d(bContext *C) { return ED_operator_editmesh(C); }
 
@@ -493,6 +549,13 @@ const ID *DEG_get_original_id(const ID *id) { return id && id->orig_id ? id->ori
 bool DEG_is_original_id(const ID *id)
 {
   return !(id->tag & (ID_TAG_COPIED_ON_EVAL | ID_TAG_COPIED_ON_EVAL_FINAL_RESULT | ID_TAG_LOCALIZED));
+}
+
+/* port-override: Bylonder draws the tools' gizmos (Spin, Bisect), so their gizmo group types are not kept. */
+wmGizmoGroupType *blender::WM_gizmogrouptype_append(void (* /*wtfunc*/)(wmGizmoGroupType *))
+{
+  static wmGizmoGroupType type = {};
+  return &type;
 }
 
 /* As view3d_context.cc defines it, for the region the context has: without its view (regiondata), sorting by view axis

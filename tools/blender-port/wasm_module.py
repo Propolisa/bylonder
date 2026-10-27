@@ -186,6 +186,12 @@ def rna_dna_fields(build):
     return text
 
 
+def own_headers():
+    """The module's own headers (wasm/*.hh and wasm/include), which its sources include: a change to them rebuilds them."""
+    paths = sorted(glob.glob(os.path.join(WASM, '*.h*')) + glob.glob(os.path.join(WASM, 'include', '**', '*'), recursive=True))
+    return hashlib.sha1(b''.join(open(p, 'rb').read() for p in paths if os.path.isfile(p))).hexdigest()
+
+
 def compile_all(build, sources, args, key):
     """Objects of the sources that build, by source; what does not build is left out (an archive member nothing needs)."""
     objects = os.path.join(build, 'objects')
@@ -255,7 +261,7 @@ def build(root, name, spec, tag):
         print(f'{lib}: {len(built)} of {len(objects)} sources build', file=sys.stderr)
     # The module's own files also see wasm/ and the generated operator table; Blender's sources need neither.
     own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)],
-                      args + [f'-I{generated}', f'-I{WASM}'], patches + operators + rna_dna_fields(out_dir))
+                      args + [f'-I{generated}', f'-I{WASM}'], patches + operators + rna_dna_fields(out_dir) + own_headers())
     failed = [src for src, obj in own.items() if obj is None]
     if failed:
         result = subprocess.run(['clang++', *args, f'-I{generated}', f'-I{WASM}', '-c', failed[0], '-o', os.devnull], capture_output=True, text=True)
@@ -264,7 +270,10 @@ def build(root, name, spec, tag):
     # Archives twice: a member one archive pulls in may need members of an archive listed before it.
     # WASM_NAMES=1 keeps function names, for profiles and stacks while debugging.
     strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
+    # Blender's code expects a thread's stack (wasm-ld's default is 64 KiB), placed first so that overflowing it traps
+    # instead of writing over the module's data.
     link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
+            '-Wl,-z,stack-size=8388608', '-Wl,--stack-first',
             '-Wl,--export=malloc', '-Wl,--export=free', *own.values(), *archives, *archives, '-lwasi-emulated-process-clocks']
     # A dry link names every unresolved symbol, for the data check; the module itself imports missing functions by name.
     check = subprocess.run([*link, '-Wl,--warn-unresolved-symbols', '-o', os.devnull], capture_output=True, text=True)

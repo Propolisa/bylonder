@@ -33,8 +33,13 @@ using namespace blender;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
-/* As Blender's main sets them up before any data is made. */
-static const bool types = (BKE_cpp_types_init(), BKE_idtype_init(), BKE_modifier_init(), true);
+/* As Blender's main sets them up before any data is made, once, on first use: other files' statics they reach are not
+ * constructed yet while the module initializes. */
+static void types_ensure()
+{
+  static const bool types = (BKE_cpp_types_init(), BKE_idtype_init(), BKE_modifier_init(), true);
+  (void)types;
+}
 
 struct ModifierObject {
   Scene scene = {};
@@ -63,6 +68,7 @@ static void result_free(ModifierObject &mo)
 
 EXPORT(modifier_object_new) ModifierObject *modifier_object_new()
 {
+  types_ensure();
   ModifierObject *mo = MEM_new<ModifierObject>(__func__);
   mo->object.type = OB_MESH;
   mo->object.runtime = MEM_new<bke::ObjectRuntime>(__func__);
@@ -111,6 +117,7 @@ EXPORT(modifier_object) Object *modifier_object(ModifierObject *mo) { return &mo
 /* A modifier of a type (ModifierType) with Blender's defaults, last in an object's stack. */
 EXPORT(modifier_add) ModifierData *modifier_add(Object *ob, int type)
 {
+  types_ensure();
   if (!BKE_modifier_get_info(ModifierType(type))) {
     return nullptr;
   }
@@ -166,6 +173,27 @@ void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
   if (uvs && uvs.is_span()) {
     h.uvs = reinterpret_cast<float(*)[2]>(const_cast<float2 *>(uvs.get_internal_span().data()));
   }
+}
+
+/* A Mesh of positions and faces whose edges Blender derives, as a script's mesh.update() does (rna_Mesh_update), read
+ * through the header until the next call. */
+EXPORT(mesh_from_faces)
+const ExtractionHeader *mesh_from_faces(int verts_num, const float3 *positions, int faces_num, const int *face_offsets, const int *corner_verts)
+{
+  types_ensure();
+  static Mesh *mesh = nullptr;
+  static ExtractionHeader header;
+  if (mesh) {
+    BKE_id_free(nullptr, mesh);
+  }
+  const int corners_num = face_offsets[faces_num];
+  mesh = BKE_mesh_new_nomain(verts_num, 0, faces_num, corners_num);
+  mesh->vert_positions_for_write().copy_from({positions, verts_num});
+  mesh->face_offsets_for_write().copy_from({face_offsets, faces_num + 1});
+  mesh->corner_verts_for_write().copy_from({corner_verts, corners_num});
+  bke::mesh_calc_edges(*mesh, false, true);
+  mesh_extraction(*mesh, header);
+  return &header;
 }
 
 /* What the modifiers reach of Blender beyond the module. */

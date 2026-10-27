@@ -21,9 +21,7 @@ function applyBMesh(edit, bm) {
   edit.history = (bm.selected ?? []).map(({ htype, ele }) => ({ htype, index: bm[POOL[htype]].index[ele] }));
 }
 
-const PORTED = {
-  'transform.edge_slide': edge_slide_exec,
-};
+const PORTED = {};
 
 export const hasMeshOperator = (idname) => idname in PORTED || hasOperator(idname);
 

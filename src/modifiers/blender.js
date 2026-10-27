@@ -9,14 +9,16 @@ import { evaluateModifiers, drawModifierPanel } from '../bmesh/bmesh-wasm.js';
 const MESH_ONLY = ['ARRAY', 'BEVEL', 'BUILD', 'DECIMATE', 'EDGE_SPLIT', 'MIRROR', 'REMESH', 'SCREW', 'SKIN', 'SOLIDIFY', 'SUBSURF', 'TRIANGULATE',
   'WELD', 'WIREFRAME', 'CAST', 'DISPLACE', 'SIMPLE_DEFORM', 'SMOOTH', 'CORRECTIVE_SMOOTH', 'LAPLACIANSMOOTH', 'WAVE', 'WEIGHTED_NORMAL'];
 const UNITS = { LENGTH: 'length', ROTATION: 'angle' };
+// Enum items Bylonder does not offer yet, by type and property.
+const NOT_OFFERED = { REMESH: { mode: ['BLOCKS', 'SMOOTH', 'SHARP'] } };
 const AXES = ['TRANSLATION', 'XYZ', 'COORDINATES', 'DIRECTION'];
 const editable = (prop) => ['BOOLEAN', 'INT', 'FLOAT', 'ENUM'].includes(prop.type) && !prop.hidden && !Array.isArray(prop.default?.[0]) &&
   !(prop.type === 'ENUM' && Array.isArray(prop.default));
 
 // The schema entry (Bylonder's field description) of an RNA property, or of one element of an RNA array.
-function field(prop, value, label = prop.name) {
+function field(prop, value, label = prop.name, hidden = []) {
   const entry = { label, default: value, description: prop.description };
-  if (prop.type === 'ENUM') entry.options = Object.fromEntries(prop.items.map(([id, name]) => [name, id]));
+  if (prop.type === 'ENUM') entry.options = Object.fromEntries(prop.items.filter(([id]) => !hidden.includes(id)).map(([id, name]) => [name, id]));
   if (prop.type === 'INT' || prop.type === 'FLOAT') {
     Object.assign(entry, { min: prop.min, max: prop.max, softMin: prop.soft_min, softMax: prop.soft_max });
     if (prop.type === 'INT') Object.assign(entry, { step: 1, integer: true });
@@ -27,11 +29,11 @@ function field(prop, value, label = prop.name) {
 }
 
 // RNA properties as schema paths: a property by its identifier, an array element as Python indexes it.
-function schema(properties, located) {
+function schema(properties, located, hidden = {}) {
   return Object.fromEntries(Object.entries(properties).filter(([id, prop]) => located[id] && editable(prop)).flatMap(([id, prop]) =>
     Array.isArray(prop.default)
       ? prop.default.map((value, i) => [`${id}[${i}]`, field(prop, value, `${prop.name} ${AXES.includes(prop.subtype) || prop.size === 3 ? 'XYZ'[i] : i}`)])
-      : [[id, field(prop, prop.default)]]));
+      : [[id, field(prop, prop.default, prop.name, hidden[id])]]));
 }
 
 // Writes a value into the DNA field (dna-modifiers.json) at a struct's address: a bit of a flag field, an element of an
@@ -53,7 +55,7 @@ function writeField(view, address, located, prop, value, index = 0) {
 function definition(id) {
   const { value: type, name, description, icon, struct, properties } = rna.types[id];
   const located = dna[struct].properties;
-  const fields = schema(properties, located);
+  const fields = schema(properties, located, NOT_OFFERED[id]);
   const write = (values) => (view, address) => {
     for (const [path, value] of Object.entries(values)) {
       const [, prop, index] = path.match(/^(\w+)(?:\[(\d+)\])?$/);

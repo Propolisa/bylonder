@@ -32,7 +32,7 @@ export const presets = [
   operatorPreset({ id: "ico", blender: "mesh.primitive_ico_sphere_add", icon: "mesh_icosphere" }),
   operatorPreset({ id: "cylinder", blender: "mesh.primitive_cylinder_add", icon: "mesh_cylinder" }),
   operatorPreset({ id: "cone", blender: "mesh.primitive_cone_add", icon: "mesh_cone" }),
-  { id: "torus", blender: "mesh.primitive_torus_add", title: "Torus", icon: "mesh_torus", builder: "CreateTorus", schema: { diameter: n(2), thickness: n(0.5), tessellation: detail(48) } },
+  operatorPreset({ id: "torus", blender: "mesh.primitive_torus_add", icon: "mesh_torus" }),
   operatorPreset({ id: "ground", blender: "mesh.primitive_grid_add", icon: "mesh_grid" }),
   operatorPreset({ id: "monkey", blender: "mesh.primitive_monkey_add", icon: "mesh_monkey" }),
   { id: "knot", group: "babylon", title: "Torus Knot", builder: "CreateTorusKnot", schema: { radius: n(1), tube: n(0.3), radialSegments: detail(64), tubularSegments: detail(32), p: n(2, 1, 12, 1), q: n(3, 1, 12, 1) } },

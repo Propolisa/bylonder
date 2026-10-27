@@ -36,6 +36,9 @@ PATCHES = [
      "    return fixed ? Number (value).toFixed (+fixed [1]) : str (value);\n"
      "};\n"
      "__setproperty__ (String.prototype, 'format', {", FORMAT),
+    # JS's % on numbers is C's fmod: the remainder with the dividend's sign.
+    ('math.js', "export var expm1 = function (x) {", "export var fmod = function (x, y) {\n\treturn x % y;\n};\nexport var expm1 = function (x) {",
+     "math.fmod, which Transcrypt's math lacks"),
 ]
 
 
@@ -63,8 +66,31 @@ def extract(source, patterns):
     imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
                and all(alias.name.split('.')[0] == 'bpy' for alias in node.names if isinstance(node, ast.Import))
                and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] == 'bpy')]
-    body = imports + [node for node in tree.body if getattr(node, 'name', None) in wanted]
-    return ast.unparse(ast.Module(body=body, type_ignores=[]))
+    nodes = [node for node in tree.body if getattr(node, 'name', None) in wanted]
+    # Only the imported names the taken code uses.
+    used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
+    for node in imports:
+        node.names = [alias for alias in node.names if (alias.asname or alias.name).split('.')[0] in used]
+    body = [node for node in imports if node.names] + nodes
+    return ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
+
+
+def hoist_imports(body):
+    """Function-local imports (methods' too) moved to the module, merged: Transcrypt emits each as an ES import, and
+    two of one module are a syntax error."""
+    names, modules = {}, {}
+    for function in (node for node in ast.walk(ast.Module(body=body, type_ignores=[])) if isinstance(node, ast.FunctionDef)):
+        local = [s for s in function.body if isinstance(s, (ast.Import, ast.ImportFrom))]
+        function.body = [s for s in function.body if s not in local] or [ast.Pass()]
+        for statement in local:
+            if isinstance(statement, ast.Import):
+                modules.update((alias.name, alias) for alias in statement.names)
+            else:
+                names.setdefault(statement.module, {}).update((alias.name, alias) for alias in statement.names)
+    hoisted = ([ast.Import(names=list(modules.values()))] if modules else []) + \
+        [ast.ImportFrom(module=module, names=list(aliases.values()), level=0) for module, aliases in names.items()]
+    return [node for node in body if isinstance(node, (ast.Import, ast.ImportFrom))] + hoisted + \
+        [node for node in body if not isinstance(node, (ast.Import, ast.ImportFrom))]
 
 
 def rna_module():
@@ -96,32 +122,41 @@ Modifier = _Struct({{'type': _Property([
 def main():
     manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
     with tempfile.TemporaryDirectory() as build:
-        shutil.copytree(os.path.join(HERE, 'bpy'), os.path.join(build, 'bpy'))
+        # Bylonder's versions of the modules Blender's scripts import (bpy, mathutils, ...): the packages here.
+        for package in (d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))):
+            shutil.copytree(os.path.join(HERE, package), os.path.join(build, package))
         open(os.path.join(build, 'bpy', '_rna.py'), 'w').write(rna_module())
         modules = []
-        for path, patterns in manifest['scripts'].items():
+        for path, spec in manifest['scripts'].items():
+            # A script's names, or {names, flags}: Transcrypt options for its Python (-o for operator overloading).
+            patterns, flags = (spec['names'], spec['flags']) if isinstance(spec, dict) else (spec, [])
             module = os.path.basename(path)
             open(os.path.join(build, module), 'w').write(extract(fetch(path), patterns))
-            modules.append(module)
-        for module in modules:
-            result = subprocess.run([sys.executable, '-I', '-m', 'transcrypt', '-b', '-n', '-k', '-m', module], cwd=build,
+            modules.append((module, flags))
+        # Transcrypt rebuilds its target folder on each run (-b), so each module's output is collected as it is made.
+        # A module with options keeps only its own output and the modules no other one has: the runtime and library
+        # modules the others share keep the default compile.
+        outputs = {}
+        for module, flags in sorted(modules, key=lambda m: bool(m[1])):
+            result = subprocess.run([sys.executable, '-I', '-m', 'transcrypt', '-b', '-n', '-k', *flags, '-m', module], cwd=build,
                                     capture_output=True, text=True)
             if result.returncode:
                 sys.exit(result.stdout + result.stderr)
+            target = os.path.join(build, '__target__')
+            for name in os.listdir(target):
+                if name.endswith('.js') and (not flags or name == module.replace('.py', '.js') or name not in outputs):
+                    outputs[name] = open(os.path.join(target, name)).read()
         os.makedirs(OUT, exist_ok=True)
-        for name in os.listdir(os.path.join(build, '__target__')):
-            if name.endswith('.js'):
-                script = open(os.path.join(build, '__target__', name)).read()
-                for target, text, replacement, reason in PATCHES:
-                    if target == name:
-                        assert text in script, f'{name}: the patch for {reason} no longer applies'
-                        script = script.replace(text, replacement)
-                # Transcrypt dates its output; without the date a rerun gives the same files.
-                script = re.sub(r"^// Transcrypt'ed from Python, .*\n", '', script, flags=re.M)
-                header = f'// Generated by tools/blender-ui/transpile.py from Blender {TAG}; do not edit.\n'
-                open(os.path.join(OUT, name), 'w').write(header + script)
-                print('wrote', os.path.relpath(os.path.join(OUT, name), REPO))
-
+        for name, script in outputs.items():
+            for target, text, replacement, reason in PATCHES:
+                if target == name:
+                    assert text in script, f'{name}: the patch for {reason} no longer applies'
+                    script = script.replace(text, replacement)
+            # Transcrypt dates its output; without the date a rerun gives the same files.
+            script = re.sub(r"^// Transcrypt'ed from Python, .*\n", '', script, flags=re.M)
+            header = f'// Generated by tools/blender-ui/transpile.py from Blender {TAG}; do not edit.\n'
+            open(os.path.join(OUT, name), 'w').write(header + script)
+            print('wrote', os.path.relpath(os.path.join(OUT, name), REPO))
 
 if __name__ == '__main__':
     main()

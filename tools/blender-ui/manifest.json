@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "scripts/startup/bl_ui/space_view3d.py": ["VIEW3D_MT_select_edit_mesh", "VIEW3D_MT_edit_mesh*", "VIEW3D_MT_transform"],
-    "scripts/startup/bl_ui/properties_data_modifier.py": ["OBJECT_MT_modifier_add*"]
+    "scripts/startup/bl_ui/space_view3d.py": ["VIEW3D_MT_*"],
+    "scripts/startup/bl_ui/properties_data_modifier.py": ["OBJECT_MT_modifier_add*"],
+    "scripts/startup/bl_ui/space_topbar.py": ["TOPBAR_MT_*"],
+    "scripts/startup/bl_operators/add_mesh_torus.py": {"names": ["add_torus", "add_uvs"], "flags": ["-o"]}
   }
 }

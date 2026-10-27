@@ -1,7 +1,15 @@
 import { menuButton } from '../editors/interface/menu.js';
+import { drawMenu, menuCoverage } from '../editors/interface/ui-layout.js';
+import { registerOperators, appendMenu, prependMenu, kw, menuUI, menuClasses } from '../windowmanager/wm-operators.js';
+import * as spaceTopbar from '../bl_ui/space_topbar.js';
+import { templates } from '../bl_ui/bpy._app.js';
 import { iconEl } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
 import { fullDate, timeAgo } from './relative-time.js';
+
+let topbarUI = null;
+// The topbar's Blender menus and entries Bylonder shows, for the Blender coverage view.
+export const topbarMenuCoverage = () => (topbarUI ? menuCoverage('TOPBAR_MT_editor_menus', topbarUI) : []);
 
 export function mountTopbar({ dock, send, examples, openExample, newProject, recentProjects, openProject }) {
   const $ = id => document.getElementById(id);
@@ -16,56 +24,74 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     if (id === 'scripting') dock.show('code');
     sync();
   };
-  menus.append(
-    menuButton('File', [
-      { label: 'New Project…', blender: 'wm.read_homefile', icon: 'file_new', run: click('new-project') },
-      { label: 'New from Example', blender: 'TOPBAR_MT_file_new', items: examples.map(example => ({ label: example.title, run: () => openExample(example) })) },
-      { label: 'Duplicate Project…', run: click('fork-project') },
-      { label: 'Rename Project…', run: click('rename-project') },
-      '-',
-      { label: 'Save Version', blender: 'wm.save_mainfile', icon: 'file_tick', keys: 'Ctrl S', run: click('checkpoint') },
-      '-',
-      { label: 'Import Project ZIP…', run: click('import') },
-      { label: 'Export Project ZIP', run: click('export') },
-      { label: 'Share Project Link…', run: click('share-project') },
-      '-',
-      { label: 'Download App Source', run: click('app-source') },
-    ], { blender: 'TOPBAR_MT_file' }),
-    menuButton('Edit', [
-      { label: 'Undo', blender: 'ed.undo', keys: 'Ctrl Z', run: () => send('invoke', 'undo') },
-      { label: 'Redo', blender: 'ed.redo', keys: 'Shift Ctrl Z', run: () => send('invoke', 'redo') },
-      '-',
-      { label: 'Remember Scene Edits', checked: () => $('remember').checked, run: click('toggle-remember') },
-      { label: 'Clear Scene Edits', run: click('clear-scene-edits') },
-      '-',
-      { label: 'Preferences…', blender: 'screen.userpref_show', icon: 'preferences', run: openPreferences },
-    ], { blender: 'TOPBAR_MT_edit' }),
-    menuButton('Render', [
-      { label: 'Run', icon: 'play', keys: 'Ctrl Enter', run: click('run'), title: 'Run the project code and rebuild the active scene' },
-      { label: 'Stop', icon: 'pause', run: click('stop'), title: 'Stop the running scenes' },
-      { label: 'Auto-run', checked: () => autoRun.checked, run: () => { autoRun.checked = !autoRun.checked; autoRun.dispatchEvent(new Event('change')); } },
-      '-',
-      { label: 'Render Image', blender: 'render.render', icon: 'render_result', keys: 'F12', run: () => send('render', 'image') },
-      { label: 'Render Animation', blender: 'render.render', keys: 'Ctrl F12', run: () => send('render', 'animation') },
-      { label: 'View Render', blender: 'render.view_show', keys: 'F11', run: () => send('render', 'view') },
-      '-',
-      { label: 'Viewport Resolution…', icon: 'preferences', run: click('render-settings') },
-    ], { blender: 'TOPBAR_MT_render' }),
-    menuButton('Window', () => [
-      ...Object.entries(workspaces).map(([id, label]) => ({ label: label + ' Workspace', checked: () => current() === id, run: () => setWorkspace(id) })),
-      '-',
-      { label: 'Arrange Areas…', run: () => dock.openMenu() },
-      { label: 'Reset Layout', run: () => dock.reset() },
-    ], { blender: 'TOPBAR_MT_window' }),
-    menuButton('Help', [
-      { label: 'Splash Screen', blender: 'wm.splash', icon: 'bylonder', run: () => splash() },
-      { label: 'Keyboard Shortcuts', icon: 'help', keys: '?', run: () => send('help') },
-      '-',
-      { label: 'Bylonder Documentation', icon: 'help', run: () => open(import.meta.env.BASE_URL + 'docs.html', '_blank', 'noopener') },
-      { label: 'Babylon.js Documentation', run: () => open('https://doc.babylonjs.com/', '_blank', 'noopener') },
-      { label: 'Blender Interface Manual', blender: 'wm.url_open_preset:MANUAL', run: () => open('https://docs.blender.org/manual/en/latest/interface/index.html', '_blank', 'noopener') },
-    ], { blender: 'TOPBAR_MT_help' }),
-  );
+  const recent = [];
+  const refreshRecent = () => recentProjects().then((projects) => recent.splice(0, Infinity, ...projects.slice(0, 10)));
+  const url = (href) => () => open(href, '_blank', 'noopener');
+  const blenderDocs = 'https://docs.blender.org/';
+  const URL_PRESETS = { MANUAL: blenderDocs + 'manual/en/latest/', API: blenderDocs + 'api/current/', RELEASE_NOTES: 'https://developer.blender.org/docs/release_notes/' };
+  const ids = Object.keys(workspaces);
+  registerOperators({
+    'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
+    'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : $('project').focus()) },
+    'wm.save_mainfile': { keys: () => 'Ctrl S', run: click('checkpoint') },
+    'wm.save_as_mainfile': { keys: ({ copy }) => (copy ? undefined : 'Shift Ctrl S'), run: ({ copy }) => click(copy ? 'export' : 'fork-project')() },
+    'ed.undo': { keys: () => 'Ctrl Z', run: () => send('invoke', 'undo') },
+    'ed.redo': { keys: () => 'Shift Ctrl Z', run: () => send('invoke', 'redo') },
+    'screen.userpref_show': { run: openPreferences },
+    'render.render': { keys: ({ animation }) => (animation ? 'Ctrl F12' : 'F12'), run: ({ animation }) => send('render', animation ? 'animation' : 'image') },
+    'render.view_show': { keys: () => 'F11', run: () => send('render', 'view') },
+    'screen.workspace_cycle': { run: ({ direction }) => setWorkspace(ids[(ids.indexOf(current()) + (direction === 'PREV' ? ids.length - 1 : 1)) % ids.length]) },
+    'wm.window_fullscreen_toggle': { run: () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()) },
+    'wm.splash': { run: () => splash() },
+    'wm.url_open_preset': { supports: ({ type }) => type in URL_PRESETS, run: ({ type }) => url(URL_PRESETS[type])() },
+    'wm.url_open': { run: ({ url: href }) => url(href)() },
+    'bylonder.project_rename': { run: click('rename-project') },
+    'bylonder.project_share': { run: click('share-project') },
+    'bylonder.project_import': { run: click('import') },
+    'bylonder.project_export': { run: click('export') },
+    'bylonder.app_source': { run: click('app-source') },
+    'bylonder.scene_edits_clear': { run: click('clear-scene-edits') },
+    'bylonder.run': { keys: () => 'Ctrl Enter', run: click('run') },
+    'bylonder.stop': { run: click('stop') },
+    'bylonder.render_settings': { run: click('render-settings') },
+    'bylonder.areas_arrange': { run: () => dock.openMenu() },
+    'bylonder.layout_reset': { run: () => dock.reset() },
+    'bylonder.shortcuts': { keys: () => '?', run: () => send('help') },
+    'bylonder.docs': { run: url(import.meta.env.BASE_URL + 'docs.html') },
+    'bylonder.babylon_docs': { run: url('https://doc.babylonjs.com/') },
+  });
+  // Bylonder's settings in its menus, as properties the menus show as check items.
+  const settings = { __bindings: {
+    remember: { label: 'Remember Scene Edits', get: () => $('remember').checked, set: click('toggle-remember') },
+    auto_run: { label: 'Auto-run', get: () => autoRun.checked, set: (value) => { autoRun.checked = value; autoRun.dispatchEvent(new Event('change')); } },
+  } };
+  const op = (layout, idname, text) => layout.operator(idname, kw({ text }));
+  appendMenu('TOPBAR_MT_file', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_rename', 'Rename Project...'); op(layout, 'bylonder.project_share', 'Share Project Link...'); op(layout, 'bylonder.app_source', 'Download App Source'); });
+  appendMenu('TOPBAR_MT_file_import', ({ layout }) => op(layout, 'bylonder.project_import', 'Project ZIP (.zip)'));
+  appendMenu('TOPBAR_MT_file_export', ({ layout }) => op(layout, 'bylonder.project_export', 'Project ZIP (.zip)'));
+  appendMenu('TOPBAR_MT_edit', ({ layout }) => { layout.separator(); layout.prop(settings, 'remember'); op(layout, 'bylonder.scene_edits_clear', 'Clear Scene Edits'); });
+  prependMenu('TOPBAR_MT_render', ({ layout }) => { op(layout, 'bylonder.run', 'Run'); op(layout, 'bylonder.stop', 'Stop'); layout.prop(settings, 'auto_run'); layout.separator(); });
+  appendMenu('TOPBAR_MT_render', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); });
+  appendMenu('TOPBAR_MT_window', ({ layout }) => { layout.separator(); op(layout, 'bylonder.areas_arrange', 'Arrange Areas...'); op(layout, 'bylonder.layout_reset', 'Reset Layout'); });
+  appendMenu('TOPBAR_MT_help', ({ layout }) => { layout.separator(); op(layout, 'bylonder.shortcuts', 'Keyboard Shortcuts'); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); });
+  // Open Recent is a menu Blender defines in C (wm_files.cc): the recent files, here the recent projects.
+  const TOPBAR_MT_file_open_recent = Object.assign(() => ({
+    draw() { for (const project of recent) this.layout.operator('wm.open_mainfile', kw({ text: project.name, icon: 'FILE_BLEND' })).filepath = project.id; },
+  }), { bl_label: 'Open Recent' });
+  templates.splice(0, Infinity, ...examples.map((example) => example.title));
+  const context = () => ({
+    area: { show_menus: true }, blend_data: { is_saved: true }, view_layer: { has_export_collections: false }, preferences: { view: { show_developer_ui: false } },
+    scene: { render: { use_multiview: false } }, sequencer_scene: null, tool_settings: {}, screen: { show_statusbar: true, show_fullscreen: false }, window: {},
+  });
+  const ui = topbarUI = menuUI({ menus: { ...menuClasses(spaceTopbar), TOPBAR_MT_file_open_recent }, context, prop: (data, name) => data?.__bindings?.[name] });
+  refreshRecent();
+  // The menus of Blender's topbar (TOPBAR_MT_editor_menus), the Blender menu shown as the logo.
+  for (const item of drawMenu('TOPBAR_MT_editor_menus', ui)) {
+    const logo = item.blender === 'TOPBAR_MT_blender';
+    const items = () => { refreshRecent(); return item.items(); };
+    menus.append(menuButton(logo ? '' : item.label, items, { blender: item.blender, icon: logo ? 'bylonder' : item.icon }));
+  }
+  bar.querySelector('.bl-logo').remove();
   const tabs = $('workspace-tabs');
   for (const [id, label] of Object.entries(workspaces)) {
     const b = document.createElement('button');
@@ -78,7 +104,6 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   const sync = () => tabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.workspace === current()));
   new MutationObserver(sync).observe(document.querySelector('#workspace'), { subtree: true, attributes: true, attributeFilter: ['hidden'] });
   sync();
-  bar.querySelector('.bl-logo').replaceChildren(iconEl('bylonder'));
 
   // The version and the build's commit; hovering tells when it last changed.
   function versionLabel() {

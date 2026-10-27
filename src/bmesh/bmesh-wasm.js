@@ -130,6 +130,19 @@ export function drawModifierPanel(modifier) {
   return JSON.parse(cString(x.modifier_panel_draw(object, md)));
 }
 
+// A copy of an extracted Mesh that is its own: arrays and attributes.
+function ownedMesh(mesh) {
+  const attributes = Object.fromEntries([...mesh.attributes].map(([name, { domain, type, data }]) => [name, { domain, type, data: data.slice() }]));
+  const { vert_positions, edges, face_offsets, corner_verts, corner_edges } = mesh;
+  return createMesh({ vert_positions: vert_positions.slice(), edges: edges.slice(), face_offsets: face_offsets.slice(), corner_verts: corner_verts.slice(), corner_edges: corner_edges.slice(), attributes });
+}
+
+// A Mesh of positions and faces (offsets into corner vertices) whose edges Blender derives, as a script's
+// mesh.update() does.
+export const meshFromFaces = (positions, face_offsets, corner_verts) =>
+  withArrays([Float32Array.from(positions), Int32Array.from(face_offsets), Int32Array.from(corner_verts)], ([p, f, c]) =>
+    ownedMesh(extractedMesh(x.mesh_from_faces(positions.length / 3, p, face_offsets.length - 1, f, c) >>> 0)));
+
 const freeing = new FinalizationRegistry((context) => x.edit_context_free(context));
 
 // Blender's edit mesh (BMEditMesh) and the context its operators run in. Elements are named by type (BM_VERT, BM_EDGE,
@@ -204,10 +217,7 @@ export class EditMesh {
 
   // A Mesh of the edit mesh that is its own: arrays, UV map and flags.
   toMesh() {
-    const mesh = this.extract(EXTRACT_ALL);
-    const attributes = Object.fromEntries([...mesh.attributes].map(([name, { domain, type, data }]) => [name, { domain, type, data: data.slice() }]));
-    const { vert_positions, edges, face_offsets, corner_verts, corner_edges } = mesh;
-    return createMesh({ vert_positions: vert_positions.slice(), edges: edges.slice(), face_offsets: face_offsets.slice(), corner_verts: corner_verts.slice(), corner_edges: corner_edges.slice(), attributes });
+    return ownedMesh(this.extract(EXTRACT_ALL));
   }
 
   // Runs a Blender mesh operator's exec, with properties by name (an enum by its item's identifier, an enum flag by a
