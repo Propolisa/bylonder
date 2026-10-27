@@ -483,7 +483,7 @@ class Source:
         events = [e for e in events if e not in ('test', 'rebind')]
         target = pointee(t)
         writes = any(e.endswith('write') for e in events)
-        whole = any(e in ('write', 'nested write') for e in events)
+        whole = any(e in ('write', 'nested write', 'read-write', 'nested read-write') for e in events)
         # A fixed array parameter (`float r_co[3]`) is a value: an output when written. A pointer is an output when
         # the function writes all of what it points to (`*r_len = n`, copy_v3_v3(r_co, ...)); one it only fills
         # element by element (`r_tris[i][0] = ...`) is a buffer the caller provides, as in C.
@@ -495,7 +495,8 @@ class Source:
         # An r_ parameter is an output unless read before written; any other is one only when first written
         # unconditionally, at the top of the function.
         first = events[0] if events else 'write'
-        if 'read' not in events or first in ('write', 'element write') or (named and first.endswith('write')):
+        reads = any(e == 'read' or e.endswith('read-write') for e in events)
+        if not reads or first in ('write', 'element write') or (named and first.endswith('write') and not first.endswith('read-write')):
             return 'out'
         return 'inout'
 
@@ -544,9 +545,9 @@ class Source:
             return 'write'
         ref = call.referenced
         sig = self.signature_of(ref) if ref is not None and ref.kind == K.FUNCTION_DECL else self.sig_of(call.spelling)
-        if sig and 0 <= index < len(sig['params']) and sig['params'][index]['out'] == 'out':
-            return 'write'
-        return 'read'
+        out = sig['params'][index]['out'] if sig and 0 <= index < len(sig['params']) else None
+        # Passed on to a parameter the callee writes: a write here too; one it also reads first is read too.
+        return {'out': 'write', 'inout': 'read-write'}.get(out, 'read')
 
     # --- emission
 
