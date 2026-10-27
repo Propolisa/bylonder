@@ -1,16 +1,6 @@
 // BMesh (bmesh_class.hh) in typed arrays: an element is an index into its pool, and a field is an array on the
 // pool, so `l->radial_next` is `bm.l.radial_next[l]`. Pools reuse freed slots last-in first-out and iterate in slot
 // order, like BLI_mempool, so element order matches Blender's.
-export const BM_VERT = 1, BM_EDGE = 2, BM_LOOP = 4, BM_FACE = 8;
-
-// eBM_elem_hflag
-export const BM_ELEM_SELECT = 1 << 0, BM_ELEM_HIDDEN = 1 << 1, BM_ELEM_SEAM = 1 << 2, BM_ELEM_SMOOTH = 1 << 3,
-  BM_ELEM_TAG = 1 << 4, BM_ELEM_DRAW = 1 << 5, BM_ELEM_TAG_ALT = 1 << 6, BM_ELEM_INTERNAL_TAG = 1 << 7;
-
-// Internal api flags (bmesh_private.hh).
-export const _FLAG_JF = 1 << 0, _FLAG_MF = 1 << 1, _FLAG_MV = 1 << 1, _FLAG_OVERLAP = 1 << 2, _FLAG_WALK = 1 << 3,
-  _FLAG_ELEM_CHECK = 1 << 4;
-
 const FIELDS = {
   v: { co: [Float32Array, 3], no: [Float32Array, 3], e: [Int32Array, 1], hflag: [Uint8Array, 1], api_flag: [Uint8Array, 1], oflag: [Uint16Array, 1], index: [Int32Array, 1] },
   e: { v1: [Int32Array, 1], v2: [Int32Array, 1], l: [Int32Array, 1], v1_disk_link_next: [Int32Array, 1], v1_disk_link_prev: [Int32Array, 1], v2_disk_link_next: [Int32Array, 1], v2_disk_link_prev: [Int32Array, 1], hflag: [Uint8Array, 1], api_flag: [Uint8Array, 1], oflag: [Uint16Array, 1], index: [Int32Array, 1] },

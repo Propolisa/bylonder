@@ -1055,8 +1055,12 @@ class FunctionPort:
             return CONSTANTS[name]
         # The value is the expansion, ported like any expression; Clang's evaluation when that has no JS form.
         self.expanding = (c.extent.start.offset, c.extent.end.offset)
+        outer, self.deps = self.deps, set()
         value = self.expr(c)
+        uses, self.deps = self.deps, outer | self.deps
         self.expanding = None
+        if value == name:
+            return value  # A macro retyping the declaration it names: `#define BM_VERT ((T)BM_VERT)`.
         local = any(x.kind == K.DECL_REF_EXPR and x.referenced is not None and x.referenced.kind in (K.VAR_DECL, K.PARM_DECL)
                     and x.referenced.semantic_parent is not None and x.referenced.semantic_parent.kind not in (K.TRANSLATION_UNIT, K.NAMESPACE)
                     for x in c.walk_preorder())
@@ -1066,7 +1070,7 @@ class FunctionPort:
             value = number_js(clangx.evaluate(c), c.type)
         if value is None:
             return fix(f'macro {name}', self.p.text(c))
-        self.deps.add(('constant', name, (definition, value)))
+        self.deps.add(('constant', name, (definition, value, frozenset(uses))))
         return name
 
     def unary(self, c, want=None):

@@ -298,8 +298,9 @@ class Driver:
         deps = set()
         if name in CONSTANTS:
             return deps
-        if isinstance(ref, tuple):  # A macro: (definition, JS value).
-            decl, value = ref
+        if isinstance(ref, tuple):  # A macro: (definition, JS value, what the value uses).
+            decl, value, deps = ref
+            deps = set(deps)
             names, js = [name], f'const {name} = {value};'
         elif ref.kind == K.ENUM_CONSTANT_DECL:
             decl = ref.semantic_parent
@@ -327,7 +328,7 @@ class Driver:
         if not local and all(n in self.exports.of(target) for n in names):
             return deps
         key = (source.rel if local else os.path.relpath(decl.location.file.name, self.root), decl.extent.start.offset)
-        self.entry(target)['constants'][names[0]] = {'key': key, 'js': js, 'exported': root or not local, 'names': names}
+        self.entry(target)['constants'][names[0]] = {'key': key, 'js': js, 'exported': root or not local, 'names': names, 'deps': deps}
         return deps
 
     def write(self):
@@ -337,7 +338,7 @@ class Driver:
             constants = [('export ' if c['exported'] else '') + c['js'] for c in sorted(entry['constants'].values(), key=lambda c: c['key'])]
             functions = [('export ' if f['exported'] else '') + f['js'] for f in sorted(entry['functions'].values(), key=lambda f: f['key'])]
             imports = {}
-            for f in entry['functions'].values():
+            for f in [*entry['functions'].values(), *entry['constants'].values()]:
                 for kind, name, ref in f['deps']:
                     home = ref if kind == 'helper' else self.home.get(name)
                     if home and name not in defined:
