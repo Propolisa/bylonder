@@ -4,8 +4,8 @@
 // menus with appendMenu, as add-ons extend Blender.
 const operators = new Map(), extensions = new Map();
 
-// An operator: run(props), optionally poll(), keys(props) for its shortcut and supports(props) when Bylonder runs it
-// with some properties only.
+// An operator: run(props), optionally poll(props), keys(props) for its shortcut, supports(props) when Bylonder runs it
+// with some properties only and enumItems(prop) for its enum properties' [identifier, name] pairs.
 export function registerOperator(idname, operator) {
   operators.set(idname, operator);
 }
@@ -30,10 +30,10 @@ export const menuUI = ({ menus, context, prop }) => ({
   prop,
   extensions: (idname) => extensions.get(idname),
   supported: (idname, props) => !!operators.get(idname) && (operators.get(idname).supports?.(props) ?? true),
-  poll: (idname) => operators.get(idname)?.poll?.() ?? true,
+  poll: (idname, props) => operators.get(idname)?.poll?.(props) ?? true,
   run: (idname, props) => operators.get(idname).run(props),
   keys: (idname, props) => operators.get(idname)?.keys?.(props),
-  enumItems: () => [],
+  enumItems: (idname, prop) => operators.get(idname)?.enumItems?.(prop) ?? [],
 });
 
 // A script's menu classes by idname (the module's exports named *_MT_*).

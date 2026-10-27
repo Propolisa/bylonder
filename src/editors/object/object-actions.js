@@ -65,7 +65,7 @@ export function createObjectActions({
     {
       id: "delete", blender: "object.delete",
       label: "Delete",
-      keys: ["Delete", "X"],
+      keys: ["X", "Delete"],
       section: "Object",
       enabled: has,
       run: () => commands.remove(),

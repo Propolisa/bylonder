@@ -13,6 +13,7 @@ import { createContext } from '../src/blenkernel/context.js';
 import { drawMenu } from '../src/editors/interface/ui-layout.js';
 import { menuUI, menuClasses } from '../src/windowmanager/wm-operators.js';
 import * as spaceView3d from '../src/bl_ui/space_view3d.js';
+import { registerObjectOperators } from '../src/editors/object/object-operators.js';
 import * as dataModifier from '../src/bl_ui/properties_data_modifier.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
@@ -133,6 +134,26 @@ assert.equal(view.state.overlays, false);
 assert.equal(propBinding(host)(c.space_data.overlay, 'show_floor'), null, 'unbound properties are not shown');
 assert.deepEqual(undo, ['Show Overlays']);
 assert.ok(['Object.location', 'Scene.frame_current', 'ToolSettings.mesh_select_mode', 'View3DOverlay.show_overlays'].every((u) => updates.includes(u)));
+
+// Blender's Object menu runs Bylonder's actions by the operators they name, and leaves out what they do not run.
+const ran = [];
+const action = (id, blender, keys = []) => ({ id, blender, label: id, keys, run: () => ran.push(id) });
+const registry = {
+  actions: [action('delete', 'object.delete', ['X', 'Delete']), action('parent', ['object.parent_set', 'object.parent_set:OBJECT'], ['Ctrl+P']),
+    action('hide', 'object.hide_view_set'), action('hide-others', 'object.hide_view_set'), action('rename', 'TOPBAR_PT_name'),
+    action('group'), action('ungroup'), action('edit-text'), action('creation', 'screen.redo_last')],
+  invoke(id) { this.actions.find((a) => a.id === id).run(); },
+};
+registerObjectOperators(registry);
+const objectMenu = drawMenu('VIEW3D_MT_object', menuUI({ menus: menuClasses(spaceView3d), context, prop: propBinding(host) }));
+const entry = (items, label) => items.find((item) => item.label === label);
+assert.equal(entry(objectMenu, 'Delete').keys, 'X');
+assert.equal(entry(objectMenu, 'Delete Global'), undefined, 'use_global is not run');
+const parentMenu = entry(objectMenu, 'Parent').items();
+entry(parentMenu, 'Object').run();
+entry(entry(objectMenu, 'Show/Hide').items(), 'Hide Unselected').run();
+entry(objectMenu, 'group').run();
+assert.deepEqual(ran, ['parent', 'hide-others', 'group']);
 
 world.modifiers.dispose();
 scene.dispose();

@@ -2,6 +2,11 @@ import { ArcRotateCamera, Color4, Vector3 } from '@babylonjs/core';
 import { menuButton } from '../interface/menu.js';
 import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
+import { drawMenu } from '../interface/ui-layout.js';
+import { menuUI, menuClasses } from '../../windowmanager/wm-operators.js';
+import { createContext } from '../../blenkernel/context.js';
+import { propBinding } from '../../makesrna/rna-bylonder.js';
+import * as spaceView3d from '../../bl_ui/space_view3d.js';
 
 const toolIcons = {
   select: 'M5 2v14l3.6-3.4 2.6 5.6 2.2-1-2.6-5.5H16Z',
@@ -21,10 +26,10 @@ const theme = new Color4(0.239, 0.239, 0.239, 1);
 // One 3D Viewport area: its canvas, editor camera, navigation, header menus, overlays and per-view state
 // (shading, overlays, camera view), as in Blender where each 3D Viewport has its own view and shading.
 // Rendering goes through the shared view manager (views.js); editing goes through the shared editor.
-//   ctx: { world, views, editor, registry, creator, dock, capture, inspector, help, overlays,
+//   ctx: { world, views, editor, creator, dock, capture, inspector, help, overlays, rna (createRNA),
 //          sceneCamera() -> authored camera, shadingChanged(), name }
 export function createView3D(ctx, { section, canvas = null, headerId, cameraName = '__editorCamera:' + headerId, from = null }) {
-  const { world, views, editor, registry, creator, dock } = ctx;
+  const { world, views, editor, creator, dock } = ctx;
   const { scene } = world;
   section.classList.add('viewport-area');
   if (!canvas) { canvas = document.createElement('canvas'); section.prepend(canvas); }
@@ -78,10 +83,6 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); next?.attachControl(canvas, true); ctx.shadingChanged(); };
 
   // Header: mode, View, Select, Add, Object menus, overlays and shading.
-  const action = id => {
-    const a = registry.actions.find(x => x.id === id);
-    return a && { label: a.label, keys: a.keys[0]?.replace(/\+/g, ' '), enabled: a.enabled, run: () => registry.invoke(id) };
-  };
   const header = dock.header(headerId);
   const cameraItem = { label: 'Camera', blender: 'view3d.view_camera', keys: 'Numpad 0', checked: () => state.cameraView, run: toggleCameraView };
   const editMode = () => world.editMode?.active;
@@ -113,7 +114,10 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     { label: 'Babylon Inspector', keys: 'Shift Ctrl I', run: ctx.inspector },
     { label: 'Keyboard Shortcuts', keys: '?', run: () => ctx.help.showModal() },
   ], { blender: 'VIEW3D_MT_view' });
-  const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : ['select-all', 'deselect', 'invert'].map(action)), { blender: 'VIEW3D_MT_select_object' });
+  // Blender's Object Mode menus, from its own scripts over this view's context.
+  const blender = menuUI({ menus: menuClasses(spaceView3d), context: () => createContext(ctx.rna, { space: view }), prop: propBinding(ctx.rna.host) });
+  const blenderMenu = (idname) => () => drawMenu(idname, blender);
+  const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
   const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
   const meshes = () => {
@@ -127,18 +131,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     '-',
     { label: 'Search…', keys: 'Shift A', run: () => creator.show() },
   ], { blender: 'VIEW3D_MT_add' });
-  const object = menuButton('Object', () => [
-    { label: 'Transform', blender: 'VIEW3D_MT_transform_object', items: ['move', 'rotate', 'scale'].map(action) },
-    { label: 'Clear', blender: 'VIEW3D_MT_object_clear', items: ['clear-location', 'clear-rotation', 'clear-scale'].map(action) },
-    '-',
-    ...['duplicate', 'rename', 'delete'].map(action),
-    '-',
-    { label: 'Parent', blender: 'VIEW3D_MT_object_parent', items: ['parent', 'unparent', 'group', 'ungroup'].map(action) },
-    { label: 'Collection', blender: 'VIEW3D_MT_object_collection', items: ['move-to-collection', 'link-to-collection', 'new-collection', 'remove-from-collection'].map(action) },
-    { label: 'Show/Hide', blender: 'VIEW3D_MT_object_showhide', items: ['hide', 'hide-others', 'show-all', 'isolate'].map(action) },
-    '-',
-    ...['add-array', 'creation', 'edit-text'].map(action),
-  ], { blender: 'VIEW3D_MT_object' });
+  const object = menuButton('Object', blenderMenu('VIEW3D_MT_object'), { blender: 'VIEW3D_MT_object' });
   const meshMenu = menuButton('Mesh', () => world.editMode.menus.mesh(), { blender: 'VIEW3D_MT_edit_mesh' });
   const vertexMenu = menuButton('Vertex', () => world.editMode.menus.vertex(), { blender: 'VIEW3D_MT_edit_mesh_vertices' });
   const edgeMenu = menuButton('Edge', () => world.editMode.menus.edge(), { blender: 'VIEW3D_MT_edit_mesh_edges' });

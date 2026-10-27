@@ -46,7 +46,7 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 
 ## Next
 
-- Draw the 3D View header and the Edit Mode menus (`view3d-menus-edit-mesh.js`, which builds its own context) from `createContext`.
+- The 3D View's Object Mode Select and Object menus are Blender's, over `createContext`, running Bylonder's actions by the operators they name (`editors/object/object-operators.js`). Next: View and Add, and the Edit Mode menus (`view3d-menus-edit-mesh.js`, which builds its own context).
 - Properties editor contexts: `SpaceProperties`, `context.modifier`, `context.material`.
 - The topbar's scene properties across windows (decision 7).
 - Camera and Light data, Mesh element collections, collections and view layers from the collections slice, Preferences.

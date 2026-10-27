@@ -59,7 +59,7 @@ export class UILayout {
       get blender() { return enumValue === undefined ? keyedId(idname, values(props)) : `${idname}:${enumValue}`; },
       available: () => ui.supported(idname, values(props)),
       get keys() { return ui.keys(idname, values(props)); },
-      enabled: () => this.#enabled() && ui.poll(idname),
+      enabled: () => this.#enabled() && ui.poll(idname, values(props)),
       run: () => ui.run(idname, values(props)),
     };
   }

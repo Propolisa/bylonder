@@ -39,6 +39,8 @@ import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequence
 import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
+import { registerObjectOperators } from "./editors/object/object-operators.js";
+import { createRNA } from "./makesrna/rna-bylonder.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -283,6 +285,8 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
+registerObjectOperators(world.objectActions);
+const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
@@ -344,7 +348,7 @@ document.querySelector("#help").onclick = () => help.showModal();
 document.querySelector("#close-help").onclick = () => help.close();
 // 3D Viewports: the primary area and any added by splitting it (dock factory 'viewport').
 const viewportCtx = {
-  world, views, editor, registry: world.objectActions, creator, dock: viewportDock, capture, inspector, help, overlays,
+  world, views, editor, registry: world.objectActions, rna: blenderRNA, creator, dock: viewportDock, capture, inspector, help, overlays,
   sceneCamera: authored,
   // Shading or camera view changed somewhere: effects attach to rendered views' cameras and one rendered view
   // (the last one clicked, else the first) shows the compositor.
