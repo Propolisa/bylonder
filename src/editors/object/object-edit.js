@@ -358,6 +358,11 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     modifiersChanged() { if (em) draw(em.mesh, em.edit.history.at(-1), EXTRACT_POSITIONS); },
     get object() { return em?.object ?? null; },
     get selectmode() { return em?.edit.selectmode ?? selectmode; },
+    // rna_Scene_editmesh_select_mode_set: the select mode, set on the edit mesh as the header buttons set it.
+    set selectmode(mode) {
+      if (!em) { selectmode = mode; return; }
+      ['VERT', 'EDGE', 'FACE'].filter((type, i) => mode & (1 << i)).forEach((type, i) => run('mesh.select_mode', { type, use_extend: i > 0 })());
+    },
     // stats_object_edit: selected and total elements, and the triangle count.
     get stats() {
       if (!em) return null;

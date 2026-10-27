@@ -6,7 +6,7 @@
 //   poll(idname): whether it can now,
 //   keys(idname, props): its shortcut, if bound, enumItems(idname, prop): an enum's [identifier, name] pairs.
 import names from '../../makesrna/operator-names.json' with { type: 'json' };
-import { context as bpyContext } from '../../bl_ui/bpy._app.js';
+import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js';
 
 // Python's keyword arguments: Transcrypt passes them as a last object marked __kwargtrans__.
 function args(list, names) {
@@ -119,13 +119,15 @@ export class UILayout {
 }
 
 // A menu's entries, separators tidied where entries Bylonder lacks left them doubled or at an end.
-// bpy.context, which some scripts read in place of the context they are given, is the one being drawn with.
+// bpy.context, which some scripts read in place of the context they are given, is the one being drawn with, and
+// bpy.data has what its blend_data binds.
 const contextKeys = new Set();
 function useContext(context) {
   contextKeys.forEach((key) => delete bpyContext[key]);
   contextKeys.clear();
   for (const key of Object.keys(context)) contextKeys.add(key);
   Object.assign(bpyContext, context);
+  if (context.blend_data) Object.assign(bpyData, context.blend_data);
 }
 
 // Draw functions added to a menu (`Menu.prepend` and `Menu.append`, as add-ons extend Blender's menus) run around its
