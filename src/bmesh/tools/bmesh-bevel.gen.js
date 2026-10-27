@@ -4232,7 +4232,7 @@ function bevel_vert_two_edges(bp, bm, bv) {
     }
     mesh_vert(vm, 0, 0, ns).co = vco(bm, v2).slice(0, 3);
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(vm, 1, 0, ns - k, 0, 0, k);
+      copy_mesh_vert(bm, vm, 1, 0, ns - k, 0, 0, k);
     }
   }
   if (Number(BM_vert_face_check(bm, bv.v)) === Number(false)) {
@@ -4279,7 +4279,7 @@ function build_vmesh(bp, bm, bv) {
   bndv = vm.boundstart;
   do {
     const i = bndv.index;
-    copy_mesh_vert(vm, i, 0, ns, bndv.next.index, 0, 0);
+    copy_mesh_vert(bm, vm, i, 0, ns, bndv.next.index, 0, 0);
     if (vm.mesh_kind !== M_ADJ) {
       for (let k = 1; k < ns; k++) {
         if (bndv.ebev) {
@@ -4289,7 +4289,7 @@ function build_vmesh(bp, bm, bv) {
             create_mesh_bmvert(bm, vm, i, 0, k, bv.v);
           }
         } else if (n === 2 && !bndv.ebev) {
-          copy_mesh_vert(bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
+          copy_mesh_vert(bm, bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
         }
       }
     }
@@ -4314,7 +4314,7 @@ function build_vmesh(bp, bm, bv) {
       create_mesh_bmvert(bm, bv.vmesh, weld1.index, 0, k, bv.v);
     }
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
+      copy_mesh_vert(bm, bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
     }
   }
   let vpipe = null;
