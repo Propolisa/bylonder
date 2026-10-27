@@ -573,6 +573,7 @@ class FunctionPort:
         self.cursors = {}
         self.views = {}
         self.kept = set()
+        self.targets = {}
 
     def temp(self):
         name = f'_r{self.temps}'
@@ -633,6 +634,32 @@ class FunctionPort:
             if ok and key in stepped:
                 cursors[key] = (base, start)
         return cursors
+
+    @staticmethod
+    def find_targets(body):
+        """The functions each local function pointer is set to, as `fn = BM_face_calc_center_median;`."""
+        targets = {}
+        for c in body.walk_preorder():
+            if is_binary(c, '=') and strip_parens_casts(kids(c)[0]).kind == K.DECL_REF_EXPR:
+                var, value = strip_parens_casts(kids(c)[0]).referenced, strip_parens_casts(kids(c)[1])
+            elif c.kind == K.VAR_DECL and clangx.var_init(c) is not None:
+                var, value = c, strip_parens_casts(clangx.var_init(c))
+            else:
+                continue
+            if var is not None and value.kind == K.DECL_REF_EXPR and value.referenced is not None and value.referenced.kind == K.FUNCTION_DECL:
+                targets.setdefault(var.hash, []).append(value.referenced.spelling)
+        return targets
+
+    def callee_sig(self, name, ref):
+        """The signature a call follows: the callee's, or through a function pointer, that of the functions it is set
+        to when their outputs agree (each bound to bm where it is set, so the call passes none)."""
+        names = self.targets.get(ref.hash) if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL) else None
+        if not names:
+            return self.p.sig_of(name)
+        sigs = [self.p.sig_of(n) for n in names]
+        if any(s is None for s in sigs) or len({tuple(p['out'] for p in s['params']) for s in sigs}) != 1:
+            return self.p.sig_of(name)
+        return {**sigs[0], 'needs_bm': False}
 
     @staticmethod
     def find_kept(body):
@@ -714,6 +741,7 @@ class FunctionPort:
         self.cursors = self.find_cursors(body)
         self.views = self.find_views(body)
         self.kept = self.find_kept(body)
+        self.targets = self.find_targets(body)
         lines = self.block_lines(body, [(f'let {p["name"]}{self.out_init(p)};', p['cursor']) for p in outs])
         statements = list(body.get_children())
         if self.outs() and canon(sig['ret']).kind == T.VOID and not (statements and statements[-1].kind == K.RETURN_STMT):
@@ -1285,7 +1313,7 @@ class FunctionPort:
             if name in IN_OUT and args:
                 helper, inout = in_out(name)
                 return self.assign(args[inout], f'{self.helper(helper)}({", ".join(self.expr(a) for a in args)})', through=True)
-            sig = self.p.sig_of(name)
+            sig = self.callee_sig(name, s.referenced)
             if sig and self.has_outs(sig):
                 self.statement_call = True
                 call = self.call(s)
@@ -1366,7 +1394,7 @@ class FunctionPort:
             if name in OUT_FIRST and name.startswith('invert'):
                 return f'({self.expr(args[0])} = {value})'
             return f'/*FIX {name} as a value*/ {value}'
-        sig = self.p.sig_of(name)
+        sig = self.callee_sig(name, ref)
         params = sig['params'] if sig else []
         arg_js = []
         for i, a in enumerate(args):

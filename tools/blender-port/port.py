@@ -296,6 +296,10 @@ class Driver:
             params = [p for p in shim['params'] if not p.startswith('...')]
             if all(len(want) != len(params) for want in wants):
                 detail['signature'] = f'Blender ({", ".join(wants[0])}), shim ({", ".join(shim["params"])})'
+            # Callers of the shim, and callbacks set to it, pass bm when the shim takes it.
+            sig = source.sigs.get(name)
+            if sig is not None:
+                sig['needs_bm'] = params[:1] == ['bm'] and 'bm' not in {p['name'] for p in sig['params']}
         return detail or None
 
     @staticmethod
