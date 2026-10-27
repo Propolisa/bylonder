@@ -1059,7 +1059,8 @@ class FunctionPort:
         value = self.expr(c)
         uses, self.deps = self.deps, outer | self.deps
         self.expanding = None
-        if value == name:
+        inner = strip_parens_casts(c)
+        if inner.kind == K.DECL_REF_EXPR and inner.spelling == name:
             return value  # A macro retyping the declaration it names: `#define BM_VERT ((T)BM_VERT)`.
         local = any(x.kind == K.DECL_REF_EXPR and x.referenced is not None and x.referenced.kind in (K.VAR_DECL, K.PARM_DECL)
                     and x.referenced.semantic_parent is not None and x.referenced.semantic_parent.kind not in (K.TRANSLATION_UNIT, K.NAMESPACE)
