@@ -1,9 +1,9 @@
-// Edit Mode operators in Blender's own code (src/bmesh/bmesh-wasm.js) against Blender 5.2's results: every fixture of an
+// Blender's own Edit Mode operators in WebAssembly (src/bmesh/bmesh-wasm.js) against Blender 5.2's results: every fixture of an
 // operator the module has must match exactly, UVs, sharp faces and selection included.
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
-import { editMeshFromMesh, editMeshFree, editMeshOperators, meshFromEditMesh, select, selectClear, selectFlush } from '../src/bmesh/bmesh-wasm.js';
+import { editMeshFromMesh, editMeshFree, hasOperator, meshFromEditMesh, runOperator, select, selectClear, selectFlush } from '../src/bmesh/bmesh-wasm.js';
 
 const dir = new URL('./fixtures/mesh/', import.meta.url);
 // Select mode (SCE_SELECT_*) and element type (BM_*) per fixture select mode.
@@ -15,14 +15,16 @@ const failures = [];
 let matched = 0;
 for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(new URL(file, dir), 'utf8'));
-  if (!fixture.edit || !editMeshOperators[fixture.edit.operator] || (fixture.edit.pre && !editMeshOperators[fixture.edit.pre.operator])) continue;
+  if (process.env.ONLY && !file.startsWith(process.env.ONLY)) continue;
+  if (!fixture.edit || !hasOperator(fixture.edit.operator) || (fixture.edit.pre && !hasOperator(fixture.edit.pre.operator))) continue;
+  if (process.env.TRACE) console.error(file);
   const bm = editMeshFromMesh(primitive_add(fixture.operator, fixture.props), SELECT[fixture.edit.select_mode][0]);
   for (const step of [fixture.edit.pre, fixture.edit].filter(Boolean)) {
     const [mode, htype] = SELECT[step.select_mode];
     selectClear(bm, mode);
     for (const i of step.select) select(bm, htype, i);
     selectFlush(bm);
-    editMeshOperators[step.operator](bm, step.props);
+    runOperator(bm, step.operator, step.props);
   }
   const mesh = meshFromEditMesh(bm);
   editMeshFree(bm);
@@ -41,4 +43,4 @@ for (const file of await readdir(dir)) {
 }
 assert.deepEqual(failures, [], `Edit Mode fixtures differ from Blender:\n${failures.join('\n')}`);
 assert.ok(matched >= 8);
-console.log(`Edit Mode in WebAssembly: ${matched} operator results match Blender 5.2 exactly (${Object.keys(editMeshOperators).length} operators)`);
+console.log(`Edit Mode in WebAssembly: ${matched} operator results match Blender 5.2 exactly, run by Blender's own operators`);

@@ -25,7 +25,8 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": "bmesh-api.cc",
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc"],
+      "operators": ["source/blender/editors/mesh/mesh_intern.hh"],
       "dependencies": {
         "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
         "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
@@ -41,6 +42,8 @@
         "source/blender/functions/intern",
         "source/blender/depsgraph/intern/depsgraph_query.cc",
         "source/blender/nodes/intern/geometry_nodes_bundle.cc",
+        "source/blender/windowmanager/intern/wm_operator_props.cc",
+        "source/blender/makesrna/intern",
         "source/blender/blenlib/intern",
         "intern/guardedalloc/intern",
         "intern/clog",

@@ -1,7 +1,6 @@
 // Edit Mode in Blender's own code (tools/blender-port/wasm/bmesh-api.cc, built by wasm_module.py): the BMesh lives in
 // the module, meshes go in and come out as Blender's edit mode orders them, and operators run as Blender's run them.
 import { instantiate } from '../port/wasm.js';
-import { operatorProperties } from '../editors/mesh/editmesh-add.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 
 const { exports: x } = await instantiate(new URL('./bmesh.wasm', import.meta.url));
@@ -35,7 +34,10 @@ export function editMeshFromMesh(mesh, selectmode) {
     withArrays([Int32Array.from(flagPointers)], ([table]) => x.bm_from_arrays(mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv, table, selectmode)));
 }
 
-export const editMeshFree = (bm) => x.bm_free(bm);
+export function editMeshFree(bm) {
+  editMeshFreeContext(bm);
+  x.bm_free(bm);
+}
 
 // The Mesh of an edit BMesh, with its UV map and flags.
 export function meshFromEditMesh(bm) {
@@ -57,21 +59,47 @@ export function meshFromEditMesh(bm) {
 // Selection: by index per element type (BM_VERT, BM_EDGE, BM_FACE), recorded in the history as a click is.
 export const select = (bm, htype, index) => x.bm_select(bm, htype, index);
 export const selectFlush = (bm) => x.bm_select_flush(bm);
-export const selectClear = (bm, selectmode) => x.bm_select_clear(bm, selectmode);
+export function selectClear(bm, selectmode) {
+  x.bm_select_clear(bm, selectmode);
+  x.edit_context_selectmode_set(contextOf(bm), selectmode);
+}
 
-const QUAD_METHOD = { BEAUTY: 0, FIXED: 1, FIXED_ALTERNATE: 2, SHORTEST_DIAGONAL: 3, LONGEST_DIAGONAL: 4 };
-const NGON_METHOD = { BEAUTY: 0, CLIP: 1 };
-const POKE_CENTER = { MEDIAN_WEIGHTED: 0, MEDIAN: 1, BOUNDS: 2 };
+const cString = (pointer) => new TextDecoder().decode(new Uint8Array(x.memory.buffer, pointer, new Uint8Array(x.memory.buffer, pointer).indexOf(0)));
+const withString = (text, fn) => withArrays([new TextEncoder().encode(text + '\0')], ([pointer]) => fn(pointer));
 
-// Operators by Blender idname, given the properties set (the rest take their RNA defaults); false when they did nothing.
-const run = {
-  'mesh.quads_convert_to_tris': (bm, p) => x.mesh_quads_convert_to_tris(bm, QUAD_METHOD[p.quad_method], NGON_METHOD[p.ngon_method]),
-  'mesh.tris_convert_to_quads': (bm, p, set) => x.mesh_tris_convert_to_quads(bm, p.face_threshold, 'face_threshold' in set, p.shape_threshold,
-    'shape_threshold' in set, p.seam, p.sharp, p.uvs, p.vcols, p.materials, p.topology_influence, p.deselect_joined),
-  'mesh.flip_normals': (bm) => x.mesh_flip_normals(bm),
-  'mesh.normals_make_consistent': (bm, p) => x.mesh_normals_make_consistent(bm, p.inside),
-  'mesh.vertices_smooth': (bm, p) => x.mesh_vertices_smooth(bm, p.factor, p.repeat, p.xaxis, p.yaxis, p.zaxis),
-  'mesh.poke': (bm, p) => x.mesh_poke(bm, p.offset, p.use_relative_offset, POKE_CENTER[p.center_mode]),
-};
-export const editMeshOperators = Object.fromEntries(Object.entries(run).map(([idname, fn]) =>
-  [idname, (bm, props = {}) => Boolean(fn(bm, operatorProperties(idname, props), props))]));
+// Blender's mesh operators by Python idname (mesh.subdivide for MESH_OT_subdivide), registered by their own functions.
+const operatorTypes = new Map(Array.from({ length: x.operator_count() }, (_, i) => {
+  const [prefix, name] = cString(x.operator_name(i)).split('_OT_');
+  return [`${prefix.toLowerCase()}.${name}`, i];
+}));
+export const hasOperator = (idname) => operatorTypes.has(idname);
+
+// The context (a scene with the BMesh's object in Edit Mode) each BMesh runs operators in.
+const contexts = new Map();
+const contextOf = (bm) => contexts.get(bm) ?? contexts.set(bm, x.edit_context_new(bm)).get(bm);
+
+// wmOperatorStatus flags.
+export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4;
+
+// Runs a Blender mesh operator's exec on a BMesh, with properties by name (an enum by its item's identifier; the rest
+// keep their defaults). Returns its status flags, or 0 when it does not poll.
+export function runOperator(bm, idname, props = {}) {
+  const op = x.operator_new(operatorTypes.get(idname));
+  try {
+    for (const [name, value] of Object.entries(props)) {
+      const numbers = Float64Array.from([value].flat(), Number);
+      const ok = withString(name, (namePointer) => typeof value === 'string'
+        ? withString(value, (item) => x.operator_set(op, namePointer, 0, 0, item))
+        : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
+      if (!ok) throw new Error(`${idname} has no property ${name} = ${value}`);
+    }
+    return x.operator_exec(contextOf(bm), op);
+  } finally {
+    x.operator_free(op);
+  }
+}
+
+function editMeshFreeContext(bm) {
+  if (contexts.has(bm)) x.edit_context_free(contexts.get(bm));
+  contexts.delete(bm);
+}

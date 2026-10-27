@@ -1,11 +1,13 @@
 """WebAssembly modules: whole Blender libraries built with Clang's wasm32-wasi target, for state that lives in the
 module (the edit-mode BMesh), where per-function units (wasm.py) would copy it at every call.
 
-A module (manifest `modules`: output path under src/, its API file in wasm/, and the library directories it draws on):
+A module (manifest `modules`: output path under src/, its API files in wasm/, the library directories it draws on,
+the libraries Blender builds against, and Blender paths the source tree lacks):
 - builds from a hard-linked copy of the Blender tree with the reviewed patches in wasm/patches applied;
 - compiles every source of its libraries in parallel, cached by source, flags and patches, and archives what builds;
-- links its API against the archives, so only what the API reaches is in the module. Symbols still missing become
-  imports, listed after the build: calling one throws (src/port/wasm.js), so a gap shows where it is reached.
+- links its API against the archives, so only what the API reaches is in the module. Functions still missing become
+  imports, listed after the build: calling one throws (src/port/wasm.js), so a gap shows where it is reached. Data
+  still missing fails the build, since it would read as zeros instead.
 
 Usage: tools/blender-port/wasm_module.py SRC [MODULE]   (SRC: Blender sources of the manifest's tag)
 """
@@ -17,20 +19,42 @@ import os
 import shutil
 import subprocess
 import sys
+import urllib.parse
 
 import convert
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WASM = os.path.join(HERE, 'wasm')
-# Header directories the editors' sources include beyond those the converter parses with.
+# Header directories the editors' and RNA's sources include beyond those the converter parses with.
 EDITOR_INCLUDES = ('blenloader', 'editors/include', 'editors/mesh', 'windowmanager', 'gpu', 'imbuf', 'blenfont', 'render', 'animrig', 'nodes',
-                   'asset_system', 'draw')
+                   'asset_system', 'draw', 'makesdna/intern', 'makesrna/intern', 'imbuf/movie')
+BLENDER = 'https://projects.blender.org/api/v1/repos/blender/blender'
+
+
+def fetch_blender_paths(root, paths, tag):
+    """Blender files and directories the source tree lacks, from Blender's repository at the manifest's tag."""
+    def fetch(path):
+        listing = json.loads(subprocess.run(['curl', '-sfL', f'{BLENDER}/contents/{urllib.parse.quote(path)}?ref={tag}'],
+                                            capture_output=True, check=True).stdout)
+        for entry in listing if isinstance(listing, list) else [listing]:
+            target = os.path.join(root, entry['path'])
+            if entry['type'] == 'dir':
+                fetch(entry['path'])
+            elif not os.path.exists(target):
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                raw = f'{BLENDER}/raw/{urllib.parse.quote(entry["path"])}?ref={tag}'
+                open(target, 'wb').write(subprocess.run(['curl', '-sfL', raw], capture_output=True, check=True).stdout)
+
+    for path in paths:
+        if not os.path.exists(os.path.join(root, path)):
+            fetch(path)
 
 
 def patched_tree(root):
-    """A hard-linked copy of root with the patches applied, made again when the patches change."""
+    """A hard-linked copy of root with the patches applied, made again when the patches or the tree's paths change."""
     patches = sorted(glob.glob(os.path.join(WASM, 'patches', '*.patch')))
-    digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in patches)).hexdigest()[:16]
+    paths = sorted(os.path.relpath(p, root) for p in glob.glob(os.path.join(root, '*/*/*')))
+    digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in patches) + '\n'.join(paths).encode()).hexdigest()[:16]
     tree = os.path.abspath(root).rstrip('/') + '-wasm'
     stamp = os.path.join(tree, '.patches')
     if not (os.path.exists(stamp) and open(stamp).read() == digest):
@@ -50,12 +74,12 @@ def patched_tree(root):
     return tree, digest
 
 
-def dependencies(tree, deps):
+def dependencies(build, deps):
     """Libraries Blender builds against, at the versions Blender pins (build_files/build_environment/cmake/versions.cmake),
-    cloned once into the tree; returns their include directories and a key of their versions."""
+    fetched once; returns their include directories and a key of their versions."""
     includes = []
     for name, dep in sorted(deps.items()):
-        path = os.path.join(tree, '.port-wasm', 'deps', f'{name}-{dep["tag"]}')
+        path = os.path.join(build, 'deps', f'{name}-{dep["tag"]}')
         if not os.path.exists(path):
             if 'sha256' in dep:  # An archive, checked against the hash Blender pins.
                 data = subprocess.run(['curl', '-sfL', dep['url']], capture_output=True, check=True).stdout
@@ -64,7 +88,8 @@ def dependencies(tree, deps):
                 os.makedirs(path)
                 subprocess.run(['tar', '-xz', '--strip-components=1', '-C', path], input=data, check=True)
             else:
-                subprocess.run(['git', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path], check=True)
+                subprocess.run(['git', '-c', 'advice.detachedHead=false', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path],
+                               check=True)
         includes.append(f'-I{os.path.join(path, dep.get("include", ""))}')
     return includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()))
 
@@ -76,9 +101,48 @@ def flags(tree):
             *(f'-I{os.path.join(tree, "source/blender", d)}' for d in EDITOR_INCLUDES), f'-I{os.path.join(tree, "intern/guardedalloc/intern")}']
 
 
-def compile_all(tree, sources, args, key):
+def operator_table(tree, build, args, spec):
+    """generated/operators.inc: OPERATOR(name) for each operator registration function (`void MESH_OT_x(wmOperatorType *)`)
+    the module's operator headers declare, as Clang parses them, so operators Blender builds out (WITH_FREESTYLE) are not
+    listed."""
+    import clang.cindex as ci
+    names = []
+    for header in spec.get('operators', []):
+        tu = ci.Index.create().parse(os.path.join(tree, header), args=[a for a in args if a.startswith(('-I', '-D', '-std', '-isystem'))]
+                                     + ['-x', 'c++', '--target=wasm32-wasi'], options=ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
+        names += [c.spelling for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.FUNCTION_DECL
+                  and c.location.file and c.location.file.name.endswith(header) and '_OT_' in c.spelling
+                  and [t.spelling for t in c.type.argument_types()] == ['wmOperatorType *']]
+    generated = os.path.join(build, 'generated')
+    os.makedirs(generated, exist_ok=True)
+    path = os.path.join(generated, 'operators.inc')
+    text = ''.join(f'OPERATOR({n})\n' for n in dict.fromkeys(names))
+    if not os.path.exists(path) or open(path).read() != text:
+        open(path, 'w').write(text)
+    return generated, text
+
+
+def rna_prototypes(build, args):
+    """generated/rna_prototypes.cc: a definition for each RNA type pointer RNA_prototypes.hh declares (generated from
+    Blender's build by tools/blender-reference/rna-prototypes.py), pointing at a type named as Blender names it. Code
+    without Blender's RNA runtime only compares and stores these pointers."""
+    import clang.cindex as ci
+    header = os.path.join(HERE, 'include', 'RNA_prototypes.hh')
+    tu = ci.Index.create().parse(header, args=['-x', 'c++', '-std=c++20'], options=ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
+    names = [c.spelling for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.VAR_DECL and c.spelling.startswith('RNA_')]
+    namespace = next((c.spelling for c in tu.cursor.get_children() if c.kind == ci.CursorKind.NAMESPACE), None)
+    lines = ['#include "operator-properties.hh"', '', f'namespace {namespace} {{' if namespace else '']
+    lines += [f'static StructRNA {n}_type{{"{n[4:]}"}};\nStructRNA *{n} = &{n}_type;' for n in names]
+    path = os.path.join(build, 'generated', 'rna_prototypes.cc')
+    text = '\n'.join(lines + (['}'] if namespace else [])) + '\n'
+    if not os.path.exists(path) or open(path).read() != text:
+        open(path, 'w').write(text)
+    return path
+
+
+def compile_all(build, sources, args, key):
     """Objects of the sources that build, by source; what does not build is left out (an archive member nothing needs)."""
-    objects = os.path.join(tree, '.port-wasm', 'objects')
+    objects = os.path.join(build, 'objects')
     os.makedirs(objects, exist_ok=True)
     common = hashlib.sha1((' '.join(args) + key + open(os.path.join(WASM, 'compat.h')).read()).encode()).hexdigest()
 
@@ -94,52 +158,80 @@ def compile_all(tree, sources, args, key):
         return dict(pool.map(one, sources))
 
 
+def demangle(names):
+    return subprocess.run(['c++filt'], input='\n'.join(names), capture_output=True, text=True).stdout.split('\n')[:len(names)]
+
+
 def live_imports(path):
-    """What the module still imports besides WASI: Blender symbols nothing in it defines."""
+    """What the module still imports besides WASI: Blender functions nothing in it defines."""
     script = ("const m = new WebAssembly.Module(require('fs').readFileSync(process.argv[1]));"
               "console.log(JSON.stringify(WebAssembly.Module.imports(m).filter((i) => i.module !== 'wasi_snapshot_preview1').map((i) => i.name)))")
     names = json.loads(subprocess.run(['node', '-e', script, path], capture_output=True, text=True, check=True).stdout)
-    demangled = subprocess.run(['c++filt'], input='\n'.join(names), capture_output=True, text=True).stdout.split('\n')
-    return sorted({d.split('(')[0] for d in demangled if d})
+    return sorted({d.split('(')[0] for d in demangle(names)})
 
 
-def build(root, name, spec):
+def undefined_data(unresolved, objects):
+    """The unresolved symbols the objects refer to as data (`O` in their symbol tables)."""
+    objdump = shutil.which('llvm-objdump') or shutil.which('llvm-objdump-18')
+    data = set()
+    for obj in objects:
+        for line in subprocess.run([objdump, '-t', obj], capture_output=True, text=True).stdout.splitlines():
+            fields = line.split()
+            if len(fields) >= 4 and fields[-2] == '*UND*' and fields[1] == 'O' and fields[-1] in unresolved:
+                data.add(fields[-1])
+    return sorted(data)
+
+
+def build(root, name, spec, tag):
+    fetch_blender_paths(root, spec.get('blender_paths', []), tag)
     tree, patches = patched_tree(root)
-    includes, versions = dependencies(tree, spec.get('dependencies', {}))
+    out_dir = tree + '-build'
+    includes, versions = dependencies(out_dir, spec.get('dependencies', {}))
     args = includes + flags(tree)
     patches += versions
-    archives = []
+    generated, operators = operator_table(tree, out_dir, args, spec)
+    archives, members = [], []
     for lib in spec['libraries']:
         sources = sorted(glob.glob(os.path.join(tree, lib, '*.c*'))) if os.path.isdir(os.path.join(tree, lib)) else [os.path.join(tree, lib)]
-        objects = compile_all(tree, sources, args, patches)
-        archive = os.path.join(tree, '.port-wasm', lib.replace('/', '_') + '.a')
+        objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args, patches)
+        built = [o for o in objects.values() if o]
+        archive = os.path.join(out_dir, lib.replace('/', '_') + '.a')
         if os.path.exists(archive):
             os.remove(archive)
-        subprocess.run([shutil.which('llvm-ar') or shutil.which('llvm-ar-18'), 'rcs', archive, *(o for o in objects.values() if o)], check=True)
+        subprocess.run([shutil.which('llvm-ar') or shutil.which('llvm-ar-18'), 'rcs', archive, *built], check=True)
         archives.append(archive)
-        print(f'{lib}: {sum(1 for o in objects.values() if o)} of {len(objects)} sources build', file=sys.stderr)
-    own = compile_all(tree, [os.path.join(WASM, spec['api']), os.path.join(WASM, 'platform.cc')], args, patches)
+        members += built
+        print(f'{lib}: {len(built)} of {len(objects)} sources build', file=sys.stderr)
+    # The module's own files also see wasm/ and the generated operator table; Blender's sources need neither.
+    own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)],
+                      args + [f'-I{generated}', f'-I{WASM}'], patches + operators)
     failed = [src for src, obj in own.items() if obj is None]
     if failed:
-        result = subprocess.run(['clang++', *args, '-c', failed[0], '-o', os.devnull], capture_output=True, text=True)
+        result = subprocess.run(['clang++', *args, f'-I{generated}', f'-I{WASM}', '-c', failed[0], '-o', os.devnull], capture_output=True, text=True)
         sys.exit(f'{os.path.relpath(failed[0], convert.REPO)} does not build:\n{result.stderr}')
     out = os.path.join(convert.REPO, 'src', name)
     # Archives twice: a member one archive pulls in may need members of an archive listed before it.
     result = subprocess.run(['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--strip-all',
-                             '-Wl,--allow-undefined', '-Wl,--export=malloc', '-Wl,--export=free', '-o', out, *own.values(),
-                             *archives, *archives, '-lwasi-emulated-process-clocks'], capture_output=True, text=True)
+                             '-Wl,--warn-unresolved-symbols', '-Wl,--error-limit=0', '-Wl,--export=malloc', '-Wl,--export=free', '-o', out,
+                             *own.values(), *archives, *archives, '-lwasi-emulated-process-clocks'], capture_output=True, text=True)
     if result.returncode:
         sys.exit(f'{name}: link failed\n{result.stderr}')
+    unresolved = {line.split('undefined symbol: ')[-1] for line in result.stderr.splitlines() if 'undefined symbol: ' in line}
+    data = undefined_data(unresolved, [*own.values(), *members])
+    if data:
+        os.remove(out)
+        sys.exit(f'{name}: data nothing defines, which would read as zeros:\n  ' + '\n  '.join(demangle(data)))
     missing = live_imports(out)
-    print(f'built src/{name}: {os.path.getsize(out)} bytes; {len(missing)} imports, which throw when called:\n  ' + '\n  '.join(missing), file=sys.stderr)
+    print(f'built src/{name}: {os.path.getsize(out)} bytes, {operators.count(chr(10))} operators; {len(missing)} imports, which throw when '
+          f'called:\n  ' + '\n  '.join(missing), file=sys.stderr)
 
 
 def main():
     root = sys.argv[1]
-    modules = json.load(open(os.path.join(HERE, 'manifest.json')))['modules']
-    for name, spec in modules.items():
+    manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
+    for name, spec in manifest['modules'].items():
         if len(sys.argv) < 3 or sys.argv[2] == name:
-            build(root, name, spec)
+            build(root, name, spec, manifest['blender'])
 
 
 if __name__ == '__main__':
