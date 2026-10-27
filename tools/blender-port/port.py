@@ -393,7 +393,7 @@ def check(root, manifest, rel):
     js = '\n\n'.join(source.emit(f)[0] for f in source.functions)
     fixes = collections.Counter(m.group(1) for m in re.finditer(r'/\*FIX ([^*:]*)', js))
     syntax = subprocess.run(['node', '--check', '--input-type=module'], input=js, capture_output=True, text=True)
-    error = syntax.stderr.strip().splitlines()[-1] if syntax.returncode else ''
+    error = next((l for l in syntax.stderr.splitlines() if 'Error' in l), 'unknown') if syntax.returncode else ''
     return js, f'{rel}: {len(source.functions)} functions, {sum(fixes.values())} FIX marks {dict(fixes.most_common())}{" SYNTAX " + error if error else ""}'
 
 

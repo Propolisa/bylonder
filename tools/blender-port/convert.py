@@ -848,6 +848,8 @@ class FunctionPort:
             elif t.spelling == ';' and level == 1:
                 semis.append(t.extent.start.offset)
         slots = [None, None, None]
+        if len(kids(c)) == 4:
+            return kids(c)[:3]  # All three present, so their order places them, also inside a macro's expansion.
         if len(semis) == 2:
             for x in kids(c)[:-1]:
                 o = x.extent.start.offset
