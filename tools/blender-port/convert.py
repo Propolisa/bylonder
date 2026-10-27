@@ -16,6 +16,7 @@ Needs Clang 18 with its Python bindings (`pip install libclang==18.1.1`), the Bl
 (`git archive v5.2.3 source/blender intern extern | tar -x -C SRC`) and fmt and Eigen headers.
 Inspect one file: tools/blender-port/convert.py SRC source/blender/bmesh/intern/bmesh_query.cc [FUNCTION ...]
 """
+import functools
 import json
 import math
 import os
@@ -299,20 +300,32 @@ def module_for(path, root):
 
 # --- parsing
 
+@functools.cache
+def clang_resource_dir():
+    return subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
+
+
 class Source:
     """One Blender source file parsed by Clang, with the prelude after its includes and its own function-like
     macros turned into functions."""
 
-    def __init__(self, root, rel, registry=None, float32=False):
+    def __init__(self, root, rel, registry=None, float32=False, index=True):
+        """Parses rel; `index=False` stops before what reads the shared registry, so parses can run in threads
+        (libclang releases the GIL) and `index()` follows on the driver's thread."""
         self.root = os.path.abspath(root)
         self.rel = rel
         # Exact float arithmetic: C rounds every float operation to 32 bits, JS computes in doubles.
         self.float32 = float32
         self.registry = registry if registry is not None else {}
-        path = os.path.join(self.root, rel)
+        self.parse_all()
+        if index:
+            self.index()
+
+    def parse_all(self):
+        path = os.path.join(self.root, self.rel)
         self.original = open(path).read()
         self.tmp = os.path.join(os.path.dirname(path), f'{TMP_PREFIX}{os.path.basename(path)}')
-        resource = subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
+        resource = clang_resource_dir()
         # As Blender's release build: NDEBUG leaves out debug checks and validation.
         self.args = ['-std=c++20', '-x', 'c++', '-DNDEBUG', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
         # Headers Blender's build generates (tools/blender-reference/rna-prototypes.py).
@@ -344,6 +357,8 @@ class Source:
             self.local_macros = {n: m for n, m in self.local_macros.items() if n not in assigned}
             self.tu = self.parse(self.prepared(types))
         os.remove(self.tmp)
+
+    def index(self):
         for d in [d for d in self.tu.diagnostics if d.severity >= 3][:10]:
             print(f'clang: {d}', file=sys.stderr)
         self.macros = {}

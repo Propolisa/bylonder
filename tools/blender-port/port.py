@@ -21,8 +21,9 @@ kind and JS syntax errors, in seconds, to try a converter change; signatures fro
 run. With one file, its JS goes to stdout.
 """
 import collections
-import multiprocessing
+import concurrent.futures
 import glob
+import multiprocessing
 import json
 import os
 import re
@@ -98,12 +99,22 @@ class Driver:
         self.home = {}  # name: the module that defines it
         self.followed = set()  # constants whose uses are followed
         self.needs_found = set()  # what shims call of Blender's, once found
+        self.parses = {}  # rel: a parse running ahead of the walk
+        self.parser = concurrent.futures.ThreadPoolExecutor(os.cpu_count())
 
     def source(self, rel):
         if rel not in self.sources:
-            print(f'parse {rel}', file=sys.stderr)
-            self.sources[rel] = convert.Source(self.root, rel, self.registry, float32=self.manifest.get('float32', False))
+            self.prefetch(rel)
+            self.sources[rel] = self.parses.pop(rel).result()
+            self.sources[rel].index()
         return self.sources[rel]
+
+    def prefetch(self, rel):
+        """Starts parsing rel on a thread, for source() to pick up."""
+        if rel not in self.sources and rel not in self.parses:
+            print(f'parse {rel}', file=sys.stderr)
+            self.parses[rel] = self.parser.submit(convert.Source, self.root, rel, self.registry,
+                                                  float32=self.manifest.get('float32', False), index=False)
 
     def module_of(self, path):
         return convert.module_for(path if os.path.isabs(path) else os.path.join(self.root, path), self.root)
@@ -150,6 +161,11 @@ class Driver:
             queue += self.follow(self.source(rel), rel, self.module_of(rel), self.constant(self.source(rel), self.module_of(rel), name, ref, root=True))
         done = set()
         while queue:
+            for waiting, waiting_name, waiting_provider in queue:
+                module = self.module_of(waiting)
+                if (waiting, waiting_name) not in done and module and waiting_name not in self.exports.of(module) \
+                        and not self.excluded(module, waiting_name):
+                    self.prefetch(waiting_provider)
             rel, name, provider = queue.pop(0)
             if (rel, name) in done:
                 continue
