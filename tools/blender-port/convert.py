@@ -304,6 +304,14 @@ def module_for(path, root):
 
 # --- parsing
 
+def include_args(root):
+    """The include paths of Blender's sources under root, and of the headers its build generates
+    (tools/blender-reference/rna-prototypes.py)."""
+    return ([f'-I{os.path.join(HERE, "include")}'] + [f'-I{os.path.join(root, "source/blender", d)}' for d in INCLUDES]
+            + [f'-I{os.path.join(root, d)}' for d in ('intern/guardedalloc', 'intern/atomic', 'intern/eigen', 'intern/profile', 'intern/clog',
+                                                       'extern/fast_float', 'extern/xxhash', 'extern/rangetree', 'extern/wcwidth')])
+
+
 @functools.cache
 def clang_resource_dir():
     return subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
@@ -329,13 +337,9 @@ class Source:
         path = os.path.join(self.root, self.rel)
         self.original = open(path).read()
         self.tmp = os.path.join(os.path.dirname(path), f'{TMP_PREFIX}{os.path.basename(path)}')
-        resource = clang_resource_dir()
         # As Blender's release build: NDEBUG leaves out debug checks and validation.
-        self.args = ['-std=c++20', '-x', 'c++', '-DNDEBUG', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
-        # Headers Blender's build generates (tools/blender-reference/rna-prototypes.py).
-        self.args += [f'-I{os.path.join(os.path.dirname(os.path.abspath(__file__)), "include")}']
-        self.args += [f'-I{os.path.join(self.root, "source/blender", d)}' for d in INCLUDES]
-        self.args += [f'-I{os.path.join(self.root, d)}' for d in ('intern/guardedalloc', 'intern/atomic', 'intern/eigen', 'intern/profile', 'intern/clog', 'extern/fast_float', 'extern/xxhash', 'extern/rangetree')]
+        self.args = ['-std=c++20', '-x', 'c++', '-DNDEBUG', f'-resource-dir={clang_resource_dir()}', '-Wno-c++11-narrowing',
+                     '-I/usr/include/eigen3', *include_args(self.root)]
         plain = self.parse(self.original, outline=True)
         includes = [c for c in plain.cursor.get_children() if c.kind == K.INCLUSION_DIRECTIVE and self.in_main(c)]
         self.prelude_line = max((c.extent.end.line for c in includes), default=0)

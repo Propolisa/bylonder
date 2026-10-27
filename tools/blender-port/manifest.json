@@ -23,6 +23,25 @@
       ]
     }
   ],
+  "modules": {
+    "bmesh/bmesh.wasm": {
+      "api": "bmesh-api.cc",
+      "libraries": [
+        "source/blender/bmesh/intern",
+        "source/blender/bmesh/operators",
+        "source/blender/bmesh/tools",
+        "source/blender/blenkernel/intern",
+        "source/blender/blentranslation/intern",
+        "source/blender/functions/intern",
+        "source/blender/depsgraph/intern/depsgraph_query.cc",
+        "source/blender/blenlib/intern",
+        "intern/guardedalloc/intern",
+        "intern/clog",
+        "intern/eigen/intern",
+        "extern/wcwidth"
+      ]
+    }
+  },
   "units": {
     "blenkernel/mesh/mesh-tessellate.js": {
       "api": {
@@ -36,6 +55,7 @@
         "source/blender/blenlib/intern/math_matrix_c.cc",
         "source/blender/blenlib/intern/math_vector.cc",
         "source/blender/blenlib/intern/polyfill_2d_beautify.cc",
+        "source/blender/blenlib/intern/task_range.cc",
         "intern/guardedalloc/intern/leak_detector.cc",
         "intern/guardedalloc/intern/mallocn.cc",
         "intern/guardedalloc/intern/mallocn_lockfree_impl.cc",

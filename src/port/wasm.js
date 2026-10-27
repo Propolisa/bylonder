@@ -1,12 +1,16 @@
-// Runtime of WebAssembly units (tools/blender-port/wasm.py): Blender's own code, called with C-layout typed arrays.
-// Each call copies its arguments into one grow-only scratch block of the module's memory and its outputs back out.
+// Runtime of WebAssembly units and modules (tools/blender-port/wasm.py, wasm_module.py): Blender's own code, called
+// with C-layout typed arrays. Each unit call copies its arguments into one grow-only scratch block of the module's
+// memory and its outputs back out.
 
 // WASI calls the module may import; the ported code does no I/O, so they have no effect.
 const wasi = new Proxy({}, { get: (_, name) => (name === 'proc_exit' ? (code) => { throw new Error(`WebAssembly exit ${code}`); } : () => 0) });
 
+// Blender symbols a module still lacks (tools/blender-port/wasm_module.py lists them): reaching one is a gap to port.
+const missing = new Proxy({}, { get: (_, name) => () => { throw new Error(`Blender's ${name} is not in this WebAssembly module`); } });
+
 export async function instantiate(url) {
   const bytes = url.protocol === 'file:' ? await process.getBuiltinModule('fs/promises').readFile(url) : await (await fetch(url)).arrayBuffer();
-  const { instance } = await WebAssembly.instantiate(bytes, { wasi_snapshot_preview1: wasi });
+  const { instance } = await WebAssembly.instantiate(bytes, { wasi_snapshot_preview1: wasi, env: missing });
   instance.exports._initialize?.();
   return new Heap(instance.exports);
 }

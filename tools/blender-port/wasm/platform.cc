@@ -1,9 +1,8 @@
-/* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime. */
+/* What Blender's code needs from the platform in a WebAssembly build: allocation without the exception runtime, and
+ * the thread count of one thread. */
 #include <cstddef>
 #include <cstdlib>
 #include <new>
-
-#include "BLI_task.hh"
 
 void *operator new(std::size_t n)
 {
@@ -40,13 +39,7 @@ extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { std::abort(); }
 /* thread_local destructors: a reactor module never exits its one thread. */
 extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0; }
 
-/* port-override: WASI has no threads, so parallel_for runs its range in one call, as Blender does without TBB. */
-namespace blender::threading::detail {
-void parallel_for_impl(const IndexRange range,
-                       const int64_t /*grain_size*/,
-                       const FunctionRef<void(IndexRange)> function,
-                       const TaskSizeHints & /*size_hints*/)
-{
-  function(range);
-}
-}  // namespace blender::threading::detail
+namespace blender {
+/* port-override: WASI has no threads; Blender's own task_range.cc runs ranges serially without TBB. */
+int BLI_system_thread_count() { return 1; }
+}  // namespace blender

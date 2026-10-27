@@ -31,6 +31,9 @@ template<class M> struct unique_lock {
   void unlock() {}
   bool owns_lock() const { return true; }
 };
+template<class... M> struct scoped_lock {
+  explicit scoped_lock(M &...) {}
+};
 }  // namespace std
 #  endif
 #endif

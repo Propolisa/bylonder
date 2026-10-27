@@ -1,0 +1,13 @@
+The pragma makes a sign-conversion warning an error, and it fires on wasm32 where Blender's own targets do not; the code is unchanged.
+--- a/source/blender/blenlib/intern/string_utf8.cc
++++ b/source/blender/blenlib/intern/string_utf8.cc
+@@ -25,9 +25,6 @@
+ #ifdef WIN32
+ #  include "utfconv.hh"
+ #endif
+-#ifdef __GNUC__
+-#  pragma GCC diagnostic error "-Wsign-conversion"
+-#endif
+ 
+ #include "BLI_strict_flags.h" /* IWYU pragma: keep. Keep last. */
+ 
