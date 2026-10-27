@@ -12,7 +12,10 @@ signature difference),
 excluded (with the manifest's reason, as a function that throws) or missing (no definition found, or a helper no
 shim provides yet).
 
-Usage: tools/blender-port/port.py SRC   (SRC: Blender sources of the manifest's tag; see convert.py)
+Units (manifest `units`) are self-contained parts with a second backend: Blender's own sources built to WebAssembly
+(`--wasm`, with Clang's wasm32-wasi target), behind the same API (`<module>.unit.gen.js`, src/port/unit.js).
+
+Usage: tools/blender-port/port.py SRC [--wasm]   (SRC: Blender sources of the manifest's tag; see convert.py)
 """
 import glob
 import json
@@ -38,6 +41,14 @@ def public_path(module):
 
 def gen_path(module):
     return public_path(module).removesuffix('.js') + '.gen.js'
+
+
+def unit_path(module):
+    return public_path(module).removesuffix('.js') + '.unit.gen.js'
+
+
+def wasm_path(module):
+    return public_path(module).removesuffix('.js') + '.wasm'
 
 
 def node(*args):
@@ -71,6 +82,7 @@ class Driver:
         self.manifest = manifest
         self.exclude = manifest.get('exclude', {})
         self.exclude_modules = manifest.get('exclude_modules', {})
+        self.units = manifest.get('units', {})
         self.registry = {}
         self.sources = {}
         self.exports = Exports()
@@ -81,7 +93,7 @@ class Driver:
     def source(self, rel):
         if rel not in self.sources:
             print(f'parse {rel}', file=sys.stderr)
-            self.sources[rel] = convert.Source(self.root, rel, self.registry)
+            self.sources[rel] = convert.Source(self.root, rel, self.registry, float32=self.manifest.get('float32', False))
         return self.sources[rel]
 
     def module_of(self, path):
@@ -121,7 +133,8 @@ class Driver:
 
     def run(self):
         # (file defining the function, function, the parsed file that holds its definition)
-        queue = [(root['source'], name, root['source']) for root in self.manifest['roots'] for name in root['functions']]
+        roots = self.manifest['roots'] + [{'source': u['source'], 'functions': u['api']} for u in self.units.values()]
+        queue = [(root['source'], name, root['source']) for root in roots for name in root['functions']]
         done = set()
         while queue:
             rel, name, provider = queue.pop(0)
@@ -225,7 +238,12 @@ class Driver:
         elif ref.kind == K.ENUM_CONSTANT_DECL:
             decl = ref.semantic_parent
             values = [e for e in decl.get_children() if e.kind == K.ENUM_CONSTANT_DECL]
-            names, js = [e.spelling for e in values], f'const {", ".join(f"{e.spelling} = {e.enum_value}" for e in values)};'
+            if decl.is_scoped_enum():
+                # An enum class keeps its scope: PolyIndexFlag.IndexCacheDirty.
+                names = [decl.spelling]
+                js = f'const {decl.spelling} = Object.freeze({{ {", ".join(f"{e.spelling}: {e.enum_value}" for e in values)} }});'
+            else:
+                names, js = [e.spelling for e in values], f'const {", ".join(f"{e.spelling} = {e.enum_value}" for e in values)};'
         else:
             decl = ref
             init = convert.clangx.var_init(ref)
@@ -264,27 +282,121 @@ class Driver:
                       f'// exporting the same name from {os.path.basename(public_path(module))}.\n')
             os.makedirs(os.path.dirname(gen_path(module)), exist_ok=True)
             open(gen_path(module), 'w').write(header + '\n'.join(lines) + '\n\n' + '\n'.join(constants) + '\n\n' + '\n\n'.join(functions) + '\n')
+            if module in self.units:
+                open(unit_path(module), 'w').write(self.unit_module(module))
             self.link(module)
         self.prune()
-        node('format', *[gen_path(m) for m in sorted(self.modules)])
+        node('format', *[gen_path(m) for m in sorted(self.modules)], *[unit_path(m) for m in sorted(self.units)])
         status = {m: self.status[m] for m in sorted(self.status)}
         open(os.path.join(HERE, 'status.json'), 'w').write(json.dumps(status, indent=2) + '\n')
 
     def link(self, module):
         """The public module re-exports the generated one; a new one starts as just that."""
         path = public_path(module)
-        star = f"export * from './{os.path.basename(gen_path(module))}';"
+        star = f"export * from './{os.path.basename(unit_path(module) if module in self.units else gen_path(module))}';"
         if not os.path.exists(path):
             open(path, 'w').write(f'// Shims for {module}: export a Blender name here to replace its generated port.\n{star}\n')
         elif star not in open(path).read().split('\n'):
             open(path, 'a').write(f'\n{star}\n')
         self.exports.forget(module)
 
+    # --- units
+
+    def api(self, module):
+        """The unit's API functions as Clang declares them."""
+        unit = self.units[module]
+        source = self.source(unit['source'])
+        return source, [source.find(name) for name in unit['api']]
+
+    def unit_module(self, module):
+        """The unit's API as live bindings, backed by the JS port or by Blender's code built to WebAssembly: the
+        WebAssembly side copies each buffer into the module's memory for the call, and outputs back."""
+        unit = self.units[module]
+        source, api = self.api(module)
+        gen = f'./{os.path.basename(gen_path(module))}'
+        wasm = []
+        for f in api:
+            params = [p.spelling for p in f.get_arguments()]
+            copies, call, outs = [], [], []
+            for p in f.get_arguments():
+                kind = buffer_kind(p.type)
+                if kind is None:
+                    call.append(p.spelling)
+                    continue
+                typed, size, const = kind
+                count = unit.get('buffers', {}).get(f.spelling, {}).get(p.spelling)
+                if count is None:
+                    sys.exit(f'{module}: {f.spelling}({p.spelling}) needs a length in the manifest\'s buffers')
+                ptr = f'p_{p.spelling}'
+                writes_only = not const and p.spelling.startswith('r_')
+                copies.append(f'const {ptr} = ' + (f'frame.alloc({typed}, ({count}) * {size});' if writes_only else f'frame.rows({typed}, {size}, {p.spelling}, {count});'))
+                call.append(ptr)
+                if not const:
+                    outs.append(f'frame.rowsOut({typed}, {size}, {p.spelling}, {count}, {ptr});')
+            result = 'const result = ' if convert.canon(f.result_type).kind != convert.T.VOID else ''
+            wasm.append(f'{f.spelling}({", ".join(params)}) {{\nconst frame = heap.frame();\n' + '\n'.join(copies) +
+                        f'\n{result}heap.exports.{f.spelling}({", ".join(call)});\n' + '\n'.join(outs) +
+                        '\nframe.end();\n' + ('return result;\n' if result else '') + '}')
+        names = ', '.join(unit['api'])
+        runtime = os.path.relpath(os.path.join(SRC, 'port/unit.js'), os.path.dirname(unit_path(module)))
+        return (f'{MARK} from Blender {self.manifest["blender"]}: the {module} unit. Do not edit.\n'
+                f"import {{ defineUnit }} from '{runtime if runtime.startswith('.') else './' + runtime}';\n"
+                f"import * as js from '{gen}';\n\nexport * from '{gen}';\n\n"
+                + '\n'.join(f'export let {n} = js.{n};' for n in unit['api']) +
+                f"\n\nexport const unit = defineUnit('{module.removesuffix('.js')}', {{\njs,\n"
+                f"url: new URL('./{os.path.basename(wasm_path(module))}', import.meta.url),\n"
+                f'wasm: (heap) => ({{\n' + ',\n'.join(wasm) + '\n}),\n'
+                f'bind: (api) => ({{ {names} }} = api),\n}});\n')
+
+    def build_wasm(self, module):
+        """Blender's sources of the unit, built to wasm32-wasi with an export per API function."""
+        unit = self.units[module]
+        source, api = self.api(module)
+        wrappers = []
+        for f in api:
+            decl = f.canonical
+            header = decl.location.file.name
+            text = source.text(decl)
+            name_offset = next(t.extent.start.offset for t in decl.get_tokens() if t.spelling == f.spelling) - decl.extent.start.offset
+            signature = text[:name_offset] + f'port_{f.spelling}' + text[name_offset + len(f.spelling):]
+            scope = []
+            parent = decl.semantic_parent
+            while parent is not None and parent.kind == K.NAMESPACE:
+                scope.insert(0, parent.spelling)
+                parent = parent.semantic_parent
+            qualified = '::'.join(scope + [f.spelling])
+            ret = '' if convert.canon(f.result_type).kind == convert.T.VOID else 'return '
+            wrappers.append(f'#include "{header}"\nextern "C" __attribute__((export_name("{f.spelling}"))) {signature}\n'
+                            f'{{\n  {ret}{qualified}({", ".join(p.spelling for p in f.get_arguments())});\n}}\n')
+        build = os.path.join(self.root, '.port-wasm', module.removesuffix('.js'))
+        os.makedirs(build, exist_ok=True)
+        wrapper = os.path.join(build, 'exports.cc')
+        open(wrapper, 'w').write('\n'.join(wrappers))
+        include = [a for a in source.args if a.startswith('-I') and a != '-I/usr/include/eigen3']
+        # fmt is header-only here, but its directory sits with the host's headers, which a wasm build must not see.
+        fmt = os.path.join(build, 'include')
+        os.makedirs(fmt, exist_ok=True)
+        if not os.path.exists(os.path.join(fmt, 'fmt')):
+            os.symlink('/usr/include/fmt', os.path.join(fmt, 'fmt'))
+        include += [f'-I{os.path.join(self.root, "intern/guardedalloc/intern")}', f'-I{fmt}']
+        flags = ['--target=wasm32-wasi', '-std=c++20', '-O3', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
+                 '-include', os.path.join(HERE, 'wasm', 'compat.h')]
+        objects = []
+        for rel in unit['wasm'] + [wrapper, os.path.join(HERE, 'wasm', 'platform.cc')]:
+            path = rel if os.path.isabs(rel) else os.path.join(self.root, rel)
+            obj = os.path.join(build, os.path.basename(path) + '.o')
+            subprocess.run(['clang++', *flags, *include, '-c', path, '-o', obj], check=True)
+            objects.append(obj)
+        subprocess.run(['clang++', '--target=wasm32-wasi', '-O3', '-mexec-model=reactor', '-Wl,--gc-sections', '-Wl,--strip-all',
+                        '-Wl,--export=malloc', '-Wl,--export=free', '-o', wasm_path(module), *objects], check=True)
+        print(f'built {os.path.relpath(wasm_path(module), convert.REPO)} ({os.path.getsize(wasm_path(module))} bytes)', file=sys.stderr)
+
     def prune(self):
         """Generated modules the manifest no longer reaches go, with their re-export."""
         for path in glob.glob(os.path.join(SRC, '**/*.gen.js'), recursive=True):
-            module = os.path.relpath(path, SRC).removesuffix('.gen.js') + '.js'
-            if module in self.modules or not open(path).read().startswith(MARK):
+            module = os.path.relpath(path, SRC).removesuffix('.gen.js').removesuffix('.unit') + '.js'
+            unit_file = path.endswith('.unit.gen.js')
+            if (module in self.units if unit_file else module in self.modules) or not open(path).read().startswith(MARK):
                 continue
             os.remove(path)
             public = public_path(module)
@@ -297,12 +409,28 @@ class Driver:
                     open(public, 'w').write('\n'.join(kept))
 
 
+def buffer_kind(t):
+    """(typed array, row size, read only) for a pointer to numbers or to rows of numbers, else None."""
+    target = convert.pointee(t)
+    if target is None:
+        return None
+    row = target if target.kind == convert.T.CONSTANTARRAY else None
+    element = convert.canon(row.element_type) if row is not None else target
+    typed = convert.TYPED_ARRAYS.get(element.kind)
+    if typed is None:
+        return None
+    return typed, row.element_count if row is not None else 1, element.is_const_qualified() or target.is_const_qualified()
+
+
 def main():
     root = sys.argv[1]
     manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
     driver = Driver(root, manifest)
     driver.run()
     driver.write()
+    if '--wasm' in sys.argv:
+        for module in driver.units:
+            driver.build_wasm(module)
     generated = sum(len(s['generated']) for s in driver.status.values())
     fixes = sum(f['js'].count('/*FIX') for e in driver.modules.values() for f in e['functions'].values())
     print(f'{generated} functions generated, {fixes} FIX marks', file=sys.stderr)

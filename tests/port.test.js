@@ -6,7 +6,7 @@ import { readFile, readdir } from 'node:fs/promises';
 const status = JSON.parse(await readFile('tools/blender-port/status.json', 'utf8'));
 const generated = (await readdir('src', { recursive: true })).filter((f) => f.endsWith('.gen.js'));
 for (const file of generated) {
-  for (const path of [file, file.replace(/\.gen\.js$/, '.js')]) {
+  for (const path of [file, file.replace(/(\.unit)?\.gen\.js$/, '.js')]) {
     await import(new URL(`../src/${path}`, import.meta.url)).catch((error) => assert.fail(`${path}: ${error.message}`));
   }
 }

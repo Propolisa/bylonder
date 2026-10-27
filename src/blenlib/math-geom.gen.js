@@ -17,52 +17,60 @@ export function power_of_2_max_i(n) {
 }
 
 export function safe_divide(a, b) {
-  return b !== 0.0 ? a / b : 0.0;
+  return b !== 0.0 ? Math.fround(a / b) : 0.0;
 }
 
-export function cross_poly_v2(verts = 2, nr) {
+export function cross_poly_v2(verts, nr) {
   let a = 0;
-  let co_prev = verts[nr - 1];
+  let co_prev = verts[(nr - 1) >>> 0];
   let co_curr = verts[0];
   let cross = 0.0;
   for (a = 0; a < nr; a++) {
-    cross += (co_prev[0] - co_curr[0]) * (co_curr[1] + co_prev[1]);
+    cross = Math.fround(
+      cross + Math.fround(Math.fround(co_prev[0] - co_curr[0]) * Math.fround(co_curr[1] + co_prev[1])),
+    );
     co_prev = co_curr;
     co_curr += 2;
   }
   return cross;
 }
 
-export function area_poly_v2(verts = 2, nr) {
-  return Math.abs(0.5 * cross_poly_v2(verts, nr));
+export function area_poly_v2(verts, nr) {
+  return Math.fround(Math.abs(Math.fround(0.5 * cross_poly_v2(verts, nr))));
 }
 
-export function closest_to_plane_normalized_v3(plane = 4, pt = 3) {
+export function closest_to_plane_normalized_v3(plane, pt) {
   const side = plane_point_side_v3(plane, pt);
   const r_close = madd(pt, plane, -side);
   return r_close;
 }
 
-export function dist_squared_to_plane_v3(p = 3, plane = 4) {
+export function dist_squared_to_plane_v3(p, plane) {
   const len_sq = len_squared_v3(plane);
   const side = plane_point_side_v3(plane, p);
-  const fac = side / len_sq;
-  return len_sq * (fac * fac);
+  const fac = Math.fround(side / len_sq);
+  return Math.fround(len_sq * Math.fround(fac * fac));
 }
 
-export function dist_squared_to_line_segment_v3(p = 3, l1 = 3, l2 = 3) {
+export function dist_squared_to_line_segment_v3(p, l1, l2) {
   const closest = closest_to_line_segment_v3(p, l1, l2);
   return len_squared_v3(sub_v3(closest, p));
 }
 
-export function isect_point_poly_v2(pt = 2, verts = 2, nr) {
+export function isect_point_poly_v2(pt, verts, nr) {
   let i = 0;
   let j = 0;
   let isect = false;
-  for (i = 0, j = nr - 1; i < nr; j = i++) {
+  for (i = 0, j = (nr - 1) >>> 0; i < nr; j = i++) {
     if (
       verts[i][1] > pt[1] !== verts[j][1] > pt[1] &&
-      pt[0] < ((verts[j][0] - verts[i][0]) * (pt[1] - verts[i][1])) / (verts[j][1] - verts[i][1]) + verts[i][0]
+      pt[0] <
+        Math.fround(
+          Math.fround(
+            Math.fround(Math.fround(verts[j][0] - verts[i][0]) * Math.fround(pt[1] - verts[i][1])) /
+              Math.fround(verts[j][1] - verts[i][1]),
+          ) + verts[i][0],
+        )
     ) {
       isect = !isect;
     }
@@ -70,65 +78,70 @@ export function isect_point_poly_v2(pt = 2, verts = 2, nr) {
   return isect;
 }
 
-export function isect_line_line_v3(v1 = 3, v2 = 3, v3 = 3, v4 = 3) {
+export function isect_line_line_v3(v1, v2, v3, v4) {
   let _r0;
   let r_i1 = [0, 0, 0];
   let r_i2 = [0, 0, 0];
-  const epsilon = 0.000001;
+  const epsilon = 9.999999974752427e-7;
   return [(([_r0, r_i1, r_i2] = isect_line_line_epsilon_v3(v1, v2, v3, v4, epsilon)), _r0), r_i1, r_i2];
 }
 
-export function interp_bilinear_quad_v3(data = 3, u, v) {
+export function interp_bilinear_quad_v3(data, u, v) {
   let res = [...data[0]];
-  res = mul_v3_fl(res, (1 - u) * (1 - v));
+  res = mul_v3_fl(res, Math.fround(Math.fround(1 - u) * Math.fround(1 - v)));
   let vec = [...data[1]];
-  vec = mul_v3_fl(vec, u * (1 - v));
+  vec = mul_v3_fl(vec, Math.fround(u * Math.fround(1 - v)));
   res = add_v3(res, vec);
   vec = [...data[2]];
-  vec = mul_v3_fl(vec, u * v);
+  vec = mul_v3_fl(vec, Math.fround(u * v));
   res = add_v3(res, vec);
   vec = [...data[3]];
-  vec = mul_v3_fl(vec, (1 - u) * v);
+  vec = mul_v3_fl(vec, Math.fround(Math.fround(1 - u) * v));
   res = add_v3(res, vec);
   return res;
 }
 
-export function plane_point_side_v3(plane = 4, co = 3) {
-  return dot_v3(co, plane) + plane[3];
+export function plane_point_side_v3(plane, co) {
+  return Math.fround(dot_v3(co, plane) + plane[3]);
 }
 
-export function minmax_v3v3_v3(vec = 3) {
+export function minmax_v3v3_v3(vec) {
   const min = [0, 0, 0];
   const max = [0, 0, 0];
-  min[0] = Math.min(min[0], vec[0]);
-  min[1] = Math.min(min[1], vec[1]);
-  min[2] = Math.min(min[2], vec[2]);
-  max[0] = Math.max(max[0], vec[0]);
-  max[1] = Math.max(max[1], vec[1]);
-  max[2] = Math.max(max[2], vec[2]);
+  min[0] = Math.fround(Math.min(min[0], vec[0]));
+  min[1] = Math.fround(Math.min(min[1], vec[1]));
+  min[2] = Math.fround(Math.min(min[2], vec[2]));
+  max[0] = Math.fround(Math.max(max[0], vec[0]));
+  max[1] = Math.fround(Math.max(max[1], vec[1]));
+  max[2] = Math.fround(Math.max(max[2], vec[2]));
   return [min, max];
 }
 
-export function add_v2_v2(r = 2, a = 2) {
-  r[0] += a[0];
-  r[1] += a[1];
+export function add_v2_v2(r, a) {
+  r[0] = Math.fround(r[0] + a[0]);
+  r[1] = Math.fround(r[1] + a[1]);
+}
+
+export function sub_v2_v2v2(a, b) {
+  const r = [0, 0];
+  r[0] = Math.fround(a[0] - b[0]);
+  r[1] = Math.fround(a[1] - b[1]);
   return r;
 }
 
-export function mul_v2_fl(r = 2, f) {
-  r[0] *= f;
-  r[1] *= f;
-  return r;
+export function mul_v2_fl(r, f) {
+  r[0] = Math.fround(r[0] * f);
+  r[1] = Math.fround(r[1] * f);
 }
 
-export function equals_v3v3(v1 = 3, v2 = 3) {
+export function equals_v3v3(v1, v2) {
   return v1[0] === v2[0] && v1[1] === v2[1] && v1[2] === v2[2];
 }
 
-export function compare_v2v2(v1 = 2, v2 = 2, limit) {
+export function compare_v2v2(v1, v2, limit) {
   return Math.abs(v1[0] - v2[0]) <= limit && Math.abs(v1[1] - v2[1]) <= limit;
 }
 
-export function compare_v3v3(v1 = 3, v2 = 3, limit) {
+export function compare_v3v3(v1, v2, limit) {
   return Math.abs(v1[0] - v2[0]) <= limit && Math.abs(v1[1] - v2[1]) <= limit && Math.abs(v1[2] - v2[2]) <= limit;
 }

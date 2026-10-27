@@ -1,5 +1,6 @@
 {
   "blender": "v5.2.3",
+  "float32": true,
   "roots": [
     {
       "source": "source/blender/bmesh/tools/bmesh_bevel.cc",
@@ -8,6 +9,27 @@
       ]
     }
   ],
+  "units": {
+    "blenlib/polyfill-2d.js": {
+      "source": "source/blender/blenlib/intern/polyfill_2d.cc",
+      "api": [
+        "BLI_polyfill_calc"
+      ],
+      "buffers": {
+        "BLI_polyfill_calc": {
+          "coords": "coords_num",
+          "r_tris": "coords_num - 2"
+        }
+      },
+      "wasm": [
+        "source/blender/blenlib/intern/polyfill_2d.cc",
+        "source/blender/blenlib/intern/BLI_memarena.cc",
+        "source/blender/blenlib/intern/math_geom.cc",
+        "intern/guardedalloc/intern/mallocn.cc",
+        "intern/guardedalloc/intern/mallocn_lockfree_impl.cc"
+      ]
+    }
+  },
   "exclude_modules": {
     "blenkernel/": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
     "blenlib/memarena": "JS allocates with the garbage collector",

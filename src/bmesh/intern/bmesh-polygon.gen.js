@@ -17,7 +17,7 @@ export function BM_face_calc_center_bounds(bm, f) {
   return r_cent;
 }
 
-export function BM_face_point_inside_test(bm, f, co = 3) {
+export function BM_face_point_inside_test(bm, f, co) {
   const projverts = new Array(bm.f.len[f]);
   let l_iter = -1;
   let i = 0;
@@ -26,5 +26,5 @@ export function BM_face_point_inside_test(bm, f, co = 3) {
   for (i = 0, l_iter = bm.f.l_first[f]; i < bm.f.len[f]; i++, l_iter = bm.l.next[l_iter]) {
     projverts[i] = mul_v2_m3v3(axis_mat, vco(bm, bm.l.v[l_iter]));
   }
-  return isect_point_poly_v2(co_2d, projverts, bm.f.len[f]);
+  return isect_point_poly_v2(co_2d, projverts, bm.f.len[f] >>> 0);
 }

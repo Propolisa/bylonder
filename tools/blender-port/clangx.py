@@ -29,6 +29,8 @@ def _load():
         'clang_EvalResult_getKind': ([ctypes.c_void_p], ctypes.c_int),
         'clang_EvalResult_getAsDouble': ([ctypes.c_void_p], ctypes.c_double),
         'clang_EvalResult_getAsLongLong': ([ctypes.c_void_p], ctypes.c_longlong),
+        'clang_EvalResult_isUnsignedInt': ([ctypes.c_void_p], ctypes.c_uint),
+        'clang_EvalResult_getAsUnsigned': ([ctypes.c_void_p], ctypes.c_ulonglong),
         'clang_EvalResult_dispose': ([ctypes.c_void_p], None),
     }
     for name, (args, result) in signatures.items():
@@ -80,6 +82,8 @@ def evaluate(c):
     try:
         kind = _lib.clang_EvalResult_getKind(result)
         if kind == _EVAL_INT:
+            if _lib.clang_EvalResult_isUnsignedInt(result):
+                return _lib.clang_EvalResult_getAsUnsigned(result)
             return _lib.clang_EvalResult_getAsLongLong(result)
         if kind == _EVAL_FLOAT:
             return _lib.clang_EvalResult_getAsDouble(result)
