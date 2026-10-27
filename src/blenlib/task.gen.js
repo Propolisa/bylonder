@@ -2,7 +2,15 @@
 // exporting the same name from task.js.
 
 export function BLI_parallel_range_settings_defaults(settings) {
-  settings.fill(0);
+  Object.assign(settings, {
+    use_threading: false,
+    userdata_chunk: null,
+    userdata_chunk_size: 0,
+    func_init: null,
+    func_reduce: null,
+    func_free: null,
+    min_iter_per_thread: 0,
+  });
   settings.use_threading = true;
   settings.min_iter_per_thread = 0;
 }

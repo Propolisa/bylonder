@@ -4671,7 +4671,7 @@ lastupdated_upper = true;
 return xnew;
 }
 
-function find_even_superellipse_chords_general(seg, r, xvals, yvals) {
+function find_even_superellipse_chords_general(bm, seg, r, xvals, yvals) {
 let smoothitermax = 10;
 let error_tol = 1e-7;
 let imax = (Math.trunc(((seg + 1)) / 2) - 1);
@@ -4719,7 +4719,7 @@ if (precision_reached) {
 break;
 }
 for (let i = 1; (i <= imax); i++) {
-xvals[i] = find_superellipse_chord_endpoint(xvals[(i - 1)], davg, r, rbig);
+xvals[i] = find_superellipse_chord_endpoint(bm, xvals[(i - 1)], davg, r, rbig);
 yvals[i] = superellipse_co(xvals[i], r, rbig);
 }
 }
@@ -5056,7 +5056,7 @@ let e = -1;
 let f = -1;
 let l = -1;
 let bv = null;
-let bp = { vert_hash: new Map(), face_hash: {  }, uv_face_hash: new Map(), uv_vert_maps: [], mem_arena: null, pro_spacing: { xvals: null, yvals: null, xvals_2: null, yvals_2: null, seg_2: 0, fullness: 0 }, pro_spacing_miter: { xvals: null, yvals: null, xvals_2: null, yvals_2: null, seg_2: 0, fullness: 0 }, math_layer_info: { face_component: null, has_math_layers: false }, bm: null, offset: 0, offset_type: 0, profile_type: 0, affect_type: 0, affect_vertices_odd: false, seg: 0, profile: 0, pro_super_r: 0, use_weights: false, bweight_offset_vert: 0, bweight_offset_edge: 0, loop_slide: false, limit_offset: false, offset_adjust: false, mark_seam: false, mark_sharp: false, harden_normals: false, _pad: [0], custom_profile: null, dvert: null, vertex_group: 0, mat_nr: 0, face_strength_mode: 0, miter_outer: 0, miter_inner: 0, vmesh_method: 0, spread: 0 };
+let bp = { vert_hash: new Map(), face_hash: null, uv_face_hash: new Map(), uv_vert_maps: [], mem_arena: null, pro_spacing: { xvals: null, yvals: null, xvals_2: null, yvals_2: null, seg_2: 0, fullness: 0 }, pro_spacing_miter: { xvals: null, yvals: null, xvals_2: null, yvals_2: null, seg_2: 0, fullness: 0 }, math_layer_info: { face_component: null, has_math_layers: false }, bm: null, offset: 0, offset_type: 0, profile_type: 0, affect_type: 0, affect_vertices_odd: false, seg: 0, profile: 0, pro_super_r: 0, use_weights: false, bweight_offset_vert: 0, bweight_offset_edge: 0, loop_slide: false, limit_offset: false, offset_adjust: false, mark_seam: false, mark_sharp: false, harden_normals: false, _pad: [0], custom_profile: null, dvert: null, vertex_group: 0, mat_nr: 0, face_strength_mode: 0, miter_outer: 0, miter_inner: 0, vmesh_method: 0, spread: 0 };
 bp.bm = bm;
 bp.offset = offset;
 bp.offset_type = offset_type;
@@ -5107,7 +5107,7 @@ bp.pro_spacing.fullness = find_profile_fullness(bp);
 if (((bp.profile_type === BEVEL_PROFILE_CUSTOM) && (((bp.miter_inner !== BEVEL_MITER_SHARP) || (bp.miter_outer !== BEVEL_MITER_SHARP))))) {
 set_profile_spacing(bp, bp.pro_spacing_miter, false);
 }
-bp.face_hash.emplace();
+(bp.face_hash = new Map());
 math_layer_info_init(bp, bm);
 uv_vert_map_init(bp, bm);
 for (v of BM_VERTS_OF_MESH(bm)) {
