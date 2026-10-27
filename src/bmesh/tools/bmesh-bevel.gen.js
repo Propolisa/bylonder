@@ -5213,7 +5213,7 @@ function find_superellipse_chord_endpoint(x0, dtarget, r, rbig) {
   return xnew;
 }
 
-function find_even_superellipse_chords_general(seg, r, xvals, yvals) {
+function find_even_superellipse_chords_general(bm, seg, r, xvals, yvals) {
   const smoothitermax = 10;
   const error_tol = 1e-7;
   const imax = Math.trunc((seg + 1) / 2) - 1;
@@ -5261,7 +5261,7 @@ function find_even_superellipse_chords_general(seg, r, xvals, yvals) {
       break;
     }
     for (let i = 1; i <= imax; i++) {
-      xvals[i] = find_superellipse_chord_endpoint(xvals[i - 1], davg, r, rbig);
+      xvals[i] = find_superellipse_chord_endpoint(bm, xvals[i - 1], davg, r, rbig);
       yvals[i] = superellipse_co(xvals[i], r, rbig);
     }
   }

@@ -15,7 +15,8 @@ function solver_new(num_rows, num_columns, num_rhs, least_squares) {
 
 export const EIG_linear_solver_new = (num_rows, num_columns, num_rhs) => solver_new(num_rows, num_columns, num_rhs, false);
 export const EIG_linear_least_squares_solver_new = (num_rows, num_columns, num_rhs) => solver_new(num_rows, num_columns, num_rhs, true);
-export function EIG_linear_solver_delete() {}
+// The garbage collector frees the solver.
+export function EIG_linear_solver_delete(_solver) {}
 
 export function EIG_linear_solver_matrix_add(solver, row, col, value) {
   solver.m[row][col] += value;
@@ -79,4 +80,4 @@ export function EIG_linear_solver_solve(solver) {
   return true;
 }
 
-export function EIG_linear_solver_print_matrix() {}
+export function EIG_linear_solver_print_matrix(_solver) {}
