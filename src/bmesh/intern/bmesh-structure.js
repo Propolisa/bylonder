@@ -95,3 +95,5 @@ export function bmesh_radial_length(bm, lp) {
   do i++; while ((it = bm.l.radial_next[it]) !== lp);
   return i;
 }
+
+export * from './bmesh-structure.gen.js';

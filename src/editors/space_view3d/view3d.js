@@ -165,12 +165,16 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
       { label: 'Hide Unselected', blender: 'mesh.hide', keys: 'Shift H', run: () => world.editMode.exec('mesh.hide', { unselected: true }) },
     ] },
     '-',
+    { label: 'Normals', blender: 'VIEW3D_MT_edit_mesh_normals', keys: 'Alt N', items: world.editMode.normalsMenu },
+    '-',
     { label: 'Delete', blender: 'VIEW3D_MT_edit_mesh_delete', items: world.editMode.deleteMenu },
   ], { blender: 'VIEW3D_MT_edit_mesh' });
   const vertexMenu = menuButton('Vertex', () => [
     { label: 'New Edge/Face from Vertices', blender: 'mesh.edge_face_add', keys: 'F', run: () => world.editMode.exec('mesh.edge_face_add') },
     '-',
     { label: 'Bevel Vertices', blender: 'mesh.bevel', keys: 'Shift Ctrl B', run: () => world.editMode.bevel('VERTICES') },
+    '-',
+    { label: 'Smooth Vertices', blender: 'mesh.vertices_smooth', run: () => world.editMode.exec('mesh.vertices_smooth', { factor: 0.5 }) },
   ], { blender: 'VIEW3D_MT_edit_mesh_vertices' });
   const edgeMenu = menuButton('Edge', () => [
     { label: 'Bevel Edges', blender: 'mesh.bevel', keys: 'Ctrl B', run: () => world.editMode.bevel('EDGES') },
@@ -181,7 +185,11 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   ], { blender: 'VIEW3D_MT_edit_mesh_edges' });
   const faceMenu = menuButton('Face', () => [
     { label: 'Extrude Faces', blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: () => world.editMode.extrudeMove() },
+    '-',
     { label: 'Inset Faces', blender: 'mesh.inset', keys: 'I', run: () => world.editMode.inset() },
+    { label: 'Poke Faces', blender: 'mesh.poke', run: () => world.editMode.exec('mesh.poke') },
+    { label: 'Triangulate Faces', blender: 'mesh.quads_convert_to_tris', keys: 'Ctrl T', run: () => world.editMode.exec('mesh.quads_convert_to_tris', { quad_method: 'BEAUTY', ngon_method: 'BEAUTY' }) },
+    { label: 'Tris to Quads', blender: 'mesh.tris_convert_to_quads', keys: 'Alt J', run: () => world.editMode.exec('mesh.tris_convert_to_quads') },
   ], { blender: 'VIEW3D_MT_edit_mesh_faces' });
   const shadingButtons = [['wire', 'shading_wire', 'Wireframe'], ['solid', 'shading_solid', 'Solid'], ['rendered', 'shading_rendered', 'Rendered']].map(([id, icon, title]) => {
     const b = iconButton(icon, 'Viewport Shading: ' + title, () => view.setShading(id));

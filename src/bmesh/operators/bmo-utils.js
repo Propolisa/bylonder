@@ -68,3 +68,5 @@ export function bmo_region_extend_exec(bm, { geom, use_contract = false, use_fac
   const out = (pool) => { const list = []; BM_ITER_MESH(pool, (i) => { if (BMO_flag_test(pool, i, SEL_FLAG)) list.push(i); }); return list; };
   return { verts: out(bm.v), edges: out(bm.e), faces: out(bm.f) };
 }
+
+export * from './bmo-utils.gen.js';

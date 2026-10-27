@@ -4,3 +4,5 @@ export function INIT_MINMAX(min, max) {
   min.fill(1e30, 0, 3);
   max.fill(-1e30, 0, 3);
 }
+
+export * from './utildefines.gen.js';

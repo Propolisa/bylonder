@@ -6,3 +6,9 @@ export function CustomData_data_equals() {
     "CustomData_data_equals is not ported: Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
   );
 }
+
+export function CustomData_sizeof() {
+  throw new Error(
+    "CustomData_sizeof is not ported: Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
+  );
+}

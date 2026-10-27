@@ -93,6 +93,16 @@ def source_rel(path, root):
     return os.path.relpath(path, root).replace(f'/{TMP_PREFIX}', '/')
 
 
+# Names C allows that JS reserves; a local of such a name gets a trailing underscore.
+JS_RESERVED = {'function', 'var', 'let', 'in', 'arguments', 'eval', 'yield', 'await', 'with', 'export', 'import', 'debugger',
+               'finally', 'typeof', 'instanceof', 'interface', 'package', 'implements', 'super', 'null', 'undefined', 'NaN',
+               'Infinity'}
+
+
+def js_local(name):
+    return name + '_' if name in JS_RESERVED else name
+
+
 def is_zero(c):
     """Whether an initializer is all zeros: Clang's implicit value-initialization, a braced list of zeros, or a zero
     constant. Evaluation stays off the lists, where libclang's evaluator crashes."""
@@ -429,7 +439,7 @@ class Source:
     # --- out parameters
 
     def signature(self, f):
-        params = [{'name': p.spelling or f'_unused{i}', 'type': p.type, 'cursor': p} for i, p in enumerate(f.get_arguments())]
+        params = [{'name': js_local(p.spelling) or f'_unused{i}', 'type': p.type, 'cursor': p} for i, p in enumerate(f.get_arguments())]
         body = next((k for k in f.get_children() if k.kind == K.COMPOUND_STMT), None)
         for p in params:
             p['out'] = self.out_kind(p, body) if body is not None else None
@@ -904,7 +914,7 @@ class FunctionPort:
                 value = f'(({tmp} = {source}), {{ ' + ', '.join(f'{f}: {tmp}.{f}' for f in record_fields(t)) + ' })'
             else:
                 value = self.expr(init, t)
-        return f'let {v.spelling}{" = " + value if value is not None else ""};'
+        return f'let {js_local(v.spelling)}{" = " + value if value is not None else ""};'
 
     # --- expressions
 
@@ -966,6 +976,8 @@ class FunctionPort:
                 self.note_ref(ref, ref.semantic_parent.spelling)
                 return f'{ref.semantic_parent.spelling}.{c.spelling}'
             self.note_ref(ref, c.spelling)
+            if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL):
+                return js_local(c.spelling)
             return CONSTANTS.get(c.spelling, c.spelling)
         if k == K.MEMBER_REF_EXPR:
             return self.member(c)

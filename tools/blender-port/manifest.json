@@ -45,7 +45,8 @@
   "exclude_modules": {
     "blenkernel/": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
     "blenlib/memarena": "JS allocates with the garbage collector",
-    "blenlib/time": "Debug timing"
+    "blenlib/time": "Debug timing",
+    "blenlib/assert": "Debug checks"
   },
   "exclude": {
     "BM_lnorspace_update": "Harden Normals: custom split normals are not ported"

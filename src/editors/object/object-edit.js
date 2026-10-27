@@ -241,6 +241,12 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     edbm_select_loop(em.bm, eed, props);
     sync();
   };
+  // VIEW3D_MT_edit_mesh_normals (the part that is ported).
+  const normalsMenu = () => [
+    { label: 'Flip', blender: 'mesh.flip_normals', run: () => exec('mesh.flip_normals') },
+    { label: 'Recalculate Outside', blender: 'mesh.normals_make_consistent', keys: 'Shift N', run: () => exec('mesh.normals_make_consistent', { inside: false }) },
+    { label: 'Recalculate Inside', blender: 'mesh.normals_make_consistent', keys: 'Shift Ctrl N', run: () => exec('mesh.normals_make_consistent', { inside: true }) },
+  ];
   // VIEW3D_MT_edit_mesh_merge: At First and At Last only when the selection history starts or ends with a vert.
   const mergeMenu = () => {
     const history = em.bm.selected, vert = (ese) => ese?.htype === BM_VERT && em.bm.selectmode & SCE_SELECT_VERTEX;
@@ -289,6 +295,12 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: loopcut },
     { blender: 'mesh.inset', keys: 'I', run: inset },
     { blender: 'mesh.bevel', keys: 'Ctrl B', run: () => bevel('EDGES') },
+    { blender: 'mesh.quads_convert_to_tris', keys: 'Ctrl T', run: () => exec('mesh.quads_convert_to_tris', { quad_method: 'BEAUTY', ngon_method: 'BEAUTY' }) },
+    { blender: 'mesh.quads_convert_to_tris', keys: 'Shift Ctrl T', run: () => exec('mesh.quads_convert_to_tris', { quad_method: 'FIXED', ngon_method: 'CLIP' }) },
+    { blender: 'mesh.tris_convert_to_quads', keys: 'Alt J', run: () => exec('mesh.tris_convert_to_quads') },
+    { blender: 'mesh.normals_make_consistent', keys: 'Shift N', run: () => exec('mesh.normals_make_consistent', { inside: false }) },
+    { blender: 'mesh.normals_make_consistent', keys: 'Shift Ctrl N', run: () => exec('mesh.normals_make_consistent', { inside: true }) },
+    { blender: 'VIEW3D_MT_edit_mesh_normals', keys: 'Alt N', run: () => openMenu(normalsMenu(), editor.pointer, 'Normals') },
     { blender: 'mesh.bevel', keys: 'Shift Ctrl B', run: () => bevel('VERTICES') },
     { blender: 'mesh.loop_select', keys: 'Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, {}) },
     { blender: 'mesh.loop_select', keys: 'Shift Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, { toggle: true }) },
@@ -329,6 +341,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     exec(idname, props) { if (em) exec(idname, props); },
     deleteMenu,
     mergeMenu: () => (em ? mergeMenu() : []),
+    normalsMenu: () => (em ? normalsMenu() : []),
     extrudeMove() { if (em) extrudeMove(); },
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
     loopcut() { if (em) loopcut(); },
