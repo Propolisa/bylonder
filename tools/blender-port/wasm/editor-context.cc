@@ -22,6 +22,7 @@
 #include "DNA_scene_types.h"
 
 #include "BKE_report.hh"
+#include "BKE_screen.hh"
 #include "DNA_key_types.h"
 #include "ED_mesh.hh"
 #include "ED_object.hh"
@@ -58,6 +59,8 @@ struct EditContext {
   Base base = {};
   Object object = {};
   Mesh mesh = {};
+  /* The region an operator draws in; without a type, as in Blender's background mode, it draws nothing. */
+  ARegion region = {};
   Extraction extraction;
 };
 
@@ -82,7 +85,10 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
   ctx->tool_settings.selectmode = bm->selectmode;
   ctx->scene.toolsettings = &ctx->tool_settings;
 
+  ctx->region.runtime = MEM_new<bke::ARegionRuntime>(__func__);
+
   ctx->C = CTX_create();
+  CTX_wm_region_set(ctx->C, &ctx->region);
   CTX_data_scene_set(ctx->C, &ctx->scene);
   PointerRNA object_ptr = {&ctx->object.id, nullptr, &ctx->object};
   CTX_store_add(ctx->stores, "edit_object", &object_ptr);
@@ -95,6 +101,7 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
 EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
 {
   CTX_free(ctx->C);
+  MEM_delete(ctx->region.runtime);
   BM_mesh_free(ctx->mesh.runtime->edit_mesh->bm);
   ctx->mesh.runtime->edit_mesh.reset();
   MEM_delete(ctx->mesh.runtime);
@@ -413,6 +420,7 @@ void WM_operator_type_modal_from_exec_for_object_edit_coords(wmOperatorType * /*
 
 /* No window, depsgraph or view to update. */
 void ED_workspace_status_text(bContext * /*C*/, const char * /*str*/) {}
+void ED_region_tag_redraw(ARegion * /*region*/) {}
 void DEG_id_tag_update(ID * /*id*/, unsigned int /*flags*/) {}
 void DEG_id_tag_update_ex(Main * /*bmain*/, ID * /*id*/, unsigned int /*flags*/) {}
 void WM_main_add_notifier(uint /*type*/, void * /*reference*/) {}
