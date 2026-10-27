@@ -1,17 +1,17 @@
 // Entering and leaving Edit Mode (object_edit.cc) and what Edit Mode does with the mouse and keys. While editing,
-// the object's BMesh is the truth: every change converts it back to Mesh data (for drawing, undo and scene edits).
+// Blender's edit mesh (an EditMesh, in WebAssembly) is the truth: every change extracts its Mesh arrays, for drawing
+// and picking, and an undo step stores them as Mesh data.
 import { Matrix, Ray, Vector3, VertexData } from '@babylonjs/core';
-import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
-import { BM_face_normal_update } from '../../bmesh/intern/bmesh-polygon.js';
-import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
-import { POOL, SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
-import { EDBM_select_pick, EDBM_edge_find_nearest, edbm_select_loop, mesh_select_all, mesh_select_mode, edbm_select_linked_pick } from '../mesh/editmesh-select.js';
+import { BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
+import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
+import { EditMesh } from '../../bmesh/bmesh-wasm.js';
+import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDBM_elem_to_index_any } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
 import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, view3d_pixel_size } from '../transform/transform.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
-import { meshOperators, operatorPreview } from '../mesh/editmesh-tools.js';
+import { meshOperator, operatorPreview, editBMesh } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
 import { inset_modal } from '../mesh/editmesh-inset.js';
 import { bevel_modal } from '../mesh/editmesh-bevel.js';
@@ -49,16 +49,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.text && !node.metadata?.group;
   const reason = (node) => (node.metadata?.wbModifiers?.length ? 'Edit Mode on objects with modifiers comes with modifiers on Mesh data.' : null);
 
-  // Converts the BMesh back to Mesh data, redraws and, for an operator, records an undo step (or, with `amend`,
+  // Extracts the edit mesh's Mesh arrays, redraws and, for an operator, records an undo step (or, with `amend`,
   // replaces the last one).
   function sync({ commit = true, amend = false } = {}) {
-    const { bm, object } = em;
-    const mesh = BM_mesh_bm_to_me(bm);
-    em.elems = { v: [], e: [], f: [] };
-    for (const name of ['v', 'e', 'f']) BM_ITER_MESH(bm[name], (i) => { em.elems[name][bm[name].index[i]] = i; });
+    const { edit, object } = em;
+    const mesh = edit.toMesh();
     em.mesh = mesh;
-    const active = BM_select_history_active_get(bm);
-    draw(mesh, active && { htype: active.htype, index: bm[POOL[active.htype]].index[active.ele] });
+    draw(mesh, edit.history.at(-1));
     if (commit || amend) object.metadata = { ...object.metadata, wbCreation: { mesh: mesh_serialize(mesh) } };
     if (amend) history.amend();
     else if (commit) {
@@ -72,17 +69,21 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // Draws a Mesh of the edit mesh, its active element given as { htype, index }.
   function draw(mesh, active) {
     mesh_batch_cache_apply(mesh, em.object);
-    em.overlay.update(mesh, { selectmode: em.bm.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: active.index } });
+    em.overlay.update(mesh, { selectmode: em.edit.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: active.index } });
   }
 
+  // EDBM_mesh_make: the edit mesh of a Mesh, its selection flushed by the select mode.
   function load(mesh) {
-    const bm = BM_mesh_bm_from_me(mesh);
-    bm.selectmode = selectmode;
-    BM_mesh_select_mode_flush(bm);
-    return bm;
+    const edit = EditMesh.fromMesh(mesh, selectmode);
+    edit.selectFlush();
+    return edit;
   }
 
   const activeObject = () => editor.selection.nodes.at(-1);
+  function freeEditMesh() {
+    em.before?.free();
+    em.edit.free();
+  }
 
   function enter(object = activeObject()) {
     if (em || !editable(object)) return false;
@@ -90,7 +91,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     if (why) { notify(why); return false; }
     editor.finish(false);
     editor.setMode('select');
-    em = { object, bm: load(objectMesh(object)), overlay: createEditMeshOverlay(object) };
+    em = { object, edit: load(objectMesh(object)), overlay: createEditMeshOverlay(object) };
     object.metadata = { ...object.metadata, editing: true };
     sync();
     editor.reconcile();
@@ -102,6 +103,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     endTool();
     redo.hide();
     em.overlay.dispose();
+    freeEditMesh();
     em.object.metadata = { ...em.object.metadata, editing: false };
     em = null;
     editor.reconcile();
@@ -132,52 +134,53 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       faceAt(x, y) {
         const p = views.pickPoint(view, x, y);
         const hit = scene.pick(p.x, p.y, (m) => m === object, false, camera);
-        return hit?.hit ? em.elems.f[em.mesh.corner_tri_faces()[hit.faceId]] ?? -1 : -1;
+        return hit?.hit ? em.mesh.corner_tri_faces()[hit.faceId] : -1;
       },
     };
   }
 
-  const run = (fn) => () => { fn(em.bm); sync(); };
+  // Runs an operator without an undo step of its own (selection changes record theirs through sync).
+  const run = (idname, props) => () => { place(); meshOperator(em.edit, idname, props); selectmode = em.edit.selectmode; sync(); };
   // The Normal orientation, Z along the summed normals of the selected faces, for a move constrained to it.
   function normalOrientation() {
-    const { bm, object } = em, sum = [0, 0, 0];
-    BM_ITER_MESH(bm.f, (f) => {
-      if (!BM_elem_flag_test(bm.f, f, BM_ELEM_SELECT)) return;
-      BM_face_normal_update(bm, f);
-      for (let a = 0; a < 3; a++) sum[a] += bm.f.no[f * 3 + a];
-    });
+    const { mesh, object } = em, normals = mesh.face_normals(), selected = mesh.attribute('.select_poly'), sum = [0, 0, 0];
+    for (let f = 0; f < mesh.faces_num; f++) if (selected[f]) for (let a = 0; a < 3; a++) sum[a] += normals[f * 3 + a];
     const normal = Vector3.TransformNormal(new Vector3(sum[0], sum[2], sum[1]), object.computeWorldMatrix(true));
     return { type: 'NORMAL', matrix: createSpaceNormal(toBlender(normal)), axis: 'Z' };
   }
-  // What an operator reads of the scene beyond the edit mesh.
-  const operatorContext = () => ({ object_to_world: toBlenderMatrix(em.object.computeWorldMatrix(true)) });
+  // Places the object for what operators do in world space.
+  const place = () => { em.edit.objectToWorld = toBlenderMatrix(em.object.computeWorldMatrix(true)); };
   // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
   function extrudeMove() {
-    const faces = em.bm.totfacesel > 0;
-    const report = meshOperators['mesh.extrude_region'](em.bm, {}, operatorContext());
+    const faces = em.edit.totals.totfacesel > 0;
+    place();
+    const report = meshOperator(em.edit, 'mesh.extrude_region');
     if (report) { notify(report); return; }
     sync({ commit: false });
     editor.start('move', { orient: faces ? 'NORMAL' : undefined, keep: true });
     if (!editor.modal) sync();
   }
   // Runs an operator as one undo step; one with visible properties opens Adjust Last Operation, which re-runs it
-  // from the Mesh as it was before.
+  // from a copy of the edit mesh as it was before.
   function exec(idname, props = {}) {
-    const before = BM_mesh_bm_to_me(em.bm);
-    // An operator may return its report.
-    const run = (values) => { const report = meshOperators[idname](em.bm, values, operatorContext()); if (typeof report === 'string') notify(report); };
+    place();
+    const before = em.edit.copy();
+    const run = (values) => { const report = meshOperator(em.edit, idname, values); if (report) notify(report); };
     run(props);
-    selectmode = em.bm.selectmode;
+    selectmode = em.edit.selectmode;
     sync();
+    em.before?.free();
+    em.before = null;
     const schema = operatorSchema(idname);
-    if (!Object.keys(schema).length) return;
+    if (!Object.keys(schema).length) { before.free(); return; }
+    em.before = before;
     const values = { ...Object.fromEntries(Object.entries(schema).map(([key, def]) => [key, def.default])), ...props };
     redo.show({
       title: rna[idname].name,
       schema,
       values,
       apply(next) {
-        em.bm = load(before);
+        em.edit.replace(before);
         run(next);
         sync({ amend: true });
       },
@@ -196,14 +199,15 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     handler.mousemove?.({ x: editor.pointer.x, y: editor.pointer.y, view: views.input, shift: false, ctrl: false, alt: false });
   }
   const loopcut = () => startTool((end) => loopcut_modal({
-    bm: () => em.bm,
+    mesh: em.mesh,
+    bm: editBMesh(em.edit, em.mesh),
     owner: em.object,
     adapter: viewAdapter,
     notify,
     end,
     // mesh.loopcut_slide: the cut, then Edge Slide.
-    confirm: (eed, number_cuts) => {
-      exec('mesh.loopcut', { edge_index: em.bm.e.index[eed], number_cuts });
+    confirm: (edge_index, number_cuts) => {
+      exec('mesh.loopcut', { edge_index, number_cuts });
       editor.start('edge_slide');
     },
   }));
@@ -211,15 +215,16 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // mesh as it is, then one undo step with its redo panel.
   function meshModal(operator, modal, extra = {}) {
     const view = views.input, world_m = em.object.computeWorldMatrix(true);
-    const median = [0, 0, 0];
+    const { vert_positions, verts_num } = em.mesh, selected = em.mesh.attribute('.select_vert'), median = [0, 0, 0];
     let count = 0;
-    BM_ITER_MESH(em.bm.v, (v) => { if (BM_elem_flag_test(em.bm.v, v, BM_ELEM_SELECT)) { for (let a = 0; a < 3; a++) median[a] += em.bm.v.co[v * 3 + a]; count++; } });
+    for (let v = 0; v < verts_num; v++) if (selected[v]) { for (let a = 0; a < 3; a++) median[a] += vert_positions[v * 3 + a]; count++; }
     if (!count) return;
     const center = Vector3.TransformCoordinates(new Vector3(median[0] / count, median[2] / count, median[1] / count), world_m);
     const screen = viewAdapter(view).project([median[0] / count, median[1] / count, median[2] / count]) ?? [0, 0];
     const scale = new Vector3();
     world_m.decompose(scale);
-    const run = operatorPreview(em.bm, operator, operatorContext());
+    place();
+    const run = operatorPreview(em.edit, operator);
     startTool((end) => modal({
       ...extra,
       center: { x: screen[0], y: screen[1] },
@@ -232,22 +237,20 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       end,
     }));
   }
-  const inset = () => em.bm.totfacesel && meshModal('mesh.inset', inset_modal);
+  const inset = () => em.edit.totals.totfacesel && meshModal('mesh.inset', inset_modal);
   const bevel = (affect) => meshModal('mesh.bevel', bevel_modal, { props: { affect } });
   // view3d.select_box: a box gesture, begun at the drag's press or (from B) at the next press.
   const MODES = { SET: SEL_OP_SET, ADD: SEL_OP_ADD, SUB: SEL_OP_SUB };
   const selectBox = (event, mode, begun = true) => startGestureBox(wm(), {
     begin: begun ? { x: event.x, y: event.y } : null,
     mode,
-    select: (rect, m) => { if (em && do_mesh_box_select(em.bm, viewAdapter(event.view ?? views.input), rect, MODES[m])) sync(); },
+    select: (rect, m) => { if (em && do_mesh_box_select(em.edit, em.mesh, viewAdapter(event.view ?? views.input), rect, MODES[m])) sync(); },
   });
-  const selectPick = (event, toggle) => { if (EDBM_select_pick(em.bm, viewAdapter(event.view), [event.x, event.y], { toggle })) sync(); };
+  const selectPick = (event, toggle) => { if (EDBM_select_pick(em.edit, em.mesh, viewAdapter(event.view), [event.x, event.y], { toggle })) sync(); };
   // mesh.loop_select and mesh.edgering_select pick the nearest edge, whatever the select mode.
-  const loopPick = (event, props) => {
-    const eed = EDBM_edge_find_nearest(em.bm, viewAdapter(event.view), [event.x, event.y]);
-    if (eed < 0) return;
-    edbm_select_loop(em.bm, eed, props);
-    sync();
+  const loopPick = (event, idname, props) => {
+    const edge_index = EDBM_edge_find_nearest(em.mesh, viewAdapter(event.view), [event.x, event.y]);
+    if (edge_index >= 0) run(idname, { object_index: 0, edge_index, ...props })();
   };
   // VIEW3D_MT_edit_mesh_normals (the part that is ported).
   const normalsMenu = () => [
@@ -257,7 +260,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   ];
   // VIEW3D_MT_edit_mesh_merge: At First and At Last only when the selection history starts or ends with a vert.
   const mergeMenu = () => {
-    const history = em.bm.selected, vert = (ese) => ese?.htype === BM_VERT && em.bm.selectmode & SCE_SELECT_VERTEX;
+    const history = em.edit.history, vert = (ese) => ese?.htype === BM_VERT && em.edit.selectmode & SCE_SELECT_VERTEX;
     return [
       ...MERGE_ITEMS.filter(([type]) => (type !== 'FIRST' || vert(history[0])) && (type !== 'LAST' || vert(history.at(-1))))
         .map(([type, label]) => ({ label, blender: 'mesh.merge:' + type, run: () => exec('mesh.merge', { type }) })),
@@ -265,7 +268,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       { label: 'By Distance', blender: 'mesh.remove_doubles', run: () => exec('mesh.remove_doubles') },
     ];
   };
-  const linkedPick = (event, deselect) => { if (edbm_select_linked_pick(em.bm, viewAdapter(event.view), [event.x, event.y], { deselect })) sync(); };
+  const linkedPick = (event, deselect) => {
+    const hit = EDBM_unified_findnearest(em.mesh, viewAdapter(event.view), [event.x, event.y], em.edit.selectmode);
+    if (hit) run('mesh.select_linked_pick', { object_index: 0, index: EDBM_elem_to_index_any(em.mesh, hit), deselect })();
+  };
   const inView = (event) => !!event.view;
   const deleteMenu = () => [
     ...DELETE_ITEMS.map(([type, label]) => ({ label, blender: 'mesh.delete:' + type, run: () => exec('mesh.delete', { type }) })),
@@ -277,15 +283,15 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { label: 'Edge Collapse', blender: 'mesh.edge_collapse', run: () => exec('mesh.edge_collapse') },
   ];
   const keymap = createKeymap([
-    { blender: 'mesh.select_mode', keys: '1', run: run((bm) => (selectmode = mesh_select_mode(bm, 'VERT'))) },
-    { blender: 'mesh.select_mode', keys: '2', run: run((bm) => (selectmode = mesh_select_mode(bm, 'EDGE'))) },
-    { blender: 'mesh.select_mode', keys: '3', run: run((bm) => (selectmode = mesh_select_mode(bm, 'FACE'))) },
-    { blender: 'mesh.select_mode', keys: 'Shift 1', run: run((bm) => (selectmode = mesh_select_mode(bm, 'VERT', { use_extend: true }))) },
-    { blender: 'mesh.select_mode', keys: 'Shift 2', run: run((bm) => (selectmode = mesh_select_mode(bm, 'EDGE', { use_extend: true }))) },
-    { blender: 'mesh.select_mode', keys: 'Shift 3', run: run((bm) => (selectmode = mesh_select_mode(bm, 'FACE', { use_extend: true }))) },
-    { blender: ['mesh.select_all', 'mesh.select_all:SELECT'], keys: 'A', run: run((bm) => mesh_select_all(bm, 'SELECT')) },
-    { blender: ['mesh.select_all', 'mesh.select_all:DESELECT'], keys: 'Alt A', run: run((bm) => mesh_select_all(bm, 'DESELECT')) },
-    { blender: ['mesh.select_all', 'mesh.select_all:INVERT'], keys: 'Ctrl I', run: run((bm) => mesh_select_all(bm, 'INVERT')) },
+    { blender: 'mesh.select_mode', keys: '1', run: run('mesh.select_mode', { type: 'VERT' }) },
+    { blender: 'mesh.select_mode', keys: '2', run: run('mesh.select_mode', { type: 'EDGE' }) },
+    { blender: 'mesh.select_mode', keys: '3', run: run('mesh.select_mode', { type: 'FACE' }) },
+    { blender: 'mesh.select_mode', keys: 'Shift 1', run: run('mesh.select_mode', { type: 'VERT', use_extend: true }) },
+    { blender: 'mesh.select_mode', keys: 'Shift 2', run: run('mesh.select_mode', { type: 'EDGE', use_extend: true }) },
+    { blender: 'mesh.select_mode', keys: 'Shift 3', run: run('mesh.select_mode', { type: 'FACE', use_extend: true }) },
+    { blender: ['mesh.select_all', 'mesh.select_all:SELECT'], keys: 'A', run: run('mesh.select_all', { action: 'SELECT' }) },
+    { blender: ['mesh.select_all', 'mesh.select_all:DESELECT'], keys: 'Alt A', run: run('mesh.select_all', { action: 'DESELECT' }) },
+    { blender: ['mesh.select_all', 'mesh.select_all:INVERT'], keys: 'Ctrl I', run: run('mesh.select_all', { action: 'INVERT' }) },
     { blender: 'mesh.select_more', keys: 'Ctrl NUMPAD_PLUS', run: () => exec('mesh.select_more') },
     { blender: 'mesh.select_less', keys: 'Ctrl NUMPAD_MINUS', run: () => exec('mesh.select_less') },
     { blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => exec('mesh.select_linked') },
@@ -309,10 +315,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'mesh.normals_make_consistent', keys: 'Shift Ctrl N', run: () => exec('mesh.normals_make_consistent', { inside: true }) },
     { blender: 'VIEW3D_MT_edit_mesh_normals', keys: 'Alt N', run: () => openMenu(normalsMenu(), editor.pointer, 'Normals') },
     { blender: 'mesh.bevel', keys: 'Shift Ctrl B', run: () => bevel('VERTICES') },
-    { blender: 'mesh.loop_select', keys: 'Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, {}) },
-    { blender: 'mesh.loop_select', keys: 'Shift Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, { toggle: true }) },
-    { blender: 'mesh.edgering_select', keys: 'Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, { ring: true }) },
-    { blender: 'mesh.edgering_select', keys: 'Shift Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, { ring: true, toggle: true }) },
+    { blender: 'mesh.loop_select', keys: 'Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.loop_select', {}) },
+    { blender: 'mesh.loop_select', keys: 'Shift Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.loop_select', { toggle: true }) },
+    { blender: 'mesh.edgering_select', keys: 'Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.edgering_select', {}) },
+    { blender: 'mesh.edgering_select', keys: 'Shift Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.edgering_select', { toggle: true }) },
     { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
     { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
     { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
@@ -334,23 +340,23 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   return {
     get active() { return !!em; },
     get object() { return em?.object ?? null; },
-    get selectmode() { return em?.bm.selectmode ?? selectmode; },
+    get selectmode() { return em?.edit.selectmode ?? selectmode; },
     // stats_object_edit: selected and total elements, and the triangle count.
     get stats() {
       if (!em) return null;
-      const { bm } = em;
-      return { verts: [bm.totvertsel ?? 0, bm.totvert], edges: [bm.totedgesel ?? 0, bm.totedge], faces: [bm.totfacesel ?? 0, bm.totface], tris: bm.totloop - 2 * bm.totface };
+      const t = em.edit.totals;
+      return { verts: [t.totvertsel, t.totvert], edges: [t.totedgesel, t.totedge], faces: [t.totfacesel, t.totface], tris: t.totloop - 2 * t.totface };
     },
     enter,
     exit,
     toggle: () => (em ? exit() : enter()),
-    setSelectMode(type, extend = false) { if (em) run((bm) => (selectmode = mesh_select_mode(bm, type, { use_extend: extend })))(); },
+    setSelectMode(type, extend = false) { if (em) run('mesh.select_mode', { type, use_extend: extend })(); },
     exec(idname, props) { if (em) exec(idname, props); },
     deleteMenu,
     mergeMenu: () => (em ? mergeMenu() : []),
     normalsMenu: () => (em ? normalsMenu() : []),
     extrudeMove() { if (em) extrudeMove(); },
-    selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
+    selectAll(action) { if (em) run('mesh.select_all', { action })(); },
     loopcut() { if (em) loopcut(); },
     inset() { if (em) inset(); },
     bevel(affect = 'EDGES') { if (em) bevel(affect); },
@@ -364,24 +370,34 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       const changed = (fn) => (...args) => { const result = fn(...args); sync({ commit: false }); return result; };
       let session;
       if (type === 'edge_slide') {
-        const slide = beginEdgeSlide(em.bm, em.object, view, mouse);
+        // Edge Slide's JS port slides a BMesh of the edit mesh's arrays; its coordinates go to the edit mesh.
+        const bm = editBMesh(em.edit, em.mesh), slide = beginEdgeSlide(bm, em.object, view, mouse);
         if (!slide) { notify('Invalid Edge Selection'); return null; }
-        const handled = (fn) => (...args) => fn(...args) && (sync({ commit: false }), true);
-        session = Object.assign(Object.create(slide), { update: changed(slide.update), keymap: handled(slide.keymap), numinput: handled(slide.numinput), cancel: changed(slide.cancel) });
+        const verts = Array.from({ length: em.mesh.verts_num }, (_, v) => v);
+        const push = () => { em.edit.setCoords(verts, bm.v.co.subarray(0, verts.length * 3)); sync({ commit: false }); };
+        const slid = (fn) => (...args) => { const result = fn(...args); push(); return result; };
+        const handled = (fn) => (...args) => fn(...args) && (push(), true);
+        session = Object.assign(Object.create(slide), { update: slid(slide.update), keymap: handled(slide.keymap), numinput: handled(slide.numinput), cancel: slid(slide.cancel) });
       } else {
-        const data = createTransMesh(em.bm, em.object);
+        const data = createTransMesh(em.edit, em.mesh, em.object);
         if (!data) return null;
         session = initTransform(type, { ...data, apply: changed(data.apply), restore: changed(data.restore) }, view, mouse, { orient: orient === 'NORMAL' ? normalOrientation() : undefined });
       }
       return Object.assign(Object.create(session), { keep, finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); } });
     },
-    // After undo or redo: the object's restored Mesh becomes the BMesh again.
+    // After undo or redo: the object's restored Mesh becomes the edit mesh again.
     reload() {
       if (!em) return;
       if (!em.object.metadata?.wbCreation?.mesh || em.object.metadata?.wbDeleted) { exit(); return; }
-      em.bm = load(mesh_deserialize(em.object.metadata.wbCreation.mesh));
+      em.edit.replace(mesh_deserialize(em.object.metadata.wbCreation.mesh));
+      em.edit.selectFlush();
       sync({ commit: false });
     },
-    dispose() { endTool(); em?.overlay.dispose(); em = null; redo.dispose(); },
+    dispose() {
+      endTool();
+      if (em) { em.overlay.dispose(); freeEditMesh(); }
+      em = null;
+      redo.dispose();
+    },
   };
 }

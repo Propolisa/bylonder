@@ -26,6 +26,7 @@
 #include "ED_mesh.hh"
 #include "ED_object.hh"
 #include "ED_screen.hh"
+#include "ED_select_utils.hh"
 
 #include "WM_api.hh"
 #include "WM_types.hh"
@@ -42,7 +43,7 @@ using namespace blender::ed::mesh;
 /* Logging is set up first, as Blender's main sets it up. */
 static const bool logging = (CLG_init(), true);
 
-/* A scene holding one mesh object in Edit Mode, whose edit mesh is a BMesh made by bm_from_arrays. */
+/* A scene holding one mesh object in Edit Mode, whose edit mesh owns a BMesh made by bm_from_arrays. */
 struct EditContext {
   bContext *C;
   Vector<std::unique_ptr<bContextStore>> stores;
@@ -88,19 +89,99 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
 EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
 {
   CTX_free(ctx->C);
+  BM_mesh_free(ctx->mesh.runtime->edit_mesh->bm);
   ctx->mesh.runtime->edit_mesh.reset();
   MEM_delete(ctx->mesh.runtime);
   MEM_delete(ctx->object.runtime);
   MEM_delete(ctx);
 }
 
-/* The BMesh an operator leaves, which may be a new one (as Undo or a cancelled operator restore). */
+/* The edit mesh's BMesh, which may be a new one after an operator (as Undo replaces it). */
 EXPORT(edit_context_bmesh) BMesh *edit_context_bmesh(EditContext *ctx) { return ctx->mesh.runtime->edit_mesh->bm; }
+/* Replaces the edit mesh's BMesh, freeing the one it had, as loading an undo step does. */
+EXPORT(edit_context_bmesh_set) void edit_context_bmesh_set(EditContext *ctx, BMesh *bm)
+{
+  BMEditMesh &em = *ctx->mesh.runtime->edit_mesh;
+  BM_mesh_free(em.bm);
+  em.bm = bm;
+  bm->selectmode = em.selectmode;
+}
+EXPORT(edit_context_selectmode) int edit_context_selectmode(EditContext *ctx) { return ctx->tool_settings.selectmode; }
 EXPORT(edit_context_selectmode_set) void edit_context_selectmode_set(EditContext *ctx, int selectmode)
 {
   ctx->tool_settings.selectmode = selectmode;
   ctx->mesh.runtime->edit_mesh->selectmode = selectmode;
   ctx->mesh.runtime->edit_mesh->bm->selectmode = selectmode;
+}
+/* EDBM_selectmode_flush: selection flushed from the elements of the select mode. */
+EXPORT(edit_mesh_select_flush) void edit_mesh_select_flush(EditContext *ctx) { EDBM_selectmode_flush(ctx->mesh.runtime->edit_mesh.get()); }
+
+/* port-override: EDBM_select_pick (editmesh_select.cc) once its view has found the element (htype and index, or -1
+ * for none): the view and its picking stay in JS. UV select sync is off, so its UV selection is left out, and the
+ * object has no material slots to make the face's active. */
+EXPORT(edit_mesh_select_pick) bool edit_mesh_select_pick(EditContext *ctx, int htype, int index, int sel_op, bool deselect_all)
+{
+  BMEditMesh *em = ctx->mesh.runtime->edit_mesh.get();
+  BMesh *bm = em->bm;
+  BMElem *ele = nullptr;
+  if (index >= 0) {
+    BM_mesh_elem_table_ensure(bm, char(htype));
+    ele = htype == BM_VERT ? reinterpret_cast<BMElem *>(BM_vert_at_index(bm, index)) :
+          htype == BM_EDGE ? reinterpret_cast<BMElem *>(BM_edge_at_index(bm, index)) :
+                             reinterpret_cast<BMElem *>(BM_face_at_index(bm, index));
+  }
+  bool changed = false;
+  if (sel_op == SEL_OP_SET && (ele || deselect_all)) {
+    EDBM_flag_disable_all(em, BM_ELEM_SELECT);
+    changed = true;
+  }
+  if (!ele) {
+    return changed;
+  }
+  BMFace *efa = htype == BM_FACE ? reinterpret_cast<BMFace *>(ele) : nullptr;
+  switch (sel_op) {
+    case SEL_OP_ADD:
+      if (efa) {
+        BM_mesh_active_face_set(bm, efa);
+      }
+      /* Deselected first so it becomes active even when it was selected. */
+      BM_select_history_remove(bm, ele);
+      BM_elem_select_set(bm, ele, false);
+      BM_select_history_store(bm, ele);
+      BM_elem_select_set(bm, ele, true);
+      break;
+    case SEL_OP_SUB:
+      BM_select_history_remove(bm, ele);
+      BM_elem_select_set(bm, ele, false);
+      break;
+    case SEL_OP_XOR:
+      if (efa) {
+        BM_mesh_active_face_set(bm, efa);
+      }
+      if (!BM_elem_flag_test(ele, BM_ELEM_SELECT)) {
+        BM_select_history_store(bm, ele);
+        BM_elem_select_set(bm, ele, true);
+      }
+      else {
+        BM_select_history_remove(bm, ele);
+        BM_elem_select_set(bm, ele, false);
+      }
+      break;
+    case SEL_OP_SET:
+      if (efa) {
+        BM_mesh_active_face_set(bm, efa);
+      }
+      if (!BM_elem_flag_test(ele, BM_ELEM_SELECT)) {
+        BM_select_history_store(bm, ele);
+        BM_elem_select_set(bm, ele, true);
+      }
+      break;
+  }
+  EDBM_selectmode_flush(em);
+  if (efa) {
+    em->mat_nr = efa->mat_nr;
+  }
+  return true;
 }
 
 /* The object's matrix (column-major, Blender's axes), which operators read for world space (the 3D cursor). */
@@ -234,6 +315,8 @@ bool ED_operator_editmesh(bContext *C)
   return obedit && obedit->type == OB_MESH && BKE_editmesh_from_object(obedit);
 }
 bool ED_operator_editable_mesh(bContext *C) { return ED_operator_editmesh(C); }
+/* port-override: the 3D View the operator needs is the editor's own, whose picking runs in JS. */
+bool ED_operator_editmesh_region_view3d(bContext *C) { return ED_operator_editmesh(C); }
 
 /* Blender's globals, defined as blender.cc, blf.cc and rna_access.cc define them: their types' member defaults are
  * Blender's defaults. */

@@ -1,105 +1,54 @@
+// Edit Mode operators by Blender idname on the edit mesh (an EditMesh, src/bmesh/bmesh-wasm.js): Blender's own, run by
+// their exec in WebAssembly, and the two still ported to JS.
 import { POOL } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_edge_at_index } from '../../bmesh/intern/bmesh-mesh.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
-import { editMeshCopy, editMeshFromMesh, editMeshFree, editMeshSync, meshFromEditMesh, objectMatrixSet, runOperator, selectHistory, selectHistorySet, selectModeSet } from '../../bmesh/bmesh-wasm.js';
+import { hasOperator } from '../../bmesh/bmesh-wasm.js';
 import { edbm_loopcut } from './editmesh-loopcut.js';
-import { edbm_select_loop } from './editmesh-select.js';
-import { EDBM_mesh_hide, EDBM_mesh_reveal } from './editmesh-utils.js';
 import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
 
-// The BMesh Blender's operators run on (src/bmesh/bmesh-wasm.js) is kept with the edit mesh between operators, as
-// Blender keeps its own: a chain of operators then visits elements in Blender's order. What JS changed in between
-// (selection, hiding, a move) is written into it; a change of topology by an operator still in JS rebuilds it.
-const BLENDER_EDIT_MESH = Symbol('Blender edit mesh');
-const freeing = new FinalizationRegistry(editMeshFree);
-const sameTopology = (a, b) => ['edges', 'face_offsets', 'corner_verts', 'corner_edges']
-  .every((key) => a[key].length === b[key].length && a[key].every((value, i) => value === b[key][i]));
-
-function blenderEditMesh(bm, { object_to_world } = {}) {
-  const mesh = BM_mesh_bm_to_me(bm), kept = bm[BLENDER_EDIT_MESH];
-  let handle;
-  if (kept && sameTopology(kept.mesh, mesh)) {
-    handle = kept.handle;
-    editMeshSync(handle, mesh);
-    selectModeSet(handle, bm.selectmode);
-  } else {
-    if (kept) {
-      freeing.unregister(bm);
-      editMeshFree(kept.handle);
-    }
-    handle = editMeshFromMesh(mesh, bm.selectmode);
-    bm[BLENDER_EDIT_MESH] = { handle, mesh };
-    freeing.register(bm, handle, bm);
-  }
-  selectHistorySet(handle, (bm.selected ?? []).map(({ htype, ele }) => ({ htype, ele: bm[POOL[htype]].index[ele] })));
-  if (object_to_world) objectMatrixSet(handle, object_to_world);
-  return handle;
+// Loop Cut and Edge Slide run as JS ports until Blender's run in WebAssembly (Loop Cut reads the evaluated mesh
+// through the depsgraph; Edge Slide is part of Blender's transform system). They work on a BMesh of the edit mesh's
+// Mesh arrays, whose elements are in the same order, for as long as they run.
+export function editBMesh(edit, mesh = edit.toMesh()) {
+  const bm = BM_mesh_bm_from_me(mesh);
+  bm.selectmode = edit.selectmode;
+  bm.selected = edit.history.map(({ htype, index }) => ({ htype, ele: index }));
+  return bm;
 }
 
-// Runs Blender's own operator on the edit mesh and takes its result back; returns its report, if it made one.
-// `object_to_world` (column-major, Blender's axes) places the object for what operators do in world space.
-function blenderOperator(idname) {
-  return (bm, props, context) => {
-    const handle = blenderEditMesh(bm, context), { selectmode } = bm;
-    const { report } = runOperator(handle, idname, props);
-    const mesh = meshFromEditMesh(handle);
-    Object.defineProperties(bm, Object.getOwnPropertyDescriptors(BM_mesh_bm_from_me(mesh)));
-    bm.selectmode = selectmode;
-    bm.selected = selectHistory(handle);
-    bm[BLENDER_EDIT_MESH].mesh = mesh;
-    return report;
-  };
+// Makes a JS BMesh's result the edit mesh.
+function applyBMesh(edit, bm) {
+  edit.replace(BM_mesh_bm_to_me(bm));
+  edit.history = (bm.selected ?? []).map(({ htype, ele }) => ({ htype, index: bm[POOL[htype]].index[ele] }));
 }
 
-// Previews an operator on the edit mesh, leaving it untouched: each run starts from a copy in Blender's BMesh and
-// gives the result's Mesh and active element ({ htype, index }) without building a JS BMesh.
-export function operatorPreview(bm, idname, context) {
-  const source = blenderEditMesh(bm, context);
-  return (props) => {
-    const copy = editMeshCopy(source);
-    try {
-      if (context?.object_to_world) objectMatrixSet(copy, context.object_to_world);
-      runOperator(copy, idname, props);
-      const active = selectHistory(copy).at(-1);
-      return { mesh: meshFromEditMesh(copy), active: active && { htype: active.htype, index: active.ele } };
-    } finally {
-      editMeshFree(copy);
-    }
-  };
-}
-
-// Blender's operators run by their own code, which every fixture of theirs matches (tests/editmesh-wasm.test.js).
-const BLENDER_OPERATORS = [
-  'mesh.bevel',
-  'mesh.delete',
-  'mesh.dissolve_edges',
-  'mesh.dissolve_faces',
-  'mesh.dissolve_mode',
-  'mesh.dissolve_verts',
-  'mesh.edge_collapse',
-  'mesh.edge_face_add',
-  'mesh.extrude_region',
-  'mesh.flip_normals',
-  'mesh.inset',
-  'mesh.merge',
-  'mesh.normals_make_consistent',
-  'mesh.poke',
-  'mesh.quads_convert_to_tris',
-  'mesh.remove_doubles',
-  'mesh.select_less',
-  'mesh.select_linked',
-  'mesh.select_more',
-  'mesh.subdivide',
-  'mesh.tris_convert_to_quads',
-  'mesh.vertices_smooth',
-];
-
-// Edit Mode operators by Blender idname, as (bm, props, context) for fixtures and keymaps.
-export const meshOperators = {
-  ...Object.fromEntries(BLENDER_OPERATORS.map((idname) => [idname, blenderOperator(idname)])),
+const PORTED = {
   'mesh.loopcut': (bm, props) => edbm_loopcut(bm, BM_edge_at_index(bm, props.edge_index), props),
-  'transform.edge_slide': (bm, props) => edge_slide_exec(bm, props),
-  'mesh.loop_select': (bm, props) => edbm_select_loop(bm, BM_edge_at_index(bm, props.edge_index), props),
-  'mesh.hide': (bm, props) => EDBM_mesh_hide(bm, bm.selectmode, !!props.unselected),
-  'mesh.reveal': (bm) => EDBM_mesh_reveal(bm, bm.selectmode),
+  'transform.edge_slide': edge_slide_exec,
 };
+
+export const hasMeshOperator = (idname) => idname in PORTED || hasOperator(idname);
+
+// Runs an Edit Mode operator; returns its report, if it made one.
+export function meshOperator(edit, idname, props = {}) {
+  if (!PORTED[idname]) return edit.run(idname, props).report;
+  const bm = editBMesh(edit);
+  PORTED[idname](bm, props);
+  applyBMesh(edit, bm);
+  return undefined;
+}
+
+// Previews an operator, leaving the edit mesh untouched: each run starts from a copy of it and gives the result's Mesh
+// and active element ({ htype, index }).
+export function operatorPreview(edit, idname) {
+  return (props) => {
+    const copy = edit.copy();
+    try {
+      meshOperator(copy, idname, props);
+      return { mesh: copy.toMesh(), active: copy.history.at(-1) };
+    } finally {
+      copy.free();
+    }
+  };
+}
