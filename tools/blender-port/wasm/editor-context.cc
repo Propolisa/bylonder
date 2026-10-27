@@ -502,6 +502,46 @@ void WorkspaceStatus::item_bool(std::string /*text*/, bool /*inverted*/, int /*i
 void WorkspaceStatus::range(std::string /*text*/, int /*icon1*/, int /*icon2*/) {}
 void WorkspaceStatus::opmodal(std::string /*text*/, const wmOperatorType * /*ot*/, int /*propvalue*/, bool /*inverted*/) {}
 
+/* As screen_ops.cc defines them: the editor's context has no window, screen or area, so operators that need one do
+ * not run, as in Blender's background mode. */
+bool ED_operator_screenactive(bContext *C) { return CTX_wm_window(C) && CTX_wm_screen(C); }
+bool ED_operator_regionactive(bContext *C) { return ED_operator_screenactive(C) && CTX_wm_region(C); }
+bool ED_operator_areaactive(bContext *C) { return ED_operator_screenactive(C) && CTX_wm_area(C); }
+bool ED_operator_active_screen_and_scene(bContext *C)
+{
+  if (!ED_operator_screenactive(C)) {
+    return false;
+  }
+  if (CTX_wm_space_seq(C) != nullptr) {
+    return CTX_data_sequencer_scene(C) != nullptr;
+  }
+  return CTX_data_scene(C) != nullptr;
+}
+static bool ed_spacetype_test(bContext *C, int type)
+{
+  const ScrArea *area = CTX_wm_area(C);
+  return area && area->spacetype == type;
+}
+bool ED_operator_view3d_active(bContext *C) { return ed_spacetype_test(C, SPACE_VIEW3D); }
+bool ED_operator_editmesh_view3d(bContext *C) { return ED_operator_editmesh(C) && ED_operator_view3d_active(C); }
+bool ED_operator_sequencer_active(bContext *C) { return ed_spacetype_test(C, SPACE_SEQ) && CTX_data_sequencer_scene(C) != nullptr; }
+bool ED_operator_region_view3d_active(bContext *C)
+{
+  if (CTX_wm_region_view3d(C)) {
+    return true;
+  }
+  CTX_wm_operator_poll_msg_set(C, "Expected a view3d region");
+  return false;
+}
+bool ED_operator_object_active_only_from_view_layer(bContext *C)
+{
+  Main &bmain = *CTX_data_main(C);
+  Scene *scene = CTX_data_scene(C);
+  ViewLayer *view_layer = CTX_data_view_layer(C);
+  BKE_view_layer_synced_ensure(bmain, scene, view_layer);
+  return BKE_view_layer_active_object_get(view_layer) != nullptr;
+}
+
 /* As screen_ops.cc defines it. */
 bool ED_operator_scene_editable(bContext *C)
 {

@@ -42,16 +42,10 @@ Edit > Preferences holds Bylonder's own settings (Keep Scenes Loaded). Blender's
 The Video Sequencer and File Browser are KubeezCut islands. Their Blender identifiers live in the KubeezCut fork, which this scan does not read yet.
 
 ## mesh.primitive_uv_sphere_add
-Status: partial
-Builds a Babylon sphere with Blender's name until the operator is ported. Plane, Cube, Circle, Cylinder, Cone and Grid are Blender's exact primitives.
-
-## mesh.primitive_ico_sphere_add
-Status: partial
-Builds a Babylon ico sphere with Blender's name until the operator is ported.
+Blender's operator builds it in the module, with Blender's positions and edges; its face and edge order differs from Blender's after the spin and merge it runs, which the primitive tests note.
 
 ## mesh.primitive_torus_add
-Status: partial
-Builds a Babylon torus with Blender's name until the operator is ported.
+Blender's own Python operator (`add_mesh_torus.py`, transpiled) builds the torus, and the module derives its edges as `mesh.update()` does.
 
 ## object.modifier_add
 Blender's modifiers run Blender's own code in the module (`tools/blender-port/wasm/modifier-api.cc`) on the object's Mesh. Settings are stored by RNA identifier (`use_axis[1]`), described by Blender's RNA (`tools/blender-reference/modifiers.py`) and written at the DNA offsets `tools/blender-port/modifier_dna.py` reads from `rna_modifier.cc`. Types that need other objects, vertex groups, binding or simulation are not offered yet. Array (Nodes) stands for Blender's Array node group asset and goes after Blender's modifiers in the stack. The Add Modifier menu is Blender's (`properties_data_modifier.py`, transpiled), and each panel is laid out by its own `panel_draw` in the module (`tools/blender-port/wasm/panel-layout.cc` records the layout; JS draws it). Fields for vertex groups, objects and operators in those panels come later.

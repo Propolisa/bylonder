@@ -25,7 +25,8 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     sync();
   };
   const recent = [];
-  const refreshRecent = () => recentProjects().then((projects) => recent.splice(0, Infinity, ...projects.slice(0, 10)));
+  // Recent projects for Open Recent, read when the menus open: the app makes its project repository after the topbar.
+  const refreshRecent = () => Promise.resolve().then(recentProjects).then((projects) => recent.splice(0, Infinity, ...projects.slice(0, 10)), () => {});
   const url = (href) => () => open(href, '_blank', 'noopener');
   const blenderDocs = 'https://docs.blender.org/';
   const URL_PRESETS = { MANUAL: blenderDocs + 'manual/en/latest/', API: blenderDocs + 'api/current/', RELEASE_NOTES: 'https://developer.blender.org/docs/release_notes/' };
@@ -84,7 +85,6 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     scene: { render: { use_multiview: false } }, sequencer_scene: null, tool_settings: {}, screen: { show_statusbar: true, show_fullscreen: false }, window: {},
   });
   const ui = topbarUI = menuUI({ menus: { ...menuClasses(spaceTopbar), TOPBAR_MT_file_open_recent }, context, prop: (data, name) => data?.__bindings?.[name] });
-  refreshRecent();
   // The menus of Blender's topbar (TOPBAR_MT_editor_menus), the Blender menu shown as the logo.
   for (const item of drawMenu('TOPBAR_MT_editor_menus', ui)) {
     const logo = item.blender === 'TOPBAR_MT_blender';

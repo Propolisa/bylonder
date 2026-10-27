@@ -17,10 +17,6 @@ const MESH_ARRAYS = ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 
 // What a fixture cannot check: Blender's mesh.loopcut needs a 3D Viewport, so its fixtures come from a stand-in whose
 // selection is not Blender's (loopcut() in tools/blender-reference/mesh-fixtures.py).
 const UNCHECKED = { 'mesh.loopcut': ['selection'] };
-// Where a JS port still differs from Blender, reported on every run until Blender's own runs here: Edge Slide's port
-// does not correct UVs (correct_uv).
-const KNOWN = { 'transform.edge_slide': ['UVs'] };
-const known = [];
 const near = (a, b) => Math.abs(a - b) < 1e-5;
 const selected = (mesh, name) => Array.from(mesh.attribute(name), Boolean).flatMap((x, i) => (x ? [i] : []));
 // Order-free form of a mesh: vertices, edges and faces (winding kept) named by rounded position.
@@ -108,12 +104,10 @@ for (const file of await readdir(dir)) {
   if (missing) { failures.push(`${file}: no operator ${missing.operator}`); continue; }
   const { operator } = fixture.edit;
   const differs = differences(fixture).filter((what) => !UNCHECKED[operator]?.includes(what));
-  if (differs.some((what) => KNOWN[operator]?.includes(what))) known.push(`${file}: ${differs.join(', ')}`);
-  const unknown = differs.filter((what) => !KNOWN[operator]?.includes(what));
-  if (unknown.length) failures.push(`${file}: ${unknown.join(', ')}`);
+  if (differs.length) failures.push(`${file}: ${differs.join(', ')}`);
   else if (!differs.length && !fixture.edit.move) matched++;
 }
 assert.deepEqual(failures, [], `Edit Mode fixtures differ from Blender:\n${failures.join('\n')}`);
-assert.ok(process.env.ONLY || (matched >= 98 && geometric >= 7 && previewed >= 20));
+assert.ok(process.env.ONLY || (matched >= 106 && geometric >= 7 && previewed >= 20));
 console.log(`Edit Mode: ${matched} operator results match Blender 5.2 exactly, ${geometric} extrudes match as geometry (Blender's order there varies by run), ${previewed} modal previews match their result`);
-if (known.length) console.log(`Edit Mode: ${known.length} results differ where a JS port is known to (${Object.entries(KNOWN).map(([op, what]) => `${op}: ${what.join(', ')}`).join('; ')})`);
+

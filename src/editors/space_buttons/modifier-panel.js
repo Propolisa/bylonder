@@ -31,7 +31,8 @@ export function blenderModifierContent({ id, modifier, definition, field, panel 
   // A sub-panel: its header's checkbox (if any) beside the title, its body and its own sub-panels inside.
   const subpanel = (node, disabled) => {
     const header = node.children.find((c) => c.kind === 'header'), check = header?.children.find((c) => c.kind === 'prop');
-    const title = node.text || header?.children.find((c) => c.kind === 'label')?.text || '';
+    // A header that is a checkbox titles its panel with the property's name, as Blender draws it.
+    const title = node.text || header?.children.find((c) => c.kind === 'label')?.text || (check && definition.schema[check.prop]?.label) || '';
     const actions = check && definition.schema[check.prop] ? () => [field(check.prop, { label: '', disabled: disabled ? () => true : undefined })] : undefined;
     return panel(`${id}.${node.prop}`, title, () => node.children.filter((c) => c !== header).flatMap((c) => draw(c, disabled)),
       { subpanel: true, actions, defaultClosed: true });

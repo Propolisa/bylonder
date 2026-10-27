@@ -1,13 +1,10 @@
 // Edit Mode operators by Blender idname on the edit mesh (an EditMesh, src/bmesh/bmesh-wasm.js): Blender's own, run by
-// their exec in WebAssembly, and the two still ported to JS.
-import { POOL } from '../../bmesh/intern/bmesh-marking.js';
-import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
+// their exec in WebAssembly.
+import { BM_mesh_bm_from_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { hasOperator } from '../../bmesh/bmesh-wasm.js';
-import { edge_slide_exec } from '../transform/transform-mesh-edge-slide.js';
 
-// Edge Slide and Loop Cut's preview run as JS ports until Blender's run in WebAssembly (Edge Slide is part of
-// Blender's transform system). They work on a BMesh of the edit mesh's Mesh arrays, whose elements are in the same
-// order, for as long as they run.
+// The interactive Edge Slide and Loop Cut previews still run as JS ports, on a BMesh of the edit mesh's Mesh arrays,
+// whose elements are in the same order, for as long as they run.
 export function editBMesh(edit, mesh = edit.toMesh()) {
   const bm = BM_mesh_bm_from_me(mesh);
   bm.selectmode = edit.selectmode;
@@ -15,15 +12,7 @@ export function editBMesh(edit, mesh = edit.toMesh()) {
   return bm;
 }
 
-// Makes a JS BMesh's result the edit mesh.
-function applyBMesh(edit, bm) {
-  edit.replace(BM_mesh_bm_to_me(bm));
-  edit.history = (bm.selected ?? []).map(({ htype, ele }) => ({ htype, index: bm[POOL[htype]].index[ele] }));
-}
-
-const PORTED = {};
-
-export const hasMeshOperator = (idname) => idname in PORTED || hasOperator(idname);
+export const hasMeshOperator = hasOperator;
 
 // Blender's operators the module registers but does not run yet, by what they reach that it lacks; menus leave them
 // out (tests/editmesh-menus.test.js checks the rest run).
@@ -43,13 +32,7 @@ const NOT_YET = Object.fromEntries([
 export const runsMeshOperator = (idname) => hasMeshOperator(idname) && !NOT_YET[idname];
 
 // Runs an Edit Mode operator; returns its report, if it made one.
-export function meshOperator(edit, idname, props = {}) {
-  if (!PORTED[idname]) return edit.run(idname, props).report;
-  const bm = editBMesh(edit);
-  PORTED[idname](bm, props);
-  applyBMesh(edit, bm);
-  return undefined;
-}
+export const meshOperator = (edit, idname, props = {}) => edit.run(idname, props).report;
 
 // Previews an operator, leaving the edit mesh untouched: each run starts from a copy of it and gives what `use` makes of
 // the result while it exists, by default its Mesh and active element ({ htype, index }).

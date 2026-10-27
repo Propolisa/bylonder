@@ -1,3 +1,4 @@
+import { hasOperator } from "../../bmesh/bmesh-wasm.js";
 import { Mesh, MeshBuilder, VertexData } from "@babylonjs/core";
 import reflected from "./builder-schema.json" with { type: "json" };
 import rna from "../../makesrna/rna-operators.json" with { type: "json" };
@@ -73,7 +74,7 @@ export function meshCatalog(config = {}) {
 // for Babylon builders.
 const recipeMesh = (recipe) => {
   if (recipe.mesh) return mesh_deserialize(recipe.mesh);
-  if (!primitiveOperators[recipe.operator]) throw Error("Unknown mesh operator");
+  if (!primitiveOperators[recipe.operator] && !hasOperator(recipe.operator)) throw Error("Unknown mesh operator");
   return primitive_add(recipe.operator, recipe.options);
 };
 

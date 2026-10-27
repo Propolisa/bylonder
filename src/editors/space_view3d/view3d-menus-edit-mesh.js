@@ -5,6 +5,7 @@
 //   macros run them, start(type): a transform, and the modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
 import { drawMenu } from '../interface/ui-layout.js';
+import { rna } from '../../makesrna/rna.js';
 import { runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { EditMesh } from '../../bmesh/bmesh-wasm.js';
 import { primitive_add } from '../mesh/editmesh-add.js';
@@ -31,18 +32,18 @@ export function editMeshMenus(api) {
     'mesh.bevel': (props) => api.bevel(props.affect ?? 'EDGES'),
     'mesh.inset': () => api.inset(),
   };
-  // bpy.context as the menus read it: one mesh object in Edit Mode.
+  // bpy.context as the menus read it: one mesh object in Edit Mode; what is not bound reads as Blender's default.
   function context() {
     const edit = api.edit(), mode = edit.selectmode, { totvertsel, totedgesel, totfacesel } = edit.totals;
-    const data = {
+    const data = rna('Mesh', {
       total_vert_sel: totvertsel, total_edge_sel: totedgesel, total_face_sel: totfacesel,
       count_selected_items: () => [totvertsel, totedgesel, totfacesel],
-    };
-    const object = { mode: 'EDIT', type: 'MESH', data };
-    return {
+    });
+    const object = rna('Object', { mode: 'EDIT', type: 'MESH', data });
+    return rna('Context', {
       mode: 'EDIT_MESH', object, active_object: object, edit_object: object, objects_in_mode_unique_data: [object],
-      tool_settings: { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) },
-    };
+      tool_settings: rna('ToolSettings', { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) }),
+    });
   }
   const ui = {
     menus: MENUS,
