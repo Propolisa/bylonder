@@ -11,6 +11,8 @@ import { formatLength } from '../../blenkernel/unit.js';
 
 // Babylon's world is Y up; Blender's is Z up.
 export const toBlender = (v) => [v.x, v.z, v.y];
+// A Babylon matrix in Blender's axes, column-major as Blender stores it (Babylon's row vectors give the same layout).
+export const toBlenderMatrix = (m) => Array.from({ length: 16 }, (_, i) => m.m[[0, 2, 1, 3][i >> 2] * 4 + [0, 2, 1, 3][i & 3]]);
 export const toBabylon = ([x, y, z]) => new Vector3(x, z, y);
 
 const CON_AXIS0 = 1, CON_AXIS1 = 2, CON_AXIS2 = 4;

@@ -3,7 +3,7 @@ import { BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_elem_flag_test, BM_ele
 import { bmesh_disk_edge_next } from './bmesh-structure.js';
 
 export const SCE_SELECT_VERTEX = 1, SCE_SELECT_EDGE = 2, SCE_SELECT_FACE = 4;
-const POOL = { [BM_VERT]: 'v', [BM_EDGE]: 'e', [BM_FACE]: 'f' };
+export const POOL = { [BM_VERT]: 'v', [BM_EDGE]: 'e', [BM_FACE]: 'f' };
 const loopsOf = (bm, f, fn) => { const first = bm.f.l_first[f]; let l = first; do fn(l); while ((l = bm.l.next[l]) !== first); };
 
 function recount(bm) {

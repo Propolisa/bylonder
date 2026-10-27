@@ -8,7 +8,7 @@ import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_
 import { EDBM_select_pick, EDBM_edge_find_nearest, edbm_select_loop, mesh_select_all, mesh_select_mode, edbm_select_linked_pick } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
-import { initTransform, createSpaceNormal, toBlender, view3d_pixel_size } from '../transform/transform.js';
+import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, view3d_pixel_size } from '../transform/transform.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
@@ -144,10 +144,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     const normal = Vector3.TransformNormal(new Vector3(sum[0], sum[2], sum[1]), object.computeWorldMatrix(true));
     return { type: 'NORMAL', matrix: createSpaceNormal(toBlender(normal)), axis: 'Z' };
   }
+  // What an operator reads of the scene beyond the edit mesh.
+  const operatorContext = () => ({ object_to_world: toBlenderMatrix(em.object.computeWorldMatrix(true)) });
   // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
   function extrudeMove() {
     const faces = em.bm.totfacesel > 0;
-    if (!meshOperators['mesh.extrude_region'](em.bm, {})) { notify('Not a valid selection for extrude'); return; }
+    const report = meshOperators['mesh.extrude_region'](em.bm, {}, operatorContext());
+    if (report) { notify(report); return; }
     sync({ commit: false });
     editor.start('move', { orient: faces ? 'NORMAL' : undefined, keep: true });
     if (!editor.modal) sync();
@@ -157,7 +160,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   function exec(idname, props = {}) {
     const before = BM_mesh_bm_to_me(em.bm);
     // An operator may return its report.
-    const run = (values) => { const report = meshOperators[idname](em.bm, values); if (typeof report === 'string') notify(report); };
+    const run = (values) => { const report = meshOperators[idname](em.bm, values, operatorContext()); if (typeof report === 'string') notify(report); };
     run(props);
     selectmode = em.bm.selectmode;
     sync();
@@ -217,7 +220,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       center: { x: screen[0], y: screen[1] },
       mouse: [editor.pointer.x, editor.pointer.y],
       pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
-      preview(props) { restore(); meshOperators[operator](em.bm, props); sync({ commit: false }); },
+      preview(props) { restore(); meshOperators[operator](em.bm, props, operatorContext()); sync({ commit: false }); },
       confirm(props) { restore(); exec(operator, props); },
       cancel() { restore(); sync({ commit: false }); },
       notify,
@@ -250,10 +253,9 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // VIEW3D_MT_edit_mesh_merge: At First and At Last only when the selection history starts or ends with a vert.
   const mergeMenu = () => {
     const history = em.bm.selected, vert = (ese) => ese?.htype === BM_VERT && em.bm.selectmode & SCE_SELECT_VERTEX;
-    const cursor = toBlender(Vector3.TransformCoordinates(Vector3.Zero(), Matrix.Invert(em.object.computeWorldMatrix(true))));
     return [
       ...MERGE_ITEMS.filter(([type]) => (type !== 'FIRST' || vert(history[0])) && (type !== 'LAST' || vert(history.at(-1))))
-        .map(([type, label]) => ({ label, blender: 'mesh.merge:' + type, run: () => exec('mesh.merge', { type, cursor }) })),
+        .map(([type, label]) => ({ label, blender: 'mesh.merge:' + type, run: () => exec('mesh.merge', { type }) })),
       '-',
       { label: 'By Distance', blender: 'mesh.remove_doubles', run: () => exec('mesh.remove_doubles') },
     ];

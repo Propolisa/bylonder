@@ -2,6 +2,7 @@
  * context finds it (the context store), and operators registered by their own MESH_OT_* functions and run by their
  * own exec. The window manager's and depsgraph's updates have nothing to update here, so they do nothing. */
 #include "BLI_listbase.h"
+#include "BLI_math_matrix.hh"
 #include "CLG_log.h"
 #include "BLF_api.hh"
 #include "BKE_global.hh"
@@ -102,6 +103,14 @@ EXPORT(edit_context_selectmode_set) void edit_context_selectmode_set(EditContext
   ctx->mesh.runtime->edit_mesh->bm->selectmode = selectmode;
 }
 
+/* The object's matrix (column-major, Blender's axes), which operators read for world space (the 3D cursor). */
+EXPORT(edit_context_object_matrix_set) void edit_context_object_matrix_set(EditContext *ctx, const float *object_to_world)
+{
+  bke::ObjectRuntime &runtime = *ctx->object.runtime;
+  std::copy_n(object_to_world, 16, runtime.object_to_world.base_ptr());
+  runtime.world_to_object = math::invert(runtime.object_to_world);
+}
+
 /* Operators, each registered by Blender's own registration function when first used. */
 
 struct OperatorDefinition {
@@ -141,6 +150,8 @@ EXPORT(operator_new) wmOperator *operator_new(int type)
   op->type = operator_type(type);
   STRNCPY(op->idname, op->type->idname);
   op->ptr = MEM_new<PointerRNA>(__func__, PointerRNA{nullptr, op->type->srna, operator_values_new()});
+  op->reports = MEM_new<ReportList>(__func__);
+  BKE_reports_init(op->reports, RPT_STORE);
   return op;
 }
 
@@ -148,6 +159,8 @@ EXPORT(operator_free) void operator_free(wmOperator *op)
 {
   operator_values_free(op->ptr->data);
   MEM_delete(op->ptr);
+  BKE_reports_free(op->reports);
+  MEM_delete(op->reports);
   MEM_delete(op);
 }
 
@@ -155,6 +168,13 @@ EXPORT(operator_free) void operator_free(wmOperator *op)
 EXPORT(operator_set) bool operator_set(wmOperator *op, const char *name, const double *numbers, int len, const char *enum_identifier)
 {
   return operator_property_set(op->ptr, name, numbers, len, enum_identifier);
+}
+
+/* The message of the last report an operator made for its user (as Blender's status bar shows it), or null. */
+EXPORT(operator_report) const char *operator_report(wmOperator *op)
+{
+  const Report *report = BKE_reports_last_displayable(op->reports);
+  return report ? report->message : nullptr;
 }
 
 /* Polls and runs an operator's exec: its wmOperatorStatus flags, or 0 when it does not poll or has no exec. */

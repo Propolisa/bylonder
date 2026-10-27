@@ -66,7 +66,16 @@ export function meshFromEditMesh(bm) {
 // Selection: by index per element type (BM_VERT, BM_EDGE, BM_FACE), recorded in the history as a click is.
 export const select = (bm, htype, index) => x.bm_select(bm, htype, index);
 export const selectFlush = (bm) => x.bm_select_flush(bm);
+// The selection history (BMesh.selected), as { htype, ele } by element index.
+export function selectHistorySet(bm, history) {
+  withArrays([Int32Array.from(history, (ese) => ese.htype), Int32Array.from(history, (ese) => ese.ele)], ([htypes, indices]) => x.bm_select_history_set(bm, htypes, indices, history.length));
+}
+export const selectHistory = (bm) => withArrays([new Int32Array(1)], ([htype]) => Array.from({ length: x.bm_select_history_len(bm) }, (_, i) => {
+  const ele = x.bm_select_history_get(bm, i, htype);
+  return { htype: new Int32Array(x.memory.buffer, htype, 1)[0], ele };
+}));
 export const translateSelected = (bm, [dx, dy, dz]) => x.bm_translate_selected(bm, dx, dy, dz);
+export const objectMatrixSet = (bm, object_to_world) => withArrays([Float32Array.from(object_to_world)], ([p]) => x.edit_context_object_matrix_set(contextOf(bm), p));
 export function selectModeSet(bm, selectmode) {
   x.edit_context_selectmode_set(contextOf(bm), selectmode);
 }
@@ -94,7 +103,8 @@ const contextOf = (bm) => contexts.get(bm) ?? contexts.set(bm, x.edit_context_ne
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4;
 
 // Runs a Blender mesh operator's exec on a BMesh, with properties by name (an enum by its item's identifier, an enum
-// flag by a list of them; the rest keep their defaults). Returns its status flags, or 0 when it does not poll.
+// flag by a list of them; the rest keep their defaults). Returns its status flags (0 when it does not poll) and the
+// message of the last report it made for the user.
 export function runOperator(bm, idname, props = {}) {
   const op = x.operator_new(operatorTypes.get(idname));
   try {
@@ -107,7 +117,8 @@ export function runOperator(bm, idname, props = {}) {
         : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
       if (!ok) throw new Error(`${idname} has no property ${name} = ${value}`);
     }
-    return x.operator_exec(contextOf(bm), op);
+    const status = x.operator_exec(contextOf(bm), op), report = x.operator_report(op);
+    return { status, report: report ? cString(report) : undefined };
   } finally {
     x.operator_free(op);
   }

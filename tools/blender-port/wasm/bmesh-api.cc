@@ -2,6 +2,7 @@
  * them, and the mesh arrays Blender's edit mode writes back. The module has no ID system, so mesh arrays go in and out
  * as BM_mesh_bm_from_me and BM_mesh_bm_to_me order them: positions, edges, faces and their corners, the UV map, and the
  * flags Blender keeps as boolean attributes (indexed by MeshFlag), any of which may be absent. */
+#include "BLI_listbase.h"
 #include "BLI_array.hh"
 #include "BLI_math_rotation.h"
 #include "BLI_math_vector.h"
@@ -157,15 +158,37 @@ void bm_to_arrays(BMesh *bm, float (*positions)[3], int (*edges)[2], int *face_o
   face_offsets[bm->totface] = corner;
 }
 
+static BMElem *element_at(BMesh *bm, int htype, int index)
+{
+  BM_mesh_elem_table_ensure(bm, char(htype));
+  return htype == BM_VERT ? reinterpret_cast<BMElem *>(BM_vert_at_index(bm, index)) :
+         htype == BM_EDGE ? reinterpret_cast<BMElem *>(BM_edge_at_index(bm, index)) :
+                            reinterpret_cast<BMElem *>(BM_face_at_index(bm, index));
+}
+
 /* Selects the index-th element of a type and records it in the selection history, as selecting by click does. */
 EXPORT(bm_select) void bm_select(BMesh *bm, int htype, int index)
 {
-  BM_mesh_elem_table_ensure(bm, char(htype));
-  BMElem *ele = htype == BM_VERT ? reinterpret_cast<BMElem *>(BM_vert_at_index(bm, index)) :
-                htype == BM_EDGE ? reinterpret_cast<BMElem *>(BM_edge_at_index(bm, index)) :
-                                   reinterpret_cast<BMElem *>(BM_face_at_index(bm, index));
+  BMElem *ele = element_at(bm, htype, index);
   BM_elem_select_set(bm, ele, true);
   BM_select_history_store(bm, ele);
+}
+
+/* The selection history (bm->selected), oldest first, as element types and indices. */
+EXPORT(bm_select_history_set) void bm_select_history_set(BMesh *bm, const int *htypes, const int *indices, int len)
+{
+  BM_select_history_clear(bm);
+  for (int i = 0; i < len; i++) {
+    BM_select_history_store(bm, element_at(bm, htypes[i], indices[i]));
+  }
+}
+EXPORT(bm_select_history_len) int bm_select_history_len(BMesh *bm) { return BLI_listbase_count(&bm->selected); }
+EXPORT(bm_select_history_get) int bm_select_history_get(BMesh *bm, int i, int *htype)
+{
+  const BMEditSelection *ese = static_cast<const BMEditSelection *>(BLI_findlink(&bm->selected, i));
+  BM_mesh_elem_index_ensure(bm, ese->htype);
+  *htype = ese->htype;
+  return BM_elem_index_get(ese->ele);
 }
 EXPORT(bm_select_flush) void bm_select_flush(BMesh *bm) { BM_mesh_select_mode_flush(bm); }
 
