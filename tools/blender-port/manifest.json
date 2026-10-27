@@ -43,7 +43,6 @@
         "source/blender/blenkernel/intern",
         "source/blender/blentranslation/intern",
         "source/blender/functions/intern",
-        "source/blender/depsgraph/intern/depsgraph_query.cc",
         "source/blender/nodes/intern/geometry_nodes_bundle.cc",
         "source/blender/windowmanager/intern/wm_operator_props.cc",
         {"path": "source/blender/makesrna/intern", "exclude": ["rna_access.cc", "rna_access_compare_override.cc", "rna_define.cc", "rna_path.cc",

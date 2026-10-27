@@ -15,6 +15,8 @@
 #include "BKE_object_types.hh"
 
 #include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_build.hh"
+#include "DEG_depsgraph_query.hh"
 
 #include "DNA_layer_types.h"
 #include "DNA_mesh_types.h"
@@ -369,14 +371,43 @@ bool ED_operator_editable_mesh(bContext *C) { return ED_operator_editmesh(C); }
 bool ED_operator_editmesh_region_view3d(bContext *C) { return ED_operator_editmesh(C); }
 
 /* port-override: the module has no depsgraph. The editor refuses Edit Mode on objects with modifiers, so what an
- * operator would read as evaluated is the original and nothing needs evaluating; the depsgraph is a token. */
-Depsgraph *BKE_scene_ensure_depsgraph(Main * /*bmain*/, Scene * /*scene*/, ViewLayer * /*view_layer*/)
+ * operator reads as evaluated is the original and nothing needs evaluating: the depsgraph is a token holding the scene
+ * it was asked for, and the queries depsgraph_query.cc would answer from a graph answer from it. */
+struct NoDepsgraph {
+  Main *bmain;
+  Scene *scene;
+  ViewLayer *view_layer;
+};
+static const NoDepsgraph &no_depsgraph(const Depsgraph *depsgraph) { return *reinterpret_cast<const NoDepsgraph *>(depsgraph); }
+Depsgraph *BKE_scene_ensure_depsgraph(Main *bmain, Scene *scene, ViewLayer *view_layer)
 {
-  static char token;
+  static NoDepsgraph token;
+  token = {bmain, scene, view_layer};
   return reinterpret_cast<Depsgraph *>(&token);
 }
 void DEG_make_active(Depsgraph * /*depsgraph*/) {}
+bool DEG_is_active(const Depsgraph * /*depsgraph*/) { return true; }
 void BKE_scene_graph_evaluated_ensure(Depsgraph * /*depsgraph*/, Main * /*bmain*/) {}
+void DEG_id_type_tag(Main * /*bmain*/, short /*id_type*/) {}
+void DEG_relations_tag_update(Main * /*bmain*/) {}
+Main *DEG_get_bmain(const Depsgraph *graph) { return no_depsgraph(graph).bmain; }
+Scene *DEG_get_input_scene(const Depsgraph *graph) { return no_depsgraph(graph).scene; }
+ViewLayer *DEG_get_input_view_layer(const Depsgraph *graph) { return no_depsgraph(graph).view_layer; }
+Scene *DEG_get_evaluated_scene(const Depsgraph *graph) { return no_depsgraph(graph).scene; }
+ViewLayer *DEG_get_evaluated_view_layer(const Depsgraph *graph) { return no_depsgraph(graph).view_layer; }
+eEvaluationMode DEG_get_mode(const Depsgraph * /*graph*/) { return DAG_EVAL_VIEWPORT; }
+ID *DEG_get_evaluated_id(const Depsgraph * /*depsgraph*/, ID *id) { return id; }
+const ID *DEG_get_evaluated_id(const Depsgraph * /*depsgraph*/, const ID *id) { return id; }
+/* No graph, so no custom data any of its evaluations asked for. */
+void DEG_get_customdata_mask_for_object(const Depsgraph * /*graph*/, Object * /*object*/, CustomData_MeshMasks * /*r_mask*/) {}
+
+/* As depsgraph_query.cc defines them. */
+ID *DEG_get_original_id(ID *id) { return id && id->orig_id ? id->orig_id : id; }
+const ID *DEG_get_original_id(const ID *id) { return id && id->orig_id ? id->orig_id : id; }
+bool DEG_is_original_id(const ID *id)
+{
+  return !(id->tag & (ID_TAG_COPIED_ON_EVAL | ID_TAG_COPIED_ON_EVAL_FINAL_RESULT | ID_TAG_LOCALIZED));
+}
 
 /* As view3d_select.cc defines them; the rest of the 3D View stays in JS. */
 ViewContext ED_view3d_viewcontext_init(bContext *C, Depsgraph *depsgraph)
