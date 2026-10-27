@@ -1,5 +1,6 @@
 // Blender's own Edit Mode operators in WebAssembly (src/bmesh/bmesh-wasm.js) against Blender 5.2's results: every fixture of an
-// operator the module has must match exactly, UVs, sharp faces and selection included.
+// operator the module has must match exactly, UVs, sharp faces and selection included. ONLY=prefix runs the fixtures
+// whose names start with it.
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
@@ -17,7 +18,6 @@ for (const file of await readdir(dir)) {
   const fixture = JSON.parse(await readFile(new URL(file, dir), 'utf8'));
   if (process.env.ONLY && !file.startsWith(process.env.ONLY)) continue;
   if (!fixture.edit || !hasOperator(fixture.edit.operator) || (fixture.edit.pre && !hasOperator(fixture.edit.pre.operator))) continue;
-  if (process.env.TRACE) console.error(file);
   const bm = editMeshFromMesh(primitive_add(fixture.operator, fixture.props), SELECT[fixture.edit.select_mode][0]);
   for (const step of [fixture.edit.pre, fixture.edit].filter(Boolean)) {
     const [mode, htype] = SELECT[step.select_mode];
