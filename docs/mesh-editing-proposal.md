@@ -34,6 +34,15 @@ An experienced Blender user enters Edit Mode with Tab and works without relearni
 | `BLI_polyfill_2d` and its beautify step | N-gon tessellation, also the Beauty method of Triangulate | A port, replacing earcut for meshes so n-gons shade identically |
 | `BLI_kdopbvh` | Ray casts and snapping | A flat BVH over `corner_tris` in typed arrays |
 
+Porting conventions, applied by `tools/blender-port/cc2js.mjs` (a C++ to JS converter for first drafts, verified and fixed by hand afterwards):
+
+- Function, struct field and slot names stay Blender's. Parameters stay in Blender's order. Functions that need the mesh and have no `bm` or `bp` take `bm` first.
+- Elements are indices, -1 for none. `v->co` is `vco(bm, v)`, `e->v1` is `bm.e.v1[e]`.
+- Vectors are `[x, y, z]` arrays used as values. Matrices are arrays of columns, `m[col][row]` as in C.
+- Out parameters are returned: alone from a void function, the out or null from a bool function with one, else `[return value, ...outs]` in parameter order.
+- Iterators are arrays named after Blender's iterator types: `for (const e of BM_EDGES_OF_VERT(bm, v))`.
+- `bmo_*_exec(bm, slots)` takes Blender's input slot names (`bmo_opdefines.cc`) and returns its output slots under the same names. A `bmesh` and `bpy.ops` facade over these, for scripts written against Blender's Python API, is planned.
+
 Axes: Mesh data is in Blender's axes (Z up, right-handed), so every ported algorithm and every Blender fixture applies unchanged. `src/draw/mesh-batch-cache.js` is the one place it meets Babylon's axes: (x, y, z) becomes (x, z, y). Swapping two axes also flips handedness, so Blender's winding stays front facing in Babylon. A test checks Babylon's own normals against ours.
 
 ## Module layout

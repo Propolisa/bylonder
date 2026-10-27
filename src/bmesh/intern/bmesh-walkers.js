@@ -1,6 +1,6 @@
 // Walkers (bmesh_walkers.cc, bmesh_walkers_impl.cc) as functions returning the elements in walk order.
 import { BMO_flag_test, BM_ELEM_HIDDEN } from './bmesh-class.js';
-import { BM_EDGES_OF_VERT, BM_FACES_OF_EDGE, BM_ITER_LOOPS_OF_VERT, BM_edge_other_vert } from './bmesh-query.js';
+import { BM_EDGES_OF_VERT, BM_FACES_OF_EDGE, BM_LOOPS_OF_VERT, BM_edge_other_vert } from './bmesh-query.js';
 
 // The walker masks (bmw_mask_check_*): a tool flag an element needs, and with `test_hidden` not hidden.
 const masks = (bm, { mask_vert = 0, mask_edge = 0, mask_face = 0, test_hidden = false }) => {
@@ -65,7 +65,7 @@ export function BMW_loop_shell_wire(bm, start, { htype = 'v', ...options } = {})
     for (const e of BM_EDGES_OF_VERT(bm, v)) {
       if (!is_wire(e) || e === e_from) continue;
       visitEdgeWire(e);
-      BM_ITER_LOOPS_OF_VERT(bm, BM_edge_other_vert(bm, e, v), visitLoop);
+      BM_LOOPS_OF_VERT(bm, BM_edge_other_vert(bm, e, v)).forEach(visitLoop);
     }
     alt.v.add(v);
   };
@@ -80,7 +80,7 @@ export function BMW_loop_shell_wire(bm, start, { htype = 'v', ...options } = {})
     }
   };
   if (htype === 'v') {
-    BM_ITER_LOOPS_OF_VERT(bm, start, visitLoop);
+    BM_LOOPS_OF_VERT(bm, start).forEach(visitLoop);
     if (bm.v.e[start] >= 0) visitVert(start);
   } else {
     const first = bm.e.l[start], radial = (fn) => { let it = first; if (first >= 0) do fn(it); while ((it = l.radial_next[it]) !== first); };

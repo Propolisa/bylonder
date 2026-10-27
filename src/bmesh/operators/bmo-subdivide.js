@@ -2,7 +2,7 @@
 // `use_sphere` (for primitives) is.
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
 import { BM_edge_split, BM_face_split } from '../intern/bmesh-mods.js';
-import { BM_vert_pair_share_face_by_len, BM_edge_share_vert_check, BM_vert_in_face, BM_ITER_LOOPS_OF_VERT } from '../intern/bmesh-query.js';
+import { BM_vert_pair_share_face_by_len, BM_edge_share_vert_check, BM_vert_in_face, BM_LOOPS_OF_VERT } from '../intern/bmesh-query.js';
 import { BMO_op_callf } from '../intern/bmesh-operators.js';
 import { BM_elem_select_set, BM_mesh_elem_hflag_disable_all, BM_mesh_select_flush_from_verts } from '../intern/bmesh-marking.js';
 
@@ -251,7 +251,7 @@ export function bmo_subdivide_edges_exec(bm, edges, {
       for (let j = 0; j < cuts; j++) {
         // An edge pair shared by another face is ambiguous: skip it (#32500).
         let ok = true;
-        BM_ITER_LOOPS_OF_VERT(bm, bm.l.v[loops[a]], (other) => { if (bm.l.f[other] !== face && BM_vert_in_face(bm, bm.l.v[loops[b]], bm.l.f[other])) ok = false; });
+        BM_LOOPS_OF_VERT(bm, bm.l.v[loops[a]]).forEach((other) => { if (bm.l.f[other] !== face && BM_vert_in_face(bm, bm.l.v[loops[b]], bm.l.f[other])) ok = false; });
         splits.push(ok ? [loops[a], loops[b]] : null);
         b = (b - 1) % vlen;
         a = (a + 1) % vlen;

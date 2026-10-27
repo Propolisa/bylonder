@@ -3,7 +3,7 @@
 import { BM_ITER_MESH, BM_ELEM_TAG, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
 import { BM_edge_create, BM_elem_attrs_copy, BM_vert_splice, bmesh_kernel_edge_separate, bmesh_kernel_vert_separate } from '../intern/bmesh-core.js';
 import { BM_face_create_verts } from '../intern/bmesh-construct.js';
-import { BM_edge_is_boundary, BM_edge_other_vert, BM_edge_other_loop, BM_ITER_LOOPS_OF_VERT, BM_EDGES_OF_VERT } from '../intern/bmesh-query.js';
+import { BM_edge_is_boundary, BM_edge_other_vert, BM_edge_other_loop, BM_LOOPS_OF_VERT, BM_EDGES_OF_VERT } from '../intern/bmesh-query.js';
 import { BM_mesh_normals_update } from '../intern/bmesh-mesh-normals.js';
 import { angle_v3v3v3, sub_v3, add_v3, mul_v3_fl, dot_v3, cross_v3, len_v3, normalize_v3 } from '../../blenlib/math-geom.js';
 
@@ -20,7 +20,7 @@ function shell_v3v3_mid_normalized_to_dist(a, b) {
 function BM_vert_calc_shell_factor(bm, v) {
   const { l } = bm, no = Array.from(bm.v.no.subarray(v * 3, v * 3 + 3));
   let shell = 0, angle = 0;
-  BM_ITER_LOOPS_OF_VERT(bm, v, (lp) => {
+  BM_LOOPS_OF_VERT(bm, v).forEach((lp) => {
     const n = fno(bm, l.f[lp]);
     if (!n[0] && !n[1] && !n[2]) return;
     const a = angle_v3v3v3(co(bm, l.v[l.prev[lp]]), co(bm, l.v[lp]), co(bm, l.v[l.next[lp]]));
@@ -146,7 +146,7 @@ export function bmo_inset_region_exec(bm, faces, {
         // Glue split verts that use no tagged face back together.
         if (vout.length > 2) {
           let ok = true;
-          BM_ITER_LOOPS_OF_VERT(bm, v_split, (lp) => { if (BM_elem_flag_test(bm.f, l.f[lp], BM_ELEM_TAG)) ok = false; });
+          BM_LOOPS_OF_VERT(bm, v_split).forEach((lp) => { if (BM_elem_flag_test(bm.f, l.f[lp], BM_ELEM_TAG)) ok = false; });
           if (ok) {
             if (v_glue < 0) v_glue = v_split;
             else if (BM_vert_splice(bm, v_glue, v_split)) vert_coords.delete(v_split);

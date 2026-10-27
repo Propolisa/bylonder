@@ -1,4 +1,4 @@
-// Primitive operators (bmo_primitive.cc). Run through BMO_op_callf; `matrix` is a column-major 4x4.
+// Primitive operators (bmo_primitive.cc). Run through BMO_op_callf; `matrix` is a 4x4 of columns.
 import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable, poolLayer } from '../intern/bmesh-class.js';
 import { BM_vert_create, BM_edge_create, BM_vert_kill } from '../intern/bmesh-core.js';
 import { BM_face_create_verts, BM_face_create_quad_tri } from '../intern/bmesh-construct.js';
@@ -7,7 +7,7 @@ import { BM_face_normal_update } from '../intern/bmesh-polygon.js';
 import { BMO_op_callf } from '../intern/bmesh-operators.js';
 import { bmo_dissolve_faces_exec } from './bmo-dissolve.js';
 import { sin_cos_from_fraction } from '../../blenlib/math-rotation.js';
-import { mul_m4_v3, mul_mat3_m4_v3, invert_m4, unit_m4 } from '../../blenlib/math-matrix.js';
+import { mul_m4_v3, mul_mat3_m4_v3, invert_m4_m4, unit_m4 } from '../../blenlib/math-matrix.js';
 
 const VERT_MARK = 1, FACE_MARK = 1 << 1, FACE_NEW = 1 << 2;
 const f32 = Math.fround;
@@ -124,7 +124,7 @@ function dissolveMarked(bm, flag) {
 
 export function BM_mesh_calc_uvs_circle(bm, matrix, radius, oflag, uv) {
   const uv_scale = f32(0.5 / radius), uv_center = 0.5;
-  const inv = invert_m4(matrix);
+  const inv = invert_m4_m4(matrix);
   markedFaces(bm, oflag, (f) => loopsOf(bm, f, (l) => {
     const [x, y] = mul_m4_v3(inv, bm.v.co.subarray(bm.l.v[l] * 3, bm.l.v[l] * 3 + 3));
     setUV(uv, l, f32(uv_center + uv_scale * x), f32(uv_center + uv_scale * y));
@@ -193,7 +193,7 @@ export function BM_mesh_calc_uvs_cone(bm, matrix, radius_top, radius_bottom, seg
   const uv_scale_top = radius_top !== 0 ? f32(uv_radius / radius_top) : radius_bottom !== 0 ? f32(uv_radius / radius_bottom) : uv_radius;
   const uv_scale_bottom = radius_bottom !== 0 ? f32(uv_radius / radius_bottom) : uv_scale_top;
   const up = mul_mat3_m4_v3(matrix, [0, 0, 1]);
-  const inv = invert_m4(matrix);
+  const inv = invert_m4_m4(matrix);
   let x = 1, y = f32(1 - uv_height);
   markedFaces(bm, oflag, (f) => {
     if (bm.f.len[f] === 4 && radius_top && radius_bottom) {

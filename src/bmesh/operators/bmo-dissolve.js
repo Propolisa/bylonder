@@ -2,7 +2,7 @@
 import { BM_ITER_MESH, BM_ELEM_HIDDEN, BM_ELEM_SELECT, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_merge_ex, BMO_flag_test, BMO_flag_enable, BMO_flag_disable } from '../intern/bmesh-class.js';
 import { BM_faces_join, BM_face_kill, BM_edge_kill, BM_vert_kill } from '../intern/bmesh-core.js';
 import { BM_face_split, BM_faces_join_pair, BM_vert_collapse_edge } from '../intern/bmesh-mods.js';
-import { BM_EDGES_OF_VERT, BM_ITER_LOOPS_OF_VERT, BM_edge_other_vert, BM_edge_is_wire, BM_edge_is_boundary, BM_vert_is_edge_pair, BM_vert_edge_pair, BM_edge_face_pair, BM_edge_loop_pair, BM_loop_other_edge_loop } from '../intern/bmesh-query.js';
+import { BM_EDGES_OF_VERT, BM_LOOPS_OF_VERT, BM_edge_other_vert, BM_edge_is_wire, BM_edge_is_boundary, BM_vert_is_edge_pair, BM_vert_edge_pair, BM_edge_face_pair, BM_edge_loop_pair, BM_loop_other_edge_loop } from '../intern/bmesh-query.js';
 import { bmesh_disk_edge_next } from '../intern/bmesh-structure.js';
 import { BM_face_calc_normal } from '../intern/bmesh-polygon.js';
 import { BM_edge_select_set_noflush } from '../intern/bmesh-marking.js';
@@ -47,7 +47,6 @@ const EDGE_TAG = 2, EDGE_ISGC = 8, EDGE_CHAIN = 16;
 const VERT_MARK = 1, VERT_TAG = 2, VERT_MARK_PAIR = 4, VERT_ISGC = 8, VERT_MARK_TEAR = 16;
 const coOf = (bm, v) => [bm.v.co[v * 3], bm.v.co[v * 3 + 1], bm.v.co[v * 3 + 2]];
 const loopsOfFace = (bm, f) => { const out = [], first = bm.f.l_first[f]; let l = first; do out.push(l); while ((l = bm.l.next[l]) !== first); return out; };
-const loopsOfVert = (bm, v) => { const out = []; BM_ITER_LOOPS_OF_VERT(bm, v, (l) => out.push(l)); return out; };
 
 // The angle at a vert with two edges: the raw angle, blended towards the angle around the vert normal as its two
 // faces fold past 90 degrees.
@@ -79,7 +78,7 @@ function bm_face_split(bm, oflag, use_edge_delete) {
   const { l } = bm, tear = [];
   BM_ITER_MESH(bm.v, (v) => {
     if (!BMO_flag_test(bm.v, v, oflag) || BM_vert_is_edge_pair(bm, v)) return;
-    BM_ITER_LOOPS_OF_VERT(bm, v, (lp) => {
+    BM_LOOPS_OF_VERT(bm, v).forEach((lp) => {
       if (bm.f.len[l.f[lp]] > 3 && !BMO_flag_test(bm.v, l.v[l.next[lp]], oflag) && !BMO_flag_test(bm.v, l.v[l.prev[lp]], oflag)) BM_face_split(bm, l.f[lp], l.next[lp], l.prev[lp], -1, true);
     });
     if (use_edge_delete) tear.push(v);
@@ -105,7 +104,7 @@ export function bmo_dissolve_verts_exec(bm, verts, { use_face_split = false, use
   }
   for (const v of verts) {
     let e_first = -1;
-    for (const l_first of loopsOfVert(bm, v)) {
+    for (const l_first of BM_LOOPS_OF_VERT(bm, v)) {
       for (const lp of loopsOfFace(bm, bm.l.f[l_first])) {
         BMO_flag_enable(bm.v, bm.l.v[lp], VERT_ISGC);
         BMO_flag_enable(bm.e, bm.l.e[lp], EDGE_ISGC);
@@ -145,7 +144,7 @@ function bmo_find_end_of_chain(bm, e, v, edge_oflag = 0) {
 // Whether dissolving v would alter a face none of its tagged edges belong to.
 function bmo_vert_touches_unselected_face(bm, v) {
   if (BMO_flag_test(bm.v, v, VERT_MARK)) return false;
-  return loopsOfVert(bm, v).some((l_a) => !BMO_flag_test(bm.e, bm.l.e[l_a], EDGE_TAG) && !BMO_flag_test(bm.e, bm.l.e[BM_loop_other_edge_loop(bm, l_a, v)], EDGE_TAG));
+  return BM_LOOPS_OF_VERT(bm, v).some((l_a) => !BMO_flag_test(bm.e, bm.l.e[l_a], EDGE_TAG) && !BMO_flag_test(bm.e, bm.l.e[BM_loop_other_edge_loop(bm, l_a, v)], EDGE_TAG));
 }
 const tagged_edges_count_at_most = (bm, v, oflag, max) => Math.min(BM_EDGES_OF_VERT(bm, v).filter((e) => BMO_flag_test(bm.e, e, oflag)).length, max);
 
