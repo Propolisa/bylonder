@@ -2,6 +2,7 @@
 // theme's colors.
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
+import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
@@ -40,6 +41,8 @@ function overlayMaterial(scene, name, { fillMode, pointSize = 1, depthUnits, slo
   return material;
 }
 
+const ACTIVE = [1, 1, 1, 1];
+const color = (c, out, o) => { out[o] = c[0]; out[o + 1] = c[1]; out[o + 2] = c[2]; out[o + 3] = c[3]; };
 const babylon = (p, v, out, o) => { out[o] = p[v * 3]; out[o + 1] = p[v * 3 + 2]; out[o + 2] = p[v * 3 + 1]; };
 
 export function createEditMeshOverlay(owner) {
@@ -57,53 +60,76 @@ export function createEditMeshOverlay(owner) {
   const faces = part('edit faces', { fillMode: Material.TriangleFillMode, depthUnits: 2e-5, slopeScale: 4, alpha: true });
   const edges = part('edit edges', { fillMode: Material.LineListDrawMode, depthUnits: 4e-5, slopeScale: 4 });
   const verts = part('edit verts', { fillMode: Material.PointListDrawMode, pointSize: theme.vertex_size * 2, depthUnits: 6e-5, slopeScale: 0, round: 1 });
-  // Fresh geometry each time: element counts change with every edit.
-  const apply = (mesh, positions, colors, indices) => {
-    mesh.geometry?.dispose();
-    const data = new VertexData();
-    Object.assign(data, { positions, colors, indices });
-    data.applyToMesh(mesh);
-    mesh.setEnabled(indices.length > 0);
-  };
+  // Positions, colors and drawn indices per part, kept while the topology stays, as Blender keeps its edit mode
+  // buffers and refills the ones out of date.
+  let buffers = null;
+
+  function fillPositions(mesh) {
+    const p = mesh.vert_positions, edgeVerts = mesh.edges, cv = mesh.corner_verts, tris = mesh.corner_tris();
+    for (let v = 0; v < mesh.verts_num; v++) babylon(p, v, buffers.verts.positions, v * 3);
+    for (let i = 0; i < edgeVerts.length; i++) babylon(p, edgeVerts[i], buffers.edges.positions, i * 3);
+    for (let t = 0; t < tris.length; t++) babylon(p, cv[tris[t]], buffers.faces.positions, t * 3);
+  }
+
+  function fillColors(mesh, selectmode, active) {
+    const attr = (name) => mesh.attribute(name), edgeVerts = mesh.edges, triFace = mesh.corner_tri_faces();
+    const selVert = attr('.select_vert'), selEdge = attr('.select_edge'), selFace = attr('.select_poly');
+    const hideVert = attr('.hide_vert'), hideEdge = attr('.hide_edge'), hideFace = attr('.hide_poly');
+    const vertexMode = selectmode & SCE_SELECT_VERTEX;
+    const isActive = (type, index) => active?.type === type && active.index === index;
+    const { verts: vb, edges: eb, faces: fb } = buffers;
+    let n = 0;
+    for (let v = 0; v < mesh.verts_num; v++) {
+      color(isActive('vert', v) ? ACTIVE : selVert[v] ? theme.vertex_select : theme.vertex, vb.colors, v * 4);
+      if (vertexMode && !hideVert[v]) vb.indices[n++] = v;
+    }
+    vb.count = n;
+    n = 0;
+    for (let e = 0; e < mesh.edges_num; e++) {
+      for (let k = 0; k < 2; k++) {
+        const on = vertexMode ? selVert[edgeVerts[e * 2 + k]] : selEdge[e];
+        color(isActive('edge', e) ? ACTIVE : on ? theme.edge_select : theme.wire_edit, eb.colors, e * 8 + k * 4);
+      }
+      if (!hideEdge[e]) { eb.indices[n++] = e * 2; eb.indices[n++] = e * 2 + 1; }
+    }
+    eb.count = n;
+    n = 0;
+    for (let t = 0; t < triFace.length; t++) {
+      const f = triFace[t];
+      if (hideFace[f]) continue;
+      const tint = isActive('face', f) ? theme.editmesh_active : selFace[f] ? theme.face_select : null;
+      if (!tint) continue;
+      for (let k = t * 3; k < t * 3 + 3; k++) { color(tint, fb.colors, k * 4); fb.indices[n++] = k; }
+    }
+    fb.count = n;
+  }
+
+  const buffer = (elements, perElement) => ({ positions: new Float32Array(elements * perElement * 3), colors: new Float32Array(elements * perElement * 4), indices: new Uint32Array(elements * perElement), count: 0 });
+  const drawn = (b) => b.indices.subarray(0, b.count);
 
   return {
-    // Redraws from the edited Mesh (selection and hiding in its attributes) and the active element.
-    update(mesh, { selectmode, active }) {
-      const p = mesh.vert_positions, attr = (name) => mesh.attribute(name);
-      const selVert = attr('.select_vert'), selEdge = attr('.select_edge'), selFace = attr('.select_poly');
-      const hideVert = attr('.hide_vert'), hideEdge = attr('.hide_edge'), hideFace = attr('.hide_poly');
-      const vertexMode = selectmode & SCE_SELECT_VERTEX;
-
-      const vPos = new Float32Array(mesh.verts_num * 3), vCol = new Float32Array(mesh.verts_num * 4), vIdx = [];
-      for (let v = 0; v < mesh.verts_num; v++) {
-        babylon(p, v, vPos, v * 3);
-        vCol.set(active?.type === 'vert' && active.index === v ? [1, 1, 1, 1] : selVert?.[v] ? theme.vertex_select : theme.vertex, v * 4);
-        if (vertexMode && !hideVert?.[v]) vIdx.push(v);
+    // Redraws from the edit mesh's Mesh (selection and hiding in its attributes) and the active element, refilling
+    // what changed: `topology`, `positions` or `flags` (selection, hiding, the select mode and the active element).
+    update(mesh, { selectmode, active, topology = true, positions = true, flags = true }) {
+      topology ||= !buffers;
+      if (topology) buffers = { verts: buffer(mesh.verts_num, 1), edges: buffer(mesh.edges_num, 2), faces: buffer(mesh.corner_tris().length / 3, 3) };
+      if (topology || positions) fillPositions(mesh);
+      if (topology || flags) fillColors(mesh, selectmode, active);
+      for (const [target, b] of [[verts, buffers.verts], [edges, buffers.edges], [faces, buffers.faces]]) {
+        if (topology) {
+          target.geometry?.dispose();
+          const data = new VertexData();
+          Object.assign(data, { positions: b.positions, colors: b.colors, indices: drawn(b) });
+          data.applyToMesh(target, true);
+        } else {
+          if (positions) target.updateVerticesData(VertexBuffer.PositionKind, b.positions);
+          if (flags) {
+            target.updateVerticesData(VertexBuffer.ColorKind, b.colors);
+            target.setIndices(drawn(b));
+          }
+        }
+        target.setEnabled(b.count > 0);
       }
-      apply(verts, vPos, vCol, vIdx);
-
-      const ePos = new Float32Array(mesh.edges_num * 6), eCol = new Float32Array(mesh.edges_num * 8), eIdx = [];
-      for (let e = 0; e < mesh.edges_num; e++) {
-        const ends = [mesh.edges[e * 2], mesh.edges[e * 2 + 1]];
-        ends.forEach((v, k) => {
-          babylon(p, v, ePos, e * 6 + k * 3);
-          const on = vertexMode ? selVert?.[v] : selEdge?.[e];
-          eCol.set(active?.type === 'edge' && active.index === e ? [1, 1, 1, 1] : on ? theme.edge_select : theme.wire_edit, e * 8 + k * 4);
-        });
-        if (!hideEdge?.[e]) eIdx.push(e * 2, e * 2 + 1);
-      }
-      apply(edges, ePos, eCol, eIdx);
-
-      const tris = mesh.corner_tris(), cv = mesh.corner_verts, triFace = mesh.corner_tri_faces();
-      const fPos = new Float32Array(tris.length * 3), fCol = new Float32Array(tris.length * 4), fIdx = [];
-      for (let t = 0; t < tris.length; t++) {
-        const f = triFace[Math.floor(t / 3)];
-        babylon(p, cv[tris[t]], fPos, t * 3);
-        if (hideFace?.[f]) continue;
-        const color = active?.type === 'face' && active.index === f ? theme.editmesh_active : selFace?.[f] ? theme.face_select : null;
-        if (color) { fCol.set(color, t * 4); fIdx.push(t); }
-      }
-      apply(faces, fPos, fCol, fIdx);
     },
     dispose() { for (const mesh of [faces, edges, verts]) { mesh.material.dispose(); mesh.dispose(); } },
   };

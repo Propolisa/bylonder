@@ -36,9 +36,11 @@ export function createMesh({ vert_positions, edges, face_offsets, corner_verts, 
     // Edges no face uses, as indices.
     loose_edges() {
       if (cache.loose_edges) return cache.loose_edges;
-      const used = new Uint8Array(mesh.edges_num);
-      for (const e of mesh.corner_edges) used[e] = 1;
-      return (cache.loose_edges = Uint32Array.from({ length: mesh.edges_num }, (_, e) => e).filter((e) => !used[e]));
+      const used = new Uint8Array(mesh.edges_num), corner_edges = mesh.corner_edges;
+      for (let c = 0; c < corner_edges.length; c++) used[corner_edges[c]] = 1;
+      const loose = new Uint32Array(used.length - used.reduce((sum, u) => sum + u, 0));
+      for (let e = 0, n = 0; e < used.length; e++) if (!used[e]) loose[n++] = e;
+      return (cache.loose_edges = loose);
     },
     bounds_min_max() {
       if (cache.bounds) return cache.bounds;

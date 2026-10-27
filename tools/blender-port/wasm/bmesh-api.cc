@@ -5,17 +5,17 @@
 #include "BLI_listbase.h"
 #include "BLI_array.hh"
 #include "BLI_math_rotation.h"
+#include "BLI_math_geom.h"
 #include "BLI_math_vector.h"
 #include "BKE_customdata.hh"
 #include "DNA_scene_types.h"
 #include "bmesh.hh"
+#include "extraction.hh"
 
 using namespace blender;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
-/* The boolean attributes BM_mesh_bm_from_me reads and BM_mesh_bm_to_me writes. */
-enum MeshFlag { SELECT_VERT, HIDE_VERT, SELECT_EDGE, HIDE_EDGE, UV_SEAM, SHARP_EDGE, SELECT_POLY, HIDE_POLY, SHARP_FACE, FLAGS_NUM };
 
 /* BM_mesh_bm_from_me for a new BMesh with tool flags (EDBM_mesh_make), then normals as edit mode has them. */
 EXPORT(bm_from_arrays)
@@ -98,64 +98,110 @@ BMesh *bm_from_arrays(int verts_num, const float (*positions)[3], int edges_num,
 }
 EXPORT(bm_free) void bm_free(BMesh *bm) { BM_mesh_free(bm); }
 
-/* Element counts, after indexing the elements in the order BM_mesh_bm_to_me writes them. */
-EXPORT(bm_size) int bm_size(BMesh *bm, int what)
+template<typename T> static T *sized(Vector<T> &buffer, int size)
 {
-  BM_mesh_elem_index_ensure(bm, BM_VERT | BM_EDGE | BM_FACE | BM_LOOP);
-  const int sizes[] = {bm->totvert, bm->totedge, bm->totface, bm->totloop};
-  return sizes[what];
+  buffer.resize(size);
+  return buffer.data();
 }
 
-/* Whether the BMesh has the UV map. */
-EXPORT(bm_has_uv) bool bm_has_uv(BMesh *bm)
+/* BM_mesh_bm_to_me's arrays and order, with the normals and triangles Blender's edit mode draws (the BMesh's own,
+ * and BM_mesh_calc_tessellation's as BKE_editmesh_looptris_calc has them). */
+void blender::extraction_update(BMesh *bm, Extraction &ex, int what)
 {
-  return CustomData_get_offset_named(&bm->ldata, CD_PROP_FLOAT2, "UVMap") != -1;
-}
-
-/* BM_mesh_bm_to_me's arrays, into buffers sized by bm_size; uvs only when bm_has_uv. */
-EXPORT(bm_to_arrays)
-void bm_to_arrays(BMesh *bm, float (*positions)[3], int (*edges)[2], int *face_offsets, int *corner_verts,
-                  int *corner_edges, float (*uvs)[2], bool *const *flags)
-{
-  auto set = [&](MeshFlag f, int i, const BMHeader &head, char hflag) { flags[f][i] = (head.hflag & hflag) != 0; };
-  const int cd_uv = CustomData_get_offset_named(&bm->ldata, CD_PROP_FLOAT2, "UVMap");
+  ExtractionHeader &h = ex.header;
+  if (what & EXTRACT_TOPOLOGY) {
+    what |= EXTRACT_POSITIONS | EXTRACT_FLAGS | EXTRACT_UV;
+  }
   BM_mesh_elem_index_ensure(bm, BM_VERT | BM_EDGE | BM_FACE | BM_LOOP);
   BMIter iter;
   BMVert *v;
-  int i;
-  BM_ITER_MESH_INDEX (v, &iter, bm, BM_VERTS_OF_MESH, i) {
-    copy_v3_v3(positions[i], v->co);
-    set(SELECT_VERT, i, v->head, BM_ELEM_SELECT);
-    set(HIDE_VERT, i, v->head, BM_ELEM_HIDDEN);
-  }
   BMEdge *e;
-  BM_ITER_MESH_INDEX (e, &iter, bm, BM_EDGES_OF_MESH, i) {
-    edges[i][0] = BM_elem_index_get(e->v1);
-    edges[i][1] = BM_elem_index_get(e->v2);
-    set(SELECT_EDGE, i, e->head, BM_ELEM_SELECT);
-    set(HIDE_EDGE, i, e->head, BM_ELEM_HIDDEN);
-    set(UV_SEAM, i, e->head, BM_ELEM_SEAM);
-    flags[SHARP_EDGE][i] = !BM_elem_flag_test(e, BM_ELEM_SMOOTH);
-  }
   BMFace *f;
-  int corner = 0;
-  BM_ITER_MESH_INDEX (f, &iter, bm, BM_FACES_OF_MESH, i) {
-    face_offsets[i] = corner;
-    set(SELECT_POLY, i, f->head, BM_ELEM_SELECT);
-    set(HIDE_POLY, i, f->head, BM_ELEM_HIDDEN);
-    flags[SHARP_FACE][i] = !BM_elem_flag_test(f, BM_ELEM_SMOOTH);
-    BMLoop *l_iter, *l_first;
-    l_iter = l_first = BM_FACE_FIRST_LOOP(f);
-    do {
-      corner_verts[corner] = BM_elem_index_get(l_iter->v);
-      corner_edges[corner] = BM_elem_index_get(l_iter->e);
-      if (cd_uv != -1) {
-        copy_v2_v2(uvs[corner], BM_ELEM_CD_GET_FLOAT_P(l_iter, cd_uv));
-      }
-      corner++;
-    } while ((l_iter = l_iter->next) != l_first);
+  int i;
+  if (what & EXTRACT_TOPOLOGY) {
+    h.verts_num = bm->totvert;
+    h.edges_num = bm->totedge;
+    h.faces_num = bm->totface;
+    h.corners_num = bm->totloop;
+    h.tris_num = poly_to_tri_count(bm->totface, bm->totloop);
+    h.edges = reinterpret_cast<int(*)[2]>(sized(ex.edges, h.edges_num));
+    h.face_offsets = sized(ex.face_offsets, h.faces_num + 1);
+    h.corner_verts = sized(ex.corner_verts, h.corners_num);
+    h.corner_edges = sized(ex.corner_edges, h.corners_num);
+    BM_ITER_MESH_INDEX (e, &iter, bm, BM_EDGES_OF_MESH, i) {
+      h.edges[i][0] = BM_elem_index_get(e->v1);
+      h.edges[i][1] = BM_elem_index_get(e->v2);
+    }
+    int corner = 0;
+    BM_ITER_MESH_INDEX (f, &iter, bm, BM_FACES_OF_MESH, i) {
+      h.face_offsets[i] = corner;
+      BMLoop *l_iter, *l_first;
+      l_iter = l_first = BM_FACE_FIRST_LOOP(f);
+      do {
+        h.corner_verts[corner] = BM_elem_index_get(l_iter->v);
+        h.corner_edges[corner++] = BM_elem_index_get(l_iter->e);
+      } while ((l_iter = l_iter->next) != l_first);
+    }
+    h.face_offsets[h.faces_num] = corner;
   }
-  face_offsets[bm->totface] = corner;
+  if (what & EXTRACT_POSITIONS) {
+    h.positions = reinterpret_cast<float(*)[3]>(sized(ex.positions, h.verts_num));
+    h.vert_normals = reinterpret_cast<float(*)[3]>(sized(ex.vert_normals, h.verts_num));
+    h.face_normals = reinterpret_cast<float(*)[3]>(sized(ex.face_normals, h.faces_num));
+    h.corner_tris = reinterpret_cast<int(*)[3]>(sized(ex.corner_tris, h.tris_num));
+    h.tri_faces = sized(ex.tri_faces, h.tris_num);
+    BM_ITER_MESH_INDEX (v, &iter, bm, BM_VERTS_OF_MESH, i) {
+      copy_v3_v3(h.positions[i], v->co);
+      copy_v3_v3(h.vert_normals[i], v->no);
+    }
+    BM_ITER_MESH_INDEX (f, &iter, bm, BM_FACES_OF_MESH, i) {
+      copy_v3_v3(h.face_normals[i], f->no);
+    }
+    Array<std::array<BMLoop *, 3>> looptris(h.tris_num);
+    BM_mesh_calc_tessellation(bm, looptris);
+    for (i = 0; i < h.tris_num; i++) {
+      for (int j = 0; j < 3; j++) {
+        h.corner_tris[i][j] = BM_elem_index_get(looptris[i][j]);
+      }
+      h.tri_faces[i] = BM_elem_index_get(looptris[i][0]->f);
+    }
+  }
+  if (what & EXTRACT_FLAGS) {
+    const int sizes[FLAGS_NUM] = {h.verts_num, h.verts_num, h.edges_num, h.edges_num, h.edges_num, h.edges_num,
+                                  h.faces_num, h.faces_num, h.faces_num};
+    for (int flag = 0; flag < FLAGS_NUM; flag++) {
+      h.flags[flag] = sized(ex.flags[flag], sizes[flag]);
+    }
+    auto set = [&](MeshFlag flag, int i, const BMHeader &head, char hflag) { h.flags[flag][i] = (head.hflag & hflag) != 0; };
+    BM_ITER_MESH_INDEX (v, &iter, bm, BM_VERTS_OF_MESH, i) {
+      set(SELECT_VERT, i, v->head, BM_ELEM_SELECT);
+      set(HIDE_VERT, i, v->head, BM_ELEM_HIDDEN);
+    }
+    BM_ITER_MESH_INDEX (e, &iter, bm, BM_EDGES_OF_MESH, i) {
+      set(SELECT_EDGE, i, e->head, BM_ELEM_SELECT);
+      set(HIDE_EDGE, i, e->head, BM_ELEM_HIDDEN);
+      set(UV_SEAM, i, e->head, BM_ELEM_SEAM);
+      h.flags[SHARP_EDGE][i] = !BM_elem_flag_test(e, BM_ELEM_SMOOTH);
+    }
+    BM_ITER_MESH_INDEX (f, &iter, bm, BM_FACES_OF_MESH, i) {
+      set(SELECT_POLY, i, f->head, BM_ELEM_SELECT);
+      set(HIDE_POLY, i, f->head, BM_ELEM_HIDDEN);
+      h.flags[SHARP_FACE][i] = !BM_elem_flag_test(f, BM_ELEM_SMOOTH);
+    }
+  }
+  if (what & EXTRACT_UV) {
+    const int cd_uv = CustomData_get_offset_named(&bm->ldata, CD_PROP_FLOAT2, "UVMap");
+    h.uvs = cd_uv == -1 ? nullptr : reinterpret_cast<float(*)[2]>(sized(ex.uvs, h.corners_num));
+    BMLoop *l;
+    if (h.uvs) {
+      BM_ITER_MESH (f, &iter, bm, BM_FACES_OF_MESH) {
+        BMIter liter;
+        BM_ITER_ELEM (l, &liter, f, BM_LOOPS_OF_FACE) {
+          copy_v2_v2(h.uvs[BM_elem_index_get(l)], BM_ELEM_CD_GET_FLOAT_P(l, cd_uv));
+        }
+      }
+    }
+  }
 }
 
 static BMElem *element_at(BMesh *bm, int htype, int index)

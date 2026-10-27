@@ -54,6 +54,43 @@ export const hasOperator = (idname) => operatorTypes.has(idname);
 // wmOperatorStatus flags.
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4;
 
+// What changed since the last extraction (ExtractFlag in extraction.hh): topology, which refills everything, positions
+// (with normals and triangles), flags, or the UV map.
+export const EXTRACT_TOPOLOGY = 1, EXTRACT_POSITIONS = 2, EXTRACT_FLAGS = 4, EXTRACT_UV = 8, EXTRACT_ALL = 15;
+
+// The Mesh of an extraction (ExtractionHeader): counts, then buffer pointers. Its arrays are views made again when the
+// module's memory grows, which detaches the old ones.
+function extractedMesh(header) {
+  const words = Array.from(new Uint32Array(x.memory.buffer, header, 5 + 10 + FLAGS.length));
+  const [verts, edges, faces, corners, tris] = words, at = (i) => words[5 + i];
+  const sizes = { POINT: verts, EDGE: edges, FACE: faces };
+  const layout = {
+    vert_positions: [Float32Array, at(0), verts * 3], vert_normals: [Float32Array, at(1), verts * 3], face_normals: [Float32Array, at(2), faces * 3],
+    edges: [Int32Array, at(3), edges * 2], face_offsets: [Int32Array, at(4), faces + 1], corner_verts: [Int32Array, at(5), corners],
+    corner_edges: [Int32Array, at(6), corners], corner_tris: [Int32Array, at(7), tris * 3], tri_faces: [Int32Array, at(8), tris],
+    UVMap: [Float32Array, at(9), corners * 2],
+    ...Object.fromEntries(FLAGS.map(([name, domain], i) => [name, [Uint8Array, at(10 + i), sizes[domain]]])),
+  };
+  let buffer = null, views = {};
+  const view = (name) => {
+    if (buffer !== x.memory.buffer) [buffer, views] = [x.memory.buffer, {}];
+    const [Type, pointer, length] = layout[name];
+    return (views[name] ??= new Type(buffer, pointer, length));
+  };
+  const mesh = createMesh({});
+  for (const name of ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges']) Object.defineProperty(mesh, name, { get: () => view(name) });
+  Object.defineProperties(mesh, { verts_num: { value: verts }, edges_num: { value: edges }, faces_num: { value: faces }, corners_num: { value: corners } });
+  const attribute = (name, domain, type) => [name, { domain, type, get data() { return view(name); } }];
+  mesh.attributes = new Map([...FLAGS.map(([name, domain]) => attribute(name, domain, 'BOOLEAN')), ...(at(9) ? [attribute('UVMap', 'CORNER', 'FLOAT2')] : [])]);
+  Object.assign(mesh, {
+    corner_tris: () => view('corner_tris'),
+    corner_tri_faces: () => view('tri_faces'),
+    face_normals: () => view('face_normals'),
+    vert_normals: () => view('vert_normals'),
+  });
+  return mesh;
+}
+
 const freeing = new FinalizationRegistry((context) => x.edit_context_free(context));
 
 // Blender's edit mesh (BMEditMesh) and the context its operators run in. Elements are named by type (BM_VERT, BM_EDGE,
@@ -107,22 +144,18 @@ export class EditMesh {
     return { totvert, totvertsel, totedge, totedgesel, totface, totfacesel, totloop };
   }
 
-  // The Mesh arrays of the edit mesh, with its UV map and flags.
+  // The edit mesh's Mesh as Blender's draw cache extracts it, refilling what changed since the last extraction (EXTRACT_*).
+  // Its arrays are views of buffers the edit mesh owns, so it is valid until the next extraction; toMesh() copies.
+  extract(what) {
+    return extractedMesh(x.edit_mesh_extract(this.#context, what) >>> 0);
+  }
+
+  // A Mesh of the edit mesh that is its own: arrays, UV map and flags.
   toMesh() {
-    const bm = this.#bm;
-    const [verts, edges, faces, corners] = [0, 1, 2, 3].map((i) => x.bm_size(bm, i));
-    const sizes = { POINT: verts, EDGE: edges, FACE: faces };
-    const arrays = [new Float32Array(verts * 3), new Int32Array(edges * 2), new Int32Array(faces + 1), new Int32Array(corners), new Int32Array(corners),
-      x.bm_has_uv(bm) ? new Float32Array(corners * 2) : null];
-    const flags = FLAGS.map(([, domain]) => new Uint8Array(sizes[domain]));
-    withArrays([...arrays, ...flags], (pointers) => {
-      withArrays([Int32Array.from(pointers.slice(arrays.length))], ([table]) => x.bm_to_arrays(bm, ...pointers.slice(0, arrays.length), table));
-      [...arrays, ...flags].forEach((a, i) => a?.set(new a.constructor(x.memory.buffer, pointers[i], a.length)));
-    });
-    const [vert_positions, edge_verts, face_offsets, corner_verts, corner_edges, uvs] = arrays;
-    const attributes = Object.fromEntries(FLAGS.map(([name, domain], i) => [name, { domain, type: 'BOOLEAN', data: flags[i] }]));
-    if (uvs) attributes.UVMap = { domain: 'CORNER', type: 'FLOAT2', data: uvs };
-    return createMesh({ vert_positions, edges: edge_verts, face_offsets, corner_verts, corner_edges, attributes });
+    const mesh = this.extract(EXTRACT_ALL);
+    const attributes = Object.fromEntries([...mesh.attributes].map(([name, { domain, type, data }]) => [name, { domain, type, data: data.slice() }]));
+    const { vert_positions, edges, face_offsets, corner_verts, corner_edges } = mesh;
+    return createMesh({ vert_positions: vert_positions.slice(), edges: edges.slice(), face_offsets: face_offsets.slice(), corner_verts: corner_verts.slice(), corner_edges: corner_edges.slice(), attributes });
   }
 
   // Runs a Blender mesh operator's exec, with properties by name (an enum by its item's identifier, an enum flag by a

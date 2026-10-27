@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
-import { EditMesh } from '../src/bmesh/bmesh-wasm.js';
+import { EditMesh, EXTRACT_ALL } from '../src/bmesh/bmesh-wasm.js';
 import { hasMeshOperator, meshOperator, operatorPreview } from '../src/editors/mesh/editmesh-tools.js';
 
 const dir = new URL('./fixtures/mesh/', import.meta.url);
@@ -75,6 +75,11 @@ function differences(fixture) {
     return [error.message.split('\n')[0]];
   }
   const mesh = edit.toMesh();
+  // What the editor draws, extracted as Blender's edit mode draws it: the BMesh's triangles and normals agree with the
+  // Mesh's own, except at zero-area faces, whose BMesh normal stays zero.
+  const live = edit.extract(EXTRACT_ALL), normals = live.face_normals(), own = mesh.face_normals();
+  if (JSON.stringify(Array.from(live.corner_tris())) !== JSON.stringify(Array.from(mesh.corner_tris()))) found.push('extracted triangles');
+  if (normals.some((n, i) => normals[i - (i % 3)] ** 2 + normals[i - (i % 3) + 1] ** 2 + normals[i - (i % 3) + 2] ** 2 > 0.5 && !near(n, own[i]))) found.push('extracted normals');
   edit.free();
   if (move) {
     // Blender's element order after an extrude varies by run, so its result compares as geometry.

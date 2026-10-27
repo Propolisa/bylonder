@@ -34,6 +34,7 @@
 #include "bmesh.hh"
 #include "mesh_intern.hh"
 #include "operator-properties.hh"
+#include "extraction.hh"
 
 using namespace blender;
 using namespace blender::ed::mesh;
@@ -53,6 +54,7 @@ struct EditContext {
   Base base = {};
   Object object = {};
   Mesh mesh = {};
+  Extraction extraction;
 };
 
 EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
@@ -113,6 +115,13 @@ EXPORT(edit_context_selectmode_set) void edit_context_selectmode_set(EditContext
   ctx->mesh.runtime->edit_mesh->selectmode = selectmode;
   ctx->mesh.runtime->edit_mesh->bm->selectmode = selectmode;
 }
+/* Refills the extraction by what changed (ExtractFlag) and gives its header. */
+EXPORT(edit_mesh_extract) const ExtractionHeader *edit_mesh_extract(EditContext *ctx, int what)
+{
+  extraction_update(ctx->mesh.runtime->edit_mesh->bm, ctx->extraction, what);
+  return &ctx->extraction.header;
+}
+
 /* EDBM_selectmode_flush: selection flushed from the elements of the select mode. */
 EXPORT(edit_mesh_select_flush) void edit_mesh_select_flush(EditContext *ctx) { EDBM_selectmode_flush(ctx->mesh.runtime->edit_mesh.get()); }
 

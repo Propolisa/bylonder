@@ -4,7 +4,7 @@
 import { Matrix, Ray, Vector3, VertexData } from '@babylonjs/core';
 import { BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
 import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
-import { EditMesh } from '../../bmesh/bmesh-wasm.js';
+import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS } from '../../bmesh/bmesh-wasm.js';
 import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDBM_elem_to_index_any } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
@@ -49,13 +49,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.text && !node.metadata?.group;
   const reason = (node) => (node.metadata?.wbModifiers?.length ? 'Edit Mode on objects with modifiers comes with modifiers on Mesh data.' : null);
 
-  // Extracts the edit mesh's Mesh arrays, redraws and, for an operator, records an undo step (or, with `amend`,
-  // replaces the last one).
-  function sync({ commit = true, amend = false } = {}) {
+  // Extracts what changed of the edit mesh (`extract`, EXTRACT_*), redraws and, for an operator, records an undo step
+  // (or, with `amend`, replaces the last one).
+  function sync({ commit = true, amend = false, extract = EXTRACT_ALL } = {}) {
     const { edit, object } = em;
-    const mesh = edit.toMesh();
+    const mesh = edit.extract(extract);
     em.mesh = mesh;
-    draw(mesh, edit.history.at(-1));
+    draw(mesh, edit.history.at(-1), extract);
     if (commit || amend) object.metadata = { ...object.metadata, wbCreation: { mesh: mesh_serialize(mesh) } };
     if (amend) history.amend();
     else if (commit) {
@@ -66,10 +66,11 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     world.onModeChange?.();
   }
 
-  // Draws a Mesh of the edit mesh, its active element given as { htype, index }.
-  function draw(mesh, active) {
-    mesh_batch_cache_apply(mesh, em.object);
-    em.overlay.update(mesh, { selectmode: em.edit.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: active.index } });
+  // Draws a Mesh of the edit mesh, its active element given as { htype, index }, redrawing what changed (EXTRACT_*).
+  function draw(mesh, active, extract = EXTRACT_ALL) {
+    const [topology, positions, flags] = [EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS].map((what) => !!(extract & what));
+    if (topology || positions) mesh_batch_cache_apply(mesh, em.object, { topology });
+    em.overlay.update(mesh, { selectmode: em.edit.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: active.index }, topology, positions, flags });
   }
 
   // EDBM_mesh_make: the edit mesh of a Mesh, its selection flushed by the select mode.
@@ -139,8 +140,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     };
   }
 
-  // Runs an operator without an undo step of its own (selection changes record theirs through sync).
-  const run = (idname, props) => () => { place(); meshOperator(em.edit, idname, props); selectmode = em.edit.selectmode; sync(); };
+  // Runs a select operator, recorded as an undo step through sync.
+  const run = (idname, props) => () => { place(); meshOperator(em.edit, idname, props); selectmode = em.edit.selectmode; sync({ extract: EXTRACT_FLAGS }); };
   // The Normal orientation, Z along the summed normals of the selected faces, for a move constrained to it.
   function normalOrientation() {
     const { mesh, object } = em, normals = mesh.face_normals(), selected = mesh.attribute('.select_poly'), sum = [0, 0, 0];
@@ -232,7 +233,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
       preview(props) { const { mesh, active } = run(props); draw(mesh, active); changed(); },
       confirm(props) { exec(operator, props); },
-      cancel() { sync({ commit: false }); },
+      // The previews drew other meshes, so the edit mesh is drawn anew.
+      cancel() { draw(em.mesh, em.edit.history.at(-1)); changed(); },
       notify,
       end,
     }));
@@ -244,9 +246,9 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   const selectBox = (event, mode, begun = true) => startGestureBox(wm(), {
     begin: begun ? { x: event.x, y: event.y } : null,
     mode,
-    select: (rect, m) => { if (em && do_mesh_box_select(em.edit, em.mesh, viewAdapter(event.view ?? views.input), rect, MODES[m])) sync(); },
+    select: (rect, m) => { if (em && do_mesh_box_select(em.edit, em.mesh, viewAdapter(event.view ?? views.input), rect, MODES[m])) sync({ extract: EXTRACT_FLAGS }); },
   });
-  const selectPick = (event, toggle) => { if (EDBM_select_pick(em.edit, em.mesh, viewAdapter(event.view), [event.x, event.y], { toggle })) sync(); };
+  const selectPick = (event, toggle) => { if (EDBM_select_pick(em.edit, em.mesh, viewAdapter(event.view), [event.x, event.y], { toggle })) sync({ extract: EXTRACT_FLAGS }); };
   // mesh.loop_select and mesh.edgering_select pick the nearest edge, whatever the select mode.
   const loopPick = (event, idname, props) => {
     const edge_index = EDBM_edge_find_nearest(em.mesh, viewAdapter(event.view), [event.x, event.y]);
@@ -367,14 +369,14 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     // the operator that ran first (extrude).
     transform(type, view, mouse, { orient, keep } = {}) {
       if (!em) return null;
-      const changed = (fn) => (...args) => { const result = fn(...args); sync({ commit: false }); return result; };
+      const changed = (fn) => (...args) => { const result = fn(...args); sync({ commit: false, extract: EXTRACT_POSITIONS }); return result; };
       let session;
       if (type === 'edge_slide') {
         // Edge Slide's JS port slides a BMesh of the edit mesh's arrays; its coordinates go to the edit mesh.
         const bm = editBMesh(em.edit, em.mesh), slide = beginEdgeSlide(bm, em.object, view, mouse);
         if (!slide) { notify('Invalid Edge Selection'); return null; }
         const verts = Array.from({ length: em.mesh.verts_num }, (_, v) => v);
-        const push = () => { em.edit.setCoords(verts, bm.v.co.subarray(0, verts.length * 3)); sync({ commit: false }); };
+        const push = () => { em.edit.setCoords(verts, bm.v.co.subarray(0, verts.length * 3)); sync({ commit: false, extract: EXTRACT_POSITIONS }); };
         const slid = (fn) => (...args) => { const result = fn(...args); push(); return result; };
         const handled = (fn) => (...args) => fn(...args) && (push(), true);
         session = Object.assign(Object.create(slide), { update: slid(slide.update), keymap: handled(slide.keymap), numinput: handled(slide.numinput), cancel: slid(slide.cancel) });
@@ -383,7 +385,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
         if (!data) return null;
         session = initTransform(type, { ...data, apply: changed(data.apply), restore: changed(data.restore) }, view, mouse, { orient: orient === 'NORMAL' ? normalOrientation() : undefined });
       }
-      return Object.assign(Object.create(session), { keep, finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep }); } });
+      return Object.assign(Object.create(session), { keep, finish(commit) { if (!commit) session.cancel(); sync({ commit: commit || keep, extract: EXTRACT_POSITIONS }); } });
     },
     // After undo or redo: the object's restored Mesh becomes the edit mesh again.
     reload() {

@@ -3,9 +3,11 @@
 // meets Babylon's (Y up, left-handed): (x, y, z) becomes (x, z, y). Swapping axes also flips handedness, so
 // Blender's counter-clockwise faces stay front facing in Babylon with their winding unchanged.
 import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
+import { VertexBuffer } from '@babylonjs/core/Buffers/buffer.js';
 import { CreateLineSystem } from '@babylonjs/core/Meshes/Builders/linesBuilder.js';
 import { Color3 } from '@babylonjs/core/Maths/math.color.js';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
+import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
 
 const babylonPoint = (p, v) => new Vector3(p[v * 3], p[v * 3 + 2], p[v * 3 + 1]);
 // Object Mode wire color of Blender's default theme.
@@ -20,9 +22,9 @@ export function mesh_batch_cache_vertex_data(mesh) {
   for (let f = 0; f < mesh.faces_num; f++) {
     const flat = !vert_normals || sharp_face?.[f];
     for (let c = face_offsets[f]; c < face_offsets[f + 1]; c++) {
-      const v = corner_verts[c] * 3, n = flat ? face_normals.subarray(f * 3, f * 3 + 3) : vert_normals.subarray(v, v + 3);
+      const v = corner_verts[c] * 3, n = flat ? face_normals : vert_normals, i = flat ? f * 3 : v;
       positions[c * 3] = p[v]; positions[c * 3 + 1] = p[v + 2]; positions[c * 3 + 2] = p[v + 1];
-      normals[c * 3] = n[0]; normals[c * 3 + 1] = n[2]; normals[c * 3 + 2] = n[1];
+      normals[c * 3] = n[i]; normals[c * 3 + 1] = n[i + 2]; normals[c * 3 + 2] = n[i + 1];
     }
   }
   const data = new VertexData();
@@ -32,8 +34,27 @@ export function mesh_batch_cache_vertex_data(mesh) {
   return data;
 }
 
-// Faces become the mesh's geometry; loose edges a line child that picks as its owner.
-export function mesh_batch_cache_apply(mesh, babylonMesh) {
+// The bounding box, for the mesh and its one submesh (which picking tests), from the Mesh's own bounds: Babylon's
+// refresh reads the vertex buffer back.
+function setBounds(mesh, babylonMesh) {
+  const bounds = mesh.bounds_min_max();
+  if (!bounds || babylonMesh.subMeshes?.length > 1) return babylonMesh.refreshBoundingInfo();
+  const corner = ([x, y, z]) => new Vector3(x, z, y), box = () => new BoundingInfo(corner(bounds.min), corner(bounds.max));
+  babylonMesh.setBoundingInfo(box());
+  babylonMesh.subMeshes?.[0]?.setBoundingInfo(box());
+}
+
+// Faces become the mesh's geometry; loose edges a line child that picks as its owner. With `topology` false only
+// positions changed since the last apply, so the buffers are updated in place.
+export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = {}) {
+  if (!topology && !mesh.loose_edges().length) {
+    const data = mesh_batch_cache_vertex_data(mesh);
+    babylonMesh.updateVerticesData(VertexBuffer.PositionKind, data.positions);
+    babylonMesh.updateVerticesData(VertexBuffer.NormalKind, data.normals);
+    babylonMesh.updateIndices(data.indices);
+    setBounds(mesh, babylonMesh);
+    return;
+  }
   babylonMesh.makeGeometryUnique?.();
   mesh_batch_cache_vertex_data(mesh).applyToMesh(babylonMesh, true);
   // A single submesh would keep its old index count when an edit changes the topology.
@@ -48,5 +69,5 @@ export function mesh_batch_cache_apply(mesh, babylonMesh) {
     wire.intersectionThreshold = 0.05;
     wire.metadata = { drawOwner: babylonMesh };
   }
-  babylonMesh.refreshBoundingInfo();
+  setBounds(mesh, babylonMesh);
 }
