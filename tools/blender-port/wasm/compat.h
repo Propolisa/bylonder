@@ -35,5 +35,11 @@ template<class... M> struct scoped_lock {
   explicit scoped_lock(M &...) {}
 };
 }  // namespace std
+/* libc++ without threads leaves out the atomic shared_ptr functions; on one thread they are a plain load and store. */
+#    include <memory>
+namespace std {
+template<class T> shared_ptr<T> atomic_load(const shared_ptr<T> *p) { return *p; }
+template<class T> void atomic_store(shared_ptr<T> *p, shared_ptr<T> r) { *p = std::move(r); }
+}  // namespace std
 #  endif
 #endif

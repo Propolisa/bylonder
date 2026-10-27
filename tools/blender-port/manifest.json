@@ -26,6 +26,11 @@
   "modules": {
     "bmesh/bmesh.wasm": {
       "api": "bmesh-api.cc",
+      "dependencies": {
+        "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
+        "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
+                  "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"}
+      },
       "libraries": [
         "source/blender/editors/mesh",
         "source/blender/bmesh/intern",
@@ -35,6 +40,7 @@
         "source/blender/blentranslation/intern",
         "source/blender/functions/intern",
         "source/blender/depsgraph/intern/depsgraph_query.cc",
+        "source/blender/nodes/intern/geometry_nodes_bundle.cc",
         "source/blender/blenlib/intern",
         "intern/guardedalloc/intern",
         "intern/clog",

@@ -50,12 +50,30 @@ def patched_tree(root):
     return tree, digest
 
 
+def dependencies(tree, deps):
+    """Libraries Blender builds against, at the versions Blender pins (build_files/build_environment/cmake/versions.cmake),
+    cloned once into the tree; returns their include directories and a key of their versions."""
+    includes = []
+    for name, dep in sorted(deps.items()):
+        path = os.path.join(tree, '.port-wasm', 'deps', f'{name}-{dep["tag"]}')
+        if not os.path.exists(path):
+            if 'sha256' in dep:  # An archive, checked against the hash Blender pins.
+                data = subprocess.run(['curl', '-sfL', dep['url']], capture_output=True, check=True).stdout
+                if hashlib.sha256(data).hexdigest() != dep['sha256']:
+                    sys.exit(f'{name}: {dep["url"]} does not match its pinned hash')
+                os.makedirs(path)
+                subprocess.run(['tar', '-xz', '--strip-components=1', '-C', path], input=data, check=True)
+            else:
+                subprocess.run(['git', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path], check=True)
+        includes.append(f'-I{os.path.join(path, dep.get("include", ""))}')
+    return includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()))
+
+
 def flags(tree):
     return ['--target=wasm32-wasi', '-std=c++20', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
             '-Wno-c++11-narrowing', '-D_WASI_EMULATED_PROCESS_CLOCKS', '-isystem', os.path.join(WASM, 'include'),
             '-include', os.path.join(WASM, 'compat.h'), *convert.include_args(tree),
-            *(f'-I{os.path.join(tree, "source/blender", d)}' for d in EDITOR_INCLUDES), f'-I{os.path.join(tree, "intern/guardedalloc/intern")}',
-            f'-I{os.path.join(tree, ".port-wasm/include")}']
+            *(f'-I{os.path.join(tree, "source/blender", d)}' for d in EDITOR_INCLUDES), f'-I{os.path.join(tree, "intern/guardedalloc/intern")}']
 
 
 def compile_all(tree, sources, args, key):
@@ -87,12 +105,9 @@ def live_imports(path):
 
 def build(root, name, spec):
     tree, patches = patched_tree(root)
-    os.makedirs(os.path.join(tree, '.port-wasm', 'include'), exist_ok=True)
-    for lib, target in (('fmt', '/usr/include/fmt'), ('Eigen', '/usr/include/eigen3/Eigen')):
-        link = os.path.join(tree, '.port-wasm', 'include', lib)
-        if not os.path.exists(link):
-            os.symlink(target, link)
-    args = flags(tree)
+    includes, versions = dependencies(tree, spec.get('dependencies', {}))
+    args = includes + flags(tree)
+    patches += versions
     archives = []
     for lib in spec['libraries']:
         sources = sorted(glob.glob(os.path.join(tree, lib, '*.c*'))) if os.path.isdir(os.path.join(tree, lib)) else [os.path.join(tree, lib)]

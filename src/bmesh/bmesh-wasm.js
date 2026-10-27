@@ -2,12 +2,14 @@
 // the module, meshes go in and come out as Blender's edit mode orders them, and operators run as Blender's run them.
 import { instantiate } from '../port/wasm.js';
 import { operatorProperties } from '../editors/mesh/editmesh-add.js';
+import { createMesh } from '../blenkernel/mesh/mesh.js';
 
 const { exports: x } = await instantiate(new URL('./bmesh.wasm', import.meta.url));
 
-// Copies arrays into module memory, runs fn with their pointers, and frees them.
+// Copies arrays into module memory (null stays a null pointer), runs fn with their pointers, and frees them.
 function withArrays(arrays, fn) {
   const pointers = arrays.map((a) => {
+    if (!a) return 0;
     const p = x.malloc(a.byteLength);
     new a.constructor(x.memory.buffer, p, a.length).set(a);
     return p;
@@ -15,32 +17,41 @@ function withArrays(arrays, fn) {
   try {
     return fn(pointers);
   } finally {
-    pointers.forEach((p) => x.free(p));
+    pointers.forEach((p) => p && x.free(p));
   }
 }
 
-// The edit BMesh of a mesh (Mesh: verts_num, vert_positions, edges, face_offsets, corner_verts, corner_edges),
-// in a select mode (SCE_SELECT_*). Free it with editMeshFree.
+// The boolean attributes Blender's edit mode reads and writes, in bmesh-api.cc's MeshFlag order, with their domains.
+const FLAGS = [['.select_vert', 'POINT'], ['.hide_vert', 'POINT'], ['.select_edge', 'EDGE'], ['.hide_edge', 'EDGE'], ['.uv_seam', 'EDGE'],
+  ['sharp_edge', 'EDGE'], ['.select_poly', 'FACE'], ['.hide_poly', 'FACE'], ['sharp_face', 'FACE']];
+const bytes = (data) => data && Uint8Array.from(data, Boolean);
+
+// The edit BMesh of a Mesh with its UV map and flags, in a select mode (SCE_SELECT_*). Free it with editMeshFree.
 export function editMeshFromMesh(mesh, selectmode) {
   const { vert_positions, edges, face_offsets, corner_verts, corner_edges } = mesh;
-  return withArrays([Float32Array.from(vert_positions), Int32Array.from(edges), Int32Array.from(face_offsets), Int32Array.from(corner_verts), Int32Array.from(corner_edges)],
-    ([p, e, f, cv, ce]) => x.bm_from_arrays(mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, selectmode));
+  const flags = FLAGS.map(([name]) => bytes(mesh.attribute(name)));
+  return withArrays([Float32Array.from(vert_positions), Int32Array.from(edges), Int32Array.from(face_offsets), Int32Array.from(corner_verts),
+    Int32Array.from(corner_edges), mesh.attribute('UVMap') && Float32Array.from(mesh.attribute('UVMap')), ...flags], ([p, e, f, cv, ce, uv, ...flagPointers]) =>
+    withArrays([Int32Array.from(flagPointers)], ([table]) => x.bm_from_arrays(mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv, table, selectmode)));
 }
 
 export const editMeshFree = (bm) => x.bm_free(bm);
 
-// The mesh arrays of an edit BMesh, with its selection per domain.
+// The Mesh of an edit BMesh, with its UV map and flags.
 export function meshFromEditMesh(bm) {
   const [verts, edges, faces, corners] = [0, 1, 2, 3].map((i) => x.bm_size(bm, i));
-  const out = [new Float32Array(verts * 3), new Int32Array(edges * 2), new Int32Array(faces + 1), new Int32Array(corners), new Int32Array(corners),
-    new Uint8Array(verts), new Uint8Array(edges), new Uint8Array(faces)];
-  withArrays(out, (pointers) => {
-    x.bm_to_arrays(bm, ...pointers);
-    out.forEach((a, i) => a.set(new a.constructor(x.memory.buffer, pointers[i], a.length)));
+  const sizes = { POINT: verts, EDGE: edges, FACE: faces };
+  const arrays = [new Float32Array(verts * 3), new Int32Array(edges * 2), new Int32Array(faces + 1), new Int32Array(corners), new Int32Array(corners),
+    x.bm_has_uv(bm) ? new Float32Array(corners * 2) : null];
+  const flags = FLAGS.map(([, domain]) => new Uint8Array(sizes[domain]));
+  withArrays([...arrays, ...flags], (pointers) => {
+    withArrays([Int32Array.from(pointers.slice(arrays.length))], ([table]) => x.bm_to_arrays(bm, ...pointers.slice(0, arrays.length), table));
+    [...arrays, ...flags].forEach((a, i) => a?.set(new a.constructor(x.memory.buffer, pointers[i], a.length)));
   });
-  const [vert_positions, edge_verts, face_offsets, corner_verts, corner_edges, select_vert, select_edge, select_poly] = out;
-  return { verts_num: verts, edges_num: edges, faces_num: faces, corners_num: corners, vert_positions, edges: edge_verts, face_offsets,
-    corner_verts, corner_edges, select_vert, select_edge, select_poly };
+  const [vert_positions, edge_verts, face_offsets, corner_verts, corner_edges, uvs] = arrays;
+  const attributes = Object.fromEntries(FLAGS.map(([name, domain], i) => [name, { domain, type: 'BOOLEAN', data: flags[i] }]));
+  if (uvs) attributes.UVMap = { domain: 'CORNER', type: 'FLOAT2', data: uvs };
+  return createMesh({ vert_positions, edges: edge_verts, face_offsets, corner_verts, corner_edges, attributes });
 }
 
 // Selection: by index per element type (BM_VERT, BM_EDGE, BM_FACE), recorded in the history as a click is.
