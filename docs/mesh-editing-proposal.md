@@ -87,9 +87,12 @@ Budgets, measured in headless Chromium on the CI machine, fail a test when a res
 
 ## WASM and libraries
 
-- **Core (Mesh, BMesh, operators): JS on typed arrays.** The topology code is branchy and local, the JIT handles it well, and the buffers go to WebGL without a copy. Move to WASM only when a benchmark fails. The flat layout keeps that option open.
-- **Boolean:** `manifold-3d` (Apache-2.0, WASM). Since 4.5, Blender ships Manifold as a Boolean solver, so the Boolean modifier and Intersect (Boolean) with the Manifold solver give Blender's results. Blender's Exact solver is not ported.
-- **Subdivision Surface:** Blender uses OpenSubdiv. Start with a JS port of OpenSubdiv's uniform Catmull-Clark rules (edge creases, boundary and UV smoothing modes), checked against Blender's output. Compile OpenSubdiv to WASM only if that is too slow. GPU subdivision waits for WebGPU.
+- **Core (BMesh, Edit Mode operators, modifiers): Blender's own code in WebAssembly.** Converting Blender's C++ to JS met a new pointer pattern with almost every operator, and many conversions were wrong without failing. Compiled to WASM, the same code gives Blender's results by construction: all of bmesh and 92 of the 94 modifier sources build unchanged. `tools/blender-port/wasm_module.py` builds them from a copy of the Blender tree with a few reviewed patches (`wasm/patches`), and every Blender symbol a module still lacks becomes an import that throws when called.
+- **One module per shared state.** WASM modules do not share memory, so everything that works on the edit BMesh and the evaluated meshes (bmesh, the mesh editors, modifiers, the blenkernel parts they reach) is one module, `bmesh.wasm`. The edit mesh and modifier results stay in its memory. Stateless whole-mesh functions (tessellation) can be separate units loaded on demand.
+- **Buffers are shared, not copied.** JS reads draw arrays as typed array views over the module's memory and passes them to WebGL. A view is taken after each call and not kept, since a call that grows memory detaches it. Data is copied only when JS keeps it across calls (undo) or sends it to a worker.
+- **Operators run as Blender runs them.** Blender's `MESH_OT_*` functions register the operators and their properties; a small boundary layer supplies the context (one object in Edit Mode), operator properties and no-op window manager and depsgraph updates.
+- **Boolean:** Blender's Manifold solver with the Manifold library at Blender's version (v3.5.2), built into the module. The Exact solver needs GMP and comes later.
+- **Subdivision Surface:** Blender's subdivision code with OpenSubdiv at Blender's version (v3_7_0), whose CPU evaluator builds to WASM. GPU subdivision waits for WebGPU.
 - **Threads:** GitHub Pages cannot send COOP and COEP headers, so there is no SharedArrayBuffer and no WASM threads. Whole-mesh work (modifier evaluation) can run in a worker with transferred buffers. Edit operators stay on the main thread, as most of Blender's are.
 - **Not used:** Babylon `VertexData` as the data model (triangles only, split vertices), earcut for meshes, CSG2 (Babylon's own Manifold wrapper) in place of the modifier.
 
