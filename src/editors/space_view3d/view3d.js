@@ -169,8 +169,12 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   ], { blender: 'VIEW3D_MT_edit_mesh' });
   const vertexMenu = menuButton('Vertex', () => [
     { label: 'New Edge/Face from Vertices', blender: 'mesh.edge_face_add', keys: 'F', run: () => world.editMode.exec('mesh.edge_face_add') },
+    '-',
+    { label: 'Bevel Vertices', blender: 'mesh.bevel', keys: 'Shift Ctrl B', run: () => world.editMode.bevel('VERTICES') },
   ], { blender: 'VIEW3D_MT_edit_mesh_vertices' });
   const edgeMenu = menuButton('Edge', () => [
+    { label: 'Bevel Edges', blender: 'mesh.bevel', keys: 'Ctrl B', run: () => world.editMode.bevel('EDGES') },
+    '-',
     { label: 'Subdivide', blender: 'mesh.subdivide', run: () => world.editMode.exec('mesh.subdivide') },
     '-',
     { label: 'Loop Cut and Slide', blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: () => world.editMode.loopcut() },

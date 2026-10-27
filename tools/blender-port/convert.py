@@ -93,6 +93,12 @@ def source_rel(path, root):
     return os.path.relpath(path, root).replace(f'/{TMP_PREFIX}', '/')
 
 
+def in_out(name):
+    """(helper, index of the argument updated) of an IN_OUT function."""
+    rule = IN_OUT[name]
+    return rule if isinstance(rule, tuple) else (rule, 0)
+
+
 def zero_of(t):
     """The JS of a default-initialized value of type t, or None when it has none."""
     t = canon(t)
@@ -1175,7 +1181,8 @@ class FunctionPort:
                 value = m(rest) if callable(m) else f'{self.helper(m)}({", ".join(rest)})'
                 return self.assign(args[0], value, 2 if '_v2' in name else 4 if '_v4' in name else 3)
             if name in IN_OUT and args:
-                return self.assign(args[0], f'{self.helper(IN_OUT[name])}({", ".join(self.expr(a) for a in args)})')
+                helper, inout = in_out(name)
+                return self.assign(args[inout], f'{self.helper(helper)}({", ".join(self.expr(a) for a in args)})')
             sig = self.p.sig_of(name)
             if sig and self.has_outs(sig):
                 self.statement_call = True
@@ -1249,7 +1256,7 @@ class FunctionPort:
         if special is not None:
             return special
         if name in OUT_FIRST or name in IN_OUT:
-            m = OUT_FIRST.get(name) or IN_OUT.get(name)
+            m = OUT_FIRST.get(name) or in_out(name)[0]
             rest = js(args[1:] if name in OUT_FIRST else args)
             value = m(rest) if callable(m) else f'{self.helper(m)}({", ".join(rest)})'
             if name in OUT_FIRST and name.startswith('invert'):

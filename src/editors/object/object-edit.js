@@ -14,6 +14,7 @@ import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperators } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
 import { inset_modal } from '../mesh/editmesh-inset.js';
+import { bevel_modal } from '../mesh/editmesh-bevel.js';
 import { openMenu } from '../interface/menu.js';
 import { createRedoPanel } from '../interface/redo-panel.js';
 import { operatorSchema } from './mesh-catalog.js';
@@ -198,29 +199,33 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       editor.start('edge_slide');
     },
   }));
-  // mesh.inset invoked: previews from the Mesh as it was, then runs as one undo step with its redo panel.
-  function inset() {
-    if (!em.bm.totfacesel) return;
+  // A modal mesh tool (mesh.inset, mesh.bevel): the median point of the selection on screen, previews from the Mesh as
+  // it was, then one undo step with its redo panel.
+  function meshModal(operator, modal, extra = {}) {
     const view = views.input, before = BM_mesh_bm_to_me(em.bm), world_m = em.object.computeWorldMatrix(true);
     const median = [0, 0, 0];
     let count = 0;
     BM_ITER_MESH(em.bm.v, (v) => { if (BM_elem_flag_test(em.bm.v, v, BM_ELEM_SELECT)) { for (let a = 0; a < 3; a++) median[a] += em.bm.v.co[v * 3 + a]; count++; } });
+    if (!count) return;
     const center = Vector3.TransformCoordinates(new Vector3(median[0] / count, median[2] / count, median[1] / count), world_m);
     const screen = viewAdapter(view).project([median[0] / count, median[1] / count, median[2] / count]) ?? [0, 0];
     const scale = new Vector3();
     world_m.decompose(scale);
     const restore = () => { em.bm = load(before); };
-    startTool((end) => inset_modal({
+    startTool((end) => modal({
+      ...extra,
       center: { x: screen[0], y: screen[1] },
       mouse: [editor.pointer.x, editor.pointer.y],
       pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
-      preview(props) { restore(); meshOperators['mesh.inset'](em.bm, props); sync({ commit: false }); },
-      confirm(props) { restore(); exec('mesh.inset', props); },
+      preview(props) { restore(); meshOperators[operator](em.bm, props); sync({ commit: false }); },
+      confirm(props) { restore(); exec(operator, props); },
       cancel() { restore(); sync({ commit: false }); },
       notify,
       end,
     }));
   }
+  const inset = () => em.bm.totfacesel && meshModal('mesh.inset', inset_modal);
+  const bevel = (affect) => meshModal('mesh.bevel', bevel_modal, { props: { affect } });
   // view3d.select_box: a box gesture, begun at the drag's press or (from B) at the next press.
   const MODES = { SET: SEL_OP_SET, ADD: SEL_OP_ADD, SUB: SEL_OP_SUB };
   const selectBox = (event, mode, begun = true) => startGestureBox(wm(), {
@@ -283,6 +288,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: extrudeMove },
     { blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: loopcut },
     { blender: 'mesh.inset', keys: 'I', run: inset },
+    { blender: 'mesh.bevel', keys: 'Ctrl B', run: () => bevel('EDGES') },
+    { blender: 'mesh.bevel', keys: 'Shift Ctrl B', run: () => bevel('VERTICES') },
     { blender: 'mesh.loop_select', keys: 'Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, {}) },
     { blender: 'mesh.loop_select', keys: 'Shift Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, { toggle: true }) },
     { blender: 'mesh.edgering_select', keys: 'Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, { ring: true }) },
@@ -326,6 +333,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     selectAll(action) { if (em) run((bm) => mesh_select_all(bm, action))(); },
     loopcut() { if (em) loopcut(); },
     inset() { if (em) inset(); },
+    bevel(affect = 'EDGES') { if (em) bevel(affect); },
     // Tab in both modes; the Mesh, 3D View and Select Box tool keymaps in Edit Mode.
     keymap: (event) => modeKeys(event) || (!!em && (keymap(event) || viewKeymap(event) || toolKeymap(event))),
     // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.

@@ -19,9 +19,10 @@ OUT_FIRST = {
     'interp_v3_v3v3': 'interp_v3', 'mid_v3_v3v3': 'mid_v3', 'negate_v3_v3': 'negate_v3', 'normalize_v3_v3': 'normalize_v3',
     'mul_v3_m4v3': 'mul_m4_v3', 'mul_v3_m3v3': 'mul_m3_v3',
 }
-# Functions updating their first argument in place: fn(inout, ...args) is `inout = js(inout, ...args)`.
+# Functions updating one argument in place, the first unless an index says: fn(inout, ...args) is
+# `inout = js(inout, ...args)`; mul_m4_v3(M, r) transforms r.
 IN_OUT = {'add_v3_v3': 'add_v3', 'sub_v3_v3': 'sub_v3', 'mul_v3_fl': 'mul_v3_fl', 'madd_v3_v3fl': 'madd', 'negate_v3': 'negate_v3',
-          'normalize_v3': 'normalize_v3', 'mul_m4_v4': 'mul_m4_v4', 'mul_m4_v3': 'mul_m4_v3', 'mul_m3_v3': 'mul_m3_v3'}
+          'normalize_v3': 'normalize_v3', 'mul_m4_v4': ('mul_m4_v4', 1), 'mul_m4_v3': ('mul_m4_v3', 1), 'mul_m3_v3': ('mul_m3_v3', 1)}
 # Functions returning a value whose port has another name.
 RENAME = {
     'dot_v3v3': 'dot_v3', 'fabsf': 'Math.abs', 'fabs': 'Math.abs', 'abs': 'Math.abs', 'sqrtf': 'Math.sqrt', 'sqrt': 'Math.sqrt',
