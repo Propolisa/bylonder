@@ -27,3 +27,5 @@ export function BM_edge_at_index(bm, index) {
   for (let e = 0; e < bm.e.size; e++) if (bm.e.alive[e] && bm.e.index[e] === index) return e;
   return -1;
 }
+
+export * from './bmesh-mesh.gen.js';

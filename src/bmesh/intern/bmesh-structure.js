@@ -96,4 +96,5 @@ export function bmesh_radial_length(bm, lp) {
   return i;
 }
 
+
 export * from './bmesh-structure.gen.js';

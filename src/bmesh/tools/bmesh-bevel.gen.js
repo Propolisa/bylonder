@@ -482,6 +482,7 @@ function determine_uv_vert_connectivity(bp, bm, v) {
 }
 
 function bevel_merge_uvs(bp, bm) {
+  let _r0;
   const num_uv_layers = CustomData_number_of_layers(bm.ldata, CD_PROP_FLOAT2);
   0;
   for (let i = 0; i < num_uv_layers; ++i) {
@@ -499,8 +500,8 @@ function bevel_merge_uvs(bp, bm) {
         }
         mul_v2_fl(uv, Math.fround(1.0 / num_uv_verts));
         for (const l of uv_vert_bucket) {
-          let luv = BM_ELEM_CD_GET_FLOAT_P(bm.l, l, uv_data_offset);
-          luv = uv.slice(0, 2);
+          const luv = BM_ELEM_CD_GET_FLOAT_P(bm.l, l, uv_data_offset);
+          (_r0 = uv.slice(0, 2)), (luv[0] = _r0[0]), (luv[1] = _r0[1]);
         }
       }
     }
@@ -711,8 +712,8 @@ function math_layer_info_init(bp, bm) {
   const totface = bm.totface;
   const face_component = new Int32Array(totface);
   bp.math_layer_info.face_component = face_component;
-  const stack = MEM_new_array_uninitialized(totface, 'math_layer_info_init');
-  const in_stack = MEM_new_array_uninitialized(totface, 'math_layer_info_init');
+  const stack = new Array(totface).fill(-1);
+  const in_stack = new Array(totface).fill(false);
   for (f = 0; f < totface; f++) {
     face_component[f] = -1;
     in_stack[f] = false;
@@ -2107,6 +2108,7 @@ function build_boundary_vertex_only(bp, bv, construct) {
 
 function build_boundary_terminal_edge(bp, bv, efirst, construct) {
   const { bm } = bp;
+  const mem_arena = bp.mem_arena;
   const vm = bv.vmesh;
   let e = efirst;
   let co = [0, 0, 0];
@@ -2114,7 +2116,7 @@ function build_boundary_terminal_edge(bp, bv, efirst, construct) {
     let no = e.fprev >= 0 ? fno(bm, e.fprev) : e.fnext >= 0 ? fno(bm, e.fnext) : null;
     co = offset_in_plane(bm, e, no, true);
     if (construct) {
-      const bndv = add_new_bound_vert(null, vm, co);
+      const bndv = add_new_bound_vert(mem_arena, vm, co);
       bndv.efirst = bndv.elast = bndv.ebev = e;
       e.leftv = bndv;
     } else {
@@ -2123,7 +2125,7 @@ function build_boundary_terminal_edge(bp, bv, efirst, construct) {
     no = e.fnext >= 0 ? fno(bm, e.fnext) : e.fprev >= 0 ? fno(bm, e.fprev) : null;
     co = offset_in_plane(bm, e, no, false);
     if (construct) {
-      const bndv = add_new_bound_vert(null, vm, co);
+      const bndv = add_new_bound_vert(mem_arena, vm, co);
       bndv.efirst = bndv.elast = e;
       e.rightv = bndv;
     } else {
@@ -2131,7 +2133,7 @@ function build_boundary_terminal_edge(bp, bv, efirst, construct) {
     }
     co = slide_dist(bm, e.next, bv.v, e.offset_l);
     if (construct) {
-      const bndv = add_new_bound_vert(null, vm, co);
+      const bndv = add_new_bound_vert(mem_arena, vm, co);
       bndv.efirst = bndv.elast = e.next;
       e.next.leftv = e.next.rightv = bndv;
       set_bound_vert_seams(bm, bv, bp.mark_seam, bp.mark_sharp);
@@ -2146,7 +2148,7 @@ function build_boundary_terminal_edge(bp, bv, efirst, construct) {
       co = offset_meet(bp, e.prev, e, bv.v, e.fprev, false, co, null);
     }
     if (construct) {
-      const bndv = add_new_bound_vert(null, vm, co);
+      const bndv = add_new_bound_vert(mem_arena, vm, co);
       bndv.efirst = e.prev;
       bndv.elast = bndv.ebev = e;
       e.leftv = bndv;
@@ -2161,7 +2163,7 @@ function build_boundary_terminal_edge(bp, bv, efirst, construct) {
       co = offset_meet(bp, e.prev, e, bv.v, e.fprev, false, co, null);
     }
     if (construct) {
-      const bndv = add_new_bound_vert(null, vm, co);
+      const bndv = add_new_bound_vert(mem_arena, vm, co);
       bndv.efirst = e.prev;
       bndv.elast = e;
       e.leftv = e.rightv = bndv;
@@ -2176,7 +2178,7 @@ function build_boundary_terminal_edge(bp, bv, efirst, construct) {
     for (e = e.next; e.next !== efirst; e = e.next) {
       co = slide_dist(bm, e, bv.v, d);
       if (construct) {
-        const bndv = add_new_bound_vert(null, vm, co);
+        const bndv = add_new_bound_vert(mem_arena, vm, co);
         bndv.efirst = bndv.elast = e;
         e.leftv = e.rightv = bndv;
       } else {
@@ -2283,6 +2285,7 @@ function adjust_miter_inner_coords(bp, bv, emiter) {
 function build_boundary(bp, bv, construct) {
   const { bm } = bp;
   let _r0, _r1;
+  const mem_arena = bp.mem_arena;
   if (bv.edgecount <= 1) {
     return;
   }
@@ -2340,7 +2343,7 @@ function build_boundary(bp, bv, construct) {
       }
     }
     if (construct) {
-      const v = add_new_bound_vert(null, vm, co);
+      const v = add_new_bound_vert(mem_arena, vm, co);
       v.efirst = e;
       v.elast = e2;
       v.ebev = e2;
@@ -2365,11 +2368,11 @@ function build_boundary(bp, bv, construct) {
         v1.ebev = null;
         let v2 = null;
         if (ang_kind === ANGLE_LARGER && miter_outer === BEVEL_MITER_PATCH) {
-          v2 = add_new_bound_vert(null, vm, co);
+          v2 = add_new_bound_vert(mem_arena, vm, co);
         } else {
           v2 = null;
         }
-        const v3 = add_new_bound_vert(null, vm, co);
+        const v3 = add_new_bound_vert(mem_arena, vm, co);
         v3.ebev = e2;
         v3.efirst = e2;
         v3.elast = e2;
@@ -3105,12 +3108,12 @@ function cubic_subdiv(bp, vm_in) {
 
 function make_cube_corner_square(mem_arena, nseg) {
   const ns2 = Math.trunc(nseg / 2);
-  const vm = new_adj_vmesh(null, 3, nseg, null);
+  const vm = new_adj_vmesh(mem_arena, 3, nseg, null);
   vm.count = 0;
   for (let i = 0; i < 3; i++) {
     const co = [0, 0, 0];
     co[i] = 1.0;
-    add_new_bound_vert(null, vm, co);
+    add_new_bound_vert(mem_arena, vm, co);
   }
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j <= ns2; j++) {
@@ -3133,12 +3136,12 @@ function make_cube_corner_square(mem_arena, nseg) {
 function make_cube_corner_square_in(mem_arena, nseg) {
   const ns2 = Math.trunc(nseg / 2);
   const odd = nseg % 2;
-  const vm = new_adj_vmesh(null, 3, nseg, null);
+  const vm = new_adj_vmesh(mem_arena, 3, nseg, null);
   vm.count = 0;
   for (let i = 0; i < 3; i++) {
     const co = [0, 0, 0];
     co[i] = 1.0;
-    add_new_bound_vert(null, vm, co);
+    add_new_bound_vert(mem_arena, vm, co);
   }
   let b = 0;
   if (odd) {
@@ -3163,22 +3166,23 @@ function make_cube_corner_square_in(mem_arena, nseg) {
 }
 
 function make_cube_corner_adj_vmesh(bp) {
+  const mem_arena = bp.mem_arena;
   const nseg = bp.seg;
   const r = bp.pro_super_r;
   if (bp.profile_type !== BEVEL_PROFILE_CUSTOM) {
     if (r === PRO_SQUARE_R) {
-      return make_cube_corner_square(null, nseg);
+      return make_cube_corner_square(mem_arena, nseg);
     }
     if (r === PRO_SQUARE_IN_R) {
-      return make_cube_corner_square_in(null, nseg);
+      return make_cube_corner_square_in(mem_arena, nseg);
     }
   }
-  const vm0 = new_adj_vmesh(null, 3, 2, null);
+  const vm0 = new_adj_vmesh(mem_arena, 3, 2, null);
   vm0.count = 0;
   for (let i = 0; i < 3; i++) {
     const co = [0, 0, 0];
     co[i] = 1.0;
-    add_new_bound_vert(null, vm0, co);
+    add_new_bound_vert(mem_arena, vm0, co);
   }
   let bndv = vm0.boundstart;
   for (let i = 0; i < 3; i++) {
@@ -3291,12 +3295,13 @@ function tri_corner_adj_vmesh(bp, bv) {
 
 function adj_vmesh(bp, bv) {
   const { bm } = bp;
+  const mem_arena = bp.mem_arena;
   const n_bndv = bv.vmesh.count;
   if (n_bndv === 3 && tri_corner_test(bp, bv) !== -1 && bp.pro_super_r !== PRO_SQUARE_IN_R) {
     return tri_corner_adj_vmesh(bp, bv);
   }
   const nseg = bv.vmesh.seg;
-  const vm0 = new_adj_vmesh(null, n_bndv, 2, bv.vmesh.boundstart);
+  const vm0 = new_adj_vmesh(mem_arena, n_bndv, 2, bv.vmesh.boundstart);
   let bndv = vm0.boundstart;
   let boundverts_center = [0, 0, 0];
   for (let i = 0; i < n_bndv; i++) {
@@ -3620,7 +3625,7 @@ function closer_v3_v3v3v3(a, b, v) {
 
 function square_out_adj_vmesh(bp, bv) {
   const { bm } = bp;
-  let _r0, _r1, _r2, _r3, _r4, _r5;
+  let _r0, _r1, _r2, _r3, _r4, _r5, _r6;
   const n_bndv = bv.vmesh.count;
   const ns = bv.vmesh.seg;
   const ns2 = Math.trunc(ns / 2);
@@ -3628,8 +3633,8 @@ function square_out_adj_vmesh(bp, bv) {
   let ns2inv = Math.fround(1.0 / ns2);
   const vm = new_adj_vmesh(bp.mem_arena, n_bndv, ns, bv.vmesh.boundstart);
   const clstride = 3 * (ns2 + 1);
-  const centerline = MEM_new_array_uninitialized(clstride * n_bndv, 'bevel');
-  const cset = MEM_new_array_zeroed(n_bndv, 'bevel');
+  const centerline = new Float32Array(clstride * n_bndv);
+  const cset = new Array(n_bndv).fill(false);
   let bndv = vm.boundstart;
   for (let i = 0; i < n_bndv; i++) {
     const bndco = bndv.nv.co.slice(0, 3);
@@ -3758,7 +3763,7 @@ function square_out_adj_vmesh(bp, bv) {
     co1 = p.slice(0, 3);
     p += 3;
     for (let j = 1; j <= ns2; j++) {
-      p = interp_v3(co1, co2, Math.fround(j * ns2inv));
+      (_r5 = interp_v3(co1, co2, Math.fround(j * ns2inv))), (p[0] = _r5[0]), (p[1] = _r5[1]), (p[2] = _r5[2]);
       p += 3;
     }
     bndv = bndv.next;
@@ -3790,13 +3795,13 @@ function square_out_adj_vmesh(bp, bv) {
         let meet1 = [0, 0, 0];
         let meet2 = [0, 0, 0];
         const ikind =
-          (([_r5, meet1, meet2] = isect_line_line_v3(
+          (([_r6, meet1, meet2] = isect_line_line_v3(
             mesh_vert(vm, i, 0, k).co,
             centerline.slice(clstride * im1, clstride * im1 + 3).slice(3 * k, 3 * k + 3),
             mesh_vert(vm, i, j, 0).co,
             centerline.slice(clstride * i, clstride * i + 3).slice(3 * j, 3 * j + 3),
           )),
-          _r5);
+          _r6);
         if (ikind === 0) {
           mesh_vert(vm, i, j, k).co = interp_v3(
             mesh_vert(vm, i, 0, k).co,

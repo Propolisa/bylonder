@@ -4,7 +4,7 @@ import { BM_edges_from_verts, BM_edges_from_verts_ensure } from './bmesh-constru
 import { BM_face_create } from './bmesh-core.js';
 
 export function BM_face_create_verts(bm, vert_arr, len, f_example, create_flag, create_edges) {
-  const edge_arr = new Array(len);
+  const edge_arr = new Array(len).fill(-1);
   if (create_edges) {
     BM_edges_from_verts_ensure(bm, edge_arr, vert_arr, len);
   } else {

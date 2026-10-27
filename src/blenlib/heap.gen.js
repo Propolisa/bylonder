@@ -63,7 +63,7 @@ function heap_up(heap, i) {
 }
 
 function heap_node_alloc_chunk(nodes_num, chunk_prev) {
-  const chunk = MEM_new_uninitialized(16 + 16 * nodes_num, 'heap_node_alloc_chunk');
+  const chunk = Array.from({ length: 16 + 16 * nodes_num }, () => ({ prev: null, size: 0, bufsize: 0, buf: [] }));
   chunk.prev = chunk_prev;
   chunk.bufsize = nodes_num;
   chunk.size = 0;
@@ -91,10 +91,10 @@ function heap_node_free(heap, node) {
 }
 
 export function BLI_heap_new_ex(reserve_num) {
-  const heap = MEM_new_zeroed('BLI_heap_new_ex');
+  const heap = { size: 0, bufsize: 0, tree: null, nodes: { chunk: null, free: null } };
   heap.size = 0;
   heap.bufsize = Math.max(1, reserve_num);
-  heap.tree = MEM_new_array_zeroed(heap.bufsize, 'BLIHeapTree');
+  heap.tree = new Array(heap.bufsize).fill(null);
   heap.nodes.chunk = heap_node_alloc_chunk(reserve_num > 1 ? reserve_num : HEAP_CHUNK_DEFAULT_NUM, null);
   heap.nodes.free = null;
   return heap;
@@ -137,7 +137,7 @@ export function BLI_heap_clear(heap, ptrfreefp) {
 export function BLI_heap_insert(heap, value, ptr) {
   if (heap.size >= heap.bufsize) {
     heap.bufsize *= 2;
-    heap.tree = MEM_realloc_uninitialized_id(heap.tree, heap.bufsize * 8, 'BLI_heap_insert');
+    heap.tree = Object.assign(new Array(heap.bufsize).fill(null), heap.tree.slice(0, heap.bufsize));
   }
   const node = heap_node_alloc(heap);
   node.ptr = ptr;

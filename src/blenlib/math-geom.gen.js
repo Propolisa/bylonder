@@ -58,6 +58,12 @@ export function power_of_2_max_u(x) {
   return x + 1;
 }
 
+export function divide_floor_i(a, b) {
+  const d = Math.trunc(a / b);
+  const r = a % b;
+  return r ? d - (Number(a < 0) ^ Number(b < 0)) : d;
+}
+
 export function mod_i(i, n) {
   return ((i % n) + n) % n;
 }
@@ -308,6 +314,7 @@ export function axis_dominant_v3_to_m3_negate(normal) {
 
 export function resolve_quad_uv_v2(r_uv, st, st0, st1, st2, st3) {
   [r_uv] = resolve_quad_uv_v2_deriv(r_uv, null, st, st0, st1, st2, st3);
+  return r_uv;
 }
 
 export function resolve_quad_uv_v2_deriv(r_uv, r_deriv, st, st0, st1, st2, st3) {

@@ -81,3 +81,5 @@ export function EIG_linear_solver_solve(solver) {
 }
 
 export function EIG_linear_solver_print_matrix(_solver) {}
+
+export * from './eigen.gen.js';

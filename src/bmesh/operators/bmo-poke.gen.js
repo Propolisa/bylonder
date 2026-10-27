@@ -10,6 +10,8 @@ import {
   BMOP_POKE_BOUNDS,
   BMOP_POKE_MEDIAN,
   BMOP_POKE_MEDIAN_WEIGHTED,
+  BMO_iter_new,
+  BMO_iter_step,
   BMO_slot_bool_get,
   BMO_slot_buffer_from_enabled_flag,
   BMO_slot_float_get,
@@ -25,34 +27,46 @@ import { CD_MDISPS } from '../../makesdna/customdata-types.js';
 const ELE_NEW = 1;
 
 export function bmo_poke_exec(bm, op) {
+  let _r0, _r1, _r2, _r3;
   const cd_loop_mdisp_offset = CustomData_get_offset(bm.ldata, CD_MDISPS);
   const oiter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
-  const f = -1;
+  let f = -1;
   const offset = BMO_slot_float_get(op.slots_in, 'offset');
   const use_relative_offset = BMO_slot_bool_get(op.slots_in, 'use_relative_offset');
   const center_mode = BMO_slot_int_get(op.slots_in, 'center_mode');
   let bm_face_calc_center_fn = null;
   switch (center_mode) {
     case BMOP_POKE_MEDIAN_WEIGHTED:
-      bm_face_calc_center_fn = BM_face_calc_center_median_weighted;
+      bm_face_calc_center_fn = (...args) => BM_face_calc_center_median_weighted(bm, ...args);
       break;
     case BMOP_POKE_BOUNDS:
-      bm_face_calc_center_fn = BM_face_calc_center_bounds;
+      bm_face_calc_center_fn = (...args) => BM_face_calc_center_bounds(bm, ...args);
       break;
     case BMOP_POKE_MEDIAN:
-      bm_face_calc_center_fn = BM_face_calc_center_median;
+      bm_face_calc_center_fn = (...args) => BM_face_calc_center_median(bm, ...args);
       break;
     default:
       0;
       return;
   }
-  for (;;) {
-    const f_center = [0, 0, 0];
+  for (
+    f =
+      (([_r3, _r1] = BMO_iter_new(op.slots_in, 'faces', BM_FACE)),
+      ((_r2 = _r1),
+      (oiter.slot = _r2.slot),
+      (oiter.cur = _r2.cur),
+      (oiter.giter = _r2.giter),
+      (oiter.val = _r2.val),
+      (oiter.restrictmask = _r2.restrictmask)),
+      _r3);
+    f >= 0;
+    f = BMO_iter_step(oiter)
+  ) {
     let v_center = -1;
     let l_first = -1;
     let l_center_example = -1;
     let offset_fac = 0;
-    bm_face_calc_center_fn(f, f_center);
+    const f_center = bm_face_calc_center_fn(f);
     v_center = BM_vert_create(bm, f_center, -1, BM_CREATE_NOP);
     BMO_flag_enable(bm.v, v_center, ELE_NEW);
     if (use_relative_offset) {

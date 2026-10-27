@@ -122,3 +122,5 @@ export function BM_elem_attrs_copy(pool, src, dst) {
   if (pool.mat_nr) pool.mat_nr[dst] = pool.mat_nr[src];
   CustomData_bmesh_copy_block(pool, src, dst);
 }
+
+export * from './bmesh-construct.gen.js';

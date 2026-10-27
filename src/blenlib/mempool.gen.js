@@ -4,13 +4,8 @@ import { power_of_2_max_u } from './math-geom.js';
 
 const POISON_REDZONE_SIZE = 0;
 const FREEWORD = 8 > 4 ? MAKE_ID_8(101, 101, 114, 102, 102, 114, 101, 101) : MAKE_ID(101, 102, 102, 101);
-const USEDWORD = MAKE_ID(117, 115, 101, 100);
 const MEMPOOL_ELEM_SIZE_MIN = 8 * 2;
 const CHUNK_OVERHEAD = 8 + 8;
-
-export function BLI_mempool_alloc() {
-  return BLI_mempool_alloc(pool);
-}
 
 export function MAKE_ID(a, b, c, d) {
   return (d << 24) | (c << 16) | (b << 8) | a;
@@ -35,25 +30,25 @@ function mempool_maxchunks(elem_num, pchunk) {
 }
 
 function mempool_chunk_alloc(pool) {
-  return MEM_new_uninitialized(8 + pool.csize, 'mempool chunk');
+  return Array.from({ length: 8 + null.csize }, () => ({ next: null }));
 }
 
 function mempool_chunk_add(pool, mpchunk, last_tail) {
-  const esize = pool.esize;
+  const esize = null.esize;
   let curnode = CHUNK_DATA(mpchunk);
-  if (pool.chunk_tail) {
-    pool.chunk_tail.next = mpchunk;
+  if (null.chunk_tail) {
+    null.chunk_tail.next = mpchunk;
   } else {
     0;
-    pool.chunks = mpchunk;
+    null.chunks = mpchunk;
   }
   mpchunk.next = null;
-  pool.chunk_tail = mpchunk;
-  if (pool.free === null) {
-    pool.free = curnode;
+  null.chunk_tail = mpchunk;
+  if (null.free === null) {
+    null.free = curnode;
   }
-  let j = pool.pchunk;
-  if (pool.flag & 1) {
+  let j = null.pchunk;
+  if (null.flag & 1) {
     while (j--) {
       const next = null;
       curnode.next = NODE_STEP_NEXT(curnode);
@@ -77,20 +72,10 @@ function mempool_chunk_add(pool, mpchunk, last_tail) {
   return curnode;
 }
 
-function mempool_chunk_free(mpchunk, pool) {}
-
-function mempool_chunk_free_all(mpchunk, pool) {
-  let mpchunk_next = null;
-  for (; mpchunk; mpchunk = mpchunk_next) {
-    mpchunk_next = mpchunk.next;
-    mempool_chunk_free(mpchunk, pool);
-  }
-}
-
 export function BLI_mempool_create(esize, elem_num, pchunk, flag) {
+  const pool = null;
   let last_tail = null;
   let i = 0;
-  const pool = MEM_new_zeroed('memory pool');
   esize = Math.max(esize, MEMPOOL_ELEM_SIZE_MIN);
   if (flag & 1) {
     esize = Math.max(esize, 16);
@@ -117,68 +102,4 @@ export function BLI_mempool_create(esize, elem_num, pchunk, flag) {
     }
   }
   return pool;
-}
-
-export function BLI_mempool_free(pool, addr) {
-  const newhead = addr;
-  if (pool.flag & 1) {
-    newhead.freeword = FREEWORD;
-  }
-  newhead.next = pool.free;
-  pool.free = newhead;
-  pool.totused--;
-  if (pool.totused === 0 && pool.chunks.next) {
-    const esize = pool.esize;
-    const first = pool.chunks;
-    mempool_chunk_free_all(first.next, pool);
-    first.next = null;
-    pool.chunk_tail = first;
-    let curnode = CHUNK_DATA(first);
-    pool.free = curnode;
-    let j = pool.pchunk;
-    while (j--) {
-      const next = NODE_STEP_NEXT(curnode);
-      curnode = next;
-    }
-    const prev = NODE_STEP_PREV(curnode);
-    curnode = prev;
-    curnode.next = null;
-  }
-}
-
-export function BLI_mempool_iternew(pool, iter) {
-  0;
-  iter.pool = pool;
-  iter.curchunk = pool.chunks;
-  iter.curindex = 0;
-}
-
-export function BLI_mempool_iterstep(iter) {
-  if (iter.curchunk === null) {
-    return null;
-  }
-  const esize = iter.pool.esize;
-  let curnode = CHUNK_DATA(iter.curchunk) + esize * iter.curindex;
-  let ret = null;
-  do {
-    ret = curnode;
-    if (++iter.curindex !== iter.pool.pchunk) {
-      curnode = curnode + esize;
-    } else {
-      iter.curindex = 0;
-      iter.curchunk = iter.curchunk.next;
-      if (iter.curchunk === null) {
-        const ret2 = ret.freeword === FREEWORD ? null : ret;
-        if (ret.freeword === FREEWORD) {
-        }
-        return ret2;
-      }
-      curnode = CHUNK_DATA(iter.curchunk);
-    }
-  } while (ret.freeword === FREEWORD);
-  return ret;
-}
-
-export function BLI_mempool_destroy(pool) {
-  mempool_chunk_free_all(pool.chunks, pool);
 }

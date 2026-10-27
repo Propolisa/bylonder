@@ -65,3 +65,5 @@ export function BM_vert_collapse_edge(bm, e_kill, v_kill, do_del, kill_degenerat
   }
   return bmesh_kernel_join_edge_kill_vert(bm, e_kill, v_kill, do_del, true, kill_degenerate_faces, kill_duplicate_faces);
 }
+
+export * from './bmesh-mods.gen.js';

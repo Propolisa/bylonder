@@ -234,3 +234,5 @@ export function BM_mesh_select_flush_from_verts(bm) {
   });
   recount(bm);
 }
+
+export * from './bmesh-marking.gen.js';

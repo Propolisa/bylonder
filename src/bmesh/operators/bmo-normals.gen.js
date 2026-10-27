@@ -12,7 +12,6 @@ import {
   normalize_v3,
   sub_v3,
 } from '../../blenlib/math-geom.js';
-import { BLI_mempool_create, BLI_mempool_destroy } from '../../blenlib/mempool.js';
 import {
   BMO_flag_disable,
   BMO_flag_enable,
@@ -115,7 +114,7 @@ function bmo_recalc_face_normals_array(bm, faces, faces_len, oflag) {
   let is_flip = false;
   let f = -1;
   let fstack = null;
-  let fstack_pool_ = null;
+  const fstack_pool_ = null;
   const fstack_type_ = -1;
   const f_start_index = (([_r0, is_flip] = recalc_face_normals_find_index(bm, faces, faces_len)), _r0);
   if (is_flip) {
@@ -123,11 +122,11 @@ function bmo_recalc_face_normals_array(bm, faces, faces_len, oflag) {
   }
   {
     fstack = null;
-    fstack_pool_ = BLI_mempool_create(16, 0, 64, 0);
   }
-  0 !== (0 ? faces[f_start_index] : 0), BLI_linklist_prepend_pool(fstack, faces[f_start_index], fstack_pool_);
+  0 !== (0 ? faces[f_start_index] : 0),
+    (fstack = BLI_linklist_prepend_pool(fstack, faces[f_start_index], fstack_pool_));
   BMO_flag_enable(bm.f, faces[f_start_index], FACE_TEMP);
-  while ((f = (fstack ? (([_r1, fstack] = BLI_linklist_pop_pool(fstack, fstack_pool_)), _r1) : -1) >= 0)) {
+  while ((f = fstack ? (([_r1, fstack] = BLI_linklist_pop_pool(fstack, fstack_pool_)), _r1) : -1) >= 0) {
     const flip_state = BMO_flag_test(bm.f, f, FACE_FLIP);
     let l_first = -1;
     let l_iter = (l_first = bm.f.l_first[f]);
@@ -142,14 +141,12 @@ function bmo_recalc_face_normals_array(bm, faces, faces_len, oflag) {
             FACE_FLIP,
             Number(bm.l.v[l_other] === bm.l.v[l_iter]) !== Number(flip_state),
           );
-          0 !== (0 ? bm.l.f[l_other] : 0), BLI_linklist_prepend_pool(fstack, bm.l.f[l_other], fstack_pool_);
+          0 !== (0 ? bm.l.f[l_other] : 0), (fstack = BLI_linklist_prepend_pool(fstack, bm.l.f[l_other], fstack_pool_));
         }
       }
     } while ((l_iter = bm.l.next[l_iter]) !== l_first);
   }
   {
-    BLI_mempool_destroy(fstack_pool_);
-    fstack_pool_ = null;
     fstack_pool_;
     fstack = null;
     fstack;
@@ -165,14 +162,14 @@ function bmo_recalc_face_normals_array(bm, faces, faces_len, oflag) {
 
 export function bmo_recalc_face_normals_exec(bm, op) {
   let _r0;
-  const groups_array = MEM_new_array_uninitialized(bm.totface, 'bmo_recalc_face_normals_exec');
-  const faces_grp = MEM_new_array_uninitialized(bm.totface, 'bmo_recalc_face_normals_exec');
+  const groups_array = new Int32Array(bm.totface);
+  const faces_grp = new Array(bm.totface).fill(-1);
   let group_index = null;
   const group_tot =
     (([_r0, group_index] = BM_mesh_calc_face_groups(
       bm,
       groups_array,
-      bmo_recalc_normal_loop_filter_cb,
+      (...args) => bmo_recalc_normal_loop_filter_cb(bm, ...args),
       null,
       null,
       0,

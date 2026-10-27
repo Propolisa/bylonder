@@ -19,7 +19,7 @@ function stack_chunk_elem_max_calc(elem_size, chunk_size) {
 }
 
 export function BLI_stack_new_ex(elem_size, description, chunk_size) {
-  const stack = MEM_new_zeroed(description);
+  const stack = { chunk_curr: null, chunk_free: null, chunk_index: 0, chunk_elem_max: 0, elem_size: 0, elem_num: 0 };
   stack.chunk_elem_max = stack_chunk_elem_max_calc(elem_size, chunk_size);
   stack.elem_size = elem_size;
   stack.chunk_index = stack.chunk_elem_max - 1;
@@ -50,7 +50,7 @@ export function BLI_stack_push_r(stack) {
       chunk = stack.chunk_free;
       stack.chunk_free = chunk.next;
     } else {
-      chunk = MEM_new_uninitialized(8 + stack.elem_size * stack.chunk_elem_max, 'BLI_stack_push_r');
+      chunk = Array.from({ length: 8 + stack.elem_size * stack.chunk_elem_max }, () => ({ next: null, data: '' }));
     }
     chunk.next = stack.chunk_curr;
     stack.chunk_curr = chunk;

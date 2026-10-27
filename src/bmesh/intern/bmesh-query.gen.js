@@ -10,7 +10,6 @@ import {
   len_v3,
   sub_v3,
 } from '../../blenlib/math-geom.js';
-import { BLI_mempool_iternew, BLI_mempool_iterstep } from '../../blenlib/mempool.js';
 import {
   BM_DISK_EDGE_NEXT,
   BM_EDGE,
@@ -25,355 +24,45 @@ import {
   vco,
 } from './bmesh-class.js';
 import {
-  BM_EDGES_OF_FACE,
-  BM_EDGES_OF_MESH,
-  BM_EDGES_OF_VERT,
-  BM_FACES_OF_EDGE,
   BM_FACES_OF_MESH,
-  BM_FACES_OF_VERT,
-  BM_LOOPS_OF_EDGE,
-  BM_LOOPS_OF_FACE,
   BM_LOOPS_OF_LOOP,
-  BM_LOOPS_OF_VERT,
-  BM_VERTS_OF_EDGE,
-  BM_VERTS_OF_FACE,
-  BM_VERTS_OF_MESH,
   BM_edge_is_manifold,
   BM_edge_other_loop,
+  BM_iter_new,
+  BM_iter_step,
 } from './bmesh-query.js';
-import {
-  bmesh_disk_edge_next,
-  bmesh_disk_faceedge_find_next,
-  bmesh_disk_faceloop_find_first,
-  bmesh_disk_facevert_count,
-  bmesh_radial_faceloop_find_first,
-  bmesh_radial_faceloop_find_next,
-} from './bmesh-structure.js';
+import { bmesh_disk_edge_next } from './bmesh-structure.js';
 
 export function BM_iter_at_index(bm, itype, data, index) {
+  const iter = {
+    data: {
+      elem_of_mesh: { pooliter: { pool: null, curchunk: null, curindex: 0 } },
+      edge_of_vert: { vdata: -1, e_first: -1, e_next: -1 },
+      face_of_vert: { vdata: -1, l_first: -1, l_next: -1, e_first: -1, e_next: -1 },
+      loop_of_vert: { vdata: -1, l_first: -1, l_next: -1, e_first: -1, e_next: -1 },
+      loop_of_edge: { edata: -1, l_first: -1, l_next: -1 },
+      loop_of_loop: { ldata: -1, l_first: -1, l_next: -1 },
+      face_of_edge: { edata: -1, l_first: -1, l_next: -1 },
+      vert_of_edge: { edata: -1 },
+      vert_of_face: { pdata: -1, l_first: -1, l_next: -1 },
+      edge_of_face: { pdata: -1, l_first: -1, l_next: -1 },
+      loop_of_face: { pdata: -1, l_first: -1, l_next: -1 },
+    },
+    begin: null,
+    step: null,
+    count: 0,
+    itype: 0,
+  };
   if (index < 0) {
     return null;
   }
-  let val = (0, BM_iter_new(null, bm, itype, data));
+  let val = (0, BM_iter_new(iter, bm, itype, data));
   let i = 0;
   while (i < index) {
-    val = BM_iter_step(null);
+    val = BM_iter_step(iter);
     i++;
   }
   return val;
-}
-
-export function bmiter__elem_of_mesh_begin(iter) {
-  BLI_mempool_iternew(iter.pooliter.pool, iter.pooliter);
-}
-
-export function bmiter__elem_of_mesh_step(iter) {
-  return BLI_mempool_iterstep(iter.pooliter);
-}
-
-export function bmiter__edge_of_vert_begin(bm, iter) {
-  if (bm.v.e[iter.vdata] >= 0) {
-    iter.e_first = bm.v.e[iter.vdata];
-    iter.e_next = bm.v.e[iter.vdata];
-  } else {
-    iter.e_first = -1;
-    iter.e_next = -1;
-  }
-}
-
-export function bmiter__edge_of_vert_step(bm, iter) {
-  const e_curr = iter.e_next;
-  if (iter.e_next >= 0) {
-    iter.e_next = bmesh_disk_edge_next(bm, iter.e_next, iter.vdata);
-    if (iter.e_next === iter.e_first) {
-      iter.e_next = -1;
-    }
-  }
-  return e_curr;
-}
-
-export function bmiter__face_of_vert_begin(bm, iter) {
-  iter.count = bmesh_disk_facevert_count(bm, iter.vdata);
-  if (iter.count) {
-    iter.l_first = bmesh_disk_faceloop_find_first(bm, bm.v.e[iter.vdata], iter.vdata);
-    iter.e_first = bm.l.e[iter.l_first];
-    iter.e_next = iter.e_first;
-    iter.l_next = iter.l_first;
-  } else {
-    iter.l_first = iter.l_next = -1;
-    iter.e_first = iter.e_next = -1;
-  }
-}
-
-export function bmiter__face_of_vert_step(bm, iter) {
-  const l_curr = iter.l_next;
-  if (iter.count && iter.l_next >= 0) {
-    iter.count--;
-    iter.l_next = bmesh_radial_faceloop_find_next(bm, iter.l_next, iter.vdata);
-    if (iter.l_next === iter.l_first) {
-      iter.e_next = bmesh_disk_faceedge_find_next(bm, iter.e_next, iter.vdata);
-      iter.l_first = bmesh_radial_faceloop_find_first(bm, bm.e.l[iter.e_next], iter.vdata);
-      iter.l_next = iter.l_first;
-    }
-  }
-  if (!iter.count) {
-    iter.l_next = -1;
-  }
-  return l_curr >= 0 ? bm.l.f[l_curr] : -1;
-}
-
-export function bmiter__loop_of_vert_begin(bm, iter) {
-  iter.count = bmesh_disk_facevert_count(bm, iter.vdata);
-  if (iter.count) {
-    iter.l_first = bmesh_disk_faceloop_find_first(bm, bm.v.e[iter.vdata], iter.vdata);
-    iter.e_first = bm.l.e[iter.l_first];
-    iter.e_next = iter.e_first;
-    iter.l_next = iter.l_first;
-  } else {
-    iter.l_first = iter.l_next = -1;
-    iter.e_first = iter.e_next = -1;
-  }
-}
-
-export function bmiter__loop_of_vert_step(bm, iter) {
-  const l_curr = iter.l_next;
-  if (iter.count) {
-    iter.count--;
-    iter.l_next = bmesh_radial_faceloop_find_next(bm, iter.l_next, iter.vdata);
-    if (iter.l_next === iter.l_first) {
-      iter.e_next = bmesh_disk_faceedge_find_next(bm, iter.e_next, iter.vdata);
-      iter.l_first = bmesh_radial_faceloop_find_first(bm, bm.e.l[iter.e_next], iter.vdata);
-      iter.l_next = iter.l_first;
-    }
-  }
-  if (!iter.count) {
-    iter.l_next = -1;
-  }
-  return l_curr;
-}
-
-export function bmiter__loop_of_edge_begin(bm, iter) {
-  iter.l_first = iter.l_next = bm.e.l[iter.edata];
-}
-
-export function bmiter__loop_of_edge_step(bm, iter) {
-  const l_curr = iter.l_next;
-  if (iter.l_next >= 0) {
-    iter.l_next = bm.l.radial_next[iter.l_next];
-    if (iter.l_next === iter.l_first) {
-      iter.l_next = -1;
-    }
-  }
-  return l_curr;
-}
-
-export function bmiter__loop_of_loop_begin(bm, iter) {
-  iter.l_first = iter.ldata;
-  iter.l_next = bm.l.radial_next[iter.l_first];
-  if (iter.l_next === iter.l_first) {
-    iter.l_next = -1;
-  }
-}
-
-export function bmiter__loop_of_loop_step(bm, iter) {
-  const l_curr = iter.l_next;
-  if (iter.l_next >= 0) {
-    iter.l_next = bm.l.radial_next[iter.l_next];
-    if (iter.l_next === iter.l_first) {
-      iter.l_next = -1;
-    }
-  }
-  return l_curr;
-}
-
-export function bmiter__face_of_edge_begin(bm, iter) {
-  iter.l_first = iter.l_next = bm.e.l[iter.edata];
-}
-
-export function bmiter__face_of_edge_step(bm, iter) {
-  const current = iter.l_next;
-  if (iter.l_next >= 0) {
-    iter.l_next = bm.l.radial_next[iter.l_next];
-    if (iter.l_next === iter.l_first) {
-      iter.l_next = -1;
-    }
-  }
-  return current >= 0 ? bm.l.f[current] : -1;
-}
-
-export function bmiter__vert_of_edge_begin(iter) {
-  iter.count = 0;
-}
-
-export function bmiter__vert_of_edge_step(bm, iter) {
-  switch (iter.count++) {
-    case 0:
-      return bm.e.v1[iter.edata];
-    case 1:
-      return bm.e.v2[iter.edata];
-    default:
-      return null;
-  }
-}
-
-export function bmiter__vert_of_face_begin(bm, iter) {
-  iter.l_first = iter.l_next = bm.f.l_first[iter.pdata];
-}
-
-export function bmiter__vert_of_face_step(bm, iter) {
-  const l_curr = iter.l_next;
-  if (iter.l_next >= 0) {
-    iter.l_next = bm.l.next[iter.l_next];
-    if (iter.l_next === iter.l_first) {
-      iter.l_next = -1;
-    }
-  }
-  return l_curr >= 0 ? bm.l.v[l_curr] : -1;
-}
-
-export function bmiter__edge_of_face_begin(bm, iter) {
-  iter.l_first = iter.l_next = bm.f.l_first[iter.pdata];
-}
-
-export function bmiter__edge_of_face_step(bm, iter) {
-  const l_curr = iter.l_next;
-  if (iter.l_next >= 0) {
-    iter.l_next = bm.l.next[iter.l_next];
-    if (iter.l_next === iter.l_first) {
-      iter.l_next = -1;
-    }
-  }
-  return l_curr >= 0 ? bm.l.e[l_curr] : -1;
-}
-
-export function bmiter__loop_of_face_begin(bm, iter) {
-  iter.l_first = iter.l_next = bm.f.l_first[iter.pdata];
-}
-
-export function bmiter__loop_of_face_step(bm, iter) {
-  const l_curr = iter.l_next;
-  if (iter.l_next >= 0) {
-    iter.l_next = bm.l.next[iter.l_next];
-    if (iter.l_next === iter.l_first) {
-      iter.l_next = -1;
-    }
-  }
-  return l_curr;
-}
-
-export function BM_iter_step(iter) {
-  return null.step(null);
-}
-
-export function BM_iter_init(iter, bm, itype, data) {
-  null.itype = itype;
-  switch (itype) {
-    case BM_VERTS_OF_MESH:
-      0;
-      0;
-      null.begin = bmiter__elem_of_mesh_begin;
-      null.step = bmiter__elem_of_mesh_step;
-      null.data.elem_of_mesh.pooliter.pool = bm.vpool;
-      break;
-    case BM_EDGES_OF_MESH:
-      0;
-      0;
-      null.begin = bmiter__elem_of_mesh_begin;
-      null.step = bmiter__elem_of_mesh_step;
-      null.data.elem_of_mesh.pooliter.pool = bm.epool;
-      break;
-    case BM_FACES_OF_MESH:
-      0;
-      0;
-      null.begin = bmiter__elem_of_mesh_begin;
-      null.step = bmiter__elem_of_mesh_step;
-      null.data.elem_of_mesh.pooliter.pool = bm.fpool;
-      break;
-    case BM_EDGES_OF_VERT:
-      0;
-      0;
-      null.begin = bmiter__edge_of_vert_begin;
-      null.step = bmiter__edge_of_vert_step;
-      null.data.edge_of_vert.vdata = data;
-      break;
-    case BM_FACES_OF_VERT:
-      0;
-      0;
-      null.begin = bmiter__face_of_vert_begin;
-      null.step = bmiter__face_of_vert_step;
-      null.data.face_of_vert.vdata = data;
-      break;
-    case BM_LOOPS_OF_VERT:
-      0;
-      0;
-      null.begin = bmiter__loop_of_vert_begin;
-      null.step = bmiter__loop_of_vert_step;
-      null.data.loop_of_vert.vdata = data;
-      break;
-    case BM_VERTS_OF_EDGE:
-      0;
-      0;
-      null.begin = bmiter__vert_of_edge_begin;
-      null.step = bmiter__vert_of_edge_step;
-      null.data.vert_of_edge.edata = data;
-      break;
-    case BM_FACES_OF_EDGE:
-      0;
-      0;
-      null.begin = bmiter__face_of_edge_begin;
-      null.step = bmiter__face_of_edge_step;
-      null.data.face_of_edge.edata = data;
-      break;
-    case BM_VERTS_OF_FACE:
-      0;
-      0;
-      null.begin = bmiter__vert_of_face_begin;
-      null.step = bmiter__vert_of_face_step;
-      null.data.vert_of_face.pdata = data;
-      break;
-    case BM_EDGES_OF_FACE:
-      0;
-      0;
-      null.begin = bmiter__edge_of_face_begin;
-      null.step = bmiter__edge_of_face_step;
-      null.data.edge_of_face.pdata = data;
-      break;
-    case BM_LOOPS_OF_FACE:
-      0;
-      0;
-      null.begin = bmiter__loop_of_face_begin;
-      null.step = bmiter__loop_of_face_step;
-      null.data.loop_of_face.pdata = data;
-      break;
-    case BM_LOOPS_OF_LOOP:
-      0;
-      0;
-      null.begin = bmiter__loop_of_loop_begin;
-      null.step = bmiter__loop_of_loop_step;
-      null.data.loop_of_loop.ldata = data;
-      break;
-    case BM_LOOPS_OF_EDGE:
-      0;
-      0;
-      null.begin = bmiter__loop_of_edge_begin;
-      null.step = bmiter__loop_of_edge_step;
-      null.data.loop_of_edge.edata = data;
-      break;
-    default:
-      0;
-      return false;
-      break;
-  }
-  null.begin(null);
-  return true;
-}
-
-export function BM_iter_new(iter, bm, itype, data) {
-  if (Number(!!BM_iter_init(null, bm, itype, data))) {
-    return BM_iter_step(null);
-  } else {
-    return null;
-  }
 }
 
 export function BM_vert_step_fan_loop(bm, l, e_step) {
@@ -539,13 +228,32 @@ export function BM_mesh_calc_face_groups(
   htype_step,
 ) {
   let group_index_len = 32;
-  let group_index = MEM_new_array_uninitialized(group_index_len, 'BM_mesh_calc_face_groups');
+  let group_index = Array.from({ length: group_index_len }, () => [0, 0]);
   const group_array = r_groups_array;
   let _group_array_index = 0;
   let group_curr = 0;
   let tot_faces = 0;
   let tot_touch = 0;
   let _stack_index = 0;
+  const iter = {
+    data: {
+      elem_of_mesh: { pooliter: { pool: null, curchunk: null, curindex: 0 } },
+      edge_of_vert: { vdata: -1, e_first: -1, e_next: -1 },
+      face_of_vert: { vdata: -1, l_first: -1, l_next: -1, e_first: -1, e_next: -1 },
+      loop_of_vert: { vdata: -1, l_first: -1, l_next: -1, e_first: -1, e_next: -1 },
+      loop_of_edge: { edata: -1, l_first: -1, l_next: -1 },
+      loop_of_loop: { ldata: -1, l_first: -1, l_next: -1 },
+      face_of_edge: { edata: -1, l_first: -1, l_next: -1 },
+      vert_of_edge: { edata: -1 },
+      vert_of_face: { pdata: -1, l_first: -1, l_next: -1 },
+      edge_of_face: { pdata: -1, l_first: -1, l_next: -1 },
+      loop_of_face: { pdata: -1, l_first: -1, l_next: -1 },
+    },
+    begin: null,
+    step: null,
+    count: 0,
+    itype: 0,
+  };
   let f = -1;
   let i = 0;
   (group_array, (_group_array_index = 0)), 0 ? bm.totface : 0;
@@ -560,13 +268,13 @@ export function BM_mesh_calc_face_groups(
     bm.f.index[f] = i;
   }
   bm.elem_index_dirty &= ~BM_FACE;
-  const stack = MEM_new_array_uninitialized(tot_faces, 'BM_mesh_calc_face_groups');
-  let f_next = (0, BM_iter_new(null, bm, BM_FACES_OF_MESH, null));
+  const stack = new Array(tot_faces).fill(-1);
+  let f_next = (0, BM_iter_new(iter, bm, BM_FACES_OF_MESH, null));
   while (tot_touch !== tot_faces) {
     let ok = false;
     0;
     (stack, (_stack_index = 0)), 0 ? tot_faces : 0;
-    for (; f_next >= 0; f_next = BM_iter_step(null)) {
+    for (; f_next >= 0; f_next = BM_iter_step(iter)) {
       if (BM_elem_flag_test(bm.f, f_next, BM_ELEM_TAG) === Number(false)) {
         BM_elem_flag_enable(bm.f, f_next, BM_ELEM_TAG);
         ((stack, stack), 1), (stack[_stack_index++] = f_next);
@@ -577,12 +285,15 @@ export function BM_mesh_calc_face_groups(
     0;
     if (group_index_len === group_curr) {
       group_index_len *= 2;
-      group_index = MEM_realloc_uninitialized_id(group_index, 8 * group_index_len, 'BM_mesh_calc_face_groups');
+      group_index = Object.assign(
+        Array.from({ length: group_index_len }, () => [0, 0]),
+        group_index.slice(0, group_index_len),
+      );
     }
     const group_item = group_index[group_curr];
     group_item[0] = (group_array, _group_array_index);
     group_item[1] = 0;
-    while ((f = (_stack_index ? stack[--_stack_index] : -1) >= 0)) {
+    while ((f = _stack_index ? stack[--_stack_index] : -1) >= 0) {
       let l_iter = -1;
       let l_first = -1;
       ((group_array, group_array), 1), (group_array[_group_array_index++] = bm.f.index[f]);
@@ -626,7 +337,10 @@ export function BM_mesh_calc_face_groups(
     group_curr++;
   }
   if (group_index_len !== group_curr) {
-    group_index = MEM_realloc_uninitialized_id(group_index, 8 * group_curr, 'BM_mesh_calc_face_groups');
+    group_index = Object.assign(
+      Array.from({ length: group_curr }, () => [0, 0]),
+      group_index.slice(0, group_curr),
+    );
   }
   const r_group_index = group_index;
   return [group_curr, r_group_index];

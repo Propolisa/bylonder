@@ -22,7 +22,7 @@ function bm_face_triangulate_mapping(
   pf_heap,
 ) {
   let faces_array_tot = bm.f.len[face] - 3;
-  const faces_array = new Array(faces_array_tot);
+  const faces_array = new Array(faces_array_tot).fill(-1);
   let faces_double = null;
   0;
   [faces_array_tot] = BM_face_triangulate(
@@ -34,7 +34,7 @@ function bm_face_triangulate_mapping(
     quad_method,
     ngon_method,
     use_tag,
-    null,
+    pf_arena,
     pf_heap,
   );
   if (faces_array_tot) {
@@ -62,6 +62,7 @@ export function BM_mesh_triangulate(
   slot_facemap_double_out,
 ) {
   let face = -1;
+  const pf_arena = null;
   let pf_heap = null;
   if (ngon_method === MOD_TRIANGULATE_NGON_BEAUTY) {
     pf_heap = BLI_heap_new_ex(BLI_POLYFILL_ALLOC_NGON_RESERVE);
@@ -81,7 +82,7 @@ export function BM_mesh_triangulate(
             op,
             slot_facemap_out,
             slot_facemap_double_out,
-            null,
+            pf_arena,
             pf_heap,
           );
         }
@@ -92,7 +93,18 @@ export function BM_mesh_triangulate(
     for (face of BM_FACES_OF_MESH(bm)) {
       if (bm.f.len[face] >= min_vertices) {
         if (Number(tag_only) === Number(false) || BM_elem_flag_test(bm.f, face, BM_ELEM_TAG)) {
-          BM_face_triangulate(bm, face, null, null, faces_double, quad_method, ngon_method, tag_only, null, pf_heap);
+          BM_face_triangulate(
+            bm,
+            face,
+            null,
+            null,
+            faces_double,
+            quad_method,
+            ngon_method,
+            tag_only,
+            pf_arena,
+            pf_heap,
+          );
         }
       }
     }

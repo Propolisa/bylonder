@@ -41,7 +41,13 @@ import {
   vco,
 } from '../intern/bmesh-class.js';
 import { BM_faces_join_pair } from '../intern/bmesh-mods.js';
-import { BMO_slot_bool_get, BMO_slot_buffer_from_enabled_flag, BMO_slot_float_get } from '../intern/bmesh-operators.js';
+import {
+  BMO_iter_new,
+  BMO_iter_step,
+  BMO_slot_bool_get,
+  BMO_slot_buffer_from_enabled_flag,
+  BMO_slot_float_get,
+} from '../intern/bmesh-operators.js';
 import { BM_face_as_array_loop_quad, BM_face_as_array_vert_quad } from '../intern/bmesh-polygon.js';
 import {
   BM_EDGES_OF_MESH,
@@ -409,9 +415,9 @@ function bm_faces_join_pair_by_edge(bm, e) {
 }
 
 export function bmo_join_triangles_exec(bm, op) {
-  let _r0;
+  let _r0, _r1, _r2, _r3, _r4, _r5, _r6, _r7, _r8;
   const siter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
-  const f = -1;
+  let f = -1;
   let e = -1;
   const delimit_data = bm_edge_delmimit_data_from_op(bm, op);
   const s = {
@@ -426,9 +432,21 @@ export function bmo_join_triangles_exec(bm, op) {
   s.edge_queue = BLI_heap_new();
   s.select_tris_only = BMO_slot_bool_get(op.slots_in, 'deselect_joined');
   if (s.use_topo_influence) {
-    s.edge_queue_nodes = MEM_new_array_uninitialized(bm.totedge, 'bmo_join_triangles_exec');
+    s.edge_queue_nodes = new Array(bm.totedge).fill(null);
   }
-  for (;;) {
+  for (
+    f =
+      (([_r3, _r1] = BMO_iter_new(op.slots_in, 'faces', BM_FACE)),
+      ((_r2 = _r1),
+      (siter.slot = _r2.slot),
+      (siter.cur = _r2.cur),
+      (siter.giter = _r2.giter),
+      (siter.val = _r2.val),
+      (siter.restrictmask = _r2.restrictmask)),
+      _r3);
+    f >= 0;
+    f = BMO_iter_step(siter)
+  ) {
     if (bm.f.len[f] === 3) {
       BMO_flag_enable(bm.f, f, FACE_INPUT);
       if (s.select_tris_only) {
@@ -442,7 +460,7 @@ export function bmo_join_triangles_exec(bm, op) {
     let f_a = -1;
     let f_b = -1;
     if (
-      (([_r0, f_a, f_b] = BM_edge_face_pair(bm, e)), _r0) &&
+      (([_r4, f_a, f_b] = BM_edge_face_pair(bm, e)), _r4) &&
       BMO_flag_test(bm.f, f_a, FACE_INPUT) &&
       BMO_flag_test(bm.f, f_b, FACE_INPUT) &&
       !bm_edge_is_delimit(bm, e, delimit_data)
@@ -465,7 +483,19 @@ export function bmo_join_triangles_exec(bm, op) {
     }
   }
   if (s.use_topo_influence && Number(BLI_heap_is_empty(s.edge_queue)) === Number(false)) {
-    for (;;) {
+    for (
+      f =
+        (([_r8, _r6] = BMO_iter_new(op.slots_in, 'faces', BM_FACE)),
+        ((_r7 = _r6),
+        (siter.slot = _r7.slot),
+        (siter.cur = _r7.cur),
+        (siter.giter = _r7.giter),
+        (siter.val = _r7.val),
+        (siter.restrictmask = _r7.restrictmask)),
+        _r8);
+      f >= 0;
+      f = BMO_iter_step(siter)
+    ) {
       if (bm.f.len[f] === 4) {
         const f_verts = BM_face_as_array_vert_quad(bm, f);
         let f_error = quad_calc_error(

@@ -182,7 +182,7 @@ export function BM_face_normal_flip_ex(bm, f, cd_loop_mdisp_offset, use_loop_mdi
 }
 
 export function BM_face_point_inside_test(bm, f, co) {
-  const projverts = new Array(bm.f.len[f]);
+  const projverts = Array.from({ length: bm.f.len[f] }, () => {});
   let l_iter = -1;
   let i = 0;
   0;
@@ -219,8 +219,8 @@ export function BM_face_triangulate(
   0;
   0;
   {
-    const loops = new Array(bm.f.len[f]);
-    const tris_buf = new Array(bm.f.len[f]);
+    const loops = new Array(bm.f.len[f]).fill(-1);
+    const tris_buf = Array.from({ length: bm.f.len[f] }, () => [0, 0, 0]);
     const tris = tris_buf;
     const totfilltri = bm.f.len[f] - 2;
     const last_tri = bm.f.len[f] - 3;
@@ -298,15 +298,15 @@ export function BM_face_triangulate(
       }
     } else {
       let l_iter = -1;
-      const projverts = new Array(bm.f.len[f]);
+      const projverts = Array.from({ length: bm.f.len[f] }, () => {});
       const axis_mat = axis_dominant_v3_to_m3_negate(fno(bm, f));
       for (i = 0, l_iter = bm.f.l_first[f]; i < bm.f.len[f]; i++, l_iter = bm.l.next[l_iter]) {
         loops[i] = l_iter;
         projverts[i] = mul_v2_m3v3(axis_mat, vco(bm, bm.l.v[l_iter]));
       }
-      BLI_polyfill_calc_arena(projverts, bm.f.len[f], 1, tris, null);
+      BLI_polyfill_calc_arena(projverts, bm.f.len[f], 1, tris, pf_arena);
       if (use_beauty) {
-        BLI_polyfill_beautify(projverts, bm.f.len[f], tris, null, pf_heap);
+        BLI_polyfill_beautify(projverts, bm.f.len[f], tris, pf_arena, pf_heap);
       }
     }
     if (cd_loop_mdisp_offset !== -1) {
@@ -322,7 +322,7 @@ export function BM_face_triangulate(
         let l_iter = bm.l.radial_next[l_new];
         do {
           if (bm.f.len[bm.l.f[l_iter]] === 3 && bm.l.v[bm.l.prev[l_new]] === bm.l.v[bm.l.prev[l_iter]]) {
-            BLI_linklist_prepend(r_faces_double, i !== last_tri ? f_new : f);
+            r_faces_double = BLI_linklist_prepend(r_faces_double, i !== last_tri ? f_new : f);
             break;
           }
         } while ((l_iter = bm.l.radial_next[l_iter]) !== l_new);

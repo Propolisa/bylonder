@@ -23,7 +23,7 @@ import {
   zero_v2,
 } from '../../blenlib/math-geom.js';
 import { invert_m3 } from '../../blenlib/math-matrix.js';
-import { BLI_mempool_alloc, BLI_mempool_create, BLI_mempool_destroy } from '../../blenlib/mempool.js';
+import { BLI_mempool_create } from '../../blenlib/mempool.js';
 import { BMO_flag_enable, BM_EDGE, BM_FACE, BM_VERT, fno, vco, vno } from '../intern/bmesh-class.js';
 import { BM_edge_split } from '../intern/bmesh-mods.js';
 import {
@@ -37,13 +37,11 @@ import {
   _bmo_slot_copy,
 } from '../intern/bmesh-operators.js';
 import { BM_face_normal_update } from '../intern/bmesh-polygon.js';
-import { BM_LOOPS_OF_EDGE, BM_LOOPS_OF_VERT } from '../intern/bmesh-query.js';
+import { BM_LOOPS_OF_VERT } from '../intern/bmesh-query.js';
 
 const VERT_OUT = 1;
 const VERT_EXCLUDE = 2;
 const FACE_EXCLUDE = 2;
-
-export function FACE_WALK_TEST(f) {}
 
 function state_calc_co_pair_fac(pc, co_a, co_b) {
   const diff_a = Math.fround(Math.abs(Math.fround(dot_m3_v3_row_x(pc.matrix, co_a) - pc.axis_sep)));
@@ -59,7 +57,7 @@ function state_calc_co_pair(pc, co_a, co_b) {
 }
 
 function state_link_add(bm, pc, state, ele, ele_from) {
-  const step_new = BLI_mempool_alloc(pc.link_pool);
+  const step_new = { next: null, ele: null, ele_from: null };
   0;
   0;
   {
@@ -252,7 +250,7 @@ export function bmo_connect_vert_pair_exec(bm, op) {
     pc.axis_sep = dot_m3_v3_row_x(pc.matrix, vco(bm, pc.v_pair[0]));
   }
   {
-    const state = MEM_new_zeroed('bmo_connect_vert_pair_exec');
+    const state = { link_last: null, dist: 0, co_prev: [0, 0, 0] };
     state_link_add(bm, pc, state, pc.v_pair[0], null);
     BLI_heapsimple_insert(pc.states, state.dist, state);
   }
@@ -302,7 +300,6 @@ export function bmo_connect_vert_pair_exec(bm, op) {
   }
   BMO_flag_enable(bm.v, pc.v_pair[0], VERT_OUT);
   BMO_flag_enable(bm.v, pc.v_pair[1], VERT_OUT);
-  BLI_mempool_destroy(pc.link_pool);
   BLI_heapsimple_free(pc.states, MEM_delete_void);
   if (state_best.link_last) {
     const op_sub = {

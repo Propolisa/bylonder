@@ -102,7 +102,7 @@ function quad_co(v1, v2, v3, v4, p, n, r_uv) {
   if (!isect_point_quad_v2(origin, projverts[0], projverts[1], projverts[2], projverts[3])) {
     return false;
   }
-  resolve_quad_uv_v2(r_uv, origin, projverts[0], projverts[3], projverts[2], projverts[1]);
+  r_uv = resolve_quad_uv_v2(r_uv, origin, projverts[0], projverts[3], projverts[2], projverts[1]);
   return true;
 }
 
@@ -230,15 +230,7 @@ function loop_interp_multires_cb(bm, userdata, ix, _unused2) {
   }
 }
 
-export function BM_loop_interp_multires_ex(
-  bm,
-  _unused0,
-  l_dst,
-  f_src,
-  f_dst_center,
-  f_src_center,
-  cd_loop_mdisp_offset,
-) {
+export function BM_loop_interp_multires_ex(bm, l_dst, f_src, f_dst_center, f_src_center, cd_loop_mdisp_offset) {
   let _r0;
   let v1 = [0, 0, 0];
   let v2 = [0, 0, 0];
@@ -258,7 +250,7 @@ export function BM_loop_interp_multires_ex(
     md_dst.totdisp = md_src.totdisp;
     md_dst.level = md_src.level;
     if (md_dst.totdisp) {
-      md_dst.disps = MEM_new_array_zeroed(md_dst.totdisp, 'BM_loop_interp_multires_ex');
+      md_dst.disps = Array.from({ length: md_dst.totdisp }, () => [0, 0, 0]);
     } else {
       return;
     }
@@ -311,7 +303,7 @@ export function BM_loop_interp_multires_ex(
     (settings.func_free = _r0.func_free),
     (settings.min_iter_per_thread = _r0.min_iter_per_thread);
   settings.use_threading = res > 5;
-  BLI_task_parallel_range(0, res, data, loop_interp_multires_cb, settings);
+  BLI_task_parallel_range(0, res, data, (...args) => loop_interp_multires_cb(bm, ...args), settings);
 }
 
 export function BM_loop_interp_multires(bm, l_dst, f_src) {
@@ -319,7 +311,7 @@ export function BM_loop_interp_multires(bm, l_dst, f_src) {
   if (cd_loop_mdisp_offset !== -1) {
     const f_dst_center = BM_face_calc_center_median(bm, bm.l.f[l_dst]);
     const f_src_center = BM_face_calc_center_median(bm, f_src);
-    BM_loop_interp_multires_ex(bm, bm, l_dst, f_src, f_dst_center, f_src_center, cd_loop_mdisp_offset);
+    BM_loop_interp_multires_ex(bm, l_dst, f_src, f_dst_center, f_src_center, cd_loop_mdisp_offset);
   }
 }
 
@@ -327,16 +319,16 @@ export function BM_face_interp_multires_ex(bm, f_dst, f_src, f_dst_center, f_src
   let l_first = -1;
   let l_iter = (l_first = bm.f.l_first[f_dst]);
   do {
-    BM_loop_interp_multires_ex(bm, bm, l_iter, f_src, f_dst_center, f_src_center, cd_loop_mdisp_offset);
+    BM_loop_interp_multires_ex(bm, l_iter, f_src, f_dst_center, f_src_center, cd_loop_mdisp_offset);
   } while ((l_iter = bm.l.next[l_iter]) !== l_first);
 }
 
 export function BM_loop_interp_from_face(bm, l_dst, f_src, do_vertex, do_multires) {
   let l_first = -1;
-  const vblocks_buf = new Array(do_vertex ? bm.f.len[f_src] : 0);
-  const blocks_buf = new Array(bm.f.len[f_src]);
-  const cos_2d_buf = new Array(bm.f.len[f_src]);
-  let w = new Array(bm.f.len[f_src]);
+  const vblocks_buf = new Array(do_vertex ? bm.f.len[f_src] : 0).fill(null);
+  const blocks_buf = new Array(bm.f.len[f_src]).fill(null);
+  const cos_2d_buf = Array.from({ length: bm.f.len[f_src] }, () => {});
+  let w = new Array(bm.f.len[f_src]).fill(0);
   const vblocks = do_vertex ? vblocks_buf : null;
   const blocks = blocks_buf;
   const cos_2d = cos_2d_buf;

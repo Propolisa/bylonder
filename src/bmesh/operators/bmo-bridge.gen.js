@@ -48,6 +48,8 @@ import { BM_data_interp_from_verts } from '../intern/bmesh-interp.js';
 import { BM_mesh_elem_hflag_disable_all } from '../intern/bmesh-marking.js';
 import {
   BMO_error_raise,
+  BMO_iter_new,
+  BMO_iter_step,
   BMO_op_exec,
   BMO_op_finish,
   BMO_op_init,
@@ -464,7 +466,7 @@ function bm_edge_test_cb(bm, e, bm_v) {
 }
 
 function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, twist_offset) {
-  let _r0, _r1;
+  let _r0, _r1, _r2, _r3, _r4, _r5, _r6, _r7, _r8, _r9, _r10, _r11, _r12, _r13;
   const eps = 9.999999747378752e-6;
   const is_closed = BM_edgeloop_is_closed(el_store_a) && BM_edgeloop_is_closed(el_store_b);
   let el_store_b_free = false;
@@ -483,8 +485,8 @@ function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, t
   }
   const el_dir = sub_v3(BM_edgeloop_center_get(el_store_a), BM_edgeloop_center_get(el_store_b));
   if (is_closed) {
-    BM_edgeloop_calc_normal(bm, bm, el_store_a);
-    BM_edgeloop_calc_normal(bm, bm, el_store_b);
+    BM_edgeloop_calc_normal(bm, el_store_a);
+    BM_edgeloop_calc_normal(bm, el_store_b);
   } else {
     const lb_a = BM_edgeloop_verts_get(el_store_a);
     const lb_b = BM_edgeloop_verts_get(el_store_b);
@@ -507,8 +509,8 @@ function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, t
       BM_edgeloop_flip(bm, el_store_b);
     }
     no = normalize_v3(el_dir);
-    BM_edgeloop_calc_normal_aligned(bm, bm, el_store_a, no);
-    BM_edgeloop_calc_normal_aligned(bm, bm, el_store_b, no);
+    BM_edgeloop_calc_normal_aligned(bm, el_store_a, no);
+    BM_edgeloop_calc_normal_aligned(bm, el_store_b, no);
   }
   const dot_a = dot_v3(BM_edgeloop_normal_get(el_store_a), el_dir);
   const dot_b = dot_v3(BM_edgeloop_normal_get(el_store_b), el_dir);
@@ -1036,8 +1038,20 @@ function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, t
         val: null,
         restrictmask: 0,
       };
-      const f = -1;
-      for (;;) {
+      let f = -1;
+      for (
+        f =
+          (([_r4, _r2] = BMO_iter_new(op_sub.slots_in, 'faces', BM_FACE)),
+          ((_r3 = _r2),
+          (siter.slot = _r3.slot),
+          (siter.cur = _r3.cur),
+          (siter.giter = _r3.giter),
+          (siter.val = _r3.val),
+          (siter.restrictmask = _r3.restrictmask)),
+          _r4);
+        f >= 0;
+        f = BMO_iter_step(siter)
+      ) {
         BM_face_normal_update(bm, f);
       }
     }
@@ -1050,7 +1064,7 @@ function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, t
         BM_elem_flag_set(bm.v, el.data, BM_ELEM_TAG, i);
       }
     }
-    (_r1 = BMO_op_initf(
+    (_r5 = BMO_op_initf(
       bm,
       0,
       'beautify_fill faces=%hf edges=ae use_restrict_tag=%b method=%i',
@@ -1058,13 +1072,13 @@ function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, t
       Number(true),
       1,
     )),
-      (op_sub.slots_in = _r1.slots_in),
-      (op_sub.slots_out = _r1.slots_out),
-      (op_sub.exec = _r1.exec),
-      (op_sub.arena = _r1.arena),
-      (op_sub.type = _r1.type),
-      (op_sub.type_flag = _r1.type_flag),
-      (op_sub.flag = _r1.flag);
+      (op_sub.slots_in = _r5.slots_in),
+      (op_sub.slots_out = _r5.slots_out),
+      (op_sub.exec = _r5.exec),
+      (op_sub.arena = _r5.arena),
+      (op_sub.type = _r5.type),
+      (op_sub.type_flag = _r5.type_flag),
+      (op_sub.flag = _r5.flag);
     if (use_edgeout) {
       const siter = {
         slot: null,
@@ -1073,8 +1087,20 @@ function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, t
         val: null,
         restrictmask: 0,
       };
-      const f = -1;
-      for (;;) {
+      let f = -1;
+      for (
+        f =
+          (([_r9, _r7] = BMO_iter_new(op_sub.slots_in, 'faces', BM_FACE)),
+          ((_r8 = _r7),
+          (siter.slot = _r8.slot),
+          (siter.cur = _r8.cur),
+          (siter.giter = _r8.giter),
+          (siter.val = _r8.val),
+          (siter.restrictmask = _r8.restrictmask)),
+          _r9);
+        f >= 0;
+        f = BMO_iter_step(siter)
+      ) {
         BMO_flag_enable(bm.f, f, FACE_OUT);
         bm_face_edges_tag_out(bm, f);
       }
@@ -1088,8 +1114,20 @@ function bridge_loop_pair(bm, el_store_a, el_store_b, use_merge, merge_factor, t
         val: null,
         restrictmask: 0,
       };
-      const f = -1;
-      for (;;) {
+      let f = -1;
+      for (
+        f =
+          (([_r13, _r11] = BMO_iter_new(op_sub.slots_out, 'geom.out', BM_FACE)),
+          ((_r12 = _r11),
+          (siter.slot = _r12.slot),
+          (siter.cur = _r12.cur),
+          (siter.giter = _r12.giter),
+          (siter.val = _r12.val),
+          (siter.restrictmask = _r12.restrictmask)),
+          _r13);
+        f >= 0;
+        f = BMO_iter_step(siter)
+      ) {
         BMO_flag_enable(bm.f, f, FACE_OUT);
         bm_face_edges_tag_out(bm, f);
       }
@@ -1131,7 +1169,7 @@ export function bmo_bridge_loops_exec(bm, op) {
   const twist_offset = BMO_slot_int_get(op.slots_in, 'twist_offset');
   let changed = false;
   BMO_slot_buffer_flag_enable(bm, op.slots_in, 'edges', BM_EDGE, EDGE_MARK);
-  const count = BM_mesh_edgeloops_find(bm, eloops, bm_edge_test_cb, bm);
+  const count = BM_mesh_edgeloops_find(bm, eloops, (...args) => bm_edge_test_cb(bm, ...args), bm);
   BM_mesh_edgeloops_calc_center(bm, eloops);
   if (count < 2) {
     BMO_error_raise(bm, op, BMO_ERROR_CANCEL, 'Select at least two edge loops');

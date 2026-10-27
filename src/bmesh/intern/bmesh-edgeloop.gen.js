@@ -13,6 +13,7 @@ import {
   add_newell_cross_v3_v3v3,
   add_v3,
   cross_v3,
+  divide_floor_i,
   dot_v3,
   is_finite_v3,
   len_squared_v3,
@@ -77,7 +78,7 @@ function bm_loop_build(bm, el_store, v_prev, v, dir) {
     return true;
   }
   while (v >= 0) {
-    const node = MEM_new_zeroed('bm_loop_build');
+    const node = { next: null, prev: null, data: null };
     node.data = v;
     add_fn(el_store.verts, node);
     el_store.len++;
@@ -122,13 +123,13 @@ export function BM_mesh_edgeloops_find(bm, r_eloops, test_fn, user_data) {
     }
   }
   const edges_len = BLI_stack_count(edge_stack);
-  let edges = MEM_new_array_uninitialized(edges_len, 'BM_mesh_edgeloops_find');
+  let edges = new Array(edges_len).fill(-1);
   edges = BLI_stack_pop_n_reverse(edge_stack, edges, BLI_stack_count(edge_stack));
   BLI_stack_free(edge_stack);
   for (let i = 0; i < edges_len; i += 1) {
     e = edges[i];
     if (BM_elem_flag_test(bm.e, e, BM_ELEM_INTERNAL_TAG)) {
-      const el_store = MEM_new_zeroed('BM_mesh_edgeloops_find');
+      const el_store = { next: null, prev: null, verts: {}, flag: 0, len: 0, co: [0, 0, 0], no: [0, 0, 0] };
       if (
         bm_loop_build(bm, el_store, bm.e.v1[e], bm.e.v2[e], 1) &&
         bm_loop_build(bm, el_store, bm.e.v2[e], bm.e.v1[e], -1) &&
@@ -152,17 +153,17 @@ export function BM_mesh_edgeloops_find(bm, r_eloops, test_fn, user_data) {
 
 export function BM_mesh_edgeloops_calc_center(bm, eloops) {
   for (const el_store of eloops) {
-    BM_edgeloop_calc_center(bm, bm, el_store);
+    BM_edgeloop_calc_center(bm, el_store);
   }
 }
 
 export function BM_mesh_edgeloops_calc_normal(bm, eloops) {
   for (const el_store of eloops) {
-    BM_edgeloop_calc_normal(bm, bm, el_store);
+    BM_edgeloop_calc_normal(bm, el_store);
   }
 }
 
-export function BM_mesh_edgeloops_calc_order(_unused0, eloops, use_normals) {
+export function BM_mesh_edgeloops_calc_order(bm, eloops, use_normals) {
   let _r0, _r1;
   const eloops_ordered = {};
   let tot = 0;
@@ -229,7 +230,7 @@ export function BM_mesh_edgeloops_calc_order(_unused0, eloops, use_normals) {
 
 export function BM_edgeloop_copy(el_store) {
   let _r0;
-  const el_store_copy = MEM_new_uninitialized('BM_edgeloop_copy');
+  const el_store_copy = { next: null, prev: null, verts: {}, flag: 0, len: 0, co: [0, 0, 0], no: [0, 0, 0] };
   (_r0 = el_store),
     (el_store_copy.next = _r0.next),
     (el_store_copy.prev = _r0.prev),
@@ -270,7 +271,7 @@ export function NODE_AS_CO(bm, n) {
   return vco(bm, n.data);
 }
 
-export function BM_edgeloop_calc_center(bm, _unused0, el_store) {
+export function BM_edgeloop_calc_center(bm, el_store) {
   let node_curr = el_store.verts.last;
   let node_prev = el_store.verts.last.prev;
   const node_first = el_store.verts.first;
@@ -302,7 +303,7 @@ export function BM_edgeloop_calc_center(bm, _unused0, el_store) {
   }
 }
 
-export function BM_edgeloop_calc_normal(bm, _unused0, el_store) {
+export function BM_edgeloop_calc_normal(bm, el_store) {
   let _r0;
   let node_curr = el_store.verts.first;
   let v_prev = el_store.verts.last;
@@ -324,7 +325,7 @@ export function BM_edgeloop_calc_normal(bm, _unused0, el_store) {
   return true;
 }
 
-export function BM_edgeloop_calc_normal_aligned(bm, _unused0, el_store, no_align) {
+export function BM_edgeloop_calc_normal_aligned(bm, el_store, no_align) {
   let _r0;
   let node_curr = el_store.verts.first;
   let v_prev = el_store.verts.last;
@@ -349,7 +350,7 @@ export function BM_edgeloop_calc_normal_aligned(bm, _unused0, el_store, no_align
   return true;
 }
 
-export function BM_edgeloop_flip(_unused0, el_store) {
+export function BM_edgeloop_flip(bm, el_store) {
   el_store.no = negate_v3(el_store.no);
   BLI_listbase_reverse(el_store.verts);
 }
@@ -405,7 +406,16 @@ export function BM_edgeloop_expand(bm, el_store, el_store_len, split, split_edge
   if (el_store.len < el_store_len) {
     let node_curr = el_store.verts.first;
     let iter_prev = 0;
-    for (;;) {
+    for (
+      let _src = el_store.len,
+        _src2 = _src * 2,
+        _dst2 = (el_store_len - el_store.len) * 2,
+        _error = _dst2 - _src,
+        iter = 0,
+        _delta = 0;
+      ((_delta = divide_floor_i(_error, _dst2)), (iter -= _delta)), iter < _src;
+      _error -= _delta * _dst2 + _src2
+    ) {
       while (iter_prev < iter) {
         node_curr = node_curr.next;
         iter_prev += 1;

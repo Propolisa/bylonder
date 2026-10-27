@@ -51,10 +51,10 @@ function heapsimple_up(heap, i, active_val, active_ptr) {
 }
 
 export function BLI_heapsimple_new_ex(reserve_num) {
-  const heap = MEM_new_zeroed('BLI_heapsimple_new_ex');
+  const heap = { size: 0, bufsize: 0, tree: null };
   heap.size = 0;
   heap.bufsize = Math.max(1, reserve_num);
-  heap.tree = MEM_new_array_zeroed(heap.bufsize, 'BLIHeapSimpleTree');
+  heap.tree = Array.from({ length: heap.bufsize }, () => ({ value: 0, ptr: null }));
   return heap;
 }
 
@@ -82,7 +82,10 @@ export function BLI_heapsimple_clear(heap, ptrfreefp) {
 export function BLI_heapsimple_insert(heap, value, ptr) {
   if (heap.size >= heap.bufsize) {
     heap.bufsize *= 2;
-    heap.tree = MEM_realloc_uninitialized_id(heap.tree, heap.bufsize * 16, 'BLI_heapsimple_insert');
+    heap.tree = Object.assign(
+      Array.from({ length: heap.bufsize }, () => ({ value: 0, ptr: null })),
+      heap.tree.slice(0, heap.bufsize),
+    );
   }
   heapsimple_up(heap, heap.size++, value, ptr);
 }
