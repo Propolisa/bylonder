@@ -4,7 +4,7 @@
 //   move(idname, props, { normal }) and slide(idname, props): an operator and then a move or Edge Slide, as Blender's
 //   macros run them, start(type): a transform, and the modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
-import { drawMenu } from '../interface/ui-layout.js';
+import { drawMenu, runs } from '../interface/ui-layout.js';
 import { rna } from '../../makesrna/rna.js';
 import { runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { EditMesh } from '../../bmesh/bmesh-wasm.js';
@@ -73,13 +73,12 @@ export function editMeshMenus(api) {
 
 const DRAWN = ['select', 'mesh', 'vertex', 'edge', 'face', 'context'];
 
-// Visits every entry and submenu the menus show for a cube with everything selected, in each select mode, as
+// Visits every entry and submenu Bylonder runs that the menus show for a cube with everything selected, in each select mode, as
 // visit(item, selectmode); `api` is what the entries run. For the Coverage view and tests.
 export function visitEditMeshMenus(api, visit) {
   let edit;
   const menus = editMeshMenus({ ...api, edit: () => edit });
-  const walk = (items, mode) => (typeof items === 'function' ? items() : items).forEach((item) => {
-    if (item === '-') return;
+  const walk = (items, mode) => (typeof items === 'function' ? items() : items).filter(runs).forEach((item) => {
     visit(item, mode);
     if (item.items) walk(item.items, mode);
   });

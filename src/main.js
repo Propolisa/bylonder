@@ -40,6 +40,7 @@ import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
+import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
@@ -457,7 +458,6 @@ const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !docum
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.timeline') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const transform = (type) => () => { creator.finish(); editor.start(type); };
-const viewAxis = (name, opposite) => () => activeView().nav.view(name, opposite);
 const inView = (event) => !!event.view;
 // The Add panel's own keys while a new object waits for its settings.
 const creatorKeys = createKeymap([
@@ -472,20 +472,39 @@ const objectModeKeys = createKeymap([
   { blender: "transform.resize", keys: "S", run: transform("scale") },
   { keys: "ESC", run: () => renderHost.escape() || editor.setMode("select") },
 ], ["Object Mode"]);
+// The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
+const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
+registerOperators({
+  "view3d.view_camera": { run: () => activeView()?.toggleCameraView() },
+  "view3d.view_persportho": { run: () => activeView()?.nav.toggle() },
+  "view3d.view_axis": { supports: ({ type, align_active }) => !!AXIS_VIEWS[type] && !align_active, run: ({ type }) => activeView()?.nav.view(...AXIS_VIEWS[type]) },
+  "view3d.view_selected": { supports: ({ use_all_regions }) => !use_all_regions, poll: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },
+  "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(activeView().id) },
+  "screen.area_split": { run: ({ direction }) => viewportDock.split(activeView().id, direction === "HORIZONTAL") },
+  "screen.area_close": { run: () => viewportDock.close(activeView().id) },
+  "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
+  "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
+});
+appendMenu("VIEW3D_MT_view", ({ layout }) => {
+  layout.separator();
+  layout.operator("bylonder.inspector", kw({ text: "Babylon Inspector" }));
+  layout.operator("bylonder.shortcuts", kw({ text: "Keyboard Shortcuts" }));
+});
 const view3dKeys = createKeymap([
-  { blender: "view3d.view_camera", keys: "Numpad 0", run: () => activeView()?.toggleCameraView() },
+  { blender: "view3d.view_camera", keys: "Numpad 0" },
   { blender: "view3d.rotate", keys: "MIDDLEMOUSE", poll: inView, run: (event) => event.view.nav.rotate(event) },
   { blender: "view3d.move", keys: "Shift MIDDLEMOUSE", poll: inView, run: (event) => event.view.nav.move(event) },
   { blender: "view3d.zoom", keys: "WHEELINMOUSE", poll: inView, run: (event) => event.view.nav.wheelZoom(1) },
   { blender: "view3d.zoom", keys: "WHEELOUTMOUSE", poll: inView, run: (event) => event.view.nav.wheelZoom(-1) },
-  { blender: "view3d.view_persportho", keys: ["Numpad 5", "5"], run: () => activeView().nav.toggle() },
-  { blender: "view3d.view_axis", keys: ["Numpad 1", "1"], run: viewAxis("front", false) },
-  { blender: "view3d.view_axis", keys: ["Ctrl Numpad 1", "Ctrl 1"], run: viewAxis("front", true) },
-  { blender: "view3d.view_axis", keys: ["Numpad 3", "3"], run: viewAxis("right", false) },
-  { blender: "view3d.view_axis", keys: ["Ctrl Numpad 3", "Ctrl 3"], run: viewAxis("right", true) },
-  { blender: "view3d.view_axis", keys: ["Numpad 7", "7"], run: viewAxis("top", false) },
-  { blender: "view3d.view_axis", keys: ["Ctrl Numpad 7", "Ctrl 7"], run: viewAxis("top", true) },
-  { blender: "view3d.view_selected", keys: ["Numpad .", "F"], run: () => nav.frame(editor.selected) },
+  { blender: "view3d.view_persportho", keys: ["Numpad 5", "5"] },
+  { blender: "view3d.view_axis", props: { type: "FRONT" }, keys: ["Numpad 1", "1"] },
+  { blender: "view3d.view_axis", props: { type: "BACK" }, keys: ["Ctrl Numpad 1", "Ctrl 1"] },
+  { blender: "view3d.view_axis", props: { type: "RIGHT" }, keys: ["Numpad 3", "3"] },
+  { blender: "view3d.view_axis", props: { type: "LEFT" }, keys: ["Ctrl Numpad 3", "Ctrl 3"] },
+  { blender: "view3d.view_axis", props: { type: "TOP" }, keys: ["Numpad 7", "7"] },
+  { blender: "view3d.view_axis", props: { type: "BOTTOM" }, keys: ["Ctrl Numpad 7", "Ctrl 7"] },
+  { blender: "view3d.view_selected", keys: ["Numpad .", "F"] },
+  { blender: "screen.screen_full_area", keys: "Ctrl Space" },
 ], ["3D View"]);
 const screenKeys = createKeymap([
   { blender: "ed.undo", keys: "Ctrl Z", run: () => undoRedo(false) },

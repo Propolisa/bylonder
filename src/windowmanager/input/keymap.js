@@ -1,6 +1,8 @@
 // Key bindings in Blender's terms: `keys` as Blender shows them ("Shift D", "Ctrl Numpad 1", "LEFTMOUSE CLICK_DRAG",
 // "Any LEFT_CTRL RELEASE"), `blender` the operator, menu or modal item they run, so scripts/blender-coverage.mjs
 // can count them. Events are window manager events (wm-event-system.js): { type, value, shift, ctrl, alt, oskey }.
+import { runOperator } from '../wm-operators.js';
+
 const MODIFIERS = ['shift', 'ctrl', 'alt', 'oskey'];
 const VALUES = { press: 'PRESS', release: 'RELEASE', click: 'CLICK', click_drag: 'CLICK_DRAG', drag: 'CLICK_DRAG', double_click: 'DOUBLE_CLICK', double: 'DOUBLE_CLICK', any_value: 'ANY' };
 const ALIASES = {
@@ -57,10 +59,24 @@ export function keyType(e) {
 
 const modifierKeys = (event) => [event.shift && 'shift', event.ctrl && 'ctrl', event.alt && 'alt'].filter(Boolean);
 
-// Runs the first binding whose keys match the event and whose poll passes. Returns whether one ran.
+// Every keymap made, as Blender's key configuration, for the shortcuts menus show.
+const keyconfig = [];
+
+// The keys bound to an operator with these properties (WM_key_event_operator_string): a binding with the same
+// properties, else one with none. `blender` may name `idname:VALUE` for an enum value.
+export function operatorKeys(idname, props = {}, keymaps = keyconfig) {
+  const values = Object.values(props).filter((value) => typeof value === 'string');
+  const bindings = keymaps.flatMap((map) => map.items)
+    .filter((item) => [item.blender].flat().some((id) => id === idname || values.some((value) => id === `${idname}:${value}`)));
+  const exact = bindings.find((item) => item.props && Object.entries(item.props).every(([key, value]) => props[key] === value));
+  return (exact ?? bindings.find((item) => !item.props))?.keys;
+}
+
+// Runs the first binding whose keys match the event and whose poll passes. Returns whether one ran. A binding without
+// `run` runs its operator (`blender`) with its `props`.
 // `keymaps` names the Blender keymaps the bindings mirror; scripts/blender-coverage.mjs reads it.
 export function createKeymap(items, keymaps = []) {
-  const bound = items.map((item) => ({ ...item, parsed: [item.keys].flat().map(parseKeys) }));
+  const bound = items.map((item) => ({ run: () => runOperator(item.blender, item.props ?? {}), ...item, parsed: [item.keys].flat().map(parseKeys) }));
   const matches = (p, event) => {
     if (p.key !== event.type) return false;
     if (p.value !== 'ANY' && p.value !== event.value) return false;
@@ -76,5 +92,6 @@ export function createKeymap(items, keymaps = []) {
     return true;
   };
   keymap.items = bound;
+  keyconfig.push(keymap);
   return keymap;
 }

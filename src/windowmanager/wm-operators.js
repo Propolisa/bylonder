@@ -2,9 +2,11 @@
 // the menus and headers drawn from Blender's own scripts (src/bl_ui, drawn by editors/interface/ui-layout.js).
 // Operators Blender lacks (Bylonder's project and code features) are registered as `bylonder.*`, and added to Blender's
 // menus with appendMenu, as add-ons extend Blender.
+import { operatorKeys } from './input/keymap.js';
+
 const operators = new Map(), extensions = new Map();
 
-// An operator: run(props), optionally poll(props), keys(props) for its shortcut, supports(props) when Bylonder runs it
+// An operator: run(props), optionally poll(props), keys(props) for its shortcut when no keymap binds it, supports(props) when Bylonder runs it
 // with some properties only and enumItems(prop) for its enum properties' [identifier, name] pairs.
 export function registerOperator(idname, operator) {
   operators.set(idname, operator);
@@ -13,6 +15,8 @@ export function registerOperator(idname, operator) {
 export function registerOperators(table) {
   for (const [idname, operator] of Object.entries(table)) registerOperator(idname, operator);
 }
+
+export const runOperator = (idname, props = {}) => operators.get(idname).run(props);
 
 const extension = (idname) => extensions.get(idname) ?? extensions.set(idname, { prepend: [], append: [] }).get(idname);
 // Menu.append and Menu.prepend: draw(self, context), drawing into self.layout.
@@ -31,8 +35,8 @@ export const menuUI = ({ menus, context, prop }) => ({
   extensions: (idname) => extensions.get(idname),
   supported: (idname, props) => !!operators.get(idname) && (operators.get(idname).supports?.(props) ?? true),
   poll: (idname, props) => operators.get(idname)?.poll?.(props) ?? true,
-  run: (idname, props) => operators.get(idname).run(props),
-  keys: (idname, props) => operators.get(idname)?.keys?.(props),
+  run: runOperator,
+  keys: (idname, props) => operators.get(idname)?.keys?.(props) ?? operatorKeys(idname, props),
   enumItems: (idname, prop) => operators.get(idname)?.enumItems?.(prop) ?? [],
 });
 

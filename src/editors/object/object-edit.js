@@ -24,7 +24,7 @@ import { objectMesh } from './object-mesh.js';
 import { viewportModifiers, evaluated } from '../../modifiers/blender.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
-import { createKeymap } from '../../windowmanager/input/keymap.js';
+import { createKeymap, operatorKeys } from '../../windowmanager/input/keymap.js';
 import { editMeshMenus } from '../space_view3d/view3d-menus-edit-mesh.js';
 
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
@@ -274,13 +274,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   };
   const inView = (event) => !!event.view;
   // An operator's shortcut in Edit Mode's keymaps: the binding with its properties, else its plain one.
-  function keysOf(idname, props = {}) {
-    const values = Object.values(props).filter((value) => typeof value === 'string');
-    const bindings = [keymap, viewKeymap, toolKeymap].flatMap((map) => map.items)
-      .filter((item) => [item.blender].flat().some((id) => id === idname || values.some((value) => id === `${idname}:${value}`)));
-    const exact = bindings.find((item) => item.props && Object.entries(item.props).every(([key, value]) => props[key] === value));
-    return (exact ?? bindings.find((item) => !item.props))?.keys;
-  }
+  const keysOf = (idname, props) => operatorKeys(idname, props, [keymap, viewKeymap, toolKeymap]);
   const menus = editMeshMenus({
     edit: () => em.edit, exec, keys: keysOf, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type),
     extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),

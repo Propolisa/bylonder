@@ -3,7 +3,7 @@ import { menuButton } from '../interface/menu.js';
 import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
-import { menuUI, menuClasses } from '../../windowmanager/wm-operators.js';
+import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
 import { createContext } from '../../blenkernel/context.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
@@ -20,7 +20,19 @@ const axes = [
   { id: 'y', dir: new Vector3(0, 1, 0), color: '#8bdc00', dark: '#557d10', view: ['top', false] },
   { id: 'z', dir: new Vector3(0, 0, 1), color: '#2890ff', dark: '#24548f', view: ['front', true] },
 ];
-const viewNames = { 'right,false': 'Right', 'right,true': 'Left', 'top,false': 'Top', 'top,true': 'Bottom', 'front,false': 'Front', 'front,true': 'Back' };
+// The Area menu, which Blender defines in C (screen_ops.cc).
+const INFO_MT_area = Object.assign(() => ({
+  draw() {
+    const { layout } = this;
+    layout.operator('screen.area_split', kw({ text: 'Horizontal Split' })).direction = 'HORIZONTAL';
+    layout.operator('screen.area_split', kw({ text: 'Vertical Split' })).direction = 'VERTICAL';
+    layout.separator();
+    layout.operator('screen.screen_full_area', kw({ text: 'Toggle Maximize Area' }));
+    layout.operator('screen.screen_full_area', kw({ text: 'Toggle Fullscreen Area' })).use_hide_panels = true;
+    layout.separator();
+    layout.operator('screen.area_close', kw({ text: 'Close Area' }));
+  },
+}), { bl_label: 'Area' });
 const theme = new Color4(0.239, 0.239, 0.239, 1);
 
 // One 3D Viewport area: its canvas, editor camera, navigation, header menus, overlays and per-view state
@@ -84,12 +96,11 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
 
   // Header: mode, View, Select, Add, Object menus, overlays and shading.
   const header = dock.header(headerId);
-  const cameraItem = { label: 'Camera', blender: 'view3d.view_camera', keys: 'Numpad 0', checked: () => state.cameraView, run: toggleCameraView };
   const editMode = () => world.editMode?.active;
   const mode = menuButton('Object Mode', () => [
     { label: 'Object Mode', blender: 'object.mode_set:OBJECT', icon: 'object_datamode', checked: () => !editMode() && !state.cameraView, run: () => { if (editMode()) world.editMode.exit(); if (state.cameraView) toggleCameraView(); } },
     { label: 'Edit Mode', blender: 'object.mode_set:EDIT', icon: 'editmode_hlt', keys: 'Tab', checked: () => !!editMode(), run: () => editMode() || world.editMode.enter() },
-    cameraItem,
+    { label: 'Camera', blender: 'view3d.view_camera', keys: 'Numpad 0', checked: () => state.cameraView, run: toggleCameraView },
   ], { icon: 'object_datamode', className: 'bl-dropdown' });
   // Header select mode buttons (Edit Mode): click switches, Shift click adds or removes a mode.
   const selectModes = Object.assign(document.createElement('span'), { className: 'bl-group' });
@@ -99,24 +110,13 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     return b;
   });
   selectModes.append(...selectModeButtons);
-  const viewpoint = Object.entries(viewNames).map(([key, label]) => {
-    const [vname, opposite] = key.split(',');
-    return { label, blender: 'view3d.view_axis:' + { right: 'RIGHT', top: 'TOP', front: 'FRONT' }[vname], keys: 'Numpad ' + { right: 3, top: 7, front: 1 }[vname] + (opposite === 'true' ? ' Ctrl' : ''), run: () => nav.view(vname, opposite === 'true') };
-  });
-  const viewMenu = menuButton('View', () => [
-    { label: 'Frame Selected', blender: 'view3d.view_selected', keys: 'Numpad .', enabled: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },
-    '-',
-    { label: 'Perspective / Orthographic', blender: 'view3d.view_persportho', keys: 'Numpad 5', run: () => nav.toggle() },
-    { label: 'Viewpoint', blender: 'VIEW3D_MT_view_viewpoint', items: viewpoint },
-    cameraItem,
-    '-',
-    { label: 'Area', blender: 'INFO_MT_area', items: [{ label: 'Toggle Maximize Area', blender: 'screen.screen_full_area', keys: 'Ctrl Space', run: () => dock.maximize(headerId) }] },
-    { label: 'Babylon Inspector', keys: 'Shift Ctrl I', run: ctx.inspector },
-    { label: 'Keyboard Shortcuts', keys: '?', run: () => ctx.help.showModal() },
-  ], { blender: 'VIEW3D_MT_view' });
   // Blender's Object Mode menus, from its own scripts over this view's context.
-  const blender = menuUI({ menus: menuClasses(spaceView3d), context: () => createContext(ctx.rna, { space: view }), prop: propBinding(ctx.rna.host) });
+  // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
+  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => createContext(ctx.rna, { space: view }), prop: propBinding(ctx.rna.host) });
+  const run = blender.run;
+  blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);
+  const viewMenu = menuButton('View', blenderMenu('VIEW3D_MT_view'), { blender: 'VIEW3D_MT_view' });
   const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
   const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });

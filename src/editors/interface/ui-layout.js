@@ -57,9 +57,9 @@ export class UILayout {
       label,
       icon: icon && icon !== 'NONE' ? icon : undefined,
       get blender() { return enumValue === undefined ? keyedId(idname, values(props)) : `${idname}:${enumValue}`; },
-      available: () => ui.supported(idname, values(props)),
+      supported: () => ui.supported(idname, values(props)),
       get keys() { return ui.keys(idname, values(props)); },
-      enabled: () => this.#enabled() && ui.poll(idname, values(props)),
+      enabled: () => this.#enabled() && ui.supported(idname, values(props)) && ui.poll(idname, values(props)),
       run: () => ui.run(idname, values(props)),
     };
   }
@@ -72,13 +72,11 @@ export class UILayout {
 
   operator_enum(...list) {
     const { operator: idname, property } = args(list, ['operator', 'property']);
-    if (!this.ui.supported(idname)) return;
     for (const [value, label] of this.ui.enumItems(idname, property)) this.items.push(this.#entry(idname, { [property]: value }, label, value));
   }
 
   operator_menu_enum(...list) {
     const { operator: idname, property, text } = args(list, ['operator', 'property', 'text']);
-    if (!this.ui.supported(idname)) return;
     const items = this.ui.enumItems(idname, property).map(([value, label]) => this.#entry(idname, { [property]: value }, label, value));
     this.items.push({ label: text ?? operatorName(idname), blender: idname, items });
   }
@@ -87,9 +85,7 @@ export class UILayout {
     const { menu: idname, text, icon } = args(list, ['menu', 'text', 'text_ctxt', 'translate', 'icon']), menu = this.ui.menus[idname];
     if (!menu) return;
     const items = () => drawMenu(idname, this.ui);
-    if (items().length) {
-      this.items.push({ label: text ?? menu.bl_label, icon: icon && icon !== 'NONE' ? icon : undefined, blender: idname, keys: this.ui.keys(idname), items });
-    }
+    this.items.push({ label: text ?? menu.bl_label, icon: icon && icon !== 'NONE' ? icon : undefined, blender: idname, keys: this.ui.keys(idname), items });
   }
 
   // A menu's entries in place, without a submenu.
@@ -139,17 +135,20 @@ export function drawMenu(idname, ui) {
   extend?.prepend.forEach((draw) => draw(menu, context));
   menu.draw(context);
   extend?.append.forEach((draw) => draw(menu, context));
-  const items = layout.items.filter((item) => item.available?.() !== false);
-  return items.filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && all.slice(i + 1).some((next) => next !== '-')));
+  return layout.items.filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && all.slice(i + 1).some((next) => next !== '-')));
 }
 
-// The Blender ids a menu shows, its own and its entries' and submenus', for the Blender coverage view.
+// Whether Bylonder runs an entry, or something in a submenu.
+export const runs = (item) => item !== '-' && (item.items ? subitems(item).some(runs) : item.supported?.() ?? true);
+export const subitems = (item) => (typeof item.items === 'function' ? item.items() : item.items);
+
+// The Blender ids of what a menu shows that Bylonder runs, its own and its entries' and submenus', for the Blender
+// coverage view.
 export function menuCoverage(idname, ui) {
   const ids = new Set([idname]);
-  const visit = (items) => items.forEach((item) => {
-    if (item === '-') return;
+  const visit = (items) => items.filter(runs).forEach((item) => {
     ids.add(item.blender);
-    if (item.items) visit(typeof item.items === 'function' ? item.items() : item.items);
+    if (item.items) visit(subitems(item));
   });
   visit(drawMenu(idname, ui));
   return [...ids];
