@@ -240,21 +240,21 @@ export function BMO_slot_map_to_flag(bm, slot_args, name, htype, oflag) {
   for (const element of slot_args[name].data.keys()) for (const [type, pool] of POOLS) if (htype & type) bm[pool].oflag[element] |= oflag;
 }
 
-// Iterators: a buffer gives its elements whose type is in restrictmask, a map its keys.
-export function BMO_iter_new(iter, slot_args, name, restrictmask) {
+// Iterators: a buffer gives its elements whose type is in restrictmask, a map its keys through `giter`, the slot
+// Blender keeps its GHash iterator in. Blender fills the caller's iterator, so by the conventions it is returned.
+export function BMO_iter_new(slot_args, name, restrictmask) {
   const slot = slot_args[name];
-  Object.assign(iter, { slot, restrictmask, cur: 0, val: null });
-  iter.keys = slot.slot_type === BMO_OP_SLOT_MAPPING ? [...slot.data.keys()] : null;
-  return BMO_iter_step(iter);
+  const iter = { slot, restrictmask, cur: 0, val: null, giter: slot.slot_type === BMO_OP_SLOT_MAPPING ? slot.data.entries() : null };
+  return [BMO_iter_step(iter), iter];
 }
 
 export function BMO_iter_step(iter) {
   const { slot } = iter;
-  if (iter.keys) {
-    if (iter.cur >= iter.keys.length) return -1;
-    const key = iter.keys[iter.cur++];
-    iter.val = slot.data.get(key);
-    return key;
+  if (iter.giter) {
+    const next = iter.giter.next();
+    if (next.done) return -1;
+    iter.val = next.value[1];
+    return next.value[0];
   }
   while (iter.cur < slot.len) {
     const i = iter.cur++;
@@ -269,8 +269,8 @@ export const BMO_iter_map_value_int = BMO_iter_map_value_float;
 export const BMO_iter_map_value_bool = (iter) => Boolean(iter.val);
 
 export function BMO_iter_as_array(slot_args, name, restrictmask, _array, len) {
-  const out = [], iter = {};
-  for (let e = BMO_iter_new(iter, slot_args, name, restrictmask); e >= 0 && out.length < len; e = BMO_iter_step(iter)) out.push(e);
+  const out = [];
+  for (let [e, iter] = BMO_iter_new(slot_args, name, restrictmask); e >= 0 && out.length < len; e = BMO_iter_step(iter)) out.push(e);
   return out;
 }
 

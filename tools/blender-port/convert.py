@@ -27,7 +27,7 @@ import sys
 import clang.cindex as ci
 
 import clangx
-from rules import (INTEGER_WRAPPERS, ALLOCATORS, ARRAY_TYPES, CONSTANTS, DROPPED_CALL_PREFIXES, DROPPED_CALLS, DROPPED_FIELDS, DROPPED_TYPES,
+from rules import (INTEGER_WRAPPERS, ALLOCATORS, ARRAY_TYPES, COUNTED_ALLOCATORS, CONSTANTS, DROPPED_CALL_PREFIXES, DROPPED_CALLS, DROPPED_FIELDS, DROPPED_TYPES,
                    HEADER_FIELDS, HELPER_MODULES, HTYPE, IN_OUT, METHODS, MODULE_FOR_SOURCE, OUT_FIRST, POOL, PRELUDE_HOMES,
                    PRELUDE_NEEDS_BM, RENAME, VEC_FIELDS, VECTOR_CONSTRUCTORS)
 
@@ -1193,10 +1193,15 @@ class FunctionPort:
             return f'Math.fround{s}'
         return s
 
-    def assign(self, lhs, value, size=3):
+    def assign(self, lhs, value, size=3, through=False):
+        """lhs = value; `through` when lhs is a pointer the value is written through, as a call's out argument is."""
         s = strip_parens_casts(lhs)
         if s.kind == K.DECL_REF_EXPR and s.referenced is not None and s.referenced.hash in self.views:
             return f'{s.spelling}.set({value})'
+        if (through and s.kind == K.DECL_REF_EXPR and s.referenced is not None and s.referenced.kind == K.VAR_DECL
+                and canon(s.referenced.type).kind == T.POINTER and is_float(pointee(s.referenced.type))):
+            # A local pointer writes through to the row it points at, as `co = cos[i]; zero_v3(co);` does.
+            return f'{s.spelling}.splice(0, {size}, ...{value})'
         target = address_of(s)
         if target is not None and strip_parens_casts(target).kind == K.ARRAY_SUBSCRIPT_EXPR:
             base, index = kids(strip_parens_casts(target))
@@ -1234,10 +1239,10 @@ class FunctionPort:
                 m = OUT_FIRST[name]
                 rest = [self.expr(a) for a in args[1:]]
                 value = m(rest) if callable(m) else f'{self.helper(m)}({", ".join(rest)})'
-                return self.assign(args[0], value, 2 if '_v2' in name else 4 if '_v4' in name else 3)
+                return self.assign(args[0], value, 2 if '_v2' in name else 4 if '_v4' in name else 3, through=True)
             if name in IN_OUT and args:
                 helper, inout = in_out(name)
-                return self.assign(args[inout], f'{self.helper(helper)}({", ".join(self.expr(a) for a in args)})')
+                return self.assign(args[inout], f'{self.helper(helper)}({", ".join(self.expr(a) for a in args)})', through=True)
             sig = self.p.sig_of(name)
             if sig and self.has_outs(sig):
                 self.statement_call = True
@@ -1246,7 +1251,7 @@ class FunctionPort:
                 targets = self.out_targets(sig, args)
                 ret_kind = canon(sig['ret']).kind
                 if ret_kind in (T.VOID, T.BOOL) and len(targets) == 1:
-                    return self.assign(targets[0], call) if targets[0] is not None else call
+                    return self.assign(targets[0][0], call, through=targets[0][1]) if targets[0] is not None else call
                 slots, after = self.out_slots(targets)
                 lhs = ([] if ret_kind == T.VOID else ['']) + slots
                 while lhs and lhs[-1] == '':
@@ -1258,17 +1263,18 @@ class FunctionPort:
         """Destructuring slots for out targets, and the assignments to run after: a target that is no plain JS lvalue
         (`v->co`, which is `bm.v.co.set(...)`) takes the value through a temporary."""
         slots, after = [], []
-        for t in targets:
-            if t is None:
+        for target in targets:
+            if target is None:
                 slots.append('')
                 continue
+            t, through = target
             plain = self.expr(t)
-            if self.assign(t, '_value') == f'{plain} = _value':
+            if self.assign(t, '_value', through=through) == f'{plain} = _value':
                 slots.append(plain)
             else:
                 tmp = self.temp()
                 slots.append(tmp)
-                after.append(self.assign(t, tmp))
+                after.append(self.assign(t, tmp, through=through))
         return slots, after
 
     def has_outs(self, sig):
@@ -1279,9 +1285,10 @@ class FunctionPort:
         for i, p in enumerate(sig['params']):
             if not p['out'] or i >= len(args):
                 continue
+            # `&x` sets x; a pointer argument is written through.
             a = address_of(args[i])
-            a = a if a is not None else strip(args[i])
-            out.append(None if is_null(a) else a)
+            target = (a, False) if a is not None else (strip(args[i]), True)
+            out.append(None if is_null(target[0]) else target)
         return out
 
     def call(self, c, want=None):
@@ -1354,9 +1361,9 @@ class FunctionPort:
     def special_call(self, name, args, want=None):
         """Calls with their own JS form, or None."""
         js = lambda xs: [self.expr(a) for a in xs]
-        if name in ALLOCATORS:
+        if name in ALLOCATORS or name in COUNTED_ALLOCATORS:
             elem = pointee(want) if want is not None and pointee(want) is not None and canon(pointee(want)).kind != T.VOID else pointee(self.call_type)
-            if name.endswith('arrayN') and len(args) >= 2:
+            if name in COUNTED_ALLOCATORS:
                 count = [self.expr(args[0])]
             else:
                 factors = self.product(args[-1]) if args else []

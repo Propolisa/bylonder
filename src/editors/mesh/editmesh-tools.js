@@ -110,11 +110,10 @@ const POKE_CENTER = { MEDIAN_WEIGHTED: 0, MEDIAN: 1, BOUNDS: 2 };
 // mesh.quads_convert_to_tris (Ctrl T): the new faces selected, duplicates removed.
 export function edbm_quads_convert_to_tris_exec(bm, { quad_method = 'BEAUTY', ngon_method = 'BEAUTY' } = {}) {
   if (!bm.totfacesel) return false;
-  const oiter = {};
   const bmop = EDBM_op_init(bm, 'triangulate faces=%hf quad_method=%i ngon_method=%i', BM_ELEM_SELECT, QUAD_METHOD[quad_method], NGON_METHOD[ngon_method]);
   BMO_op_exec(bm, bmop);
   BMO_slot_buffer_hflag_enable(bm, bmop.slots_out, 'faces.out', BM_FACE, BM_ELEM_SELECT, true);
-  for (let f = BMO_iter_new(oiter, bmop.slots_out, 'face_map_double.out', BM_FACE); f >= 0; f = BMO_iter_step(oiter)) BM_face_kill(bm, f);
+  for (let [f, oiter] = BMO_iter_new(bmop.slots_out, 'face_map_double.out', BM_FACE); f >= 0; f = BMO_iter_step(oiter)) BM_face_kill(bm, f);
   BM_mesh_select_mode_flush_ex(bm, bm.selectmode);
   return EDBM_op_finish(bm, bmop);
 }

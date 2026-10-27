@@ -41,7 +41,9 @@ CONSTANTS = {'M_PI': 'Math.PI', 'M_PI_2': 'Math.PI / 2', 'M_PI_4': 'Math.PI / 4'
 DROPPED_CALLS = {'UNUSED_VARS', 'MEM_freeN', 'MEM_SAFE_FREE', 'MEM_delete', 'MEM_delete_array'}
 DROPPED_CALL_PREFIXES = ('BLI_memarena_',)
 DROPPED_FIELDS = {'mem_arena'}
-ALLOCATORS = {'BLI_memarena_alloc', 'BLI_memarena_calloc', 'MEM_malloc_arrayN', 'MEM_calloc_arrayN', 'MEM_mallocN', 'MEM_callocN'}
+ALLOCATORS = {'BLI_memarena_alloc', 'BLI_memarena_calloc', 'MEM_mallocN', 'MEM_callocN'}
+# Allocators whose first argument is the element count.
+COUNTED_ALLOCATORS = {'MEM_malloc_arrayN', 'MEM_calloc_arrayN', 'MEM_new_array_uninitialized', 'MEM_new_array_zeroed'}
 # Declarations the port has no use for.
 DROPPED_TYPES = {'BMIter', 'MemArena', 'bl_port_iter'}
 # blender::Vector, Map and Set as JS arrays, Maps and Sets.
