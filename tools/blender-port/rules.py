@@ -11,17 +11,13 @@ HEADER_FIELDS = {'hflag', 'index', 'api_flag'}
 
 # Vector and matrix functions writing their first argument: fn(out, ...args) is `out = js(...args)`.
 OUT_FIRST = {
-    'copy_v3_v3': lambda a: f'[...{a[0]}]', 'copy_v3_v3_db': lambda a: f'[...{a[0]}]', 'copy_v2_v2': lambda a: f'[...{a[0]}]',
-    'copy_v4_v4': lambda a: f'[...{a[0]}]', 'copy_v3_fl': lambda a: f'[{a[0]}, {a[0]}, {a[0]}]', 'copy_v3_fl3': lambda a: f'[{", ".join(a)}]',
+    'copy_v3_v3': lambda a: f'{a[0]}.slice(0, 3)', 'copy_v3_v3_db': lambda a: f'{a[0]}.slice(0, 3)', 'copy_v2_v2': lambda a: f'{a[0]}.slice(0, 2)',
+    'copy_v4_v4': lambda a: f'{a[0]}.slice(0, 4)', 'copy_v3_fl': lambda a: f'[{a[0]}, {a[0]}, {a[0]}]', 'copy_v3_fl3': lambda a: f'[{", ".join(a)}]',
     'zero_v3': lambda a: '[0, 0, 0]', 'unit_m4': lambda a: 'unit_m4()', 'unit_m3': lambda a: 'unit_m3()',
     'copy_m4_m4': lambda a: f'{a[0]}.map((c) => [...c])',
     'add_v3_v3v3': 'add_v3', 'sub_v3_v3v3': 'sub_v3', 'mul_v3_v3fl': 'mul_v3_fl', 'madd_v3_v3v3fl': 'madd', 'cross_v3_v3v3': 'cross_v3',
     'interp_v3_v3v3': 'interp_v3', 'mid_v3_v3v3': 'mid_v3', 'negate_v3_v3': 'negate_v3', 'normalize_v3_v3': 'normalize_v3',
-    'closest_to_line_segment_v3': 'closest_to_line_segment_v3', 'closest_to_plane_v3': 'closest_to_plane_v3',
-    'closest_to_line_v3': 'closest_to_line_v3', 'plane_from_point_normal_v3': 'plane_from_point_normal_v3',
-    'mul_v3_m4v3': 'mul_m4_v3', 'mul_v2_m3v3': 'mul_v2_m3v3', 'mul_v3_m3v3': 'mul_m3_v3', 'axis_dominant_v3_to_m3': 'axis_dominant_v3_to_m3',
-    'project_v3_v3v3': 'project_v3_v3v3', 'project_plane_normalized_v3_v3v3': 'project_plane_normalized_v3_v3v3',
-    'invert_m4_m4': 'invert_m4_m4', 'mul_m4_m4m4': 'mul_m4_m4m4', 'mul_m3_m3m3': 'mul_m3_m3m3',
+    'mul_v3_m4v3': 'mul_m4_v3', 'mul_v3_m3v3': 'mul_m3_v3',
 }
 # Functions updating their first argument in place: fn(inout, ...args) is `inout = js(inout, ...args)`.
 IN_OUT = {'add_v3_v3': 'add_v3', 'sub_v3_v3': 'sub_v3', 'mul_v3_fl': 'mul_v3_fl', 'madd_v3_v3fl': 'madd', 'negate_v3': 'negate_v3',
@@ -33,7 +29,8 @@ RENAME = {
     'asinf': 'Math.asin', 'atan2f': 'Math.atan2', 'atan2': 'Math.atan2', 'powf': 'Math.pow', 'pow': 'Math.pow', 'floorf': 'Math.floor',
     'ceilf': 'Math.ceil', 'expf': 'Math.exp', 'logf': 'Math.log', 'min_ff': 'Math.min', 'max_ff': 'Math.max', 'min_ii': 'Math.min',
     'max_ii': 'Math.max', 'min_dd': 'Math.min', 'max_dd': 'Math.max', 'fmaxf': 'Math.max', 'fminf': 'Math.min', 'min': 'Math.min',
-    'max': 'Math.max', 'safe_acosf': 'saacos', 'cbrtf': 'Math.cbrt', 'cbrt': 'Math.cbrt',
+    'max': 'Math.max', 'safe_acosf': 'saacos', 'cbrtf': 'Math.cbrt', 'cbrt': 'Math.cbrt', 'isfinite': 'Number.isFinite',
+    'isnan': 'Number.isNaN',
 }
 # Macros and constants with a JS equivalent.
 CONSTANTS = {'M_PI': 'Math.PI', 'M_PI_2': 'Math.PI / 2', 'M_PI_4': 'Math.PI / 4', 'M_SQRT2': 'Math.SQRT2', 'M_SQRT1_2': 'Math.SQRT1_2',
@@ -56,25 +53,26 @@ METHODS = {'append': 'push', 'remove_last': 'pop', 'lookup': 'get', 'contains': 
 # The JS module of each helper the rules above emit.
 HELPER_MODULES = {
     'blenlib/math-geom.js': {'add_v3', 'sub_v3', 'mul_v3_fl', 'madd', 'cross_v3', 'dot_v3', 'len_v3', 'len_squared_v3', 'interp_v3', 'mid_v3',
-                             'negate_v3', 'normalize_v3', 'saacos', 'project_v3_v3v3', 'project_plane_normalized_v3_v3v3'},
-    'blenlib/math-matrix.js': {'unit_m4', 'unit_m3', 'mul_m4_v3', 'mul_m4_v4', 'mul_m3_v3', 'invert_m4_m4', 'mul_m4_m4m4', 'mul_m3_m3m3'},
+                             'negate_v3', 'normalize_v3', 'saacos'},
+    'blenlib/math-matrix.js': {'unit_m4', 'unit_m3', 'mul_m4_v3', 'mul_m4_v4', 'mul_m3_v3'},
     'bmesh/intern/bmesh-class.js': {'vco', 'vno', 'fno', 'BM_ELEM_API_FLAG_ENABLE', 'BM_ELEM_API_FLAG_DISABLE', 'BM_ELEM_API_FLAG_TEST',
                                     'BM_elem_flag_test', 'BM_elem_flag_enable', 'BM_elem_flag_disable', 'BM_elem_flag_set',
-                                    'BMO_flag_test', 'BMO_flag_enable', 'BMO_flag_disable', 'BMO_flag_set'},
+                                    'BMO_flag_test', 'BMO_flag_enable', 'BMO_flag_disable', 'BMO_flag_set', 'BM_ELEM_CD_GET_FLOAT',
+                                    'BM_ELEM_CD_GET_FLOAT_P', 'BM_ELEM_CD_GET_VOID_P', 'BM_ELEM_CD_GET_INT', 'BM_ELEM_CD_SET_FLOAT'},
 }
 # Where the shims of the prelude's macros live, and which of them take the mesh. The prelude keeps a macro only
 # when its expansion has no JS form (BM_DISK_EDGE_NEXT indexes a struct by a comparison).
 PRELUDE_HOMES = {'INIT_MINMAX': 'blenlib/utildefines.js', 'INIT_MINMAX2': 'blenlib/utildefines.js',
-                 **{n: 'bmesh/intern/bmesh-class.js' for n in ('BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV', 'BM_ELEM_CD_GET_FLOAT',
-                                                            'BM_ELEM_CD_GET_FLOAT_P', 'BM_ELEM_CD_GET_VOID_P', 'BM_ELEM_CD_GET_INT', 'BM_ELEM_CD_SET_FLOAT')}}
+                 **{n: 'bmesh/intern/bmesh-class.js' for n in ('BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV')}}
 PRELUDE_NEEDS_BM = {'BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV'}
 
-# Blender sources whose port lives in a module of another name (paths below source/blender, as regexes).
+# Blender sources whose port lives in a module of another name (paths below source/blender, or below the source root
+# for the rest, as regexes).
 MODULE_FOR_SOURCE = {
     r'blenlib/BLI_math_(vector|geom|base|solvers)': 'blenlib/math-geom.js', r'blenlib/BLI_math_matrix': 'blenlib/math-matrix.js',
     r'blenlib/BLI_math_rotation': 'blenlib/math-rotation.js', r'blenlib/intern/math_(vector|geom|base)': 'blenlib/math-geom.js',
     r'blenlib/intern/math_matrix': 'blenlib/math-matrix.js', r'blenlib/BLI_kdtree': 'blenlib/kdtree.js',
     r'bmesh/intern/bmesh_iterators': 'bmesh/intern/bmesh-query.js', r'bmesh/intern/bmesh_inline': 'bmesh/intern/bmesh-class.js',
     r'bmesh/bmesh_class': 'bmesh/intern/bmesh-class.js', r'bmesh/intern/bmesh_private': 'bmesh/intern/bmesh-class.js',
-    r'bmesh/intern/bmesh_operator_api': 'bmesh/intern/bmesh-operators.js',
+    r'bmesh/intern/bmesh_operator_api': 'bmesh/intern/bmesh-operators.js', r'intern/eigen/': 'intern/eigen.js',
 }

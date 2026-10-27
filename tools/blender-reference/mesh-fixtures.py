@@ -42,6 +42,10 @@ HOLE5 = {"pre": ("FACE", [5], "delete", {"type": "FACE"})}
 CORNER0 = {"pre": ("FACE", [0], "delete", {"type": "FACE"})}
 EDIT_CASES = {
     "delete-vert": (("primitive_cube_add", {}), "VERT", [0], "delete", {"type": "VERT"}),
+    "bevel-edge-cube": (("primitive_cube_add", {}), "EDGE", [0], "bevel", {"offset": 0.2, "segments": 1}),
+    "bevel-edge-cube-3": (("primitive_cube_add", {}), "EDGE", [0], "bevel", {"offset": 0.2, "segments": 3}),
+    "bevel-edges-cube": (("primitive_cube_add", {}), "EDGE", [0, 1, 2], "bevel", {"offset": 0.2, "segments": 2}),
+    "bevel-vert-cube": (("primitive_cube_add", {}), "VERT", [0], "bevel", {"offset": 0.2, "affect": "VERTICES"}),
     "delete-edge": (("primitive_cube_add", {}), "EDGE", [0], "delete", {"type": "EDGE"}),
     "delete-face": (("primitive_grid_add", {"x_subdivisions": 3, "y_subdivisions": 3}), "FACE", [4], "delete", {"type": "FACE"}),
     "delete-edge-face": (("primitive_cube_add", {}), "EDGE", [0], "delete", {"type": "EDGE_FACE"}),

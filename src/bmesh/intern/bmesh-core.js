@@ -7,6 +7,7 @@ import {
 import { BM_edge_exists, BM_edge_other_vert, BM_vert_in_edge, BM_verts_in_edge, BM_face_find_double, BM_edge_face_count_is_over, BM_EDGES_OF_VERT } from './bmesh-query.js';
 import { BM_face_create_ngon, BM_elem_attrs_copy } from './bmesh-construct.js';
 import { BM_select_history_remove } from './bmesh-marking.js';
+import { CustomData_bmesh_copy_block } from '../../blenkernel/customdata.js';
 
 export const BM_CREATE_NOP = 0, BM_CREATE_NO_DOUBLE = 1 << 1, BM_CREATE_SKIP_CD = 1 << 2;
 
@@ -42,7 +43,7 @@ export function BM_edge_create(bm, v1, v2, e_example = -1, create_flag = BM_CREA
 function bm_loop_create(bm, v, edge, f, l_example = -1) {
   const { l } = bm;
   const loop = poolAlloc(l);
-  if (l_example >= 0) for (const layer of l.layers) layer.data.copyWithin(loop * layer.size, l_example * layer.size, l_example * layer.size + layer.size);
+  if (l_example >= 0) CustomData_bmesh_copy_block(bm.ldata, l_example, loop);
   l.v[loop] = v;
   l.e[loop] = edge;
   l.f[loop] = f;

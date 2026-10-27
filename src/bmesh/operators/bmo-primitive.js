@@ -1,5 +1,7 @@
 // Primitive operators (bmo_primitive.cc). Run through BMO_op_callf; `matrix` is a 4x4 of columns.
-import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable, poolLayer } from '../intern/bmesh-class.js';
+import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
+import { CustomData_get_offset } from '../../blenkernel/customdata.js';
+import { CD_PROP_FLOAT2 } from '../../makesdna/customdata-types.js';
 import { BM_vert_create, BM_edge_create, BM_vert_kill, BM_face_create_verts, BM_CREATE_NOP } from '../intern/bmesh-core.js';
 import { BM_face_create_quad_tri } from '../intern/bmesh-construct.js';
 import { BM_edge_collapse } from '../intern/bmesh-mods.js';
@@ -13,7 +15,7 @@ const VERT_MARK = 1, FACE_MARK = 1 << 1, FACE_NEW = 1 << 2;
 const f32 = Math.fround;
 
 // The loop UV layer when UVs are wanted and the mesh has one (CustomData_get_offset(CD_PROP_FLOAT2) != -1).
-const uvLayer = (bm, calc_uvs) => (calc_uvs ? poolLayer(bm.l, 'UVMap') : null);
+const uvLayer = (bm, calc_uvs) => (calc_uvs ? bm.ldata.layers[CustomData_get_offset(bm.ldata, CD_PROP_FLOAT2)] ?? null : null);
 const loopsOf = (bm, f, fn) => { const first = bm.f.l_first[f]; let l = first, i = 0; do fn(l, i++); while ((l = bm.l.next[l]) !== first); };
 const markedFaces = (bm, flag, fn) => BM_ITER_MESH(bm.f, (f) => BMO_flag_test(bm.f, f, flag) && fn(f));
 const setUV = (uv, l, u, v) => { uv.data[l * 2] = u; uv.data[l * 2 + 1] = v; };
@@ -124,7 +126,8 @@ function dissolveMarked(bm, flag) {
 
 export function BM_mesh_calc_uvs_circle(bm, matrix, radius, oflag, uv) {
   const uv_scale = f32(0.5 / radius), uv_center = 0.5;
-  const inv = invert_m4_m4(matrix);
+  const inv = unit_m4();
+  invert_m4_m4(inv, matrix);
   markedFaces(bm, oflag, (f) => loopsOf(bm, f, (l) => {
     const [x, y] = mul_m4_v3(inv, bm.v.co.subarray(bm.l.v[l] * 3, bm.l.v[l] * 3 + 3));
     setUV(uv, l, f32(uv_center + uv_scale * x), f32(uv_center + uv_scale * y));
@@ -193,7 +196,8 @@ export function BM_mesh_calc_uvs_cone(bm, matrix, radius_top, radius_bottom, seg
   const uv_scale_top = radius_top !== 0 ? f32(uv_radius / radius_top) : radius_bottom !== 0 ? f32(uv_radius / radius_bottom) : uv_radius;
   const uv_scale_bottom = radius_bottom !== 0 ? f32(uv_radius / radius_bottom) : uv_scale_top;
   const up = mul_mat3_m4_v3(matrix, [0, 0, 1]);
-  const inv = invert_m4_m4(matrix);
+  const inv = unit_m4();
+  invert_m4_m4(inv, matrix);
   let x = 1, y = f32(1 - uv_height);
   markedFaces(bm, oflag, (f) => {
     if (bm.f.len[f] === 4 && radius_top && radius_bottom) {

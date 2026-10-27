@@ -17,6 +17,7 @@ Needs Clang 18 with its Python bindings (`pip install libclang==18.1.1`), the Bl
 Inspect one file: tools/blender-port/convert.py SRC source/blender/bmesh/intern/bmesh_query.cc [FUNCTION ...]
 """
 import json
+import math
 import os
 import re
 import struct
@@ -36,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 PRELUDE = os.path.join(HERE, 'prelude.hh')
 INCLUDES = ['blenlib', 'bmesh', 'makesdna', 'blenkernel', 'blentranslation', 'makesrna', 'imbuf', 'gpu', 'geometry',
-            'functions', 'editors/include', '']
+            'functions', 'editors/include', 'depsgraph', 'windowmanager', 'blenfont', '']
 NULLS = (K.CXX_NULL_PTR_LITERAL_EXPR, K.GNU_NULL_EXPR)
 NESTING = (K.IF_STMT, K.FOR_STMT, K.WHILE_STMT, K.DO_STMT, K.SWITCH_STMT, K.CONDITIONAL_OPERATOR, K.CXX_FOR_RANGE_STMT)
 OPS = {'==': '===', '!=': '!=='}
@@ -83,6 +84,15 @@ def is_float_array(t):
     return t.kind == T.CONSTANTARRAY and is_float(t.element_type)
 
 
+# The parsed copy of a source sits next to it, so its quoted includes resolve; one per process, so runs can overlap.
+TMP_PREFIX = f'.port{os.getpid()}_'
+
+
+def source_rel(path, root):
+    """A parsed file's path relative to root, naming the original source rather than its parsed copy."""
+    return os.path.relpath(path, root).replace(f'/{TMP_PREFIX}', '/')
+
+
 def zero_of(t):
     """The JS of a default-initialized value of type t, or None when it has none."""
     t = canon(t)
@@ -102,6 +112,8 @@ def zero_of(t):
     name = t.get_declaration().spelling
     if name in ARRAY_TYPES:
         return '[]'
+    if name == 'optional':
+        return 'null'
     if name in ('Map', 'Set'):
         return f'new {name}()'
     if t.kind == T.RECORD:
@@ -234,11 +246,11 @@ def needs_mesh(ref):
 def module_for(path, root):
     """The Bylonder module that ports a Blender source file: kebab case, without the BLI_/BKE_/DNA_ prefix."""
     rel = os.path.relpath(path, os.path.join(root, 'source/blender'))
+    for pattern, module in MODULE_FOR_SOURCE.items():
+        if re.match(pattern, rel if not rel.startswith('..') else os.path.relpath(path, root)):
+            return module
     if rel.startswith('..'):
         return None
-    for pattern, module in MODULE_FOR_SOURCE.items():
-        if re.match(pattern, rel):
-            return module
     d, base = os.path.split(rel)
     if d.split('/')[0] in ('blenlib', 'blenkernel') and d.endswith('/intern'):
         d = d[:-len('/intern')]
@@ -262,12 +274,14 @@ class Source:
         self.registry = registry if registry is not None else {}
         path = os.path.join(self.root, rel)
         self.original = open(path).read()
-        self.tmp = os.path.join(os.path.dirname(path), '.port_' + os.path.basename(path))
+        self.tmp = os.path.join(os.path.dirname(path), f'{TMP_PREFIX}{os.path.basename(path)}')
         resource = subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
         self.args = ['-std=c++20', '-x', 'c++', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
+        # Headers Blender's build generates (tools/blender-reference/rna-prototypes.py).
+        self.args += [f'-I{os.path.join(os.path.dirname(os.path.abspath(__file__)), "include")}']
         self.args += [f'-I{os.path.join(self.root, "source/blender", d)}' for d in INCLUDES]
-        self.args += [f'-I{os.path.join(self.root, d)}' for d in ('intern/guardedalloc', 'intern/atomic', 'intern/eigen', 'intern/profile', 'extern/fast_float', 'extern/xxhash')]
-        plain = self.parse(self.original)
+        self.args += [f'-I{os.path.join(self.root, d)}' for d in ('intern/guardedalloc', 'intern/atomic', 'intern/eigen', 'intern/profile', 'intern/clog', 'extern/fast_float', 'extern/xxhash', 'extern/rangetree')]
+        plain = self.parse(self.original, outline=True)
         includes = [c for c in plain.cursor.get_children() if c.kind == K.INCLUSION_DIRECTIVE and self.in_main(c)]
         self.prelude_line = max((c.extent.end.line for c in includes), default=0)
         bodies = [(f.extent.start.offset, f.extent.end.offset) for f in plain.cursor.walk_preorder()
@@ -299,15 +313,16 @@ class Source:
             if c.kind == K.MACRO_INSTANTIATION and self.in_main(c):
                 self.macros[(c.extent.start.offset, c.extent.end.offset)] = (c.spelling, c.referenced)
         self.functions = [c for c in self.tu.cursor.walk_preorder() if c.kind in (K.FUNCTION_DECL, K.FUNCTION_TEMPLATE) and c.is_definition() and self.in_main(c)]
-        self.sigs = {}
+        self.sigs, self.computing = {}, set()
         for f in self.functions:
-            self.sigs[f.spelling] = self.signature(f)
-            self.registry[f.spelling] = self.sigs[f.spelling]
+            self.signature_of(f)
 
-    def parse(self, text):
+    def parse(self, text, outline=False):
+        """The translation unit of text; an outline (includes, macros, function extents) skips function bodies."""
         self.text_of_tu = text
         open(self.tmp, 'w').write(text)
-        return ci.Index.create().parse(self.tmp, args=self.args, options=ci.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        options = ci.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD | (ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES if outline else 0)
+        return ci.Index.create().parse(self.tmp, args=self.args, options=options)
 
     def macro_parts(self, m):
         """(lines, parameters, body) of an expression-like macro definition, or None."""
@@ -347,8 +362,27 @@ class Source:
     def sig_of(self, name):
         return self.sigs.get(name) or self.registry.get(name)
 
+    def signature_of(self, ref):
+        """The signature of the function ref names, computed on first use when this file defines it, so a callee defined
+        further down is known."""
+        name = ref.spelling
+        sig = self.sig_of(name)
+        if sig is not None or name in self.computing:
+            return sig
+        f = self.find(name)
+        if f is None:
+            return None
+        self.computing.add(name)
+        self.sigs[name] = self.registry[name] = self.signature(f)
+        self.computing.discard(name)
+        return self.sigs[name]
+
     def find(self, name):
         return next((f for f in self.functions if f.spelling == name), None)
+
+    def declaration(self, name):
+        """A declaration of the function name anywhere in the translation unit (its own file or a header), or None."""
+        return next((c for c in self.tu.cursor.walk_preorder() if c.kind == K.FUNCTION_DECL and c.spelling == name), None)
 
     def definition(self, name, rel):
         """The definition of name in the file rel (this file or a header it includes), with its signature known."""
@@ -356,7 +390,7 @@ class Source:
             self.definitions = {}
             for c in self.tu.cursor.walk_preorder():
                 if c.kind in (K.FUNCTION_DECL, K.FUNCTION_TEMPLATE) and c.is_definition() and c.location.file:
-                    self.definitions.setdefault((c.spelling, os.path.relpath(c.location.file.name, self.root).replace('/.port_', '/')), c)
+                    self.definitions.setdefault((c.spelling, source_rel(c.location.file.name, self.root)), c)
         f = self.definitions.get((name, rel))
         if f is not None and f.spelling not in self.sigs:
             self.sigs[f.spelling] = self.registry[f.spelling] = self.signature(f)
@@ -365,7 +399,7 @@ class Source:
     # --- out parameters
 
     def signature(self, f):
-        params = [{'name': p.spelling, 'type': p.type, 'cursor': p} for p in f.get_arguments()]
+        params = [{'name': p.spelling or f'_unused{i}', 'type': p.type, 'cursor': p} for i, p in enumerate(f.get_arguments())]
         body = next((k for k in f.get_children() if k.kind == K.COMPOUND_STMT), None)
         for p in params:
             p['out'] = self.out_kind(p, body) if body is not None else None
@@ -444,7 +478,10 @@ class Source:
         index = next((n for n, a in enumerate(call.get_arguments()) if a.hash == arg.hash), -1)
         if index == 0 and call.spelling in OUT_FIRST:
             return 'write'
-        sig = self.sig_of(call.spelling) if hasattr(self, 'sigs') else None
+        if index == 0 and call.spelling in ('memcpy', 'memmove', 'memset'):
+            return 'write'
+        ref = call.referenced
+        sig = self.signature_of(ref) if ref is not None and ref.kind == K.FUNCTION_DECL else self.sig_of(call.spelling)
         if sig and 0 <= index < len(sig['params']) and sig['params'][index]['out'] == 'out':
             return 'write'
         return 'read'
@@ -470,6 +507,8 @@ class FunctionPort:
         self.statement_call = False
         self.uses_bm = False
         self.deps = set()
+        self.cursors = {}
+        self.views = {}
 
     def temp(self):
         name = f'_r{self.temps}'
@@ -481,19 +520,128 @@ class FunctionPort:
         self.uses_bm = True
         return 'bm'
 
+    def find_cursors(self, body):
+        """Pointers stepping through an array of structs (`EdgeHalf *e = bv->edges; ... e++`), as {var: (base, start)}.
+        Being incremented makes a pointer one into an array, so it ports exactly as an index into that array, when every
+        value it takes is in the same array."""
+        parents, refs, stepped = {}, {}, set()
+
+        def visit(c):
+            for k in kids(c):
+                parents[k.hash] = c
+                visit(k)
+        visit(body)
+
+        def up(c):
+            p = parents.get(c.hash)
+            while p is not None and p.kind in (K.UNEXPOSED_EXPR, K.PAREN_EXPR):
+                p = parents.get(p.hash)
+            return p
+        candidates = {}
+        for c in body.walk_preorder():
+            if c.kind == K.VAR_DECL and is_record_pointer(c.type) and not pool_of(c.type):
+                place = self.array_place(clangx.var_init(c))
+                if place:
+                    candidates[c.hash] = (c, *place)
+            elif c.kind == K.DECL_REF_EXPR and c.referenced is not None:
+                refs.setdefault(c.referenced.hash, []).append(c)
+        cursors = {}
+        for key, (var, base, start) in candidates.items():
+            ok = True
+            for ref in refs.get(key, []):
+                p = up(ref)
+                if p is None:
+                    continue
+                if p.kind == K.UNARY_OPERATOR and clangx.unary_operator(p)[0] in ('++', '--'):
+                    stepped.add(key)
+                elif is_binary(p, '+=', '-='):
+                    stepped.add(key)
+                elif is_unary(p, '&'):
+                    ok = False
+                elif is_binary(p, '=') and strip(kids(p)[0]).hash == ref.hash:
+                    place = self.array_place(kids(p)[1])
+                    ok = ok and bool(place) and self.p.text(place[0]) == self.p.text(base)
+                elif is_binary(p, '==', '!=', '<', '>', '<=', '>=', '-'):
+                    other = next(k for k in kids(p) if strip(k).hash != ref.hash) if len(kids(p)) == 2 else None
+                    place = self.array_place(other) if other is not None else None
+                    ok = ok and (bool(place) and self.p.text(place[0]) == self.p.text(base) or
+                                 (other is not None and strip(other).kind == K.DECL_REF_EXPR and strip(other).referenced is not None and strip(other).referenced.hash in candidates))
+            if ok and key in stepped:
+                cursors[key] = (base, start)
+        return cursors
+
+    def find_views(self, body):
+        """Number pointers into a buffer that are only written through (`float *co = buf + 3 * k`), as {var: (buf,
+        offset)}: a typed array view, so writes reach the buffer as in C."""
+        views, assigned = {}, set()
+        for c in body.walk_preorder():
+            if c.kind == K.VAR_DECL and pointee(c.type) is not None and (is_float(pointee(c.type)) or is_int(pointee(c.type))):
+                init = clangx.var_init(c)
+                place = self.buffer_place(init) if init is not None else None
+                if place:
+                    views[c.hash] = place
+            elif is_binary(c, '=', '+=', '-=') or (c.kind == K.UNARY_OPERATOR and clangx.unary_operator(c)[0] in ('++', '--')):
+                target = strip_parens_casts(kids(c)[0])
+                if target.kind == K.DECL_REF_EXPR and target.referenced is not None:
+                    assigned.add(target.referenced.hash)
+        return {k: v for k, v in views.items() if k not in assigned}
+
+    def buffer_place(self, c):
+        """(buffer, offset) of a number pointer expression `buf + i` or `&buf[i]`, or None."""
+        c = strip_parens_casts(c)
+        if is_binary(c, '+') and pointee(kids(c)[0].type) is not None and is_int(kids(c)[1].type):
+            return kids(c)[0], kids(c)[1]
+        if is_unary(c, '&') and strip_parens_casts(kids(c)[0]).kind == K.ARRAY_SUBSCRIPT_EXPR:
+            base, index = kids(strip_parens_casts(kids(c)[0]))
+            if pointee(base.type) is not None and (is_float(pointee(base.type)) or is_int(pointee(base.type))):
+                return base, index
+        return None
+
+    def array_place(self, c):
+        """(array, index) a struct pointer expression points at: `arr`, `&arr[i]` or `arr + i`; else None."""
+        if c is None:
+            return None
+        c = strip_parens_casts(c)
+        if is_unary(c, '&') and strip_parens_casts(kids(c)[0]).kind == K.ARRAY_SUBSCRIPT_EXPR:
+            return tuple(kids(strip_parens_casts(kids(c)[0])))
+        if is_binary(c, '+') and is_record_pointer(kids(c)[0].type) and is_int(kids(c)[1].type):
+            return kids(c)[0], kids(c)[1]
+        if c.kind in (K.DECL_REF_EXPR, K.MEMBER_REF_EXPR) and is_record_pointer(c.type) and not pool_of(c.type):
+            if c.kind == K.DECL_REF_EXPR and c.referenced is not None and c.referenced.hash in self.cursors:
+                return None
+            return c, None
+        return None
+
+    def cursor_of(self, c):
+        """The cursor variable c refers to, or None."""
+        c = strip_parens_casts(c)
+        if c.kind == K.DECL_REF_EXPR and c.referenced is not None and c.referenced.hash in self.cursors:
+            return c.referenced
+        return None
+
+    def cursor_index(self, c):
+        """The array index a struct pointer expression stands for, beside a cursor."""
+        var = self.cursor_of(c)
+        if var is not None:
+            return f'{var.spelling}_i'
+        array, index = self.array_place(c)
+        return self.expr(index) if index is not None else '0'
+
     def emit(self):
         sig = self.sig
         params = [p['name'] + self.default_of(i) for i, p in enumerate(sig['params']) if p['out'] != 'out']
         outs = [p for p in sig['params'] if p['out'] == 'out']
         body = next(k for k in self.f.get_children() if k.kind == K.COMPOUND_STMT)
+        self.cursors = self.find_cursors(body)
+        self.views = self.find_views(body)
         lines = self.block_lines(body, [(f'let {p["name"]}{self.out_init(p)};', p['cursor']) for p in outs])
         statements = list(body.get_children())
         if self.outs() and canon(sig['ret']).kind == T.VOID and not (statements and statements[-1].kind == K.RETURN_STMT):
             lines.append(f'{self.return_outs(None)};')
         prologue = []
-        if self.uses_bm and not {'bm', 'bp'} & {p['name'] for p in sig['params']}:
+        sig['needs_bm'] = self.uses_bm and not {'bm', 'bp'} & {p['name'] for p in sig['params']}
+        if sig['needs_bm']:
             params.insert(0, 'bm')
-            sig['needs_bm'] = True
         elif self.uses_bm and 'bm' not in params:
             prologue.append('const { bm } = bp;')
         sig['emitted'] = True
@@ -674,7 +822,11 @@ class FunctionPort:
             var = next(v for v in kids(it) if v.spelling == 'bl_port_it')
             return self.iter_loop(var, nexts[0] if nexts else None, incs[0] if incs else None, body)
         init, cond, inc = self.for_slots(c)
-        init_js = '' if init is None else ' '.join(self.declaration(init)).rstrip(';') if init.kind == K.DECL_STMT else self.expr_statement(init)
+        if init is not None and init.kind == K.DECL_STMT:
+            # One `let` for every variable the header declares.
+            init_js = 'let ' + ', '.join(re.sub(r'^(let|const) ', '', d).rstrip(';') for d in self.declaration(init))
+        else:
+            init_js = '' if init is None else self.expr_statement(init)
         cond_js = self.cond(cond) if cond is not None else ''
         inc_js = self.expr(inc) if inc is not None else ''
         return f'for ({init_js}; {cond_js}; {inc_js}) {self.body(body)}'
@@ -700,15 +852,19 @@ class FunctionPort:
         t = canon(v.type)
         if dropped(t):
             return None
+        if v.hash in self.cursors:
+            _, start = self.cursors[v.hash]
+            return f'let {v.spelling}_i = {self.expr(start) if start is not None else 0};'
+        if v.hash in self.views:
+            buf, offset = self.views[v.hash]
+            return f'const {v.spelling} = {self.expr(buf)}.subarray({self.expr(offset)});'
         init = clangx.var_init(v)
         if init is None:
             value = zero_of(t)
         else:
             si = strip(init)
             if si.kind == K.INIT_LIST_EXPR:
-                items = kids(si)
-                zero = t.kind == T.CONSTANTARRAY and all(clangx.evaluate(x) == 0 for x in items)
-                value = zero_of(t) if zero else '[' + ', '.join(self.expr(x) for x in items) + ']'
+                value = self.init_list(si, t)
             elif (si.kind == K.CALL_EXPR and si.referenced is not None and si.referenced.kind == K.CONSTRUCTOR and not arguments(si)) or (
                     si.kind == K.UNEXPOSED_EXPR and not kids(si)):
                 value = zero_of(t)
@@ -772,6 +928,8 @@ class FunctionPort:
             return '-1' if want is not None and pool_of(want) else 'null'
         if k == K.DECL_REF_EXPR:
             ref = c.referenced
+            if ref is not None and ref.hash in self.cursors:
+                return f'{self.expr(self.cursors[ref.hash][0])}[{ref.spelling}_i]'
             if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL) and dropped(ref.type):
                 return 'null'
             if ref is not None and ref.kind == K.ENUM_CONSTANT_DECL and ref.semantic_parent.is_scoped_enum():
@@ -802,12 +960,34 @@ class FunctionPort:
         if k in (K.BINARY_OPERATOR, K.COMPOUND_ASSIGNMENT_OPERATOR):
             return self.binary(c)
         if k == K.INIT_LIST_EXPR:
-            return '[' + ', '.join(self.expr(x) for x in ch) + ']'
+            return self.init_list(c, c.type)
         if k == K.CXX_THIS_EXPR:
             return 'this'
         if k == K.CXX_UNARY_EXPR and clangx.evaluate(c) is not None:
             return str(clangx.evaluate(c))
         return fix(k.name, self.p.text(c))
+
+    def init_list(self, c, t):
+        """A braced initializer of type t: a struct with every field, an array with every element, omitted ones zero."""
+        t, items = canon(t), kids(c)
+        explicit = lambda x: not (x.kind == K.UNEXPOSED_EXPR and not kids(x))  # Clang's implicit value-initialization.
+        if decl_name(t) in ('Map', 'Set'):
+            return f'new {decl_name(t)}([{", ".join(self.expr(x) for x in items)}])'
+        if t.kind == T.RECORD and decl_name(t) not in ARRAY_TYPES:
+            fields = [f for f in t.get_fields() if f.spelling]
+            values = [self.expr(items[i], f.type) if i < len(items) and explicit(items[i]) else (zero_of(f.type) or 'null')
+                      for i, f in enumerate(fields)]
+            return '{ ' + ', '.join(f'{f.spelling}: {v}' for f, v in zip(fields, values)) + ' }'
+        if t.kind == T.CONSTANTARRAY and all(clangx.evaluate(x) == 0 for x in items):
+            return zero_of(t)
+        element = canon(t.element_type) if t.kind == T.CONSTANTARRAY else None
+        keyed = element is not None and decl_name(element) in ('Map', 'Set')
+        # A braced element of a list of Sets or Maps constructs one: Vector<Set<T>>{{l}}.
+        values = [f'new {decl_name(element)}({self.init_list(strip(x), strip(x).type)})' if keyed and strip(x).kind == K.INIT_LIST_EXPR
+                  else self.expr(x, element) for x in items]
+        if t.kind == T.CONSTANTARRAY:
+            values += [zero_of(t.element_type) or 'null'] * (t.element_count - len(values))
+        return '[' + ', '.join(values) + ']'
 
     def literal(self, c):
         """A number as the lexer spelled it, without C's suffixes; inside a macro's expansion, as Clang evaluates it."""
@@ -855,6 +1035,9 @@ class FunctionPort:
             return self.expr(operand, want)
         if op == '*':
             return self.expr(operand, want)
+        cursor = self.cursor_of(operand)
+        if cursor is not None and op in ('++', '--'):
+            return f'{cursor.spelling}_i{op}' if postfix else f'{op}{cursor.spelling}_i'
         a = self.expr(operand)
         if op in ('++', '--') and is_record_pointer(operand.type):
             return fix(MEMORY, self.p.text(c))
@@ -909,6 +1092,8 @@ class FunctionPort:
                     return f'{self.bm}.{opool}.{field}[{elem}]'
                 if field == 'htype':
                     return HTYPE[opool]
+                if field == 'data':
+                    return elem  # An element's CustomData block is the element: its layers are arrays on its pool.
                 return fix(f'head.{field}', elem)
             if opool:
                 return f'{self.bm}.{opool}.{outer.spelling}_{field}[{elem}]'
@@ -919,6 +1104,15 @@ class FunctionPort:
         op = clangx.binary_operator(c)
         if op in ('&&', '||'):
             return f'({self.cond(lhs)} {op} {self.cond(rhs)})'
+        cursor = self.cursor_of(lhs)
+        if cursor is not None or self.cursor_of(rhs) is not None:
+            # A cursor's value is its index: stepping, moving and comparing work on indices.
+            if op == '=':
+                return f'{cursor.spelling}_i = {self.cursor_index(rhs)}'
+            if op in ('+=', '-='):
+                return f'{cursor.spelling}_i {op} {self.expr(rhs)}'
+            if op in ('==', '!=', '<', '>', '<=', '>=', '-'):
+                return f'({self.cursor_index(lhs)} {OPS.get(op, op)} {self.cursor_index(rhs)})'
         if op == '=':
             return self.assign(lhs, self.expr(rhs, lhs.type))
         if is_record_pointer(lhs.type) and (op in ('+=', '-=') or (is_record_pointer(rhs.type) and op in ('<', '>', '<=', '>=', '-'))):
@@ -945,6 +1139,8 @@ class FunctionPort:
 
     def assign(self, lhs, value, size=3):
         s = strip_parens_casts(lhs)
+        if s.kind == K.DECL_REF_EXPR and s.referenced is not None and s.referenced.hash in self.views:
+            return f'{s.spelling}.set({value})'
         target = address_of(s)
         if target is not None and strip_parens_casts(target).kind == K.ARRAY_SUBSCRIPT_EXPR:
             base, index = kids(strip_parens_casts(target))
@@ -966,6 +1162,8 @@ class FunctionPort:
         s = strip(c)
         if is_binary(s, '=') and strip(kids(s)[0]).spelling in DROPPED_FIELDS:
             return None
+        if s.kind == K.CSTYLE_CAST_EXPR and canon(s.type).kind == T.VOID and clangx.evaluate(kids(s)[-1]) is not None:
+            return None  # `(void)0`, as macros end statements.
         if s.kind == K.CALL_EXPR:
             name = s.spelling
             args = arguments(s)
@@ -987,11 +1185,29 @@ class FunctionPort:
                 ret_kind = canon(sig['ret']).kind
                 if ret_kind in (T.VOID, T.BOOL) and len(targets) == 1:
                     return self.assign(targets[0], call) if targets[0] is not None else call
-                lhs = ([] if ret_kind == T.VOID else ['']) + [self.expr(t) if t is not None else '' for t in targets]
+                slots, after = self.out_slots(targets)
+                lhs = ([] if ret_kind == T.VOID else ['']) + slots
                 while lhs and lhs[-1] == '':
                     lhs.pop()
-                return f'[{", ".join(lhs)}] = {call}' if lhs else call
+                return ', '.join([f'[{", ".join(lhs)}] = {call}' if lhs else call, *after])
         return self.expr(c)
+
+    def out_slots(self, targets):
+        """Destructuring slots for out targets, and the assignments to run after: a target that is no plain JS lvalue
+        (`v->co`, which is `bm.v.co.set(...)`) takes the value through a temporary."""
+        slots, after = [], []
+        for t in targets:
+            if t is None:
+                slots.append('')
+                continue
+            plain = self.expr(t)
+            if self.assign(t, '_value') == f'{plain} = _value':
+                slots.append(plain)
+            else:
+                tmp = self.temp()
+                slots.append(tmp)
+                after.append(self.assign(t, tmp))
+        return slots, after
 
     def has_outs(self, sig):
         return any(p['out'] for p in sig['params'])
@@ -1016,6 +1232,8 @@ class FunctionPort:
                 return '[' + ', '.join(js(args)) + ']'
             if not args:
                 return zero_of(c.type) or '{}'
+            if decl_name(c.type) in ('Map', 'Set') and len(args) == 1:
+                return f'new {decl_name(c.type)}({self.expr(args[0])})'
             if decl_name(c.type) in ARRAY_TYPES and is_int(args[0].type) and len(args) <= 2:
                 return f'new Array({self.expr(args[0])})' + (f'.fill({self.expr(args[1])})' if len(args) == 2 else '')
             if len(args) == 1:
@@ -1061,15 +1279,14 @@ class FunctionPort:
         if self.p.float32 and js_name.startswith('Math.') and canon(c.type).kind == T.FLOAT:
             call = f'Math.fround({call})'
         if sig and self.has_outs(sig) and not self.statement_call:
-            targets = [self.expr(t) if t is not None else '' for t in self.out_targets(sig, args)]
+            targets, after = self.out_slots(self.out_targets(sig, args))
             ret_kind = canon(sig['ret']).kind
             if not any(targets):
                 return call if ret_kind == T.VOID or (ret_kind == T.BOOL and len(targets) == 1) else f'{call}[0]'
             if ret_kind == T.BOOL and len(targets) == 1:
-                return f'(({targets[0]} = {call}) != null)'
-            t = f'_r{self.temps}'
-            self.temps += 1
-            return f'(([{"" if ret_kind == T.VOID else t + ", "}{", ".join(targets)}] = {call}), {t})'
+                return f'(({targets[0]} = {call}) != null' + (f' ? ({", ".join(after)}, true) : false)' if after else ')')
+            t = self.temp()
+            return f'(([{"" if ret_kind == T.VOID else t + ", "}{", ".join(targets)}] = {call}), {"".join(a + ", " for a in after)}{t})'
         return call
 
     def special_call(self, name, args, want=None):
@@ -1078,14 +1295,20 @@ class FunctionPort:
         if name in ALLOCATORS:
             elem = pointee(want) if want is not None and pointee(want) is not None and canon(pointee(want)).kind != T.VOID else pointee(self.call_type)
             if name.endswith('arrayN') and len(args) >= 2:
-                count = [args[0]]
+                count = [self.expr(args[0])]
             else:
-                count = [f for f in self.product(args[-1]) if strip_parens_casts(f).kind != K.CXX_UNARY_EXPR] if args else []
+                factors = self.product(args[-1]) if args else []
+                count = [self.expr(f) for f in factors if strip_parens_casts(f).kind != K.CXX_UNARY_EXPR]
+                # sizeof(float[3]) * n of float is 3 * n floats: the sizes give how many elements each counted item is.
+                sizes = math.prod(clangx.evaluate(f) or 1 for f in factors if strip_parens_casts(f).kind == K.CXX_UNARY_EXPR)
+                size = canon(elem).get_size() if elem is not None and canon(elem).kind != T.VOID else 0
+                if size > 0 and sizes != size and sizes % size == 0:
+                    count.insert(0, str(sizes // size))
             if elem is None or canon(elem).kind == T.VOID:
-                return f'new Array({" * ".join(self.expr(f) for f in count)})' if count else '{}'
+                return f'new Array({" * ".join(count)})' if count else '{}'
             if not count:
                 return zero_of(elem) or '{}'
-            return buffer_of(elem, ' * '.join(self.expr(f) for f in count))
+            return buffer_of(elem, ' * '.join(count))
         if name == 'bl_port_alloca':
             return buffer_of(pointee(args[0].type), self.expr(args[1]))
         if name == 'memset':
@@ -1093,6 +1316,8 @@ class FunctionPort:
             elem = pointee(strip_parens_casts(dst).type)
             if (elem is None or elem.kind == T.VOID) and want is not None:
                 elem = pointee(want)
+            if elem is not None and byte == 0 and is_struct_value(elem) and clangx.evaluate(args[2]) == canon(elem).get_size():
+                return f'Object.assign({self.expr(strip_parens_casts(dst), want)}, {zero_of(elem)})'  # One struct, zeroed.
             value = fill_value(elem, byte) if elem is not None and byte is not None else None
             return f'{self.expr(dst, want)}.fill({value})' if value is not None else fix('memset', self.p.text(self.call_node))
         if name == 'memcpy':
@@ -1123,14 +1348,15 @@ class FunctionPort:
             self.temps += 1
             return f'({t} = {self.helper("len_v3")}({v}), {v} = {self.helper("normalize_v3")}({v}), {t})'
         pool = lambda: pool_of(strip_parens_casts(args[0]).type) or '/*FIX pool*/'
-        if re.fullmatch(r'BM_ELEM_API_FLAG_(ENABLE|DISABLE|TEST)', name):
-            return f'{self.helper(name)}({self.bm}.{pool()}, {", ".join(js(args))})'
         if name == 'BM_elem_index_get':
             return f'{self.bm}.{pool()}.index[{self.expr(args[0])}]'
         if name == 'BM_elem_index_set':
             return f'{self.bm}.{pool()}.index[{self.expr(args[0])}] = {self.expr(args[1])}'
         if name.startswith('BM_elem_flag_'):
             return f'{self.helper(name.removesuffix("_bool"))}({self.bm}.{pool()}, {", ".join(js(args))})'
+        if is_prelude(self.call_node.referenced) and args and pool_of(strip_parens_casts(args[0]).type) and name not in PRELUDE_NEEDS_BM:
+            # The prelude's element macros are shims taking the element's pool first, like Blender's overloads per type.
+            return f'{self.helper(name)}({self.bm}.{pool()}, {", ".join(js(args))})'
         m = re.fullmatch(r'BMO_(vert|edge|face)_flag_(test|enable|disable|set)(_bool)?', name)
         if m:
             return f'{self.helper("BMO_flag_" + m.group(2))}({self.bm}.{m.group(1)[0]}, {", ".join(js(args[1:]))})'
@@ -1179,7 +1405,32 @@ class FunctionPort:
         base = kids(callee)[0] if kids(callee) else None
         b = self.expr(base) if base is not None else 'this'
         a = [self.expr(x) for x in args]
-        keyed = (canon(base.type).get_declaration().spelling if base is not None else '') in ('Map', 'Set')
+        held = canon(base.type) if base is not None else None
+        if held is not None and held.kind in (T.POINTER, T.LVALUEREFERENCE, T.RVALUEREFERENCE):
+            held = canon(held.get_pointee())
+        container = held.get_declaration().spelling if held is not None else ''
+        keyed = container in ('Map', 'Set')
+        if container in ARRAY_TYPES:
+            # New elements of a Vector or Array are default-constructed.
+            element = zero_of(held.get_template_argument_type(0)) or 'null'
+            fill = lambda n: f'Array.from({{ length: {n} }}, () => {element})'
+            if name == 'resize':
+                return f'({b}.length = Math.min({b}.length, {a[0]}), {b}.push(...{fill(f"{a[0]} - {b}.length")}))'
+            if name == 'reinitialize':
+                return f'({b} = {fill(a[0])})'
+            if name == 'reserve':
+                return 'undefined'
+            if name == 'contains':
+                return f'{b}.includes({a[0]})'
+        if container == 'optional':
+            # std::optional<T> is T or null.
+            value = {'emplace': zero_of(canon(base.type).get_template_argument_type(0)) or '{}', 'reset': 'null'}
+            if name in value and not args:
+                return f'({b} = {value[name]})'
+            if name == 'has_value':
+                return f'({b} != null)'
+            if name == 'value':
+                return b
         if name in ('size', 'index_range') and not args:
             return f'{b}.size' if keyed else f'{b}.length'
         if name == 'is_empty':
@@ -1192,10 +1443,14 @@ class FunctionPort:
             return f'{b}.clear()' if keyed else f'{b}.length = 0'
         if name in ('data', 'as_span', 'as_mutable_span'):
             return b
+        if name == 'lookup_ptr':
+            return f'({b}.get({a[0]}) ?? null)'
+        if name == 'pop_try':
+            return f'({b}.length ? {b}.pop() : null)'
         if name == 'lookup_default':
             return f'({b}.get({a[0]}) ?? {a[1]})'
         if name in ('add', 'add_new', 'add_overwrite'):
-            setlike = base is not None and canon(base.type).get_declaration().spelling == 'Set'
+            setlike = container == 'Set'
             return f'{b}.{"add" if setlike else "set"}({", ".join(a)})'
         return f'{b}.{METHODS.get(name, name)}({", ".join(a)})'
 

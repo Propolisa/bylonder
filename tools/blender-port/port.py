@@ -15,11 +15,15 @@ shim provides yet).
 Units (manifest `units`) are self-contained parts built to WebAssembly from Blender's own sources instead (`--wasm`,
 see wasm.py).
 
-Usage: tools/blender-port/port.py SRC [--wasm | --units-only]   (SRC: Blender sources of the manifest's tag; see convert.py)
+Usage: tools/blender-port/port.py SRC [--wasm | --units-only | --check FILE]   (SRC: Blender sources of the manifest's tag;
+see convert.py). --check converts every function of one Blender file to stdout and counts its FIX marks by kind, in
+seconds, to try a converter change; signatures from other files are known only in a full run.
 """
+import collections
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -57,13 +61,18 @@ class Exports:
     def __init__(self):
         self.cache = {}
 
-    def of(self, module):
-        if not module:
-            return {}
+    def read(self, module):
         path = public_path(module)
         if path not in self.cache:
-            self.cache[path] = json.loads(node('exports', path))[path] if os.path.exists(path) else {}
+            self.cache[path] = json.loads(node('exports', path))[path] if os.path.exists(path) else {'exports': {}, 'needs': []}
         return self.cache[path]
+
+    def of(self, module):
+        return self.read(module)['exports'] if module else {}
+
+    def needs(self, module):
+        """Generated functions the module's shims call."""
+        return self.read(module)['needs'] if module else []
 
     def forget(self, module):
         self.cache.pop(public_path(module), None)
@@ -111,7 +120,7 @@ class Driver:
         directory, confirmed by parsing."""
         definition = decl.get_definition()
         if definition is not None and definition.location.file and not convert.is_prelude(definition):
-            return os.path.relpath(definition.location.file.name, self.root).replace('/.port_', '/'), source.rel
+            return convert.source_rel(definition.location.file.name, self.root), source.rel
         header = os.path.relpath(decl.location.file.name, self.root)
         directory = os.path.dirname(header)
         stem = os.path.splitext(os.path.basename(header))[0].removesuffix('_inline')
@@ -140,6 +149,14 @@ class Driver:
             self.home.setdefault(name, module)
             if name in self.exports.of(module):
                 self.note(module, 'shimmed', name, self.check_shim(provider, rel, module, name))
+                # What the shim calls of Blender's, found from its declaration like any call.
+                for need in self.exports.needs(module):
+                    decl = self.source(provider).declaration(need)
+                    where = self.definition_file(decl, self.source(provider)) if decl is not None else None
+                    if where:
+                        queue.append((where[0], need, where[1]))
+                    else:
+                        self.note(module, 'missing', need, 'a shim calls it; no definition found')
                 continue
             reason = self.excluded(module, name)
             if reason:
@@ -155,14 +172,19 @@ class Driver:
                                                      'exported': f.linkage != ci.LinkageKind.INTERNAL or rel.endswith(('.hh', '.h')),
                                                      'source': provider, 'file': rel}
             queue += self.follow(source, rel, module, deps)
-        # Again, now that every signature is known: out parameters and `bm` across files.
-        for module, entry in self.modules.items():
-            for name, item in entry['functions'].items():
-                if 'source' in item:
-                    source = self.sources[item['source']]
-                    item['js'], item['deps'] = source.emit(source.definition(name, item['file']))
-                    self.follow(source, item['source'], module, item['deps'])
-                    self.note(module, 'generated', name)
+        # Again, now that every signature is known: out parameters and `bm` across files, until whether each function
+        # takes `bm` settles (a caller passes it only to callees that use it).
+        items = [(module, name, item) for module, entry in self.modules.items() for name, item in entry['functions'].items() if 'source' in item]
+        for _ in range(len(items)):
+            before = {name: self.sources[item['source']].sigs[name].get('needs_bm') for _, name, item in items}
+            for module, name, item in items:
+                source = self.sources[item['source']]
+                item['js'], item['deps'] = source.emit(source.definition(name, item['file']))
+            if all(self.sources[item['source']].sigs[name].get('needs_bm') == before[name] for _, name, item in items):
+                break
+        for module, name, item in items:
+            self.follow(self.sources[item['source']], item['source'], module, item['deps'])
+            self.note(module, 'generated', name)
 
     def follow(self, source, rel, module, deps):
         """The functions deps reach, to port next. Constants are placed and helpers checked on the way."""
@@ -211,14 +233,22 @@ class Driver:
         source = self.source(provider)
         f = source.definition(name, rel)
         if f is not None and shim['params'] is not None:
-            fp = convert.FunctionPort(source, f)
-            fp.emit()
-            want = [p['name'] for p in fp.sig['params'] if p['out'] != 'out']
-            if fp.sig.get('needs_bm'):
-                want.insert(0, 'bm')
-            if len(want) != len(shim['params']):
-                detail['signature'] = f'Blender ({", ".join(want)}), shim ({", ".join(shim["params"])})'
+            # Blender's overloads of the name are one JS function: the shim conforms when it takes any of them.
+            overloads = [g for g in source.functions if g.spelling == name] or [f]
+            wants = [self.ported_params(source, g) for g in overloads]
+            if all(len(want) != len(shim['params']) for want in wants):
+                detail['signature'] = f'Blender ({", ".join(wants[0])}), shim ({", ".join(shim["params"])})'
         return detail or None
+
+    @staticmethod
+    def ported_params(source, f):
+        """The JS parameters the conventions make of f's signature."""
+        fp = convert.FunctionPort(source, f, source.signature(f))
+        fp.emit()
+        want = [p['name'] for p in fp.sig['params'] if p['out'] != 'out']
+        if fp.sig.get('needs_bm'):
+            want.insert(0, 'bm')
+        return want
 
     def constant(self, source, module, name, ref):
         """An enum, file-scope variable or macro constant, written in the module of the file that defines it."""
@@ -310,10 +340,20 @@ class Driver:
                     open(public, 'w').write('\n'.join(kept))
 
 
+def check(driver, rel):
+    source = driver.source(rel)
+    js = '\n\n'.join(source.emit(f)[0] for f in source.functions)
+    print(js)
+    fixes = collections.Counter(m.group(1) for m in re.finditer(r'/\*FIX ([^*:]*)', js))
+    print(f'{len(source.functions)} functions, {sum(fixes.values())} FIX marks: {dict(fixes.most_common())}', file=sys.stderr)
+
+
 def main():
     root = sys.argv[1]
     manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
     driver = Driver(root, manifest)
+    if '--check' in sys.argv:
+        return check(driver, sys.argv[sys.argv.index('--check') + 1])
     if '--units-only' not in sys.argv:
         driver.run()
         driver.write()

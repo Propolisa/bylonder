@@ -16,15 +16,3 @@ export const _FLAG_JF = 1,
   _FLAG_WALK = 8,
   _FLAG_WALK_ALT = 16,
   _FLAG_ELEM_CHECK = 128;
-
-export function BM_ELEM_CD_GET_FLOAT() {
-  throw new Error("BM_ELEM_CD_GET_FLOAT is not ported: Custom data layers are not in Bylonder's BMesh yet");
-}
-
-export function BM_ELEM_CD_GET_FLOAT_P() {
-  throw new Error("BM_ELEM_CD_GET_FLOAT_P is not ported: Custom data layers are not in Bylonder's BMesh yet");
-}
-
-export function BM_ELEM_CD_GET_VOID_P() {
-  throw new Error("BM_ELEM_CD_GET_VOID_P is not ported: Custom data layers are not in Bylonder's BMesh yet");
-}
