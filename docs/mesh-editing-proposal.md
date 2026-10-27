@@ -34,7 +34,7 @@ An experienced Blender user enters Edit Mode with Tab and works without relearni
 | `BLI_polyfill_2d` and its beautify step | N-gon tessellation, also the Beauty method of Triangulate | A port, replacing earcut for meshes so n-gons shade identically |
 | `BLI_kdopbvh` | Ray casts and snapping | A flat BVH over `corner_tris` in typed arrays |
 
-Porting conventions, applied by `tools/blender-port/cc2js.mjs` (a C++ to JS converter for first drafts, verified and fixed by hand afterwards):
+Porting conventions, applied by `tools/blender-port/cc2js.py`. It drafts ports through Clang's AST, with types, overloads and declarations resolved, and imports each name from the module that ports its Blender source file. It lists the dependencies not ported yet. Drafts are verified and fixed by hand:
 
 - Function, struct field and slot names stay Blender's. Parameters stay in Blender's order. Functions that need the mesh and have no `bm` or `bp` take `bm` first.
 - Elements are indices, -1 for none. `v->co` is `vco(bm, v)`, `e->v1` is `bm.e.v1[e]`.
