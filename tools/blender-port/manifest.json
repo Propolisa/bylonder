@@ -18,7 +18,8 @@
         "bmo_smooth_vert_def",
         "bmo_poke_def",
         "bmo_connect_vert_pair_def",
-        "bmo_bridge_loops_def"
+        "bmo_bridge_loops_def",
+        "BMO_ERROR_CANCEL"
       ]
     }
   ],

@@ -211,11 +211,12 @@ class Driver:
             self.constant(self.source(rel), self.module_of(rel), name, ref, root=True)
 
     def root_constants(self):
-        """(file, name, declaration) of the manifest's root constants, such as the BMesh operator definitions."""
+        """(file, name, declaration) of the manifest's root constants: the BMesh operator definitions, and constants
+        Bylonder's own code uses, such as an enum value of a header the file includes."""
         for root in self.manifest['roots']:
             for name in root.get('constants', []):
                 source = self.source(root['source'])
-                ref = next((c for c in source.tu.cursor.walk_preorder() if c.kind == K.VAR_DECL and c.spelling == name and source.in_main(c)), None)
+                ref = source.constant_declaration(name)
                 if ref is None:
                     sys.exit(f'{root["source"]}: no constant {name}')
                 yield root['source'], name, ref

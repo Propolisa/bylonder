@@ -5,7 +5,6 @@ import {
   BMO_OP_SLOT_ELEMENT_BUF, BMO_OP_SLOT_INT, BMO_OP_SLOT_MAPPING, BMO_OP_SLOT_SUBTYPE_INT_ENUM, BMO_OP_SLOT_SUBTYPE_INT_FLAG,
   BMO_OP_SLOT_VEC, BMO_OPTYPE_FLAG_NORMALS_CALC, BMO_OPTYPE_FLAG_SELECT_FLUSH, BMO_OPTYPE_FLAG_SELECT_VALIDATE,
   BMO_FLAG_RESPECT_HIDE,
-  BMO_ERROR_CANCEL, // Not used here: importing it has the generator write it, for the editors' EDBM_op_finish.
 } from './bmesh-operators.gen.js';
 import * as opdefines from './bmesh-opdefines.js';
 import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_HIDDEN, BM_ELEM_SELECT, BM_ITER_MESH, BM_elem_flag_test, BM_elem_flag_enable, BM_elem_flag_disable } from './bmesh-class.js';
