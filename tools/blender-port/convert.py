@@ -1016,6 +1016,9 @@ class FunctionPort:
             self.note_ref(ref, c.spelling)
             if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL):
                 return js_local(c.spelling)
+            if ref is not None and ref.kind == K.FUNCTION_DECL and (self.p.sig_of(c.spelling) or {}).get('needs_bm'):
+                # A function passed as a callback is called without bm, so it takes this caller's.
+                return f'(...args) => {c.spelling}({self.bm}, ...args)'
             return CONSTANTS.get(c.spelling, c.spelling)
         if k == K.MEMBER_REF_EXPR:
             return self.member(c)

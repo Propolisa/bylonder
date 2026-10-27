@@ -86,7 +86,7 @@ export function BM_ELEM_CD_GET_FLOAT_P(pool, i, offset) {
 }
 export const BM_ELEM_CD_GET_VOID_P = BM_ELEM_CD_GET_FLOAT_P;
 
-export const BM_elem_flag_test = (pool, i, flag) => (pool.hflag[i] & flag) !== 0;
+export const BM_elem_flag_test = (pool, i, flag) => pool.hflag[i] & flag;
 export const BM_elem_flag_enable = (pool, i, flag) => { pool.hflag[i] |= flag; };
 export const BM_elem_flag_disable = (pool, i, flag) => { pool.hflag[i] &= ~flag; };
 export const BM_elem_flag_set = (pool, i, flag, value) => (value ? BM_elem_flag_enable : BM_elem_flag_disable)(pool, i, flag);
