@@ -1,5 +1,8 @@
 /* Force-included in WebAssembly builds of Blender's sources: what wasi-libc and its libc++ leave out. */
 #include <stdlib.h>
+/* WASI is not __unix__, so sources that guard these POSIX headers on it skip them; wasi-libc has them. */
+#include <sys/time.h>
+#include <unistd.h>
 
 /* wasi-libc has aligned_alloc, not memalign. */
 static inline void *memalign(size_t align, size_t size)
@@ -28,6 +31,15 @@ template<class M> struct unique_lock {
   void unlock() {}
   bool owns_lock() const { return true; }
 };
+template<class... M> struct scoped_lock {
+  explicit scoped_lock(M &...) {}
+};
+}  // namespace std
+/* libc++ without threads leaves out the atomic shared_ptr functions; on one thread they are a plain load and store. */
+#    include <memory>
+namespace std {
+template<class T> shared_ptr<T> atomic_load(const shared_ptr<T> *p) { return *p; }
+template<class T> void atomic_store(shared_ptr<T> *p, shared_ptr<T> r) { *p = std::move(r); }
 }  // namespace std
 #  endif
 #endif

@@ -1,0 +1,12 @@
+The size check assumes 64-bit pointers; on wasm32 the same two pointers are 8 bytes.
+--- a/source/blender/blenlib/BLI_resource_scope.hh
++++ b/source/blender/blenlib/BLI_resource_scope.hh
+@@ -141,7 +141,7 @@
+  * from #NonCopyable. That happens because then there would be two #NonCopyable types at the same
+  * address which is not allowed. The proper solution is probably to change how NonCopyable and
+  * NonMovable are used overall. */
+-static_assert(sizeof(ResourceScope) == 16);
++static_assert(sizeof(ResourceScope) == 2 * sizeof(void *));
+ 
+ /* -------------------------------------------------------------------- */
+ /** \name #ResourceScope Inline Methods

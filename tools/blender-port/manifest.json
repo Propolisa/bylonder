@@ -7,8 +7,48 @@
       "functions": [
         "BM_mesh_bevel"
       ]
+    },
+    {
+      "source": "source/blender/bmesh/intern/bmesh_opdefines.cc",
+      "constants": [
+        "bmo_triangulate_def",
+        "bmo_join_triangles_def",
+        "bmo_reverse_faces_def",
+        "bmo_recalc_face_normals_def",
+        "bmo_smooth_vert_def",
+        "bmo_poke_def",
+        "bmo_connect_vert_pair_def",
+        "bmo_bridge_loops_def",
+        "BMO_ERROR_CANCEL"
+      ]
     }
   ],
+  "modules": {
+    "bmesh/bmesh.wasm": {
+      "api": "bmesh-api.cc",
+      "dependencies": {
+        "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
+        "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
+                  "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"}
+      },
+      "libraries": [
+        "source/blender/editors/mesh",
+        "source/blender/bmesh/intern",
+        "source/blender/bmesh/operators",
+        "source/blender/bmesh/tools",
+        "source/blender/blenkernel/intern",
+        "source/blender/blentranslation/intern",
+        "source/blender/functions/intern",
+        "source/blender/depsgraph/intern/depsgraph_query.cc",
+        "source/blender/nodes/intern/geometry_nodes_bundle.cc",
+        "source/blender/blenlib/intern",
+        "intern/guardedalloc/intern",
+        "intern/clog",
+        "intern/eigen/intern",
+        "extern/wcwidth"
+      ]
+    }
+  },
   "units": {
     "blenkernel/mesh/mesh-tessellate.js": {
       "api": {
@@ -22,6 +62,7 @@
         "source/blender/blenlib/intern/math_matrix_c.cc",
         "source/blender/blenlib/intern/math_vector.cc",
         "source/blender/blenlib/intern/polyfill_2d_beautify.cc",
+        "source/blender/blenlib/intern/task_range.cc",
         "intern/guardedalloc/intern/leak_detector.cc",
         "intern/guardedalloc/intern/mallocn.cc",
         "intern/guardedalloc/intern/mallocn_lockfree_impl.cc",
@@ -32,7 +73,8 @@
   "exclude_modules": {
     "blenkernel/": "Custom data layers, deform groups and custom normals are not in Bylonder's BMesh yet",
     "blenlib/memarena": "JS allocates with the garbage collector",
-    "blenlib/time": "Debug timing"
+    "blenlib/time": "Debug timing",
+    "blenlib/assert": "Debug checks"
   },
   "exclude": {
     "BM_lnorspace_update": "Harden Normals: custom split normals are not ported"

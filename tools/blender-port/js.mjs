@@ -56,5 +56,11 @@ if (command === 'exports') {
   }
   process.stdout.write(JSON.stringify(out));
 } else if (command === 'format') {
-  for (const file of files) await format(file);
+  // Every file is tried; files that do not parse stay as written, and all their errors are reported together.
+  const failed = [];
+  for (const file of files) await format(file).catch((error) => failed.push(error.message));
+  if (failed.length) {
+    process.stderr.write(failed.join('\n') + '\n');
+    process.exitCode = 1;
+  }
 }
