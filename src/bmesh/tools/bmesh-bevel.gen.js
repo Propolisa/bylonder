@@ -3241,16 +3241,16 @@ function tri_corner_adj_vmesh(bp, bv) {
   const co1 = bndv.nv.co.slice(0, 3);
   bndv = bndv.next;
   const co2 = bndv.nv.co.slice(0, 3);
-  let mat = make_unit_cube_map(co0, co1, co2, vco(bm, bv.v));
+  const mat = make_unit_cube_map(co0, co1, co2, vco(bm, bv.v));
   const ns = bp.seg;
   const ns2 = Math.trunc(ns / 2);
   const vm = make_cube_corner_adj_vmesh(bp);
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j <= ns2; j++) {
       for (let k = 0; k <= ns; k++) {
-        const v = mesh_vert(vm, i, j, k).co.slice(0, 3);
+        let v = mesh_vert(vm, i, j, k).co.slice(0, 3);
         v[3] = 1.0;
-        mat = mul_m4_v4(mat, v);
+        v = mul_m4_v4(mat, v);
         mesh_vert(vm, i, j, k).co = v.slice(0, 3);
       }
     }

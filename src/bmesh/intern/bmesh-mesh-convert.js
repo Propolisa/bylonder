@@ -4,6 +4,7 @@ import { BM_data_layer_add_named } from './bmesh-interp.js';
 import { CD_PROP_FLOAT, CD_PROP_FLOAT2 } from '../../makesdna/customdata-types.js';
 import { BM_vert_create, BM_edge_create, BM_face_create, BM_CREATE_SKIP_CD } from './bmesh-core.js';
 import { createMesh } from '../../blenkernel/mesh/mesh.js';
+import { BM_face_normal_update } from './bmesh-polygon.js';
 
 // Mesh attribute types of the corner layers BMesh keeps.
 const LAYER_OF_ATTRIBUTE = { FLOAT: CD_PROP_FLOAT, FLOAT2: CD_PROP_FLOAT2 };
@@ -73,7 +74,8 @@ export function BM_mesh_bm_to_me(bm) {
   return createMesh({ vert_positions, edges, face_offsets, corner_verts, corner_edges, attributes });
 }
 
-export function BM_mesh_bm_from_me(mesh) {
+// Normals as Edit Mode loads them (calc_face_normal and calc_vert_normal).
+export function BM_mesh_bm_from_me(mesh, { calc_face_normal = true, calc_vert_normal = true } = {}) {
   const bm = BM_mesh_create({ totvert: mesh.verts_num, totedge: mesh.edges_num, totloop: mesh.corners_num, totface: mesh.faces_num });
   const attr = (name) => mesh.attributes.get(name)?.data;
   for (const [name, { domain, type }] of mesh.attributes) if (domain === 'CORNER' && LAYER_OF_ATTRIBUTE[type]) BM_data_layer_add_named(bm, bm.ldata, LAYER_OF_ATTRIBUTE[type], name);
@@ -101,6 +103,11 @@ export function BM_mesh_bm_from_me(mesh) {
   for (const [name, pool] of SHARP_ATTRIBUTES) {
     const data = attr(name);
     pools[pool].forEach((elem, i) => { if (data?.[i]) bm[pool].hflag[elem] &= ~BM_ELEM_SMOOTH; else bm[pool].hflag[elem] |= BM_ELEM_SMOOTH; });
+  }
+  if (calc_face_normal) BM_ITER_MESH(bm.f, (f) => BM_face_normal_update(bm, f));
+  if (calc_vert_normal) {
+    const normals = mesh.vert_normals();
+    pools.v.forEach((v, i) => bm.v.no.set(normals.subarray(i * 3, i * 3 + 3), v * 3));
   }
   return bm;
 }
