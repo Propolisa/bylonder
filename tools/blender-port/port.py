@@ -187,7 +187,7 @@ class Driver:
                     decl = source.declaration(need) if constant is None else None
                     where = self.definition_file(decl, source) if decl is not None else None
                     if constant is not None:
-                        self.constant(source, module, need, constant, root=True)  # Exported, for the shim.
+                        self.constant(source, module, need, constant)
                     elif where:
                         queue.append((where[0], need, where[1]))
                     else:
@@ -222,7 +222,8 @@ class Driver:
             self.follow(self.sources[item['source']], item['source'], module, item['deps'])
             self.note(module, 'generated', name)
         for module in {m for m, st in self.status.items() if st['shimmed']}:
-            for need in set(self.exports.needs(module)) - self.needs_found:
+            defined = {n for c in self.entry(module)['constants'].values() for n in c['names']} | set(self.entry(module)['functions'])
+            for need in set(self.exports.needs(module)) - self.needs_found - defined:
                 self.note(module, 'missing', need, 'a shim calls it; no definition found')
         # Root constants again, now that their calls know which functions take bm.
         for rel, name, ref in self.root_constants():
@@ -355,7 +356,9 @@ class Driver:
         tag = self.manifest['blender']
         for module, entry in sorted(self.modules.items()):
             defined = set(entry['functions']) | {n for c in entry['constants'].values() for n in c['names']}
-            constants = [('export ' if c['exported'] else '') + c['js'] for c in sorted(entry['constants'].values(), key=lambda c: c['key'])]
+            needs = set(self.exports.needs(module))  # What the module's shim imports from it is exported, whatever declares it.
+            constants = [('export ' if c['exported'] or needs & set(c['names']) else '') + c['js']
+                         for c in sorted(entry['constants'].values(), key=lambda c: c['key'])]
             functions = [('export ' if f['exported'] else '') + f['js'] for f in sorted(entry['functions'].values(), key=lambda f: f['key'])]
             imports = {}
             for f in [*entry['functions'].values(), *entry['constants'].values()]:
