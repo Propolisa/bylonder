@@ -12,11 +12,6 @@ import {
 } from './math-geom.js';
 import { transpose_m3 } from './math-matrix.js';
 
-const IS_POINT_IX = 1 << 0;
-const IS_SEGMENT_IX = 1 << 1;
-const DIR_V2_SET = 0;
-const SWAP_AXIS = 0;
-
 export function safe_acos_approx(x) {
   const f = Math.fround(Math.abs(x));
   const m = f < 1.0 ? Math.fround(1.0 - Math.fround(1.0 - f)) : 1.0;
@@ -77,29 +72,6 @@ export function plane_from_point_normal_v3(plane_co, plane_no) {
   const r_plane = [...plane_no];
   r_plane[3] = -dot_v3(r_plane, plane_co);
   return r_plane;
-}
-
-export function dist_squared_to_line_segment_v2(p, l1, l2) {
-  let closest = [0, 0];
-  [, closest] = closest_to_line_segment_v2(p, l1, l2);
-  return len_squared_v2v2(closest, p);
-}
-
-export function closest_to_line_segment_v2(p, l1, l2) {
-  let _r0;
-  let r_close = [0, 0];
-  let cp = [0, 0];
-  const lambda = (([_r0, cp] = closest_to_line_v2(p, l1, l2)), _r0);
-  if (lambda <= 0.0) {
-    r_close = [...l1];
-    return [0.0, r_close];
-  }
-  if (lambda >= 1.0) {
-    r_close = [...l2];
-    return [1.0, r_close];
-  }
-  r_close = [...cp];
-  return [lambda, r_close];
 }
 
 export function closest_to_line_segment_v3(p, l1, l2) {
@@ -209,130 +181,12 @@ export function closest_to_line_v3(p, l1, l2) {
   return [(([_r0, r_close] = closest_to_ray_v3(p, l1, u)), _r0), r_close];
 }
 
-export function closest_to_line_v2(p, l1, l2) {
-  const r_close = [0, 0];
-  const u = sub_v2_v2v2(l2, l1);
-  const h = sub_v2_v2v2(p, l1);
-  const denom = dot_v2v2(u, u);
-  if (denom === 0.0) {
-    r_close[0] = l1[0];
-    r_close[1] = l1[1];
-    return [0.0, r_close];
-  }
-  const lambda = Math.fround(dot_v2v2(u, h) / denom);
-  r_close[0] = Math.fround(l1[0] + Math.fround(u[0] * lambda));
-  r_close[1] = Math.fround(l1[1] + Math.fround(u[1] * lambda));
-  return [lambda, r_close];
-}
-
-export function line_point_factor_v2_ex(p, l1, l2, epsilon, fallback) {
-  const u = sub_v2_v2v2(l2, l1);
-  const h = sub_v2_v2v2(p, l1);
-  const dot = len_squared_v2(u);
-  return dot > epsilon ? Math.fround(dot_v2v2(u, h) / dot) : fallback;
-}
-
-export function line_point_factor_v2(p, l1, l2) {
-  return line_point_factor_v2_ex(p, l1, l2, 0.0, 0.0);
-}
-
 export function axis_dominant_v3_to_m3(normal) {
   let r_mat = Array.from({ length: 3 }, () => [0, 0, 0]);
   r_mat[2] = [...normal];
   [r_mat[0], r_mat[1]] = ortho_basis_v3v3_v3(r_mat[2]);
   r_mat = transpose_m3(r_mat);
   return r_mat;
-}
-
-function mean_value_half_tan_v2_db(d_curr, d_next) {
-  const area = cross_v2v2_db(d_curr.dir, d_next.dir);
-  if (area !== 0.0) {
-    const dot = dot_v2v2_db(d_curr.dir, d_next.dir);
-    const len = d_curr.len * d_next.len;
-    const result = (len - dot) / area;
-    if (isfinite(result)) {
-      return result;
-    }
-  }
-  return 0.0;
-}
-
-export function interp_weights_poly_v2(w, v, n, co) {
-  let _r0;
-  let max_value = 0;
-  for (let i = 0; i < n; i++) {
-    max_value = Math.fround(Math.max(max_value, Math.fround(Math.abs(Math.fround(v[i][0] - co[0])))));
-    max_value = Math.fround(Math.max(max_value, Math.fround(Math.abs(Math.fround(v[i][1] - co[1])))));
-  }
-  const eps = Math.fround(Math.fround(16.0 * 1.1920929e-7) * max_value);
-  const eps_sq = Math.fround(eps * eps);
-  let ht = 0;
-  let totweight = 0.0;
-  let ix_flag = 0;
-  const d_curr = { dir: [0, 0], len: 0 };
-  const d_next = { dir: [0, 0], len: 0 };
-  let i_curr = n - 1;
-  let i_next = 0;
-  let v_curr = v[i_curr];
-  let v_next = v[i_next];
-  {
-    d_curr.dir = sub_v2db_v2fl_v2fl(v_curr - 2, co);
-    d_curr.len = len_v2_db(d_curr.dir);
-  }
-  DIR_V2_SET;
-  {
-    d_next.dir = sub_v2db_v2fl_v2fl(v_curr, co);
-    d_next.len = len_v2_db(d_next.dir);
-  }
-  DIR_V2_SET;
-  let ht_prev = mean_value_half_tan_v2_db(d_curr, d_next);
-  while (i_next < n) {
-    if (d_next.len < eps) {
-      ix_flag = IS_POINT_IX;
-      break;
-    }
-    if (dist_squared_to_line_segment_v2(co, v_curr, v_next) < eps_sq) {
-      ix_flag = IS_SEGMENT_IX;
-      break;
-    }
-    (_r0 = d_next), (d_curr.dir = _r0.dir), (d_curr.len = _r0.len);
-    {
-      d_next.dir = sub_v2db_v2fl_v2fl(v_next, co);
-      d_next.len = len_v2_db(d_next.dir);
-    }
-    DIR_V2_SET;
-    ht = mean_value_half_tan_v2_db(d_curr, d_next);
-    w[i_curr] = d_curr.len === 0.0 ? 0.0 : Math.fround((ht_prev + ht) / d_curr.len);
-    totweight = Math.fround(totweight + w[i_curr]);
-    i_curr = i_next++;
-    v_curr = v_next;
-    v_next = v[i_next];
-    ht_prev = ht;
-  }
-  if (ix_flag) {
-    w.fill(0);
-    if (ix_flag & IS_POINT_IX) {
-      w[i_curr] = 1.0;
-    } else {
-      let fac = line_point_factor_v2(co, v_curr, v_next);
-      {
-        if (fac < 0.0) {
-          fac = 0.0;
-        } else if (fac > 1.0) {
-          fac = 1.0;
-        }
-      }
-      0;
-      w[i_curr] = Math.fround(1.0 - fac);
-      w[i_next] = fac;
-    }
-  } else {
-    if (totweight !== 0.0) {
-      for (i_curr = 0; i_curr < n; i_curr++) {
-        w[i_curr] = Math.fround(w[i_curr] / totweight);
-      }
-    }
-  }
 }
 
 export function resolve_quad_uv_v2(r_uv, st, st0, st1, st2, st3) {
@@ -531,7 +385,6 @@ export function axis_sort_v3(axis_values, r_axis_order) {
         [v[0], v[2]] = [v[2], v[0]];
         [r_axis_order[0], r_axis_order[2]] = [r_axis_order[2], r_axis_order[0]];
       }
-      SWAP_AXIS;
     }
   } else {
     if (v[1] < v[2]) {
@@ -539,13 +392,11 @@ export function axis_sort_v3(axis_values, r_axis_order) {
         [v[0], v[1]] = [v[1], v[0]];
         [r_axis_order[0], r_axis_order[1]] = [r_axis_order[1], r_axis_order[0]];
       }
-      SWAP_AXIS;
     } else {
       {
         [v[0], v[2]] = [v[2], v[0]];
         [r_axis_order[0], r_axis_order[2]] = [r_axis_order[2], r_axis_order[0]];
       }
-      SWAP_AXIS;
     }
   }
   if (v[2] < v[1]) {
@@ -553,7 +404,6 @@ export function axis_sort_v3(axis_values, r_axis_order) {
       [v[1], v[2]] = [v[2], v[1]];
       [r_axis_order[1], r_axis_order[2]] = [r_axis_order[2], r_axis_order[1]];
     }
-    SWAP_AXIS;
   }
 }
 
@@ -581,45 +431,17 @@ export function sub_v2_v2v2(a, b) {
   return r;
 }
 
-export function sub_v2db_v2fl_v2fl(a, b) {
-  const r = [0, 0];
-  r[0] = a[0] - b[0];
-  r[1] = a[1] - b[1];
-  return r;
-}
-
 export function mul_v2_fl(r, f) {
   r[0] = Math.fround(r[0] * f);
   r[1] = Math.fround(r[1] * f);
-}
-
-export function dot_v2v2(a, b) {
-  return Math.fround(Math.fround(a[0] * b[0]) + Math.fround(a[1] * b[1]));
-}
-
-export function dot_v2v2_db(a, b) {
-  return a[0] * b[0] + a[1] * b[1];
 }
 
 export function cross_v2v2(a, b) {
   return Math.fround(Math.fround(a[0] * b[1]) - Math.fround(a[1] * b[0]));
 }
 
-export function cross_v2v2_db(a, b) {
-  return a[0] * b[1] - a[1] * b[0];
-}
-
 export function len_squared_v2(v) {
   return Math.fround(Math.fround(v[0] * v[0]) + Math.fround(v[1] * v[1]));
-}
-
-export function len_v2_db(v) {
-  return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-}
-
-export function len_squared_v2v2(a, b) {
-  const d = sub_v2_v2v2(b, a);
-  return dot_v2v2(d, d);
 }
 
 export function equals_v3v3(v1, v2) {

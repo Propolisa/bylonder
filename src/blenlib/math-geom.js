@@ -1,4 +1,6 @@
 // Geometry functions (math_geom.cc) on [x, y, z] arrays.
+import { dist_squared_to_line_segment_v2, line_point_factor_v2 } from './math-geom.gen.js';
+
 export const sub_v3 = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 export const add_v3 = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 export const mul_v3_fl = (a, f) => [a[0] * f, a[1] * f, a[2] * f];
@@ -94,5 +96,44 @@ export function isect_ray_ray_v3(origin_a, direction_a, origin_b, direction_b) {
 export const angle_v3v3v3 = (v1, v2, v3) => angle_v3v3(sub_v3(v1, v2), sub_v3(v3, v2));
 export const angle_on_axis_v3v3v3_v3 = (v1, v2, v3, axis) => angle_v3v3(project_plane_normalized_v3_v3v3(sub_v3(v1, v2), axis), project_plane_normalized_v3_v3v3(sub_v3(v3, v2), axis));
 export const interpf = (target, origin, t) => t * target + (1 - t) * origin;
+
+// interp_weights_poly_v2: mean value weights of co in the polygon v, written to w.
+// port-override: Blender steps a float pointer back across rows (`v[n - 1] - 2` for v[n - 2]); here rows are indexed.
+export function interp_weights_poly_v2(w, v, n, co) {
+  let max_value = 0;
+  for (let i = 0; i < n; i++) max_value = Math.max(max_value, Math.abs(Math.fround(v[i][0] - co[0])), Math.abs(Math.fround(v[i][1] - co[1])));
+  const eps = Math.fround(Math.fround(16 * 1.1920929e-7) * max_value);
+  const eps_sq = Math.fround(eps * eps);
+  const dir = (p) => { const d = [p[0] - co[0], p[1] - co[1]]; return { d, len: Math.sqrt(d[0] * d[0] + d[1] * d[1]) }; };
+  const half_tan = (a, b) => {
+    const area = a.d[0] * b.d[1] - a.d[1] * b.d[0];
+    if (area === 0) return 0;
+    const result = (a.len * b.len - (a.d[0] * b.d[0] + a.d[1] * b.d[1])) / area;
+    return Number.isFinite(result) ? result : 0;
+  };
+  let i_curr = n - 1, i_next = 0, ix = 0, totweight = 0;
+  let d_curr = dir(v[n - 2]), d_next = dir(v[n - 1]);
+  let ht_prev = half_tan(d_curr, d_next);
+  while (i_next < n) {
+    if (d_next.len < eps) { ix = 1; break; }
+    if (dist_squared_to_line_segment_v2(co, v[i_curr], v[i_next]) < eps_sq) { ix = 2; break; }
+    d_curr = d_next;
+    d_next = dir(v[i_next]);
+    const ht = half_tan(d_curr, d_next);
+    w[i_curr] = d_curr.len === 0 ? 0 : Math.fround((ht_prev + ht) / d_curr.len);
+    totweight = Math.fround(totweight + w[i_curr]);
+    i_curr = i_next++;
+    ht_prev = ht;
+  }
+  if (ix) {
+    w.fill(0, 0, n);
+    if (ix === 1) w[i_curr] = 1;
+    else {
+      const fac = Math.min(Math.max(line_point_factor_v2(co, v[i_curr], v[i_next]), 0), 1);
+      w[i_curr] = Math.fround(1 - fac);
+      w[i_next] = fac;
+    }
+  } else if (totweight !== 0) for (let i = 0; i < n; i++) w[i] = Math.fround(w[i] / totweight);
+}
 
 export * from './math-geom.gen.js';

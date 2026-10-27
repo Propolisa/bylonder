@@ -245,11 +245,11 @@ def needs_mesh(ref):
 def module_for(path, root):
     """The Bylonder module that ports a Blender source file: kebab case, without the BLI_/BKE_/DNA_ prefix."""
     rel = os.path.relpath(path, os.path.join(root, 'source/blender'))
+    for pattern, module in MODULE_FOR_SOURCE.items():
+        if re.match(pattern, rel if not rel.startswith('..') else os.path.relpath(path, root)):
+            return module
     if rel.startswith('..'):
         return None
-    for pattern, module in MODULE_FOR_SOURCE.items():
-        if re.match(pattern, rel):
-            return module
     d, base = os.path.split(rel)
     if d.split('/')[0] in ('blenlib', 'blenkernel') and d.endswith('/intern'):
         d = d[:-len('/intern')]
@@ -917,6 +917,8 @@ class FunctionPort:
         """A braced initializer of type t: a struct with every field, an array with every element, omitted ones zero."""
         t, items = canon(t), kids(c)
         explicit = lambda x: not (x.kind == K.UNEXPOSED_EXPR and not kids(x))  # Clang's implicit value-initialization.
+        if decl_name(t) in ('Map', 'Set'):
+            return f'new {decl_name(t)}([{", ".join(self.expr(x) for x in items)}])'
         if t.kind == T.RECORD and decl_name(t) not in ARRAY_TYPES:
             fields = [f for f in t.get_fields() if f.spelling]
             values = [self.expr(items[i], f.type) if i < len(items) and explicit(items[i]) else (zero_of(f.type) or 'null')
@@ -924,7 +926,11 @@ class FunctionPort:
             return '{ ' + ', '.join(f'{f.spelling}: {v}' for f, v in zip(fields, values)) + ' }'
         if t.kind == T.CONSTANTARRAY and all(clangx.evaluate(x) == 0 for x in items):
             return zero_of(t)
-        values = [self.expr(x, t.element_type if t.kind == T.CONSTANTARRAY else None) for x in items]
+        element = canon(t.element_type) if t.kind == T.CONSTANTARRAY else None
+        keyed = element is not None and decl_name(element) in ('Map', 'Set')
+        # A braced element of a list of Sets or Maps constructs one: Vector<Set<T>>{{l}}.
+        values = [f'new {decl_name(element)}({self.init_list(strip(x), strip(x).type)})' if keyed and strip(x).kind == K.INIT_LIST_EXPR
+                  else self.expr(x, element) for x in items]
         if t.kind == T.CONSTANTARRAY:
             values += [zero_of(t.element_type) or 'null'] * (t.element_count - len(values))
         return '[' + ', '.join(values) + ']'
@@ -1100,6 +1106,8 @@ class FunctionPort:
         s = strip(c)
         if is_binary(s, '=') and strip(kids(s)[0]).spelling in DROPPED_FIELDS:
             return None
+        if s.kind == K.CSTYLE_CAST_EXPR and canon(s.type).kind == T.VOID and clangx.evaluate(kids(s)[-1]) is not None:
+            return None  # `(void)0`, as macros end statements.
         if s.kind == K.CALL_EXPR:
             name = s.spelling
             args = arguments(s)

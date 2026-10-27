@@ -29,7 +29,8 @@ RENAME = {
     'asinf': 'Math.asin', 'atan2f': 'Math.atan2', 'atan2': 'Math.atan2', 'powf': 'Math.pow', 'pow': 'Math.pow', 'floorf': 'Math.floor',
     'ceilf': 'Math.ceil', 'expf': 'Math.exp', 'logf': 'Math.log', 'min_ff': 'Math.min', 'max_ff': 'Math.max', 'min_ii': 'Math.min',
     'max_ii': 'Math.max', 'min_dd': 'Math.min', 'max_dd': 'Math.max', 'fmaxf': 'Math.max', 'fminf': 'Math.min', 'min': 'Math.min',
-    'max': 'Math.max', 'safe_acosf': 'saacos', 'cbrtf': 'Math.cbrt', 'cbrt': 'Math.cbrt',
+    'max': 'Math.max', 'safe_acosf': 'saacos', 'cbrtf': 'Math.cbrt', 'cbrt': 'Math.cbrt', 'isfinite': 'Number.isFinite',
+    'isnan': 'Number.isNaN',
 }
 # Macros and constants with a JS equivalent.
 CONSTANTS = {'M_PI': 'Math.PI', 'M_PI_2': 'Math.PI / 2', 'M_PI_4': 'Math.PI / 4', 'M_SQRT2': 'Math.SQRT2', 'M_SQRT1_2': 'Math.SQRT1_2',
@@ -65,12 +66,13 @@ PRELUDE_HOMES = {'INIT_MINMAX': 'blenlib/utildefines.js', 'INIT_MINMAX2': 'blenl
                  **{n: 'bmesh/intern/bmesh-class.js' for n in ('BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV')}}
 PRELUDE_NEEDS_BM = {'BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV'}
 
-# Blender sources whose port lives in a module of another name (paths below source/blender, as regexes).
+# Blender sources whose port lives in a module of another name (paths below source/blender, or below the source root
+# for the rest, as regexes).
 MODULE_FOR_SOURCE = {
     r'blenlib/BLI_math_(vector|geom|base|solvers)': 'blenlib/math-geom.js', r'blenlib/BLI_math_matrix': 'blenlib/math-matrix.js',
     r'blenlib/BLI_math_rotation': 'blenlib/math-rotation.js', r'blenlib/intern/math_(vector|geom|base)': 'blenlib/math-geom.js',
     r'blenlib/intern/math_matrix': 'blenlib/math-matrix.js', r'blenlib/BLI_kdtree': 'blenlib/kdtree.js',
     r'bmesh/intern/bmesh_iterators': 'bmesh/intern/bmesh-query.js', r'bmesh/intern/bmesh_inline': 'bmesh/intern/bmesh-class.js',
     r'bmesh/bmesh_class': 'bmesh/intern/bmesh-class.js', r'bmesh/intern/bmesh_private': 'bmesh/intern/bmesh-class.js',
-    r'bmesh/intern/bmesh_operator_api': 'bmesh/intern/bmesh-operators.js',
+    r'bmesh/intern/bmesh_operator_api': 'bmesh/intern/bmesh-operators.js', r'intern/eigen/': 'intern/eigen.js',
 }

@@ -61,13 +61,18 @@ class Exports:
     def __init__(self):
         self.cache = {}
 
-    def of(self, module):
-        if not module:
-            return {}
+    def read(self, module):
         path = public_path(module)
         if path not in self.cache:
-            self.cache[path] = json.loads(node('exports', path))[path] if os.path.exists(path) else {}
+            self.cache[path] = json.loads(node('exports', path))[path] if os.path.exists(path) else {'exports': {}, 'needs': []}
         return self.cache[path]
+
+    def of(self, module):
+        return self.read(module)['exports'] if module else {}
+
+    def needs(self, module):
+        """Generated functions the module's shims call."""
+        return self.read(module)['needs'] if module else []
 
     def forget(self, module):
         self.cache.pop(public_path(module), None)
@@ -144,6 +149,8 @@ class Driver:
             self.home.setdefault(name, module)
             if name in self.exports.of(module):
                 self.note(module, 'shimmed', name, self.check_shim(provider, rel, module, name))
+                # What the shim calls of Blender's, looked for in the same file first.
+                queue += [(rel, need, provider) for need in self.exports.needs(module)]
                 continue
             reason = self.excluded(module, name)
             if reason:
