@@ -1200,8 +1200,10 @@ class FunctionPort:
             return f'{s.spelling}.set({value})'
         if (through and s.kind == K.DECL_REF_EXPR and s.referenced is not None and s.referenced.kind == K.VAR_DECL
                 and canon(s.referenced.type).kind == T.POINTER and is_float(pointee(s.referenced.type))):
-            # A local pointer writes through to the row it points at, as `co = cos[i]; zero_v3(co);` does.
-            return f'{s.spelling}.splice(0, {size}, ...{value})'
+            # A local pointer writes through to what it points at (an array row or a typed-array view), as
+            # `co = cos[i]; zero_v3(co);` does.
+            t = self.temp()
+            return f'(({t} = {value}), ' + ', '.join(f'({s.spelling}[{i}] = {t}[{i}])' for i in range(size)) + ')'
         target = address_of(s)
         if target is not None and strip_parens_casts(target).kind == K.ARRAY_SUBSCRIPT_EXPR:
             base, index = kids(strip_parens_casts(target))
