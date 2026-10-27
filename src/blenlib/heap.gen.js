@@ -163,10 +163,12 @@ export function BLI_heap_is_empty(heap) {
 }
 
 export function BLI_heap_top_value(heap) {
+  0;
   return heap.tree[0].value;
 }
 
 export function BLI_heap_pop_min(heap) {
+  0;
   const ptr = heap.tree[0].ptr;
   heap_node_free(heap, heap.tree[0]);
   if (--heap.size) {
@@ -177,6 +179,7 @@ export function BLI_heap_pop_min(heap) {
 }
 
 export function BLI_heap_remove(heap, node) {
+  0;
   let i = node.index;
   while (i > 0) {
     const p = HEAP_PARENT(i);

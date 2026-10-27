@@ -57,7 +57,7 @@ const FACE_INPUT = 1 << 2;
 const maximum_improvement = 0.9900000095367432;
 
 export function ASSERT_VALID_ERROR_METRIC(val) {
-  return BLI_assert(Number.isFinite(val) && val >= 0 && val <= 2 * Math.PI);
+  return 0;
 }
 
 function quad_calc_error(v1, v2, v3, v4) {
@@ -113,6 +113,8 @@ function quad_calc_error(v1, v2, v3, v4) {
 
 function bm_edge_to_quad_verts(bm, e) {
   const r_v_quad = [-1, -1, -1, -1];
+  0;
+  0;
   r_v_quad[0] = bm.l.v[bm.e.l[e]];
   r_v_quad[1] = bm.l.v[bm.l.prev[bm.l.radial_next[bm.e.l[e]]]];
   r_v_quad[2] = bm.l.v[bm.l.next[bm.e.l[e]]];
@@ -157,10 +159,10 @@ function bm_edge_delmimit_data_from_op(bm, op) {
     ],
     cdata_len: 0,
   };
-  delimit_data.do_seam = Number(BMO_slot_bool_get(bm, op.slots_in, 'cmp_seam'));
-  delimit_data.do_sharp = Number(BMO_slot_bool_get(bm, op.slots_in, 'cmp_sharp'));
-  delimit_data.do_mat = Number(BMO_slot_bool_get(bm, op.slots_in, 'cmp_materials'));
-  const angle_face = BMO_slot_float_get(bm, op.slots_in, 'angle_face_threshold');
+  delimit_data.do_seam = Number(BMO_slot_bool_get(op.slots_in, 'cmp_seam'));
+  delimit_data.do_sharp = Number(BMO_slot_bool_get(op.slots_in, 'cmp_sharp'));
+  delimit_data.do_mat = Number(BMO_slot_bool_get(op.slots_in, 'cmp_materials'));
+  const angle_face = BMO_slot_float_get(op.slots_in, 'angle_face_threshold');
   if (angle_face < Math.fround(180.0 * Math.fround(3.141592653589793 / 180.0))) {
     delimit_data.angle_face = angle_face;
     delimit_data.angle_face__cos = Math.fround(Math.cos(angle_face));
@@ -168,7 +170,7 @@ function bm_edge_delmimit_data_from_op(bm, op) {
   } else {
     delimit_data.do_angle_face = Number(false);
   }
-  const angle_shape = BMO_slot_float_get(bm, op.slots_in, 'angle_shape_threshold');
+  const angle_shape = BMO_slot_float_get(op.slots_in, 'angle_shape_threshold');
   if (angle_shape < Math.fround(180.0 * Math.fround(3.141592653589793 / 180.0))) {
     delimit_data.angle_shape = angle_shape;
     delimit_data.do_angle_shape = Number(true);
@@ -176,21 +178,21 @@ function bm_edge_delmimit_data_from_op(bm, op) {
     delimit_data.do_angle_shape = Number(false);
   }
   if (
-    BMO_slot_bool_get(bm, op.slots_in, 'cmp_uvs') &&
+    BMO_slot_bool_get(op.slots_in, 'cmp_uvs') &&
     bm_edge_delimit_cdata(bm.ldata, CD_PROP_FLOAT2, delimit_data.cdata[delimit_data.cdata_len])
   ) {
     delimit_data.cdata_len += 1;
   }
   delimit_data.cdata[delimit_data.cdata_len].cd_offset = -1;
   if (
-    BMO_slot_bool_get(bm, op.slots_in, 'cmp_vcols') &&
+    BMO_slot_bool_get(op.slots_in, 'cmp_vcols') &&
     bm_edge_delimit_cdata(bm.ldata, CD_PROP_BYTE_COLOR, delimit_data.cdata[delimit_data.cdata_len])
   ) {
     delimit_data.cdata_len += 1;
   }
   delimit_data.cdata[delimit_data.cdata_len].cd_offset = -1;
   if (
-    BMO_slot_bool_get(bm, op.slots_in, 'cmp_vcols') &&
+    BMO_slot_bool_get(op.slots_in, 'cmp_vcols') &&
     bm_edge_delimit_cdata(bm.ldata, CD_PROP_COLOR, delimit_data.cdata[delimit_data.cdata_len])
   ) {
     delimit_data.cdata_len += 1;
@@ -254,6 +256,8 @@ function bm_edge_is_delimit(bm, e, delimit_data) {
 }
 
 function add_without_duplicates(neighbor_info, e, l) {
+  0;
+  0;
   for (let index = 0; index < neighbor_info.items_num; index++) {
     if (neighbor_info.items[neighbor_info.items_num].e === e) {
       return;
@@ -272,7 +276,6 @@ function add_neighbors(bm, neighbor_info, l_in_quad) {
   if (bm.f.len[bm.l.f[l_in_neighbor]] !== 3) {
     return;
   }
-  const items_num_prev = neighbor_info.items_num;
   const l_other_arr = [bm.l.prev[l_in_neighbor], bm.l.next[l_in_neighbor]];
   for (let i = 0; i < ARRAY_SIZE(l_other_arr); i++) {
     const l_other = l_other_arr[i];
@@ -336,6 +339,7 @@ function compute_alignment(bm, s, quad_a_vecs, quad_b_verts, l_shared, plane_nor
 
 function reprioritize_join(bm, s, e_merge, l_shared, neighbor_quad_vecs, neighbor_quad_error, neighbor_quad_normal) {
   ASSERT_VALID_ERROR_METRIC(neighbor_quad_error);
+  0;
   const node = s.edge_queue_nodes[bm.e.index[e_merge]];
   if (node === null) {
     return;
@@ -358,6 +362,7 @@ function reprioritize_join(bm, s, e_merge, l_shared, neighbor_quad_vecs, neighbo
 }
 
 function reprioritize_face_neighbors(bm, s, f, f_error) {
+  0;
   const neighbor_info = {
     items: [
       { e: -1, l: -1 },
@@ -390,6 +395,7 @@ function reprioritize_face_neighbors(bm, s, f, f_error) {
 }
 
 function bm_faces_join_pair_by_edge(bm, e) {
+  0;
   const l_a = bm.e.l[e];
   const l_b = bm.l.radial_next[bm.e.l[e]];
   if (bm.f.len[bm.l.f[l_a]] !== 3 || bm.f.len[bm.l.f[l_b]] !== 3) {
@@ -415,10 +421,10 @@ export function bmo_join_triangles_exec(bm, op) {
     topo_influnce: 0,
     select_tris_only: false,
   };
-  s.topo_influnce = BMO_slot_float_get(bm, op.slots_in, 'topology_influence');
+  s.topo_influnce = BMO_slot_float_get(op.slots_in, 'topology_influence');
   s.use_topo_influence = s.topo_influnce !== 0.0;
   s.edge_queue = BLI_heap_new();
-  s.select_tris_only = BMO_slot_bool_get(bm, op.slots_in, 'deselect_joined');
+  s.select_tris_only = BMO_slot_bool_get(op.slots_in, 'deselect_joined');
   if (s.use_topo_influence) {
     s.edge_queue_nodes = MEM_new_array_uninitialized(bm.totedge, 'bmo_join_triangles_exec');
   }
@@ -487,6 +493,7 @@ export function bmo_join_triangles_exec(bm, op) {
     }
   }
   {
+    0;
   }
   BLI_heap_free(s.edge_queue, null);
   if (s.use_topo_influence) {

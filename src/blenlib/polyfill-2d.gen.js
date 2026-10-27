@@ -2,7 +2,6 @@
 // exporting the same name from polyfill-2d.js.
 import { cross_poly_v2, sub_v2_v2v2 } from './math-geom.js';
 
-export const BLI_POLYFILL_ARENA_SIZE = MEM_SIZE_OPTIMAL(1 << 14);
 const KDTREE_INDEX_CACHE_UNSET = 4294967295;
 const CONCAVE = -1,
   TANGENTIAL = 0,
@@ -66,6 +65,7 @@ function kdtree2d_init(tree, coords_num, indices) {
       undefined /*FIX pointer arithmetic on structs (needs a port-override shim): node++*/;
     }
   }
+  0;
 }
 
 function kdtree2d_balance_recursive(nodes, node_num, axis, coords, ofs) {
@@ -130,6 +130,7 @@ function kdtree2d_init_mapping(tree) {
     if (node.pos !== KDNODE_UNSET) {
       tree.nodes[node.pos].parent = i;
     }
+    0;
     tree.nodes_map[node.index] = i;
   }
   tree.nodes[tree.root].parent = KDNODE_UNSET;
@@ -143,6 +144,7 @@ function kdtree2d_node_remove(tree, index) {
   tree.nodes_map[index] = KDNODE_UNSET;
   let node = tree.nodes[node_index];
   tree.node_num -= 1;
+  0;
   node.flag |= KDNODE_FLAG_REMOVED;
   while (node.parent !== KDNODE_UNSET) {
     let node_child = 0;
@@ -153,10 +155,12 @@ function kdtree2d_node_remove(tree, index) {
     } else {
       break;
     }
+    0;
     const node_parent = tree.nodes[node.parent];
     if (node_parent.neg === node_index) {
       node_parent.neg = node_child;
     } else {
+      0;
       node_parent.pos = node_child;
     }
     if (node_child !== KDNODE_UNSET) {
@@ -203,6 +207,7 @@ function kdtree2d_isect_tri_recursive(tree, tri_index, tri_isect, tri_center, bo
           : 4294967295;
     }
   }
+  0;
   return result;
 }
 
@@ -259,8 +264,6 @@ function pf_coord_remove(pf, pi) {
   if (pf.indices === pi) {
     pf.indices = pi.next;
   }
-  pi.index = 4294967295;
-  pi.next = pi.prev = null;
   pf.coords_num -= 1;
 }
 

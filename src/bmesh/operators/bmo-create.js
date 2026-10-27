@@ -225,7 +225,7 @@ function bmo_edgeloop_fill_exec(bm, edges, { mat_nr = 0, use_smooth = false } = 
       v = BM_edge_other_vert(bm, e_next, v);
       e_prev = e_next;
     } while (v !== f_verts[0]);
-    if (BM_face_exists(bm, f_verts) < 0) {
+    if (BM_face_exists(bm, f_verts, f_verts.length) < 0) {
       const f = BM_face_create_ngon_verts(bm, f_verts, f_verts.length, -1, BM_CREATE_NOP, true, false);
       BMO_flag_enable(bm.f, f, ELE_OUT);
       bm.f.mat_nr[f] = mat_nr;

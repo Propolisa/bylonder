@@ -185,6 +185,7 @@ export function BM_face_point_inside_test(bm, f, co) {
   const projverts = new Array(bm.f.len[f]);
   let l_iter = -1;
   let i = 0;
+  0;
   const axis_mat = axis_dominant_v3_to_m3(fno(bm, f));
   const co_2d = mul_v2_m3v3(axis_mat, co);
   for (i = 0, l_iter = bm.f.l_first[f]; i < bm.f.len[f]; i++, l_iter = bm.l.next[l_iter]) {
@@ -214,6 +215,9 @@ export function BM_face_triangulate(
   let f_new = -1;
   let nf_i = 0;
   let ne_i = 0;
+  0;
+  0;
+  0;
   {
     const loops = new Array(bm.f.len[f]);
     const tris_buf = new Array(bm.f.len[f]);
@@ -313,6 +317,7 @@ export function BM_face_triangulate(
       const v_tri = [bm.l.v[ltri[0]], bm.l.v[ltri[1]], bm.l.v[ltri[2]]];
       f_new = BM_face_create_verts(bm, v_tri, 3, f, BM_CREATE_NOP, true);
       l_new = bm.f.l_first[f_new];
+      0;
       if (bm.l.radial_next[l_new] !== l_new) {
         let l_iter = bm.l.radial_next[l_new];
         do {
@@ -367,6 +372,7 @@ export function BM_face_triangulate(
 export function BM_face_as_array_vert_tri(bm, f) {
   const r_verts = [-1, -1, -1];
   let l = bm.f.l_first[f];
+  0;
   r_verts[0] = bm.l.v[l];
   l = bm.l.next[l];
   r_verts[1] = bm.l.v[l];
@@ -378,6 +384,7 @@ export function BM_face_as_array_vert_tri(bm, f) {
 export function BM_face_as_array_vert_quad(bm, f) {
   const r_verts = [-1, -1, -1, -1];
   let l = bm.f.l_first[f];
+  0;
   r_verts[0] = bm.l.v[l];
   l = bm.l.next[l];
   r_verts[1] = bm.l.v[l];
@@ -391,6 +398,7 @@ export function BM_face_as_array_vert_quad(bm, f) {
 export function BM_face_as_array_loop_quad(bm, f) {
   const r_loops = [-1, -1, -1, -1];
   let l = bm.f.l_first[f];
+  0;
   r_loops[0] = l;
   l = bm.l.next[l];
   r_loops[1] = l;

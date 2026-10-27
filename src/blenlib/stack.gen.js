@@ -10,6 +10,7 @@ function stack_get_last_elem(stack) {
 
 function stack_chunk_elem_max_calc(elem_size, chunk_size) {
   const elem_size_min = elem_size * CHUNK_ELEM_MIN;
+  0;
   while (chunk_size <= elem_size_min) {
     chunk_size <<= 1;
   }
@@ -55,6 +56,7 @@ export function BLI_stack_push_r(stack) {
     stack.chunk_curr = chunk;
     stack.chunk_index = 0;
   }
+  0;
   stack.elem_num++;
   return stack_get_last_elem(stack);
 }
@@ -66,12 +68,14 @@ export function BLI_stack_push(stack, src) {
 
 export function BLI_stack_pop(stack) {
   const dst = [];
+  0;
   dst.splice(0, stack.elem_size, ...stack_get_last_elem(stack).slice(0, stack.elem_size));
   BLI_stack_discard(stack);
   return dst;
 }
 
 export function BLI_stack_pop_n_reverse(stack, dst, n) {
+  0;
   dst = dst + stack.elem_size * n;
   while (n--) {
     dst = dst - stack.elem_size;
@@ -81,6 +85,7 @@ export function BLI_stack_pop_n_reverse(stack, dst, n) {
 }
 
 export function BLI_stack_discard(stack) {
+  0;
   stack.elem_num--;
   if (--stack.chunk_index === 18446744073709551615) {
     const chunk_free = stack.chunk_curr;

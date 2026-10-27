@@ -95,6 +95,7 @@ class Driver:
         self.status = {}
         self.home = {}  # name: the module that defines it
         self.followed = set()  # constants whose uses are followed
+        self.needs_found = set()  # what shims call of Blender's, once found
 
     def source(self, rel):
         if rel not in self.sources:
@@ -158,19 +159,22 @@ class Driver:
             self.home.setdefault(name, module)
             if name in self.exports.of(module):
                 self.note(module, 'shimmed', name, self.check_shim(provider, rel, module, name))
-                # What the shim calls of Blender's, found from its declaration like any call.
+                # What the shim calls of Blender's, found from its declaration like any call: from the first file
+                # reaching one of the module's shims that declares it.
                 for need in self.exports.needs(module):
+                    if need in self.needs_found:
+                        continue
                     source = self.source(provider)
                     constant = source.constant_declaration(need)
+                    decl = source.declaration(need) if constant is None else None
+                    where = self.definition_file(decl, source) if decl is not None else None
                     if constant is not None:
                         self.constant(source, module, need, constant)
-                        continue
-                    decl = source.declaration(need)
-                    where = self.definition_file(decl, source) if decl is not None else None
-                    if where:
+                    elif where:
                         queue.append((where[0], need, where[1]))
                     else:
-                        self.note(module, 'missing', need, 'a shim calls it; no definition found')
+                        continue
+                    self.needs_found.add(need)
                 continue
             reason = self.excluded(module, name)
             if reason:
@@ -199,6 +203,9 @@ class Driver:
         for module, name, item in items:
             self.follow(self.sources[item['source']], item['source'], module, item['deps'])
             self.note(module, 'generated', name)
+        for module in {m for m, st in self.status.items() if st['shimmed']}:
+            for need in set(self.exports.needs(module)) - self.needs_found:
+                self.note(module, 'missing', need, 'a shim calls it; no definition found')
         # Root constants again, now that their calls know which functions take bm.
         for rel, name, ref in self.root_constants():
             self.constant(self.source(rel), self.module_of(rel), name, ref, root=True)
@@ -266,7 +273,9 @@ class Driver:
             # Blender's overloads of the name are one JS function: the shim conforms when it takes any of them.
             overloads = [g for g in source.functions if g.spelling == name] or [f]
             wants = [self.ported_params(source, g) for g in overloads]
-            if all(len(want) != len(shim['params']) for want in wants):
+            # A rest parameter takes C's variadic arguments, which the conventions leave out.
+            params = [p for p in shim['params'] if not p.startswith('...')]
+            if all(len(want) != len(params) for want in wants):
                 detail['signature'] = f'Blender ({", ".join(wants[0])}), shim ({", ".join(shim["params"])})'
         return detail or None
 

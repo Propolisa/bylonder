@@ -52,7 +52,7 @@ function remdoubles_createface(bm, f, targetmap) {
   } while ((l_curr = l.next[l_curr]) !== first);
   for (const v of verts) BMO_flag_disable(bm.v, v, VERT_IN_FACE);
   if (bail || edges.length < 3) return null;
-  const existing = BM_face_exists(bm, verts);
+  const existing = BM_face_exists(bm, verts, verts.length);
   if (existing >= 0) return { f: existing, created: false };
   const f_new = BM_face_create(bm, verts, edges, edges.length, f);
   loopsOf(bm, f_new).forEach((lp, i) => BM_elem_attrs_copy(bm.l, loops[i], lp));

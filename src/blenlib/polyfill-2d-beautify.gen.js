@@ -43,10 +43,12 @@ function oedge_cmp(a1, a2) {
   if (x1.e_half < x2.e_half) {
     return -1;
   }
+  0;
   return 0;
 }
 
 function is_boundary_edge(i_a, i_b, coord_last) {
+  0;
   return i_a + 1 === i_b || (i_a === 0 && i_b === coord_last);
 }
 
@@ -58,6 +60,7 @@ export function BLI_polyfill_beautify_quad_rotate_calc_ex(v1, v2, v3, v4, lock_d
     const area_2x_241 = cross_tri_v2(v2, v4, v1);
     const area_2x_123 = cross_tri_v2(v1, v2, v3);
     const area_2x_134 = cross_tri_v2(v1, v3, v4);
+    0;
     r_area = Math.fround(
       Math.fround(
         Math.fround(
@@ -116,6 +119,7 @@ export function BLI_polyfill_edge_calc_rotate_beauty__area(v1, v2, v3, v4, lock_
       let no_scale = 0;
       const no_a = cross_tri_v3(v2, v3, v4);
       const no_b = cross_tri_v3(v2, v4, v1);
+      0;
       let no = add_v3(no_a, no_b);
       if ((no_scale = ((_r0 = len_v3(no)), (no = normalize_v3(no)), _r0)) === 0.0) {
         break;
@@ -234,10 +238,12 @@ export function BLI_polyfill_beautify(coords, coords_num, tris, arena, eheap) {
       }
     }
   }
+  0;
   qsort(order_edges, order_edges_len, 12, oedge_cmp);
   for (let i = 0, base_index = 0; i < order_edges_len; base_index++) {
     const oe_a = order_edges[i++];
     const oe_b = order_edges[i++];
+    0;
     half_edges[oe_a.e_half].e_radial = oe_b.e_half;
     half_edges[oe_b.e_half].e_radial = oe_a.e_half;
     half_edges[oe_a.e_half].base_index = base_index;

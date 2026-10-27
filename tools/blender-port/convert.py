@@ -1364,6 +1364,12 @@ class FunctionPort:
             if not count:
                 return zero_of(elem) or '{}'
             return buffer_of(elem, ' * '.join(count))
+        if name in ('MEM_SIZE_OPTIMAL', '__builtin_expect'):
+            return self.expr(args[0])  # A size hint and a branch hint: the value itself.
+        if name == 'qsort':
+            # qsort(base, n, size, cmp) sorts the first n elements; the comparator takes the elements themselves.
+            base, n, cmp = self.expr(args[0]), self.expr(args[1]), self.expr(args[3])
+            return f'{base}.splice(0, {n}, ...{base}.slice(0, {n}).sort({cmp}))'
         if name == 'bl_port_alloca':
             return buffer_of(pointee(args[0].type), self.expr(args[1]))
         if name == 'memset':

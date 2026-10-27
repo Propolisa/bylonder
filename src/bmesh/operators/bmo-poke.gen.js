@@ -28,9 +28,9 @@ export function bmo_poke_exec(bm, op) {
   const cd_loop_mdisp_offset = CustomData_get_offset(bm.ldata, CD_MDISPS);
   const oiter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
   const f = -1;
-  const offset = BMO_slot_float_get(bm, op.slots_in, 'offset');
-  const use_relative_offset = BMO_slot_bool_get(bm, op.slots_in, 'use_relative_offset');
-  const center_mode = BMO_slot_int_get(bm, op.slots_in, 'center_mode');
+  const offset = BMO_slot_float_get(op.slots_in, 'offset');
+  const use_relative_offset = BMO_slot_bool_get(op.slots_in, 'use_relative_offset');
+  const center_mode = BMO_slot_int_get(op.slots_in, 'center_mode');
   let bm_face_calc_center_fn = null;
   switch (center_mode) {
     case BMOP_POKE_MEDIAN_WEIGHTED:
@@ -43,6 +43,7 @@ export function bmo_poke_exec(bm, op) {
       bm_face_calc_center_fn = BM_face_calc_center_median;
       break;
     default:
+      0;
       return;
   }
   for (;;) {
@@ -51,7 +52,7 @@ export function bmo_poke_exec(bm, op) {
     let l_first = -1;
     let l_center_example = -1;
     let offset_fac = 0;
-    bm_face_calc_center_fn(bm, f, f_center);
+    bm_face_calc_center_fn(f, f_center);
     v_center = BM_vert_create(bm, f_center, -1, BM_CREATE_NOP);
     BMO_flag_enable(bm.v, v_center, ELE_NEW);
     if (use_relative_offset) {

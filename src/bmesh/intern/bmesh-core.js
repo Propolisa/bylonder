@@ -293,7 +293,8 @@ export function BM_faces_join(bm, faces, do_del, want_double) {
 }
 
 // bmesh_kernel_loop_reverse: flips a face's winding; each loop takes the previous loop's edge and radial links.
-export function bmesh_kernel_loop_reverse(bm, f) {
+// port-override: multires displacement is not ported, so its layer offset and flip are taken and ignored.
+export function bmesh_kernel_loop_reverse(bm, f, _cd_loop_mdisp_offset = -1, _use_loop_mdisp_flip = false) {
   const { l } = bm;
   const l_first = bm.f.l_first[f];
   let e_prev = l.e[l.prev[l_first]];

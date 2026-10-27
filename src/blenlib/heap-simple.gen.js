@@ -92,6 +92,7 @@ export function BLI_heapsimple_is_empty(heap) {
 }
 
 export function BLI_heapsimple_pop_min(heap) {
+  0;
   const ptr = heap.tree[0].ptr;
   if (--heap.size) {
     heapsimple_down(heap, 0, heap.tree[heap.size]);

@@ -72,13 +72,14 @@ function bm_loop_build(bm, el_store, v_prev, v, dir) {
   let e_next = -1;
   let v_next = -1;
   const v_first = v;
+  0;
   if (!BM_elem_flag_test(bm.v, v, BM_ELEM_INTERNAL_TAG)) {
     return true;
   }
   while (v >= 0) {
     const node = MEM_new_zeroed('bm_loop_build');
     node.data = v;
-    add_fn(bm, el_store.verts, node);
+    add_fn(el_store.verts, node);
     el_store.len++;
     BM_elem_flag_disable(bm.v, v, BM_ELEM_INTERNAL_TAG);
     const count = (([_r0, e_next] = bm_vert_other_tag(bm, v, v_prev)), _r0);
@@ -110,7 +111,8 @@ export function BM_mesh_edgeloops_find(bm, r_eloops, test_fn, user_data) {
   }
   const edge_stack = BLI_stack_new(8, 'BM_mesh_edgeloops_find');
   for (e of BM_EDGES_OF_MESH(bm)) {
-    if (test_fn(bm, e, user_data)) {
+    0;
+    if (test_fn(e, user_data)) {
       BM_elem_flag_enable(bm.e, e, BM_ELEM_INTERNAL_TAG);
       BM_elem_flag_enable(bm.v, bm.e.v1[e], BM_ELEM_INTERNAL_TAG);
       BM_elem_flag_enable(bm.v, bm.e.v2[e], BM_ELEM_INTERNAL_TAG);
@@ -197,6 +199,7 @@ export function BM_mesh_edgeloops_calc_order(_unused0, eloops, use_normals) {
     const no = eloops_ordered.last.no;
     let len_best_sq = Number.MAX_VALUE;
     if (use_normals) {
+      no;
     }
     for (const el_store of eloops) {
       let len_sq = 0;
@@ -370,6 +373,7 @@ export function BM_edgeloop_expand(bm, el_store, el_store_len, split, split_edge
             const v_split =
               (([_r0, e_split] = BM_edge_split(bm, e_other, split_swap ? node_curr_copy.data : v_other, 0.0)), _r0);
             bm.v.e[v_split] = e_split;
+            EDGE_SPLIT;
             split_edges.add(e_split);
             node_curr_copy.data = v_split;
           }
@@ -384,6 +388,7 @@ export function BM_edgeloop_expand(bm, el_store, el_store_len, split, split_edge
             const v_split =
               (([_r1, e_split] = BM_edge_split(bm, e_other, split_swap ? node_curr_copy.data : v_other, 0.0)), _r1);
             bm.v.e[v_split] = e_split;
+            EDGE_SPLIT;
             split_edges.add(e_split);
             node_curr_copy.data = v_split;
           }
@@ -418,6 +423,7 @@ export function BM_edgeloop_expand(bm, el_store, el_store_len, split, split_edge
             const v_split =
               (([_r2, e_split] = BM_edge_split(bm, e_other, split_swap ? node_curr_copy.data : v_other, 0.0)), _r2);
             bm.v.e[v_split] = e_split;
+            EDGE_SPLIT;
             split_edges.add(e_split);
             node_curr_copy.data = v_split;
           }
@@ -432,6 +438,7 @@ export function BM_edgeloop_expand(bm, el_store, el_store_len, split, split_edge
             const v_split =
               (([_r3, e_split] = BM_edge_split(bm, e_other, split_swap ? node_curr_copy.data : v_other, 0.0)), _r3);
             bm.v.e[v_split] = e_split;
+            EDGE_SPLIT;
             split_edges.add(e_split);
             node_curr_copy.data = v_split;
           }
@@ -445,4 +452,5 @@ export function BM_edgeloop_expand(bm, el_store, el_store_len, split, split_edge
       iter_prev += 1;
     }
   }
+  0;
 }

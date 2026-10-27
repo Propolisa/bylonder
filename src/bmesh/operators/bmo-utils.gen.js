@@ -10,7 +10,7 @@ import { CD_MDISPS } from '../../makesdna/customdata-types.js';
 
 export function bmo_reverse_faces_exec(bm, op) {
   const cd_loop_mdisp_offset = CustomData_get_offset(bm.ldata, CD_MDISPS);
-  const use_loop_mdisp_flip = BMO_slot_bool_get(bm, op.slots_in, 'flip_multires');
+  const use_loop_mdisp_flip = BMO_slot_bool_get(op.slots_in, 'flip_multires');
   const siter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
   const f = -1;
   for (;;) {
@@ -22,18 +22,18 @@ export function bmo_smooth_vert_exec(bm, _unused0, op) {
   const siter = { slot: null, cur: 0, giter: { gh: null, curEntry: null, curBucket: 0 }, val: null, restrictmask: 0 };
   const v = -1;
   let e = -1;
-  const cos = MEM_new_array_uninitialized(BMO_slot_buffer_len(bm, op.slots_in, 'verts'), 'bmo_smooth_vert_exec');
+  const cos = MEM_new_array_uninitialized(BMO_slot_buffer_len(op.slots_in, 'verts'), 'bmo_smooth_vert_exec');
   let co = null;
   let co2 = null;
-  const clip_dist = BMO_slot_float_get(bm, op.slots_in, 'clip_dist');
-  const fac = BMO_slot_float_get(bm, op.slots_in, 'factor');
+  const clip_dist = BMO_slot_float_get(op.slots_in, 'clip_dist');
+  const fac = BMO_slot_float_get(op.slots_in, 'factor');
   let j = 0;
-  const clipx = Number(BMO_slot_bool_get(bm, op.slots_in, 'mirror_clip_x'));
-  const clipy = Number(BMO_slot_bool_get(bm, op.slots_in, 'mirror_clip_y'));
-  const clipz = Number(BMO_slot_bool_get(bm, op.slots_in, 'mirror_clip_z'));
-  const xaxis = Number(BMO_slot_bool_get(bm, op.slots_in, 'use_axis_x'));
-  const yaxis = Number(BMO_slot_bool_get(bm, op.slots_in, 'use_axis_y'));
-  const zaxis = Number(BMO_slot_bool_get(bm, op.slots_in, 'use_axis_z'));
+  const clipx = Number(BMO_slot_bool_get(op.slots_in, 'mirror_clip_x'));
+  const clipy = Number(BMO_slot_bool_get(op.slots_in, 'mirror_clip_y'));
+  const clipz = Number(BMO_slot_bool_get(op.slots_in, 'mirror_clip_z'));
+  const xaxis = Number(BMO_slot_bool_get(op.slots_in, 'use_axis_x'));
+  const yaxis = Number(BMO_slot_bool_get(op.slots_in, 'use_axis_y'));
+  const zaxis = Number(BMO_slot_bool_get(op.slots_in, 'use_axis_z'));
   let i = 0;
   for (;;) {
     co = cos[i];

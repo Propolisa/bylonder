@@ -55,6 +55,8 @@ function recalc_face_normals_find_index(bm, faces, faces_len) {
     const f_cent = BM_face_calc_center_median_weighted(bm, faces[i]);
     cent = madd(cent, f_cent, Math.fround(cent_fac * f_area));
     cent_area_accum = Math.fround(cent_area_accum + f_area);
+    0;
+    0;
   }
   if (cent_area_accum !== 0.0) {
     cent = mul_v3_fl(cent, Math.fround(1.0 / cent_area_accum));

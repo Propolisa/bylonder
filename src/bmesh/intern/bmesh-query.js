@@ -103,24 +103,6 @@ export function BM_face_vert_share_loop(bm, f, v) {
 }
 export const BM_vert_in_face = (bm, v, f) => BM_face_vert_share_loop(bm, f, v) >= 0;
 
-// The face with exactly these verts in this cyclic order, in either winding, or -1.
-export function BM_face_exists(bm, verts) {
-  const { l } = bm, len = verts.length;
-  for (const e of BM_EDGES_OF_VERT(bm, verts[0])) {
-    const first = bm.e.l[e];
-    if (first < 0) continue;
-    let r = first;
-    do {
-      if (l.v[r] !== verts[0] || bm.f.len[l.f[r]] !== len) continue;
-      let i_walk = 2;
-      const dir = l.v[l.next[r]] === verts[1] ? l.next : l.v[l.prev[r]] === verts[1] ? l.prev : null;
-      if (dir) for (let walk = dir[dir[r]]; i_walk !== len && l.v[walk] === verts[i_walk]; walk = dir[walk]) i_walk++;
-      if (i_walk === len) return l.f[r];
-    } while ((r = l.radial_next[r]) !== first);
-  }
-  return -1;
-}
-
 // The two loops (BM_edge_loop_pair) or faces (BM_edge_face_pair) of a manifold edge, or null.
 export function BM_edge_loop_pair(bm, e) {
   const la = bm.e.l[e];

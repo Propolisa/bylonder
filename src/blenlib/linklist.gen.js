@@ -22,7 +22,7 @@ export function BLI_linklist_prepend_pool(listp, ptr, mempool) {
 export function BLI_linklist_pop_pool(listp, mempool) {
   const link = listp.link;
   const next = listp.next;
-  listp = BLI_mempool_free(mempool, listp);
+  BLI_mempool_free(mempool, listp);
   listp = next;
   return [link, listp];
 }

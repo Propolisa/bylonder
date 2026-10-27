@@ -221,6 +221,8 @@ function nearly_parallel(d1, d2) {
 }
 
 function nearly_parallel_normalized(d1, d2) {
+  d1;
+  d2;
   const direction_dot = dot_v3(d1, d2);
   return Math.abs(Math.fround(Math.abs(direction_dot)) - 1.0) <= BEVEL_EPSILON_ANG_DOT;
 }
@@ -332,6 +334,7 @@ function find_other_end_edge_half(bp, e) {
   if (bvo) {
     r_bvother = bvo;
     const eother = find_edge_half(bvo, e.e);
+    0;
     return [eother, r_bvother];
   }
   r_bvother = null;
@@ -405,6 +408,7 @@ function update_uv_vert_map(bp, uv_face, bv, nv_bv_map) {
       }
       const orig_v = nv_bv_map ? nv_bv_map.get(bm.l.v[l]) : bv;
       const orig_l = BM_face_vert_share_loop(bm, uv_face.attached_frep, orig_v);
+      0;
       let is_bucket_found = false;
       let l2 = -1;
       for (l2 of BM_LOOPS_OF_VERT(bm, bm.l.v[l])) {
@@ -416,6 +420,7 @@ function update_uv_vert_map(bp, uv_face, bv, nv_bv_map) {
           continue;
         }
         const orig_l2 = BM_face_vert_share_loop(bm, uv_face2.attached_frep, orig_v);
+        0;
         let is_orig_uv_verts_connected = false;
         const orig_uv_vert_buckets = uv_vert_map.get(orig_v);
         for (const orig_uv_vert_bucket of orig_uv_vert_buckets) {
@@ -446,6 +451,7 @@ function update_uv_vert_map(bp, uv_face, bv, nv_bv_map) {
 
 function determine_uv_vert_connectivity(bp, bm, v) {
   const num_uv_layers = CustomData_number_of_layers(bm.ldata, CD_PROP_FLOAT2);
+  0;
   for (let i = 0; i < num_uv_layers; ++i) {
     const uv_data_offset = CustomData_get_n_offset(bm.ldata, CD_PROP_FLOAT2, i);
     const uv_vert_buckets = [];
@@ -470,12 +476,14 @@ function determine_uv_vert_connectivity(bp, bm, v) {
         uv_vert_buckets.push(new Set([l]));
       }
     }
+    0;
     bp.uv_vert_maps[i].set(v, uv_vert_buckets);
   }
 }
 
 function bevel_merge_uvs(bp, bm) {
   const num_uv_layers = CustomData_number_of_layers(bm.ldata, CD_PROP_FLOAT2);
+  0;
   for (let i = 0; i < num_uv_layers; ++i) {
     const uv_data_offset = CustomData_get_n_offset(bm.ldata, CD_PROP_FLOAT2, i);
     for (const uv_vert_buckets of bp.uv_vert_maps[i].values()) {
@@ -556,6 +564,7 @@ function bev_create_ngon(bp, bm, vert_arr, totv, face_arr, facerep, snap_edge_ar
       for (l of BM_LOOPS_OF_FACE(bm, f)) {
         let interp_f = -1;
         if (face_arr) {
+          0;
           interp_f = face_arr[i];
         } else {
           interp_f = facerep;
@@ -620,10 +629,12 @@ function contig_ldata_across_edge(bm, e, f1, f2) {
   if (v1 === v2) {
     return false;
   }
+  0;
   const lv1f1 = lef1;
   const lv2f1 = bm.l.next[lef1];
   const lv1f2 = bm.l.next[lef2];
   const lv2f2 = lef2;
+  0;
   for (let i = 0; i < bm.ldata.totlayer; i++) {
     if (CustomData_layer_has_math(bm.ldata, i)) {
       if (!contig_ldata_across_loops(bm, lv1f1, lv1f2, i) || !contig_ldata_across_loops(bm, lv2f1, lv2f2, i)) {
@@ -711,6 +722,7 @@ function math_layer_info_init(bp, bm) {
     if (face_component[f] === -1 && !in_stack[f]) {
       let stack_top = 0;
       current_component++;
+      0;
       stack[stack_top] = BM_face_at_index(bm, f);
       in_stack[f] = true;
       while (stack_top >= 0) {
@@ -733,6 +745,7 @@ function math_layer_info_init(bp, bm) {
               }
               if (contig_ldata_across_edge(bm, bme, bmf, bmf_other)) {
                 stack_top++;
+                0;
                 stack[stack_top] = bmf_other;
                 in_stack[bmf_other_index] = true;
               }
@@ -766,6 +779,7 @@ function math_layer_info_init(bp, bm) {
       bot_face_component = face_component[f];
     }
   }
+  0;
   swap_face_components(face_component, totface, face_component[0], top_face_component);
   if (bot_face_component !== top_face_component) {
     if (bot_face_component === 0) {
@@ -800,6 +814,7 @@ function choose_rep_face(bp, face, nfaces) {
     value_vecs[f][value_index++] = cent[2];
     value_vecs[f][value_index++] = cent[0];
     value_vecs[f][value_index++] = cent[1];
+    0;
   }
   let best_f = -1;
   for (let value_index = 0; num_viable > 1 && value_index < VEC_VALUE_LEN; value_index++) {
@@ -911,6 +926,7 @@ function point_between_edges(bm, co, v, f, e1, e2) {
 }
 
 function edge_edge_angle_less_than_180(bm, e1, e2, f) {
+  0;
   let v = -1;
   let v1 = -1;
   let v2 = -1;
@@ -931,6 +947,7 @@ function edge_edge_angle_less_than_180(bm, e1, e2, f) {
     v1 = bm.e.v1[e1];
     v2 = bm.e.v1[e2];
   } else {
+    0;
     return false;
   }
   const dir1 = sub_v3(vco(bm, v1), vco(bm, v));
@@ -1264,6 +1281,7 @@ function offset_on_edge_between(bp, e1, e2, emid, v) {
   let meetco = [0, 0, 0];
   let r_sinratio;
   let retval = false;
+  0;
   let ang1 = 0;
   let ang2 = 0;
   let meet1 = [0, 0, 0];
@@ -1567,6 +1585,7 @@ function make_unit_cube_map(va, vb, vc, vd) {
 }
 
 function superellipse_co(x, r, rbig) {
+  0;
   if (rbig) {
     return Math.pow(1.0 - Math.pow(x, r), 1.0 / r);
   }
@@ -1583,8 +1602,10 @@ function get_profile_point(bp, pro, i, nseg) {
     }
   } else {
     if (nseg === bp.seg) {
+      0;
       r_co = pro.prof_co.slice(3 * i, 3 * i + 3).slice(0, 3);
     } else {
+      0;
       const subsample_spacing = Math.trunc(bp.pro_spacing.seg_2 / nseg);
       r_co = pro.prof_co_2.slice(3 * i * subsample_spacing, 3 * i * subsample_spacing + 3).slice(0, 3);
     }
@@ -1685,6 +1706,7 @@ function snap_to_superellipsoid(co, super_r, midline) {
   let y = b;
   let z = c;
   if (r === PRO_SQUARE_R || r === PRO_SQUARE_IN_R) {
+    0;
     z = 0.0;
     x = Math.fround(Math.min(1.0, x));
     y = Math.fround(Math.min(1.0, y));
@@ -1786,6 +1808,7 @@ function check_edge_data_seam_sharp_edges(bm, bv, flag) {
 }
 
 function bevel_extend_edge_data_ex(bm, bv, flag) {
+  0;
   const vm = bv.vmesh;
   let bcur = bv.vmesh.boundstart;
   let start = bcur;
@@ -2052,6 +2075,7 @@ function calculate_vm_profiles(bp, bv, vm) {
 function build_boundary_vertex_only(bp, bv, construct) {
   const { bm } = bp;
   const vm = bv.vmesh;
+  0;
   const efirst = bv.edges[0];
   let e = efirst;
   do {
@@ -2162,6 +2186,7 @@ function build_boundary_terminal_edge(bp, bv, efirst, construct) {
   }
   if (bv.edgecount >= 3) {
     const bndv = vm.boundstart;
+    0;
     set_profile_params(bp, bv, bndv);
     move_profile_plane(bm, bndv, bv.v);
   }
@@ -2196,6 +2221,7 @@ function adjust_miter_coords(bp, bv, emiter) {
     v2 = v1.next;
     v3 = v2.next;
   } else {
+    0;
     v2 = null;
     v3 = v1.next;
   }
@@ -2266,6 +2292,7 @@ function build_boundary(bp, bv, construct) {
   }
   const vm = bv.vmesh;
   const efirst = next_bev(bv, null);
+  0;
   if (bv.selcount === 1) {
     build_boundary_terminal_edge(bp, bv, efirst, construct);
     return;
@@ -2275,6 +2302,7 @@ function build_boundary(bp, bv, construct) {
   let emiter = null;
   let e = efirst;
   do {
+    0;
     let eon = null;
     let in_plane = 0;
     let not_in_plane = 0;
@@ -2624,6 +2652,7 @@ function adjust_offsets(bp, bm) {
         if (!enext) {
           break;
         }
+        0;
         const vnext = enext.leftv;
         v.adjchain = vnext;
         vchainend = vnext;
@@ -2727,6 +2756,7 @@ function mesh_vert_canon(vm, i, j, k) {
   const ns = vm.seg;
   const ns2 = Math.trunc(ns / 2);
   const odd = ns % 2;
+  0;
   if (!odd && j === ns2 && k === ns2) {
     return mesh_vert(vm, 0, j, k);
   }
@@ -2939,6 +2969,7 @@ function cubic_subdiv(bp, vm_in) {
   const n_boundary = vm_in.count;
   const ns_in = vm_in.seg;
   const ns_in2 = Math.trunc(ns_in / 2);
+  0;
   const ns_out = 2 * ns_in;
   const vm_out = new_adj_vmesh(bp.mem_arena, n_boundary, ns_out, vm_in.boundstart);
   for (let i = 0; i < n_boundary; i++) {
@@ -3397,6 +3428,7 @@ function get_incident_edges(bm, f, v) {
 }
 
 function find_closer_edge(bm, co, e1, e2) {
+  0;
   const dsq1 = dist_squared_to_line_segment_v3(co, vco(bm, bm.e.v1[e1]), vco(bm, bm.e.v2[e1]));
   const dsq2 = dist_squared_to_line_segment_v3(co, vco(bm, bm.e.v1[e2]), vco(bm, bm.e.v2[e2]));
   if (dsq1 < dsq2) {
@@ -3412,6 +3444,7 @@ function find_face_internal_boundverts(bm, bv, f) {
   }
   let n_internal = 0;
   const vm = bv.vmesh;
+  0;
   let v = vm.boundstart;
   do {
     if (BM_face_point_inside_test(bm, f, v.nv.co)) {
@@ -3434,6 +3467,8 @@ function projected_boundary_area(bm, bv, f) {
   const proj_co = Array.from({ length: vm.count }, () => [0, 0]);
   const axis_mat = axis_dominant_v3_to_m3(fno(bm, f));
   [e1, e2] = get_incident_edges(bm, f, bv.v);
+  0;
+  0;
   let v = vm.boundstart;
   let i = 0;
   let unsnapped = [null, null, null];
@@ -3462,6 +3497,7 @@ function projected_boundary_area(bm, bv, f) {
 }
 
 function is_bad_uv_poly(bm, bv, frep) {
+  0;
   const area = projected_boundary_area(bm, bv, frep);
   return area < BEVEL_EPSILON_BIG;
 }
@@ -3807,6 +3843,7 @@ function snap_edges_for_vmesh_vert(
   frep_beats_next,
 ) {
   const r_snap_edges = [-1, -1, -1, -1];
+  0;
   for (let corner = 0; corner < 4; corner++) {
     r_snap_edges[corner] = -1;
     if (ns % 2 === 0) {
@@ -3860,6 +3897,7 @@ function bevel_build_rings(bp, bm, bv, vpipe) {
   const ns = bv.vmesh.seg;
   const ns2 = Math.trunc(ns / 2);
   const odd = ns % 2;
+  0;
   let vm1 = null;
   if (bp.pro_super_r === PRO_SQUARE_R && bv.selcount >= 3 && !odd && bp.profile_type !== BEVEL_PROFILE_CUSTOM) {
     vm1 = square_out_adj_vmesh(bp, bv);
@@ -3947,6 +3985,7 @@ function bevel_build_rings(bp, bm, bv, vpipe) {
         const bmv3 = mesh_vert(vm, i, j + 1, k + 1).v;
         const bmv4 = mesh_vert(vm, i, j + 1, k).v;
         const bmvs = [bmv1, bmv2, bmv3, bmv4];
+        0;
         const fr = [-1, -1, -1, -1];
         let se = [-1, -1, -1, -1];
         if (bp.affect_type === BEVEL_AFFECT_VERTICES) {
@@ -4173,6 +4212,7 @@ function bevel_build_poly(bp, bm, bv) {
 
 function bevel_build_trifan(bp, bm, bv) {
   let _r0;
+  0;
   let f = bevel_build_poly(bp, bm, bv);
   if (f < 0) {
     return;
@@ -4181,6 +4221,7 @@ function bevel_build_trifan(bp, bm, bv) {
   const v_fan = bm.l.v[l_fan];
   while (bm.f.len[f] > 3) {
     let l_new = -1;
+    0;
     const f_new = (([_r0, l_new] = BM_face_split(bm, f, l_fan, bm.l.next[bm.l.next[l_fan]], -1, false)), _r0);
     flag_out_edge(bm, bm.l.e[l_new]);
     if (bm.f.len[f_new] > bm.f.len[f]) {
@@ -4192,6 +4233,7 @@ function bevel_build_trifan(bp, bm, bv) {
       } else if (bm.l.v[bm.l.prev[l_new]] === v_fan) {
         l_fan = bm.l.prev[l_new];
       } else {
+        0;
       }
     } else {
       if (bm.l.v[l_fan] === v_fan) {
@@ -4200,6 +4242,7 @@ function bevel_build_trifan(bp, bm, bv) {
       } else if (bm.l.v[bm.l.prev[l_fan]] === v_fan) {
         l_fan = bm.l.prev[l_fan];
       } else {
+        0;
       }
     }
     record_face_kind(bp, f_new, F_VERT);
@@ -4208,6 +4251,7 @@ function bevel_build_trifan(bp, bm, bv) {
 
 function bevel_vert_two_edges(bp, bm, bv) {
   const vm = bv.vmesh;
+  0;
   let v1 = mesh_vert(vm, 0, 0, 0).v;
   let v2 = mesh_vert(vm, 1, 0, 0).v;
   const ns = vm.seg;
@@ -4233,9 +4277,11 @@ function bevel_vert_two_edges(bp, bm, bv) {
   }
   if (Number(BM_vert_face_check(bm, bv.v)) === Number(false)) {
     const e_eg = bv.edges[0].e;
+    0;
     for (let k = 0; k < ns; k++) {
       v1 = mesh_vert(vm, 0, 0, k).v;
       v2 = mesh_vert(vm, 0, 0, k + 1).v;
+      0;
       const bme = BM_edge_create(bm, v1, v2, e_eg, BM_CREATE_NO_DOUBLE);
       if (bme >= 0) {
         flag_out_edge(bm, bme);
@@ -4375,6 +4421,9 @@ function bevel_edge_order_extend(bm, bv, i) {
   const j = i;
   for (let sucindex = 0; sucindex < nsucs; sucindex++) {
     const nextbme = sucs[sucindex];
+    0;
+    0;
+    0;
     bv.edges[j + 1].e = nextbme;
     BM_BEVEL_EDGE_TAG_ENABLE(bm, nextbme);
     const tryj = bevel_edge_order_extend(bm, bv, j + 1);
@@ -4392,6 +4441,7 @@ function bevel_edge_order_extend(bm, bv, i) {
   }
   if (bestj > j) {
     for (let k = j + 1; k <= bestj; k++) {
+      0;
       bv.edges[k].e = save_path[k - (j + 1)];
       BM_BEVEL_EDGE_TAG_ENABLE(bm, bv.edges[k].e);
     }
@@ -4445,6 +4495,7 @@ function fast_bevel_edge_order(bm, bv) {
 function find_bevel_edge_order(bm, bv, first_bme) {
   const ntot = bv.edgecount;
   for (let i = 0; ; ) {
+    0;
     bv.edges[i].e = first_bme;
     BM_BEVEL_EDGE_TAG_ENABLE(bm, first_bme);
     if (i === 0 && fast_bevel_edge_order(bm, bv)) {
@@ -4475,6 +4526,7 @@ function find_bevel_edge_order(bm, bv, first_bme) {
     const e2 = i === bv.edgecount - 1 ? bv.edges[0] : bv.edges[i + 1];
     const bme = e.e;
     const bme2 = e2.e;
+    0;
     if (e.fnext >= 0 || e2.fprev >= 0) {
       continue;
     }
@@ -4504,6 +4556,7 @@ function bevel_vert_construct(bm, bp, v) {
     const face_count = BM_edge_face_count(bm, bme);
     BM_BEVEL_EDGE_TAG_DISABLE(bm, bme);
     if (BM_elem_flag_test(bm.e, bme, BM_ELEM_TAG) && bp.affect_type !== BEVEL_AFFECT_VERTICES) {
+      0;
       nsel++;
       if (first_bme < 0) {
         first_bme = bme;
@@ -4732,6 +4785,7 @@ function bevel_vert_construct(bm, bp, v) {
           break;
         }
         default: {
+          0;
           bv.edges[e_i].offset_l_spec = bp.offset;
           break;
         }
@@ -4801,9 +4855,11 @@ function bevel_vert_construct(bm, bp, v) {
     let i = 0;
     for (bme of BM_EDGES_OF_VERT(bm, v)) {
       if (BM_edge_is_wire(bm, bme)) {
+        0;
         bv.wire_edges[i++] = bme;
       }
     }
+    0;
   }
   return bv;
 }
@@ -4821,8 +4877,10 @@ function bev_rebuild_polygon(bm, bp, f) {
       const bv = find_bevvert(bp, bm.l.v[l]);
       const vm = bv.vmesh;
       const e = find_edge_half(bv, bm.l.e[l]);
+      0;
       const bme = e.e;
       const eprev = find_edge_half(bv, bm.l.e[lprev]);
+      0;
       let go_ccw = false;
       if (e.prev === eprev) {
         if (eprev.prev === e) {
@@ -4857,6 +4915,7 @@ function bev_rebuild_polygon(bm, bp, f) {
           on_profile_start = true;
         }
       }
+      0;
       let v = vstart;
       if (!on_profile_start) {
         vv.push(v.nv.v);
@@ -4924,9 +4983,11 @@ function bev_rebuild_polygon(bm, bp, f) {
   if (do_rebuild) {
     const n = vv.length;
     const f_new = bev_create_ngon(bp, bm, vv, n, null, f, null, -1, nv_bv_map, -1, true);
+    0;
     let bme_prev = ee[n - 1];
     for (let k = 0; k < n; k++) {
       const bme_new = BM_edge_exists(bm, vv[k], vv[(k + 1) % n]);
+      0;
       if (ee[k] !== bme_new) {
         BM_elem_attrs_copy(bm.e, ee[k], bme_new);
         if (k < n - 1 && ee[k] === ee[k + 1]) {
@@ -5044,6 +5105,7 @@ function weld_cross_attrs_copy(bm, bv, vm, vmindex, e) {
       break;
     }
   }
+  0;
   const disable_seam =
     BM_elem_flag_test(bm.e, bme_prev, BM_ELEM_SEAM) !== BM_elem_flag_test(bm.e, bme_next, BM_ELEM_SEAM);
   const enable_smooth =
@@ -5051,6 +5113,7 @@ function weld_cross_attrs_copy(bm, bv, vm, vmindex, e) {
   const nseg = e.seg;
   for (let i = 0; i < nseg; i++) {
     const bme = BM_edge_exists(bm, mesh_vert(vm, vmindex, 0, i).v, mesh_vert(vm, vmindex, 0, i + 1).v);
+    0;
     BM_elem_attrs_copy(bm.e, bme_prev, bme);
     if (disable_seam) {
       BM_elem_flag_disable(bm.e, bme, BM_ELEM_SEAM);
@@ -5068,13 +5131,17 @@ function bevel_build_edge_polygons(bm, bp, bme) {
   }
   const bv1 = find_bevvert(bp, bm.e.v1[bme]);
   const bv2 = find_bevvert(bp, bm.e.v2[bme]);
+  0;
   const e1 = find_edge_half(bv1, bme);
   const e2 = find_edge_half(bv2, bme);
+  0;
   const nseg = e1.seg;
+  0;
   const bmv1 = e1.leftv.nv.v;
   const bmv4 = e1.rightv.nv.v;
   const bmv2 = e2.rightv.nv.v;
   const bmv3 = e2.leftv.nv.v;
+  0;
   const f1 = e1.fprev;
   const f2 = e1.fnext;
   const faces = [f1, f1, f2, f2];
@@ -5154,6 +5221,7 @@ function bevel_build_edge_polygons(bm, bp, bme) {
   }
   const bme1 = BM_edge_exists(bm, bmv1, bmv2);
   const bme2 = BM_edge_exists(bm, bmv3, bmv4);
+  0;
   BM_elem_attrs_copy(bm.e, bme, bme1);
   BM_elem_attrs_copy(bm.e, bme, bme2);
   if (bevvert_is_weld_cross(bv1)) {
@@ -5819,6 +5887,7 @@ export function BM_mesh_bevel(
   }
   for (v of BM_VERTS_OF_MESH(bm)) {
     if (BM_elem_flag_test(bm.v, v, BM_ELEM_TAG)) {
+      0;
       uv_vert_map_pop(bp, v);
       BM_vert_kill(bm, v);
     }

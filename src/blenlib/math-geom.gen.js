@@ -171,6 +171,7 @@ export function closest_to_plane_v3(plane, pt) {
 
 export function closest_to_plane_normalized_v3(plane, pt) {
   const side = plane_point_side_v3(plane, pt);
+  plane;
   const r_close = madd(pt, plane, -side);
   return r_close;
 }
@@ -281,17 +282,27 @@ export function line_point_factor_v2(p, l1, l2) {
 
 export function axis_dominant_v3_to_m3(normal) {
   let r_mat = Array.from({ length: 3 }, () => [0, 0, 0]);
+  normal;
   r_mat[2] = normal.slice(0, 3);
   [r_mat[0], r_mat[1]] = ortho_basis_v3v3_v3(r_mat[2]);
+  r_mat[0];
+  r_mat[1];
   r_mat = transpose_m3(r_mat);
+  0;
+  0;
   return r_mat;
 }
 
 export function axis_dominant_v3_to_m3_negate(normal) {
   let r_mat = Array.from({ length: 3 }, () => [0, 0, 0]);
+  normal;
   r_mat[2] = negate_v3(normal);
   [r_mat[0], r_mat[1]] = ortho_basis_v3v3_v3(r_mat[2]);
+  r_mat[0];
+  r_mat[1];
   r_mat = transpose_m3(r_mat);
+  0;
+  0;
   return r_mat;
 }
 
@@ -457,6 +468,7 @@ export function ortho_basis_v3v3_v3(n) {
   const f = len_squared_v2(n);
   if (f > eps) {
     const d = Math.fround(1.0 / Math.fround(Math.sqrt(f)));
+    0;
     r_n1[0] = Math.fround(n[1] * d);
     r_n1[1] = Math.fround(-n[0] * d);
     r_n1[2] = 0.0;
@@ -471,8 +483,10 @@ export function ortho_basis_v3v3_v3(n) {
   return [r_n1, r_n2];
 }
 
-export function ortho_v3_v3(out, v) {
+export function ortho_v3_v3(v) {
+  const out = [0, 0, 0];
   const axis = axis_dominant_v3_single(v);
+  0;
   switch (axis) {
     case 0:
       out[0] = Math.fround(-v[1] - v[2]);
@@ -497,6 +511,7 @@ export function rotate_normalized_v3_v3v3fl(p, axis, angle) {
   const out = [0, 0, 0];
   const costheta = Math.fround(Math.cos(angle));
   const sintheta = Math.fround(Math.sin(angle));
+  axis;
   out[0] = Math.fround(
     Math.fround(
       Math.fround(

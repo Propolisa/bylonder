@@ -5,7 +5,6 @@ import { power_of_2_max_u } from './math-geom.js';
 const POISON_REDZONE_SIZE = 0;
 const FREEWORD = 8 > 4 ? MAKE_ID_8(101, 101, 114, 102, 102, 114, 101, 101) : MAKE_ID(101, 102, 102, 101);
 const USEDWORD = MAKE_ID(117, 115, 101, 100);
-const mempool_debug_memset = false;
 const MEMPOOL_ELEM_SIZE_MIN = 8 * 2;
 const CHUNK_OVERHEAD = 8 + 8;
 
@@ -45,6 +44,7 @@ function mempool_chunk_add(pool, mpchunk, last_tail) {
   if (pool.chunk_tail) {
     pool.chunk_tail.next = mpchunk;
   } else {
+    0;
     pool.chunks = mpchunk;
   }
   mpchunk.next = null;
@@ -101,12 +101,10 @@ export function BLI_mempool_create(esize, elem_num, pchunk, flag) {
   pool.chunk_tail = null;
   pool.esize = esize;
   {
+    0;
     pchunk = Math.trunc((power_of_2_max_u(pchunk * esize) - CHUNK_OVERHEAD) / esize);
   }
   pool.csize = esize * pchunk;
-  {
-    const final_size = MEM_SIZE_OVERHEAD + 8 + pool.csize;
-  }
   pool.pchunk = pchunk;
   pool.flag = flag;
   pool.free = null;
@@ -123,24 +121,6 @@ export function BLI_mempool_create(esize, elem_num, pchunk, flag) {
 
 export function BLI_mempool_free(pool, addr) {
   const newhead = addr;
-  {
-    let chunk = null;
-    let found = false;
-    for (chunk = pool.chunks; chunk; chunk = chunk.next) {
-      if (
-        (undefined /*FIX StmtExpr: ARRAY_HAS_ITEM((char *)addr, (char *)CHUNK_DATA(chunk), pool->csize)*/,
-        addr - CHUNK_DATA(chunk) < pool.csize)
-      ) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-    }
-  }
-  if (mempool_debug_memset) {
-    undefined /*FIX memset: memset(addr, 255, pool->esize - POISON_REDZONE_SIZE)*/;
-  }
   if (pool.flag & 1) {
     newhead.freeword = FREEWORD;
   }
@@ -164,15 +144,10 @@ export function BLI_mempool_free(pool, addr) {
     curnode = prev;
     curnode.next = null;
   }
-  return addr;
-}
-
-export function BLI_mempool_len(pool) {
-  const ret = pool.totused;
-  return ret;
 }
 
 export function BLI_mempool_iternew(pool, iter) {
+  0;
   iter.pool = pool;
   iter.curchunk = pool.chunks;
   iter.curindex = 0;

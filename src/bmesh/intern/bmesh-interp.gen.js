@@ -70,9 +70,6 @@ export function BM_data_interp_from_verts(bm, v_src_1, v_src_2, v_dst, fac) {
 }
 
 function compute_mdisp_quad(bm, l, l_f_center) {
-  {
-    const cent = BM_face_calc_center_median(bm, bm.l.f[l]);
-  }
   const p = mid_v3(vco(bm, bm.l.v[bm.l.prev[l]]), vco(bm, bm.l.v[l]));
   const n = mid_v3(vco(bm, bm.l.v[bm.l.next[l]]), vco(bm, bm.l.v[l]));
   const v1 = l_f_center.slice(0, 3);
@@ -345,10 +342,11 @@ export function BM_loop_interp_from_face(bm, l_dst, f_src, do_vertex, do_multire
   const cos_2d = cos_2d_buf;
   let axis_dominant = [0, 0, 0];
   if (!is_zero_v3(fno(bm, f_src))) {
+    0;
     axis_dominant = fno(bm, f_src).slice(0, 3);
   } else {
     const vec = BM_face_calc_tangent_auto(bm, f_src);
-    axis_dominant = ortho_v3_v3(axis_dominant, vec);
+    axis_dominant = ortho_v3_v3(vec);
     axis_dominant = normalize_v3(axis_dominant);
   }
   const axis_mat = axis_dominant_v3_to_m3(axis_dominant);

@@ -39,6 +39,7 @@ function ghash_buckets_resize(gh, nbuckets) {
   const buckets_old = gh.buckets;
   const nbuckets_old = gh.nbuckets;
   let i = 0;
+  0;
   gh.nbuckets = nbuckets;
   const buckets_new = MEM_new_array_zeroed(gh.nbuckets, 'ghash_buckets_resize');
   if (buckets_old) {
@@ -91,6 +92,8 @@ function ghash_buckets_expand(gh, nentries, user_defined) {
 
 function ghash_insert_ex(gh, key, val, bucket_index) {
   const e = BLI_mempool_alloc(gh.entrypool);
+  0;
+  0;
   e.e.next = gh.buckets[bucket_index];
   e.e.key = key;
   e.val = val;
