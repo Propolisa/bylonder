@@ -6,11 +6,14 @@
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
 import { drawMenu, runs } from '../interface/ui-layout.js';
 import { rna } from '../../makesrna/rna.js';
+import { blenderKeys } from '../../windowmanager/keyconfig.js';
 import { runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { EditMesh } from '../../bmesh/bmesh-wasm.js';
 import { primitive_add } from '../mesh/editmesh-add.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../../bmesh/intern/bmesh-marking.js';
 
+// The keymaps an Edit Mode 3D View's handlers run, in order.
+const KEYMAPS = ['Mesh', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 const MENUS = Object.fromEntries(Object.entries(spaceView3d).filter(([name]) => name.includes('_MT_')));
 
 export function editMeshMenus(api) {
@@ -51,7 +54,7 @@ export function editMeshMenus(api) {
     run: (idname, props) => (actions[idname] ? actions[idname](props) : api.exec(idname, props)),
     supported: (idname) => !!actions[idname] || runsMeshOperator(idname),
     poll: (idname) => !!actions[idname] || api.edit().poll(idname),
-    keys: api.keys,
+    keys: (idname, props) => api.keys(idname, props) ?? blenderKeys(KEYMAPS, idname, props),
     enumItems: (idname, prop) => api.edit().enumItems(idname, prop),
   };
   const draw = (idname) => () => drawMenu(idname, ui);

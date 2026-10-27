@@ -145,10 +145,12 @@ const registry = {
   invoke(id) { this.actions.find((a) => a.id === id).run(); },
 };
 registerObjectOperators(registry);
-const objectMenu = drawMenu('VIEW3D_MT_object', menuUI({ menus: menuClasses(spaceView3d), context, prop: propBinding(host) }));
+const keymaps = () => ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
+const objectMenu = drawMenu('VIEW3D_MT_object', menuUI({ menus: menuClasses(spaceView3d), context, prop: propBinding(host), keymaps }));
 const entry = (items, label) => items.find((item) => item.label === label);
 assert.equal(entry(objectMenu, 'Delete').keys, 'X');
 assert.equal(entry(objectMenu, 'Delete Global').enabled(), false, 'use_global is not run: shown, greyed out');
+assert.deepEqual(['Join', 'Delete Global', 'Apply', 'Link/Transfer Data'].map((label) => entry(objectMenu, label).keys), ['Ctrl J', 'Shift X', 'Ctrl A', 'Ctrl L'], "shortcuts from Blender's keymap");
 assert.equal(entry(objectMenu, 'Join').enabled(), false, 'what Bylonder lacks is shown, greyed out');
 const parentMenu = entry(objectMenu, 'Parent').items();
 entry(parentMenu, 'Object').run();

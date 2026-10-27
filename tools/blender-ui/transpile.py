@@ -52,10 +52,24 @@ def fetch(path):
     return open(cache).read()
 
 
+# The modules Blender's scripts import that Bylonder has: its bpy and mathutils (here), and Transcrypt's math.
+IMPORTABLE = {'bpy', 'mathutils', 'math'}
+
+
+def defined_name(node):
+    """The name a module-level class, function or single-name assignment defines."""
+    if isinstance(node, (ast.ClassDef, ast.FunctionDef)):
+        return node.name
+    if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        return node.targets[0].id
+    return None
+
+
 def extract(source, patterns):
-    """The module's bpy imports, then the classes matching patterns with what they use from the module, in its order."""
+    """The module's imports Bylonder has, then the classes and functions matching patterns with what they use from the
+    module (constants too), in its order."""
     tree = ast.parse(source)
-    defined = {node.name: node for node in tree.body if isinstance(node, (ast.ClassDef, ast.FunctionDef))}
+    defined = {defined_name(node): node for node in tree.body if defined_name(node)}
     wanted, todo = set(), [name for name in defined if any(fnmatch.fnmatchcase(name, p) for p in patterns)]
     while todo:
         name = todo.pop()
@@ -64,15 +78,77 @@ def extract(source, patterns):
         wanted.add(name)
         todo += [n.id for n in ast.walk(defined[name]) if isinstance(n, ast.Name) and n.id in defined]
     imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
-               and all(alias.name.split('.')[0] == 'bpy' for alias in node.names if isinstance(node, ast.Import))
-               and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] == 'bpy')]
-    nodes = [node for node in tree.body if getattr(node, 'name', None) in wanted]
+               and all(alias.name.split('.')[0] in IMPORTABLE for alias in node.names if isinstance(node, ast.Import))
+               and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] in IMPORTABLE)]
+    nodes = [node for node in tree.body if defined_name(node) in wanted]
     # Only the imported names the taken code uses.
     used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
     for node in imports:
         node.names = [alias for alias in node.names if (alias.asname or alias.name).split('.')[0] in used]
     body = [node for node in imports if node.names] + nodes
-    return ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
+    source = ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
+    rewritten = ast.unparse(Unpacking().visit(ast.parse(source)))
+    return rewritten + (UNPACKING_HELPERS if rewritten != source else '')
+
+
+class Unpacking(ast.NodeTransformer):
+    """Unpacking in displays ({**a, 'k': v}, [*a, b]) and calls, which Transcrypt cannot compile, as calls to the
+    helpers UNPACKING_HELPERS defines."""
+    def visit_Dict(self, node):
+        self.generic_visit(node)
+        if None not in node.keys:
+            return node
+        parts, run = [], ast.Dict(keys=[], values=[])
+        for key, value in zip(node.keys, node.values):
+            if key is None:
+                parts += [run, value] if run.keys else [value]
+                run = ast.Dict(keys=[], values=[])
+            else:
+                run.keys.append(key)
+                run.values.append(value)
+        parts += [run] if run.keys else []
+        return ast.Call(func=ast.Name('_merged', ast.Load()), args=parts, keywords=[])
+
+    def visit_List(self, node):
+        self.generic_visit(node)
+        if not any(isinstance(e, ast.Starred) for e in node.elts):
+            return node
+        parts, run = [], []
+        for element in node.elts:
+            if isinstance(element, ast.Starred):
+                parts += ([ast.List(elts=run, ctx=ast.Load())] if run else []) + [element.value]
+                run = []
+            else:
+                run.append(element)
+        parts += [ast.List(elts=run, ctx=ast.Load())] if run else []
+        return ast.Call(func=ast.Name('_joined', ast.Load()), args=parts, keywords=[])
+
+    visit_Tuple = visit_List
+
+    def visit_Call(self, node):
+        """f(a=1, **b), which Transcrypt compiles wrong, as f(**_merged({'a': 1}, b))."""
+        self.generic_visit(node)
+        if not any(k.arg is None for k in node.keywords) or len(node.keywords) == 1:
+            return node
+        merged = ast.Dict(keys=[ast.Constant(k.arg) if k.arg else None for k in node.keywords], values=[k.value for k in node.keywords])
+        node.keywords = [ast.keyword(arg=None, value=self.visit_Dict(merged))]
+        return node
+
+
+UNPACKING_HELPERS = '''
+def _merged(*dicts):
+    result = {}
+    for d in dicts:
+        result.update(d)
+    return result
+
+
+def _joined(*lists):
+    result = []
+    for items in lists:
+        result.extend(list(items))
+    return result
+'''
 
 
 def hoist_imports(body):

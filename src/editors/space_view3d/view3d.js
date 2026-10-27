@@ -20,6 +20,9 @@ const axes = [
   { id: 'y', dir: new Vector3(0, 1, 0), color: '#8bdc00', dark: '#557d10', view: ['top', false] },
   { id: 'z', dir: new Vector3(0, 0, 1), color: '#2890ff', dark: '#24548f', view: ['front', true] },
 ];
+// The keymaps an Object Mode 3D View's handlers run, in order.
+const KEYMAPS = ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
+
 // The Area menu, which Blender defines in C (screen_ops.cc).
 const INFO_MT_area = Object.assign(() => ({
   draw() {
@@ -112,7 +115,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   selectModes.append(...selectModeButtons);
   // Blender's Object Mode menus, from its own scripts over this view's context.
   // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
-  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => createContext(ctx.rna, { space: view }), prop: propBinding(ctx.rna.host) });
+  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => createContext(ctx.rna, { space: view }), prop: propBinding(ctx.rna.host), keymaps: () => KEYMAPS });
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);

@@ -40,7 +40,7 @@ export const normalizeKeys = (keys) => parseKeys(keys).combo;
 // A binding as Blender's menus show it: "Ctrl Numpad +" for "Ctrl NUMPAD_PLUS", the first of several.
 const KEY_LABELS = { NUMPAD_PLUS: 'Numpad +', NUMPAD_MINUS: 'Numpad -', NUMPAD_PERIOD: 'Numpad .', RET: 'Return', ESC: 'Esc', DEL: 'Delete' };
 export const keysLabel = (keys) => [keys].flat()[0]?.split(' ')
-  .map((token) => KEY_LABELS[token] ?? (/^[A-Z][A-Z_]+$/.test(token) ? token.split('_').map((w) => w[0] + w.slice(1).toLowerCase()).join(' ') : token))
+  .map((token) => KEY_LABELS[token] ?? (/^[A-Z][A-Z0-9_]+$/.test(token) ? token.split('_').map((w) => w[0] + w.slice(1).toLowerCase()).join(' ') : token))
   .join(' ') ?? '';
 
 const CODES = {

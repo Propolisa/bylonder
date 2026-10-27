@@ -3,6 +3,7 @@
 // Operators Blender lacks (Bylonder's project and code features) are registered as `bylonder.*`, and added to Blender's
 // menus with appendMenu, as add-ons extend Blender.
 import { operatorKeys } from './input/keymap.js';
+import { blenderKeys } from './keyconfig.js';
 
 const operators = new Map(), extensions = new Map();
 
@@ -26,9 +27,10 @@ export const prependMenu = (idname, draw) => extension(idname).prepend.push(draw
 // Python keyword arguments for a layout call from JS, as Transcrypt passes them.
 export const kw = (keywords) => ({ ...keywords, __kwargtrans__: null });
 
-// What drawMenu needs (see ui-layout.js), from the menus (classes by idname), the context the scripts read, and the
-// properties Bylonder binds (prop(data, name) giving { label, get, set }).
-export const menuUI = ({ menus, context, prop }) => ({
+// What drawMenu needs (see ui-layout.js), from the menus (classes by idname), the context the scripts read, the
+// properties Bylonder binds (prop(data, name) giving { label, get, set }) and the Blender keymaps whose shortcuts the
+// menus show where Bylonder binds none (keymaps() giving their names, in the order Blender's handlers run).
+export const menuUI = ({ menus, context, prop, keymaps = () => ['Window', 'Screen'] }) => ({
   menus,
   context,
   prop,
@@ -36,7 +38,7 @@ export const menuUI = ({ menus, context, prop }) => ({
   supported: (idname, props) => !!operators.get(idname) && (operators.get(idname).supports?.(props) ?? true),
   poll: (idname, props) => operators.get(idname)?.poll?.(props) ?? true,
   run: runOperator,
-  keys: (idname, props) => operators.get(idname)?.keys?.(props) ?? operatorKeys(idname, props),
+  keys: (idname, props) => operators.get(idname)?.keys?.(props) ?? operatorKeys(idname, props) ?? blenderKeys(keymaps(), idname, props),
   enumItems: (idname, prop) => operators.get(idname)?.enumItems?.(prop) ?? [],
 });
 
