@@ -1,6 +1,8 @@
 // Add Mesh operators (editmesh_add.cc): MESH_OT_primitive_*_add. Each builds the primitive into a new BMesh, as
 // Blender does when adding in Object Mode, and returns the Mesh. Properties are the operators' RNA properties.
-import { BM_mesh_create, poolLayerAdd } from '../../bmesh/intern/bmesh-class.js';
+import { BM_mesh_create } from '../../bmesh/intern/bmesh-class.js';
+import { BM_data_layer_add_named } from '../../bmesh/intern/bmesh-interp.js';
+import { CD_PROP_FLOAT2 } from '../../makesdna/customdata-types.js';
 import { BMO_op_callf } from '../../bmesh/intern/bmesh-operators.js';
 import { BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { bmo_create_grid_exec, bmo_create_cube_exec, bmo_create_circle_exec, bmo_create_cone_exec } from '../../bmesh/operators/bmo-primitive.js';
@@ -10,7 +12,7 @@ const FILL = { NOTHING: 0, NGON: 1, TRIFAN: 2 };
 
 function make_prim(exec, args, calc_uvs) {
   const bm = BM_mesh_create();
-  if (calc_uvs) poolLayerAdd(bm.l, 'UVMap', Float32Array, 2);
+  if (calc_uvs) BM_data_layer_add_named(bm, bm.ldata, CD_PROP_FLOAT2, 'UVMap');
   BMO_op_callf(bm, exec, { ...args, calc_uvs });
   return BM_mesh_bm_to_me(bm);
 }

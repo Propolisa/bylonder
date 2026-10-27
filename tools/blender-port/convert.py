@@ -83,6 +83,15 @@ def is_float_array(t):
     return t.kind == T.CONSTANTARRAY and is_float(t.element_type)
 
 
+# The parsed copy of a source sits next to it, so its quoted includes resolve; one per process, so runs can overlap.
+TMP_PREFIX = f'.port{os.getpid()}_'
+
+
+def source_rel(path, root):
+    """A parsed file's path relative to root, naming the original source rather than its parsed copy."""
+    return os.path.relpath(path, root).replace(f'/{TMP_PREFIX}', '/')
+
+
 def zero_of(t):
     """The JS of a default-initialized value of type t, or None when it has none."""
     t = canon(t)
@@ -102,6 +111,8 @@ def zero_of(t):
     name = t.get_declaration().spelling
     if name in ARRAY_TYPES:
         return '[]'
+    if name == 'optional':
+        return 'null'
     if name in ('Map', 'Set'):
         return f'new {name}()'
     if t.kind == T.RECORD:
@@ -262,7 +273,7 @@ class Source:
         self.registry = registry if registry is not None else {}
         path = os.path.join(self.root, rel)
         self.original = open(path).read()
-        self.tmp = os.path.join(os.path.dirname(path), '.port_' + os.path.basename(path))
+        self.tmp = os.path.join(os.path.dirname(path), f'{TMP_PREFIX}{os.path.basename(path)}')
         resource = subprocess.run(['clang', '-print-resource-dir'], capture_output=True, text=True).stdout.strip()
         self.args = ['-std=c++20', '-x', 'c++', f'-resource-dir={resource}', '-Wno-c++11-narrowing', '-I/usr/include/eigen3']
         self.args += [f'-I{os.path.join(self.root, "source/blender", d)}' for d in INCLUDES]
@@ -356,7 +367,7 @@ class Source:
             self.definitions = {}
             for c in self.tu.cursor.walk_preorder():
                 if c.kind in (K.FUNCTION_DECL, K.FUNCTION_TEMPLATE) and c.is_definition() and c.location.file:
-                    self.definitions.setdefault((c.spelling, os.path.relpath(c.location.file.name, self.root).replace('/.port_', '/')), c)
+                    self.definitions.setdefault((c.spelling, source_rel(c.location.file.name, self.root)), c)
         f = self.definitions.get((name, rel))
         if f is not None and f.spelling not in self.sigs:
             self.sigs[f.spelling] = self.registry[f.spelling] = self.signature(f)
@@ -706,9 +717,7 @@ class FunctionPort:
         else:
             si = strip(init)
             if si.kind == K.INIT_LIST_EXPR:
-                items = kids(si)
-                zero = t.kind == T.CONSTANTARRAY and all(clangx.evaluate(x) == 0 for x in items)
-                value = zero_of(t) if zero else '[' + ', '.join(self.expr(x) for x in items) + ']'
+                value = self.init_list(si, t)
             elif (si.kind == K.CALL_EXPR and si.referenced is not None and si.referenced.kind == K.CONSTRUCTOR and not arguments(si)) or (
                     si.kind == K.UNEXPOSED_EXPR and not kids(si)):
                 value = zero_of(t)
@@ -802,12 +811,28 @@ class FunctionPort:
         if k in (K.BINARY_OPERATOR, K.COMPOUND_ASSIGNMENT_OPERATOR):
             return self.binary(c)
         if k == K.INIT_LIST_EXPR:
-            return '[' + ', '.join(self.expr(x) for x in ch) + ']'
+            return self.init_list(c, c.type)
         if k == K.CXX_THIS_EXPR:
             return 'this'
         if k == K.CXX_UNARY_EXPR and clangx.evaluate(c) is not None:
             return str(clangx.evaluate(c))
         return fix(k.name, self.p.text(c))
+
+    def init_list(self, c, t):
+        """A braced initializer of type t: a struct with every field, an array with every element, omitted ones zero."""
+        t, items = canon(t), kids(c)
+        explicit = lambda x: not (x.kind == K.UNEXPOSED_EXPR and not kids(x))  # Clang's implicit value-initialization.
+        if t.kind == T.RECORD and decl_name(t) not in ARRAY_TYPES:
+            fields = [f for f in t.get_fields() if f.spelling]
+            values = [self.expr(items[i], f.type) if i < len(items) and explicit(items[i]) else (zero_of(f.type) or 'null')
+                      for i, f in enumerate(fields)]
+            return '{ ' + ', '.join(f'{f.spelling}: {v}' for f, v in zip(fields, values)) + ' }'
+        if t.kind == T.CONSTANTARRAY and all(clangx.evaluate(x) == 0 for x in items):
+            return zero_of(t)
+        values = [self.expr(x, t.element_type if t.kind == T.CONSTANTARRAY else None) for x in items]
+        if t.kind == T.CONSTANTARRAY:
+            values += [zero_of(t.element_type) or 'null'] * (t.element_count - len(values))
+        return '[' + ', '.join(values) + ']'
 
     def literal(self, c):
         """A number as the lexer spelled it, without C's suffixes; inside a macro's expansion, as Clang evaluates it."""
@@ -909,6 +934,8 @@ class FunctionPort:
                     return f'{self.bm}.{opool}.{field}[{elem}]'
                 if field == 'htype':
                     return HTYPE[opool]
+                if field == 'data':
+                    return elem  # An element's CustomData block is the element: its layers are arrays on its pool.
                 return fix(f'head.{field}', elem)
             if opool:
                 return f'{self.bm}.{opool}.{outer.spelling}_{field}[{elem}]'
@@ -1123,14 +1150,15 @@ class FunctionPort:
             self.temps += 1
             return f'({t} = {self.helper("len_v3")}({v}), {v} = {self.helper("normalize_v3")}({v}), {t})'
         pool = lambda: pool_of(strip_parens_casts(args[0]).type) or '/*FIX pool*/'
-        if re.fullmatch(r'BM_ELEM_API_FLAG_(ENABLE|DISABLE|TEST)', name):
-            return f'{self.helper(name)}({self.bm}.{pool()}, {", ".join(js(args))})'
         if name == 'BM_elem_index_get':
             return f'{self.bm}.{pool()}.index[{self.expr(args[0])}]'
         if name == 'BM_elem_index_set':
             return f'{self.bm}.{pool()}.index[{self.expr(args[0])}] = {self.expr(args[1])}'
         if name.startswith('BM_elem_flag_'):
             return f'{self.helper(name.removesuffix("_bool"))}({self.bm}.{pool()}, {", ".join(js(args))})'
+        if is_prelude(self.call_node.referenced) and args and pool_of(strip_parens_casts(args[0]).type) and name not in PRELUDE_NEEDS_BM:
+            # The prelude's element macros are shims taking the element's pool first, like Blender's overloads per type.
+            return f'{self.helper(name)}({self.bm}.{pool()}, {", ".join(js(args))})'
         m = re.fullmatch(r'BMO_(vert|edge|face)_flag_(test|enable|disable|set)(_bool)?', name)
         if m:
             return f'{self.helper("BMO_flag_" + m.group(2))}({self.bm}.{m.group(1)[0]}, {", ".join(js(args[1:]))})'
@@ -1179,7 +1207,17 @@ class FunctionPort:
         base = kids(callee)[0] if kids(callee) else None
         b = self.expr(base) if base is not None else 'this'
         a = [self.expr(x) for x in args]
-        keyed = (canon(base.type).get_declaration().spelling if base is not None else '') in ('Map', 'Set')
+        container = canon(base.type).get_declaration().spelling if base is not None else ''
+        keyed = container in ('Map', 'Set')
+        if container == 'optional':
+            # std::optional<T> is T or null.
+            value = {'emplace': zero_of(canon(base.type).get_template_argument_type(0)) or '{}', 'reset': 'null'}
+            if name in value and not args:
+                return f'({b} = {value[name]})'
+            if name == 'has_value':
+                return f'({b} != null)'
+            if name == 'value':
+                return b
         if name in ('size', 'index_range') and not args:
             return f'{b}.size' if keyed else f'{b}.length'
         if name == 'is_empty':

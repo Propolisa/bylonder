@@ -15,11 +15,15 @@ shim provides yet).
 Units (manifest `units`) are self-contained parts built to WebAssembly from Blender's own sources instead (`--wasm`,
 see wasm.py).
 
-Usage: tools/blender-port/port.py SRC [--wasm | --units-only]   (SRC: Blender sources of the manifest's tag; see convert.py)
+Usage: tools/blender-port/port.py SRC [--wasm | --units-only | --check FILE]   (SRC: Blender sources of the manifest's tag;
+see convert.py). --check converts every function of one Blender file to stdout and counts its FIX marks by kind, in
+seconds, to try a converter change; signatures from other files are known only in a full run.
 """
+import collections
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -111,7 +115,7 @@ class Driver:
         directory, confirmed by parsing."""
         definition = decl.get_definition()
         if definition is not None and definition.location.file and not convert.is_prelude(definition):
-            return os.path.relpath(definition.location.file.name, self.root).replace('/.port_', '/'), source.rel
+            return convert.source_rel(definition.location.file.name, self.root), source.rel
         header = os.path.relpath(decl.location.file.name, self.root)
         directory = os.path.dirname(header)
         stem = os.path.splitext(os.path.basename(header))[0].removesuffix('_inline')
@@ -310,10 +314,20 @@ class Driver:
                     open(public, 'w').write('\n'.join(kept))
 
 
+def check(driver, rel):
+    source = driver.source(rel)
+    js = '\n\n'.join(source.emit(f)[0] for f in source.functions)
+    print(js)
+    fixes = collections.Counter(m.group(1) for m in re.finditer(r'/\*FIX ([^*:]*)', js))
+    print(f'{len(source.functions)} functions, {sum(fixes.values())} FIX marks: {dict(fixes.most_common())}', file=sys.stderr)
+
+
 def main():
     root = sys.argv[1]
     manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
     driver = Driver(root, manifest)
+    if '--check' in sys.argv:
+        return check(driver, sys.argv[sys.argv.index('--check') + 1])
     if '--units-only' not in sys.argv:
         driver.run()
         driver.write()

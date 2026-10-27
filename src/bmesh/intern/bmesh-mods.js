@@ -2,6 +2,7 @@
 import { bmesh_kernel_join_edge_kill_vert, bmesh_kernel_loop_reverse, BM_faces_join, bmesh_kernel_join_vert_kill_edge, bmesh_kernel_split_edge_make_vert, bmesh_kernel_split_face_make_edge } from './bmesh-core.js';
 import { BM_elem_attrs_copy } from './bmesh-construct.js';
 import { BM_edge_other_vert, BM_loop_is_adjacent } from './bmesh-query.js';
+import { CustomData_bmesh_copy_block, CustomData_bmesh_interp } from '../../blenkernel/customdata.js';
 
 export const BM_edge_collapse = (bm, e_kill, v_kill, do_del, kill_degenerate_faces) =>
   bmesh_kernel_join_vert_kill_edge(bm, e_kill, v_kill, do_del, true, kill_degenerate_faces);
@@ -11,14 +12,6 @@ export function BM_edge_verts_swap(bm, e) {
   [E.v1[e], E.v2[e]] = [E.v2[e], E.v1[e]];
   [E.v1_disk_link_next[e], E.v2_disk_link_next[e]] = [E.v2_disk_link_next[e], E.v1_disk_link_next[e]];
   [E.v1_disk_link_prev[e], E.v2_disk_link_prev[e]] = [E.v2_disk_link_prev[e], E.v1_disk_link_prev[e]];
-}
-
-// Loop custom data of `dst` as src[0] * w[0] + src[1] * w[1] (CustomData_bmesh_interp for two sources).
-function loopDataInterp(bm, src, w, dst) {
-  for (const layer of bm.l.layers) {
-    const n = layer.size, d = layer.data;
-    for (let k = 0; k < n; k++) d[dst * n + k] = d[src[0] * n + k] * w[0] + d[src[1] * n + k] * w[1];
-  }
 }
 
 // BM_data_interp_face_vert_edge: loop data at the new vert `v` on edge `e`, between v_src_1's loop and the next.
@@ -31,7 +24,7 @@ function BM_data_interp_face_vert_edge(bm, v_src_1, v, e, fac) {
     if (l.v[it] === v_src_1) { l_v1 = it; l_v = l.next[l_v1]; l_v2 = l.next[l_v]; }
     else if (l.v[it] === v) { l_v1 = l.next[it]; l_v = it; l_v2 = l.prev[it]; }
     if (l_v1 < 0 || l_v2 < 0) return;
-    loopDataInterp(bm, [l_v1, l_v2], [fac, 1 - fac], l_v);
+    CustomData_bmesh_interp(bm.ldata, [l_v1, l_v2], [fac, Math.fround(1 - fac)], 2, l_v);
   } while ((it = l.radial_next[it]) !== first);
 }
 
@@ -67,7 +60,7 @@ export function BM_vert_collapse_edge(bm, e_kill, v_kill, do_del, kill_degenerat
     let it = first;
     do {
       const kv = l.next[it];
-      if (l.v[it] === tv && l.v[kv] === v_kill) for (const layer of l.layers) layer.data.copyWithin(kv * layer.size, it * layer.size, it * layer.size + layer.size);
+      if (l.v[it] === tv && l.v[kv] === v_kill) CustomData_bmesh_copy_block(bm.ldata, it, kv);
     } while ((it = l.radial_next[it]) !== first);
   }
   return bmesh_kernel_join_edge_kill_vert(bm, e_kill, v_kill, do_del, true, kill_degenerate_faces, kill_duplicate_faces);

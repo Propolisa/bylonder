@@ -32,7 +32,8 @@ Blender's files, pinned to one Blender tag. Never edit `*.gen.js`. Bylonder dive
 overlap: generated, shimmed (with signature differences), excluded (with a reason) and missing.
 
 - Fix wrong output in the converter (`convert.py`, mapping tables in `rules.py`), never by hand, and keep improving it
-  without regressions, preferring what Clang or JS tooling states exactly over text matching.
+  without regressions, preferring what Clang or JS tooling states exactly over text matching. Try a change on one file
+  with `port.py SRC --check FILE` (seconds) before a full run.
 - A shim that deviates from what the converter would produce on purpose (performance, Bylonder's design) carries a
   `// port-override: <reason>` comment, so overrides can be found and rechecked as Blender changes.
 - Goal: the same module boundaries can also be built to WASM from Blender's sources, selectable per subsystem at

@@ -60,13 +60,13 @@ HELPER_MODULES = {
     'blenlib/math-matrix.js': {'unit_m4', 'unit_m3', 'mul_m4_v3', 'mul_m4_v4', 'mul_m3_v3', 'invert_m4_m4', 'mul_m4_m4m4', 'mul_m3_m3m3'},
     'bmesh/intern/bmesh-class.js': {'vco', 'vno', 'fno', 'BM_ELEM_API_FLAG_ENABLE', 'BM_ELEM_API_FLAG_DISABLE', 'BM_ELEM_API_FLAG_TEST',
                                     'BM_elem_flag_test', 'BM_elem_flag_enable', 'BM_elem_flag_disable', 'BM_elem_flag_set',
-                                    'BMO_flag_test', 'BMO_flag_enable', 'BMO_flag_disable', 'BMO_flag_set'},
+                                    'BMO_flag_test', 'BMO_flag_enable', 'BMO_flag_disable', 'BMO_flag_set', 'BM_ELEM_CD_GET_FLOAT',
+                                    'BM_ELEM_CD_GET_FLOAT_P', 'BM_ELEM_CD_GET_VOID_P', 'BM_ELEM_CD_GET_INT', 'BM_ELEM_CD_SET_FLOAT'},
 }
 # Where the shims of the prelude's macros live, and which of them take the mesh. The prelude keeps a macro only
 # when its expansion has no JS form (BM_DISK_EDGE_NEXT indexes a struct by a comparison).
 PRELUDE_HOMES = {'INIT_MINMAX': 'blenlib/utildefines.js', 'INIT_MINMAX2': 'blenlib/utildefines.js',
-                 **{n: 'bmesh/intern/bmesh-class.js' for n in ('BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV', 'BM_ELEM_CD_GET_FLOAT',
-                                                            'BM_ELEM_CD_GET_FLOAT_P', 'BM_ELEM_CD_GET_VOID_P', 'BM_ELEM_CD_GET_INT', 'BM_ELEM_CD_SET_FLOAT')}}
+                 **{n: 'bmesh/intern/bmesh-class.js' for n in ('BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV')}}
 PRELUDE_NEEDS_BM = {'BM_DISK_EDGE_NEXT', 'BM_DISK_EDGE_PREV'}
 
 # Blender sources whose port lives in a module of another name (paths below source/blender, as regexes).

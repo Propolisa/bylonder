@@ -17,6 +17,7 @@ import { BM_EDGES_OF_VERT, BM_edge_exists, BM_edge_other_vert, BM_edge_is_wire, 
 import { BM_edge_at_index } from '../../bmesh/intern/bmesh-mesh.js';
 import { bmo_contextual_create_exec } from '../../bmesh/operators/bmo-create.js';
 import { EDBM_mesh_hide, EDBM_mesh_reveal, EDBM_select_more, EDBM_select_less } from './editmesh-utils.js';
+import { edbm_bevel_exec } from './editmesh-bevel.js';
 
 // The %hv, %he and %hf operator slots: elements with a header flag.
 export function BMO_slot_buffer_from_hflag(bm, pool, hflag) {
@@ -249,6 +250,7 @@ export const meshOperators = {
   'transform.edge_slide': (bm, props) => edge_slide_exec(bm, props),
   'mesh.loop_select': (bm, props) => edbm_select_loop(bm, BM_edge_at_index(bm, props.edge_index), props),
   'mesh.inset': (bm, props) => edbm_inset_exec(bm, props),
+  'mesh.bevel': (bm, props) => edbm_bevel_exec(bm, props),
   'mesh.subdivide': (bm, props) => edbm_subdivide_exec(bm, props),
   'mesh.dissolve_faces': (bm) => edbm_dissolve_faces_exec(bm),
   'mesh.dissolve_verts': (bm, props) => { edbm_dissolve_verts_exec(bm, props); },

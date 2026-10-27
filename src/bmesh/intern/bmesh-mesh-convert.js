@@ -1,7 +1,13 @@
 // Mesh and BMesh conversion (bmesh_mesh_convert.cc): entering and leaving Edit Mode.
-import { BM_mesh_create, BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_SMOOTH, BM_ELEM_SEAM, poolLayerAdd } from './bmesh-class.js';
+import { BM_mesh_create, BM_ITER_MESH, BM_ELEM_SELECT, BM_ELEM_HIDDEN, BM_ELEM_SMOOTH, BM_ELEM_SEAM } from './bmesh-class.js';
+import { BM_data_layer_add_named } from './bmesh-interp.js';
+import { CD_PROP_FLOAT, CD_PROP_FLOAT2 } from '../../makesdna/customdata-types.js';
 import { BM_vert_create, BM_edge_create, BM_face_create, BM_CREATE_SKIP_CD } from './bmesh-core.js';
 import { createMesh } from '../../blenkernel/mesh/mesh.js';
+
+// Mesh attribute types of the corner layers BMesh keeps.
+const LAYER_OF_ATTRIBUTE = { FLOAT: CD_PROP_FLOAT, FLOAT2: CD_PROP_FLOAT2 };
+const ATTRIBUTE_OF_LAYER = { [CD_PROP_FLOAT]: 'FLOAT', [CD_PROP_FLOAT2]: 'FLOAT2' };
 
 // Element flags kept as boolean attributes on the Mesh, as Blender names them.
 const FLAG_ATTRIBUTES = [
@@ -62,7 +68,7 @@ export function BM_mesh_bm_to_me(bm) {
   for (const layer of bm.l.layers) {
     const data = new Float32Array(c * layer.size);
     for (let i = 0; i < c; i++) data.set(layer.data.subarray(loops[i] * layer.size, loops[i] * layer.size + layer.size), i * layer.size);
-    attributes[layer.name] = { domain: 'CORNER', type: layer.size === 2 ? 'FLOAT2' : 'FLOAT', data };
+    attributes[layer.name] = { domain: 'CORNER', type: ATTRIBUTE_OF_LAYER[layer.type], data };
   }
   return createMesh({ vert_positions, edges, face_offsets, corner_verts, corner_edges, attributes });
 }
@@ -70,7 +76,7 @@ export function BM_mesh_bm_to_me(bm) {
 export function BM_mesh_bm_from_me(mesh) {
   const bm = BM_mesh_create({ totvert: mesh.verts_num, totedge: mesh.edges_num, totloop: mesh.corners_num, totface: mesh.faces_num });
   const attr = (name) => mesh.attributes.get(name)?.data;
-  for (const [name, { domain, type }] of mesh.attributes) if (domain === 'CORNER') poolLayerAdd(bm.l, name, Float32Array, type === 'FLOAT2' ? 2 : 1);
+  for (const [name, { domain, type }] of mesh.attributes) if (domain === 'CORNER' && LAYER_OF_ATTRIBUTE[type]) BM_data_layer_add_named(bm, bm.ldata, LAYER_OF_ATTRIBUTE[type], name);
   const verts = [];
   for (let v = 0; v < mesh.verts_num; v++) verts.push(BM_vert_create(bm, mesh.vert_positions.subarray(v * 3, v * 3 + 3)));
   const edges = [];

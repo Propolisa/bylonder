@@ -1,5 +1,7 @@
 // Primitive operators (bmo_primitive.cc). Run through BMO_op_callf; `matrix` is a 4x4 of columns.
-import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable, poolLayer } from '../intern/bmesh-class.js';
+import { BM_ITER_MESH, BMO_flag_test, BMO_flag_enable } from '../intern/bmesh-class.js';
+import { CustomData_get_offset } from '../../blenkernel/customdata.js';
+import { CD_PROP_FLOAT2 } from '../../makesdna/customdata-types.js';
 import { BM_vert_create, BM_edge_create, BM_vert_kill, BM_face_create_verts, BM_CREATE_NOP } from '../intern/bmesh-core.js';
 import { BM_face_create_quad_tri } from '../intern/bmesh-construct.js';
 import { BM_edge_collapse } from '../intern/bmesh-mods.js';
@@ -13,7 +15,7 @@ const VERT_MARK = 1, FACE_MARK = 1 << 1, FACE_NEW = 1 << 2;
 const f32 = Math.fround;
 
 // The loop UV layer when UVs are wanted and the mesh has one (CustomData_get_offset(CD_PROP_FLOAT2) != -1).
-const uvLayer = (bm, calc_uvs) => (calc_uvs ? poolLayer(bm.l, 'UVMap') : null);
+const uvLayer = (bm, calc_uvs) => (calc_uvs ? bm.ldata.layers[CustomData_get_offset(bm.ldata, CD_PROP_FLOAT2)] ?? null : null);
 const loopsOf = (bm, f, fn) => { const first = bm.f.l_first[f]; let l = first, i = 0; do fn(l, i++); while ((l = bm.l.next[l]) !== first); };
 const markedFaces = (bm, flag, fn) => BM_ITER_MESH(bm.f, (f) => BMO_flag_test(bm.f, f, flag) && fn(f));
 const setUV = (uv, l, u, v) => { uv.data[l * 2] = u; uv.data[l * 2 + 1] = v; };

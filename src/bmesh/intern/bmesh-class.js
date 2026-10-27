@@ -51,16 +51,6 @@ export function poolFree(pool, i) {
   pool.tot--;
 }
 
-// CustomData layer on a pool (CD_PROP_FLOAT2 UV maps and the like), one value of `size` numbers per element.
-export function poolLayerAdd(pool, name, Type, size, defaultValue = new Array(size).fill(0)) {
-  const layer = { name, size, default: defaultValue, data: new Type(pool.capacity * size) };
-  for (let i = 0; i < pool.size; i++) layer.data.set(defaultValue, i * size);
-  pool.layers.push(layer);
-  return layer;
-}
-
-export const poolLayer = (pool, name) => pool.layers.find((layer) => layer.name === name);
-
 // BM_mesh_create.
 export function BM_mesh_create({ totvert = 64, totedge = 64, totloop = 256, totface = 64 } = {}) {
   return {
@@ -72,6 +62,11 @@ export function BM_mesh_create({ totvert = 64, totedge = 64, totloop = 256, totf
     get totedge() { return this.e.tot; },
     get totloop() { return this.l.tot; },
     get totface() { return this.f.tot; },
+    // CustomData: each pool holds its own layers.
+    get vdata() { return this.v; },
+    get edata() { return this.e; },
+    get ldata() { return this.l; },
+    get pdata() { return this.f; },
     act_face: -1,
     selectmode: 1,
   };
@@ -90,6 +85,16 @@ export const BM_DISK_EDGE_PREV = (bm, e, v) => (v === bm.e.v2[e] ? bm.e.v2_disk_
 export const vco = (bm, v) => [bm.v.co[v * 3], bm.v.co[v * 3 + 1], bm.v.co[v * 3 + 2]];
 export const vno = (bm, v) => [bm.v.no[v * 3], bm.v.no[v * 3 + 1], bm.v.no[v * 3 + 2]];
 export const fno = (bm, f) => [bm.f.no[f * 3], bm.f.no[f * 3 + 1], bm.f.no[f * 3 + 2]];
+
+// BM_ELEM_CD_*: an element's value in the layer at `offset` (CustomData_get_offset); _P is a view that writes through.
+export const BM_ELEM_CD_GET_FLOAT = (pool, i, offset) => pool.layers[offset].data[i];
+export const BM_ELEM_CD_GET_INT = BM_ELEM_CD_GET_FLOAT;
+export const BM_ELEM_CD_SET_FLOAT = (pool, i, offset, value) => { pool.layers[offset].data[i] = value; };
+export function BM_ELEM_CD_GET_FLOAT_P(pool, i, offset) {
+  const { data, size } = pool.layers[offset];
+  return data.subarray(i * size, i * size + size);
+}
+export const BM_ELEM_CD_GET_VOID_P = BM_ELEM_CD_GET_FLOAT_P;
 
 export const BM_elem_flag_test = (pool, i, flag) => (pool.hflag[i] & flag) !== 0;
 export const BM_elem_flag_enable = (pool, i, flag) => { pool.hflag[i] |= flag; };

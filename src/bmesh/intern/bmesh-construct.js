@@ -5,6 +5,7 @@ import { bmesh_disk_edge_next } from './bmesh-structure.js';
 import { BM_edge_other_vert, BM_edge_exists } from './bmesh-query.js';
 import { BM_verts_calc_normal_from_cloud_ex } from './bmesh-polygon.js';
 import { angle_signed_on_axis_v3v3v3_v3 } from '../../blenlib/math-geom.js';
+import { CustomData_bmesh_copy_block } from '../../blenkernel/customdata.js';
 
 // Fills edge_arr with the edges between consecutive verts, created where missing: edge i joins vert i and i + 1.
 export function BM_edges_from_verts_ensure(bm, edge_arr, vert_arr, len) {
@@ -105,7 +106,7 @@ export function BM_face_copy_shared(bm, f, filter = () => true) {
       const src = l.v[other] === l.v[it] ? [other, l.next[other]] : [l.next[other], other];
       [it, l.next[it]].forEach((dst, j) => {
         if (copied.has(dst) || !filter(src[j])) return;
-        for (const layer of l.layers) layer.data.copyWithin(dst * layer.size, src[j] * layer.size, src[j] * layer.size + layer.size);
+        CustomData_bmesh_copy_block(bm.ldata, src[j], dst);
         copied.add(dst);
       });
     }
@@ -119,5 +120,5 @@ export function BM_elem_attrs_copy(pool, src, dst) {
   pool.hflag[dst] = (pool.hflag[src] & ~BM_ELEM_SELECT) | (pool.hflag[dst] & BM_ELEM_SELECT);
   if (pool.no) pool.no.copyWithin(dst * 3, src * 3, src * 3 + 3);
   if (pool.mat_nr) pool.mat_nr[dst] = pool.mat_nr[src];
-  for (const layer of pool.layers) layer.data.copyWithin(dst * layer.size, src * layer.size, src * layer.size + layer.size);
+  CustomData_bmesh_copy_block(pool, src, dst);
 }

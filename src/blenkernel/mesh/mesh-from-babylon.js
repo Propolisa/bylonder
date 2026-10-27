@@ -1,7 +1,9 @@
 // Mesh data from Babylon geometry, for meshes built by project code or Babylon's builders. Babylon splits vertices
 // along normal and UV seams; corners at the same position weld back into one vertex. Positions return to Blender's
 // axes ((x, y, z) from Babylon's (x, z, y)), triangles stay triangles, and faces Babylon shades smoothly stay smooth.
-import { BM_mesh_create, BM_ELEM_SMOOTH, poolLayerAdd, poolLayer } from '../../bmesh/intern/bmesh-class.js';
+import { BM_mesh_create, BM_ELEM_SMOOTH } from '../../bmesh/intern/bmesh-class.js';
+import { BM_data_layer_add_named } from '../../bmesh/intern/bmesh-interp.js';
+import { CD_PROP_FLOAT2 } from '../../makesdna/customdata-types.js';
 import { BM_vert_create, BM_face_create_verts, BM_CREATE_NOP } from '../../bmesh/intern/bmesh-core.js';
 import { BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 
@@ -9,7 +11,8 @@ const WELD_PRECISION = 1e5;
 
 export function mesh_from_vertex_data({ positions, indices, normals, uvs }) {
   const bm = BM_mesh_create();
-  const uv = uvs ? poolLayerAdd(bm.l, 'UVMap', Float32Array, 2) : null;
+  if (uvs) BM_data_layer_add_named(bm, bm.ldata, CD_PROP_FLOAT2, 'UVMap');
+  const uv = uvs ? bm.ldata.layers[0] : null;
   const welded = new Map(), vertOf = [];
   for (let i = 0; i < positions.length / 3; i++) {
     const co = [positions[i * 3], positions[i * 3 + 2], positions[i * 3 + 1]];
