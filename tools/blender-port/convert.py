@@ -1396,6 +1396,8 @@ class FunctionPort:
                 return call if ret_kind == T.VOID or (ret_kind == T.BOOL and len(targets) == 1) else f'{call}[0]'
             if ret_kind == T.BOOL and len(targets) == 1:
                 return f'(({targets[0]} = {call}) != null' + (f' ? ({", ".join(after)}, true) : false)' if after else ')')
+            if ret_kind == T.VOID and len(targets) == 1:
+                return '(' + ', '.join([f'{targets[0]} = {call}', *after]) + ')'  # One output comes back bare.
             t = self.temp()
             return f'(([{"" if ret_kind == T.VOID else t + ", "}{", ".join(targets)}] = {call}), {"".join(a + ", " for a in after)}{t})'
         return call
