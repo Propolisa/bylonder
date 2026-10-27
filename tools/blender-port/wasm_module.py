@@ -26,7 +26,7 @@ import convert
 HERE = os.path.dirname(os.path.abspath(__file__))
 WASM = os.path.join(HERE, 'wasm')
 # Header directories the editors' and RNA's sources include beyond those the converter parses with.
-EDITOR_INCLUDES = ('blenloader', 'editors/include', 'editors/mesh', 'windowmanager', 'gpu', 'imbuf', 'blenfont', 'render', 'animrig', 'nodes',
+EDITOR_INCLUDES = ('blenloader', 'modifiers', 'modifiers/intern', 'modifiers/intern/lineart', 'sequencer', 'editors/include', 'editors/mesh', 'windowmanager', 'gpu', 'imbuf', 'blenfont', 'render', 'animrig', 'nodes',
                    'asset_system', 'draw', 'makesdna/intern', 'makesrna/intern', 'imbuf/movie', 'editors/transform')
 BLENDER = 'https://projects.blender.org/api/v1/repos/blender/blender'
 
@@ -76,8 +76,8 @@ def patched_tree(root):
 
 def dependencies(build, deps):
     """Libraries Blender builds against, at the versions Blender pins (build_files/build_environment/cmake/versions.cmake),
-    fetched once; returns their include directories and a key of their versions."""
-    includes = []
+    fetched once; returns their directories, their include directories and a key of their versions."""
+    paths, includes = {}, []
     for name, dep in sorted(deps.items()):
         path = os.path.join(build, 'deps', f'{name}-{dep["tag"]}')
         if not os.path.exists(path):
@@ -90,12 +90,15 @@ def dependencies(build, deps):
             else:
                 subprocess.run(['git', '-c', 'advice.detachedHead=false', 'clone', '-q', '--depth', '1', '--branch', dep['tag'], dep['url'], path],
                                check=True)
+        paths[name] = path
         includes.append(f'-I{os.path.join(path, dep.get("include", ""))}')
-    return includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()))
+    return paths, includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()))
 
 
-def flags(tree):
-    return ['--target=wasm32-wasi', '-std=c++20', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
+def flags(tree, spec):
+    """Clang's arguments for the module's sources, with its Blender build options (`defines`) and the header directories
+    outside source/blender it includes (`includes`)."""
+    return [*(f'-D{d}' for d in spec.get('defines', [])), *(f'-I{os.path.join(tree, d)}' for d in spec.get('includes', [])),'--target=wasm32-wasi', '-std=c++20', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions',
             '-Wno-c++11-narrowing', '-D_WASI_EMULATED_PROCESS_CLOCKS', '-isystem', os.path.join(WASM, 'include'),
             '-include', os.path.join(WASM, 'compat.h'), *convert.include_args(tree),
             *(f'-I{os.path.join(tree, "source/blender", d)}' for d in EDITOR_INCLUDES), f'-I{os.path.join(tree, "intern/guardedalloc/intern")}']
@@ -186,15 +189,17 @@ def build(root, name, spec, tag):
     fetch_blender_paths(root, spec.get('blender_paths', []), tag)
     tree, patches = patched_tree(root)
     out_dir = tree + '-build'
-    includes, versions = dependencies(out_dir, spec.get('dependencies', {}))
-    args = includes + flags(tree)
+    deps, includes, versions = dependencies(out_dir, spec.get('dependencies', {}))
+    args = includes + flags(tree, spec)
     patches += versions
     generated, operators = operator_table(tree, out_dir, args, spec)
     archives, members = [], []
     for lib in spec['libraries']:
-        # A library is a directory or a file, or {path, exclude}: a directory without some of its files.
-        lib, exclude = (lib['path'], set(lib['exclude'])) if isinstance(lib, dict) else (lib, set())
-        sources = sorted(glob.glob(os.path.join(tree, lib, '*.c*'))) if os.path.isdir(os.path.join(tree, lib)) else [os.path.join(tree, lib)]
+        # A library is a directory or a file, or {path, exclude, dependency}: a directory without some of its files, in
+        # Blender's tree or in a dependency's.
+        lib, exclude, base = (lib['path'], set(lib.get('exclude', [])), deps[lib['dependency']] if 'dependency' in lib else tree) \
+            if isinstance(lib, dict) else (lib, set(), tree)
+        sources = sorted(glob.glob(os.path.join(base, lib, '*.c*'))) if os.path.isdir(os.path.join(base, lib)) else [os.path.join(base, lib)]
         sources = [s for s in sources if os.path.basename(s) not in exclude]
         objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args, patches)
         built = [o for o in objects.values() if o]

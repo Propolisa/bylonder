@@ -2,7 +2,11 @@ import { Matrix, Vector3, VertexData } from '@babylonjs/core';
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { arrayDefinition, realize } from './array.js';
-export const modifierDefinitions=new Map([[arrayDefinition.id,arrayDefinition]]);
+import { blenderModifierDefinitions, evaluateBlenderModifiers } from './blender.js';
+import { objectMesh } from '../editors/object/object-mesh.js';
+import { mesh_batch_cache_vertex_data } from '../draw/mesh-batch-cache.js';
+import { mesh_serialize } from '../blenkernel/mesh/mesh.js';
+export const modifierDefinitions=new Map([...blenderModifierDefinitions,arrayDefinition].map(d=>[d.id,d]));
 export function registerModifier(definition){if(!definition.id||!definition.schema||!definition.evaluate)throw Error('Invalid modifier definition');modifierDefinitions.set(definition.id,definition);}
 export const modifierStack=node=>node.metadata?.wbModifiers||[];
 const valid=(value,def)=>{
@@ -10,7 +14,7 @@ const valid=(value,def)=>{
   if(typeof value==='number'){if(!Number.isFinite(value))throw Error('Modifier values must be finite');value=Math.max(def.min??-1e9,Math.min(def.max??1e9,value));if(def.integer)value=Math.round(value);}
   if(def.options&&!Object.values(def.options).includes(value))throw Error('Invalid modifier option');return value;
 };
-export function addModifier(node,type='ARRAY',values={}){
+export function addModifier(node,type='GN_ARRAY',values={}){
   const definition=modifierDefinitions.get(type);if(!definition)throw Error('Unknown modifier: '+type);
   if(!node?.getTotalVertices?.()||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
   node.metadata||={};node.metadata.wbModifierBase||=VertexData.ExtractFromMesh(node).serialize();
@@ -46,9 +50,17 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
     if(curvePaths){const transform=curve.computeWorldMatrix(true).multiply(inverse);curvePaths=curvePaths.map(path=>({...path,points:path.points.map(point=>{const v=Vector3.TransformCoordinates(Vector3.FromArray(point),transform);return v.asArray();})}));}
     return {objectMatrix,curvePaths};
   }
+  const blenderMesh=(node,modifiers)=>evaluateBlenderModifiers(objectMesh(node,VertexData.Parse(base(node))),modifiers);
+  // Blender's modifiers run first, together, in the module on the object's Mesh; Bylonder's then take their result.
   function evaluate(node,stack=modifierStack(node)){
-    let result={data:base(node),matrices:[Matrix.Identity()]};
-    for(const modifier of stack){if(!modifier.showViewport)continue;const definition=modifierDefinitions.get(modifier.type);if(!definition)throw Error('Unsupported modifier: '+modifier.type);result=definition.evaluate(result,modifier,context(node,modifier));}return result;
+    const visible=stack.filter(m=>m.showViewport),definitions=visible.map(m=>modifierDefinitions.get(m.type));
+    if(!definitions.every(Boolean))throw Error('Unsupported modifier: '+visible[definitions.indexOf(undefined)].type);
+    const leading=definitions.findIndex(d=>!d.mesh),count=leading<0?visible.length:leading;
+    if(definitions.slice(count).some(d=>d.mesh))throw Error('Blender modifiers go before '+definitions[count].name+' in the stack.');
+    const data=count?mesh_batch_cache_vertex_data(blenderMesh(node,visible.slice(0,count))).serialize():base(node);
+    let result={data,matrices:[Matrix.Identity()]};
+    for(const modifier of visible.slice(count))result=modifierDefinitions.get(modifier.type).evaluate(result,modifier,context(node,modifier));
+    return result;
   }
   function draw(node,result){
     applying=true;
@@ -66,7 +78,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
   const api={
     definitions:modifierDefinitions,stack:modifierStack,errors,
     subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
-    add(node,type='ARRAY',values={}){
+    add(node,type='GN_ARRAY',values={}){
       if(!node?.getTotalVertices?.()||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
       const definition=modifierDefinitions.get(type);if(!definition)throw Error('Unknown modifier');
       node.metadata||={};base(node);
@@ -80,12 +92,15 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
     remove(node,id){node.metadata.wbModifiers=modifierStack(node).filter(m=>m.id!==id);api.refresh();commit();emit();},
     move(node,id,index){const stack=modifierStack(node),old=stack.findIndex(m=>m.id===id);if(old<0)return;stack.splice(Math.max(0,Math.min(stack.length-1,index)),0,stack.splice(old,1)[0]);api.refresh();commit();emit();},
     duplicate(node,id){const source=modifierStack(node).find(m=>m.id===id);if(source){const copy=api.add(node,source.type,structuredClone(source.values));api.move(node,copy.id,modifierStack(node).indexOf(source)+1);return copy;}},
-    apply(node,id){const modifier=modifierStack(node).find(m=>m.id===id);if(!modifier)return;const definition=modifierDefinitions.get(modifier.type);const result=definition.evaluate({data:base(node),matrices:[Matrix.Identity()]},{...modifier,showViewport:true},context(node,modifier));const data=realize(result.data,result.matrices);
-      node.metadata.wbModifierBase=data;node.metadata.wbCreation={vertices:data,material:node.material?.name||null};node.metadata.wbModifiers=modifierStack(node).filter(m=>m.id!==id);cache.delete(node);api.refresh();commit();emit();},
+    apply(node,id){const modifier=modifierStack(node).find(m=>m.id===id);if(!modifier)return;const one=[{...modifier,showViewport:true}];
+      if(modifierDefinitions.get(modifier.type).mesh){const mesh=blenderMesh(node,one);node.metadata.wbModifierBase=mesh_batch_cache_vertex_data(mesh).serialize();node.metadata.wbCreation={mesh:mesh_serialize(mesh)};}
+      else{const result=evaluate(node,one),data=realize(result.data,result.matrices);node.metadata.wbModifierBase=data;node.metadata.wbCreation={vertices:data,material:node.material?.name||null};}node.metadata.wbModifiers=modifierStack(node).filter(m=>m.id!==id);cache.delete(node);api.refresh();commit();emit();},
     copyToSelected(node,id,nodes){const m=modifierStack(node).find(m=>m.id===id);if(m)for(const other of nodes)if(other!==node&&other.getTotalVertices?.())api.add(other,m.type,structuredClone(m.values));},
     refresh(){
       if(applying)return;
       for(const node of world.objects){
+        // Files saved before Blender's Array came keep Bylonder's as ARRAY.
+        for(const m of node.metadata?.wbModifiers||[])if(m.type==='ARRAY'&&'shape' in m.values)m.type='GN_ARRAY';
         if(node.isDisposed()||deleted(node)||!node.getTotalVertices?.())continue;
         const stack=modifierStack(node),prior=cache.get(node);
         if(!stack.length&&!prior)continue;

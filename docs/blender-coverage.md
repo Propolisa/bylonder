@@ -53,5 +53,8 @@ Builds a Babylon ico sphere with Blender's name until the operator is ported.
 Status: partial
 Builds a Babylon torus with Blender's name until the operator is ported.
 
+## object.modifier_add
+Blender's modifiers run Blender's own code in the module (`tools/blender-port/wasm/modifier-api.cc`) on the object's Mesh. Settings are stored by RNA identifier (`use_axis[1]`), described by Blender's RNA (`tools/blender-reference/modifiers.py`) and written at the DNA offsets `tools/blender-port/modifier_dna.py` reads from `rna_modifier.cc`. Types that need other objects, vertex groups, binding or simulation are not offered yet. Array (Nodes) stands for Blender's Array node group asset and goes after Blender's modifiers in the stack.
+
 ## Transform Modal Map > *
 Typed values, the Global and Local cycling of repeated axis keys and the header text follow transform.cc. The scene orientation is always Global, so the second axis press is Local. Ctrl snaps to 1 unit in every view; Blender's orthographic axis views step the grid with zoom.

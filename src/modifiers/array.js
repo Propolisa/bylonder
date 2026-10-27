@@ -95,7 +95,7 @@ export function mergeVertices(data,distance){
   }
   out.indices=[];for(let i=0;i<data.indices.length;i+=3){const triangle=data.indices.slice(i,i+3).map(j=>indices[j]);if(new Set(triangle).size===3)out.indices.push(...triangle);}return out;
 }
-export const arrayDefinition={id:'ARRAY',blender:'object.modifier_add:ARRAY',name:'Array',category:'Generate',icon:'MOD_ARRAY',schema:arrayFields,defaults:arrayDefaults,evaluate(input,modifier,context){
+export const arrayDefinition={id:'GN_ARRAY',name:'Array (Nodes)',category:'Generate',icon:'MOD_ARRAY',schema:arrayFields,defaults:arrayDefaults,evaluate(input,modifier,context){
   const p=modifier.values,transforms=arrayMatrices(p,geometryBounds(input.data,input.matrices),context);
   if(input.matrices.length*transforms.length>10000)throw Error('Modifier stack exceeds 10,000 instances.');
   const matrices=transforms.flatMap(transform=>input.matrices.map(matrix=>matrix.multiply(transform)));

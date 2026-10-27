@@ -35,12 +35,13 @@ const FLAGS = [['.select_vert', 'POINT'], ['.hide_vert', 'POINT'], ['.select_edg
   ['sharp_edge', 'EDGE'], ['.select_poly', 'FACE'], ['.hide_poly', 'FACE'], ['sharp_face', 'FACE']];
 const bytes = (data) => data && Uint8Array.from(data, Boolean);
 
+const meshArrays = (mesh) => [Float32Array.from(mesh.vert_positions), Int32Array.from(mesh.edges), Int32Array.from(mesh.face_offsets),
+  Int32Array.from(mesh.corner_verts), Int32Array.from(mesh.corner_edges), mesh.attribute('UVMap') && Float32Array.from(mesh.attribute('UVMap'))];
+
 // The BMesh of a Mesh with its UV map and flags, in a select mode (SCE_SELECT_*).
 function bmFromMesh(mesh, selectmode) {
-  const { vert_positions, edges, face_offsets, corner_verts, corner_edges } = mesh;
   const flags = FLAGS.map(([name]) => bytes(mesh.attribute(name)));
-  return withArrays([Float32Array.from(vert_positions), Int32Array.from(edges), Int32Array.from(face_offsets), Int32Array.from(corner_verts),
-    Int32Array.from(corner_edges), mesh.attribute('UVMap') && Float32Array.from(mesh.attribute('UVMap')), ...flags], ([p, e, f, cv, ce, uv, ...flagPointers]) =>
+  return withArrays([...meshArrays(mesh), ...flags], ([p, e, f, cv, ce, uv, ...flagPointers]) =>
     withArrays([Int32Array.from(flagPointers)], ([table]) => x.bm_from_arrays(mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv, table, selectmode)));
 }
 
@@ -81,7 +82,8 @@ function extractedMesh(header) {
   for (const name of ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges']) Object.defineProperty(mesh, name, { get: () => view(name) });
   Object.defineProperties(mesh, { verts_num: { value: verts }, edges_num: { value: edges }, faces_num: { value: faces }, corners_num: { value: corners } });
   const attribute = (name, domain, type) => [name, { domain, type, get data() { return view(name); } }];
-  mesh.attributes = new Map([...FLAGS.map(([name, domain]) => attribute(name, domain, 'BOOLEAN')), ...(at(9) ? [attribute('UVMap', 'CORNER', 'FLOAT2')] : [])]);
+  mesh.attributes = new Map([...FLAGS.filter((_, i) => at(10 + i)).map(([name, domain]) => attribute(name, domain, 'BOOLEAN')),
+    ...(at(9) ? [attribute('UVMap', 'CORNER', 'FLOAT2')] : [])]);
   Object.assign(mesh, {
     corner_tris: () => view('corner_tris'),
     corner_tri_faces: () => view('tri_faces'),
@@ -89,6 +91,25 @@ function extractedMesh(header) {
     vert_normals: () => view('vert_normals'),
   });
   return mesh;
+}
+
+// Blender's modifier stack on an object's Mesh (modifier-api.cc). A modifier is its type (ModifierType) and a function
+// that writes its settings into its ModifierData, given a DataView of the module's memory and the struct's address.
+// Returns the evaluated Mesh, whose arrays are valid until the next evaluation, and each modifier's error or null.
+let modifierObject = 0;
+export function evaluateModifiers(mesh, modifiers) {
+  modifierObject ||= x.modifier_object_new();
+  withArrays(meshArrays(mesh), ([p, e, f, cv, ce, uv]) =>
+    x.modifier_object_mesh_set(modifierObject, mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv));
+  x.modifier_clear(modifierObject);
+  const added = modifiers.map(({ type, write }) => {
+    const md = x.modifier_add(modifierObject, type) >>> 0;
+    if (!md) throw new Error(`Modifier type ${type} is not in this WebAssembly module`);
+    write(new DataView(x.memory.buffer), md);
+    return md;
+  });
+  const result = extractedMesh(x.modifier_object_eval(modifierObject) >>> 0);
+  return { mesh: result, errors: added.map((md) => (x.modifier_error(md) ? cString(x.modifier_error(md)) : null)) };
 }
 
 const freeing = new FinalizationRegistry((context) => x.edit_context_free(context));

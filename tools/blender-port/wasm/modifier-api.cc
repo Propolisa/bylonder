@@ -1,0 +1,182 @@
+/* Blender's modifier stack on an object outside Edit Mode: the object's mesh comes in as arrays, its modifiers are
+ * Blender's ModifierData (JS writes their settings at the offsets of their DNA structs), and mesh_create_eval_final
+ * evaluates them as the depsgraph would. The result's arrays are read in place through an ExtractionHeader. */
+#include "BKE_attribute.hh"
+#include "BKE_cpp_types.hh"
+#include "BKE_idtype.hh"
+#include "BKE_lib_id.hh"
+#include "BKE_mesh.hh"
+#include "BKE_mesh_runtime.hh"
+#include "BKE_mesh_wrapper.hh"
+#include "BKE_modifier.hh"
+#include "BKE_object_types.hh"
+#include "BKE_scene.hh"
+#include "BLI_listbase.h"
+#include "BLI_math_base.h"
+#include "BLI_time.h"
+#include "BLO_readfile.hh"
+#include "DEG_depsgraph.hh"
+#include "DNA_mesh_types.h"
+#include "DNA_modifier_types.h"
+#include "DNA_object_types.h"
+#include "DNA_scene_types.h"
+#include "GPU_platform_backend_enum.h"
+#include "MEM_guardedalloc.h"
+
+#include "extraction.hh"
+
+#include <ctime>
+
+using namespace blender;
+
+#define EXPORT(name) extern "C" __attribute__((export_name(#name)))
+
+/* As Blender's main sets them up before any data is made. */
+static const bool types = (BKE_cpp_types_init(), BKE_idtype_init(), BKE_modifier_init(), true);
+
+struct ModifierObject {
+  Scene scene = {};
+  Object object = {};
+  Mesh *result = nullptr;
+  ExtractionHeader header = {};
+};
+
+static Mesh *&object_mesh(ModifierObject &mo) { return reinterpret_cast<Mesh *&>(mo.object.data); }
+
+static void result_free(ModifierObject &mo)
+{
+  if (mo.result) {
+    BKE_id_free(nullptr, mo.result);
+    mo.result = nullptr;
+  }
+}
+
+EXPORT(modifier_object_new) ModifierObject *modifier_object_new()
+{
+  ModifierObject *mo = MEM_new<ModifierObject>(__func__);
+  mo->object.type = OB_MESH;
+  mo->object.runtime = MEM_new<bke::ObjectRuntime>(__func__);
+  mo->object.runtime->object_to_world = float4x4::identity();
+  mo->object.runtime->world_to_object = float4x4::identity();
+  return mo;
+}
+
+EXPORT(modifier_object_free) void modifier_object_free(ModifierObject *mo)
+{
+  result_free(*mo);
+  BKE_modifiers_free(&mo->object.modifiers);
+  if (object_mesh(*mo)) {
+    BKE_id_free(nullptr, object_mesh(*mo));
+  }
+  MEM_delete(mo->object.runtime);
+  MEM_delete(mo);
+}
+
+/* The object's mesh, from the arrays bm_from_arrays takes; a UV map comes in as Blender's default "UVMap". */
+EXPORT(modifier_object_mesh_set)
+void modifier_object_mesh_set(ModifierObject *mo, int verts_num, const float3 *positions, int edges_num, const int2 *edges, int faces_num,
+                              const int *face_offsets, const int *corner_verts, const int *corner_edges, const float2 *uvs)
+{
+  const int corners_num = face_offsets[faces_num];
+  Mesh *mesh = BKE_mesh_new_nomain(verts_num, edges_num, faces_num, corners_num);
+  mesh->vert_positions_for_write().copy_from({positions, verts_num});
+  mesh->edges_for_write().copy_from({edges, edges_num});
+  mesh->face_offsets_for_write().copy_from({face_offsets, faces_num + 1});
+  mesh->corner_verts_for_write().copy_from({corner_verts, corners_num});
+  mesh->corner_edges_for_write().copy_from({corner_edges, corners_num});
+  if (uvs) {
+    mesh->attributes_for_write().add<float2>("UVMap", bke::AttrDomain::Corner,
+                                             bke::AttributeInitVArray(VArray<float2>::from_span({uvs, corners_num})));
+    mesh->uv_maps_active_set("UVMap");
+    mesh->uv_maps_default_set("UVMap");
+  }
+  if (object_mesh(*mo)) {
+    BKE_id_free(nullptr, object_mesh(*mo));
+  }
+  object_mesh(*mo) = mesh;
+}
+
+/* A modifier of a type (ModifierType) with Blender's defaults, last in the stack. */
+EXPORT(modifier_add) ModifierData *modifier_add(ModifierObject *mo, int type)
+{
+  if (!BKE_modifier_get_info(ModifierType(type))) {
+    return nullptr;
+  }
+  ModifierData *md = BKE_modifier_new(type);
+  BLI_addtail(&mo->object.modifiers, md);
+  return md;
+}
+
+EXPORT(modifier_clear) void modifier_clear(ModifierObject *mo) { BKE_modifiers_free(&mo->object.modifiers); }
+
+/* What the modifier reported in its last evaluation (BKE_modifier_set_error), or null. */
+EXPORT(modifier_error) const char *modifier_error(const ModifierData *md) { return md->error; }
+
+/* Evaluates the stack as the viewport does and extracts the result, which stays until the next evaluation. */
+EXPORT(modifier_object_eval) const ExtractionHeader *modifier_object_eval(ModifierObject *mo)
+{
+  result_free(*mo);
+  Depsgraph *depsgraph = BKE_scene_ensure_depsgraph(nullptr, &mo->scene, nullptr);
+  CustomData_MeshMasks mask = CD_MASK_MESH;
+  mo->result = bke::mesh_create_eval_final(depsgraph, &mo->scene, &mo->object, &mask);
+  /* Subdivision Surface last in the stack defers to the wrapper, which holds the subdivided mesh. */
+  const Mesh *mesh = BKE_mesh_wrapper_ensure_subdivision(mo->result);
+  BKE_mesh_wrapper_ensure_mdata(const_cast<Mesh *>(mesh));
+  ExtractionHeader &h = mo->header;
+  h = {};
+  h.verts_num = mesh->verts_num;
+  h.edges_num = mesh->edges_num;
+  h.faces_num = mesh->faces_num;
+  h.corners_num = mesh->corners_num;
+  h.tris_num = mesh->corner_tris().size();
+  h.positions = reinterpret_cast<float(*)[3]>(const_cast<float3 *>(mesh->vert_positions().data()));
+  h.vert_normals = reinterpret_cast<float(*)[3]>(const_cast<float3 *>(mesh->vert_normals().data()));
+  h.face_normals = reinterpret_cast<float(*)[3]>(const_cast<float3 *>(mesh->face_normals().data()));
+  h.edges = reinterpret_cast<int(*)[2]>(const_cast<int2 *>(mesh->edges().data()));
+  h.face_offsets = const_cast<int *>(mesh->face_offsets().data());
+  h.corner_verts = const_cast<int *>(mesh->corner_verts().data());
+  h.corner_edges = const_cast<int *>(mesh->corner_edges().data());
+  h.corner_tris = reinterpret_cast<int(*)[3]>(const_cast<int3 *>(mesh->corner_tris().data()));
+  h.tri_faces = const_cast<int *>(mesh->corner_tri_faces().data());
+  const VArray<float2> uvs = *mesh->attributes().lookup<float2>(mesh->active_or_default_uv_map_name(), bke::AttrDomain::Corner);
+  if (uvs && uvs.is_span()) {
+    h.uvs = reinterpret_cast<float(*)[2]>(const_cast<float2 *>(uvs.get_internal_span().data()));
+  }
+  return &h;
+}
+
+/* What the modifiers reach of Blender beyond the module. */
+
+namespace blender {
+
+/* Modifier types the module leaves out (Geometry Nodes needs file streams, Line Art Grease Pencil): an empty name makes
+ * BKE_modifier_get_info treat them as unknown. */
+ModifierTypeInfo modifierType_Nodes = {};
+ModifierTypeInfo modifierType_GreasePencilLineart = {};
+
+/* port-override: no GPU in the module, so subdivision is evaluated on the CPU. */
+GPUBackendType GPU_backend_get_type() { return GPU_BACKEND_NONE; }
+
+int64_t BLI_time_now_seconds_i() { return int64_t(time(nullptr)); }
+double BLI_time_now_seconds()
+{
+  timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  return ts.tv_sec + ts.tv_nsec * 1e-9;
+}
+
+/* As readfile.cc defines them for data not read from a file, which is all the module's data. */
+ID_Readfile_Data::Tags BLO_readfile_id_runtime_tags(const ID & /*id*/) { return {}; }
+void BLO_readfile_id_runtime_data_free(ID & /*id*/) {}
+
+/* As scene.cc defines them; scene.cc comes with Blender's scenes, which the module's one scene does without. */
+int get_render_subsurf_level(const RenderData *r, int lvl, bool for_render)
+{
+  if (r->mode & R_SIMPLIFY) {
+    return for_render ? min_ii(r->simplify_subsurf_render, lvl) : min_ii(r->simplify_subsurf, lvl);
+  }
+  return lvl;
+}
+float BKE_scene_ctime_get(const Scene *scene) { return (scene->r.cfra + scene->r.subframe) * scene->r.framelen; }
+
+}  // namespace blender

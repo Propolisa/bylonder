@@ -1,7 +1,7 @@
 // Entering and leaving Edit Mode (object_edit.cc) and what Edit Mode does with the mouse and keys. While editing,
 // Blender's edit mesh (an EditMesh, in WebAssembly) is the truth: every change extracts its Mesh arrays, for drawing
 // and picking, and an undo step stores them as Mesh data.
-import { Matrix, Ray, Vector3, VertexData } from '@babylonjs/core';
+import { Matrix, Ray, Vector3 } from '@babylonjs/core';
 import { BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
 import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
 import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS } from '../../bmesh/bmesh-wasm.js';
@@ -19,23 +19,14 @@ import { openMenu } from '../interface/menu.js';
 import { createRedoPanel } from '../interface/redo-panel.js';
 import { operatorSchema } from './mesh-catalog.js';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
-import { primitive_add } from '../mesh/editmesh-add.js';
 import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js';
-import { mesh_from_vertex_data } from '../../blenkernel/mesh/mesh-from-babylon.js';
+import { objectMesh } from './object-mesh.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { editMeshMenus } from '../space_view3d/view3d-menus-edit-mesh.js';
 
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
-
-// The Mesh an object's geometry comes from: its saved Mesh, its Blender primitive, or its Babylon geometry welded.
-export function objectMesh(node) {
-  const creation = node.metadata?.wbCreation;
-  if (creation?.mesh) return mesh_deserialize(creation.mesh);
-  if (creation?.operator) return primitive_add(creation.operator, creation.options);
-  return mesh_from_vertex_data(VertexData.ExtractFromMesh(node));
-}
 
 export function createEditMode({ world, editor, views, history, notify, changed }) {
   const { scene } = world;

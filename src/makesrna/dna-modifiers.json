@@ -1,0 +1,8119 @@
+{
+ "ArmatureModifier": {
+  "sdna": "ArmatureModifierData",
+  "size": 188,
+  "properties": {
+   "object": {
+    "offset": 116,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_bone_envelopes": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_vertex_groups": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_deform_preserve_volume": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_multi_modifier": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 0
+   },
+   "vertex_group": {
+    "offset": 124,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   }
+  }
+ },
+ "ArrayModifier": {
+  "sdna": "ArrayModifierData",
+  "size": 180,
+  "properties": {
+   "fit_type": {
+    "offset": 156,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "count": {
+    "offset": 168,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "fit_length": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float"
+   },
+   "curve": {
+    "offset": 116,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_constant_offset": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "constant_offset_displace": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "use_relative_offset": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "relative_offset_displace": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "use_merge_vertices": {
+    "offset": 164,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_merge_vertices_cap": {
+    "offset": 164,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "merge_threshold": {
+    "offset": 152,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_object_offset": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "offset_object": {
+    "offset": 120,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "start_cap": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "end_cap": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "offset_u": {
+    "offset": 172,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset_v": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "BevelModifier": {
+  "sdna": "BevelModifierData",
+  "size": 352,
+  "properties": {
+   "width": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "width_pct": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "segments": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "affect": {
+    "offset": 138,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "limit_method": {
+    "offset": 122,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "edge_weight": {
+    "offset": 224,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "vertex_weight": {
+    "offset": 288,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "angle_limit": {
+    "offset": 144,
+    "size": 4,
+    "kind": "float"
+   },
+   "vertex_group": {
+    "offset": 152,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_clamp_overlap": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8192,
+    "negative": true
+   },
+   "offset_type": {
+    "offset": 118,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "profile_type": {
+    "offset": 120,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "profile": {
+    "offset": 140,
+    "size": 4,
+    "kind": "float"
+   },
+   "material": {
+    "offset": 126,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "loop_slide": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384,
+    "negative": true
+   },
+   "mark_seam": {
+    "offset": 128,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "mark_sharp": {
+    "offset": 128,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "harden_normals": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": -32768
+   },
+   "face_strength_mode": {
+    "offset": 130,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "miter_outer": {
+    "offset": 134,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "miter_inner": {
+    "offset": 132,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "spread": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float"
+   },
+   "custom_profile": {
+    "offset": 220,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "vmesh_method": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "BooleanModifier": {
+  "sdna": "BooleanModifierData",
+  "size": 132,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "collection": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "operation": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "operand_type": {
+    "offset": 123,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true
+   },
+   "double_threshold": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "solver": {
+    "offset": 121,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "use_self": {
+    "offset": 123,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_hole_tolerant": {
+    "offset": 123,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "material_mode": {
+    "offset": 122,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "debug_options": {
+    "offset": 124,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "BuildModifier": {
+  "sdna": "BuildModifierData",
+  "size": 124,
+  "properties": {
+   "frame_start": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "frame_duration": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_reverse": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_random_order": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "seed": {
+    "offset": 120,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "CastModifier": {
+  "sdna": "CastModifierData",
+  "size": 196,
+  "properties": {
+   "cast_type": {
+    "offset": 190,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_x": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_y": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_z": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_radius_as_size": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_transform": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "factor": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float"
+   },
+   "radius": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "size": {
+    "offset": 120,
+    "size": 4,
+    "kind": "float"
+   },
+   "vertex_group": {
+    "offset": 124,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   }
+  }
+ },
+ "ClothModifier": {
+  "sdna": "ClothModifierData",
+  "size": 180,
+  "properties": {
+   "settings": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "collision_settings": {
+    "offset": 116,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "solver_result": {
+    "offset": 176,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "point_cache": {
+    "offset": 120,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "hair_grid_min": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "hair_grid_max": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "hair_grid_resolution": {
+    "offset": 160,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "length": 3
+   }
+  }
+ },
+ "CollisionModifier": {
+  "sdna": "CollisionModifierData",
+  "size": 164,
+  "properties": {}
+ },
+ "CorrectiveSmoothModifier": {
+  "sdna": "CorrectiveSmoothModifierData",
+  "size": 232,
+  "properties": {
+   "factor": {
+    "offset": 120,
+    "size": 4,
+    "kind": "float"
+   },
+   "iterations": {
+    "offset": 128,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "scale": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "rest_source": {
+    "offset": 133,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "smooth_type": {
+    "offset": 132,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_vertex_group": {
+    "offset": 130,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "vertex_group": {
+    "offset": 140,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "use_only_smooth": {
+    "offset": 130,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_pin_boundary": {
+    "offset": 130,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   }
+  }
+ },
+ "CurveModifier": {
+  "sdna": "CurveModifierData",
+  "size": 188,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "vertex_group": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "deform_axis": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "DataTransferModifier": {
+  "sdna": "DataTransferModifierData",
+  "size": 268,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_object_transform": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "bit": 1
+   },
+   "use_vert_data": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "bit": 268435456
+   },
+   "use_edge_data": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "bit": 536870912
+   },
+   "use_loop_data": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "bit": 1073741824
+   },
+   "use_poly_data": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "bit": 2147483648
+   },
+   "data_types_verts": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true
+   },
+   "data_types_edges": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true
+   },
+   "data_types_loops": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true
+   },
+   "data_types_polys": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true
+   },
+   "vert_mapping": {
+    "offset": 116,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "edge_mapping": {
+    "offset": 120,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "loop_mapping": {
+    "offset": 124,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "poly_mapping": {
+    "offset": 128,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_max_distance": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "bit": 2
+   },
+   "max_distance": {
+    "offset": 132,
+    "size": 4,
+    "kind": "float"
+   },
+   "ray_radius": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float"
+   },
+   "islands_precision": {
+    "offset": 140,
+    "size": 4,
+    "kind": "float"
+   },
+   "mix_mode": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "mix_factor": {
+    "offset": 192,
+    "size": 4,
+    "kind": "float"
+   },
+   "vertex_group": {
+    "offset": 196,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "bit": 4
+   }
+  }
+ },
+ "DecimateModifier": {
+  "sdna": "DecimateModifierData",
+  "size": 196,
+  "properties": {
+   "decimate_type": {
+    "offset": 190,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "ratio": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "iterations": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "angle_limit": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "vertex_group": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_collapse_triangulate": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_symmetry": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "symmetry_axis": {
+    "offset": 115,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "vertex_group_factor": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_dissolve_boundaries": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "delimit": {
+    "offset": 114,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "face_count": {
+    "offset": 192,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "DisplaceModifier": {
+  "sdna": "DisplaceModifierData",
+  "size": 348,
+  "properties": {
+   "vertex_group": {
+    "offset": 268,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "mid_level": {
+    "offset": 332,
+    "size": 4,
+    "kind": "float"
+   },
+   "strength": {
+    "offset": 260,
+    "size": 4,
+    "kind": "float"
+   },
+   "direction": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "space": {
+    "offset": 336,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_vertex_group": {
+    "offset": 340,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "texture": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_coords": {
+    "offset": 256,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "uv_layer": {
+    "offset": 180,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   },
+   "texture_coords_object": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_coords_bone": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   }
+  }
+ },
+ "DynamicPaintModifier": {
+  "sdna": "DynamicPaintModifierData",
+  "size": 124,
+  "properties": {
+   "canvas_settings": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "brush_settings": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "ui_type": {
+    "offset": 116,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "EdgeSplitModifier": {
+  "sdna": "EdgeSplitModifierData",
+  "size": 116,
+  "properties": {
+   "split_angle": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_edge_angle": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_edge_sharp": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   }
+  }
+ },
+ "ExplodeModifier": {
+  "sdna": "ExplodeModifierData",
+  "size": 196,
+  "properties": {
+   "protect": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_edge_cut": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "show_unborn": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "show_alive": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "show_dead": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_size": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "particle_uv": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68
+   },
+   "invert_vertex_group": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   }
+  }
+ },
+ "FluidModifier": {
+  "sdna": "FluidModifierData",
+  "size": 132,
+  "properties": {
+   "domain_settings": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "flow_settings": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "effector_settings": {
+    "offset": 116,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "fluid_type": {
+    "offset": 124,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilArmatureModifier": {
+  "sdna": "GreasePencilArmatureModifierData",
+  "size": 276,
+  "properties": {
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "object": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_bone_envelopes": {
+    "offset": 268,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_vertex_groups": {
+    "offset": 268,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_deform_preserve_volume": {
+    "offset": 268,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   }
+  }
+ },
+ "GreasePencilArrayModifier": {
+  "sdna": "GreasePencilArrayModifierData",
+  "size": 348,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "count": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "offset_object": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "constant_offset": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "relative_offset": {
+    "offset": 288,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "random_offset": {
+    "offset": 300,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "random_rotation": {
+    "offset": 312,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "random_scale": {
+    "offset": 324,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "seed": {
+    "offset": 340,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "replace_material": {
+    "offset": 344,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_constant_offset": {
+    "offset": 272,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "use_object_offset": {
+    "offset": 272,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512
+   },
+   "use_relative_offset": {
+    "offset": 272,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "use_uniform_random_scale": {
+    "offset": 272,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024
+   }
+  }
+ },
+ "GreasePencilBuildModifier": {
+  "sdna": "GreasePencilBuildModifierData",
+  "size": 388,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "mode": {
+    "offset": 282,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "transition": {
+    "offset": 284,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "start_delay": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "length": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "concurrent_time_alignment": {
+    "offset": 286,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "time_mode": {
+    "offset": 296,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "speed_factor": {
+    "offset": 288,
+    "size": 4,
+    "kind": "float"
+   },
+   "speed_maxgap": {
+    "offset": 292,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_restrict_frame_range": {
+    "offset": 280,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_percentage": {
+    "offset": 296,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "percentage_factor": {
+    "offset": 308,
+    "size": 4,
+    "kind": "float"
+   },
+   "frame_start": {
+    "offset": 264,
+    "size": 4,
+    "kind": "float"
+   },
+   "frame_end": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_fading": {
+    "offset": 280,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384
+   },
+   "fade_factor": {
+    "offset": 312,
+    "size": 4,
+    "kind": "float"
+   },
+   "target_vertex_group": {
+    "offset": 316,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "fade_opacity_strength": {
+    "offset": 380,
+    "size": 4,
+    "kind": "float"
+   },
+   "fade_thickness_strength": {
+    "offset": 384,
+    "size": 4,
+    "kind": "float"
+   },
+   "object": {
+    "offset": 304,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   }
+  }
+ },
+ "GreasePencilColorModifier": {
+  "sdna": "GreasePencilColorModifierData",
+  "size": 284,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_custom_curve": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "custom_curve": {
+    "offset": 256,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "color_mode": {
+    "offset": 264,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "hue": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "saturation": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "value": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "GreasePencilDashModifierData": {
+  "sdna": "GreasePencilDashModifierData",
+  "size": 284,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "segment_active_index": {
+    "offset": 272,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "dash_offset": {
+    "offset": 276,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilDashModifierSegment": {
+  "sdna": "GreasePencilDashModifierSegment",
+  "size": 88,
+  "properties": {
+   "name": {
+    "offset": 0,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "dash": {
+    "offset": 64,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "gap": {
+    "offset": 68,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "radius": {
+    "offset": 72,
+    "size": 4,
+    "kind": "float"
+   },
+   "opacity": {
+    "offset": 76,
+    "size": 4,
+    "kind": "float"
+   },
+   "material_index": {
+    "offset": 80,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_cyclic": {
+    "offset": 84,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ },
+ "GreasePencilEnvelopeModifier": {
+  "sdna": "GreasePencilEnvelopeModifierData",
+  "size": 288,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "mode": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "spread": {
+    "offset": 284,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mat_nr": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "thickness": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "strength": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "skip": {
+    "offset": 280,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilHookModifier": {
+  "sdna": "GreasePencilHookModifierData",
+  "size": 428,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_custom_curve": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "custom_curve": {
+    "offset": 256,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "object": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "subtarget": {
+    "offset": 268,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "strength": {
+    "offset": 424,
+    "size": 4,
+    "kind": "float"
+   },
+   "falloff_type": {
+    "offset": 340,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "falloff_radius": {
+    "offset": 420,
+    "size": 4,
+    "kind": "float"
+   },
+   "center": {
+    "offset": 408,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "matrix_inverse": {
+    "offset": 344,
+    "size": 16,
+    "kind": "int",
+    "length": 4
+   },
+   "use_falloff_uniform": {
+    "offset": 336,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ },
+ "GreasePencilLatticeModifier": {
+  "sdna": "GreasePencilLatticeModifierData",
+  "size": 276,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "object": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "strength": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "GreasePencilLengthModifier": {
+  "sdna": "GreasePencilLengthModifierData",
+  "size": 324,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "start_factor": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "end_factor": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "start_length": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "end_length": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "random_start_factor": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "random_end_factor": {
+    "offset": 280,
+    "size": 4,
+    "kind": "float"
+   },
+   "random_offset": {
+    "offset": 284,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_random": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "seed": {
+    "offset": 292,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "step": {
+    "offset": 296,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "overshoot_factor": {
+    "offset": 288,
+    "size": 4,
+    "kind": "float"
+   },
+   "mode": {
+    "offset": 300,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_curvature": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "invert_curvature": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "point_density": {
+    "offset": 308,
+    "size": 4,
+    "kind": "float"
+   },
+   "segment_influence": {
+    "offset": 312,
+    "size": 4,
+    "kind": "float"
+   },
+   "max_angle": {
+    "offset": 316,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "GreasePencilLineartModifier": {
+  "sdna": "GreasePencilLineartModifierData",
+  "size": 424,
+  "properties": {
+   "use_custom_camera": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 131072
+   },
+   "use_fuzzy_intersections": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_fuzzy_all": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_object_instances": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_edge_overlap": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_clip_plane_boundaries": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "crease_threshold": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float"
+   },
+   "split_angle": {
+    "offset": 372,
+    "size": 4,
+    "kind": "float"
+   },
+   "smooth_tolerance": {
+    "offset": 376,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_loose_as_contour": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "invert_source_vertex_group": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "use_output_vertex_group_match_by_name": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "use_face_mark": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512
+   },
+   "use_face_mark_invert": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024
+   },
+   "use_face_mark_boundaries": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048
+   },
+   "use_face_mark_keep_contour": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 262144
+   },
+   "chaining_image_threshold": {
+    "offset": 380,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_loose_edge_chain": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4096
+   },
+   "use_geometry_space_chain": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8192
+   },
+   "use_detail_preserve": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304
+   },
+   "use_overlap_edge_type_support": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384
+   },
+   "stroke_depth_offset": {
+    "offset": 392,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_offset_towards_custom_camera": {
+    "offset": 388,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "source_camera": {
+    "offset": 116,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "light_contour_object": {
+    "offset": 120,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "source_type": {
+    "offset": 110,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "source_object": {
+    "offset": 124,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "source_collection": {
+    "offset": 128,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "use_contour": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 2
+   },
+   "use_loose": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 32
+   },
+   "use_crease": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 4
+   },
+   "use_material": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 8
+   },
+   "use_edge_mark": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 1
+   },
+   "use_intersection": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 16
+   },
+   "use_light_contour": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 64
+   },
+   "use_shadow": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "bit": 256
+   },
+   "shadow_region_filtering": {
+    "offset": 361,
+    "size": 1,
+    "kind": "int"
+   },
+   "silhouette_filtering": {
+    "offset": 362,
+    "size": 1,
+    "kind": "int"
+   },
+   "fill_strokes": {
+    "offset": 363,
+    "size": 1,
+    "kind": "int",
+    "bit": 0
+   },
+   "use_multiple_levels": {
+    "offset": 111,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 0
+   },
+   "level_start": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "level_end": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "target_layer": {
+    "offset": 136,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "target_material": {
+    "offset": 132,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "source_vertex_group": {
+    "offset": 200,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "vertex_group": {
+    "offset": 264,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "is_baked": {
+    "offset": 388,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_cache": {
+    "offset": 388,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "overscan": {
+    "offset": 328,
+    "size": 4,
+    "kind": "float"
+   },
+   "radius": {
+    "offset": 352,
+    "size": 4,
+    "kind": "float"
+   },
+   "opacity": {
+    "offset": 348,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_material_mask": {
+    "offset": 358,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_material_mask_match": {
+    "offset": 358,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_material_mask_bits": {
+    "offset": 359,
+    "size": 1,
+    "kind": "int",
+    "bit": 1,
+    "bitset": 8
+   },
+   "use_intersection_match": {
+    "offset": 358,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_intersection_mask": {
+    "offset": 360,
+    "size": 1,
+    "kind": "int",
+    "bit": 1,
+    "bitset": 8
+   },
+   "use_crease_on_smooth": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32768
+   },
+   "use_crease_on_sharp": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 65536
+   },
+   "use_image_boundary_trimming": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1048576
+   },
+   "use_back_face_culling": {
+    "offset": 384,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 524288
+   },
+   "shadow_camera_near": {
+    "offset": 340,
+    "size": 4,
+    "kind": "float"
+   },
+   "shadow_camera_far": {
+    "offset": 344,
+    "size": 4,
+    "kind": "float"
+   },
+   "shadow_camera_size": {
+    "offset": 336,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_invert_collection": {
+    "offset": 388,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_invert_silhouette": {
+    "offset": 388,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   }
+  }
+ },
+ "GreasePencilMirrorModifier": {
+  "sdna": "GreasePencilMirrorModifierData",
+  "size": 276,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "object": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_axis_x": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_axis_y": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_axis_z": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   }
+  }
+ },
+ "GreasePencilMultiplyModifier": {
+  "sdna": "GreasePencilMultiModifierData",
+  "size": 300,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "use_fade": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "duplicates": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "distance": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "fading_thickness": {
+    "offset": 284,
+    "size": 4,
+    "kind": "float"
+   },
+   "fading_opacity": {
+    "offset": 288,
+    "size": 4,
+    "kind": "float"
+   },
+   "fading_center": {
+    "offset": 280,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "GreasePencilNoiseModifier": {
+  "sdna": "GreasePencilNoiseModifierData",
+  "size": 308,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_custom_curve": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "custom_curve": {
+    "offset": 256,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "factor": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "factor_strength": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "factor_thickness": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "factor_uvs": {
+    "offset": 280,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_random": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "seed": {
+    "offset": 300,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "noise_scale": {
+    "offset": 284,
+    "size": 4,
+    "kind": "float"
+   },
+   "noise_offset": {
+    "offset": 288,
+    "size": 4,
+    "kind": "float"
+   },
+   "step": {
+    "offset": 296,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "random_mode": {
+    "offset": 292,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilOffsetModifier": {
+  "sdna": "GreasePencilOffsetModifierData",
+  "size": 364,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "offset_mode": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "location": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "rotation": {
+    "offset": 284,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "scale": {
+    "offset": 296,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "stroke_location": {
+    "offset": 308,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "stroke_rotation": {
+    "offset": 320,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "stroke_scale": {
+    "offset": 332,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "seed": {
+    "offset": 344,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "stroke_step": {
+    "offset": 348,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "stroke_start_offset": {
+    "offset": 352,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_uniform_random_scale": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ },
+ "GreasePencilOpacityModifier": {
+  "sdna": "GreasePencilOpacityModifierData",
+  "size": 284,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_custom_curve": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "custom_curve": {
+    "offset": 256,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "color_mode": {
+    "offset": 268,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "color_factor": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float",
+    "custom": true
+   },
+   "hardness_factor": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_weight_as_factor": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_uniform_opacity": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "GreasePencilOutlineModifier": {
+  "sdna": "GreasePencilOutlineModifierData",
+  "size": 288,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "thickness": {
+    "offset": 272,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "sample_length": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "subdivision": {
+    "offset": 280,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_keep_shape": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "outline_material": {
+    "offset": 284,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "object": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   }
+  }
+ },
+ "GreasePencilShrinkwrapModifier": {
+  "sdna": "GreasePencilShrinkwrapModifierData",
+  "size": 300,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "wrap_method": {
+    "offset": 276,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "wrap_mode": {
+    "offset": 279,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "cull_face": {
+    "offset": 278,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "target": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "auxiliary_target": {
+    "offset": 268,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "offset": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "project_limit": {
+    "offset": 280,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_project_x": {
+    "offset": 284,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_project_y": {
+    "offset": 284,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_project_z": {
+    "offset": 284,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "subsurf_levels": {
+    "offset": 285,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "use_negative_direction": {
+    "offset": 278,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_positive_direction": {
+    "offset": 278,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_invert_cull": {
+    "offset": 278,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "smooth_factor": {
+    "offset": 288,
+    "size": 4,
+    "kind": "float"
+   },
+   "smooth_step": {
+    "offset": 292,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilSimplifyModifier": {
+  "sdna": "GreasePencilSimplifyModifierData",
+  "size": 288,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "factor": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "mode": {
+    "offset": 264,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "step": {
+    "offset": 270,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "length": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "sharp_threshold": {
+    "offset": 280,
+    "size": 4,
+    "kind": "float"
+   },
+   "distance": {
+    "offset": 284,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "GreasePencilSmoothModifier": {
+  "sdna": "GreasePencilSmoothModifierData",
+  "size": 284,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_custom_curve": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "custom_curve": {
+    "offset": 256,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "factor": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_edit_position": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_edit_strength": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_edit_thickness": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_edit_uv": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "step": {
+    "offset": 272,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_keep_shape": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "use_smooth_ends": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   }
+  }
+ },
+ "GreasePencilSubdivModifier": {
+  "sdna": "GreasePencilSubdivModifierData",
+  "size": 284,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "level": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "subdivision_type": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilTextureModifier": {
+  "sdna": "GreasePencilTextureModifierData",
+  "size": 304,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "uv_offset": {
+    "offset": 264,
+    "size": 4,
+    "kind": "float"
+   },
+   "uv_scale": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "alignment_rotation": {
+    "offset": 296,
+    "size": 4,
+    "kind": "float"
+   },
+   "fill_rotation": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "fill_offset": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float",
+    "length": 2
+   },
+   "fill_scale": {
+    "offset": 284,
+    "size": 4,
+    "kind": "float"
+   },
+   "fit_method": {
+    "offset": 292,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "mode": {
+    "offset": 294,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilThickModifierData": {
+  "sdna": "GreasePencilThickModifierData",
+  "size": 284,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_custom_curve": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "custom_curve": {
+    "offset": 256,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "thickness": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "thickness_factor": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_weight_factor": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_uniform_thickness": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ },
+ "GreasePencilTimeModifier": {
+  "sdna": "GreasePencilTimeModifierData",
+  "size": 300,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "segment_active_index": {
+    "offset": 296,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mode": {
+    "offset": 276,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "offset": {
+    "offset": 268,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "frame_scale": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "frame_start": {
+    "offset": 280,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "frame_end": {
+    "offset": 284,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "use_keep_loop": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_custom_frame_range": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "GreasePencilTimeModifierSegment": {
+  "sdna": "GreasePencilTimeModifierSegment",
+  "size": 80,
+  "properties": {
+   "name": {
+    "offset": 0,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "segment_start": {
+    "offset": 64,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "segment_end": {
+    "offset": 68,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "segment_repeat": {
+    "offset": 76,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "segment_mode": {
+    "offset": 72,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "GreasePencilTintModifier": {
+  "sdna": "GreasePencilTintModifierData",
+  "size": 300,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_custom_curve": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "custom_curve": {
+    "offset": 256,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "color_mode": {
+    "offset": 266,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "factor": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   },
+   "tint_mode": {
+    "offset": 267,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "color": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "color_ramp": {
+    "offset": 292,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "object": {
+    "offset": 288,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "radius": {
+    "offset": 272,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_weight_as_factor": {
+    "offset": 264,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ },
+ "GreasePencilWeightAngleModifier": {
+  "sdna": "GreasePencilWeightAngleModifierData",
+  "size": 348,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "target_vertex_group": {
+    "offset": 280,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "use_multiply": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_invert_output": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "angle": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "axis": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "space": {
+    "offset": 274,
+    "size": 2,
+    "kind": "int"
+   },
+   "minimum_weight": {
+    "offset": 268,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "GreasePencilWeightProximityModifier": {
+  "sdna": "GreasePencilWeightProximityModifierData",
+  "size": 348,
+  "properties": {
+   "tree_node_filter": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "use_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "layer_pass_filter": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_layer_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "invert_layer_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_layer_group_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "material_filter": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "material_pass_filter": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_material_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "invert_material_pass_filter": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "vertex_group_name": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   },
+   "use_multiply": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_invert_output": {
+    "offset": 264,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "target_vertex_group": {
+    "offset": 268,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "object": {
+    "offset": 344,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "distance_start": {
+    "offset": 336,
+    "size": 4,
+    "kind": "float"
+   },
+   "minimum_weight": {
+    "offset": 332,
+    "size": 4,
+    "kind": "float"
+   },
+   "distance_end": {
+    "offset": 340,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "HookModifier": {
+  "sdna": "HookModifierData",
+  "size": 348,
+  "properties": {
+   "strength": {
+    "offset": 276,
+    "size": 4,
+    "kind": "float"
+   },
+   "falloff_type": {
+    "offset": 177,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "falloff_radius": {
+    "offset": 260,
+    "size": 4,
+    "kind": "float"
+   },
+   "falloff_curve": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "center": {
+    "offset": 248,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "matrix_inverse": {
+    "offset": 184,
+    "size": 16,
+    "kind": "int",
+    "length": 4
+   },
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "subtarget": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "use_falloff_uniform": {
+    "offset": 176,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "vertex_group": {
+    "offset": 280,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 176,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "LaplacianDeformModifier": {
+  "sdna": "LaplacianDeformModifierData",
+  "size": 200,
+  "properties": {
+   "vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "iterations": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_vertex_group": {
+    "offset": 192,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "LaplacianSmoothModifier": {
+  "sdna": "LaplacianSmoothModifierData",
+  "size": 188,
+  "properties": {
+   "use_x": {
+    "offset": 184,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_y": {
+    "offset": 184,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_z": {
+    "offset": 184,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_volume_preserve": {
+    "offset": 184,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "use_normalized": {
+    "offset": 184,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "lambda_factor": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "lambda_border": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float"
+   },
+   "iterations": {
+    "offset": 186,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "vertex_group": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 184,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   }
+  }
+ },
+ "LatticeModifier": {
+  "sdna": "LatticeModifierData",
+  "size": 188,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "vertex_group": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 180,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "strength": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "MaskModifier": {
+  "sdna": "MaskModifierData",
+  "size": 188,
+  "properties": {
+   "mode": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "armature": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "vertex_group": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_smooth": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "threshold": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "MeshCacheModifier": {
+  "sdna": "MeshCacheModifierData",
+  "size": 1236,
+  "properties": {
+   "cache_format": {
+    "offset": 109,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "interpolation": {
+    "offset": 115,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "time_mode": {
+    "offset": 110,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "play_mode": {
+    "offset": 111,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "deform_mode": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "filepath": {
+    "offset": 212,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 1024
+   },
+   "factor": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "vertex_group": {
+    "offset": 121,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "forward_axis": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "up_axis": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "flip_axis": {
+    "offset": 114,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "bitset": 3
+   },
+   "frame_start": {
+    "offset": 192,
+    "size": 4,
+    "kind": "float"
+   },
+   "frame_scale": {
+    "offset": 196,
+    "size": 4,
+    "kind": "float"
+   },
+   "eval_frame": {
+    "offset": 200,
+    "size": 4,
+    "kind": "float"
+   },
+   "eval_time": {
+    "offset": 204,
+    "size": 4,
+    "kind": "float"
+   },
+   "eval_factor": {
+    "offset": 208,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "MeshDeformModifier": {
+  "sdna": "MeshDeformModifierData",
+  "size": 340,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "vertex_group": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "precision": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "use_dynamic_bind": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "MeshSequenceCacheModifier": {
+  "sdna": "MeshSeqCacheModifierData",
+  "size": 2172,
+  "properties": {
+   "cache_file": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "object_path": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 1024
+   },
+   "read_data": {
+    "offset": 1136,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "use_vertex_interpolation": {
+    "offset": 1136,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "velocity_scale": {
+    "offset": 1140,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "MeshToVolumeModifier": {
+  "sdna": "MeshToVolumeModifierData",
+  "size": 140,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "resolution_mode": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "voxel_size": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "voxel_amount": {
+    "offset": 120,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "interior_band_width": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "density": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "MirrorModifier": {
+  "sdna": "MirrorModifierData",
+  "size": 148,
+  "properties": {
+   "use_axis": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "bitset": 3
+   },
+   "use_bisect_axis": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "bitset": 3
+   },
+   "use_bisect_flip_axis": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "bitset": 3
+   },
+   "use_clip": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_mirror_vertex_groups": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_mirror_merge": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "negative": true
+   },
+   "use_mirror_u": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_mirror_v": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_mirror_udim": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384
+   },
+   "mirror_offset_u": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "mirror_offset_v": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset_u": {
+    "offset": 132,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset_v": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float"
+   },
+   "merge_threshold": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float"
+   },
+   "bisect_threshold": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "mirror_object": {
+    "offset": 140,
+    "size": 4,
+    "kind": "pointer"
+   }
+  }
+ },
+ "Modifier": {
+  "sdna": "ModifierData",
+  "size": 108,
+  "properties": {
+   "name": {
+    "offset": 32,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "type": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "show_viewport": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "bit": 1
+   },
+   "show_render": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "bit": 2
+   },
+   "show_in_editmode": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "bit": 4
+   },
+   "show_on_cage": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "bit": 8
+   },
+   "show_expanded": {
+    "offset": 22,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "custom": true
+   },
+   "is_active": {
+    "offset": 20,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "custom": true
+   },
+   "use_pin_to_last": {
+    "offset": 20,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "custom": true
+   },
+   "is_override_data": {
+    "offset": 20,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true
+   },
+   "use_apply_on_spline": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "bit": 64
+   },
+   "execution_time": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float"
+   },
+   "persistent_uid": {
+    "offset": 28,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "MultiresModifier": {
+  "sdna": "MultiresModifierData",
+  "size": 124,
+  "properties": {
+   "uv_smooth": {
+    "offset": 118,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "quality": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "boundary_smooth": {
+    "offset": 120,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "levels": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "sculpt_levels": {
+    "offset": 109,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "render_levels": {
+    "offset": 110,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "total_levels": {
+    "offset": 111,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "show_only_control_edges": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_creases": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_custom_normals": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_sculpt_base_mesh": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   }
+  }
+ },
+ "NodesModifier": {
+  "sdna": "NodesModifierData",
+  "size": 148,
+  "properties": {
+   "node_group": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "bake_directory": {
+    "offset": 116,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "bake_target": {
+    "offset": 121,
+    "size": 1,
+    "kind": "int"
+   },
+   "bakes": {
+    "offset": 128,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "panels": {
+    "offset": 140,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "show_group_selector": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "bit": 1,
+    "negative": true
+   },
+   "show_manage_panel": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "bit": 2,
+    "negative": true
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   }
+  }
+ },
+ "NodesModifierBakeDataBlocks": {
+  "sdna": "NodesModifierBake",
+  "size": 56,
+  "properties": {
+   "active_index": {
+    "offset": 32,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "NodesModifierBakes": {
+  "sdna": "NodesModifierData",
+  "size": 148,
+  "properties": {}
+ },
+ "NodesModifierDataBlock": {
+  "sdna": "NodesModifierDataBlock",
+  "size": 20,
+  "properties": {
+   "id_name": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "lib_name": {
+    "offset": 4,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "id": {
+    "offset": 8,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "id_type": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "NodesModifierPanels": {
+  "sdna": "NodesModifierData",
+  "size": 148,
+  "properties": {}
+ },
+ "NormalEditModifier": {
+  "sdna": "NormalEditModifierData",
+  "size": 212,
+  "properties": {
+   "mode": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "offset": {
+    "offset": 192,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "mix_mode": {
+    "offset": 180,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "mix_factor": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float"
+   },
+   "mix_limit": {
+    "offset": 188,
+    "size": 4,
+    "kind": "float"
+   },
+   "no_polynors_fix": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "target": {
+    "offset": 172,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "use_direction_parallel": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "OceanModifier": {
+  "sdna": "OceanModifierData",
+  "size": 1372,
+  "properties": {
+   "geometry_mode": {
+    "offset": 1349,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "size": {
+    "offset": 1360,
+    "size": 4,
+    "kind": "float"
+   },
+   "repeat_x": {
+    "offset": 1352,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "repeat_y": {
+    "offset": 1354,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "use_normals": {
+    "offset": 1350,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_foam": {
+    "offset": 1350,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_spray": {
+    "offset": 1350,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "invert_spray": {
+    "offset": 1350,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "spray_layer_name": {
+    "offset": 1280,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68
+   },
+   "resolution": {
+    "offset": 116,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "viewport_resolution": {
+    "offset": 120,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "spatial_size": {
+    "offset": 124,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "wind_velocity": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   },
+   "damping": {
+    "offset": 132,
+    "size": 4,
+    "kind": "float"
+   },
+   "wave_scale_min": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float"
+   },
+   "wave_alignment": {
+    "offset": 144,
+    "size": 4,
+    "kind": "float"
+   },
+   "wave_direction": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float"
+   },
+   "wave_scale": {
+    "offset": 152,
+    "size": 4,
+    "kind": "float"
+   },
+   "depth": {
+    "offset": 140,
+    "size": 4,
+    "kind": "float"
+   },
+   "foam_coverage": {
+    "offset": 160,
+    "size": 4,
+    "kind": "float"
+   },
+   "bake_foam_fade": {
+    "offset": 1364,
+    "size": 4,
+    "kind": "float"
+   },
+   "foam_layer_name": {
+    "offset": 1212,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68
+   },
+   "choppiness": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float",
+    "custom": true
+   },
+   "time": {
+    "offset": 164,
+    "size": 4,
+    "kind": "float"
+   },
+   "spectrum": {
+    "offset": 168,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "fetch_jonswap": {
+    "offset": 172,
+    "size": 4,
+    "kind": "float"
+   },
+   "sharpen_peak_jonswap": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   },
+   "random_seed": {
+    "offset": 1356,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "frame_start": {
+    "offset": 180,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "frame_end": {
+    "offset": 184,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "is_cached": {
+    "offset": 1348,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "filepath": {
+    "offset": 188,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 1024
+   }
+  }
+ },
+ "ParticleInstanceModifier": {
+  "sdna": "ParticleInstanceModifierData",
+  "size": 284,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "particle_system_index": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "axis": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "space": {
+    "offset": 118,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "use_normal": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_children": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_path": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "show_unborn": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "show_alive": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "show_dead": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_preserve_shape": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_size": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "position": {
+    "offset": 120,
+    "size": 4,
+    "kind": "float"
+   },
+   "random_position": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "rotation": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   },
+   "random_rotation": {
+    "offset": 132,
+    "size": 4,
+    "kind": "float"
+   },
+   "particle_amount": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float"
+   },
+   "particle_offset": {
+    "offset": 140,
+    "size": 4,
+    "kind": "float"
+   },
+   "index_layer_name": {
+    "offset": 144,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68
+   },
+   "value_layer_name": {
+    "offset": 212,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68
+   }
+  }
+ },
+ "ParticleSystemModifier": {
+  "sdna": "ParticleSystemModifierData",
+  "size": 140,
+  "properties": {
+   "particle_system": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   }
+  }
+ },
+ "RemeshModifier": {
+  "sdna": "RemeshModifierData",
+  "size": 132,
+  "properties": {
+   "mode": {
+    "offset": 122,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "scale": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float"
+   },
+   "threshold": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "octree_depth": {
+    "offset": 120,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "sharpness": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "voxel_size": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "adaptivity": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_remove_disconnected": {
+    "offset": 121,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_smooth_shade": {
+    "offset": 121,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "ScrewModifier": {
+  "sdna": "ScrewModifierData",
+  "size": 148,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "steps": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int"
+   },
+   "render_steps": {
+    "offset": 116,
+    "size": 4,
+    "kind": "int"
+   },
+   "iterations": {
+    "offset": 120,
+    "size": 4,
+    "kind": "int"
+   },
+   "axis": {
+    "offset": 138,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "angle": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   },
+   "screw_offset": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "merge_threshold": {
+    "offset": 132,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_normal_flip": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_normal_calculate": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_object_screw_offset": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_merge_vertices": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "use_smooth_shade": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_stretch_u": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_stretch_v": {
+    "offset": 136,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   }
+  }
+ },
+ "ShrinkwrapModifier": {
+  "sdna": "ShrinkwrapModifierData",
+  "size": 196,
+  "properties": {
+   "wrap_method": {
+    "offset": 184,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "wrap_mode": {
+    "offset": 187,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "cull_face": {
+    "offset": 186,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "target": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "auxiliary_target": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "vertex_group": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "offset": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float"
+   },
+   "project_limit": {
+    "offset": 188,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_project_x": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_project_y": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_project_z": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "subsurf_levels": {
+    "offset": 193,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "use_negative_direction": {
+    "offset": 186,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_positive_direction": {
+    "offset": 186,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_invert_cull": {
+    "offset": 186,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "invert_vertex_group": {
+    "offset": 186,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   }
+  }
+ },
+ "SimpleDeformModifier": {
+  "sdna": "SimpleDeformModifierData",
+  "size": 196,
+  "properties": {
+   "deform_method": {
+    "offset": 188,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "vertex_group": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "deform_axis": {
+    "offset": 190,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "origin": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "factor": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   },
+   "angle": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   },
+   "limits": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float",
+    "length": 2
+   },
+   "lock_x": {
+    "offset": 189,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "lock_y": {
+    "offset": 189,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "lock_z": {
+    "offset": 189,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "invert_vertex_group": {
+    "offset": 191,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ },
+ "SkinModifier": {
+  "sdna": "SkinModifierData",
+  "size": 116,
+  "properties": {
+   "branch_smoothing": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_smooth_shade": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_x_symmetry": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_y_symmetry": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_z_symmetry": {
+    "offset": 113,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   }
+  }
+ },
+ "SmoothModifier": {
+  "sdna": "SmoothModifierData",
+  "size": 180,
+  "properties": {
+   "use_x": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_y": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_z": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "factor": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "iterations": {
+    "offset": 178,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "vertex_group": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 176,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ },
+ "SoftBodyModifier": {
+  "sdna": "SoftbodyModifierData",
+  "size": 108,
+  "properties": {}
+ },
+ "SolidifyModifier": {
+  "sdna": "SolidifyModifierData",
+  "size": 348,
+  "properties": {
+   "solidify_mode": {
+    "offset": 316,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "thickness": {
+    "offset": 300,
+    "size": 4,
+    "kind": "float"
+   },
+   "thickness_clamp": {
+    "offset": 312,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_thickness_angle_clamp": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "thickness_vertex_group": {
+    "offset": 308,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset": {
+    "offset": 304,
+    "size": 4,
+    "kind": "float"
+   },
+   "edge_crease_inner": {
+    "offset": 320,
+    "size": 4,
+    "kind": "float"
+   },
+   "edge_crease_outer": {
+    "offset": 324,
+    "size": 4,
+    "kind": "float"
+   },
+   "edge_crease_rim": {
+    "offset": 328,
+    "size": 4,
+    "kind": "float"
+   },
+   "material_offset": {
+    "offset": 336,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "material_offset_rim": {
+    "offset": 338,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "shell_vertex_group": {
+    "offset": 172,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "rim_vertex_group": {
+    "offset": 236,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "use_rim": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_even_offset": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_quality_normals": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "invert_vertex_group": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_flat_faces": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256
+   },
+   "use_flip_normals": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_rim_only": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "nonmanifold_thickness_mode": {
+    "offset": 317,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "nonmanifold_boundary_mode": {
+    "offset": 318,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "nonmanifold_merge_threshold": {
+    "offset": 340,
+    "size": 4,
+    "kind": "float"
+   },
+   "bevel_convex": {
+    "offset": 344,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "SubsurfModifier": {
+  "sdna": "SubsurfModifierData",
+  "size": 132,
+  "properties": {
+   "uv_smooth": {
+    "offset": 116,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "quality": {
+    "offset": 118,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "boundary_smooth": {
+    "offset": 120,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "subdivision_type": {
+    "offset": 108,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "levels": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "render_levels": {
+    "offset": 112,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "show_only_control_edges": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_creases": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "use_custom_normals": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_limit_surface": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "negative": true
+   },
+   "use_adaptive_subdivision": {
+    "offset": 114,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "adaptive_space": {
+    "offset": 122,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "adaptive_pixel_size": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "adaptive_object_edge_length": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   },
+   "null": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "bit": null
+   }
+  }
+ },
+ "SurfaceDeformModifier": {
+  "sdna": "SurfaceDeformModifierData",
+  "size": 284,
+  "properties": {
+   "target": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "falloff": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float"
+   },
+   "vertex_group": {
+    "offset": 216,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 144,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_sparse_bind": {
+    "offset": 144,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "strength": {
+    "offset": 212,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "SurfaceModifier": {
+  "sdna": "SurfaceModifierData",
+  "size": 132,
+  "properties": {}
+ },
+ "TriangulateModifier": {
+  "sdna": "TriangulateModifierData",
+  "size": 124,
+  "properties": {
+   "quad_method": {
+    "offset": 112,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "ngon_method": {
+    "offset": 116,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "min_vertices": {
+    "offset": 120,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "keep_custom_normals": {
+    "offset": 108,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "UVProjectModifier": {
+  "sdna": "UVProjectModifierData",
+  "size": 244,
+  "properties": {
+   "uv_layer": {
+    "offset": 172,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   },
+   "projector_count": {
+    "offset": 152,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "projectors": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer",
+    "length": 10,
+    "custom": true
+   },
+   "aspect_x": {
+    "offset": 156,
+    "size": 4,
+    "kind": "float"
+   },
+   "aspect_y": {
+    "offset": 160,
+    "size": 4,
+    "kind": "float"
+   },
+   "scale_x": {
+    "offset": 164,
+    "size": 4,
+    "kind": "float"
+   },
+   "scale_y": {
+    "offset": 168,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "UVWarpModifier": {
+  "sdna": "UVWarpModifierData",
+  "size": 412,
+  "properties": {
+   "axis_u": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "axis_v": {
+    "offset": 109,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "center": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float",
+    "length": 2
+   },
+   "offset": {
+    "offset": 120,
+    "size": 4,
+    "kind": "float",
+    "length": 2
+   },
+   "scale": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float",
+    "length": 2
+   },
+   "rotation": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float"
+   },
+   "object_from": {
+    "offset": 140,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "bone_from": {
+    "offset": 144,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "object_to": {
+    "offset": 208,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "bone_to": {
+    "offset": 212,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "vertex_group": {
+    "offset": 276,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 110,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "uv_layer": {
+    "offset": 340,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   }
+  }
+ },
+ "VertexWeightEditModifier": {
+  "sdna": "WeightVGEditModifierData",
+  "size": 412,
+  "properties": {
+   "vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "falloff_type": {
+    "offset": 174,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_falloff": {
+    "offset": 172,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "normalize": {
+    "offset": 172,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "map_curve": {
+    "offset": 180,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "use_add": {
+    "offset": 172,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_remove": {
+    "offset": 172,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "default_weight": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   },
+   "add_threshold": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float"
+   },
+   "remove_threshold": {
+    "offset": 188,
+    "size": 4,
+    "kind": "float"
+   },
+   "mask_constant": {
+    "offset": 192,
+    "size": 4,
+    "kind": "float"
+   },
+   "mask_vertex_group": {
+    "offset": 196,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "mask_texture": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "mask_tex_use_channel": {
+    "offset": 260,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mask_tex_mapping": {
+    "offset": 336,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mask_tex_uv_layer": {
+    "offset": 340,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   },
+   "mask_tex_map_object": {
+    "offset": 268,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "mask_tex_map_bone": {
+    "offset": 272,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   }
+  }
+ },
+ "VertexWeightMixModifier": {
+  "sdna": "WeightVGMixModifierData",
+  "size": 476,
+  "properties": {
+   "vertex_group_a": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "vertex_group_b": {
+    "offset": 172,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group_a": {
+    "offset": 472,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "invert_vertex_group_b": {
+    "offset": 472,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "default_weight_a": {
+    "offset": 236,
+    "size": 4,
+    "kind": "float"
+   },
+   "default_weight_b": {
+    "offset": 240,
+    "size": 4,
+    "kind": "float"
+   },
+   "mix_mode": {
+    "offset": 244,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "mix_set": {
+    "offset": 245,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "normalize": {
+    "offset": 472,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "mask_constant": {
+    "offset": 252,
+    "size": 4,
+    "kind": "float"
+   },
+   "mask_vertex_group": {
+    "offset": 256,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "mask_texture": {
+    "offset": 324,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "mask_tex_use_channel": {
+    "offset": 320,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mask_tex_mapping": {
+    "offset": 396,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mask_tex_uv_layer": {
+    "offset": 400,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   },
+   "mask_tex_map_object": {
+    "offset": 328,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "mask_tex_map_bone": {
+    "offset": 332,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   }
+  }
+ },
+ "VertexWeightProximityModifier": {
+  "sdna": "WeightVGProximityModifierData",
+  "size": 420,
+  "properties": {
+   "vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "proximity_mode": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "proximity_geometry": {
+    "offset": 180,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true
+   },
+   "target": {
+    "offset": 184,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "min_dist": {
+    "offset": 408,
+    "size": 4,
+    "kind": "float"
+   },
+   "max_dist": {
+    "offset": 412,
+    "size": 4,
+    "kind": "float"
+   },
+   "falloff_type": {
+    "offset": 416,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "invert_falloff": {
+    "offset": 180,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "normalize": {
+    "offset": 180,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "map_curve": {
+    "offset": 172,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "mask_constant": {
+    "offset": 188,
+    "size": 4,
+    "kind": "float"
+   },
+   "mask_vertex_group": {
+    "offset": 192,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "mask_texture": {
+    "offset": 260,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "mask_tex_use_channel": {
+    "offset": 256,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mask_tex_mapping": {
+    "offset": 332,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "mask_tex_uv_layer": {
+    "offset": 336,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   },
+   "mask_tex_map_object": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "mask_tex_map_bone": {
+    "offset": 268,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   }
+  }
+ },
+ "VolumeDisplaceModifier": {
+  "sdna": "VolumeDisplaceModifierData",
+  "size": 140,
+  "properties": {
+   "strength": {
+    "offset": 120,
+    "size": 4,
+    "kind": "float"
+   },
+   "texture": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_map_mode": {
+    "offset": 116,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "texture_map_object": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_mid_level": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float",
+    "length": 3
+   },
+   "texture_sample_radius": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "VolumeToMeshModifier": {
+  "sdna": "VolumeToMeshModifierData",
+  "size": 204,
+  "properties": {
+   "object": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "threshold": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float"
+   },
+   "adaptivity": {
+    "offset": 116,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_smooth_shade": {
+    "offset": 120,
+    "size": 4,
+    "kind": "int",
+    "bit": 1
+   },
+   "grid_name": {
+    "offset": 136,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "resolution_mode": {
+    "offset": 124,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "voxel_size": {
+    "offset": 128,
+    "size": 4,
+    "kind": "float"
+   },
+   "voxel_amount": {
+    "offset": 132,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "WarpModifier": {
+  "sdna": "WarpModifierData",
+  "size": 484,
+  "properties": {
+   "object_from": {
+    "offset": 260,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "bone_from": {
+    "offset": 268,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "object_to": {
+    "offset": 264,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "bone_to": {
+    "offset": 332,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "strength": {
+    "offset": 464,
+    "size": 4,
+    "kind": "float"
+   },
+   "falloff_type": {
+    "offset": 473,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "falloff_radius": {
+    "offset": 468,
+    "size": 4,
+    "kind": "float"
+   },
+   "falloff_curve": {
+    "offset": 396,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "use_volume_preserve": {
+    "offset": 472,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "vertex_group": {
+    "offset": 400,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 472,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "texture": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_coords": {
+    "offset": 256,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "uv_layer": {
+    "offset": 180,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   },
+   "texture_coords_object": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_coords_bone": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   }
+  }
+ },
+ "WaveModifier": {
+  "sdna": "WaveModifierData",
+  "size": 380,
+  "properties": {
+   "use_x": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_y": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_cyclic": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_normal": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "use_normal_x": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_normal_y": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64
+   },
+   "use_normal_z": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "time_offset": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float"
+   },
+   "lifetime": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float"
+   },
+   "damping_time": {
+    "offset": 356,
+    "size": 4,
+    "kind": "float"
+   },
+   "falloff_radius": {
+    "offset": 360,
+    "size": 4,
+    "kind": "float"
+   },
+   "start_position_x": {
+    "offset": 332,
+    "size": 4,
+    "kind": "float"
+   },
+   "start_position_y": {
+    "offset": 336,
+    "size": 4,
+    "kind": "float"
+   },
+   "start_position_object": {
+    "offset": 260,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "vertex_group": {
+    "offset": 264,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 328,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "speed": {
+    "offset": 352,
+    "size": 4,
+    "kind": "float"
+   },
+   "height": {
+    "offset": 340,
+    "size": 4,
+    "kind": "float"
+   },
+   "width": {
+    "offset": 344,
+    "size": 4,
+    "kind": "float"
+   },
+   "narrowness": {
+    "offset": 348,
+    "size": 4,
+    "kind": "float"
+   },
+   "texture": {
+    "offset": 108,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_coords": {
+    "offset": 256,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "uv_layer": {
+    "offset": 180,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 68,
+    "custom": true
+   },
+   "texture_coords_object": {
+    "offset": 112,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "texture_coords_bone": {
+    "offset": 116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   }
+  }
+ },
+ "WeightedNormalModifier": {
+  "sdna": "WeightedNormalModifierData",
+  "size": 180,
+  "properties": {
+   "weight": {
+    "offset": 174,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "mode": {
+    "offset": 172,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "thresh": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   },
+   "keep_sharp": {
+    "offset": 173,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 173,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_face_influence": {
+    "offset": 173,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   }
+  }
+ },
+ "WeldModifier": {
+  "sdna": "WeldModifierData",
+  "size": 180,
+  "properties": {
+   "mode": {
+    "offset": 176,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "merge_threshold": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float"
+   },
+   "vertex_group": {
+    "offset": 112,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 177,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "loose_edges": {
+    "offset": 177,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   }
+  }
+ },
+ "WireframeModifier": {
+  "sdna": "WireframeModifierData",
+  "size": 196,
+  "properties": {
+   "thickness": {
+    "offset": 172,
+    "size": 4,
+    "kind": "float"
+   },
+   "thickness_vertex_group": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset": {
+    "offset": 176,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_replace": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_boundary": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_even_offset": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_relative_offset": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "use_crease": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "crease_weight": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float"
+   },
+   "material_offset": {
+    "offset": 190,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "vertex_group": {
+    "offset": 108,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true
+   },
+   "invert_vertex_group": {
+    "offset": 188,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   }
+  }
+ }
+}

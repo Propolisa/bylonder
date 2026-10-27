@@ -25,12 +25,15 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "modifier-api.cc"],
+      "defines": ["WITH_OPENSUBDIV"],
+      "includes": ["intern/opensubdiv"],
       "operators": ["source/blender/editors/mesh/mesh_intern.hh"],
       "dependencies": {
         "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
         "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
-                  "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"}
+                  "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"},
+        "opensubdiv": {"url": "https://github.com/PixarAnimationStudios/OpenSubdiv.git", "tag": "v3_7_0"}
       },
       "libraries": [
         "source/blender/editors/mesh",
@@ -40,7 +43,18 @@
         "source/blender/bmesh/intern",
         "source/blender/bmesh/operators",
         "source/blender/bmesh/tools",
-        "source/blender/blenkernel/intern",
+        {"path": "source/blender/blenkernel/intern", "exclude": ["blender.cc", "layer.cc", "scene.cc"]},
+        {"path": "source/blender/modifiers/intern", "exclude": ["MOD_nodes.cc"]},
+        "source/blender/geometry/intern/mesh_merge_verts.cc",
+        "source/blender/geometry/intern/randomize.cc",
+        "intern/opensubdiv/internal/base",
+        "intern/opensubdiv/internal/topology",
+        {"path": "intern/opensubdiv/internal/evaluator", "exclude": ["eval_output_gpu.cc", "gpu_compute_evaluator.cc", "gpu_patch_table.cc"]},
+        {"dependency": "opensubdiv", "path": "opensubdiv/far"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/sdc"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/vtr"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/bfr"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/osd"},
         "source/blender/blentranslation/intern",
         "source/blender/functions/intern",
         "source/blender/nodes/intern/geometry_nodes_bundle.cc",

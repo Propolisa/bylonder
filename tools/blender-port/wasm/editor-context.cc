@@ -352,36 +352,6 @@ Base *BKE_view_layer_base_find(ViewLayer *view_layer, Object *ob)
 void BKE_view_layer_synced_ensure(const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
 void _BKE_view_layer_synced_ensure_or_assert(const Main * /*bmain*/, const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
 
-/* As object.cc defines them; object.cc comes with the rest of Blender's object handling. */
-const Mesh *BKE_object_get_editmesh_eval_final(const Object *object)
-{
-  const Mesh *mesh = id_cast<const Mesh *>(object->data);
-  if (mesh->runtime->edit_mesh == nullptr) {
-    return nullptr;
-  }
-  return reinterpret_cast<Mesh *>(object->runtime->data_eval);
-}
-const Mesh *BKE_object_get_editmesh_eval_cage(const Object *object) { return object->runtime->editmesh_eval_cage; }
-void BKE_object_get_mirror_axes(const Object *ob, bool r_axis[3])
-{
-  r_axis[0] = r_axis[1] = r_axis[2] = false;
-  for (const ModifierData &md : ob->modifiers) {
-    if (md.type == eModifierType_Mirror && (md.mode & eModifierMode_Realtime)) {
-      const MirrorModifierData *mmd = reinterpret_cast<const MirrorModifierData *>(&md);
-      if (mmd->mirror_ob || (mmd->flag & MOD_MIR_NO_MERGE)) {
-        continue;
-      }
-      r_axis[0] |= (mmd->flag & MOD_MIR_AXIS_X) != 0;
-      r_axis[1] |= (mmd->flag & MOD_MIR_AXIS_Y) != 0;
-      r_axis[2] |= (mmd->flag & MOD_MIR_AXIS_Z) != 0;
-    }
-  }
-}
-Mesh *BKE_object_get_original_mesh(const Object *object)
-{
-  return id_cast<Mesh *>(object->id.orig_id == nullptr ? object->data : id_cast<Object *>(object->id.orig_id)->data);
-}
-
 /* As object_edit.cc defines them; object_edit.cc comes with the rest of Blender's object editing. */
 Object *ed::object::context_object(const bContext *C)
 {
@@ -398,8 +368,6 @@ Object *ed::object::context_active_object(const bContext *C)
   }
   return ob;
 }
-const float4x4 &Object::object_to_world() const { return this->runtime->object_to_world; }
-const float4x4 &Object::world_to_object() const { return this->runtime->world_to_object; }
 
 /* As object_shapekey.cc checks a mesh: an operator that moves vertices refuses a locked active shape key. */
 bool ed::object::shape_key_report_if_locked(const Object *obedit, ReportList *reports)
