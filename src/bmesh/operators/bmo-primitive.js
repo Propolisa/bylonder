@@ -126,7 +126,8 @@ function dissolveMarked(bm, flag) {
 
 export function BM_mesh_calc_uvs_circle(bm, matrix, radius, oflag, uv) {
   const uv_scale = f32(0.5 / radius), uv_center = 0.5;
-  const inv = invert_m4_m4(matrix);
+  const inv = unit_m4();
+  invert_m4_m4(inv, matrix);
   markedFaces(bm, oflag, (f) => loopsOf(bm, f, (l) => {
     const [x, y] = mul_m4_v3(inv, bm.v.co.subarray(bm.l.v[l] * 3, bm.l.v[l] * 3 + 3));
     setUV(uv, l, f32(uv_center + uv_scale * x), f32(uv_center + uv_scale * y));
@@ -195,7 +196,8 @@ export function BM_mesh_calc_uvs_cone(bm, matrix, radius_top, radius_bottom, seg
   const uv_scale_top = radius_top !== 0 ? f32(uv_radius / radius_top) : radius_bottom !== 0 ? f32(uv_radius / radius_bottom) : uv_radius;
   const uv_scale_bottom = radius_bottom !== 0 ? f32(uv_radius / radius_bottom) : uv_scale_top;
   const up = mul_mat3_m4_v3(matrix, [0, 0, 1]);
-  const inv = invert_m4_m4(matrix);
+  const inv = unit_m4();
+  invert_m4_m4(inv, matrix);
   let x = 1, y = f32(1 - uv_height);
   markedFaces(bm, oflag, (f) => {
     if (bm.f.len[f] === 4 && radius_top && radius_bottom) {

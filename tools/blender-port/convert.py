@@ -313,10 +313,9 @@ class Source:
             if c.kind == K.MACRO_INSTANTIATION and self.in_main(c):
                 self.macros[(c.extent.start.offset, c.extent.end.offset)] = (c.spelling, c.referenced)
         self.functions = [c for c in self.tu.cursor.walk_preorder() if c.kind in (K.FUNCTION_DECL, K.FUNCTION_TEMPLATE) and c.is_definition() and self.in_main(c)]
-        self.sigs = {}
+        self.sigs, self.computing = {}, set()
         for f in self.functions:
-            self.sigs[f.spelling] = self.signature(f)
-            self.registry[f.spelling] = self.sigs[f.spelling]
+            self.signature_of(f)
 
     def parse(self, text, outline=False):
         """The translation unit of text; an outline (includes, macros, function extents) skips function bodies."""
@@ -362,6 +361,21 @@ class Source:
 
     def sig_of(self, name):
         return self.sigs.get(name) or self.registry.get(name)
+
+    def signature_of(self, ref):
+        """The signature of the function ref names, computed on first use when this file defines it, so a callee defined
+        further down is known."""
+        name = ref.spelling
+        sig = self.sig_of(name)
+        if sig is not None or name in self.computing:
+            return sig
+        f = self.find(name)
+        if f is None:
+            return None
+        self.computing.add(name)
+        self.sigs[name] = self.registry[name] = self.signature(f)
+        self.computing.discard(name)
+        return self.sigs[name]
 
     def find(self, name):
         return next((f for f in self.functions if f.spelling == name), None)
@@ -464,7 +478,10 @@ class Source:
         index = next((n for n, a in enumerate(call.get_arguments()) if a.hash == arg.hash), -1)
         if index == 0 and call.spelling in OUT_FIRST:
             return 'write'
-        sig = self.sig_of(call.spelling) if hasattr(self, 'sigs') else None
+        if index == 0 and call.spelling in ('memcpy', 'memmove', 'memset'):
+            return 'write'
+        ref = call.referenced
+        sig = self.signature_of(ref) if ref is not None and ref.kind == K.FUNCTION_DECL else self.sig_of(call.spelling)
         if sig and 0 <= index < len(sig['params']) and sig['params'][index]['out'] == 'out':
             return 'write'
         return 'read'
