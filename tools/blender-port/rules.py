@@ -11,8 +11,8 @@ HEADER_FIELDS = {'hflag', 'index', 'api_flag'}
 
 # Vector and matrix functions writing their first argument: fn(out, ...args) is `out = js(...args)`.
 OUT_FIRST = {
-    'copy_v3_v3': lambda a: f'[...{a[0]}]', 'copy_v3_v3_db': lambda a: f'[...{a[0]}]', 'copy_v2_v2': lambda a: f'[...{a[0]}]',
-    'copy_v4_v4': lambda a: f'[...{a[0]}]', 'copy_v3_fl': lambda a: f'[{a[0]}, {a[0]}, {a[0]}]', 'copy_v3_fl3': lambda a: f'[{", ".join(a)}]',
+    'copy_v3_v3': lambda a: f'{a[0]}.slice(0, 3)', 'copy_v3_v3_db': lambda a: f'{a[0]}.slice(0, 3)', 'copy_v2_v2': lambda a: f'{a[0]}.slice(0, 2)',
+    'copy_v4_v4': lambda a: f'{a[0]}.slice(0, 4)', 'copy_v3_fl': lambda a: f'[{a[0]}, {a[0]}, {a[0]}]', 'copy_v3_fl3': lambda a: f'[{", ".join(a)}]',
     'zero_v3': lambda a: '[0, 0, 0]', 'unit_m4': lambda a: 'unit_m4()', 'unit_m3': lambda a: 'unit_m3()',
     'copy_m4_m4': lambda a: f'{a[0]}.map((c) => [...c])',
     'add_v3_v3v3': 'add_v3', 'sub_v3_v3v3': 'sub_v3', 'mul_v3_v3fl': 'mul_v3_fl', 'madd_v3_v3v3fl': 'madd', 'cross_v3_v3v3': 'cross_v3',

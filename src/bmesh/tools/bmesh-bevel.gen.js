@@ -136,6 +136,14 @@ import {
   BM_vert_face_check,
   BM_vert_step_fan_loop,
 } from '../intern/bmesh-query.js';
+import {
+  EIG_linear_least_squares_solver_new,
+  EIG_linear_solver_delete,
+  EIG_linear_solver_matrix_add,
+  EIG_linear_solver_right_hand_side_add,
+  EIG_linear_solver_solve,
+  EIG_linear_solver_variable_get,
+} from '../../intern/eigen.js';
 import { CD_PROP_FLOAT2, CD_PROP_INT16_2D, CD_PROP_INT32 } from '../../makesdna/customdata-types.js';
 import { MOD_WEIGHTEDNORMALS_FACEWEIGHT_CDLAYER_ID } from '../../makesdna/modifier-types.js';
 

@@ -150,7 +150,7 @@ class Driver:
             if name in self.exports.of(module):
                 self.note(module, 'shimmed', name, self.check_shim(provider, rel, module, name))
                 # What the shim calls of Blender's, looked for in the same file first.
-                queue += [(rel, need, provider) for need in self.exports.needs(module)]
+                queue += [(rel, need, rel) for need in self.exports.needs(module)]
                 continue
             reason = self.excluded(module, name)
             if reason:

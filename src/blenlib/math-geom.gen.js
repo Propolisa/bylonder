@@ -74,6 +74,29 @@ export function plane_from_point_normal_v3(plane_co, plane_no) {
   return r_plane;
 }
 
+export function dist_squared_to_line_segment_v2(p, l1, l2) {
+  let closest = [0, 0];
+  [, closest] = closest_to_line_segment_v2(p, l1, l2);
+  return len_squared_v2v2(closest, p);
+}
+
+export function closest_to_line_segment_v2(p, l1, l2) {
+  let _r0;
+  let r_close = [0, 0];
+  let cp = [0, 0];
+  const lambda = (([_r0, cp] = closest_to_line_v2(p, l1, l2)), _r0);
+  if (lambda <= 0.0) {
+    r_close = [...l1];
+    return [0.0, r_close];
+  }
+  if (lambda >= 1.0) {
+    r_close = [...l2];
+    return [1.0, r_close];
+  }
+  r_close = [...cp];
+  return [lambda, r_close];
+}
+
 export function closest_to_line_segment_v3(p, l1, l2) {
   let _r0;
   let r_close = [0, 0, 0];
@@ -179,6 +202,33 @@ export function closest_to_line_v3(p, l1, l2) {
   let r_close = [0, 0, 0];
   const u = sub_v3(l2, l1);
   return [(([_r0, r_close] = closest_to_ray_v3(p, l1, u)), _r0), r_close];
+}
+
+export function closest_to_line_v2(p, l1, l2) {
+  const r_close = [0, 0];
+  const u = sub_v2_v2v2(l2, l1);
+  const h = sub_v2_v2v2(p, l1);
+  const denom = dot_v2v2(u, u);
+  if (denom === 0.0) {
+    r_close[0] = l1[0];
+    r_close[1] = l1[1];
+    return [0.0, r_close];
+  }
+  const lambda = Math.fround(dot_v2v2(u, h) / denom);
+  r_close[0] = Math.fround(l1[0] + Math.fround(u[0] * lambda));
+  r_close[1] = Math.fround(l1[1] + Math.fround(u[1] * lambda));
+  return [lambda, r_close];
+}
+
+export function line_point_factor_v2_ex(p, l1, l2, epsilon, fallback) {
+  const u = sub_v2_v2v2(l2, l1);
+  const h = sub_v2_v2v2(p, l1);
+  const dot = len_squared_v2(u);
+  return dot > epsilon ? Math.fround(dot_v2v2(u, h) / dot) : fallback;
+}
+
+export function line_point_factor_v2(p, l1, l2) {
+  return line_point_factor_v2_ex(p, l1, l2, 0.0, 0.0);
 }
 
 export function axis_dominant_v3_to_m3(normal) {
@@ -436,12 +486,21 @@ export function mul_v2_fl(r, f) {
   r[1] = Math.fround(r[1] * f);
 }
 
+export function dot_v2v2(a, b) {
+  return Math.fround(Math.fround(a[0] * b[0]) + Math.fround(a[1] * b[1]));
+}
+
 export function cross_v2v2(a, b) {
   return Math.fround(Math.fround(a[0] * b[1]) - Math.fround(a[1] * b[0]));
 }
 
 export function len_squared_v2(v) {
   return Math.fround(Math.fround(v[0] * v[0]) + Math.fround(v[1] * v[1]));
+}
+
+export function len_squared_v2v2(a, b) {
+  const d = sub_v2_v2v2(b, a);
+  return dot_v2v2(d, d);
 }
 
 export function equals_v3v3(v1, v2) {

@@ -17,6 +17,7 @@ Needs Clang 18 with its Python bindings (`pip install libclang==18.1.1`), the Bl
 Inspect one file: tools/blender-port/convert.py SRC source/blender/bmesh/intern/bmesh_query.cc [FUNCTION ...]
 """
 import json
+import math
 import os
 import re
 import struct
@@ -486,6 +487,7 @@ class FunctionPort:
         self.uses_bm = False
         self.deps = set()
         self.cursors = {}
+        self.views = {}
 
     def temp(self):
         name = f'_r{self.temps}'
@@ -547,6 +549,33 @@ class FunctionPort:
                 cursors[key] = (base, start)
         return cursors
 
+    def find_views(self, body):
+        """Number pointers into a buffer that are only written through (`float *co = buf + 3 * k`), as {var: (buf,
+        offset)}: a typed array view, so writes reach the buffer as in C."""
+        views, assigned = {}, set()
+        for c in body.walk_preorder():
+            if c.kind == K.VAR_DECL and pointee(c.type) is not None and (is_float(pointee(c.type)) or is_int(pointee(c.type))):
+                init = clangx.var_init(c)
+                place = self.buffer_place(init) if init is not None else None
+                if place:
+                    views[c.hash] = place
+            elif is_binary(c, '=', '+=', '-=') or (c.kind == K.UNARY_OPERATOR and clangx.unary_operator(c)[0] in ('++', '--')):
+                target = strip_parens_casts(kids(c)[0])
+                if target.kind == K.DECL_REF_EXPR and target.referenced is not None:
+                    assigned.add(target.referenced.hash)
+        return {k: v for k, v in views.items() if k not in assigned}
+
+    def buffer_place(self, c):
+        """(buffer, offset) of a number pointer expression `buf + i` or `&buf[i]`, or None."""
+        c = strip_parens_casts(c)
+        if is_binary(c, '+') and pointee(kids(c)[0].type) is not None and is_int(kids(c)[1].type):
+            return kids(c)[0], kids(c)[1]
+        if is_unary(c, '&') and strip_parens_casts(kids(c)[0]).kind == K.ARRAY_SUBSCRIPT_EXPR:
+            base, index = kids(strip_parens_casts(kids(c)[0]))
+            if pointee(base.type) is not None and (is_float(pointee(base.type)) or is_int(pointee(base.type))):
+                return base, index
+        return None
+
     def array_place(self, c):
         """(array, index) a struct pointer expression points at: `arr`, `&arr[i]` or `arr + i`; else None."""
         if c is None:
@@ -583,6 +612,7 @@ class FunctionPort:
         outs = [p for p in sig['params'] if p['out'] == 'out']
         body = next(k for k in self.f.get_children() if k.kind == K.COMPOUND_STMT)
         self.cursors = self.find_cursors(body)
+        self.views = self.find_views(body)
         lines = self.block_lines(body, [(f'let {p["name"]}{self.out_init(p)};', p['cursor']) for p in outs])
         statements = list(body.get_children())
         if self.outs() and canon(sig['ret']).kind == T.VOID and not (statements and statements[-1].kind == K.RETURN_STMT):
@@ -804,6 +834,9 @@ class FunctionPort:
         if v.hash in self.cursors:
             _, start = self.cursors[v.hash]
             return f'let {v.spelling}_i = {self.expr(start) if start is not None else 0};'
+        if v.hash in self.views:
+            buf, offset = self.views[v.hash]
+            return f'const {v.spelling} = {self.expr(buf)}.subarray({self.expr(offset)});'
         init = clangx.var_init(v)
         if init is None:
             value = zero_of(t)
@@ -1085,6 +1118,8 @@ class FunctionPort:
 
     def assign(self, lhs, value, size=3):
         s = strip_parens_casts(lhs)
+        if s.kind == K.DECL_REF_EXPR and s.referenced is not None and s.referenced.hash in self.views:
+            return f'{s.spelling}.set({value})'
         target = address_of(s)
         if target is not None and strip_parens_casts(target).kind == K.ARRAY_SUBSCRIPT_EXPR:
             base, index = kids(strip_parens_casts(target))
@@ -1239,14 +1274,20 @@ class FunctionPort:
         if name in ALLOCATORS:
             elem = pointee(want) if want is not None and pointee(want) is not None and canon(pointee(want)).kind != T.VOID else pointee(self.call_type)
             if name.endswith('arrayN') and len(args) >= 2:
-                count = [args[0]]
+                count = [self.expr(args[0])]
             else:
-                count = [f for f in self.product(args[-1]) if strip_parens_casts(f).kind != K.CXX_UNARY_EXPR] if args else []
+                factors = self.product(args[-1]) if args else []
+                count = [self.expr(f) for f in factors if strip_parens_casts(f).kind != K.CXX_UNARY_EXPR]
+                # sizeof(float[3]) * n of float is 3 * n floats: the sizes give how many elements each counted item is.
+                sizes = math.prod(clangx.evaluate(f) or 1 for f in factors if strip_parens_casts(f).kind == K.CXX_UNARY_EXPR)
+                size = canon(elem).get_size() if elem is not None and canon(elem).kind != T.VOID else 0
+                if size > 0 and sizes != size and sizes % size == 0:
+                    count.insert(0, str(sizes // size))
             if elem is None or canon(elem).kind == T.VOID:
-                return f'new Array({" * ".join(self.expr(f) for f in count)})' if count else '{}'
+                return f'new Array({" * ".join(count)})' if count else '{}'
             if not count:
                 return zero_of(elem) or '{}'
-            return buffer_of(elem, ' * '.join(self.expr(f) for f in count))
+            return buffer_of(elem, ' * '.join(count))
         if name == 'bl_port_alloca':
             return buffer_of(pointee(args[0].type), self.expr(args[1]))
         if name == 'memset':
