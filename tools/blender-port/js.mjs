@@ -1,7 +1,7 @@
 // JS side of the port generator.
 // `node js.mjs exports FILE...`: each module's exports as JSON, {file: {exports: {name: {params, override}}, needs}},
 // from its syntax tree: params are a function's parameter names (null for other values), override the reason in a
-// leading `// port-override: <reason>` comment, needs the names it imports from the tree's other modules.
+// leading `// port-override: <reason>` comment, needs the names its shims import from its own generated module.
 // `node js.mjs format FILE...`: generated modules get ESLint's prefer-const fix, then Prettier.
 import { readFileSync, writeFileSync } from 'node:fs';
 import * as espree from 'espree';
@@ -14,8 +14,8 @@ const paramName = (p) => (p.type === 'AssignmentPattern' ? paramName(p.left) : p
 function exportsOf(text, file) {
   const tree = parse(text);
   const names = {};
-  // Names imported from other modules of the tree; the generator ports any that are Blender's.
-  const needs = tree.body.filter((n) => n.type === 'ImportDeclaration' && n.source.value.startsWith('.')).flatMap((n) => n.specifiers.filter((s) => s.imported).map((s) => s.imported.name));
+  const generated = './' + file.split('/').pop().replace(/\.js$/, '.gen.js');
+  const needs = tree.body.filter((n) => n.type === 'ImportDeclaration' && n.source.value === generated).flatMap((n) => n.specifiers.map((s) => s.imported.name));
   const override = (node) => {
     const comment = tree.comments.filter((c) => c.range[1] <= node.range[0] && !text.slice(c.range[1], node.range[0]).trim()).at(-1);
     return comment?.value.match(/^\s*port-override:\s*(.*)$/)?.[1] ?? null;

@@ -16,10 +16,12 @@ Units (manifest `units`) are self-contained parts built to WebAssembly from Blen
 see wasm.py).
 
 Usage: tools/blender-port/port.py SRC [--wasm | --units-only | --check FILE]   (SRC: Blender sources of the manifest's tag;
-see convert.py). --check converts every function of one Blender file to stdout and counts its FIX marks by kind, in
-seconds, to try a converter change; signatures from other files are known only in a full run.
+see convert.py). --check FILE... [-j N] converts every function of each Blender file in parallel, counting FIX marks by
+kind and JS syntax errors, in seconds, to try a converter change; signatures from other files are known only in a full
+run. With one file, its JS goes to stdout.
 """
 import collections
+import multiprocessing
 import glob
 import json
 import os
@@ -384,12 +386,23 @@ class Driver:
                     open(public, 'w').write('\n'.join(kept))
 
 
-def check(driver, rel):
-    source = driver.source(rel)
+def check(root, manifest, rel):
+    """One file's functions as JS, and a summary line: functions, FIX marks by kind, and any JS syntax error."""
+    source = Driver(root, manifest).source(rel)
     js = '\n\n'.join(source.emit(f)[0] for f in source.functions)
-    print(js)
     fixes = collections.Counter(m.group(1) for m in re.finditer(r'/\*FIX ([^*:]*)', js))
-    print(f'{len(source.functions)} functions, {sum(fixes.values())} FIX marks: {dict(fixes.most_common())}', file=sys.stderr)
+    syntax = subprocess.run(['node', '--check', '--input-type=module'], input=js, capture_output=True, text=True)
+    error = syntax.stderr.strip().splitlines()[-1] if syntax.returncode else ''
+    return js, f'{rel}: {len(source.functions)} functions, {sum(fixes.values())} FIX marks {dict(fixes.most_common())}{" SYNTAX " + error if error else ""}'
+
+
+def check_all(root, manifest, files, jobs):
+    """--check: the files converted in parallel, one summary line each; with one file, its JS to stdout too."""
+    with multiprocessing.Pool(min(jobs, len(files))) as pool:
+        for js, line in pool.starmap(check, [(root, manifest, rel) for rel in files]):
+            if len(files) == 1:
+                print(js)
+            print(line, file=sys.stderr)
 
 
 def main():
@@ -397,7 +410,9 @@ def main():
     manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
     driver = Driver(root, manifest)
     if '--check' in sys.argv:
-        return check(driver, sys.argv[sys.argv.index('--check') + 1])
+        jobs = int(sys.argv.pop(sys.argv.index('-j') + 1)) if '-j' in sys.argv else max(os.cpu_count() - 1, 1)
+        files = [a for a in sys.argv[sys.argv.index('--check') + 1:] if not a.startswith('-')]
+        return check_all(root, manifest, files, jobs)
     if '--units-only' not in sys.argv:
         driver.run()
         driver.write()
