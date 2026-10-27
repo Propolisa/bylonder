@@ -4,7 +4,7 @@ import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../src/bmesh/intern/bmesh-mesh-convert.js';
 import { BM_mesh_elem_hflag_enable_all, BM_mesh_select_mode_flush, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
 import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT } from '../src/bmesh/intern/bmesh-class.js';
-import { meshOperators } from '../src/editors/mesh/editmesh-tools.js';
+import { meshOperators, operatorPreview } from '../src/editors/mesh/editmesh-tools.js';
 
 const runs = Number(process.argv[2] ?? 3);
 const mesh = primitive_add('mesh.primitive_grid_add', { x_subdivisions: 317, y_subdivisions: 317 });
@@ -51,4 +51,12 @@ for (const [name, props] of operators) {
   } catch (error) {
     console.log(`${name.padEnd(30)} failed: ${error.message.split('\n')[0]}`);
   }
+}
+
+// A modal tool's step: its preview re-run from the edit mesh as it was, after the first.
+for (const [name, props] of operators.filter(([name]) => /bevel|inset/.test(name))) {
+  const bm = selectedAll(), preview = operatorPreview(bm, name);
+  preview(props);
+  const times = Array.from({ length: runs }, () => { const t = performance.now(); preview(props); return performance.now() - t; });
+  console.log(`${(name + ' preview').padEnd(30)} ${ms(times.sort((a, b) => a - b)[runs >> 1])}`);
 }

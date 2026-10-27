@@ -39,7 +39,7 @@ assert.ok(data.positions.length === 24 * 3 && data.indices.length === 36);
 console.log('Mesh: draw cache maps Blender axes onto Babylon with outward winding');
 
 // Edit Mode operators on Blender's own selection, compared with Blender's result.
-import { meshOperators } from '../src/editors/mesh/editmesh-tools.js';
+import { meshOperators, operatorPreview } from '../src/editors/mesh/editmesh-tools.js';
 import { BM_elem_select_set, BM_select_history_store, BM_mesh_elem_hflag_disable_all, BM_mesh_select_mode_flush, SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../src/bmesh/intern/bmesh-marking.js';
 import { BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SEAM, BM_ELEM_SELECT } from '../src/bmesh/intern/bmesh-class.js';
 const SELECT = { VERT: [SCE_SELECT_VERTEX, BM_VERT], EDGE: [SCE_SELECT_EDGE, BM_EDGE], FACE: [SCE_SELECT_FACE, BM_FACE] };
@@ -59,7 +59,10 @@ function geometry(positions, edges, face_offsets, corner_verts) {
 
 // Operators whose resulting selection is compared with Blender's too.
 const SELECTION_CHECKED = /select/;
-let edited = 0, geometric = 0;
+// Modal tools, whose previews must show what running them gives.
+const PREVIEWED = /^mesh\.(bevel|inset)$/;
+const MESH_ARRAYS = ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges'];
+let edited = 0, geometric = 0, previewed = 0;
 // Every fixture runs, so one test run reports every operator that differs from Blender.
 const failures = [];
 for (const file of await readdir(dir)) {
@@ -86,7 +89,13 @@ function checkEdit(name, fixture) {
     bm.selectmode = mode;
     for (const i of select) { BM_elem_select_set(bm, htype, live[i], true); BM_select_history_store(bm, htype, live[i]); }
     BM_mesh_select_mode_flush(bm);
+    const preview = PREVIEWED.test(operator) && operatorPreview(bm, operator)(props).mesh;
     meshOperators[operator](bm, props);
+    if (preview) {
+      const result = BM_mesh_bm_to_me(bm);
+      for (const key of MESH_ARRAYS) assert.deepEqual(Array.from(preview[key]), Array.from(result[key]), `${name}: preview ${key}`);
+      previewed++;
+    }
   };
   if (fixture.edit.pre) run(fixture.edit.pre);
   run({ select_mode, select, operator, props });
@@ -109,5 +118,5 @@ function checkEdit(name, fixture) {
   assert.deepEqual(Array.from(mesh.corner_edges), fixture.corner_edges, name + ': corner edges');
   edited++;
 }
-assert.ok(edited >= 7 && geometric >= 7);
-console.log(`Mesh: ${edited} Edit Mode operator results match Blender 5.2 exactly, ${geometric} extrudes match as geometry (Blender's order there varies by run)`);
+assert.ok(edited >= 7 && geometric >= 7 && previewed >= 20);
+console.log(`Mesh: ${edited} Edit Mode operator results match Blender 5.2 exactly, ${geometric} extrudes match as geometry (Blender's order there varies by run), ${previewed} modal previews match their result`);

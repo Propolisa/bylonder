@@ -4,14 +4,14 @@ import { Matrix, Ray, Vector3, VertexData } from '@babylonjs/core';
 import { BM_ITER_MESH, BM_VERT, BM_EDGE, BM_FACE, BM_ELEM_SELECT, BM_elem_flag_test } from '../../bmesh/intern/bmesh-class.js';
 import { BM_face_normal_update } from '../../bmesh/intern/bmesh-polygon.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
-import { SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
+import { POOL, SCE_SELECT_VERTEX, BM_mesh_select_mode_flush, BM_select_history_active_get } from '../../bmesh/intern/bmesh-marking.js';
 import { EDBM_select_pick, EDBM_edge_find_nearest, edbm_select_loop, mesh_select_all, mesh_select_mode, edbm_select_linked_pick } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
 import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, view3d_pixel_size } from '../transform/transform.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
-import { meshOperators } from '../mesh/editmesh-tools.js';
+import { meshOperators, operatorPreview } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
 import { inset_modal } from '../mesh/editmesh-inset.js';
 import { bevel_modal } from '../mesh/editmesh-bevel.js';
@@ -57,9 +57,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     em.elems = { v: [], e: [], f: [] };
     for (const name of ['v', 'e', 'f']) BM_ITER_MESH(bm[name], (i) => { em.elems[name][bm[name].index[i]] = i; });
     em.mesh = mesh;
-    mesh_batch_cache_apply(mesh, object);
     const active = BM_select_history_active_get(bm);
-    em.overlay.update(mesh, { selectmode: bm.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: bm[{ [BM_VERT]: 'v', [BM_EDGE]: 'e', [BM_FACE]: 'f' }[active.htype]].index[active.ele] } });
+    draw(mesh, active && { htype: active.htype, index: bm[POOL[active.htype]].index[active.ele] });
     if (commit || amend) object.metadata = { ...object.metadata, wbCreation: { mesh: mesh_serialize(mesh) } };
     if (amend) history.amend();
     else if (commit) {
@@ -68,6 +67,12 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     }
     changed();
     world.onModeChange?.();
+  }
+
+  // Draws a Mesh of the edit mesh, its active element given as { htype, index }.
+  function draw(mesh, active) {
+    mesh_batch_cache_apply(mesh, em.object);
+    em.overlay.update(mesh, { selectmode: em.bm.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: active.index } });
   }
 
   function load(mesh) {
@@ -202,10 +207,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       editor.start('edge_slide');
     },
   }));
-  // A modal mesh tool (mesh.inset, mesh.bevel): the median point of the selection on screen, previews from the Mesh as
-  // it was, then one undo step with its redo panel.
+  // A modal mesh tool (mesh.inset, mesh.bevel): the median point of the selection on screen, previews of the edit
+  // mesh as it is, then one undo step with its redo panel.
   function meshModal(operator, modal, extra = {}) {
-    const view = views.input, before = BM_mesh_bm_to_me(em.bm), world_m = em.object.computeWorldMatrix(true);
+    const view = views.input, world_m = em.object.computeWorldMatrix(true);
     const median = [0, 0, 0];
     let count = 0;
     BM_ITER_MESH(em.bm.v, (v) => { if (BM_elem_flag_test(em.bm.v, v, BM_ELEM_SELECT)) { for (let a = 0; a < 3; a++) median[a] += em.bm.v.co[v * 3 + a]; count++; } });
@@ -214,15 +219,15 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     const screen = viewAdapter(view).project([median[0] / count, median[1] / count, median[2] / count]) ?? [0, 0];
     const scale = new Vector3();
     world_m.decompose(scale);
-    const restore = () => { em.bm = load(before); };
+    const run = operatorPreview(em.bm, operator, operatorContext());
     startTool((end) => modal({
       ...extra,
       center: { x: screen[0], y: screen[1] },
       mouse: [editor.pointer.x, editor.pointer.y],
       pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
-      preview(props) { restore(); meshOperators[operator](em.bm, props, operatorContext()); sync({ commit: false }); },
-      confirm(props) { restore(); exec(operator, props); },
-      cancel() { restore(); sync({ commit: false }); },
+      preview(props) { const { mesh, active } = run(props); draw(mesh, active); changed(); },
+      confirm(props) { exec(operator, props); },
+      cancel() { sync({ commit: false }); },
       notify,
       end,
     }));

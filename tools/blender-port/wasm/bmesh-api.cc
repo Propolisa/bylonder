@@ -190,6 +190,8 @@ EXPORT(bm_select_history_get) int bm_select_history_get(BMesh *bm, int i, int *h
   *htype = ese->htype;
   return BM_elem_index_get(ese->ele);
 }
+/* A copy in the same element order with the same selection history (BM_mesh_copy). */
+EXPORT(bm_copy) BMesh *bm_copy(BMesh *bm) { return BM_mesh_copy(bm); }
 EXPORT(bm_select_flush) void bm_select_flush(BMesh *bm) { BM_mesh_select_mode_flush(bm); }
 
 /* edbm_quads_convert_to_tris_exec (editmesh_tools.cc). */

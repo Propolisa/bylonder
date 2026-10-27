@@ -1,7 +1,7 @@
 import { POOL } from '../../bmesh/intern/bmesh-marking.js';
 import { BM_edge_at_index } from '../../bmesh/intern/bmesh-mesh.js';
 import { BM_mesh_bm_from_me, BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
-import { editMeshFromMesh, editMeshFree, editMeshSync, meshFromEditMesh, objectMatrixSet, runOperator, selectHistory, selectHistorySet, selectModeSet } from '../../bmesh/bmesh-wasm.js';
+import { editMeshCopy, editMeshFromMesh, editMeshFree, editMeshSync, meshFromEditMesh, objectMatrixSet, runOperator, selectHistory, selectHistorySet, selectModeSet } from '../../bmesh/bmesh-wasm.js';
 import { edbm_loopcut } from './editmesh-loopcut.js';
 import { edbm_select_loop } from './editmesh-select.js';
 import { EDBM_mesh_hide, EDBM_mesh_reveal } from './editmesh-utils.js';
@@ -15,35 +15,56 @@ const freeing = new FinalizationRegistry(editMeshFree);
 const sameTopology = (a, b) => ['edges', 'face_offsets', 'corner_verts', 'corner_edges']
   .every((key) => a[key].length === b[key].length && a[key].every((value, i) => value === b[key][i]));
 
-function blenderEditMesh(bm) {
+function blenderEditMesh(bm, { object_to_world } = {}) {
   const mesh = BM_mesh_bm_to_me(bm), kept = bm[BLENDER_EDIT_MESH];
+  let handle;
   if (kept && sameTopology(kept.mesh, mesh)) {
-    editMeshSync(kept.handle, mesh);
-    selectModeSet(kept.handle, bm.selectmode);
-    return kept.handle;
+    handle = kept.handle;
+    editMeshSync(handle, mesh);
+    selectModeSet(handle, bm.selectmode);
+  } else {
+    if (kept) {
+      freeing.unregister(bm);
+      editMeshFree(kept.handle);
+    }
+    handle = editMeshFromMesh(mesh, bm.selectmode);
+    bm[BLENDER_EDIT_MESH] = { handle, mesh };
+    freeing.register(bm, handle, bm);
   }
-  if (kept) {
-    freeing.unregister(bm);
-    editMeshFree(kept.handle);
-  }
-  return editMeshFromMesh(mesh, bm.selectmode);
+  selectHistorySet(handle, (bm.selected ?? []).map(({ htype, ele }) => ({ htype, ele: bm[POOL[htype]].index[ele] })));
+  if (object_to_world) objectMatrixSet(handle, object_to_world);
+  return handle;
 }
 
 // Runs Blender's own operator on the edit mesh and takes its result back; returns its report, if it made one.
 // `object_to_world` (column-major, Blender's axes) places the object for what operators do in world space.
 function blenderOperator(idname) {
-  return (bm, props, { object_to_world } = {}) => {
-    const handle = blenderEditMesh(bm), { selectmode } = bm;
-    selectHistorySet(handle, (bm.selected ?? []).map(({ htype, ele }) => ({ htype, ele: bm[POOL[htype]].index[ele] })));
-    if (object_to_world) objectMatrixSet(handle, object_to_world);
+  return (bm, props, context) => {
+    const handle = blenderEditMesh(bm, context), { selectmode } = bm;
     const { report } = runOperator(handle, idname, props);
     const mesh = meshFromEditMesh(handle);
     Object.defineProperties(bm, Object.getOwnPropertyDescriptors(BM_mesh_bm_from_me(mesh)));
     bm.selectmode = selectmode;
     bm.selected = selectHistory(handle);
-    bm[BLENDER_EDIT_MESH] = { handle, mesh };
-    freeing.register(bm, handle, bm);
+    bm[BLENDER_EDIT_MESH].mesh = mesh;
     return report;
+  };
+}
+
+// Previews an operator on the edit mesh, leaving it untouched: each run starts from a copy in Blender's BMesh and
+// gives the result's Mesh and active element ({ htype, index }) without building a JS BMesh.
+export function operatorPreview(bm, idname, context) {
+  const source = blenderEditMesh(bm, context);
+  return (props) => {
+    const copy = editMeshCopy(source);
+    try {
+      if (context?.object_to_world) objectMatrixSet(copy, context.object_to_world);
+      runOperator(copy, idname, props);
+      const active = selectHistory(copy).at(-1);
+      return { mesh: meshFromEditMesh(copy), active: active && { htype: active.htype, index: active.ele } };
+    } finally {
+      editMeshFree(copy);
+    }
   };
 }
 

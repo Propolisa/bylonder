@@ -41,6 +41,7 @@ export function editMeshSync(bm, mesh) {
     ([p, uv, ...flagPointers]) => withArrays([Int32Array.from(flagPointers)], ([table]) => x.bm_sync(bm, p, uv, table)));
 }
 
+export const editMeshCopy = (bm) => x.bm_copy(bm);
 export function editMeshFree(bm) {
   editMeshFreeContext(bm);
   x.bm_free(bm);
