@@ -483,6 +483,7 @@ class FunctionPort:
         self.statement_call = False
         self.uses_bm = False
         self.deps = set()
+        self.cursors = {}
 
     def temp(self):
         name = f'_r{self.temps}'
@@ -494,11 +495,92 @@ class FunctionPort:
         self.uses_bm = True
         return 'bm'
 
+    def find_cursors(self, body):
+        """Pointers stepping through an array of structs (`EdgeHalf *e = bv->edges; ... e++`), as {var: (base, start)}.
+        Being incremented makes a pointer one into an array, so it ports exactly as an index into that array, when every
+        value it takes is in the same array."""
+        parents, refs, stepped = {}, {}, set()
+
+        def visit(c):
+            for k in kids(c):
+                parents[k.hash] = c
+                visit(k)
+        visit(body)
+
+        def up(c):
+            p = parents.get(c.hash)
+            while p is not None and p.kind in (K.UNEXPOSED_EXPR, K.PAREN_EXPR):
+                p = parents.get(p.hash)
+            return p
+        candidates = {}
+        for c in body.walk_preorder():
+            if c.kind == K.VAR_DECL and is_record_pointer(c.type) and not pool_of(c.type):
+                place = self.array_place(clangx.var_init(c))
+                if place:
+                    candidates[c.hash] = (c, *place)
+            elif c.kind == K.DECL_REF_EXPR and c.referenced is not None:
+                refs.setdefault(c.referenced.hash, []).append(c)
+        cursors = {}
+        for key, (var, base, start) in candidates.items():
+            ok = True
+            for ref in refs.get(key, []):
+                p = up(ref)
+                if p is None:
+                    continue
+                if p.kind == K.UNARY_OPERATOR and clangx.unary_operator(p)[0] in ('++', '--'):
+                    stepped.add(key)
+                elif is_binary(p, '+=', '-='):
+                    stepped.add(key)
+                elif is_unary(p, '&'):
+                    ok = False
+                elif is_binary(p, '=') and strip(kids(p)[0]).hash == ref.hash:
+                    place = self.array_place(kids(p)[1])
+                    ok = ok and bool(place) and self.p.text(place[0]) == self.p.text(base)
+                elif is_binary(p, '==', '!=', '<', '>', '<=', '>=', '-'):
+                    other = next(k for k in kids(p) if strip(k).hash != ref.hash) if len(kids(p)) == 2 else None
+                    place = self.array_place(other) if other is not None else None
+                    ok = ok and (bool(place) and self.p.text(place[0]) == self.p.text(base) or
+                                 (other is not None and strip(other).kind == K.DECL_REF_EXPR and strip(other).referenced is not None and strip(other).referenced.hash in candidates))
+            if ok and key in stepped:
+                cursors[key] = (base, start)
+        return cursors
+
+    def array_place(self, c):
+        """(array, index) a struct pointer expression points at: `arr`, `&arr[i]` or `arr + i`; else None."""
+        if c is None:
+            return None
+        c = strip_parens_casts(c)
+        if is_unary(c, '&') and strip_parens_casts(kids(c)[0]).kind == K.ARRAY_SUBSCRIPT_EXPR:
+            return tuple(kids(strip_parens_casts(kids(c)[0])))
+        if is_binary(c, '+') and is_record_pointer(kids(c)[0].type) and is_int(kids(c)[1].type):
+            return kids(c)[0], kids(c)[1]
+        if c.kind in (K.DECL_REF_EXPR, K.MEMBER_REF_EXPR) and is_record_pointer(c.type) and not pool_of(c.type):
+            if c.kind == K.DECL_REF_EXPR and c.referenced is not None and c.referenced.hash in self.cursors:
+                return None
+            return c, None
+        return None
+
+    def cursor_of(self, c):
+        """The cursor variable c refers to, or None."""
+        c = strip_parens_casts(c)
+        if c.kind == K.DECL_REF_EXPR and c.referenced is not None and c.referenced.hash in self.cursors:
+            return c.referenced
+        return None
+
+    def cursor_index(self, c):
+        """The array index a struct pointer expression stands for, beside a cursor."""
+        var = self.cursor_of(c)
+        if var is not None:
+            return f'{var.spelling}_i'
+        array, index = self.array_place(c)
+        return self.expr(index) if index is not None else '0'
+
     def emit(self):
         sig = self.sig
         params = [p['name'] + self.default_of(i) for i, p in enumerate(sig['params']) if p['out'] != 'out']
         outs = [p for p in sig['params'] if p['out'] == 'out']
         body = next(k for k in self.f.get_children() if k.kind == K.COMPOUND_STMT)
+        self.cursors = self.find_cursors(body)
         lines = self.block_lines(body, [(f'let {p["name"]}{self.out_init(p)};', p['cursor']) for p in outs])
         statements = list(body.get_children())
         if self.outs() and canon(sig['ret']).kind == T.VOID and not (statements and statements[-1].kind == K.RETURN_STMT):
@@ -717,6 +799,9 @@ class FunctionPort:
         t = canon(v.type)
         if dropped(t):
             return None
+        if v.hash in self.cursors:
+            _, start = self.cursors[v.hash]
+            return f'let {v.spelling}_i = {self.expr(start) if start is not None else 0};'
         init = clangx.var_init(v)
         if init is None:
             value = zero_of(t)
@@ -787,6 +872,8 @@ class FunctionPort:
             return '-1' if want is not None and pool_of(want) else 'null'
         if k == K.DECL_REF_EXPR:
             ref = c.referenced
+            if ref is not None and ref.hash in self.cursors:
+                return f'{self.expr(self.cursors[ref.hash][0])}[{ref.spelling}_i]'
             if ref is not None and ref.kind in (K.VAR_DECL, K.PARM_DECL) and dropped(ref.type):
                 return 'null'
             if ref is not None and ref.kind == K.ENUM_CONSTANT_DECL and ref.semantic_parent.is_scoped_enum():
@@ -886,6 +973,9 @@ class FunctionPort:
             return self.expr(operand, want)
         if op == '*':
             return self.expr(operand, want)
+        cursor = self.cursor_of(operand)
+        if cursor is not None and op in ('++', '--'):
+            return f'{cursor.spelling}_i{op}' if postfix else f'{op}{cursor.spelling}_i'
         a = self.expr(operand)
         if op in ('++', '--') and is_record_pointer(operand.type):
             return fix(MEMORY, self.p.text(c))
@@ -952,6 +1042,15 @@ class FunctionPort:
         op = clangx.binary_operator(c)
         if op in ('&&', '||'):
             return f'({self.cond(lhs)} {op} {self.cond(rhs)})'
+        cursor = self.cursor_of(lhs)
+        if cursor is not None or self.cursor_of(rhs) is not None:
+            # A cursor's value is its index: stepping, moving and comparing work on indices.
+            if op == '=':
+                return f'{cursor.spelling}_i = {self.cursor_index(rhs)}'
+            if op in ('+=', '-='):
+                return f'{cursor.spelling}_i {op} {self.expr(rhs)}'
+            if op in ('==', '!=', '<', '>', '<=', '>=', '-'):
+                return f'({self.cursor_index(lhs)} {OPS.get(op, op)} {self.cursor_index(rhs)})'
         if op == '=':
             return self.assign(lhs, self.expr(rhs, lhs.type))
         if is_record_pointer(lhs.type) and (op in ('+=', '-=') or (is_record_pointer(rhs.type) and op in ('<', '>', '<=', '>=', '-'))):
