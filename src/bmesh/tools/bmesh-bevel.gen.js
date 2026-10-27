@@ -2874,7 +2874,6 @@ function interp_range(frac, n, f) {
 }
 
 function interp_vmesh(bp, vm_in, nseg) {
-  const { bm } = bp;
   let _r0, _r1;
   const n_bndv = vm_in.count;
   const ns_in = vm_in.seg;
@@ -2931,12 +2930,11 @@ function interp_vmesh(bp, vm_in, nseg) {
     const center = vmesh_center(vm_in);
     mesh_vert(vm_out, 0, nseg2, nseg2).co = center.slice(0, 3);
   }
-  vmesh_copy_equiv_verts(bm, vm_out);
+  vmesh_copy_equiv_verts(vm_out);
   return vm_out;
 }
 
 function cubic_subdiv(bp, vm_in) {
-  const { bm } = bp;
   let co = [0, 0, 0];
   const n_boundary = vm_in.count;
   const ns_in = vm_in.seg;
@@ -2972,13 +2970,13 @@ function cubic_subdiv(bp, vm_in) {
     }
     bndv = bndv.next;
   }
-  vmesh_copy_equiv_verts(bm, vm_out);
+  vmesh_copy_equiv_verts(vm_out);
   for (let i = 0; i < n_boundary; i++) {
     for (let k = 0; k < ns_in; k++) {
       mesh_vert(vm_in, i, 0, k).co = mesh_vert(vm_out, i, 0, 2 * k).co.slice(0, 3);
     }
   }
-  vmesh_copy_equiv_verts(bm, vm_in);
+  vmesh_copy_equiv_verts(vm_in);
   for (let i = 0; i < n_boundary; i++) {
     for (let j = 0; j < ns_in2; j++) {
       for (let k = 0; k < ns_in2; k++) {
@@ -3042,7 +3040,7 @@ function cubic_subdiv(bp, vm_in) {
       }
     }
   }
-  vmesh_copy_equiv_verts(bm, vm_out);
+  vmesh_copy_equiv_verts(vm_out);
   gamma = sabin_gamma(n_boundary);
   beta = -gamma;
   let co1 = [0, 0, 0];
@@ -3074,7 +3072,7 @@ function cubic_subdiv(bp, vm_in) {
   return vm_out;
 }
 
-function make_cube_corner_square(bm, mem_arena, nseg) {
+function make_cube_corner_square(mem_arena, nseg) {
   const ns2 = Math.trunc(nseg / 2);
   const vm = new_adj_vmesh(null, 3, nseg, null);
   vm.count = 0;
@@ -3097,7 +3095,7 @@ function make_cube_corner_square(bm, mem_arena, nseg) {
       }
     }
   }
-  vmesh_copy_equiv_verts(bm, vm);
+  vmesh_copy_equiv_verts(vm);
   return vm;
 }
 
@@ -3134,12 +3132,11 @@ function make_cube_corner_square_in(mem_arena, nseg) {
 }
 
 function make_cube_corner_adj_vmesh(bp) {
-  const { bm } = bp;
   const nseg = bp.seg;
   const r = bp.pro_super_r;
   if (bp.profile_type !== BEVEL_PROFILE_CUSTOM) {
     if (r === PRO_SQUARE_R) {
-      return make_cube_corner_square(bm, null, nseg);
+      return make_cube_corner_square(null, nseg);
     }
     if (r === PRO_SQUARE_IN_R) {
       return make_cube_corner_square_in(null, nseg);
@@ -3179,7 +3176,7 @@ function make_cube_corner_adj_vmesh(bp) {
     }
   }
   mesh_vert(vm0, 0, 1, 1).co = co.slice(0, 3);
-  vmesh_copy_equiv_verts(bm, vm0);
+  vmesh_copy_equiv_verts(vm0);
   let vm1 = vm0;
   while (vm1.seg < nseg) {
     vm1 = cubic_subdiv(bp, vm1);
@@ -3293,7 +3290,7 @@ function adj_vmesh(bp, bv) {
   } else {
     mesh_vert(vm0, 0, 1, 1).co = boundverts_center.slice(0, 3);
   }
-  vmesh_copy_equiv_verts(bm, vm0);
+  vmesh_copy_equiv_verts(vm0);
   let vm1 = vm0;
   do {
     vm1 = cubic_subdiv(bp, vm1);
@@ -3748,7 +3745,7 @@ function square_out_adj_vmesh(bp, bv) {
   if (!odd) {
     mesh_vert(vm, 0, ns2, ns2).co = vco(bm, bv.v).slice(0, 3);
   }
-  vmesh_copy_equiv_verts(bm, vm);
+  vmesh_copy_equiv_verts(vm);
   bndv = vm.boundstart;
   for (let i = 0; i < n_bndv; i++) {
     const im1 = i === 0 ? n_bndv - 1 : i - 1;
@@ -3779,7 +3776,7 @@ function square_out_adj_vmesh(bp, bv) {
     }
     bndv = bndv.next;
   }
-  vmesh_copy_equiv_verts(bm, vm);
+  vmesh_copy_equiv_verts(vm);
   return vm;
 }
 
@@ -3892,7 +3889,7 @@ function bevel_build_rings(bp, bm, bv, vpipe) {
       }
     }
   }
-  vmesh_copy_equiv_verts(bm, vm);
+  vmesh_copy_equiv_verts(vm);
   const bndv_rep_faces = new Array(n_bndv).fill(-1);
   let bndv = vm.boundstart;
   do {
@@ -3972,7 +3969,6 @@ function bevel_build_rings(bp, bm, bv, vpipe) {
             const b2 = e && e.is_seam ? bme : -1;
             const b3 = enext && enext.is_seam ? bmenext : -1;
             se = snap_edges_for_vmesh_vert(
-              bm,
               i,
               j,
               k,
@@ -4232,7 +4228,7 @@ function bevel_vert_two_edges(bp, bm, bv) {
     }
     mesh_vert(vm, 0, 0, ns).co = vco(bm, v2).slice(0, 3);
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(bm, vm, 1, 0, ns - k, 0, 0, k);
+      copy_mesh_vert(vm, 1, 0, ns - k, 0, 0, k);
     }
   }
   if (Number(BM_vert_face_check(bm, bv.v)) === Number(false)) {
@@ -4279,7 +4275,7 @@ function build_vmesh(bp, bm, bv) {
   bndv = vm.boundstart;
   do {
     const i = bndv.index;
-    copy_mesh_vert(bm, vm, i, 0, ns, bndv.next.index, 0, 0);
+    copy_mesh_vert(vm, i, 0, ns, bndv.next.index, 0, 0);
     if (vm.mesh_kind !== M_ADJ) {
       for (let k = 1; k < ns; k++) {
         if (bndv.ebev) {
@@ -4289,7 +4285,7 @@ function build_vmesh(bp, bm, bv) {
             create_mesh_bmvert(bm, vm, i, 0, k, bv.v);
           }
         } else if (n === 2 && !bndv.ebev) {
-          copy_mesh_vert(bm, bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
+          copy_mesh_vert(bv.vmesh, i, 0, k, 1 - i, 0, ns - k);
         }
       }
     }
@@ -4314,7 +4310,7 @@ function build_vmesh(bp, bm, bv) {
       create_mesh_bmvert(bm, bv.vmesh, weld1.index, 0, k, bv.v);
     }
     for (let k = 1; k < ns; k++) {
-      copy_mesh_vert(bm, bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
+      copy_mesh_vert(bv.vmesh, weld2.index, 0, ns - k, weld1.index, 0, k);
     }
   }
   let vpipe = null;
@@ -5213,7 +5209,7 @@ function find_superellipse_chord_endpoint(x0, dtarget, r, rbig) {
   return xnew;
 }
 
-function find_even_superellipse_chords_general(bm, seg, r, xvals, yvals) {
+function find_even_superellipse_chords_general(seg, r, xvals, yvals) {
   const smoothitermax = 10;
   const error_tol = 1e-7;
   const imax = Math.trunc((seg + 1) / 2) - 1;
@@ -5261,7 +5257,7 @@ function find_even_superellipse_chords_general(bm, seg, r, xvals, yvals) {
       break;
     }
     for (let i = 1; i <= imax; i++) {
-      xvals[i] = find_superellipse_chord_endpoint(bm, xvals[i - 1], davg, r, rbig);
+      xvals[i] = find_superellipse_chord_endpoint(xvals[i - 1], davg, r, rbig);
       yvals[i] = superellipse_co(xvals[i], r, rbig);
     }
   }
@@ -5282,7 +5278,7 @@ function find_even_superellipse_chords_general(bm, seg, r, xvals, yvals) {
   }
 }
 
-function find_even_superellipse_chords(bm, n, r, xvals, yvals) {
+function find_even_superellipse_chords(n, r, xvals, yvals) {
   const seg_odd = n % 2;
   const n2 = Math.trunc(n / 2);
   if (r === PRO_LINE_R) {
@@ -5338,7 +5334,7 @@ function find_even_superellipse_chords(bm, n, r, xvals, yvals) {
     }
     return;
   }
-  find_even_superellipse_chords_general(bm, n, r, xvals, yvals);
+  find_even_superellipse_chords_general(n, r, xvals, yvals);
 }
 
 function find_profile_fullness(bp) {
@@ -5379,7 +5375,6 @@ function find_profile_fullness(bp) {
 }
 
 function set_profile_spacing(bp, pro_spacing, custom) {
-  const { bm } = bp;
   const seg = bp.seg;
   if (seg <= 1) {
     pro_spacing.xvals = null;
@@ -5404,7 +5399,7 @@ function set_profile_spacing(bp, pro_spacing, custom) {
         pro_spacing.yvals_2[i] = bp.custom_profile.segments[i].x;
       }
     } else {
-      find_even_superellipse_chords(bm, seg_2, bp.pro_super_r, pro_spacing.xvals_2, pro_spacing.yvals_2);
+      find_even_superellipse_chords(seg_2, bp.pro_super_r, pro_spacing.xvals_2, pro_spacing.yvals_2);
     }
   }
   pro_spacing.xvals = new Float64Array(seg + 1);
@@ -5418,7 +5413,7 @@ function set_profile_spacing(bp, pro_spacing, custom) {
       pro_spacing.yvals[i] = bp.custom_profile.segments[i].x;
     }
   } else {
-    find_even_superellipse_chords(bm, seg, bp.pro_super_r, pro_spacing.xvals, pro_spacing.yvals);
+    find_even_superellipse_chords(seg, bp.pro_super_r, pro_spacing.xvals, pro_spacing.yvals);
   }
 }
 

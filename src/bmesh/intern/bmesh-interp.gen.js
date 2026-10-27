@@ -115,7 +115,7 @@ function mdisp_in_mdispquad(bm, l_src, l_dst, l_dst_f_center, p, res, r_uv) {
   v2 = add_v3(v2, c);
   v3 = add_v3(v3, c);
   v4 = add_v3(v4, c);
-  if (!quad_co(bm, v1, v2, v3, v4, p, vno(bm, bm.l.v[l_src]), r_uv)) {
+  if (!quad_co(v1, v2, v3, v4, p, vno(bm, bm.l.v[l_src]), r_uv)) {
     return [false, r_axis_x, r_axis_y];
   }
   mul_v2_fl(r_uv, res - 1);
@@ -189,7 +189,6 @@ function loop_interp_multires_cb(bm, userdata, ix, _unused2) {
       if ((([_r0, src_axis_x, src_axis_y] = mdisp_in_mdispquad(bm, l_dst, l_iter, f_src_center, co, res, uv)), _r0)) {
         old_mdisps_bilinear(md_dst.disps[iy * res + ix], md_src.disps, res, uv[0], uv[1]);
         md_dst.disps[iy * res + ix] = bm_loop_flip_disp(
-          bm,
           src_axis_x,
           src_axis_y,
           axis_x,
