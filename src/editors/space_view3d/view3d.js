@@ -113,20 +113,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     { label: 'Babylon Inspector', keys: 'Shift Ctrl I', run: ctx.inspector },
     { label: 'Keyboard Shortcuts', keys: '?', run: () => ctx.help.showModal() },
   ], { blender: 'VIEW3D_MT_view' });
-  const select = menuButton('Select', () => (editMode() ? editSelectItems : ['select-all', 'deselect', 'invert'].map(action)), { blender: 'VIEW3D_MT_select_object' });
-  const editSelectItems = [
-    { label: 'All', blender: 'mesh.select_all:SELECT', keys: 'A', run: () => world.editMode.selectAll('SELECT') },
-    { label: 'None', blender: 'mesh.select_all:DESELECT', keys: 'Alt A', run: () => world.editMode.selectAll('DESELECT') },
-    { label: 'Invert', blender: 'mesh.select_all:INVERT', keys: 'Ctrl I', run: () => world.editMode.selectAll('INVERT') },
-    '-',
-    { label: 'Select More/Less', blender: 'VIEW3D_MT_edit_mesh_select_more_less', items: [
-      { label: 'More', blender: 'mesh.select_more', keys: 'Ctrl Numpad +', run: () => world.editMode.exec('mesh.select_more') },
-      { label: 'Less', blender: 'mesh.select_less', keys: 'Ctrl Numpad -', run: () => world.editMode.exec('mesh.select_less') },
-    ] },
-    { label: 'Select Linked', blender: 'VIEW3D_MT_edit_mesh_select_linked', items: [
-      { label: 'Linked', blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => world.editMode.exec('mesh.select_linked') },
-    ] },
-  ];
+  const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : ['select-all', 'deselect', 'invert'].map(action)), { blender: 'VIEW3D_MT_select_object' });
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
   const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
   const meshes = () => {
@@ -152,45 +139,10 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     '-',
     ...['add-array', 'creation', 'edit-text'].map(action),
   ], { blender: 'VIEW3D_MT_object' });
-  const meshMenu = menuButton('Mesh', () => [
-    { label: 'Transform', blender: 'VIEW3D_MT_transform', items: [['Move', 'transform.translate', 'G', 'move'], ['Rotate', 'transform.rotate', 'R', 'rotate'], ['Scale', 'transform.resize', 'S', 'scale']].map(([label, blender, keys, type]) => ({ label, blender, keys, run: () => editor.start(type) })) },
-    '-',
-    { label: 'Extrude', blender: 'VIEW3D_MT_edit_mesh_extrude', items: [{ label: 'Extrude Faces', blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: () => world.editMode.extrudeMove() }] },
-    '-',
-    { label: 'Merge', blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', items: world.editMode.mergeMenu },
-    '-',
-    { label: 'Show/Hide', blender: 'VIEW3D_MT_edit_mesh_showhide', items: [
-      { label: 'Reveal Hidden', blender: 'mesh.reveal', keys: 'Alt H', run: () => world.editMode.exec('mesh.reveal') },
-      { label: 'Hide Selected', blender: 'mesh.hide', keys: 'H', run: () => world.editMode.exec('mesh.hide') },
-      { label: 'Hide Unselected', blender: 'mesh.hide', keys: 'Shift H', run: () => world.editMode.exec('mesh.hide', { unselected: true }) },
-    ] },
-    '-',
-    { label: 'Normals', blender: 'VIEW3D_MT_edit_mesh_normals', keys: 'Alt N', items: world.editMode.normalsMenu },
-    '-',
-    { label: 'Delete', blender: 'VIEW3D_MT_edit_mesh_delete', items: world.editMode.deleteMenu },
-  ], { blender: 'VIEW3D_MT_edit_mesh' });
-  const vertexMenu = menuButton('Vertex', () => [
-    { label: 'New Edge/Face from Vertices', blender: 'mesh.edge_face_add', keys: 'F', run: () => world.editMode.exec('mesh.edge_face_add') },
-    '-',
-    { label: 'Bevel Vertices', blender: 'mesh.bevel', keys: 'Shift Ctrl B', run: () => world.editMode.bevel('VERTICES') },
-    '-',
-    { label: 'Smooth Vertices', blender: 'mesh.vertices_smooth', run: () => world.editMode.exec('mesh.vertices_smooth', { factor: 0.5 }) },
-  ], { blender: 'VIEW3D_MT_edit_mesh_vertices' });
-  const edgeMenu = menuButton('Edge', () => [
-    { label: 'Bevel Edges', blender: 'mesh.bevel', keys: 'Ctrl B', run: () => world.editMode.bevel('EDGES') },
-    '-',
-    { label: 'Subdivide', blender: 'mesh.subdivide', run: () => world.editMode.exec('mesh.subdivide') },
-    '-',
-    { label: 'Loop Cut and Slide', blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: () => world.editMode.loopcut() },
-  ], { blender: 'VIEW3D_MT_edit_mesh_edges' });
-  const faceMenu = menuButton('Face', () => [
-    { label: 'Extrude Faces', blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: () => world.editMode.extrudeMove() },
-    '-',
-    { label: 'Inset Faces', blender: 'mesh.inset', keys: 'I', run: () => world.editMode.inset() },
-    { label: 'Poke Faces', blender: 'mesh.poke', run: () => world.editMode.exec('mesh.poke') },
-    { label: 'Triangulate Faces', blender: 'mesh.quads_convert_to_tris', keys: 'Ctrl T', run: () => world.editMode.exec('mesh.quads_convert_to_tris', { quad_method: 'BEAUTY', ngon_method: 'BEAUTY' }) },
-    { label: 'Tris to Quads', blender: 'mesh.tris_convert_to_quads', keys: 'Alt J', run: () => world.editMode.exec('mesh.tris_convert_to_quads') },
-  ], { blender: 'VIEW3D_MT_edit_mesh_faces' });
+  const meshMenu = menuButton('Mesh', () => world.editMode.menus.mesh(), { blender: 'VIEW3D_MT_edit_mesh' });
+  const vertexMenu = menuButton('Vertex', () => world.editMode.menus.vertex(), { blender: 'VIEW3D_MT_edit_mesh_vertices' });
+  const edgeMenu = menuButton('Edge', () => world.editMode.menus.edge(), { blender: 'VIEW3D_MT_edit_mesh_edges' });
+  const faceMenu = menuButton('Face', () => world.editMode.menus.face(), { blender: 'VIEW3D_MT_edit_mesh_faces' });
   const shadingButtons = [['wire', 'shading_wire', 'Wireframe'], ['solid', 'shading_solid', 'Solid'], ['rendered', 'shading_rendered', 'Rendered']].map(([id, icon, title]) => {
     const b = iconButton(icon, 'Viewport Shading: ' + title, () => view.setShading(id));
     b.dataset.shading = id;

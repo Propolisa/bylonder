@@ -26,6 +26,8 @@
 #include "ED_mesh.hh"
 #include "ED_object.hh"
 #include "ED_screen.hh"
+#include "ED_view3d.hh"
+#include "BKE_scene.hh"
 #include "ED_select_utils.hh"
 
 #include "WM_api.hh"
@@ -326,6 +328,44 @@ bool ED_operator_editmesh(bContext *C)
 bool ED_operator_editable_mesh(bContext *C) { return ED_operator_editmesh(C); }
 /* port-override: the 3D View the operator needs is the editor's own, whose picking runs in JS. */
 bool ED_operator_editmesh_region_view3d(bContext *C) { return ED_operator_editmesh(C); }
+
+/* port-override: the module has no depsgraph. The editor refuses Edit Mode on objects with modifiers, so what an
+ * operator would read as evaluated is the original and nothing needs evaluating; the depsgraph is a token. */
+Depsgraph *BKE_scene_ensure_depsgraph(Main * /*bmain*/, Scene * /*scene*/, ViewLayer * /*view_layer*/)
+{
+  static char token;
+  return reinterpret_cast<Depsgraph *>(&token);
+}
+void DEG_make_active(Depsgraph * /*depsgraph*/) {}
+void BKE_scene_graph_evaluated_ensure(Depsgraph * /*depsgraph*/, Main * /*bmain*/) {}
+
+/* As view3d_select.cc defines them; the rest of the 3D View stays in JS. */
+ViewContext ED_view3d_viewcontext_init(bContext *C, Depsgraph *depsgraph)
+{
+  ViewContext vc = {};
+  vc.C = C;
+  vc.region = CTX_wm_region(C);
+  vc.bmain = CTX_data_main(C);
+  vc.depsgraph = depsgraph;
+  vc.scene = CTX_data_scene(C);
+  vc.view_layer = CTX_data_view_layer(C);
+  vc.v3d = CTX_wm_view3d(C);
+  vc.win = CTX_wm_window(C);
+  vc.rv3d = CTX_wm_region_view3d(C);
+  vc.obact = CTX_data_active_object(C);
+  vc.obedit = CTX_data_edit_object(C);
+  return vc;
+}
+void ED_view3d_viewcontext_init_object(ViewContext *vc, Object *obact)
+{
+  vc->obact = obact;
+  if (vc->obedit) {
+    vc->obedit = obact;
+    if (vc->em) {
+      vc->em = BKE_editmesh_from_object(vc->obedit);
+    }
+  }
+}
 
 /* Blender's globals, defined as blender.cc, blf.cc and rna_access.cc define them: their types' member defaults are
  * Blender's defaults. */

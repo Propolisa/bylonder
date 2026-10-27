@@ -268,7 +268,11 @@ creator = createAddMesh(
 );
 commands.setBefore(() => creator.finish());
 world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { ui?.refresh(); views.wake(); } });
-world.onModeChange = () => viewports().forEach((view) => view.sync());
+// Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
+world.onModeChange = () => {
+  if (world.editMode?.active) creator.finish();
+  viewports().forEach((view) => view.sync());
+};
 world.beforeSelection = () => creator.finish();
 world.objectActions = createObjectActions({
   world,
