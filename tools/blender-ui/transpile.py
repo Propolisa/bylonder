@@ -87,13 +87,12 @@ def extract(source, patterns):
         node.names = [alias for alias in node.names if (alias.asname or alias.name).split('.')[0] in used]
     body = [node for node in imports if node.names] + nodes
     source = ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
-    rewritten = ast.unparse(Unpacking().visit(ast.parse(source)))
-    return rewritten + (UNPACKING_HELPERS if rewritten != source else '')
+    rewritten = ast.unparse(TranscryptFixes().visit(ast.parse(source)))
+    return rewritten + (HELPERS if rewritten != source else '')
 
 
-class Unpacking(ast.NodeTransformer):
-    """Python Transcrypt compiles wrong, rewritten: unpacking in displays ({**a, 'k': v}, [*a, b]) and calls as calls
-    to the helpers UNPACKING_HELPERS defines, and the statements below."""
+class TranscryptFixes(ast.NodeTransformer):
+    """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
     def visit_Dict(self, node):
         self.generic_visit(node)
         if None not in node.keys:
@@ -147,6 +146,15 @@ class Unpacking(ast.NodeTransformer):
         target = node.targets[0]
         return ast.Expr(ast.Call(func=ast.Attribute(target.value, 'pop', ast.Load()), args=[target.slice], keywords=[]))
 
+    def visit_JoinedStr(self, node):
+        """f-strings, which Transcrypt mis-parses with brace escapes ({{), as ''.join of their parts."""
+        self.generic_visit(node)
+        parts = [value if isinstance(value, ast.Constant) else ast.Call(
+            func=ast.Name('_formatted', ast.Load()),
+            args=[value.value, ast.Constant(chr(value.conversion) if value.conversion > 0 else ''), value.format_spec or ast.Constant('')],
+            keywords=[]) for value in node.values]
+        return ast.Call(func=ast.Attribute(ast.Constant(''), 'join', ast.Load()), args=[ast.List(elts=parts, ctx=ast.Load())], keywords=[])
+
     def visit_comprehension(self, node):
         """Comprehensions loop by index up to len(), which is 0 for iterators (enumerate, zip, generators): the
         iterable as a list."""
@@ -156,12 +164,20 @@ class Unpacking(ast.NodeTransformer):
         return node
 
 
-UNPACKING_HELPERS = '''
+HELPERS = '''
 def _merged(*dicts):
     result = {}
     for d in dicts:
         result.update(d)
     return result
+
+
+def _formatted(value, conversion, spec):
+    if conversion == 'r':
+        value = repr(value)
+    elif conversion == 's':
+        value = str(value)
+    return ('{:' + spec + '}').format(value) if spec else str(value)
 
 
 def _joined(*lists):
