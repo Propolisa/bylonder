@@ -5,12 +5,13 @@
 # Run inside an X server, with event simulation:
 #   blender --factory-startup --enable-event-simulate START.blend --python tool-fixtures.py -- OUT.json
 import json
+import math
 import sys
 
 import bmesh
 import bpy
 from bpy_extras.view3d_utils import location_3d_to_region_2d
-from mathutils import Quaternion
+from mathutils import Matrix, Quaternion, Vector
 
 out = sys.argv[sys.argv.index("--") + 1]
 STEPS = 8
@@ -29,8 +30,9 @@ def clicks(points, key=None):
     return events + ([(key, "PRESS", points[-1]), (key, "RELEASE", points[-1])] if key else [])
 
 
-# Tool, the cube's selected vertices by position (all when None) and the input in pixels from the first selected
-# vertex, or the region's center.
+TOP = [(1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1)]
+# Tool, the cube's selected vertices by position (all when None), the input in pixels from an anchor (a point given in
+# Blender's world, else the first selected vertex, else the region's center), and the anchor.
 FIXTURES = [
     ("builtin.shrink_fatten", None, drag((60, 20), (140, 40))),
     ("builtin.push_pull", None, drag((60, 20), (130, 60))),
@@ -43,6 +45,16 @@ FIXTURES = [
     ("builtin.rip_region", [(1, 1, 1)], drag((0, 0), (40, 25))),
     ("builtin.knife", None, clicks([(-70, 20), (60, 35)], "RET")),
     ("builtin.extrude_to_cursor", [(1, 1, 1)], clicks([(80, 40)])),
+    ("builtin.extrude_region", TOP, drag((0, 0), (30, 60))),
+    ("builtin.extrude_manifold", TOP, drag((0, 0), (0, -50))),
+    ("builtin.inset_faces", TOP, drag((60, 0), (20, 0))),
+    ("builtin.bevel", [(1, 1, 1), (1, -1, 1)], drag((20, 0), (70, 0))),
+    ("builtin.edge_slide", TOP, drag((0, 0), (0, -40))),
+    ("builtin.loop_cut", None, drag((0, 0), (20, 30)), (1, 1, 0)),
+    ("builtin.bisect", None, drag((-150, -80), (150, 90))),
+    ("builtin.poly_build", None, drag((0, 0), (40, 30)), (1, 1, 0)),
+    # The Spin tool's gizmo: a click on the Z axis' first button (gizmo_mesh_spin_init_refresh places it).
+    ("builtin.spin", None, "SPIN_BUTTON"),
 ]
 VIEW = {"rotation": (0.82, 0.42, 0.19, 0.33), "distance": 9.0}
 
@@ -54,6 +66,25 @@ def window():
 def view3d():
     area = next(a for a in window().screen.areas if a.type == "VIEW_3D")
     return area, next(r for r in area.regions if r.type == "WINDOW")
+
+
+# Where the Spin gizmo's first Z button is (gizmo_mesh_spin_init_refresh): at the 3D cursor, the gizmo radius
+# (INIT_SCALE_BASE of the gizmo size, in pixels at the cursor) along the Y axis turned 45 degrees about Z.
+def spin_button(region, rv3d):
+    center = bpy.context.scene.cursor.location
+    right = Vector(rv3d.view_matrix.inverted().col[0][:3])
+    pixel = 1 / (location_3d_to_region_2d(region, rv3d, center + right) - location_3d_to_region_2d(region, rv3d, center)).length
+    offset = Matrix.Rotation(math.pi / 4, 3, "Z") @ Vector((0, 2.3 * bpy.context.preferences.view.gizmo_size * pixel, 0))
+    return location_3d_to_region_2d(region, rv3d, center + offset)
+
+
+# The edge a preselection gizmo has under the anchor, the middle of one: its vertices.
+def preselected_edge(ob, anchor):
+    for e in ob.data.edges:
+        a, b = (ob.data.vertices[i].co for i in e.vertices)
+        if anchor and ((a + b) / 2 - Vector(anchor[0])).length < 1e-6:
+            return list(e.vertices)
+    return None
 
 
 def flat(matrix):
@@ -85,13 +116,14 @@ def operator_values(op):
 
 def steps():
     results = []
-    for tool, select, input_events in FIXTURES:
+    for tool, select, input_events, *anchor in FIXTURES:
         with bpy.context.temp_override(window=window()):
             bpy.ops.wm.read_homefile()
         yield 1.0
         area, region = view3d()
         cube = bpy.data.objects["Cube"]
         start_mesh = mesh_data(cube)
+        edge = preselected_edge(cube, anchor)
         with bpy.context.temp_override(window=window(), area=area, region=region, object=cube, active_object=cube):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_mode(type="VERT")
@@ -103,7 +135,9 @@ def steps():
                 v.select = tuple(v.co) in select
             bm.select_flush(True)
             bmesh.update_edit_mesh(cube.data)
-        bpy.context.scene.tool_settings.workspace_tool_type = "DEFAULT"
+            del bm  # It must not outlive the edit mesh, which reading the next home file frees.
+        # Drags run the tool from anywhere, as from its handle; the Spin tool's buttons are its gizmo.
+        bpy.context.scene.tool_settings.workspace_tool_type = "FALLBACK" if input_events == "SPIN_BUTTON" else "DEFAULT"
         rv3d = area.spaces.active.region_3d
         rv3d.view_perspective = "PERSP"
         rv3d.view_rotation = Quaternion(VIEW["rotation"]).normalized()
@@ -112,7 +146,10 @@ def steps():
         yield 0.5
         active = bpy.context.workspace.tools.from_space_view3d_mode("EDIT_MESH").idname
         assert active == tool, (active, tool)
-        origin = location_3d_to_region_2d(region, rv3d, select[0]) if select else (region.width / 2, region.height / 2)
+        origin = location_3d_to_region_2d(region, rv3d, anchor[0] if anchor else select[0]) if anchor or select else (region.width / 2, region.height / 2)
+        gizmo = "spin" if input_events == "SPIN_BUTTON" else None
+        if gizmo:
+            input_events = clicks([spin_button(region, rv3d) - Vector(origin)])
         events = [(type, value, round(origin[0] + dx), round(origin[1] + dy)) for type, value, (dx, dy) in input_events]
         for type, value, x, y in events:
             window().event_simulate(type=type, value=value, x=region.x + x, y=region.y + y)
@@ -121,7 +158,7 @@ def steps():
         with bpy.context.temp_override(window=window(), area=area, region=region):
             bpy.ops.object.mode_set(mode="OBJECT")
         results.append({
-            "tool": tool, "select": select, "events": events,
+            "tool": tool, "select": select, "events": events, "gizmo": gizmo, "edge": edge,
             "view": {"viewmat": flat(rv3d.view_matrix), "winmat": flat(rv3d.window_matrix), "winx": region.width,
                      "winy": region.height, "persp": rv3d.is_perspective},
             "start": start_mesh, "mesh": mesh_data(cube),

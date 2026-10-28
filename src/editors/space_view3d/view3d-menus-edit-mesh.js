@@ -1,8 +1,8 @@
 // The 3D View's Edit Mode menus: Blender's own (space_view3d.py, in Blender's Python tree) drawn
 // with Bylonder's UILayout, holding the operators Bylonder runs. `api` is Edit Mode's:
 //   context(): bpy.context (blenkernel/context.js), edit(): the EditMesh, exec(idname, props): runs an operator as an undo step, keys(idname, props): its shortcut,
-//   macro(idname, props, transform, transformProps, event): an operator and then a transform, as Blender's macros run
-//   them, module(idname, props, event): one of Blender's modal operators, start(type, options): a transform, and the
+//   macro(steps, event): Blender's macro's operators in turn, module(idname, props, event): one of Blender's modal
+//   operators, start(type, options): a transform, and the
 //   modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
 import { menus as MENUS } from '../../python/bpy_interface.js';
 import { drawMenu, runs } from '../interface/ui-layout.js';
@@ -18,24 +18,32 @@ const KEYMAPS = ['Mesh', 'Object Non-modal', '3D View', '3D View Generic', 'Fram
 
 // A macro's properties of one of its operators (TRANSFORM_OT_translate in mesh.extrude_context_move's).
 const macroProps = (props, name) => Object.fromEntries(props[name] ?? []);
-// Blender's macros (mesh_ops.cc): an operator, then a transform of its result.
-const MACROS = {
-  'mesh.duplicate_move': ['mesh.duplicate', 'transform.translate'],
-  'mesh.extrude_context_move': ['mesh.extrude_context', 'transform.translate'],
-  'mesh.extrude_region_move': ['mesh.extrude_region', 'transform.translate'],
-  'mesh.extrude_region_shrink_fatten': ['mesh.extrude_region', 'transform.shrink_fatten'],
-  'mesh.extrude_vertices_move': ['mesh.extrude_verts_indiv', 'transform.translate'],
-  'mesh.extrude_edges_move': ['mesh.extrude_edges_indiv', 'transform.translate'],
-  'mesh.extrude_faces_move': ['mesh.extrude_faces_indiv', 'transform.shrink_fatten'],
-  'mesh.extrude_manifold': ['mesh.extrude_region', 'transform.translate'],
-  'mesh.rip_move': ['mesh.rip', 'transform.translate'],
-  'mesh.rip_edge_move': ['mesh.rip_edge', 'transform.translate'],
-  'mesh.offset_edge_loops_slide': ['mesh.offset_edge_loops', 'transform.edge_slide'],
-};
 // The operator RNA struct names a macro's properties are kept under.
 const struct = (idname) => idname.split('.')[0].toUpperCase() + '_OT_' + idname.split('.')[1];
+// Blender's macros (mesh_ops.cc, ED_operatormacros_mesh): their operators in turn, with the properties the macro sets.
+const MOVE = { use_proportional_edit: false, mirror: false };
+const MACROS = {
+  'mesh.duplicate_move': [['mesh.duplicate'], ['transform.translate', MOVE]],
+  'mesh.extrude_context_move': [['mesh.extrude_context'], ['transform.translate', MOVE]],
+  'mesh.extrude_region_move': [['mesh.extrude_region'], ['transform.translate', MOVE]],
+  'mesh.extrude_region_shrink_fatten': [['mesh.extrude_region'], ['transform.shrink_fatten', MOVE]],
+  'mesh.extrude_vertices_move': [['mesh.extrude_verts_indiv'], ['transform.translate', MOVE]],
+  'mesh.extrude_edges_move': [['mesh.extrude_edges_indiv'], ['transform.translate', MOVE]],
+  'mesh.extrude_faces_move': [['mesh.extrude_faces_indiv'], ['transform.shrink_fatten', MOVE]],
+  'mesh.extrude_manifold': [['mesh.extrude_region', { use_dissolve_ortho_edges: true }], ['transform.translate', { ...MOVE, use_automerge_and_split: true }]],
+  'mesh.rip_move': [['mesh.rip'], ['transform.translate', MOVE]],
+  'mesh.rip_edge_move': [['mesh.rip_edge'], ['transform.translate', MOVE]],
+  'mesh.offset_edge_loops_slide': [['mesh.offset_edge_loops'], ['transform.edge_slide', { single_side: true }]],
+  'mesh.polybuild_face_at_cursor_move': [['mesh.polybuild_face_at_cursor'], ['transform.translate', MOVE]],
+  'mesh.polybuild_split_at_cursor_move': [['mesh.polybuild_split_at_cursor'], ['transform.translate', MOVE]],
+  'mesh.polybuild_transform_at_cursor_move': [['mesh.polybuild_transform_at_cursor'], ['transform.translate', MOVE]],
+  'mesh.polybuild_extrude_at_cursor_move': [['mesh.polybuild_transform_at_cursor'], ['mesh.extrude_edges_indiv'], ['transform.translate', MOVE]],
+};
+// A macro's steps with the properties it was called with over its own.
+export const isMacro = (idname) => idname in MACROS;
+export const macroSteps = (idname, props) => MACROS[idname].map(([step, defaults = {}]) => [step, { ...defaults, ...macroProps(props, struct(step)) }]);
 // Transforms Blender's own code runs in the module's 3D View.
-const MODULE_TRANSFORMS = ['transform.shrink_fatten', 'transform.push_pull', 'transform.tosphere', 'transform.shear', 'transform.vert_slide'];
+const MODULE_TRANSFORMS = ['transform.shrink_fatten', 'transform.push_pull', 'transform.tosphere', 'transform.shear', 'transform.vert_slide', 'transform.edge_slide'];
 
 // What Edit Mode runs itself rather than as an operator's exec, by Blender idname: transforms, Blender's macros and modal
 // tools, run with the operator's properties and the event that ran them (a tool's drag starts where it was pressed).
@@ -43,13 +51,11 @@ export const editMeshActions = (api) => ({
   'transform.translate': () => api.start('move'),
   'transform.rotate': () => api.start('rotate'),
   'transform.resize': () => api.start('scale'),
-  'transform.edge_slide': (props = {}, event) => api.start('edge_slide', { point: event, view: event?.view, releaseConfirm: !!props.release_confirm }),
   ...Object.fromEntries(MODULE_TRANSFORMS.map((idname) => [idname, (props, event) => api.module(idname, props, event)])),
   'view3d.edit_mesh_extrude_move_normal': () => api.extrudeMove(),
   'view3d.select_box': () => api.selectBox(),
-  ...Object.fromEntries(Object.entries(MACROS).map(([idname, [first, transform]]) => [idname, (props = {}, event) =>
-    api.macro(first, macroProps(props, struct(first)), transform, macroProps(props, struct(transform)), event)])),
-  'mesh.loopcut_slide': (props = {}, event) => api.loopcut(event, macroProps(props, 'TRANSFORM_OT_edge_slide')),
+  ...Object.fromEntries(Object.keys(MACROS).map((idname) => [idname, (props = {}, event) => api.macro(macroSteps(idname, props), event)])),
+  'mesh.loopcut_slide': (props = {}, event) => api.loopcut(event, macroProps(props, 'TRANSFORM_OT_edge_slide'), macroProps(props, 'MESH_OT_loopcut')),
   'mesh.bevel': (props = {}, event) => api.bevel(props.affect ?? 'EDGES', event, props),
   'mesh.inset': (props = {}, event) => api.inset(event, props),
 });
@@ -124,5 +130,5 @@ export function idleApi(record = () => {}) {
       tool_settings: rna('ToolSettings', { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) }),
     });
   };
-  return api = { context, exec: record, macro: record, module: record, keys: none, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
+  return api = { context, exec: record, macro: ([[idname, props]]) => record(idname, props), module: record, keys: none, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
 }

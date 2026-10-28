@@ -182,6 +182,84 @@ const checks = {
     await app.until((b) => b.world.editMode.mesh.faces_num === 30);
   },
 
+  async "Loop Cut tool cuts the ring under the pointer and slides it"() {
+    await editMeshTool("builtin.loop_cut");
+    const [x, y] = await screenOf([1, 1, 0]);
+    await app.page.mouse.move(x, y, { steps: 4 });
+    await app.page.mouse.down();
+    await app.page.mouse.move(x + 20, y - 15, { steps: 6 });
+    await app.page.mouse.up();
+    await app.until((b) => b.world.editMode.mesh.faces_num === 10);
+  },
+
+  async "Spin tool's gizmo button spins the cube about Z"() {
+    await editMeshTool("builtin.spin");
+    // The Z axis' first button: from the 3D cursor, the gizmo radius (2.3 times 75 pixels) along Y turned 45 degrees.
+    const [fx, fy] = await app.bylonder((b) => {
+      const view = b.views.input, { width, height } = view.canvas, cssScale = view.canvas.getBoundingClientRect().width / width;
+      const project = (v) => BABYLON.Vector3.Project(v, BABYLON.Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
+      const origin = project(BABYLON.Vector3.Zero()), right = project(view.camera.getDirection(BABYLON.Vector3.Right()));
+      const pixelsPerUnit = Math.hypot(right.x - origin.x, right.y - origin.y) * cssScale;
+      const button = project(new BABYLON.Vector3(-Math.SQRT1_2, 0, Math.SQRT1_2).scale((2.3 * 75) / pixelsPerUnit));
+      return [button.x / width, button.y / height];
+    });
+    await app.hover(fx, fy);
+    await app.page.mouse.down();
+    await app.page.mouse.up();
+    await app.until((b) => b.world.editMode.mesh.faces_num === 78);
+  },
+
+  async "Knife tool cuts across the cube's faces"() {
+    await editMeshTool("builtin.knife");
+    const [x, y] = await app.point();
+    await app.page.mouse.move(x - 120, y + 10);
+    await app.page.mouse.down();
+    await app.page.mouse.move(x + 120, y - 10, { steps: 12 });
+    await app.page.mouse.up();
+    await app.page.keyboard.press("Enter");
+    await app.until((b) => b.world.editMode.mesh.faces_num > 6);
+  },
+
+  async "Bisect tool cuts the cube along the dragged line"() {
+    await editMeshTool("builtin.bisect", { group: "builtin.knife", label: "Bisect" });
+    const [x, y] = await app.point();
+    await app.page.mouse.move(x - 150, y - 60);
+    await app.page.mouse.down();
+    await app.page.mouse.move(x + 150, y + 70, { steps: 10 });
+    await app.page.mouse.up();
+    await app.until((b) => b.world.editMode.mesh.faces_num > 6);
+  },
+
+  // On a closed mesh no vertex is on a boundary, so the tool's preselection is the vertex nearest the pointer, which a
+  // drag moves (gizmo_preselect_elem_test_select).
+  async "Poly Build tool moves the vertex under the pointer"() {
+    await editMeshTool("builtin.poly_build");
+    const positions = () => app.bylonder((b) => Array.from(b.world.editMode.mesh.vert_positions).join());
+    const before = await positions();
+    const [x, y] = await screenOf([1, 1, 0]);
+    await app.page.mouse.move(x, y, { steps: 4 });
+    await app.page.mouse.down();
+    await app.page.mouse.move(x + 40, y + 30, { steps: 6 });
+    await app.page.mouse.up();
+    await app.until((b, before) => b.world.editMode.mesh.verts_num === 8 && Array.from(b.world.editMode.mesh.vert_positions).join() !== before, before);
+  },
+
+  async "Annotate tool draws a stroke, Measure tool a ruler"() {
+    await app.locator('[data-tool="builtin.annotate"]').click();
+    const [x, y] = await app.point(0.3, 0.3);
+    await app.page.mouse.move(x, y);
+    await app.page.mouse.down();
+    await app.page.mouse.move(x + 120, y + 40, { steps: 12 });
+    await app.page.mouse.up();
+    await app.until((b) => b.world.annotations.layers.some((l) => !l.ruler && l.frames?.some((f) => f.strokes.length)));
+    await app.locator('[data-tool="builtin.measure"]').click();
+    await app.page.mouse.move(x, y + 200);
+    await app.page.mouse.down();
+    await app.page.mouse.move(x + 150, y + 220, { steps: 10 });
+    await app.page.mouse.up();
+    await app.until((b) => b.world.annotations.rulerLayer()?.frames?.some((f) => f.strokes.length));
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {
@@ -222,6 +300,33 @@ const checks = {
     await app.until((b) => Math.abs(b.editor.selection.nodes.at(-1).position.x - 2) < 1e-6, null, 60000);
   },
 };
+
+// Edit Mode on the cube with everything selected, and a tool from the toolbar: one in a group from the flyout its
+// button opens when held.
+async function editMeshTool(tool, { group, label } = {}) {
+  await app.click();
+  await app.page.keyboard.press("Tab");
+  await app.until((b) => b.world.editMode.active);
+  await app.page.keyboard.press("a");
+  if (!group) return app.locator(`[data-tool="${tool}"]`).click();
+  await app.locator(`[data-tool="${group}"]`).hover();
+  await app.page.mouse.down();
+  const item = app.frame().getByText(label, { exact: true }).last();
+  await item.waitFor();
+  await app.page.mouse.up();
+  await item.click();
+  await app.until((b, name) => b.world.toolsystem.active("EDIT_MESH").idname === name, tool);
+}
+
+// A point of the scene in Blender's axes, in page coordinates of the 3D Viewport.
+async function screenOf([bx, by, bz]) {
+  const [fx, fy] = await app.bylonder((b, [x, y, z]) => {
+    const view = b.views.input, { width, height } = view.canvas;
+    const p = BABYLON.Vector3.Project(new BABYLON.Vector3(x, z, y), BABYLON.Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
+    return [p.x / width, p.y / height];
+  }, [bx, by, bz]);
+  return app.point(fx, fy);
+}
 
 async function menu(id, item) {
   await app.page.click(`[data-blender="${id}"]`);

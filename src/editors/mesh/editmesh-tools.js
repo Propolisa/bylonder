@@ -3,8 +3,8 @@
 import { BM_mesh_bm_from_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { hasOperator } from '../../bmesh/bmesh-wasm.js';
 
-// The interactive Edge Slide and Loop Cut previews still run as JS ports, on a BMesh of the edit mesh's Mesh arrays,
-// whose elements are in the same order, for as long as they run.
+// Ctrl R's Loop Cut preview and G G's Edge Slide in Bylonder's Move still run as JS ports, on a BMesh of the edit
+// mesh's Mesh arrays, whose elements are in the same order, for as long as they run.
 export function editBMesh(edit, mesh = edit.toMesh()) {
   const bm = BM_mesh_bm_from_me(mesh);
   bm.selectmode = edit.selectmode;
@@ -21,13 +21,8 @@ const NOT_YET = Object.fromEntries([
   ...lacking('new objects, which need a Main the module does not have', ['mesh.separate']),
   ...lacking("Blender's attribute RNA", ['mesh.attribute_set']),
   ...lacking("Blender's shape key checks", ['mesh.shape_propagate_to_all']),
-  ...lacking("Blender's gizmos", ['mesh.bisect', 'mesh.spin']),
   ...lacking("Blender's live UV unwrap", ['mesh.mark_seam']),
-  ...lacking("the 3D View's interactive tools", [
-    'mesh.knife_tool', 'mesh.knife_project', 'mesh.rip', 'mesh.rip_edge', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_face_at_cursor',
-    'mesh.polybuild_split_at_cursor', 'mesh.polybuild_dissolve_at_cursor', 'mesh.polybuild_transform_at_cursor',
-    'mesh.polybuild_delete_at_cursor',
-  ]),
+  ...lacking("other objects' meshes, which need a Main the module does not have", ['mesh.knife_project']),
 ]);
 export const runsMeshOperator = (idname) => hasMeshOperator(idname) && !NOT_YET[idname];
 

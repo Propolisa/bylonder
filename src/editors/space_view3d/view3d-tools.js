@@ -11,6 +11,7 @@ import { cursor3d_update } from './view3d-cursor.js';
 import { createRuler } from './view3d-gizmo-ruler.js';
 import { createPlacement } from './view3d-placement.js';
 import { registerToolGizmos } from './view3d-gizmo-tool.js';
+import { registerMeshGizmos } from './view3d-gizmo-mesh.js';
 import { createAnnotate } from '../gpencil/annotate.js';
 import { objectMesh } from '../object/object-mesh.js';
 import { worldAxes } from '../transform/transform-mesh.js';
@@ -43,7 +44,9 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
     const active = editor.selection.nodes.at(-1);
     return constrainMode === 2 && active ? worldAxes(active.computeWorldMatrix(true)) : unit_m3();
   };
-  const gizmoMap = createGizmoMap({ group: () => (activeView() && !activeView().state.cameraView ? tool()?.gizmo_group ?? '' : '') });
+  // The active tool's gizmo group, then the redo gizmos the last operator asked for (MESH_GGT_spin_redo).
+  const toolGroup = () => (activeView() && !activeView().state.cameraView ? tool()?.gizmo_group ?? '' : '');
+  const gizmoMap = createGizmoMap({ groups: () => [toolGroup(), ...(world.editMode.active ? world.editMode.lastOperation?.gizmos ?? [] : [])] });
   const ruler = createRuler({ world, region, sources, wm: world.wm, commit, orientation, active: toolActive('VIEW3D_GGT_ruler') });
   const annotate = createAnnotate({
     annotations: () => world.annotations, region, cursor: () => world.sceneSettings.state.cursor.location,
@@ -69,6 +72,18 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
     properties: (group) => world.toolsystem.properties(tool(), group),
     extrude: (event, { normal }) => invokeOperator('mesh.extrude_context_move',
       { TRANSFORM_OT_translate: [['release_confirm', true], ...(normal ? [['orient_type', 'NORMAL']] : [])] }, event),
+  });
+  registerMeshGizmos({
+    region, wm: world.wm, active: (gizmo) => world.editMode.active && toolActive(gizmo)(), toolKeymap,
+    preselect: { edgeRing: (event, cuts) => world.editMode.preselectEdgeRing(event, cuts), elem: (event) => world.editMode.preselectElem(event) },
+    cuts: () => Object.fromEntries(world.toolsystem.properties(tool(), 'mesh.loopcut_slide').MESH_OT_loopcut ?? []).number_cuts ?? 1,
+    spinAxes: () => {
+      const axis = world.toolsystem.properties(tool(), 'MESH_GGT_spin').axis ?? ['Z'];
+      return ['X', 'Y', 'Z'].flatMap((name, i) => ([...(typeof axis === 'string' ? [axis] : axis)].includes(name) ? [i] : []));
+    },
+    cursor: () => world.sceneSettings.state.cursor.location,
+    spin: (event, axis) => invokeOperator('mesh.spin', { ...world.toolsystem.keymapProperties(mode(), tool().keymap, 'mesh.spin'), axis }, event),
+    lastOperation: () => world.editMode.lastOperation,
   });
   const inView = (props, event) => !!(event?.view ?? activeView());
 
@@ -101,11 +116,17 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
     },
   });
 
+  const withToolGroup = (handle) => {
+    world.editMode.toolGizmoGroup = toolGroup();
+    return handle();
+  };
+
   return {
-    // The gizmo map's state for the tool system's keymap order, its handler, and pointer hovering.
-    gizmoState: (event) => gizmoMap.state(event),
-    keymap: (event) => inArea(area, () => gizmoMap.keymap(event)),
-    hover: (event) => gizmoMap.mousemove(event),
+    // The gizmo map's state for the tool system's keymap order, its handler, and pointer hovering; each tells the
+    // module which group shows, as its operators read the preselection from it.
+    gizmoState: (event) => withToolGroup(() => gizmoMap.state(event)),
+    keymap: (event) => withToolGroup(() => inArea(area, () => gizmoMap.keymap(event))),
+    hover: (event) => withToolGroup(() => gizmoMap.mousemove(event)),
     dispose: gizmoMap.dispose,
   };
 }

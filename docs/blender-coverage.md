@@ -80,26 +80,25 @@ The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/spac
 The transform settings (`draw_xform_template`) draw from Blender's Python. Transform orientation slots are stored but no transform uses them yet.
 
 ## 3D View Tool: Measure > *
-Rulers are kept in the scene's annotations (`RulerData3D`) as Blender keeps them, and drawn with Blender's units. Snapping (Ctrl) reaches vertices, edges and faces of the objects drawn; Blender also snaps to edge midpoints and perpendiculars.
+Rulers are kept in the scene's annotations (`RulerData3D`) as Blender keeps them, and drawn with Blender's units. Snapping (Ctrl) reaches vertices, edges, edge midpoints, the point of an edge perpendicular to the ruler's other end, and faces of the objects drawn, refined along an edge as `snap_edge_points_impl` does.
 
 ## Generic Tool: Annotate > *
-Strokes are smoothed and simplified as `annotate_paint.cc` does and drawn in screen space with the layer's color and thickness. Pressure is the pointer's; the stabilizer and the onion skin are not drawn yet.
+Strokes are smoothed and simplified as `annotate_paint.cc` does and drawn in screen space with the layer's color and thickness. Pressure is the pointer's. The stabilizer (`use_stabilizer`, or Shift while drawing) trails the pointer by its factor outside its radius and draws its rings and rope; the onion skin is not drawn yet.
 
 ## 3D View Tool: Edit Mesh, Loop Cut > *
-Status: partial
-A press cuts at the edge ring under the mouse and slides it. The ring's preview under the pointer (`VIEW3D_GGT_mesh_preselect_edgering`) is not drawn yet.
+The edge ring under the pointer is Blender's preselection (`EDBM_preselect_edgering_update_from_edge` in the module), drawn by Bylonder's `VIEW3D_GGT_mesh_preselect_edgering`. A press runs `mesh.loopcut` at that edge, then Blender's Edge Slide modal.
 
 ## 3D View Tool: Edit Mesh, Spin > *
-Status: partial
-Spin runs Blender's operator from the drag; its gizmo (`MESH_GGT_spin`) and the redo gizmo that drags out the angle are not drawn yet, so the angle comes from the Adjust Last Operation panel.
+The gizmo (`MESH_GGT_spin`) draws two buttons per enabled axis around the 3D cursor; a click spins about the axis. Spin asks for its redo gizmo (`MESH_GGT_spin_redo`), a dial at the spin's center whose drag adjusts the angle through Adjust Last Operation. The gizmos are Bylonder's drawing; the operator is Blender's.
 
 ## 3D View Tool: Edit Mesh, Poly Build > *
-Status: missing
-Needs the preselection gizmo (`VIEW3D_GGT_mesh_preselect_elem`), which picks the element its macros act on.
+The preselection is `gizmo_preselect_elem_test_select` run in the module (`edit_mesh_preselect_elem`), so on a closed mesh it picks vertices as Blender does. The macros' operators read it through `ED_view3d_gizmo_mesh_preselect_get_active`.
 
 ## 3D View Tool: Edit Mesh, Extrude Manifold > *
-Status: partial
-Extrudes and moves as Blender's macro does; the automerge and split of faces the move dissolves into its neighbors is not run yet.
+Blender's macro runs in the module, its move with `use_automerge_and_split`, so faces the move dissolves into their neighbors are merged and split as in Blender.
+
+## 3D View Tool: Edit Mesh, Bisect > *
+The line is Blender's straight-line gesture (`WM_gesture_straightline_invoke` and its modal, `gesture-api.cc`), drawn by Bylonder. Blender then asks for its gizmo (`MESH_GGT_bisect`), which is not drawn: the plane is adjusted from Adjust Last Operation.
 
 ## VIEW3D_MT_curve_add
 Blender's own primitive operators fill the curve, in the module (`ED_curve_add_nurbs_primitive`). Surfaces (Add > Surface) are not offered yet. See `docs/curves-and-text.md`.

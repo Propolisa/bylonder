@@ -288,6 +288,7 @@ EXPORT(edit_mesh_eval) const ExtractionHeader *edit_mesh_eval(EditContext *ctx)
 /* port-override: the 3D View the editor shows (ED_view3d_update_viewmat with Babylon's camera as its matrices): its view
  * and window matrices (Blender's axes, column-major), its size in pixels and whether it is a perspective view. Operators
  * then act in it as in Blender's window region, projecting the mouse as it does. */
+static wmGizmoMap *gizmo_map_standin();
 EXPORT(edit_context_view_set)
 void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
 {
@@ -317,8 +318,9 @@ void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *
     ctx->workspace_hook.act_layout = &ctx->layout;
     ctx->layout.screen = &ctx->screen;
     BLI_addtail(&ctx->screen.areabase, &area);
-    /* The editor's gizmo map (wm-gizmo-map.js) draws and runs the view's gizmos, so operators set up none. */
-    ctx->v3d.gizmo_flag = V3D_GIZMO_HIDE;
+    /* The editor's gizmo map (wm-gizmo-map.js) draws and runs the view's gizmos; the module's stands in for it
+     * (WM_gizmomap_group_find below). */
+    ctx->region.runtime->gizmo_map = gizmo_map_standin();
     area.spacetype = SPACE_VIEW3D;
     BLI_addtail(&area.spacedata, &ctx->v3d);
     BLI_addtail(&area.regionbase, &region);
@@ -327,6 +329,198 @@ void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *
   CTX_wm_window_set(ctx->C, &ctx->window);
   CTX_wm_area_set(ctx->C, &area);
   CTX_wm_region_set(ctx->C, &region);
+}
+
+/* The gizmo map Bylonder's window manager keeps (wm-gizmo-map.js), as the module's operators see it: the group of
+ * the active tool JS shows (edit_context_gizmo_group_set), the gizmo groups an operator asks for after it runs (its
+ * redo gizmos, read by edit_context_gizmo_requested), and the mesh element the preselection gizmo has under the mouse
+ * (edit_mesh_preselect_elem). */
+static std::string gizmo_group_shown;
+static std::string gizmo_groups_requested;
+static BMElem *preselected = nullptr;
+
+static wmGizmoMap *gizmo_map_standin()
+{
+  static char standin;
+  return reinterpret_cast<wmGizmoMap *>(&standin);
+}
+
+EXPORT(edit_context_gizmo_group_set) void edit_context_gizmo_group_set(const char *idname) { gizmo_group_shown = idname; }
+EXPORT(edit_context_gizmo_requested) const char *edit_context_gizmo_requested()
+{
+  static std::string requested;
+  requested = gizmo_groups_requested;
+  gizmo_groups_requested.clear();
+  return requested.c_str();
+}
+
+namespace blender {
+
+/* port-override: the stand-in gizmo map has one gizmo group, the one JS shows, with one gizmo; what an operator reads
+ * of it is answered below (ED_view3d_gizmo_mesh_preselect_get_active). */
+wmGizmoGroup *WM_gizmomap_group_find(wmGizmoMap * /*gzmap*/, const char *idname)
+{
+  static wmGizmoGroup group = {};
+  static wmGizmo gizmo = {};
+  if (gizmo_group_shown != idname || !STREQ(idname, "VIEW3D_GGT_mesh_preselect_elem")) {
+    return nullptr;
+  }
+  group.gizmos.first = group.gizmos.last = &gizmo;
+  return &group;
+}
+bool WM_gizmo_context_check_drawstep(const bContext * /*C*/, eWM_GizmoFlagMapDrawStep /*step*/) { return true; }
+/* No gizmo runs modally in the module, and none of its groups is listed: the gizmos are Bylonder's. */
+wmGizmo *WM_gizmomap_get_modal(const wmGizmoMap * /*gzmap*/) { return nullptr; }
+const ListBaseT<wmGizmoGroup> *WM_gizmomap_group_list(wmGizmoMap * /*gzmap*/)
+{
+  static ListBaseT<wmGizmoGroup> none = {};
+  return &none;
+}
+
+/* port-override: gizmo group types by name only, so an operator's request for one reaches JS, which draws it. */
+wmGizmoGroupType *WM_gizmogrouptype_find(StringRef idname, bool /*quiet*/)
+{
+  static Map<std::string, std::unique_ptr<wmGizmoGroupType>> types;
+  return types.lookup_or_add_cb(idname, [&]() {
+    auto type = std::make_unique<wmGizmoGroupType>();
+    type->idname = BLI_strdupn(idname.data(), idname.size());
+    return type;
+  }).get();
+}
+bool WM_gizmo_group_type_ensure_ptr(wmGizmoGroupType *gzgt)
+{
+  gizmo_groups_requested += std::string(gzgt->idname) + "\n";
+  return true;
+}
+bool WM_gizmo_group_type_ensure(StringRef idname) { return WM_gizmo_group_type_ensure_ptr(WM_gizmogrouptype_find(idname, true)); }
+void WM_gizmo_group_type_reinit_ptr(Main * /*bmain*/, wmGizmoGroupType *gzgt) { WM_gizmo_group_type_ensure_ptr(gzgt); }
+
+/* port-override: the preselection gizmo is Bylonder's; its element is the one edit_mesh_preselect_elem found. */
+void ED_view3d_gizmo_mesh_preselect_get_active(const bContext *C, const wmGizmo * /*gz*/, Base **r_base, BMElem **r_ele)
+{
+  ViewLayer *view_layer = CTX_data_view_layer(C);
+  BKE_view_layer_synced_ensure(*CTX_data_main(C), CTX_data_scene(C), view_layer);
+  *r_base = preselected ? BKE_view_layer_active_base_get(view_layer) : nullptr;
+  *r_ele = preselected;
+}
+
+}  // namespace blender
+
+/* port-override: the layouts of editmesh_preselect_edgering.cc's and editmesh_preselect_elem.cc's private structs,
+ * whose geometry JS draws. */
+struct PreSelEdgeRingLayout {
+  float (*edges)[2][3];
+  int edges_len;
+  float (*verts)[3];
+  int verts_len;
+};
+struct PreSelElemLayout {
+  float (*edges)[2][3];
+  int edges_len;
+  float (*verts)[3];
+  int verts_len;
+  float (*preview_tris)[3][3];
+  int preview_tris_len;
+  float (*preview_lines)[2][3];
+  int preview_lines_len;
+};
+
+/* Preselection geometry for JS, in object space: counts of edges, vertices, preview triangles and preview lines,
+ * then their coordinates in that order. */
+static Vector<float> preselection_geometry;
+static const float *preselection_pack(float (*edges)[2][3], int edges_len, float (*verts)[3], int verts_len,
+                                      float (*tris)[3][3], int tris_len, float (*lines)[2][3], int lines_len)
+{
+  preselection_geometry = {float(edges_len), float(verts_len), float(tris_len), float(lines_len)};
+  const auto add = [](const void *data, int len) {
+    preselection_geometry.extend(Span(static_cast<const float *>(data), data ? len : 0));
+  };
+  add(edges, edges_len * 6);
+  add(verts, verts_len * 3);
+  add(tris, tris_len * 9);
+  add(lines, lines_len * 6);
+  return preselection_geometry.data();
+}
+
+/* The Loop Cut tool's preview (gizmo_preselect_edgering_test_select): the edge ring from an edge with `cuts` cuts
+ * (EDBM_preselect_edgering_update_from_edge), or nothing for -1. */
+EXPORT(edit_mesh_preselect_edgering) const float *edit_mesh_preselect_edgering(EditContext *ctx, int edge_index, int cuts)
+{
+  BMesh *bm = ctx->mesh.runtime->edit_mesh->bm;
+  EditMesh_PreSelEdgeRing *psel = EDBM_preselect_edgering_create();
+  if (edge_index >= 0 && edge_index < bm->totedge) {
+    BM_mesh_elem_table_ensure(bm, BM_EDGE);
+    EDBM_preselect_edgering_update_from_edge(psel, bm, BM_edge_at_index(bm, edge_index), cuts, {});
+  }
+  PreSelEdgeRingLayout &ring = *reinterpret_cast<PreSelEdgeRingLayout *>(psel);
+  const float *out = preselection_pack(ring.edges, ring.edges_len, ring.verts, ring.verts_len, nullptr, 0, nullptr, 0);
+  EDBM_preselect_edgering_destroy(psel);
+  return out;
+}
+
+/* The Poly Build tool's preselection (gizmo_preselect_elem_test_select, mirrored): the element under the mouse
+ * (region pixels, y up) by EDBM_unified_findnearest_from_raycast, Ctrl creating and Shift deleting, and its
+ * preview; it is the element the tool's operators then act on. */
+EXPORT(edit_mesh_preselect_elem) const float *edit_mesh_preselect_elem(EditContext *ctx, int x, int y, int modifier)
+{
+  bContext *C = ctx->C;
+  static EditMesh_PreSelElem *psel = EDBM_preselect_elem_create();
+  const bool is_ctrl_pressed = (modifier & KM_CTRL) != 0;
+  const bool is_shift_pressed = (modifier & KM_SHIFT) != 0;
+  EDBM_preselect_action_set(psel, PRESELECT_ACTION_TRANSFORM);
+  if (is_ctrl_pressed && !is_shift_pressed) {
+    EDBM_preselect_action_set(psel, PRESELECT_ACTION_CREATE);
+  }
+  if (!is_ctrl_pressed && is_shift_pressed) {
+    EDBM_preselect_action_set(psel, PRESELECT_ACTION_DELETE);
+  }
+  Vector<Base *> bases = BKE_view_layer_array_from_bases_in_edit_mode(*CTX_data_main(C), CTX_data_scene(C), CTX_data_view_layer(C), CTX_wm_view3d(C));
+  ViewContext vc = em_setup_viewcontext(C);
+  vc.mval[0] = x;
+  vc.mval[1] = y;
+  BMElem *best = nullptr;
+  int base_index_vert = -1, base_index_edge = -1, base_index_face = -1;
+  BMVert *eve_test;
+  BMEdge *eed_test;
+  BMFace *efa_test;
+  if (EDBM_unified_findnearest_from_raycast(&vc, bases, false, true, &base_index_vert, &base_index_edge, &base_index_face,
+                                            &eve_test, &eed_test, &efa_test))
+  {
+    if (EDBM_preselect_action_get(psel) == PRESELECT_ACTION_DELETE) {
+      if (efa_test) {
+        best = reinterpret_cast<BMElem *>(efa_test);
+      }
+    }
+    else if (eed_test) {
+      best = reinterpret_cast<BMElem *>(eed_test);
+    }
+    if (eve_test) {
+      float vert_p_co[2], vert_co[3];
+      const float mval_f[2] = {float(x), float(y)};
+      mul_v3_m4v3(vert_co, bases[base_index_vert]->object->object_to_world().ptr(), eve_test->co);
+      ED_view3d_project_v2(vc.region, vert_co, vert_p_co);
+      if (len_v2v2(vert_p_co, mval_f) < 35) {
+        best = reinterpret_cast<BMElem *>(eve_test);
+      }
+      if (!BM_vert_is_boundary(eve_test) && EDBM_preselect_action_get(psel) != PRESELECT_ACTION_DELETE) {
+        best = reinterpret_cast<BMElem *>(eve_test);
+      }
+    }
+  }
+  preselected = best;
+  BMesh *bm = ctx->mesh.runtime->edit_mesh->bm;
+  if (best) {
+    const int mval[2] = {x, y};
+    EDBM_preselect_elem_update_from_single(psel, bm, best, {});
+    EDBM_preselect_elem_update_preview(psel, &vc, bm, best, mval);
+  }
+  else {
+    EDBM_preselect_elem_clear(psel);
+    EDBM_preselect_preview_clear(psel);
+  }
+  PreSelElemLayout &elem = *reinterpret_cast<PreSelElemLayout *>(psel);
+  return preselection_pack(elem.edges, elem.edges_len, elem.verts, elem.verts_len, elem.preview_tris, elem.preview_tris_len,
+                           elem.preview_lines, elem.preview_lines_len);
 }
 
 /* The text the last operator showed in the view's header (ED_area_status_text), or null. */
@@ -375,6 +569,10 @@ void blender::WM_operatortype_append(void (*opfunc)(wmOperatorType *ot))
   appended_operators().append({type->idname, opfunc, type});
 }
 
+namespace blender {
+void gesture_straightline_modal_keymap(wmKeyConfig *keyconf);
+}
+
 static Vector<OperatorDefinition> &operators()
 {
   static Vector<OperatorDefinition> table = [] {
@@ -394,6 +592,7 @@ static Vector<OperatorDefinition> &operators()
     keymaps = true;
     ed::transform::keymap_transform(nullptr);
     knifetool_modal_keymap(nullptr);
+    gesture_straightline_modal_keymap(nullptr);
   }
   return table;
 }
@@ -439,6 +638,14 @@ EXPORT(operator_free) void operator_free(wmOperator *op)
 EXPORT(operator_set) bool operator_set(wmOperator *op, const char *name, const double *numbers, int len, const char *enum_identifier)
 {
   return operator_property_set(op->ptr, name, numbers, len, enum_identifier);
+}
+
+/* The values the operator ran with, as JSON (operator_values_json). */
+EXPORT(operator_values) const char *operator_values(wmOperator *op)
+{
+  static std::string json;
+  json = operator_values_json(op->ptr);
+  return json.c_str();
 }
 
 /* The message of the last report an operator made for its user (as Blender's status bar shows it), or null. */
@@ -489,11 +696,22 @@ EXPORT(operator_exec) int operator_exec(bContext *C, wmOperator *op)
 
 /* The event an operator's invoke or modal gets (wmEvent): its type and value (wmEventType, KM_PRESS...), where it is in
  * the context's region (Blender's y up), its modifier keys (wmEventModifierFlag), its text and the previous press. */
+static wmEvent *last_event = nullptr;
+/* Where the press a drag began with was (region pixels, y up), for the event wm_event_set made last
+ * (WM_event_drag_start_xy reads it). */
+EXPORT(wm_event_press_set) void wm_event_press_set(bContext *C, int x, int y)
+{
+  const ARegion *region = CTX_wm_region(C);
+  const int2 origin = region ? int2(region->winrct.xmin, region->winrct.ymin) : int2(0);
+  last_event->prev_press_xy[0] = x + origin.x;
+  last_event->prev_press_xy[1] = y + origin.y;
+}
 EXPORT(wm_event_set)
 wmEvent *wm_event_set(bContext *C, int type, int val, int x, int y, int modifier, const char *utf8, int prev_type, int prev_val)
 {
   static wmEvent event;
   event = {};
+  last_event = &event;
   event.type = wmEventType(type);
   event.val = short(val);
   const ARegion *region = CTX_wm_region(C);

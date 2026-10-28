@@ -20,7 +20,7 @@ export function drawCallbackAdd(draw) {
 
 // A theme color (0..1) with an alpha, as CSS.
 export const css = ([r, g, b, a = 1], alpha = a) => `rgb(${Math.round(r * 255)} ${Math.round(g * 255)} ${Math.round(b * 255)} / ${alpha})`;
-export const THEME = { ...theme.user_interface, text: theme.view_3d.space.text, wire: theme.view_3d.wire };
+export const THEME = { ...theme.user_interface, text: theme.view_3d.space.text, wire: theme.view_3d.wire, view_overlay: theme.view_3d.view_overlay };
 
 export function createToolOverlay(view) {
   const canvas = Object.assign(document.createElement('canvas'), { className: 'tool-overlay' });
