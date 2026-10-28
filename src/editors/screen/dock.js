@@ -8,7 +8,7 @@ import 'splitpanes/dist/splitpanes.css';
 import './dock.css';
 import { profile, validateLayout, swapSections, focusedSection } from './model.js';
 
-export function mountDock({host, items, tree, defaults, storageKey, bareFocus=false}) {
+export function mountDock({host, items, tree, defaults, storageKey, bareFocus=false, focus: defaultFocus=null}) {
   items=[...items];
   const headers=new Map();
   const header=id=>{if(!headers.has(id))headers.set(id,Object.assign(document.createElement('div'),{className:'dock-header-content'}));return headers.get(id);};
@@ -34,7 +34,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
     state.tree=validAreaTree(saved[state.profile]?.tree,ids.length)?saved[state.profile].tree:structuredClone(tree);
     if(saved[state.profile]?.sizes)for(const [key,pair] of Object.entries(saved[state.profile].sizes))if(Array.isArray(pair)&&pair.length===2&&pair.every(n=>Number.isFinite(n)&&n>0))state.layout.sizes[key]=pair;
     if(saved[state.profile]?.horizontal)Object.assign(state.layout.horizontal,saved[state.profile].horizontal);
-    state.focus=ids.includes(saved[state.profile]?.focus)?saved[state.profile].focus:null;
+    state.focus=!saved[state.profile]?defaultFocus:ids.includes(saved[state.profile].focus)?saved[state.profile].focus:null;
   };
   load();
   host.classList.add('dock');
@@ -82,7 +82,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   const closeMenu=()=>menuElement?.close();
   const openMenu=()=>{if(!menuElement.open)menuElement.showModal();};
   const reset=()=>{
-    saved={remember:state.remember};state.layout=structuredClone(defaults(state.profile));state.layout.order.push(...ids.slice(baseCount));state.layout.hidden.push(...ids.slice(baseCount));state.tree=structuredClone(tree);state.focus=null;
+    saved={remember:state.remember};state.layout=structuredClone(defaults(state.profile));state.layout.order.push(...ids.slice(baseCount));state.layout.hidden.push(...ids.slice(baseCount));state.tree=structuredClone(tree);state.focus=defaultFocus;
     persist();closeMenu();host.dispatchEvent(new CustomEvent('dock-reset',{bubbles:true}));
   };
   const button=(label,fn,title,attrs={})=>h('button',{type:'button',onClick:fn,title,...attrs},label);

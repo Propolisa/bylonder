@@ -36,6 +36,10 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 - Next to mirror, as Bylonder gains them: `scene.unit_settings` (operators and `ED_scene_grid_scale` read `scene->unit`), proportional editing and snapping in ToolSettings, `frame_current` for operators that read time, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 - One list of RNA paths then names everything that crosses, so a value Blender's C++ reads is the value Blender's scripts show.
 
+## Workspaces
+
+The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.
+
 ## Menus
 
 Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order.
