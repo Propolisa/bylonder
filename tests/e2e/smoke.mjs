@@ -153,6 +153,26 @@ const checks = {
     await app.locator('[data-shading="wire"]').nth(1).click();
     assert.deepEqual(await app.bylonder((b) => b.views.all.filter((v) => v.nav).map((v) => v.state.shading).sort()), ["solid", "wire"]);
   },
+
+  // The Scripting workspace's Python Console runs Blender's console in CPython over Bylonder's bpy, and the Text
+  // Editor runs a script; Info reports the operator.
+  async "Scripting: the console adds a cube, a script moves the object"() {
+    await app.page.click('[data-workspace="scripting"]');
+    const pythonConsole = app.locator(".bl-console"), textEditor = app.locator(".bl-text-editor");
+    await pythonConsole.waitFor();
+    await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console").textContent), null, 180000);
+    const before = await app.bylonder((b) => b.world.objects.length);
+    await pythonConsole.hover();
+    await app.page.keyboard.type("bpy.ops.mesh.primitive_cube_add()");
+    await app.page.keyboard.press("Enter");
+    await app.until((b, n) => b.world.objects.length > n, before);
+    await app.until(() => /bpy\.ops\.mesh\.primitive_cube_add\(/.test(document.querySelector(".bl-info").textContent));
+    await textEditor.hover();
+    await app.page.keyboard.press("Alt+n");
+    await app.page.keyboard.type("import bpy\nbpy.context.object.location.x = 2\n");
+    await app.page.keyboard.press("Alt+p");
+    await app.until((b) => Math.abs(b.editor.selection.nodes.at(-1).position.x - 2) < 1e-6, null, 60000);
+  },
 };
 
 async function menu(id, item) {

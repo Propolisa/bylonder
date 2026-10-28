@@ -87,6 +87,8 @@
 .bl-icon-object_data{color:var(--bl-icon-object-data)}.bl-icon-modifier{color:var(--bl-icon-modifier)}.bl-icon-shading{color:var(--bl-icon-shading)}.bl-icon-folder{color:var(--bl-icon-folder)}
 .bl-node-link{background:var(--bl-wcol-menu)}
 .bl-properties-header>.bl-row{flex:1}
+/* An area's header (area-ui.js): its row spans the header, items keep their widths (ED_region_header_layout). */
+.bl-area-header>.bl-row{flex:1}.bl-area-header .bl-widget{flex:none}
 /* A popover's block (UI_block_theme_style POPUP): the menu's back, its panels' layouts inside. */
 .bl-popover-block{position:fixed;z-index:1001;gap:calc(var(--bl-row)*.25);box-sizing:border-box;padding:calc(var(--bl-row)*.4);border-radius:calc(var(--bl-row)*.25);background:var(--bl-menu-back);box-shadow:inset 0 0 0 1px var(--bl-menu-back-line),var(--bl-shadow-menu);color:var(--bl-text);font:var(--bl-widget-font)}
 .bl-popover-title{color:var(--bl-menu-back-text)}

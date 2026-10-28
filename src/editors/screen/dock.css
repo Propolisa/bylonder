@@ -61,3 +61,4 @@
   .dock-dialog label{font-size:14px}.dock-dialog button,.dock-dialog select{min-height:40px;font-size:14px}
 }
 .dock-leaf.bare>.dock-heading{display:none}
+.dock-leaf.no-header>.dock-heading{display:none}

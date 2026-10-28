@@ -105,6 +105,7 @@ SETUP = {
     "camera-data": properties_tab("Camera", "DATA"),
     "toolbar": click_tool,
     "sidebar-item": lambda: key("N", *view3d_point(*REST)),
+    "scripting": lambda: setattr(window(), "workspace", bpy.data.workspaces["Scripting"]),
 }
 
 

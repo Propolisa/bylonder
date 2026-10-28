@@ -370,8 +370,12 @@ function templateID(node, env) {
       : node.new ? button({ text: 'New', iconName: 'ADD', kind: 'tool', className: 'flex-1', disabled: !ui.supported(node.new, {}), onClick: () => ui.run(node.new, {}) }) : null,
     // Data-blocks other than objects, scenes, collections and workspaces can keep a fake user (template_id_cb).
     id && !NO_FAKE_USER.has(struct) ? propItem({ kind: 'prop', data: id, property: 'use_fake_user', text: '', icon: 'FAKE_USER_OFF', toggle: true }, env) : null,
+    // The open operator: Open beside New, an icon beside a name.
+    node.open ? button({ text: id ? '' : 'Open', iconName: 'FILEBROWSER', kind: 'tool', className: id ? '' : 'flex-1', iconOnly: !!id, title: operators[node.open]?.description,
+      disabled: !ui.supported(node.open, {}), onClick: () => ui.run(node.open, {}) }) : null,
+    // An unlink operator runs instead of clearing the pointer (text.unlink deletes the text).
     id && node.unlink && node.data[INFO].bound.has(node.property)
-      ? button({ iconName: 'X', kind: 'tool', title: 'Unlink', onClick: () => prop.set(null) }) : null,
+      ? button({ iconName: 'X', kind: 'tool', title: 'Unlink', onClick: () => (typeof node.unlink === 'string' && ui.supported(node.unlink, {}) ? ui.run(node.unlink, {}) : prop.set(null)) }) : null,
   ]);
 }
 

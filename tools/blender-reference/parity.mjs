@@ -78,6 +78,11 @@ const SETUP = {
   "camera-data": (app) => propertiesTab(app, "Camera", "Data"),
   toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
+  // The console prints Blender's banner once CPython has loaded.
+  scripting: async (app) => {
+    await app.page.click('[data-workspace="scripting"]');
+    await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console")?.textContent ?? ""), null, 180000);
+  },
 };
 
 // The object selected alone, and the Properties editor on a tab.

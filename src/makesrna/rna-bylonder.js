@@ -5,7 +5,7 @@
 // pushed by the UI that made the edit (host.undoPush), as Blender's buttons push them, never by RNA.
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
-import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
+import { Camera, Light, PointLight, SpotLight, Quaternion, VertexBuffer } from '@babylonjs/core';
 import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import rnaOperators from './rna-operators.json' with { type: 'json' };
@@ -16,6 +16,7 @@ import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
 import { fileFormats, containers, videoCodecs, qualities } from '../render/formats.js';
 import { textDefaults, updateText } from '../blenkernel/text/text.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
+import { isSyntaxHighlightSupported } from '../editors/space_text/text-format.js';
 
 // Swapping two axes is its own inverse and flips handedness.
 const axes = ([x, y, z]) => [x, z, y];
@@ -118,6 +119,8 @@ const textOption = (key, read = (v) => v, write = (v) => v) => ({ get: (ob) => r
 const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXED;
 const sensor = (camera) => (horizontal(camera) ? 36 : 24);
 const settable = (key) => ({ get: (owner) => owner[key], set: (owner, value) => { owner[key] = value; } });
+// A setting of an editor's space data (SpaceText, SpaceConsole), which redraws it.
+const spaceSetting = (key) => ({ get: (space) => space.settings[key], set: (space, value) => { space.settings[key] = value; space.changed(); } });
 // Enum items for Bylonder's own choices, as RNA's [identifier, name, description, icon].
 const choices = (table, label = (entry) => entry.label) => () => Object.entries(table).map(([id, entry]) => [id, label(entry), '', 'NONE']);
 // A slice's setting by path, written without a commit (the UI that made the edit pushes the undo step).
@@ -220,6 +223,7 @@ const STRUCTS = {
     total_edge_sel: (ob, r) => editTotals(ob, r).edges[0],
     total_face_sel: (ob, r) => editTotals(ob, r).faces[0],
     count_selected_items: (ob, r) => () => { const t = editTotals(ob, r); return [t.verts[0], t.edges[0], t.faces[0]]; },
+    vertices: (ob, r) => meshVertices(ob, r),
   },
   // A material of the material library (blenkernel/material/library.js): Babylon's PBR or Standard material as
   // Blender's Principled BSDF, its settings as Blender's.
@@ -467,6 +471,57 @@ const STRUCTS = {
     operator_properties: (ref, r) => (idname) => operatorProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
     gizmo_group_properties: () => () => rna('GizmoGroupProperties'),
   },
+  // A Text data-block (blenkernel/texts.js) and its lines; an edit saves the text with the project.
+  Text: {
+    name: { get: (text) => text.name, set: (text, name, r) => r.world.texts.rename(text, name) },
+    filepath: (text) => text.filepath,
+    is_in_memory: () => true,
+    is_dirty: () => false,
+    is_modified: () => false,
+    indentation: { get: (text) => (text.tabsToSpaces ? 'SPACES' : 'TABS'), set: (text, value, r) => { text.tabsToSpaces = value === 'SPACES'; r.world.texts.edited(text); } },
+    lines: (text, r) => collection(text.lines.map((_, i) => textLine(text, i, r))),
+    current_line: (text, r) => textLine(text, text.curl, r),
+    select_end_line: (text, r) => textLine(text, text.sell, r),
+    ...Object.fromEntries([['current_line_index', 'curl'], ['current_character', 'curc'], ['select_end_line_index', 'sell'], ['select_end_character', 'selc']].map(([name, key]) => [name,
+      { get: (text) => text[key], set: (text, value, r) => { text[key] = value; r.world.texts.edited(text); } }])),
+    clear: (text, r) => () => { text.setContent(''); r.world.texts.edited(text); },
+    write: (text, r) => (value) => { text.moveEof(false); text.insert(value); r.world.texts.edited(text); },
+    from_string: (text, r) => (value) => { text.setContent(value); r.world.texts.edited(text); },
+    as_string: (text) => () => text.content,
+    cursor_set: (text, r) => (...list) => {
+      const { line, character = 0, select = false } = pyArgs(list, ['line', 'character', 'select']);
+      text.moveTo(line, character, !!select);
+      r.world.texts.edited(text);
+    },
+    select_set: (text, r) => (...list) => {
+      const { line_start, char_start, line_end, char_end } = pyArgs(list, ['line_start', 'char_start', 'line_end', 'char_end']);
+      text.moveTo(line_start, char_start, false);
+      text.moveTo(line_end, char_end, true);
+      r.world.texts.edited(text);
+    },
+  },
+  // The Text Editor (editors/space_text): its text and settings.
+  SpaceTextEditor: {
+    type: () => 'TEXT_EDITOR',
+    text: { get: (st, r) => r.pointer('Text', st.text), set: (st, value) => st.setText(value?.[INFO].owner ?? null) },
+    ...Object.fromEntries(['show_line_numbers', 'show_word_wrap', 'show_syntax_highlight', 'show_line_highlight', 'show_margin', 'margin_column', 'font_size', 'tab_width',
+      'show_region_ui', 'show_region_footer', 'use_live_edit', 'use_match_case', 'use_find_wrap', 'use_find_all', 'find_text', 'replace_text'].map((name) => [name, spaceSetting(name)])),
+    top: { get: (st) => st.top, set: (st, value) => st.scrollTo(value) },
+    visible_lines: (st) => st.visibleLines(),
+    use_overwrite: (st) => st.settings.overwrite,
+    is_syntax_highlight_supported: (st) => () => isSyntaxHighlightSupported(st.text),
+  },
+  // The Python Console (editors/space_console): its lines, prompt and language.
+  SpaceConsole: {
+    type: () => 'CONSOLE',
+    ...Object.fromEntries(['font_size', 'prompt', 'language', 'select_start', 'select_end'].map((name) => [name, spaceSetting(name)])),
+    scrollback: (sc) => collection(sc.scrollback.map((line) => rna('ConsoleLine', line))),
+    history: (sc) => collection(sc.history.map((line) => rna('ConsoleLine', line))),
+  },
+  SpaceInfo: { type: () => 'INFO' },
+  WindowManager: {
+    clipboard: { get: () => clipboard, set: (owner, value) => setClipboard(String(value)) },
+  },
   // A 3D Viewport (space_view3d/view3d.js): its regions, shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',
@@ -487,6 +542,35 @@ const STRUCTS = {
   },
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
+// One of a text's lines (TextLine); writing its body edits the text.
+const textLine = (text, i, r) => rna('TextLine', {
+  get body() { return text.lines[i] ?? ''; },
+  set body(value) { text.lines[i] = String(value); r.world.texts.edited(text); },
+  format: '',
+});
+// Mesh.vertices over the Babylon mesh's position buffer, the geometry's one owner (docs/blender-boundary.md, Who owns
+// what): `co` in Blender's axes, per vertex (MeshVertex, made when read) or whole through foreach_get and foreach_set,
+// which copy the buffer once. Babylon's vertices are split where Blender's are shared.
+function meshVertices(ob, r) {
+  const positions = () => ob.getVerticesData?.(VertexBuffer.PositionKind) ?? [];
+  const write = (data) => { ob.setVerticesData(VertexBuffer.PositionKind, data, ob.getVertexBuffer(VertexBuffer.PositionKind)?.isUpdatable()); ob.refreshBoundingInfo?.(); r.host.update?.('Mesh', 'vertices', ob); };
+  const vertex = (i) => rna('MeshVertex', {
+    index: i,
+    get co() { const p = positions(); return axes([p[3 * i], p[3 * i + 1], p[3 * i + 2]]); },
+    set co(value) { const p = Float32Array.from(positions()); [p[3 * i], p[3 * i + 2], p[3 * i + 1]] = value; write(p); },
+  });
+  const swap = (from, to) => { for (let i = 0; i < from.length; i += 3) { to[i] = from[i]; to[i + 1] = from[i + 2]; to[i + 2] = from[i + 1]; } return to; };
+  const list = Object.assign(collection(new Array(positions().length / 3)), {
+    __foreach_get__: (attr) => (attr === 'co' ? swap(positions(), new Float64Array(positions().length)) : undefined),
+    __foreach_set__: (attr, values) => (attr === 'co' ? (write(swap(values, new Float32Array(values.length))), true) : undefined),
+  });
+  return new Proxy(list, { get: (target, key) => (typeof key === 'string' && /^\d+$/.test(key) ? vertex(Number(key)) : target[key]) });
+}
+
+// The window manager's clipboard (WM_clipboard_text_set); the system's is written too, and read where it can be.
+let clipboard = '';
+export const setClipboard = (value) => { clipboard = value; globalThis.navigator?.clipboard?.writeText(value).catch(() => {}); };
+export const readClipboard = async () => { try { return (await globalThis.navigator.clipboard.readText()) ?? clipboard; } catch { return clipboard; } };
 // A flag of an animation editor's space (eGraphEdit_Flag, eSAction_Flag), and of its dope sheet's filters; `inverted`
 // for a property that is on when the flag is off (show_handles is !SIPO_NOHANDLES).
 function spaceFlag(bit, inverted = false) {
@@ -538,6 +622,15 @@ export function createRNA(host) {
     host,
     world: host.world,
     objects: () => host.world.objects.filter((ob) => !deleted(ob)),
+    // bpy.data.texts: the project's texts, with new and remove (py_new as Transcrypt names it).
+    texts() {
+      const texts = host.world.texts;
+      if (!texts) return collection();
+      const add = (...list) => r.pointer('Text', texts.new(pyArgs(list, ['name']).name ?? 'Text'));
+      return Object.assign(collection(texts.all.map((text) => r.pointer('Text', text))), {
+        new: add, py_new: add, remove: (...list) => texts.remove(pyArgs(list, ['text']).text?.[INFO].owner),
+      });
+    },
     pointer(struct, owner, key = owner) {
       if (!owner || !struct) return null;
       const structs = cache.get(key) ?? cache.set(key, new Map()).get(key);
