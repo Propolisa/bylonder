@@ -97,11 +97,12 @@ def extract(source, patterns):
     body = [node for node in imports if node.names] + nodes
     source = ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
     rewritten = ast.unparse(TranscryptFixes().visit(ast.parse(source)))
-    return rewritten + (HELPERS if uses_helpers(rewritten) else '')
+    # Before the code: module-level code may use them, and JS functions defined by assignment exist only once it ran.
+    return (HELPERS if uses_helpers(rewritten) else '') + rewritten
 
 
 def uses_helpers(source):
-    return re.search(r'\b_(merged|joined|formatted|ellipsis|property)\b', source) is not None
+    return re.search(r'\b_(merged|joined|formatted|ellipsis|property|new_object)\b', source) is not None
 
 
 class TranscryptFixes(ast.NodeTransformer):
@@ -156,6 +157,9 @@ class TranscryptFixes(ast.NodeTransformer):
         if isinstance(node.func, ast.Name) and node.func.id == 'type' and len(node.args) == 3:
             # type(name, bases, attributes), a new class, as Transcrypt's metaclass makes one.
             return ast.Call(func=ast.Attribute(ast.Name('type', ast.Load()), '__new__', ast.Load()), args=[ast.Name('type', ast.Load()), *node.args], keywords=[])
+        if isinstance(node.func, ast.Name) and node.func.id == 'object' and not node.args and not node.keywords:
+            # object(), a sentinel, which Transcrypt's object cannot make: a new JS object, as unique.
+            return ast.Call(ast.Name('_new_object', ast.Load()), [], [])
         if isinstance(node.func, ast.Name) and node.func.id == 'zip':
             # zip's strict only checks lengths, and Transcrypt's zip takes it for an iterable.
             node.keywords = [k for k in node.keywords if k.arg != 'strict']
@@ -165,6 +169,18 @@ class TranscryptFixes(ast.NodeTransformer):
         node.keywords = [ast.keyword(arg=None, value=ast.Call(func=ast.Name('_merged', ast.Load()), args=self.visit_Dict(merged).args
                                                                 if None in merged.keys else [merged], keywords=[]))]
         return node
+
+    def visit_Assign(self, node):
+        """Assignments to __doc__, which do nothing for the UI and fail on Transcrypt's method accessors, dropped."""
+        self.generic_visit(node)
+        return None if any(isinstance(t, ast.Attribute) and t.attr == '__doc__' for t in node.targets) else node
+
+    def visit_Compare(self, node):
+        """Blender's reload idiom, `"name" in locals()`, is False: modules load once."""
+        self.generic_visit(node)
+        reload = (len(node.ops) == 1 and isinstance(node.ops[0], ast.In) and isinstance(node.comparators[0], ast.Call)
+                  and getattr(node.comparators[0].func, 'id', None) == 'locals')
+        return ast.copy_location(ast.Constant(False), node) if reload else node
 
     def visit_Delete(self, node):
         """del d[k], which Transcrypt compiles to a no-op with operator overloading, as d.pop(k)."""
@@ -196,7 +212,7 @@ class TranscryptFixes(ast.NodeTransformer):
 
     def visit_ClassDef(self, node):
         self.scopes.append('class')
-        node = self.dataclass(node)
+        node = self.builtin_bases(self.dataclass(node))
         self.scopes.pop()
         return self.annotations(node)
 
@@ -223,6 +239,13 @@ class TranscryptFixes(ast.NodeTransformer):
         if self.scopes and self.scopes[-1] == 'class':
             return node
         return ast.copy_location(ast.Assign(targets=[node.target], value=node.value), node) if node.value is not None else None
+
+    @staticmethod
+    def builtin_bases(node):
+        """Builtin containers as bases (class C(dict)), which Transcrypt cannot subclass, dropped: the class keeps its own
+        methods only."""
+        node.bases = [b for b in node.bases if not (isinstance(b, ast.Name) and b.id in ('dict', 'list', 'set', 'tuple'))]
+        return node
 
     def dataclass(self, node):
         """@dataclass classes, which Transcrypt cannot compile, as classes with the __init__ dataclasses would make from
@@ -371,6 +394,10 @@ def _merged(*dicts):
 
 
 _ellipsis = __pragma__('js', '{}', 'Symbol ("Ellipsis")')
+
+
+def _new_object():
+    return __pragma__('js', '{}', '{}')
 
 
 def _property(fget=None, fset=None, fdel=None, doc=None):

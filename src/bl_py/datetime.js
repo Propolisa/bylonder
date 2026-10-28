@@ -902,15 +902,15 @@ export var timedelta =  __class__ ('timedelta', [object], {
 		return self._days != 0 || self._seconds != 0 || self._microseconds != 0;
 	});}
 });
-Object.defineProperty (timedelta, 'microseconds', property.call (timedelta, timedelta._get_microseconds));
-Object.defineProperty (timedelta, 'seconds', property.call (timedelta, timedelta._get_seconds));
-Object.defineProperty (timedelta, 'days', property.call (timedelta, timedelta._get_days));;
+globalThis.Object.defineProperty (timedelta, 'microseconds', property.call (timedelta, timedelta._get_microseconds));
+globalThis.Object.defineProperty (timedelta, 'seconds', property.call (timedelta, timedelta._get_seconds));
+globalThis.Object.defineProperty (timedelta, 'days', property.call (timedelta, timedelta._get_days));;
 export var _td_min = timedelta (-(999999999));
 export var _td_max = timedelta (__kwargtrans__ ({days: 999999999, hours: 23, minutes: 59, seconds: 59, microseconds: 999999}));
 export var _td_resolution = timedelta (__kwargtrans__ ({microseconds: 1}));
-Object.defineProperty (timedelta, 'min', {get: function () {return _td_min;}})
-Object.defineProperty (timedelta, 'max', {get: function () {return _td_max;}})
-Object.defineProperty (timedelta, 'resolution', {get: function () {return _td_resolution;}})
+globalThis.Object.defineProperty (timedelta, 'min', {get: function () {return _td_min;}})
+globalThis.Object.defineProperty (timedelta, 'max', {get: function () {return _td_max;}})
+globalThis.Object.defineProperty (timedelta, 'resolution', {get: function () {return _td_resolution;}})
 export var date =  __class__ ('date', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, year, month, day) {
@@ -1144,14 +1144,14 @@ export var date =  __class__ ('date', [object], {
 	});},
 	resolution: timedelta (__kwargtrans__ ({days: 1}))
 });
-Object.defineProperty (date, 'day', property.call (date, date._get_day));
-Object.defineProperty (date, 'month', property.call (date, date._get_month));
-Object.defineProperty (date, 'year', property.call (date, date._get_year));;
+globalThis.Object.defineProperty (date, 'day', property.call (date, date._get_day));
+globalThis.Object.defineProperty (date, 'month', property.call (date, date._get_month));
+globalThis.Object.defineProperty (date, 'year', property.call (date, date._get_year));;
 export var _date_class = date;
 export var _d_min = date (1, 1, 1);
 export var _d_max = date (9999, 12, 31);
-Object.defineProperty (date, 'min', {get: function () {return _d_min;}})
-Object.defineProperty (date, 'max', {get: function () {return _d_max;}})
+globalThis.Object.defineProperty (date, 'min', {get: function () {return _d_min;}})
+globalThis.Object.defineProperty (date, 'max', {get: function () {return _d_max;}})
 export var tzinfo =  __class__ ('tzinfo', [object], {
 	__module__: __name__,
 	get tzname () {return __get__ (this, function (self, dt) {
@@ -1498,16 +1498,16 @@ export var time =  __class__ ('time', [object], {
 	});},
 	resolution: timedelta (__kwargtrans__ ({microseconds: 1}))
 });
-Object.defineProperty (time, 'tzinfo', property.call (time, time._get_tzinfo));
-Object.defineProperty (time, 'microsecond', property.call (time, time._get_microsecond));
-Object.defineProperty (time, 'second', property.call (time, time._get_second));
-Object.defineProperty (time, 'minute', property.call (time, time._get_minute));
-Object.defineProperty (time, 'hour', property.call (time, time._get_hour));;
+globalThis.Object.defineProperty (time, 'tzinfo', property.call (time, time._get_tzinfo));
+globalThis.Object.defineProperty (time, 'microsecond', property.call (time, time._get_microsecond));
+globalThis.Object.defineProperty (time, 'second', property.call (time, time._get_second));
+globalThis.Object.defineProperty (time, 'minute', property.call (time, time._get_minute));
+globalThis.Object.defineProperty (time, 'hour', property.call (time, time._get_hour));;
 export var _time_class = time;
 export var _tm_min = time (0, 0, 0);
 export var _tm_max = time (23, 59, 59, 999999);
-Object.defineProperty (time, 'min', {get: function () {return _tm_min;}})
-Object.defineProperty (time, 'max', {get: function () {return _tm_max;}})
+globalThis.Object.defineProperty (time, 'min', {get: function () {return _tm_min;}})
+globalThis.Object.defineProperty (time, 'max', {get: function () {return _tm_max;}})
 export var datetime =  __class__ ('datetime', [date], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, year, month, day, hour, minute, second, microsecond, tzinfo) {
@@ -2059,15 +2059,15 @@ export var datetime =  __class__ ('datetime', [date], {
 	});},
 	resolution: timedelta (__kwargtrans__ ({microseconds: 1}))
 });
-Object.defineProperty (datetime, 'tzinfo', property.call (datetime, datetime._get_tzinfo));
-Object.defineProperty (datetime, 'microsecond', property.call (datetime, datetime._get_microsecond));
-Object.defineProperty (datetime, 'second', property.call (datetime, datetime._get_second));
-Object.defineProperty (datetime, 'minute', property.call (datetime, datetime._get_minute));
-Object.defineProperty (datetime, 'hour', property.call (datetime, datetime._get_hour));;
+globalThis.Object.defineProperty (datetime, 'tzinfo', property.call (datetime, datetime._get_tzinfo));
+globalThis.Object.defineProperty (datetime, 'microsecond', property.call (datetime, datetime._get_microsecond));
+globalThis.Object.defineProperty (datetime, 'second', property.call (datetime, datetime._get_second));
+globalThis.Object.defineProperty (datetime, 'minute', property.call (datetime, datetime._get_minute));
+globalThis.Object.defineProperty (datetime, 'hour', property.call (datetime, datetime._get_hour));;
 export var _dt_min = datetime (1, 1, 1);
 export var _dt_max = datetime (9999, 12, 31, 23, 59, 59, 999999);
-Object.defineProperty (datetime, 'min', {get: function () {return _dt_min;}})
-Object.defineProperty (datetime, 'max', {get: function () {return _dt_max;}})
+globalThis.Object.defineProperty (datetime, 'min', {get: function () {return _dt_min;}})
+globalThis.Object.defineProperty (datetime, 'max', {get: function () {return _dt_max;}})
 export var _isoweek1monday = function (year) {
 	var THURSDAY = 3;
 	var firstday = _ymd2ord (year, 1, 1);
@@ -2228,9 +2228,9 @@ export var timezone =  __class__ ('timezone', [tzinfo], {
 export var _tz_utc = timezone._create (timedelta (0));
 export var _tz_min = timezone._create (timezone._minoffset);
 export var _tz_max = timezone._create (timezone._maxoffset);
-Object.defineProperty (timezone, 'utc', {get: function () {return _tz_utc;}})
-Object.defineProperty (timezone, 'min', {get: function () {return _tz_min;}})
-Object.defineProperty (timezone, 'max', {get: function () {return _tz_max;}})
+globalThis.Object.defineProperty (timezone, 'utc', {get: function () {return _tz_utc;}})
+globalThis.Object.defineProperty (timezone, 'min', {get: function () {return _tz_min;}})
+globalThis.Object.defineProperty (timezone, 'max', {get: function () {return _tz_max;}})
 export var _EPOCH = datetime (1970, 1, 1, __kwargtrans__ ({tzinfo: timezone.utc}));
 
 //# sourceMappingURL=datetime.map

@@ -24,8 +24,8 @@ export function __nest__ (headObject, tailNames, value) {
             current = current [tailChain [index]];
         }
     }
-    for (let attrib of Object.getOwnPropertyNames (value)) {
-        Object.defineProperty (current, attrib, {
+    for (let attrib of globalThis.Object.getOwnPropertyNames (value)) {
+        globalThis.Object.defineProperty (current, attrib, {
             get () {return value [attrib];},
             enumerable: true,
             configurable: true
@@ -43,7 +43,7 @@ export function __get__ (aThis, func, quotedFuncName) {
     if (aThis) {
         if (aThis.hasOwnProperty ('__class__') || typeof aThis == 'string' || aThis instanceof String) {
             if (quotedFuncName) {
-                Object.defineProperty (aThis, quotedFuncName, {
+                globalThis.Object.defineProperty (aThis, quotedFuncName, {
                     value: function () {
                         var args = [] .slice.apply (arguments);
                         return func.apply (null, [aThis] .concat (args));
@@ -94,27 +94,27 @@ export var py_metatype = {
         for (var index = bases.length - 1; index >= 0; index--) {
             var base = bases [index];
             for (var attrib in base) {
-                var descrip = Object.getOwnPropertyDescriptor (base, attrib);
+                var descrip = globalThis.Object.getOwnPropertyDescriptor (base, attrib);
                 if (descrip == null) {
                     continue;
                 }
-                Object.defineProperty (cls, attrib, descrip);
+                globalThis.Object.defineProperty (cls, attrib, descrip);
             }
             for (let symbol of Object.getOwnPropertySymbols (base)) {
-                let descrip = Object.getOwnPropertyDescriptor (base, symbol);
-                Object.defineProperty (cls, symbol, descrip);
+                let descrip = globalThis.Object.getOwnPropertyDescriptor (base, symbol);
+                globalThis.Object.defineProperty (cls, symbol, descrip);
             }
         }
         cls.__metaclass__ = meta;
         cls.__name__ = name.startsWith ('py_') ? name.slice (3) : name;
         cls.__bases__ = bases;
         for (var attrib in attribs) {
-            var descrip = Object.getOwnPropertyDescriptor (attribs, attrib);
-            Object.defineProperty (cls, attrib, descrip);
+            var descrip = globalThis.Object.getOwnPropertyDescriptor (attribs, attrib);
+            globalThis.Object.defineProperty (cls, attrib, descrip);
         }
         for (let symbol of Object.getOwnPropertySymbols (attribs)) {
-            let descrip = Object.getOwnPropertyDescriptor (attribs, symbol);
-            Object.defineProperty (cls, symbol, descrip);
+            let descrip = globalThis.Object.getOwnPropertyDescriptor (attribs, symbol);
+            globalThis.Object.defineProperty (cls, symbol, descrip);
         }
         return cls;
     }
@@ -126,7 +126,7 @@ export var object = {
     __name__: 'object',
     __bases__: [],
     __new__: function (args) {
-        var instance = Object.create (this, {__class__: {value: this, enumerable: true}});
+        var instance = globalThis.Object.create (this, {__class__: {value: this, enumerable: true}});
         if ('__getattr__' in this || '__setattr__' in this) {
             instance.__proxy__ = new Proxy (instance, {
                 get: function (target, name) {
@@ -194,7 +194,7 @@ export function property (getter, setter) {
 }
 export function __setproperty__ (anObject, name, descriptor) {
     if (!anObject.hasOwnProperty (name)) {
-        Object.defineProperty (anObject, name, descriptor);
+        globalThis.Object.defineProperty (anObject, name, descriptor);
     }
 }
 export function assert (condition, message) {
@@ -1386,7 +1386,7 @@ function __pop__ (aKey, aDefault) {
     return aDefault;
 }
 function __popitem__ () {
-    const aKeys = Object.keys (this);
+    const aKeys = globalThis.Object.keys (this);
     if (aKeys.length === 0) {
         throw KeyError ("popitem(): dictionary is empty", new Error ());
     }
