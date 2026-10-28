@@ -6,7 +6,7 @@
 // the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
 import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
-import { regionCanvas, drawGrid, drawFrameRange, drawScrubbing, drawChannels, channelRows, channelToggles, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
+import { regionCanvas, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, drawChannels, channelRows, channelToggles, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
 import { newOperator, operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { keymapHandler, modalItem } from '../../windowmanager/keyconfig.js';
@@ -42,6 +42,8 @@ const KEYMAPS = {
 const HEADERS = { GRAPH_EDITOR: 'GRAPH_HT_header', DOPESHEET_EDITOR: 'DOPESHEET_HT_header' };
 const SPACE_TYPES = { GRAPH_EDITOR: SPACE_GRAPH, DOPESHEET_EDITOR: SPACE_ACTION };
 // The channel region's width (its region type's prefsizex): the Graph Editor's leaves room for its scroll bar.
+// The editors' own keymaps, which the marker strip's events skip.
+const EDITOR_KEYMAPS = new Set(['Dopesheet', 'Graph Editor']);
 const CHANNELS_WIDTH = { GRAPH_EDITOR: 200 + 11, DOPESHEET_EDITOR: 200 }, UI_SIDEBAR_PANEL_WIDTH = 280;
 const BUTTONS = ['LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE', 'BUTTON4MOUSE', 'BUTTON5MOUSE'];
 const KEYMAP_EVENT_TYPES = { SPACEBAR: 'SPACE' };
@@ -309,10 +311,16 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     const into = region ?? (x < size.channels ? RGN_TYPE_CHANNELS : RGN_TYPE_WINDOW), left = into === RGN_TYPE_CHANNELS ? 0 : size.channels;
     return { type, value, x: x - left, y, region: into, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, oskey: e.metaKey, modifier: modifiers(e), native: e };
   }
+  // ED_markers_region_visible: the space shows markers (SACTION_SHOW_MARKERS, SIPO_SHOW_MARKERS).
+  const markersShown = () => !!(area.settings.flag & (graph ? 1 << 16 : 1 << 14));
   // Which of a region's keymaps take an event now (their handlers' polls).
   function keymapActive(name, event) {
     if (name === 'Time Scrub') return event.region === RGN_TYPE_WINDOW && event.y >= size.height - area.metrics().scrubHeight;
-    if (name === 'Markers') return false;
+    // WM_event_handler_region_marker_poll, and the editor's own keymap's no_marker poll: the marker strip takes events
+    // when there are markers to show.
+    const onMarkers = event.region === RGN_TYPE_WINDOW && markersShown() && animation.anim.markers.length > 0 && event.y < UI_MARKER_MARGIN_Y;
+    if (name === 'Markers') return onMarkers;
+    if (EDITOR_KEYMAPS.has(name)) return !onMarkers;
     return true;
   }
   function dispatch(event) {
@@ -443,6 +451,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       const { cur } = v2d, rows = channelRows(channels, v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
       drawKeyRows(main, v2d, rows, metrics, { backdrops: !timeline });
     }
+    if (markersShown()) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
     drawScrubbing(main, v2d, frame, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
     if (size.channels) {

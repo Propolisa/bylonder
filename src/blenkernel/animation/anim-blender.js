@@ -193,6 +193,17 @@ export class BlenderAnimation {
     const cfra = Math.floor(frame);
     x.anim_scene_time_set(this.main.scene, cfra, frame - cfra, start, end, previewStart, previewEnd, preview, fps, KEYFRAME_TYPES.indexOf(keyframeType), autoKey);
   }
+  // The scene's markers (Scene.timeline_markers): { name, frame, select } in list order; set replaces them.
+  get markers() {
+    return Array.from({ length: x.anim_markers(this.main.scene) }, (_, i) => withArrays([new Int32Array(2)], ([p]) => {
+      const name = cString(x.anim_marker(this.main.scene, i, p)), [frame, flag] = new Int32Array(x.memory.buffer, p, 2);
+      return { name, frame, select: !!(flag & SELECT) };
+    }));
+  }
+  set markers(markers) {
+    x.anim_markers_clear(this.main.scene);
+    for (const { name, frame, select } of markers) withString(name, (n) => x.anim_marker_add(this.main.scene, frame, select ? SELECT : 0, n));
+  }
   get frame() { return x.anim_scene_frame(this.main.scene); }
   get range() {
     const [start, end, previewStart, previewEnd, preview] = new Int32Array(x.memory.buffer, x.anim_scene_range(this.main.scene) >>> 0, 5);

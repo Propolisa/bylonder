@@ -64,6 +64,15 @@ PANEL_CASES = {
     "panel-interpolation": (0, 1, "interpolation", "ELASTIC"),
     "panel-easing": (1, 1, "easing", "EASE_IN"),
 }
+# Marker operators in the Dope Sheet, on markers at frames 10 (selected), 30 and 45: (operator, properties).
+MARKER_CASES = {
+    "marker-move": ("marker.move", {"frames": 5}),
+    "marker-duplicate": ("marker.duplicate", {"frames": 3}),
+    "marker-select-all": ("marker.select_all", {"action": "SELECT"}),
+    "marker-delete": ("marker.delete", {"confirm": False}),
+    "marker-add": ("marker.add", {}),
+}
+MARKERS = [("F_10", 10, True), ("F_30", 30, False), ("F_45", 45, False)]
 FRAME = 12
 
 r = lambda v: [round(x, 4) for x in v]
@@ -147,4 +156,20 @@ for name, (curve, key, prop, value) in PANEL_CASES.items():
     data = {"panel": [curve, key, prop, value], "keys": KEYS, "before": before, "after": keys()}
     with open(os.path.join(out_dir, name + ".json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))
-print("fixtures written", len(CASES) + len(PANEL_CASES))
+def markers():
+    return [{"name": m.name, "frame": m.frame, "select": m.select} for m in bpy.context.scene.timeline_markers]
+
+
+for name, (idname, props) in MARKER_CASES.items():
+    build([])
+    for marker_name, frame, select in MARKERS:
+        bpy.context.scene.timeline_markers.new(marker_name, frame=frame).select = select
+    window, area, region = area_for(DOPESHEET)
+    before = markers()
+    with bpy.context.temp_override(window=window, area=area, region=region):
+        module, op = idname.split(".")
+        result = sorted(getattr(getattr(bpy.ops, module), op)(**props))
+    data = {"markers_operator": idname, "props": props, "result": result, "frame": FRAME, "before": before, "after": markers()}
+    with open(os.path.join(out_dir, name + ".json"), "w") as f:
+        json.dump(data, f, separators=(",", ":"))
+print("fixtures written", len(CASES) + len(PANEL_CASES) + len(MARKER_CASES))

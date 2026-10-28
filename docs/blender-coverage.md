@@ -64,11 +64,11 @@ Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with sea
 
 ## DOPESHEET_EDITOR > *
 Status: partial
-The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). The sidebar, markers and the Action, Shape Key, Grease Pencil, Mask and Cache File modes are not shown yet.
+The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). Markers are the scene's (Scene.timeline_markers in the module), saved with the animation. The Action, Shape Key, Grease Pencil, Mask and Cache File modes are not shown yet.
 
 ## GRAPH_EDITOR > *
 Status: partial
-Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Drivers mode, F-Curve modifiers and the sidebar are not shown yet.
+Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Its sidebar panels (graph_buttons.cc) are ported as their layout calls in `editors/animation/anim-buttons.js`. Drivers mode and the F-Modifier panels are not shown yet.
 ## VIEW3D_PT_transform
 The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/space_view3d/view3d-buttons.js`. Edit Mode's Median panel is not ported yet.
 

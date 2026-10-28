@@ -61,7 +61,7 @@ function setup(fixture, name) {
 const read = (name) => JSON.parse(fs.readFileSync(new URL(name + '.json', dir)));
 
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
-const cases = files.filter((f) => !f.startsWith('panel-')), panels = files.filter((f) => f.startsWith('panel-'));
+const cases = files.filter((f) => !/^(panel|marker)-/.test(f)), panels = files.filter((f) => f.startsWith('panel-')), markers = files.filter((f) => f.startsWith('marker-'));
 for (const file of cases) {
   const name = file.replace('.json', ''), fixture = read(name), { anim, ob, area } = setup(fixture, name);
   if (fixture.operator) {
@@ -86,6 +86,19 @@ for (const file of panels) {
   area.dispose();
 }
 
+// Marker operators in the Dope Sheet (anim_markers.cc), on the scene's markers.
+for (const file of markers) {
+  const name = file.replace('.json', ''), fixture = read(name), main = new BlenderMain(), anim = new BlenderAnimation(main);
+  anim.setTime({ frame: fixture.frame, start: 1, end: 250, previewStart: 0, previewEnd: 0, preview: false, fps: 24 });
+  anim.markers = fixture.before;
+  const area = new AnimArea(main, SPACE_ACTION);
+  area.subtype = ACTION_MODES.DOPESHEET;
+  area.layout(RGN_TYPE_WINDOW, 0, 0, 800, 400);
+  assert.ok(area.run(newOperator(fixture.markers_operator, fixture.props), RGN_TYPE_WINDOW) & OPERATOR_FINISHED, `${name}: finished`);
+  assert.deepEqual(anim.markers, fixture.after, name);
+  area.dispose();
+}
+
 // Blender's modal transform from events: the key, an axis, a typed value and Enter give what the operator's exec with
 // that value gives (with snapping to frames toggled off for scaling, which the exec does not snap).
 const DIGITS = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
@@ -101,4 +114,4 @@ for (const [name, idname, key, axes, typed] of MODAL) {
   compare(state(anim, ob), fixture.after, `${name} (modal)`);
   area.dispose();
 }
-console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits and ${MODAL.length} modal transforms match Blender 5.2`);
+console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits, ${markers.length} marker operators and ${MODAL.length} modal transforms match Blender 5.2`);

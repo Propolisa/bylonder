@@ -17,6 +17,7 @@
 #include "BLT_translation.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
+#include "BKE_scene.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_vector.h"
@@ -437,6 +438,32 @@ EXPORT(anim_area_settings_set) void anim_area_settings_set(AnimArea *a, int flag
 
 /* An FCurve's active keyframe (BKE_fcurve_active_keyframe_index), or -1. */
 EXPORT(anim_fcurve_active_key) int anim_fcurve_active_key(FCurve *fcu) { return BKE_fcurve_active_keyframe_index(fcu); }
+
+/* The scene's markers (Scene.timeline_markers), in list order: their count, then one by one its frame and flag
+ * (SELECT) and its name. */
+EXPORT(anim_markers) int anim_markers(Scene *scene) { return BLI_listbase_count(&scene->markers); }
+EXPORT(anim_marker) const char *anim_marker(Scene *scene, int index, int *r_frame_flag)
+{
+  const TimeMarker *marker = static_cast<const TimeMarker *>(BLI_findlink(&scene->markers, index));
+  r_frame_flag[0] = marker->frame;
+  r_frame_flag[1] = int(marker->flag);
+  return marker->name;
+}
+/* Replaces the scene's markers, as loading a file does: none, then each added. */
+EXPORT(anim_markers_clear) void anim_markers_clear(Scene *scene)
+{
+  while (TimeMarker *marker = static_cast<TimeMarker *>(BLI_pophead(&scene->markers))) {
+    MEM_delete(marker);
+  }
+}
+EXPORT(anim_marker_add) void anim_marker_add(Scene *scene, int frame, int flag, const char *name)
+{
+  TimeMarker *marker = MEM_new<TimeMarker>(__func__);
+  marker->frame = frame;
+  marker->flag = uint(flag);
+  STRNCPY(marker->name, name);
+  BLI_addtail(&scene->markers, marker);
+}
 
 /* The context's active Action (screen_context.cc's active_action), or null. */
 EXPORT(anim_active_action) bAction *anim_active_action(bContext *C)
@@ -1026,6 +1053,9 @@ float BLF_width(int /*fontid*/, const char * /*str*/, size_t /*str_len*/, Result
 /* As scene.cc defines them. */
 double Scene::frames_per_second() const { return double(this->r.frs_sec) / double(this->r.frs_sec_base); }
 float BKE_scene_frame_get(const Scene *scene) { return scene->r.cfra + scene->r.subframe; }
+/* port-override: the module's markers have no cameras bound (Bylonder's scene camera is its own), so moving markers
+ * switches no camera. */
+bool BKE_scene_camera_switch_update(Scene * /*scene*/) { return false; }
 
 /* port-override: scene.cc's Scene type without its data callbacks (the module world's Scene is main-api.cc's), so the
  * Scene is an ID that has animation data, as in Blender. */
