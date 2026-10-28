@@ -1,12 +1,11 @@
 // The Outliner (editors/space_outliner), Blender's own: its tree is built, drawn, selected and edited by Blender's code
-// in the module (outliner-area.js) over the world's Blender mirror (object-blender.js, collections-blender.js). Its
+// in the module (outliner-area.js) over Blender's Main, kept equal to the scene (blenkernel/main-sync.js). Its
 // header is Blender's script (OUTLINER_HT_header, drawn by the shared layout renderer); its main region is a canvas
 // the module's drawing is replayed on (region-draw.js). Events become Blender's: a button under the pointer applies as
 // Blender's handlers apply it, the rest runs Blender's keymaps on the Outliner's operators, registered by idname and
-// run in the Outliner as the context area. After each, what Blender's code changed comes back to Bylonder (writeBack).
+// run in the Outliner as the context area. After each, what Blender's code changed comes back to the scene.
 import { blenderModule, operatorNames, pollOperator } from '../../bmesh/bmesh-wasm.js';
 import { createContext } from '../../blenkernel/context.js';
-import { dnaStruct } from '../../makesrna/dna-struct.js';
 import { keymapHandler } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
 import { inArea, menuUI, registerOperator } from '../../windowmanager/wm-operators.js';
@@ -20,7 +19,6 @@ import { menus, headers, panels } from '../../python/bpy_interface.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import { createApp, h, reactive, markRaw } from 'vue';
 import '../interface/layout-view.css';
-import { deleted } from '../object/identity.js';
 import { OutlinerArea, modifierOf, OPERATOR_FINISHED, OPERATOR_CANCELLED, OPERATOR_PASS_THROUGH } from './outliner-area.js';
 import './space-outliner.css';
 
@@ -30,14 +28,13 @@ const KEYMAPS = ['Outliner', 'View2D Buttons List', 'Screen', 'Window'];
 // U.dbl_click_time in milliseconds, U.drag_threshold_mouse in pixels.
 const DOUBLE_CLICK_TIME = 350, DRAG_THRESHOLD = 3;
 const BUTTONS = ['LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE', 'BUTTON4MOUSE', 'BUTTON5MOUSE'];
-// ID_OB (MAKE_ID2('O', 'B')), and the ui::ButtonType values of the buttons the Outliner defines.
-const ID_OB = 0x424f;
+// The ui::ButtonType values of the buttons the Outliner defines.
 const BUT_TEXT = 3, BUT_LABEL = 21, BUT_DRAG_LOCK = 1 << 12;
 
-//   world, editor, commands: Bylonder's; objects: the world's Blender mirror (createBlenderObjects); rna:
-//   createRNA(host); region: the element the main region fills; header: the area's header element.
-export function createOutliner({ world, editor, commands, objects, rna, region, header }) {
-  const area = new OutlinerArea(objects.blender);
+//   world, editor, commands: Bylonder's; scene: the scene's Main (createMainSync); rna: createRNA(host); region: the
+//   element the main region fills; header: the area's header element.
+export function createOutliner({ world, editor, commands, sync: scene, rna, region, header }) {
+  const area = new OutlinerArea(scene.blender);
   const canvas = Object.assign(document.createElement('canvas'), { className: 'bl-ui bl-outliner-region' });
   canvas.tabIndex = -1;
   canvas.setAttribute('aria-label', 'Outliner');
@@ -55,42 +52,20 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
   const keys = keymapHandler(KEYMAPS);
   const dispatch = (event) => inArea(outlinerArea, () => keys(event));
 
-  // Bylonder's world into the mirror; the Outliner syncs its selection from the view layer's when Bylonder's changed.
+  // Main made current; the Outliner syncs its selection from the view layer's when Bylonder's changed.
   let selection = '';
+  const selected = () => editor.selection.nodes.map((node) => scene.objectOf(node)).join();
   function sync() {
-    objects.sync();
-    const next = editor.selection.nodes.map((node) => objects.objectOf(node)).join();
+    scene.flush();
+    const next = selected();
     if (next !== selection) area.selectionChanged();
     selection = next;
   }
 
-  // What Blender's code changed, back into Bylonder's objects, then its collections.
+  // What Blender's code changed, back into the scene.
   function writeBack() {
-    const { blender } = objects, alive = new Set(blender.ids(ID_OB)), selected = [], active = [];
-    for (const node of world.objects.filter((n) => !deleted(n))) {
-      const ob = objects.objectOf(node);
-      if (!ob) continue;
-      if (!alive.has(ob)) {
-        node.metadata = { ...node.metadata, wbDeleted: true };
-        node.setEnabled(false);
-        objects.forget(node);
-        continue;
-      }
-      const base = blender.base(ob), dna = dnaStruct('Object', ob), data = rna.pointer('Object', node);
-      if (base?.selected) (base.active ? active : selected).push(node);
-      if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
-      for (const name of ['hide_select', 'hide_render', 'hide_viewport']) if (data[name] !== dna[name]) data[name] = dna[name];
-      const name = blender.name(ob);
-      if (name !== objects.syncedName(node)) {
-        node.name = name;
-        objects.named(node, name);
-      }
-      const parent = objects.nodeOf(blender.parent(ob));
-      if (parent !== (objects.objectOf(node.parent) ? node.parent : null)) node.setParent(parent);
-    }
-    editor.selection.replace([...selected, ...active]);
-    world.collections.assign(objects.collections.read());
-    selection = editor.selection.nodes.map((node) => objects.objectOf(node)).join();
+    scene.writeBack();
+    selection = selected();
   }
 
   // An operator's run ended: what it changed comes back, as one undo step when its type makes one.

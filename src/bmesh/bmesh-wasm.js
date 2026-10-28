@@ -2,7 +2,7 @@
 // module, in a scene with its object in Edit Mode, and is the only one. Operators, selection and transforms change it;
 // drawing and picking read the Mesh arrays extracted from it, as Blender's draw cache extracts its buffers from the
 // BMesh.
-import { instantiate } from '../port/wasm.js';
+import { instantiate, files } from '../port/wasm.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { BMESH_WASM } from './bmesh-module.js';
 import { FLAGS, moduleMesh } from './module-mesh.js';
@@ -341,6 +341,10 @@ const addresses = (fn) => {
 };
 
 const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num', CORNER: 'corners_num' };
+// Node sockets' eNodeSocketDatatype and PropertySubType by idname (SOCK_FLOAT, SOCK_VECTOR, SOCK_RGBA, SOCK_SHADER;
+// PROP_FACTOR, PROP_DIRECTION).
+const SOCKET_TYPES = { NodeSocketFloat: [0, 0], NodeSocketFloatFactor: [0, 15], NodeSocketVector: [1, 0], NodeSocketVectorDirection: [1, 22],
+  NodeSocketColor: [2, 0], NodeSocketShader: [3, 0] };
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
 
 // Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
@@ -424,6 +428,61 @@ export class BlenderMain {
     return ownedMesh(mesh);
   }
 
+  // Empties a mesh object's Mesh of its geometry, keeping its material slots: Main holds geometry only while Blender's
+  // code needs it.
+  clearMesh(ob) {
+    x.object_mesh_clear(ob);
+    this.#attributes.delete(ob);
+  }
+  // A mesh object's Mesh with its modifiers applied, as Blender's viewport evaluates it: a Mesh that is its own.
+  evaluatedMesh(ob) { return ownedMesh(extractedMesh(x.object_mesh_eval(this.#context, ob) >>> 0)); }
+  // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
+  setModifiers(ob, modifiers) { return setModifiers(ob, modifiers).errors; }
+
+  // Materials and worlds, by address: their users are those that use them.
+  addMaterial(name) { return withString(name, (p) => x.main_material_add(this.#context, p)) >>> 0; }
+  addWorld(name) { return withString(name, (p) => x.main_world_add(this.#context, p)) >>> 0; }
+  removeID(id) { x.main_id_remove(this.#context, id); }
+  users(id) { return x.id_users(id); }
+  setFakeUser(id, fake) { x.id_fake_user_set(id, fake); }
+  get world() { return x.main_scene_world(this.#context) >>> 0; }
+  set world(world) { x.main_scene_world_set(this.#context, world ?? 0); }
+  // An object's material slots (0 for an empty one), set whole on its data.
+  setMaterials(ob, materials) {
+    withArrays([Uint32Array.from(materials)], ([p]) => x.object_materials_set(this.#context, ob, p, materials.length));
+  }
+  materials(ob) { return addresses((p) => x.object_materials(ob, p)); }
+  // An ID's custom string property (null when it has none), for what only Bylonder has.
+  setProperty(id, name, value) { withString(name, (n) => withString(value, (v) => x.id_property_string_set(id, n, v))); }
+  property(id, name) { const p = withString(name, (n) => x.id_property_string(id, n)) >>> 0; return p ? cString(p) : null; }
+
+  // A Material's or World's node tree, set whole from { nodes: [{ idname, name, location, width, inputs, outputs }],
+  // links: [[from node, output, to node, input]] }, a socket being { identifier, name, socket (its idname, as
+  // NodeSocketColor), value }; and as Main holds it ({ nodes: [{ idname, name, inputs: { identifier: value } }], links }).
+  setNodeTree(owner, { nodes, links }) {
+    x.node_tree_clear(this.#context, owner);
+    const made = new Map(), linked = new Set(links.map(([, , to, input]) => `${to}:${input}`));
+    for (const { idname, name, location = [0, 0], width = 140, inputs = [], outputs = [] } of nodes) {
+      const node = withString(idname, (i) => withString(name, (n) => x.node_add(owner, i, n, location[0], location[1], width))) >>> 0;
+      const sockets = new Map();
+      // An input without a value or link is left out: Blender's node type adds it with its default when the file is read.
+      const given = inputs.filter(({ identifier, value }) => (value ?? null) !== null || linked.has(`${name}:${identifier}`));
+      for (const [output, list] of [[false, given], [true, outputs]]) for (const { identifier, name: label = identifier, socket, value } of list) {
+        const [type, subtype] = SOCKET_TYPES[socket];
+        const values = Float32Array.from(value === null || value === undefined ? [] : [value].flat());
+        const pointer = withString(identifier, (i) => withString(label, (n) => withArrays([values], ([v]) =>
+          x.node_socket_add(owner, node, output, type, subtype, i, n, values.length ? v : 0, values.length)))) >>> 0;
+        sockets.set((output ? 'out:' : 'in:') + identifier, pointer);
+      }
+      made.set(name, { node, sockets });
+    }
+    for (const [from, output, to, input] of links) {
+      const a = made.get(from), b = made.get(to);
+      x.node_link_add(owner, a.node, a.sockets.get('out:' + output), b.node, b.sockets.get('in:' + input));
+    }
+  }
+  nodeTree(owner) { return JSON.parse(cString(x.node_tree_describe(owner))); }
+
   // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
   get scene() { return x.main_scene(this.#context) >>> 0; }
@@ -445,6 +504,17 @@ export class BlenderMain {
   }
   collectionChildren(collection) { return addresses((p) => x.collection_items(collection, false, p)); }
   collectionObjects(collection) { return addresses((p) => x.collection_items(collection, true, p)); }
+  // Main as a .blend file, written by Blender's own writer (writefile.cc and each ID type's blend_write) through its
+  // wm.save_as_mainfile operator, as a copy: the file's bytes.
+  writeBlend(filepath = '/untitled.blend') {
+    x.main_save_preferences();
+    const { status, report } = this.run('wm.save_as_mainfile', { filepath, copy: true, check_existing: false, relative_remap: false, compress: false });
+    const bytes = files.get(filepath);
+    files.delete(filepath);
+    if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
+    return bytes;
+  }
+
   // Main's IDs of a type (ID_GR, ID_OB...).
   ids(type) { return addresses((p) => x.main_ids(this.#context, type, p)); }
   name(id) { return cString(x.id_name(id)); }
@@ -454,6 +524,8 @@ export class BlenderMain {
   get activeCollection() { return x.layer_collection_collection(x.main_layer_collection_active(this.#context)) >>> 0; }
   set activeCollection(collection) { x.main_layer_collection_activate(this.#context, this.layerCollection(collection)); }
   syncCollections() { x.main_collections_sync(this.#context); }
+  // After Blender's code deleted objects: they leave the Scene Collection too, as they leave the scenes in Main.
+  cleanMasterCollection() { x.main_collection_master_clean(this.#context); }
   // An object's base (eBaseFlags, with ACTIVE when it is the active one), or null when it has none in the view layer,
   // and its parent.
   base(ob) {

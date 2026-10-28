@@ -131,6 +131,11 @@ def library_flags(entry, tree, deps, spec):
              + [f'-I{os.path.join(HERE if d.startswith("wasm/") else tree, d)}' for d in entry.get('includes', [])]
              + [f'-D{d}' for d in entry.get('defines', [])] + entry.get('flags', []))
     key = ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
+    # The module's own include directories' headers (wasm/fstream), so a change to one builds its users again.
+    for d in entry.get('includes', []):
+        if d.startswith('wasm/'):
+            key += hashlib.sha1(b''.join(open(p, 'rb').read() for p in sorted(glob.glob(os.path.join(HERE, d, '**'), recursive=True))
+                                         if os.path.isfile(p))).hexdigest()[:8]
     if 'rename' in entry:
         header = renamed_functions(tree, **entry['rename'])
         flags += ['-include', header]
@@ -210,10 +215,11 @@ def operator_table(tree, build, args, spec):
     return generated, text
 
 
-def rna_prototypes(build, args):
+def rna_prototypes(build, args, referenced):
     """generated/rna_prototypes.cc: a definition for each RNA type pointer RNA_prototypes.hh declares (generated from
-    Blender's build by tools/blender-reference/rna-prototypes.py), pointing at a type named as Blender names it, and
-    the list of them (rna_types). Code without Blender's RNA runtime only compares and stores these pointers."""
+    Blender's build by tools/blender-reference/rna-prototypes.py), pointing at a type named as Blender names it, the
+    list of them (rna_types), and for each RNA property it declares that the module's sources refer to (`referenced`,
+    data_references). Code without Blender's RNA runtime only compares and stores these."""
     import clang.cindex as ci
     header = os.path.join(HERE, 'include', 'RNA_prototypes.hh')
     tu = ci.Index.create().parse(header, args=['-x', 'c++', '-std=c++20'], options=ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
@@ -223,6 +229,9 @@ def rna_prototypes(build, args):
     lines += [f'static StructRNA {n}_type{{"{n[4:]}"}};\nStructRNA *{n} = &{n}_type;' for n in names]
     # All of them, for finding one by name (rna_struct_find).
     lines += ['extern StructRNA **const rna_types[] = {' + ''.join(f'&{n}, ' for n in names) + 'nullptr};']
+    properties = [c.spelling for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.VAR_DECL and c.spelling.startswith('rna_')
+                  and '::'.join(filter(None, [namespace, c.spelling])) in referenced]
+    lines += [f'static PropertyRNA {n}_property{{"{n.split("_", 2)[-1]}"}};\nPropertyRNA &{n} = {n}_property;' for n in properties]
     path = os.path.join(build, 'generated', 'rna_prototypes.cc')
     text = '\n'.join(lines + (['}'] if namespace else [])) + '\n'
     if not os.path.exists(path) or open(path).read() != text:
@@ -358,6 +367,72 @@ def compile_all(build, sources, args, key):
         return dict(pool.map(one, sources))
 
 
+# Where wasm32 pads a DNA struct that Blender's own layout, made for 64-bit pointers, does not: wasm32 aligns a 64-bit
+# member to 8 bytes after a run of 4-byte pointers, and the struct's size to 8 then. makesdna reads its headers with a
+# pointer there (before or after a member), which on wasm32 is the 4 bytes Clang pads (and on 64-bit keeps the layout
+# makesdna checks), so the SDNA describes the module's memory; a .blend reader skips the members.
+WASM32_PADS = {'DNA_scene_types.h': [('  struct CustomData_MeshMasks customdata_mask;', 'before'), ('  bke::SceneRuntime *runtime = nullptr;', 'after')]}
+
+
+def sdna(tree, build, args, archives):
+    """makesdna's output for the module's target (generated/sdna): Blender's DNA as the .blend writer records it (dna.cc),
+    the struct ids BLO_write_struct takes (dna_struct_ids.cc) and the check of every struct's size and member offsets
+    against Clang's layout (dna_verify.cc). makesdna lays structs out for the platform it runs on, so it is built for
+    wasm32 too, from the module's archives, and run by Node's WASI. Returns the sources to build with the module."""
+    out = os.path.join(build, 'generated', 'sdna')
+    os.makedirs(out, exist_ok=True)
+    makesdna = os.path.join(tree, 'source/blender/makesdna')
+    listing = open(os.path.join(tree, 'source/blender/CMakeLists.txt')).read()
+    headers = re.findall(r'/makesdna/(DNA_\w+\.h)', listing[listing.index('set(SRC_DNA_INC'):listing.index('set(SRC_DNA_OTHER_INC')])
+    includes = {'dna_includes_all.h': ''.join(f'#include "{h}"\n' for h in headers),
+                'dna_includes_as_strings.h': ''.join(f'\t"{h}",\n' for h in headers)}
+    for file, text in includes.items():
+        path = os.path.join(out, file)
+        if not os.path.exists(path) or open(path).read() != text:
+            open(path, 'w').write(text)
+    sources = [os.path.join(makesdna, 'intern', f) for f in ('makesdna.cc', 'dna_parse.cc', 'dna_utils.cc')]
+    digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in [*sources, *(os.path.join(makesdna, h) for h in headers)])
+                          + ' '.join(args).encode() + json.dumps(WASM32_PADS).encode()).hexdigest()[:16]
+    # The headers makesdna reads, with the pads.
+    padded = os.path.join(out, 'headers')
+    os.makedirs(padded, exist_ok=True)
+    for path in glob.glob(os.path.join(makesdna, '*.h')) + glob.glob(os.path.join(makesdna, '*.hh')):
+        text = open(path).read()
+        for i, (member, where) in enumerate(WASM32_PADS.get(os.path.basename(path), [])):
+            assert text.count(member + '\n') == 1, f'{os.path.basename(path)}: {member.strip()} is not where it was'
+            pad = f'  void *_pad_wasm32_{i};\n'
+            text = text.replace(member + '\n', pad + member + '\n' if where == 'before' else member + '\n' + pad)
+        target = os.path.join(padded, os.path.basename(path))
+        if not os.path.exists(target) or open(target).read() != text:
+            open(target, 'w').write(text)
+    outputs = [os.path.join(out, f) for f in ('dna.cc', 'dna_type_offsets.h', 'dna_verify.cc', 'dna_struct_ids.cc', 'dna_defaults.cc')]
+    stamp = os.path.join(out, '.digest')
+    if not (os.path.exists(stamp) and open(stamp).read() == digest and all(map(os.path.exists, outputs))):
+        tool_args = [f'-I{os.path.join(WASM, "fstream-read")}', *args, f'-I{out}', f'-I{os.path.join(makesdna, "intern")}']
+        # With the module's platform functions (allocation, thread-local destructors).
+        objects = compile_all(build, [*sources, os.path.join(WASM, 'platform.cc')], tool_args, digest)
+        if not all(objects.values()):
+            failed = next(s for s, o in objects.items() if not o)
+            result = subprocess.run(['clang++', *tool_args, '-c', failed, '-o', os.devnull],
+                                    capture_output=True, text=True)
+            sys.exit(f'makesdna does not build:\n{result.stderr}')
+        tool = os.path.join(out, 'makesdna.wasm')
+        link = subprocess.run(['clang++', '--target=wasm32-wasi', '-O2', *objects.values(), *archives, *archives, '-lwasi-emulated-process-clocks',
+                               '-Wl,--allow-undefined', '-o', tool], capture_output=True, text=True)
+        if link.returncode:
+            sys.exit(f'makesdna does not link:\n{link.stderr}')
+        script = ("const { WASI } = require('node:wasi'); const fs = require('node:fs');"
+                  "const wasi = new WASI({ version: 'preview1', args: ['makesdna', ...process.argv.slice(2)], preopens: { '/': '/' }, returnOnExit: true });"
+                  "const instance = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(process.argv[1])), { wasi_snapshot_preview1: wasi.wasiImport,"
+                  " env: new Proxy({}, { get: (_, name) => () => { throw new Error(name); } }) });"
+                  "process.exitCode = wasi.start(instance);")
+        run = subprocess.run(['node', '-e', script, tool, *outputs, padded + '/'], capture_output=True, text=True)
+        if run.returncode:
+            sys.exit(f'makesdna failed:\n{run.stdout}{run.stderr}')
+        open(stamp, 'w').write(digest)
+    return [outputs[0], outputs[2], outputs[3], os.path.join(makesdna, 'intern', 'dna_genfile.cc')]
+
+
 def demangle(names):
     return subprocess.run(['c++filt'], input='\n'.join(names), capture_output=True, text=True).stdout.split('\n')[:len(names)]
 
@@ -370,16 +445,17 @@ def live_imports(path):
     return sorted({d.split('(')[0] for d in demangle(names)})
 
 
-def undefined_data(unresolved, objects):
-    """The unresolved symbols the objects refer to as data (`O` in their symbol tables)."""
+def data_references(objects):
+    """The data the objects refer to without defining (`O` and `*UND*` in their symbol tables), demangled as wasm-ld
+    names it."""
     objdump = shutil.which('llvm-objdump') or shutil.which('llvm-objdump-18')
     data = set()
     for obj in objects:
-        for line in subprocess.run([objdump, '-t', obj], capture_output=True, text=True).stdout.splitlines():
-            fields = line.split()
-            if len(fields) >= 4 and fields[-2] == '*UND*' and fields[1] == 'O' and fields[-1] in unresolved:
-                data.add(fields[-1])
-    return sorted(data)
+        for line in subprocess.run([objdump, '-t', '-C', obj], capture_output=True, text=True).stdout.splitlines():
+            fields = line.split(None, 3)
+            if len(fields) == 4 and fields[1] == 'O' and fields[2] == '*UND*':
+                data.add(fields[3])
+    return data
 
 
 def build(root, name, spec, tag):
@@ -416,8 +492,12 @@ def build(root, name, spec, tag):
         print(f'{lib}: {len(built)} of {len(objects)} sources build', file=sys.stderr)
     # The module's own files also see wasm/, the generated operator table and the operators' editors' headers; Blender's
     # sources need none of them.
-    own_args = args + [f'-I{generated}', f'-I{WASM}', *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
-    own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)]
+    own_args = args + [f'-I{generated}', f'-I{os.path.join(generated, "sdna")}', f'-I{os.path.join(tree, "source/blender/makesdna/intern")}', f'-I{WASM}', *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
+    dna = sdna(tree, out_dir, args, archives) if spec.get('sdna') else []
+    referenced = data_references(members)
+    # As Blender builds its DNA library (makesdna/intern/CMakeLists.txt).
+    own_args += ['-DWITH_DNA_GHASH'] if dna else []
+    own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args, referenced)] + dna
                       + fetched_files(out_dir, spec.get('fetch', []), tag)
                       + ([datatoc(out_dir, spec['datatoc'], tag)] if spec.get('datatoc') else []),
                       own_args, patches + operators + rna_dna_fields(out_dir) + rna_funcs(out_dir) + own_headers())
@@ -437,9 +517,9 @@ def build(root, name, spec, tag):
     # A dry link names every unresolved symbol, for the data check; the module itself imports missing functions by name.
     check = subprocess.run([*link, '-Wl,--warn-unresolved-symbols', '-o', os.devnull], capture_output=True, text=True)
     unresolved = {line.split('undefined symbol: ')[-1] for line in check.stderr.splitlines() if 'undefined symbol: ' in line}
-    data = undefined_data(unresolved, [*own.values(), *members])
+    data = sorted((referenced | data_references(own.values())) & unresolved)
     if data:
-        sys.exit(f'{name}: data nothing defines, which would read as zeros:\n  ' + '\n  '.join(demangle(data)))
+        sys.exit(f'{name}: data nothing defines, which would read as zeros:\n  ' + '\n  '.join(data))
     result = subprocess.run([*link, '-Wl,--allow-undefined', '-o', out], capture_output=True, text=True)
     if result.returncode:
         sys.exit(f'{name}: link failed\n{result.stderr}')

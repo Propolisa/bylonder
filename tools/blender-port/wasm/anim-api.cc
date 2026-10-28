@@ -1179,27 +1179,9 @@ bool ED_operator_region_animview_active(bContext *C)
   return true;
 }
 
-/* As scene.cc defines them. */
-double Scene::frames_per_second() const { return double(this->r.frs_sec) / double(this->r.frs_sec_base); }
-float BKE_scene_frame_get(const Scene *scene) { return scene->r.cfra + scene->r.subframe; }
 /* port-override: the module's markers have no cameras bound (Bylonder's scene camera is its own), so moving markers
  * switches no camera. */
 bool BKE_scene_camera_switch_update(Scene * /*scene*/) { return false; }
-
-/* port-override: scene.cc's Scene type without its data callbacks (the module world's Scene is main-api.cc's), so the
- * Scene is an ID that has animation data, as in Blender. */
-IDTypeInfo IDType_ID_SCE = {
-    .id_code = Scene::id_type,
-    .id_filter = FILTER_ID_SCE,
-    .dependencies_id_types = 0,
-    .main_listbase_index = INDEX_ID_SCE,
-    .struct_size = sizeof(Scene),
-    .name = "Scene",
-    .name_plural = N_("scenes"),
-    .translation_context = BLT_I18NCONTEXT_ID_SCENE,
-    .flags = IDTYPE_FLAGS_NEVER_UNUSED,
-    .asset_type_info = nullptr,
-};
 
 /* As wm_operators.cc defines it. */
 int WM_operator_smooth_viewtx_get(const wmOperator *op)

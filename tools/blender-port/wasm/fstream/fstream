@@ -1,5 +1,6 @@
-// <fstream> for sources whose debug paths write files (delaunay_2d.cc's SVG dumps) or that include BLI_fileops.hh
-// (action_draw.cc): wasi's libc++ is built without a
+// <fstream> for sources whose debug paths write files (delaunay_2d.cc's SVG dumps) or that declare file streams they
+// do not use (BLI_fileops.hh's, in action_draw.cc and the .blend writer, which writes through POSIX calls): wasi's
+// libc++ is built without a
 // filesystem, so its <fstream> declares the streams without defining them. The module has no files, so every stream
 // fails to open, as a file that cannot be opened does. Seen only by the libraries that list wasm/fstream as includes.
 #pragma once

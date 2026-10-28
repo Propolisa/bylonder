@@ -427,7 +427,8 @@
     "size": 4,
     "kind": "int",
     "signed": true,
-    "type": "INT"
+    "type": "INT",
+    "length": 3
    },
    "parent_bone": {
     "offset": 376,

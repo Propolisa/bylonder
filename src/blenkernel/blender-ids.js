@@ -1,11 +1,11 @@
-// The IDs that stand for Bylonder's data in the module's Blender world (one BlenderMain per world): an object for each
-// Bylonder object, by key ('object:' and its node id), whoever asks first (the Object Mode mirror, or animation data
-// for an object not built yet). An object made again with another type keeps its animation.
-import { BlenderMain, blenderModule } from '../bmesh/bmesh-wasm.js';
+// The IDs that stand for Bylonder's data in the module's Blender world (the realm's BlenderMain, which curves' fonts
+// are in too): an object for each Bylonder object, by key ('object:' and its node id), whoever asks first (the scene
+// sync, main-sync.js, or animation data for an object not built yet). An object made again with another type keeps its animation.
+import { blenderMain, blenderModule } from '../bmesh/bmesh-wasm.js';
 
 const { exports: x } = blenderModule;
 
-export function createBlenderIDs(blender = new BlenderMain()) {
+export function createBlenderIDs(blender = blenderMain()) {
   const objects = new Map(); // key -> { ob, type }
   return {
     blender,

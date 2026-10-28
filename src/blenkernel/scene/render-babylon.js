@@ -8,11 +8,13 @@ import { seededRandom } from '../../render/clock.js';
 // Effects that need scene geometry (Raytracing, Motion Blur) read Babylon's geometry buffer renderer, which renders
 // for whichever camera the scene renders through, never its prepass renderer: the prepass is one scene-wide switch
 // that routes every camera's draw into its targets, so views without these effects would never reach their canvas.
+// `ocioView`: Blender's view transform (its OCIO config's view) nearest to each: Babylon's ACES is the fit of ACES 1's
+// output transform, its Standard tone map a filmic curve.
 export const viewTransforms = {
-  STANDARD: { label: 'Standard', apply: ip => { ip.toneMappingEnabled = false; } },
-  KHR_PBR_NEUTRAL: { label: 'Khronos PBR Neutral', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_KHR_PBR_NEUTRAL; } },
-  ACES: { label: 'ACES', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES; } },
-  BABYLON_STANDARD: { label: 'Babylon Standard', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_STANDARD; } },
+  STANDARD: { label: 'Standard', ocioView: 'Standard', apply: ip => { ip.toneMappingEnabled = false; } },
+  KHR_PBR_NEUTRAL: { label: 'Khronos PBR Neutral', ocioView: 'Khronos PBR Neutral', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_KHR_PBR_NEUTRAL; } },
+  ACES: { label: 'ACES', ocioView: 'ACES 1.3', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES; } },
+  BABYLON_STANDARD: { label: 'Babylon Standard', ocioView: 'Filmic', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_STANDARD; } },
 };
 // Blender's contrast looks, as Babylon image processing contrast.
 export const looks = { NONE: ['None', 1], VERY_LOW_CONTRAST: ['Very Low Contrast', 0.6], LOW_CONTRAST: ['Low Contrast', 0.8], MEDIUM_LOW_CONTRAST: ['Medium Low Contrast', 0.9], MEDIUM_HIGH_CONTRAST: ['Medium High Contrast', 1.1], HIGH_CONTRAST: ['High Contrast', 1.2], VERY_HIGH_CONTRAST: ['Very High Contrast', 1.4] };
