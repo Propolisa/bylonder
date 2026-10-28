@@ -14,7 +14,9 @@ import {
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
 import { createOutliner } from "./editors/space_outliner/outliner";
-import { nodeId } from "./editors/object/identity";
+import { nodeId, visible, deleted } from "./editors/object/identity";
+import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
+import { createWorkbench } from "./draw/workbench.js";
 import { createMouseCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
@@ -149,7 +151,17 @@ try {
 }
 const { world, sdk, animation, scene, objects, baseline, documentState } = built;
 const authored = () => built.authoredCamera;
-const overlays = createViewportOverlays(scene);
+// Theme wire color of an object (Resources::object_wire_theme_id): the active or selected color, else its type's.
+const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.nodes.at(-1) === node ? theme.object_active : theme.object_selected;
+const overlays = createViewportOverlays(scene, {
+  objects: () => world.objects,
+  color: wireColor,
+  sceneCamera: authored,
+  visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),
+  aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
+}, { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) });
+world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
+world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
 // particles, video; otherwise they stop until the next input or change.
 const observerCount = () => scene.onBeforeRenderObservable.observers.length + scene.onAfterRenderObservable.observers.length;
@@ -396,10 +408,6 @@ const mountView = (options) => {
 };
 shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
-if (authored()) {
-  primary.editorCamera.setPosition(authored().position.clone());
-  primary.editorCamera.setTarget(authored().getTarget?.() || BABYLON.Vector3.Zero());
-}
 viewportDock.setFactory("viewport", (host, id) => mountView({ section: host, headerId: id, from: activeView()?.editorCamera || primary.editorCamera }));
 views.setInput(primary);
 views.onFocus = () => viewportCtx.shadingChanged();

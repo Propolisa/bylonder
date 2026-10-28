@@ -18,7 +18,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
   // One rule for what a click can select: live, unlocked, visible, and selectable through its collections.
   const selectable = (m) =>
     (m = owner(m), objects.includes(m)) && !m.metadata?.wbDeleted && !m.metadata?.wbLocked &&
-    m.isEnabled() && m.isVisible && (world.collections?.selectable(m) ?? true);
+    m.isEnabled() && m.isVisible !== false && (world.collections?.selectable(m) ?? true);
   const selected = selection.pivot;
   let mode = "select",
     modal = null;
@@ -31,10 +31,14 @@ export function createEditor(world, views, history, changed, notify, capture) {
     const p = Vector3.Project(point, Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
     return { x: rect.left + (p.x * rect.width) / width, y: rect.top + (p.y * rect.height) / height };
   };
-  // Client coordinates to the topmost selectable object in a view.
-  const pickIn = (view, clientX, clientY, predicate = selectable) => {
+  // Client coordinates to the selectable object under them in a view: an overlay extra (an empty) within reach, else
+  // the topmost mesh. Objects in a group pick as the group.
+  const pickIn = (view, clientX, clientY) => {
     const p = views.pickPoint(view, clientX, clientY);
-    return scene.pick(p.x, p.y, predicate, false, view.camera);
+    let node = world.pickExtra?.(p.x, p.y, view.camera, selectable);
+    if (!node) { const hit = scene.pick(p.x, p.y, selectable, false, view.camera); node = hit?.hit ? owner(hit.pickedMesh) : null; }
+    while (node?.parent?.metadata?.group && !node.parent.metadata.wbDeleted) node = node.parent;
+    return node;
   };
   const showCursor = () => {
     const rect = modal.view.canvas.getBoundingClientRect();
@@ -174,16 +178,10 @@ export function createEditor(world, views, history, changed, notify, capture) {
       const p = views.pickPoint(view, event.x, event.y);
       if (gizmos.utilityLayer.utilityLayerScene.pick(p.x, p.y, undefined, false, view.camera)?.hit) return;
     }
-    const pick = pickIn(view, event.x, event.y);
-    let target = pick?.hit ? owner(pick.pickedMesh) : null;
-    while (target?.parent?.metadata?.group && !target.parent.metadata.wbDeleted) target = target.parent;
-    select(target, toggle);
+    select(pickIn(view, event.x, event.y), toggle);
   };
   const contextMenu = (event) => {
-    const pick = pickIn(event.view, event.x, event.y);
-    let target = owner(pick?.pickedMesh);
-    while (target?.parent?.metadata?.group) target = target.parent;
-    world.contextMenu?.open(event.native, target);
+    world.contextMenu?.open(event.native, pickIn(event.view, event.x, event.y));
   };
   const inView = (event) => !!event.view && !event.view.state.cameraView && !world.editMode?.active;
   const selectKeymap = createKeymap([
@@ -237,10 +235,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     get mode() { return mode; },
     get pointer() { return last; },
     updateGesture: update,
-    pick(x,y,view=views.input) {
-      const hit=pickIn(view,x,y);
-      let node=owner(hit?.pickedMesh);while(node?.parent?.metadata?.group&&!node.parent.metadata.wbDeleted)node=node.parent;return node;
-    },
+    pick: (x, y, view = views.input) => pickIn(view, x, y),
     // Object Mode keymaps: click select (3D View) and the context menu (Object Mode).
     keymap: (event) => selectKeymap(event) || contextKeymap(event),
     // A view going away ends a transform running in it.

@@ -24,8 +24,8 @@ export const createScene = function () {
   camera.minZ = 0.1;
   camera.maxZ = 100;
 
-  // A 1000 W point light (intensity 1) of radius 0.1 m.
-  new BABYLON.PointLight('Light', new BABYLON.Vector3(4.0762, 5.9039, 1.0055), scene).radius = 0.1;
+  const light = new BABYLON.PointLight('Light', new BABYLON.Vector3(4.0762, 5.9039, 1.0055), scene);
+  light.radius = 0.1;
   return scene;
 };
 `,

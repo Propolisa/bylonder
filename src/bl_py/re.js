@@ -639,12 +639,12 @@ export var Match =  __class__ ('Match', [object], {
 		return tuple ([self.start (group), self.end (group)]);
 	});}
 });
-Object.defineProperty (Match, 'pos', property.call (Match, Match._getPos, Match._setPos));
-Object.defineProperty (Match, 'endpos', property.call (Match, Match._getEndPos, Match._setEndPos));
-Object.defineProperty (Match, 're', property.call (Match, Match._getRe, Match._setRe));
-Object.defineProperty (Match, 'string', property.call (Match, Match._getString, Match._setString));
-Object.defineProperty (Match, 'lastgroup', property.call (Match, Match._getLastGroup, Match._setLastGroup));
-Object.defineProperty (Match, 'lastindex', property.call (Match, Match._getLastIndex, Match._setLastIndex));
+globalThis.Object.defineProperty (Match, 'pos', property.call (Match, Match._getPos, Match._setPos));
+globalThis.Object.defineProperty (Match, 'endpos', property.call (Match, Match._getEndPos, Match._setEndPos));
+globalThis.Object.defineProperty (Match, 're', property.call (Match, Match._getRe, Match._setRe));
+globalThis.Object.defineProperty (Match, 'string', property.call (Match, Match._getString, Match._setString));
+globalThis.Object.defineProperty (Match, 'lastgroup', property.call (Match, Match._getLastGroup, Match._setLastGroup));
+globalThis.Object.defineProperty (Match, 'lastindex', property.call (Match, Match._getLastIndex, Match._setLastIndex));
 export var Regex =  __class__ ('Regex', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, pattern, flags) {
@@ -1354,10 +1354,10 @@ export var Regex =  __class__ ('Regex', [object], {
 		}
 	});}
 });
-Object.defineProperty (Regex, 'pattern', property.call (Regex, Regex._getPattern, Regex._setPattern));
-Object.defineProperty (Regex, 'flags', property.call (Regex, Regex._getFlags, Regex._setFlags));
-Object.defineProperty (Regex, 'groups', property.call (Regex, Regex._getGroups, Regex._setGroups));
-Object.defineProperty (Regex, 'groupindex', property.call (Regex, Regex._getGroupIndex, Regex._setGroupIndex));
+globalThis.Object.defineProperty (Regex, 'pattern', property.call (Regex, Regex._getPattern, Regex._setPattern));
+globalThis.Object.defineProperty (Regex, 'flags', property.call (Regex, Regex._getFlags, Regex._setFlags));
+globalThis.Object.defineProperty (Regex, 'groups', property.call (Regex, Regex._getGroups, Regex._setGroups));
+globalThis.Object.defineProperty (Regex, 'groupindex', property.call (Regex, Regex._getGroupIndex, Regex._setGroupIndex));
 export var PyRegExp =  __class__ ('PyRegExp', [Regex], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, pyPattern, flags) {

@@ -2,6 +2,144 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {pi} from './math.js';
 var __name__ = '__main__';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var Params =  __class__ ('Params', [object], {
 	__module__: __name__,
 	__slots__: tuple (['legacy', 'select_mouse', 'select_mouse_value', 'action_mouse', 'tool_mouse', 'tool_maybe_tweak_value', 'context_menu_event', 'cursor_set_event', 'cursor_tweak_event', 'use_tweak_select_passthrough', 'use_mouse_emulate_3_button', 'spacebar_action', 'use_select_all_toggle', 'use_gizmo_drag', 'use_fallback_tool', 'use_fallback_tool_select_handled', 'use_v3d_tab_menu', 'use_v3d_shade_ex_pie', 'use_v3d_mmb_pan', 'use_alt_click_leader', 'use_key_activate_tools', 'use_region_toggle_pie', 'tool_modifier', 'use_pie_click_drag', 'v3d_tilde_action', 'v3d_alt_mmb_drag_action', 'use_alt_navigation', 'use_file_single_click', 'use_fallback_tool_select_mouse', 'select_mouse_value_fallback', 'select_tweak_event', 'pie_value', 'tool_tweak_event', 'tool_maybe_tweak_event']),
@@ -7280,131 +7418,6 @@ export var generate_keymaps = function (params) {
 		}
 		return __accu0__;
 	}) (), [__call__ (km_sequencer_tool_blade, null, params), __call__ (km_sequencer_tool_slip, null, params), __call__ (km_sequencer_preview_tool_generic_cursor, null, params), __call__ (km_sequencer_preview_tool_sample, null, params), __call__ (km_sequencer_preview_tool_move, null, params), __call__ (km_sequencer_preview_tool_rotate, null, params), __call__ (km_sequencer_preview_tool_scale, null, params)]);
-};
-export var _merged = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var dicts = tuple ();
-	}
-	var result = dict ({});
-	var __iterable0__ = dicts;
-	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
-		var d = __getitem__ (__iterable0__, __index0__);
-		(function () {
-			var __accu0__ = result;
-			return __call__ (__accu0__.py_update, __accu0__, d);
-		}) ();
-	}
-	return result;
-};
-export var _ellipsis = Symbol ("Ellipsis")
-export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
-		var fget = null;
-	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
-		var fset = null;
-	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
-		var fdel = null;
-	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
-		var doc = null;
-	};
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
-					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
-					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
-					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return property(fget, fset)
-};
-export var _formatted = function (value, conversion, spec) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
-					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	if (__eq__ (conversion, 'r')) {
-		var value = __call__ (repr, null, value);
-	}
-	else if (__eq__ (conversion, 's')) {
-		var value = __call__ (str, null, value);
-	}
-	return (spec ? (function () {
-		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
-		return __call__ (__accu0__.format, __accu0__, value);
-	}) () : __call__ (str, null, value));
-};
-export var _joined = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var lists = tuple ();
-	}
-	var result = [];
-	var __iterable0__ = lists;
-	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
-		var py_items = __getitem__ (__iterable0__, __index0__);
-		(function () {
-			var __accu0__ = result;
-			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
-		}) ();
-	}
-	return result;
-};
-export var _super_classmethod = function (owner, cls, method) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
-					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 
 //# sourceMappingURL=blender_default.map

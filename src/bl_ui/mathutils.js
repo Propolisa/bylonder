@@ -115,5 +115,56 @@ export var Matrix =  __class__ ('Matrix', [object], {
 		return __call__ (Vector, null, out);
 	});}
 });
+export var Euler =  __class__ ('Euler', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, angles, order) {
+		if (typeof angles == 'undefined' || (angles != null && angles.hasOwnProperty ("__kwargtrans__"))) {;
+			var angles = tuple ([0.0, 0.0, 0.0]);
+		};
+		if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
+			var order = 'XYZ';
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'angles': var angles = __allkwargs0__ [__attrib0__]; break;
+						case 'order': var order = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.py_values = __call__ (list, null, angles);
+		self.order = order;
+	});}
+});
+export var Color =  __class__ ('Color', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, rgb) {
+		if (typeof rgb == 'undefined' || (rgb != null && rgb.hasOwnProperty ("__kwargtrans__"))) {;
+			var rgb = tuple ([0.0, 0.0, 0.0]);
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'rgb': var rgb = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.py_values = __call__ (list, null, rgb);
+	});}
+});
 
 //# sourceMappingURL=mathutils.map

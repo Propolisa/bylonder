@@ -5,6 +5,131 @@ import {contexts as i18n_contexts} from './bpy.app.translations.js';
 import * as __module_node_add_menu__ from './node_add_menu.js';
 __nest__ (node_add_menu, '', __module_node_add_menu__);
 var __name__ = '__main__';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	for (var d of dicts) {
+		result.py_update (d);
+	}
+	return result;
+};
+export var _ellipsis = Symbol ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (conversion == 'r') {
+		var value = repr (value);
+	}
+	else if (conversion == 's') {
+		var value = str (value);
+	}
+	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	for (var py_items of lists) {
+		result.extend (list (py_items));
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var line_style_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -585,117 +710,5 @@ export var NODE_MT_shader_node_all_base =  __class__ ('NODE_MT_shader_node_all_b
 });
 export var add_menus = dict ({'NODE_MT_category_shader_input': NODE_MT_shader_node_input_base, 'NODE_MT_category_shader_input_constant': NODE_MT_shader_node_input_constant_base, 'NODE_MT_category_shader_output': NODE_MT_shader_node_output_base, 'NODE_MT_category_shader_color': NODE_MT_shader_node_color_base, 'NODE_MT_category_shader_shader': NODE_MT_shader_node_shader_base, 'NODE_MT_category_shader_texture': NODE_MT_shader_node_texture_base, 'NODE_MT_category_shader_displacement': NODE_MT_shader_node_displacement_base, 'NODE_MT_category_shader_vector': NODE_MT_shader_node_vector_base, 'NODE_MT_category_shader_math': NODE_MT_shader_node_math_base, 'NODE_MT_category_shader_utilities': NODE_MT_shader_node_utilities_base, 'NODE_MT_shader_node_add_all': NODE_MT_shader_node_all_base});
 var add_menus = node_add_menu.generate_menus (add_menus, __kwargtrans__ ({template: node_add_menu.AddNodeMenu, base_dict: node_add_menu.add_base_pathing_dict}));
-export var _merged = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var dicts = tuple ();
-	}
-	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
-	}
-	return result;
-};
-export var _ellipsis = Symbol ("Ellipsis")
-export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
-		var fget = null;
-	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
-		var fset = null;
-	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
-		var fdel = null;
-	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
-		var doc = null;
-	};
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
-					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
-					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
-					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return property(fget, fset)
-};
-export var _formatted = function (value, conversion, spec) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
-					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	if (conversion == 'r') {
-		var value = repr (value);
-	}
-	else if (conversion == 's') {
-		var value = str (value);
-	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
-};
-export var _joined = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var lists = tuple ();
-	}
-	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
-	}
-	return result;
-};
-export var _super_classmethod = function (owner, cls, method) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
-					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
-};
 
 //# sourceMappingURL=node_add_menu_shader.map

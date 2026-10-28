@@ -1,27 +1,25 @@
-import { Color3, MeshBuilder, Vector3 } from '@babylonjs/core';
-import { GridMaterial } from '@babylonjs/materials/grid/gridMaterial';
 import { nodeId } from '../object/identity.js';
+import { createGridOverlay } from '../../draw/overlay-grid.js';
+import { createExtrasOverlay } from '../../draw/overlay-extra.js';
+import { createCursorOverlay } from '../../draw/overlay-cursor.js';
+import { createOriginOverlay } from '../../draw/overlay-origin.js';
 
-// Parts shared by every 3D Viewport: the floor grid and axis overlays (shown per view by view3d.js) and the
-// status bar text. Each view's header, gizmo and shading live in view3d.js.
-export function createViewportOverlays(scene) {
-  const grid = MeshBuilder.CreateGround('__grid', { width: 400, height: 400 }, scene);
-  const material = new GridMaterial('__gridMaterial', scene);
-  Object.assign(material, { mainColor: new Color3(0.239, 0.239, 0.239), lineColor: new Color3(0.36, 0.36, 0.36), opacity: 0.99, gridRatio: 1, majorUnitFrequency: 10, minorUnitVisibility: 0.35, backFaceCulling: false, zOffset: 2 });
-  grid.material = material;
-  const axisLine = (name, a, b, color) => {
-    const line = MeshBuilder.CreateLines(name, { points: [a, b] }, scene);
-    line.color = Color3.FromHexString(color);
-    line.alpha = 0.8;
-    return line;
-  };
-  const meshes = [grid, axisLine('__axisX', new Vector3(-200, 0, 0), new Vector3(200, 0, 0), '#ff3352'), axisLine('__axisZ', new Vector3(0, 0, -200), new Vector3(0, 0, 200), '#2890ff')];
-  for (const mesh of meshes) { mesh.isPickable = false; mesh.metadata = { editable: false }; mesh.doNotSerialize = true; }
+// Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
+// and the extras of cameras, lights and empties. Each view's header, gizmo and shading live in view3d.js.
+//   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js)
+export function createViewportOverlays(scene, extras, origins) {
+  const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene), origin = createOriginOverlay(scene, origins);
+  const extra = createExtrasOverlay(scene, extras), meshes = [...grid.meshes, ...cursor.meshes];
   let shown = true;
   return {
+    extras: extra,
     // Called per view right before it renders.
-    setEnabled(value) { if (shown !== value) { shown = value; meshes.forEach(mesh => mesh.setEnabled(value)); } },
-    dispose() { meshes.forEach(m => m.dispose()); material.dispose(); },
+    setEnabled(value) {
+      extra.setEnabled(value);
+      origin.update(value);
+      if (shown !== value) { shown = value; meshes.forEach((mesh) => mesh.setEnabled(value)); }
+    },
+    dispose() { grid.dispose(); cursor.dispose(); origin.dispose(); extra.dispose(); },
   };
 }
 
