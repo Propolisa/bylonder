@@ -15,7 +15,7 @@ export var Vector =  __class__ ('Vector', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_values': var py_values = __allkwargs0__ [__attrib0__]; break;
+						case 'values': case 'py_values': var py_values = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}

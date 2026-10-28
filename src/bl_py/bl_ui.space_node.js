@@ -20,7 +20,7 @@ import * as __module_rna_prop_ui__ from './rna_prop_ui.js';
 __nest__ (rna_prop_ui, '', __module_rna_prop_ui__);
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_node';
 export var NODE_HT_header =  __class__ ('NODE_HT_header', [Header], {
 	__module__: __name__,
@@ -1604,3 +1604,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_node.map
+export {AnnotationDataPanel, DATA_PT_EEVEE_light, DATA_PT_light, EEVEE_MATERIAL_PT_settings, EEVEE_MATERIAL_PT_settings_surface, EEVEE_MATERIAL_PT_settings_volume, Header, MATERIAL_PT_viewport, Menu, Panel, PresetPanel, ToolActivePanelHelper, WORLD_PT_viewport_display, _globals, _import, _lazy, _member, _module, geometry_modifier_poll, i18n_contexts, iface_, register_class};

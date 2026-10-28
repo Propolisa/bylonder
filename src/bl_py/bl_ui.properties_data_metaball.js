@@ -199,3 +199,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_metaball.map
+export {Panel, PropertiesAnimationMixin, PropertyPanel, register_class};

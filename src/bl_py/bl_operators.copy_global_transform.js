@@ -11,7 +11,7 @@ __nest__ (bpy, '', __module_bpy__);
 import {Any, Iterable, Optional, TypeAlias} from './typing.js';
 import * as __module_abc__ from './abc.js';
 __nest__ (abc, '', __module_abc__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.copy_global_transform';
 export var _merged = function () {
 	if (arguments.length) {
@@ -121,7 +121,7 @@ export var _joined = function () {
 	return result;
 };
 export var _axis_enum_items = [tuple (['x', 'X', '', 1]), tuple (['y', 'Y', '', 2]), tuple (['z', 'Z', '', 3])];
-export var KeyInfo = dict.__getitem__ ([float, str]);
+export var KeyInfo = dict;
 export var get_matrix = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -430,7 +430,6 @@ export var UnableToMirrorError =  __class__ ('UnableToMirrorError', [Exception],
 });
 export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'method': bpy.props.EnumProperty (__kwargtrans__ ({py_items: _method_items, py_name: 'Paste Method', description: 'Update the current transform, selected keyframes, or even create new keys', options: new set (['SKIP_SAVE'])})), 'bake_step': bpy.props.IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Only used for baking. Step=1 creates a key on every frame, step=2 bakes on 2s, etc', min: 1, soft_min: 1, soft_max: 5, options: new set (['SKIP_SAVE'])})), 'use_mirror': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Mirror Transform', description: 'When pasting, mirror the transform relative to a specific object or bone', py_default: false, options: new set (['SKIP_SAVE'])})), 'mirror_axis_loc': bpy.props.EnumProperty (__kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Location Axis', description: 'Coordinate axis used to mirror the location part of the transform', py_default: 'x', options: new set (['SKIP_SAVE'])})), 'mirror_axis_rot': bpy.props.EnumProperty (__kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Rotation Axis', description: 'Coordinate axis used to mirror the rotation part of the transform', py_default: 'z', options: new set (['SKIP_SAVE'])})), 'use_relative': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Use Relative Paste', description: 'When pasting, assume the pasted matrix is relative to another object (set in the user interface)', py_default: false, options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'object.paste_transform',
 	bl_label: 'Paste Global Transform',
 	bl_description: 'Pastes the matrix from the clipboard to the currently active pose bone or object. Uses world-space matrices',
@@ -924,6 +923,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 	});}
 });
+OBJECT_OT_paste_transform.__annotations__ = dict ({'method': bpy.props.EnumProperty (__kwargtrans__ ({py_items: OBJECT_OT_paste_transform._method_items, py_name: 'Paste Method', description: 'Update the current transform, selected keyframes, or even create new keys', options: new set (['SKIP_SAVE'])})), 'bake_step': bpy.props.IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Only used for baking. Step=1 creates a key on every frame, step=2 bakes on 2s, etc', min: 1, soft_min: 1, soft_max: 5, options: new set (['SKIP_SAVE'])})), 'use_mirror': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Mirror Transform', description: 'When pasting, mirror the transform relative to a specific object or bone', py_default: false, options: new set (['SKIP_SAVE'])})), 'mirror_axis_loc': bpy.props.EnumProperty (__kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Location Axis', description: 'Coordinate axis used to mirror the location part of the transform', py_default: 'x', options: new set (['SKIP_SAVE'])})), 'mirror_axis_rot': bpy.props.EnumProperty (__kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Rotation Axis', description: 'Coordinate axis used to mirror the rotation part of the transform', py_default: 'z', options: new set (['SKIP_SAVE'])})), 'use_relative': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Use Relative Paste', description: 'When pasting, assume the pasted matrix is relative to another object (set in the user interface)', py_default: false, options: new set (['SKIP_SAVE'])}))});
 export var Transformable =  __class__ ('Transformable', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self) {
@@ -1552,7 +1552,6 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 });
 export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [FixToCameraCommon, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'use_location': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Location', description: 'Create Location keys when fixing to the scene camera', py_default: true})), 'use_rotation': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Create Rotation keys when fixing to the scene camera', py_default: true})), 'use_scale': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Create Scale keys when fixing to the scene camera', py_default: true}))}),
 	bl_idname: 'object.fix_to_camera',
 	bl_label: 'Fix to Scene Camera',
 	bl_description: 'Generate new keys to fix the selected object/bone to the camera on unkeyed frames',
@@ -1658,6 +1657,7 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 		}
 	});}
 });
+OBJECT_OT_fix_to_camera.__annotations__ = dict ({'use_location': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Location', description: 'Create Location keys when fixing to the scene camera', py_default: true})), 'use_rotation': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Create Rotation keys when fixing to the scene camera', py_default: true})), 'use_scale': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Create Scale keys when fixing to the scene camera', py_default: true}))});
 export var OBJECT_OT_delete_fix_to_camera_keys =  __class__ ('OBJECT_OT_delete_fix_to_camera_keys', [Operator, FixToCameraCommon], {
 	__module__: __name__,
 	bl_idname: 'object.delete_fix_to_camera_keys',
@@ -1789,3 +1789,4 @@ export var unregister = function () {
 };
 
 //# sourceMappingURL=bl_operators.copy_global_transform.map
+export {ActionChannelbag, Any, Camera, Context, ID, Iterable, Matrix, Object, Operator, Optional, PoseBone, TypeAlias, _globals, _import, _lazy, _member, _module};

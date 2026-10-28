@@ -6,8 +6,9 @@
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
 import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
-import { rna, collection, baseOf, INFO } from './rna.js';
+import { rna, collection, baseOf, INFO, pyArgs } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
+import rnaOperators from './rna-operators.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
 import { deleted, nodeId } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
@@ -73,6 +74,10 @@ function array(get, set, names = 'xyz') {
   };
 }
 
+const dimensions = (ob) => {
+  const size = ob.getBoundingInfo?.().boundingBox.extendSize.scale(2) ?? { x: 0, y: 0, z: 0 };
+  return axes([size.x * Math.abs(ob.scaling.x), size.y * Math.abs(ob.scaling.y), size.z * Math.abs(ob.scaling.z)]);
+};
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
 const lightType = (light) => (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
 const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
@@ -186,6 +191,11 @@ const STRUCTS = {
     lock_scale: transformLocks('scaling'),
     users_collection: (ob, r) => collection((r.world.collections?.memberships?.(nodeId(ob)) ?? []).map((id) => r.pointer('Collection', r.world.collections.byId(id)))),
     active_material_index: { get: (ob, r) => r.world.materials?.active(ob) ?? 0, set: (ob, index, r) => r.world.materials.setActive(ob, index) },
+    // BKE_object_dimensions_get: the bounding box's size in the object's scale; setting it scales the object.
+    dimensions: array((ob) => dimensions(ob), (ob, value) => {
+      const now = dimensions(ob), scale = axes(ob.scaling.asArray());
+      ob.scaling.copyFromFloats(...axes(scale.map((s, i) => (now[i] ? (s * value[i]) / now[i] : s))));
+    }),
     parent: (ob, r) => (r.world.objects.includes(ob.parent) ? r.pointer('Object', ob.parent) : null),
     children: (ob, r) => collection(r.objects().filter((child) => child.parent === ob).map((child) => r.pointer('Object', child))),
     // The active modifier is the one last made active (object.modifier_set_active, or added), else the last.
@@ -251,8 +261,14 @@ const STRUCTS = {
     view_layers: (world, r) => collection((world.collections?.viewLayers() ?? []).map((layer) => r.pointer('ViewLayer', layer))),
     unit_settings: (world, r) => r.pointer('UnitSettings', world),
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
+    // The scene's orientation, then the Move, Rotate and Scale tools' (Default: the scene's), as the scene keeps them.
+    transform_orientation_slots: (world) => (orientationSlots.get(world) ?? orientationSlots.set(world, collection([0, 1, 2, 3].map((slot) =>
+      rna('TransformOrientationSlot', Object.defineProperty({ type: slot ? 'DEFAULT' : 'GLOBAL' }, 'enum_items_of', {
+        value: (prop) => (prop === 'type' && slot ? [['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN']] : []),
+      }))))).get(world)),
   },
   ToolSettings: {
+    workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },
     mesh_select_mode: array((world) => SELECT_BITS.map((bit) => !!((world.editMode?.selectmode ?? SCE_SELECT_VERTEX) & bit)), (world, value) => {
       const mode = SELECT_BITS.reduce((mask, bit, i) => (value[i] ? mask | bit : mask), 0);
       if (mode && world.editMode) world.editMode.selectmode = mode;
@@ -393,8 +409,30 @@ const STRUCTS = {
       'physics', 'constraints', 'data', 'bone', 'bone_constraints', 'material', 'texture', 'strip', 'strip_modifier'].map((tab) => ['show_properties_' + tab, () => true])),
   },
   // A 3D Viewport (space_view3d/view3d.js): its shading, overlays and view.
+  // The workspace's active tools (bToolRef, windowmanager/wm-toolsystem.js), as rna_workspace_api.cc gives them.
+  WorkSpace: {
+    tools: (world, r) => Object.assign(collection(), {
+      from_space_view3d_mode: (...list) => {
+        const { mode, create } = pyArgs(list, ['mode', 'create']);
+        return r.pointer('WorkSpaceTool', world.toolsystem?.ref('VIEW_3D', mode, !!create));
+      },
+    }),
+  },
+  WorkSpaceTool: {
+    ...Object.fromEntries(['idname', 'idname_fallback', 'index', 'space_type', 'mode'].map((name) => [name, (ref) => ref[name]])),
+    widget: (ref) => ref.gizmo_group,
+    use_brushes: (ref) => ref.options.has('USE_BRUSHES'),
+    use_paint_canvas: (ref) => ref.options.has('USE_PAINT_CANVAS'),
+    setup: (ref, r) => (...list) => r.world.toolsystem.setup(ref, pyArgs(list, TOOL_SETUP)),
+    refresh_from_context: () => () => {},
+    operator_properties: (ref, r) => (idname) => operatorProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
+    gizmo_group_properties: () => () => rna('GizmoGroupProperties'),
+  },
+  // A 3D Viewport (space_view3d/view3d.js): its regions, shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',
+    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header'].map((name) => [name,
+      { get: (view) => view.state[name], set: (view, value) => setViewState(view, name, !!value) }])),
     shading: (view, r) => r.pointer('View3DShading', view),
     overlay: (view, r) => r.pointer('View3DOverlay', view),
     region_3d: (view, r) => r.pointer('RegionView3D', view),
@@ -410,6 +448,27 @@ const STRUCTS = {
   },
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
+// Scenes' transform orientation slots (Scene.transform_orientation_slots).
+const orientationSlots = new WeakMap();
+const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
+
+// An operator's struct name (WM_operator_py_idname's inverse): view3d.select_box is VIEW3D_OT_select_box.
+export const operatorStruct = (idname) => idname.replace(/^(\w+)\./, (match, group) => group.toUpperCase() + '_OT_');
+export const operatorIdname = (struct) => struct.replace(/^(\w+?)_OT_/, (match, group) => group.toLowerCase() + '.');
+
+// An operator's properties (OperatorProperties) over the values stored for it: Blender's defaults (rna-operators.json)
+// until set. Writing one is an update (host.update), as a tool setting is.
+export function operatorProperties(idname, values, host) {
+  const data = {};
+  for (const [name, def] of Object.entries(rnaOperators[idname]?.properties ?? {})) {
+    Object.defineProperty(data, name, {
+      enumerable: true,
+      get: () => values[name] ?? def.default,
+      set: (value) => { values[name] = value; host?.update?.('OperatorProperties', name, values); },
+    });
+  }
+  return rna(operatorStruct(idname), data);
+}
 function setViewState(view, key, value) {
   if (value === undefined) throw TypeError(`bpy_struct: invalid ${key}`);
   if (key === 'shading' && view.setShading) return view.setShading(value);

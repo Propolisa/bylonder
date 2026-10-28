@@ -171,7 +171,8 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			if (con.target_space == 'CUSTOM' || con.owner_space == 'CUSTOM') {
 				var col = layout.column ();
 				col.prop (con, 'space_object');
-				if (space_objectcon.space_object) {
+				var space_object = con.space_object;
+				if (space_object) {
 					var _match_subject = space_object.py_metatype;
 					if (_match_subject == 'ARMATURE') {
 						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
@@ -960,7 +961,8 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			if (con.project_axis_space == 'CUSTOM') {
 				var col = layout.column ();
 				col.prop (con, 'space_object');
-				if (space_objectcon.space_object) {
+				var space_object = con.space_object;
+				if (space_object) {
 					var _match_subject = space_object.py_metatype;
 					if (_match_subject == 'ARMATURE') {
 						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
@@ -3267,3 +3269,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_constraint.map
+export {Panel, i18n_contexts, register_class};

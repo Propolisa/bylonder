@@ -10,7 +10,7 @@ import * as __module_time__ from './time.js';
 __nest__ (time, '', __module_time__);
 import * as __module_io__ from './io.js';
 __nest__ (io, '', __module_io__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bpy_internal.filesystem.locking';
 export var __all__ = tuple (['mutex_lock_and_open', 'mutex_lock_and_open_with_retry', 'MutexAcquisitionError']);
 export var MutexAcquisitionError =  __class__ ('MutexAcquisitionError', [Exception], {
@@ -167,3 +167,4 @@ export var mutex_lock_and_open = function (file_path, mode) {
 };
 
 //# sourceMappingURL=_bpy_internal.filesystem.locking.map
+export {Callable, Path, _globals, _import, _lazy, _member, _module};

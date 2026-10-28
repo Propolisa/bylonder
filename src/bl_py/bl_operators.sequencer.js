@@ -8,7 +8,7 @@ import {EnumProperty, FloatProperty, IntProperty} from './_bpy.props.js';
 import {FileHandler, Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.sequencer';
 export var _animated_properties_get = function (strip) {
 	if (arguments.length) {
@@ -116,7 +116,6 @@ export var SequencerCrossfadeSounds =  __class__ ('SequencerCrossfadeSounds', [O
 });
 export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'camera': IntProperty (__kwargtrans__ ({py_name: 'Camera', min: 1, max: 32, soft_min: 1, soft_max: 32, py_default: 1}))}),
 	bl_idname: 'sequencer.split_multicam',
 	bl_label: 'Split Multicam',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -174,6 +173,7 @@ export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Opera
 		return new set (['FINISHED']);
 	});}
 });
+SequencerSplitMulticam.__annotations__ = dict ({'camera': IntProperty (__kwargtrans__ ({py_name: 'Camera', min: 1, max: 32, soft_min: 1, soft_max: 32, py_default: 1}))});
 export var SequencerDeinterlaceSelectedMovies =  __class__ ('SequencerDeinterlaceSelectedMovies', [Operator], {
 	__module__: __name__,
 	bl_idname: 'sequencer.deinterlace_selected_movies',
@@ -299,7 +299,6 @@ export var SequencerFadesClear =  __class__ ('SequencerFadesClear', [Operator], 
 });
 export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'duration_seconds': FloatProperty (__kwargtrans__ ({py_name: 'Fade Duration', description: 'Duration of the fade in seconds', py_default: 1.0, min: 0.01})), 'type': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['IN_OUT', 'Fade In and Out', 'Fade selected strips in and out']), tuple (['IN', 'Fade In', 'Fade in selected strips']), tuple (['OUT', 'Fade Out', 'Fade out selected strips']), tuple (['CURSOR_FROM', 'From Current Frame', 'Fade from the time cursor to the end of overlapping strips']), tuple (['CURSOR_TO', 'To Current Frame', 'Fade from the start of strips under the time cursor to the current frame'])]), py_name: 'Fade Type', description: 'Fade in, out, both in and out, to, or from the current frame. Default is both in and out', py_default: 'IN_OUT'}))}),
 	bl_idname: 'sequencer.fades_add',
 	bl_label: 'Add Fades',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -571,6 +570,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		keyframe_points [-(1)].co = keyframe_points [-(1)].co;
 	});}
 });
+SequencerFadesAdd.__annotations__ = dict ({'duration_seconds': FloatProperty (__kwargtrans__ ({py_name: 'Fade Duration', description: 'Duration of the fade in seconds', py_default: 1.0, min: 0.01})), 'type': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['IN_OUT', 'Fade In and Out', 'Fade selected strips in and out']), tuple (['IN', 'Fade In', 'Fade in selected strips']), tuple (['OUT', 'Fade Out', 'Fade out selected strips']), tuple (['CURSOR_FROM', 'From Current Frame', 'Fade from the time cursor to the end of overlapping strips']), tuple (['CURSOR_TO', 'To Current Frame', 'Fade from the start of strips under the time cursor to the current frame'])]), py_name: 'Fade Type', description: 'Fade in, out, both in and out, to, or from the current frame. Default is both in and out', py_default: 'IN_OUT'}))});
 export var Fade =  __class__ ('Fade', [object], {
 	__module__: __name__,
 	__slots__: tuple (['type', 'animated_property', 'duration', 'max_value', 'start', 'end']),
@@ -744,3 +744,4 @@ export var SEQUENCER_FH_sound_strip =  __class__ ('SEQUENCER_FH_sound_strip', [F
 export var classes = tuple ([SequencerCrossfadeSounds, SequencerSplitMulticam, SequencerDeinterlaceSelectedMovies, SequencerFadesClear, SequencerFadesAdd, SEQUENCER_FH_image_strip, SEQUENCER_FH_movie_strip, SEQUENCER_FH_sound_strip]);
 
 //# sourceMappingURL=bl_operators.sequencer.map
+export {EnumProperty, FileHandler, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module, rpt_};

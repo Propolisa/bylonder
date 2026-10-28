@@ -693,5 +693,6 @@ export var DATA_PT_custom_props_curve =  __class__ ('DATA_PT_custom_props_curve'
 	_property_type: bpy.types.Curve
 });
 export var classes = tuple ([DATA_PT_context_curve, DATA_PT_shape_curve, DATA_PT_curve_texture_space, DATA_PT_geometry_curve, DATA_PT_geometry_curve_bevel, DATA_PT_geometry_curve_start_end, DATA_PT_pathanim, DATA_PT_font, DATA_PT_font_transform, DATA_PT_paragraph, DATA_PT_paragraph_alignment, DATA_PT_paragraph_spacing, DATA_PT_text_boxes, DATA_PT_curve_animation, DATA_PT_custom_props_curve]);
+export var _classes_in_order = ['CurveButtonsPanel', 'CurveButtonsPanelCurve', 'CurveButtonsPanelSurface', 'CurveButtonsPanelText', 'CurveButtonsPanelActive', 'DATA_PT_context_curve', 'DATA_PT_shape_curve', 'DATA_PT_curve_texture_space', 'DATA_PT_geometry_curve', 'DATA_PT_geometry_curve_bevel', 'DATA_PT_curve_animation', 'DATA_PT_geometry_curve_start_end', 'DATA_PT_pathanim', 'DATA_PT_font', 'DATA_PT_font_transform', 'DATA_PT_paragraph', 'DATA_PT_paragraph_alignment', 'DATA_PT_paragraph_spacing', 'DATA_PT_text_boxes', 'DATA_PT_custom_props_curve'];
 
 //# sourceMappingURL=properties_data_curve.map

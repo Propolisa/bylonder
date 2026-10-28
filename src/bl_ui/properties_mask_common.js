@@ -723,5 +723,6 @@ export var MASK_MT_select =  __class__ ('MASK_MT_select', [Menu], {
 	});}
 });
 export var classes = tuple ([MASK_UL_layers, MASK_MT_mask, MASK_MT_add, MASK_MT_move_to_layer, MASK_MT_visibility, MASK_MT_transform, MASK_MT_animation, MASK_MT_select]);
+export var _classes_in_order = ['MASK_UL_layers', 'MASK_PT_mask', 'MASK_PT_layers', 'MASK_PT_spline', 'MASK_PT_point', 'MASK_PT_animation', 'MASK_PT_display', 'MASK_PT_transforms', 'MASK_PT_tools', 'MASK_MT_mask', 'MASK_MT_add', 'MASK_MT_move_to_layer', 'MASK_MT_visibility', 'MASK_MT_transform', 'MASK_MT_animation', 'MASK_MT_select'];
 
 //# sourceMappingURL=properties_mask_common.map

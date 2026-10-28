@@ -16,9 +16,11 @@ export function createContext(r, { area: type = 'VIEW_3D', region: regionType = 
   const object = (ob) => r.pointer('Object', ob);
   const scene = r.pointer('Scene', world), view_layer = world.collections ? r.pointer('ViewLayer', world.collections.layer()) : rna('ViewLayer', { name: 'ViewLayer' });
   const space_data = space ? r.pointer(SPACES[type], space) : rna(SPACES[type] ?? 'Space');
-  const region_data = REGION_DATA[type] && regionType === 'WINDOW' ? space_data.region_3d ?? null : null;
+  // A region given as its type, or as { type, width, height } where its size matters (the toolbar's layout).
+  const { type: region_type = regionType, ...size } = typeof regionType === 'string' ? {} : regionType;
+  const region_data = REGION_DATA[type] && region_type === 'WINDOW' ? space_data.region_3d ?? null : null;
   const area = rna('Area', { type, ui_type: type, show_menus: true, spaces: collection([space_data]) });
-  const region = rna('Region', { type: regionType });
+  const region = rna('Region', { type: region_type, ...size, view2d: rna('View2D', { region_to_view: (x, y) => [x, y] }) });
   const screen = rna('Screen', { areas: collection([area]) });
   const window = rna('Window', { scene, view_layer, screen });
   const editObject = () => world.editMode?.object ?? null;
@@ -31,8 +33,9 @@ export function createContext(r, { area: type = 'VIEW_3D', region: regionType = 
   const data = {
     window, screen, area, region, space_data, region_data, scene, view_layer,
     get engine() { return scene.render.engine; },
+    workspace: r.pointer('WorkSpace', world),
     tool_settings: scene.tool_settings,
-    preferences: rna('Preferences', host.preferences ?? {}),
+    preferences: rna('Preferences', { system: rna('PreferencesSystem', { ui_scale: 1 }), ...host.preferences }),
     blend_data: rna('BlendData', { scenes: collection([scene]), objects: scene.objects }),
     get mode() { const ob = editObject(); return ob ? EDIT_MODES[object(ob).type] ?? 'OBJECT' : 'OBJECT'; },
     get object() { return object(activeObject()); },

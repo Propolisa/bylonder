@@ -5,7 +5,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {BoolProperty, FloatVectorProperty, IntProperty} from './_bpy.props.js';
 import {Vector} from './mathutils.js';
 import {Operator} from './_bpy.types.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.object_randomize_transform';
 export var randomize_selected = function (context, seed, delta, loc, rot, scale, scale_even, _scale_min) {
 	if (arguments.length) {
@@ -131,7 +131,6 @@ export var randomize_selected = function (context, seed, delta, loc, rot, scale,
 };
 export var RandomizeLocRotSize =  __class__ ('RandomizeLocRotSize', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'random_seed': IntProperty (__kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_delta': BoolProperty (__kwargtrans__ ({py_name: 'Transform Delta', description: 'Randomize delta transform values instead of regular transform', py_default: false})), 'use_loc': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: -(100.0), max: 100.0, py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'TRANSLATION'})), 'use_rot': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation values', py_default: true})), 'rot': FloatVectorProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation over each axis', min: -(3.141592), max: +(3.141592), py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'EULER'})), 'use_scale': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': BoolProperty (__kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for all axis', py_default: false})), 'scale': FloatVectorProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: -(100.0), max: 100.0, py_default: tuple ([1.0, 1.0, 1.0])}))}),
 	bl_idname: 'object.randomize_transform',
 	bl_label: 'Randomize Transform',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -178,6 +177,8 @@ export var RandomizeLocRotSize =  __class__ ('RandomizeLocRotSize', [Operator], 
 		return new set (['FINISHED']);
 	});}
 });
+RandomizeLocRotSize.__annotations__ = dict ({'random_seed': IntProperty (__kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_delta': BoolProperty (__kwargtrans__ ({py_name: 'Transform Delta', description: 'Randomize delta transform values instead of regular transform', py_default: false})), 'use_loc': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: -(100.0), max: 100.0, py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'TRANSLATION'})), 'use_rot': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation values', py_default: true})), 'rot': FloatVectorProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation over each axis', min: -(3.141592), max: +(3.141592), py_default: tuple ([0.0, 0.0, 0.0]), subtype: 'EULER'})), 'use_scale': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': BoolProperty (__kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for all axis', py_default: false})), 'scale': FloatVectorProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: -(100.0), max: 100.0, py_default: tuple ([1.0, 1.0, 1.0])}))});
 export var classes = tuple ([RandomizeLocRotSize]);
 
 //# sourceMappingURL=bl_operators.object_randomize_transform.map
+export {BoolProperty, FloatVectorProperty, IntProperty, Operator, Vector, _globals, _import, _lazy, _member, _module};

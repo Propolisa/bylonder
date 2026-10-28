@@ -288,5 +288,6 @@ export var PROPERTIES_PT_visibility =  __class__ ('PROPERTIES_PT_visibility', [P
 	});}
 });
 export var classes = tuple ([PROPERTIES_HT_header, PROPERTIES_PT_navigation_bar, PROPERTIES_PT_options, PROPERTIES_PT_visibility]);
+export var _classes_in_order = ['PROPERTIES_HT_header', 'PROPERTIES_PT_navigation_bar', 'PROPERTIES_PT_options', 'PropertiesAnimationMixin', 'PROPERTIES_PT_visibility'];
 
 //# sourceMappingURL=space_properties.map

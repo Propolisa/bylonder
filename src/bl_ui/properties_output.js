@@ -1042,5 +1042,6 @@ export var RENDER_PT_stereoscopy =  __class__ ('RENDER_PT_stereoscopy', [RenderO
 	});}
 });
 export var classes = tuple ([RENDER_PT_format_presets, RENDER_PT_ffmpeg_presets, RENDER_MT_framerate_presets, RENDER_MT_pixeldensity_presets, RENDER_PT_format, RENDER_PT_frame_range, RENDER_PT_time_stretching, RENDER_PT_stereoscopy, RENDER_PT_output, RENDER_PT_output_views, RENDER_PT_output_color_management, RENDER_PT_output_pixel_density, RENDER_PT_encoding, RENDER_PT_encoding_video, RENDER_PT_encoding_audio, RENDER_PT_stamp, RENDER_PT_stamp_note, RENDER_PT_stamp_burn, RENDER_UL_renderviews, RENDER_PT_post_processing]);
+export var _classes_in_order = ['RENDER_PT_format_presets', 'RENDER_PT_ffmpeg_presets', 'RENDER_MT_framerate_presets', 'RENDER_MT_pixeldensity_presets', 'RenderOutputButtonsPanel', 'RENDER_PT_format', 'RENDER_PT_frame_range', 'RENDER_PT_time_stretching', 'RENDER_PT_post_processing', 'RENDER_PT_stamp', 'RENDER_PT_stamp_note', 'RENDER_PT_stamp_burn', 'RENDER_PT_output', 'RENDER_PT_output_views', 'RENDER_PT_output_color_management', 'RENDER_PT_output_pixel_density', 'RENDER_PT_encoding', 'RENDER_PT_encoding_video', 'RENDER_PT_encoding_audio', 'RENDER_UL_renderviews', 'RENDER_PT_stereoscopy'];
 
 //# sourceMappingURL=properties_output.map

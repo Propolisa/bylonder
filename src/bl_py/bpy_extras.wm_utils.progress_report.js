@@ -37,7 +37,6 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		self.steps = [100000];
 		self.curr_step = [0];
 	});},
-	initialize: __init__,
 	get __enter__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -246,6 +245,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		self.step ();
 	});}
 });
+ProgressReport.initialize = ProgressReport.__init__;
 export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object], {
 	__module__: __name__,
 	__slots__: tuple (['progress', 'nbr', 'msg', 'final_msg', 'level']),

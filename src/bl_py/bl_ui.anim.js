@@ -66,3 +66,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.anim.map
+export {Menu, register_class};

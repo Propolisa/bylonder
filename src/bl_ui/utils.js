@@ -45,7 +45,7 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 		}
 		else {
 		}
-		if (__t__ (text === null)) {
+		if (text === null) {
 			var text = cls.bl_label;
 		}
 		layout.popover (__kwargtrans__ ({panel: cls.__name__, icon: 'PRESET', text: text}));
@@ -71,5 +71,6 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 		Menu.draw_preset (self, context);
 	});}
 });
+export var _classes_in_order = ['PresetPanel'];
 
 //# sourceMappingURL=utils.map

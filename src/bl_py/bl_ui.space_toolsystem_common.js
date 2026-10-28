@@ -2,14 +2,14 @@
 import * as __self__ from './bl_ui.space_toolsystem_common.js';
 (globalThis.__py_modules ??= {})['bl_ui.space_toolsystem_common'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {register_class} from './bpy.utils.js';
 import {namedtuple} from './collections.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_tip as tip_} from './_bpy.app.translations.js';
 import {Menu} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_toolsystem_common';
 export var _merged = function () {
 	if (arguments.length) {
@@ -234,7 +234,7 @@ export var with_args = function () {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					default: kw [__attrib0__] = __allkwargs0__ [__attrib0__];
+					default: kw [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 				}
 			}
 			delete kw.__kwargtrans__;
@@ -1615,7 +1615,12 @@ export var _activate_by_item = function (context, space_type, item, index) {
 		var keymap_fallback = keymap_fallback + ' (fallback)';
 	}
 	tool.setup (__kwargtrans__ ({idname: item.idname, keymap: (item.keymap !== null ? item.keymap [0] : ''), cursor: item.cursor || 'DEFAULT', options: item.options || set (), gizmo_group: gizmo_group, brush_type: item.brush_type || 'ANY', data_block: item.data_block || '', operator: item.operator || '', index: index, idname_fallback: idname_fallback, keymap_fallback: keymap_fallback}));
-	if (gizmo_group != '' && propstool.gizmo_group_properties (gizmo_group)) {
+	var _walrus1 = gizmo_group != '';
+	if (_walrus1) {
+		var props = tool.gizmo_group_properties (gizmo_group);
+		var _walrus1 = props;
+	}
+	if (_walrus1) {
 		if (props === null) {
 			print ('Error:', gizmo_group, 'could not access properties!');
 		}
@@ -2023,3 +2028,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_toolsystem_common.map
+export {Menu, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, namedtuple, register_class, tip_};

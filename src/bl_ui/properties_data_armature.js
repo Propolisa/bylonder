@@ -658,5 +658,6 @@ export var POSE_MT_selection_sets_select =  __class__ ('POSE_MT_selection_sets_s
 	});}
 });
 export var classes = tuple ([DATA_PT_context_arm, DATA_PT_pose, DATA_PT_bone_collections, DATA_UL_bone_collections, ARMATURE_MT_collection_context_menu, ARMATURE_MT_collection_tree_context_menu, DATA_PT_motion_paths, DATA_PT_motion_paths_display, DATA_PT_display, DATA_PT_iksolver_itasc, DATA_PT_armature_animation, DATA_PT_custom_props_arm, DATA_PT_custom_props_bcoll, POSE_MT_selection_set_create, POSE_MT_selection_sets_context_menu, POSE_MT_selection_sets_select, POSE_PT_selection_sets, POSE_UL_selection_set]);
+export var _classes_in_order = ['ArmatureButtonsPanel', 'DATA_PT_context_arm', 'DATA_PT_pose', 'DATA_PT_display', 'DATA_UL_bone_collections', 'DATA_PT_bone_collections', 'ARMATURE_MT_collection_context_menu', 'ARMATURE_MT_collection_tree_context_menu', 'DATA_PT_iksolver_itasc', 'DATA_PT_motion_paths', 'DATA_PT_motion_paths_display', 'DATA_PT_armature_animation', 'DATA_PT_custom_props_arm', 'DATA_PT_custom_props_bcoll', 'POSE_MT_selection_sets_context_menu', 'POSE_PT_selection_sets', 'POSE_UL_selection_set', 'POSE_MT_selection_set_create', 'POSE_MT_selection_sets_select'];
 
 //# sourceMappingURL=properties_data_armature.map

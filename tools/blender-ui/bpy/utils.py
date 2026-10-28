@@ -12,5 +12,10 @@ def smpte_from_frame(frame, fps=None, fps_base=None):
     return '{}{:02d}:{:02d}:{:02d}:{:02d}'.format(sign, total // (3600 * fps), total // (60 * fps) % 60, total // fps % 60, total % fps)
 
 
+# Blender's data files, by their path under datafiles/ (tool icons).
+def system_resource(kind, path=""):
+    return "datafiles/" + path
+
+
 def escape_identifier(text):
     return text.replace('\\', '\\\\').replace('"', '\\"')

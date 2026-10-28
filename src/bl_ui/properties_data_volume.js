@@ -303,5 +303,6 @@ export var DATA_PT_custom_props_volume =  __class__ ('DATA_PT_custom_props_volum
 	_property_type: bpy.types.Volume
 });
 export var classes = tuple ([DATA_PT_context_volume, DATA_PT_volume_grids, DATA_PT_volume_file, DATA_PT_volume_viewport_display, DATA_PT_volume_viewport_display_slicing, DATA_PT_volume_render, DATA_PT_volume_animation, DATA_PT_custom_props_volume, VOLUME_UL_grids]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_volume', 'DATA_PT_volume_file', 'VOLUME_UL_grids', 'DATA_PT_volume_grids', 'DATA_PT_volume_render', 'DATA_PT_volume_viewport_display', 'DATA_PT_volume_viewport_display_slicing', 'DATA_PT_volume_animation', 'DATA_PT_custom_props_volume'];
 
 //# sourceMappingURL=properties_data_volume.map

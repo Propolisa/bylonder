@@ -35,3 +35,4 @@ export var RENDER_OT_swap_dimensions =  __class__ ('RENDER_OT_swap_dimensions', 
 export var classes = tuple ([RENDER_OT_swap_dimensions]);
 
 //# sourceMappingURL=bl_operators.render.map
+export {Operator};

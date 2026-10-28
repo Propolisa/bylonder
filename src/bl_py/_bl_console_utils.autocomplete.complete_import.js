@@ -8,7 +8,7 @@ import * as __module_sys__ from './sys.js';
 __nest__ (sys, '', __module_sys__);
 import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bl_console_utils.autocomplete.complete_import';
 export var TIMEOUT_STORAGE = 3;
 export var TIMEOUT_GIVEUP = 20;
@@ -158,7 +158,7 @@ export var complete = function (line) {
 			}
 		};
 		try {
-			var m = __import__ (mod);
+			var m = _import (mod);
 		}
 		catch (__except0__) {
 			return [];
@@ -246,3 +246,4 @@ export var complete = function (line) {
 };
 
 //# sourceMappingURL=_bl_console_utils.autocomplete.complete_import.map
+export {_globals, _import, _lazy, _member, _module};

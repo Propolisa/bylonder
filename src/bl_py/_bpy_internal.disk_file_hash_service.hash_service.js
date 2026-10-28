@@ -200,7 +200,11 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		var infile = filepath.open (__kwargtrans__ ({mode: 'rb'}));
 		try {
 			infile.__enter__ ();
-			while (blockinfile.read (HASH_BLOCK_SIZE)) {
+			while (true) {
+				var block = infile.read (HASH_BLOCK_SIZE);
+				if (!(block)) {
+					break;
+				}
 				hasher.py_update (block);
 			}
 			infile.__exit__ ();
@@ -238,3 +242,4 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 });
 
 //# sourceMappingURL=_bpy_internal.disk_file_hash_service.hash_service.map
+export {Callable, Path};

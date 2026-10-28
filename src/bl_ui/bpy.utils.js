@@ -42,6 +42,26 @@ export var smpte_from_frame = function (frame, fps, fps_base) {
 	var sign = (frame < 0 ? '-' : '');
 	return '{}{:02d}:{:02d}:{:02d}:{:02d}'.format (sign, Math.floor (total / (3600 * fps)), __mod__ (Math.floor (total / (60 * fps)), 60), __mod__ (Math.floor (total / fps), 60), __mod__ (total, fps));
 };
+export var system_resource = function (kind, path) {
+	if (typeof path == 'undefined' || (path != null && path.hasOwnProperty ("__kwargtrans__"))) {;
+		var path = '';
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'kind': var kind = __allkwargs0__ [__attrib0__]; break;
+					case 'path': var path = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return 'datafiles/' + path;
+};
 export var escape_identifier = function (text) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

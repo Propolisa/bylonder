@@ -8,11 +8,10 @@ import {Operator} from './_bpy.types.js';
 import {pgettext_rpt as rpt_} from './_bpy.app.translations.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.freestyle';
 export var SCENE_OT_freestyle_fill_range_by_selection =  __class__ ('SCENE_OT_freestyle_fill_range_by_selection', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', description: 'Type of the modifier to work on', py_items: tuple ([tuple (['COLOR', 'Color', 'Color modifier type']), tuple (['ALPHA', 'Alpha', 'Alpha modifier type']), tuple (['THICKNESS', 'Thickness', 'Thickness modifier type'])])})), 'name': StringProperty (__kwargtrans__ ({py_name: 'Name', description: 'Name of the modifier to work on'}))}),
 	bl_idname: 'scene.freestyle_fill_range_by_selection',
 	bl_label: 'Fill Range by Selection',
 	bl_options: new set (['INTERNAL']),
@@ -154,6 +153,7 @@ export var SCENE_OT_freestyle_fill_range_by_selection =  __class__ ('SCENE_OT_fr
 		return new set (['FINISHED']);
 	});}
 });
+SCENE_OT_freestyle_fill_range_by_selection.__annotations__ = dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', description: 'Type of the modifier to work on', py_items: tuple ([tuple (['COLOR', 'Color', 'Color modifier type']), tuple (['ALPHA', 'Alpha', 'Alpha modifier type']), tuple (['THICKNESS', 'Thickness', 'Thickness modifier type'])])})), 'name': StringProperty (__kwargtrans__ ({py_name: 'Name', description: 'Name of the modifier to work on'}))});
 export var SCENE_OT_freestyle_add_edge_marks_to_keying_set =  __class__ ('SCENE_OT_freestyle_add_edge_marks_to_keying_set', [Operator], {
 	__module__: __name__,
 	bl_idname: 'scene.freestyle_add_edge_marks_to_keying_set',
@@ -272,7 +272,6 @@ export var SCENE_OT_freestyle_add_face_marks_to_keying_set =  __class__ ('SCENE_
 });
 export var SCENE_OT_freestyle_module_open =  __class__ ('SCENE_OT_freestyle_module_open', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'make_internal': BoolProperty (__kwargtrans__ ({py_name: 'Make internal', description: 'Make module file internal after loading', py_default: true}))}),
 	bl_idname: 'scene.freestyle_module_open',
 	bl_label: 'Open Style Module File',
 	bl_options: new set (['INTERNAL']),
@@ -335,6 +334,8 @@ export var SCENE_OT_freestyle_module_open =  __class__ ('SCENE_OT_freestyle_modu
 		return new set (['FINISHED']);
 	});}
 });
+SCENE_OT_freestyle_module_open.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'make_internal': BoolProperty (__kwargtrans__ ({py_name: 'Make internal', description: 'Make module file internal after loading', py_default: true}))});
 export var classes = tuple ([SCENE_OT_freestyle_add_edge_marks_to_keying_set, SCENE_OT_freestyle_add_face_marks_to_keying_set, SCENE_OT_freestyle_fill_range_by_selection, SCENE_OT_freestyle_module_open]);
 
 //# sourceMappingURL=bl_operators.freestyle.map
+export {BoolProperty, EnumProperty, Operator, StringProperty, _globals, _import, _lazy, _member, _module, rpt_};

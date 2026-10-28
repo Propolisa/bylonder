@@ -642,3 +642,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_cloth.map
+export {Panel, PresetPanel, effector_weights_ui, point_cache_ui, register_class};

@@ -5,7 +5,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {pi} from './math.js';
 import {BoolProperty, FloatProperty, IntProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.vertexpaint_dirt';
 export var ensure_active_color_attribute = function (me) {
 	if (arguments.length) {
@@ -139,7 +139,6 @@ export var applyVertexDirt = function (me, blur_iterations, blur_strength, clamp
 };
 export var VertexPaintDirt =  __class__ ('VertexPaintDirt', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'blur_strength': FloatProperty (__kwargtrans__ ({py_name: 'Blur Strength', description: 'Blur strength per iteration', min: 0.01, max: 1.0, py_default: 1.0})), 'blur_iterations': IntProperty (__kwargtrans__ ({py_name: 'Blur Iterations', description: 'Number of times to blur the colors (higher blurs more)', min: 0, max: 40, py_default: 1})), 'clean_angle': FloatProperty (__kwargtrans__ ({py_name: 'Highlight Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: pi, unit: 'ROTATION'})), 'dirt_angle': FloatProperty (__kwargtrans__ ({py_name: 'Dirt Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: 0.0, unit: 'ROTATION'})), 'dirt_only': BoolProperty (__kwargtrans__ ({py_name: 'Dirt Only', description: "Don't calculate cleans for convex areas", py_default: false})), 'normalize': BoolProperty (__kwargtrans__ ({py_name: 'Normalize', description: 'Normalize the colors, increasing the contrast', py_default: true}))}),
 	bl_idname: 'paint.vertex_color_dirt',
 	bl_label: 'Dirty Vertex Colors',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -182,6 +181,8 @@ export var VertexPaintDirt =  __class__ ('VertexPaintDirt', [Operator], {
 		return ret;
 	});}
 });
+VertexPaintDirt.__annotations__ = dict ({'blur_strength': FloatProperty (__kwargtrans__ ({py_name: 'Blur Strength', description: 'Blur strength per iteration', min: 0.01, max: 1.0, py_default: 1.0})), 'blur_iterations': IntProperty (__kwargtrans__ ({py_name: 'Blur Iterations', description: 'Number of times to blur the colors (higher blurs more)', min: 0, max: 40, py_default: 1})), 'clean_angle': FloatProperty (__kwargtrans__ ({py_name: 'Highlight Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: pi, unit: 'ROTATION'})), 'dirt_angle': FloatProperty (__kwargtrans__ ({py_name: 'Dirt Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: 0.0, unit: 'ROTATION'})), 'dirt_only': BoolProperty (__kwargtrans__ ({py_name: 'Dirt Only', description: "Don't calculate cleans for convex areas", py_default: false})), 'normalize': BoolProperty (__kwargtrans__ ({py_name: 'Normalize', description: 'Normalize the colors, increasing the contrast', py_default: true}))});
 export var classes = tuple ([VertexPaintDirt]);
 
 //# sourceMappingURL=bl_operators.vertexpaint_dirt.map
+export {BoolProperty, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module, pi};

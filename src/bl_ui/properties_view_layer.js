@@ -57,6 +57,7 @@ export var VIEWLAYER_UL_aov =  __class__ ('VIEWLAYER_UL_aov', [UIList], {
 		}
 		else {
 		}
+		// pass;
 		var row = layout.row ();
 		var py_split = row.py_split (__kwargtrans__ ({factor: 0.65}));
 		py_split.row ().prop (item, 'name', __kwargtrans__ ({text: '', icon: self.aov_icon (item), emboss: false}));
@@ -504,5 +505,6 @@ export var VIEWLAYER_PT_layer_custom_props =  __class__ ('VIEWLAYER_PT_layer_cus
 	_property_type: ViewLayer
 });
 export var classes = tuple ([VIEWLAYER_MT_lightgroup_sync, VIEWLAYER_PT_context_layer, VIEWLAYER_PT_layer, VIEWLAYER_PT_layer_passes, VIEWLAYER_PT_workbench_layer_passes_data, VIEWLAYER_PT_eevee_layer_passes_data, VIEWLAYER_PT_eevee_layer_passes_light, VIEWLAYER_PT_layer_passes_cryptomatte, VIEWLAYER_PT_layer_passes_aov, VIEWLAYER_PT_layer_passes_lightgroups, VIEWLAYER_PT_filter, VIEWLAYER_PT_override, VIEWLAYER_PT_layer_custom_props, VIEWLAYER_UL_aov]);
+export var _classes_in_order = ['VIEWLAYER_UL_aov', 'ViewLayerButtonsPanel', 'VIEWLAYER_PT_context_layer', 'VIEWLAYER_PT_layer', 'VIEWLAYER_PT_layer_passes', 'VIEWLAYER_PT_eevee_layer_passes_data', 'VIEWLAYER_PT_workbench_layer_passes_data', 'VIEWLAYER_PT_eevee_layer_passes_light', 'ViewLayerAOVPanelHelper', 'VIEWLAYER_PT_layer_passes_aov', 'ViewLayerCryptomattePanelHelper', 'VIEWLAYER_PT_layer_passes_cryptomatte', 'VIEWLAYER_MT_lightgroup_sync', 'ViewLayerLightgroupsPanelHelper', 'VIEWLAYER_PT_layer_passes_lightgroups', 'VIEWLAYER_PT_filter', 'VIEWLAYER_PT_override', 'VIEWLAYER_PT_layer_custom_props'];
 
 //# sourceMappingURL=properties_view_layer.map

@@ -326,7 +326,6 @@ export var align_objects = function (context, align_x, align_y, align_z, align_m
 };
 export var AlignObjects =  __class__ ('AlignObjects', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'bb_quality': BoolProperty (__kwargtrans__ ({py_name: 'High Quality', description: 'Enables high quality but slow calculation of the bounding box for perfect results on complex shape meshes with rotation/scale', py_default: true})), 'align_mode': EnumProperty (__kwargtrans__ ({py_name: 'Align Mode', description: 'Side of object to use for alignment', py_items: tuple ([tuple (['OPT_1', 'Negative Sides', '']), tuple (['OPT_2', 'Centers', '']), tuple (['OPT_3', 'Positive Sides', ''])]), py_default: 'OPT_2'})), 'relative_to': EnumProperty (__kwargtrans__ ({py_name: 'Relative To', description: 'Reference location to align to', py_items: tuple ([tuple (['OPT_1', 'Scene Origin', 'Use the scene origin as the position for the selected objects to align to']), tuple (['OPT_2', '3D Cursor', 'Use the 3D cursor as the position for the selected objects to align to']), tuple (['OPT_3', 'Selection', 'Use the selected objects as the position for the selected objects to align to']), tuple (['OPT_4', 'Active', 'Use the active object as the position for the selected objects to align to'])]), py_default: 'OPT_4'})), 'align_axis': EnumProperty (__kwargtrans__ ({py_name: 'Align', description: 'Align to axis', py_items: tuple ([tuple (['X', 'X', '']), tuple (['Y', 'Y', '']), tuple (['Z', 'Z', ''])]), options: new set (['ENUM_FLAG'])}))}),
 	bl_idname: 'object.align',
 	bl_label: 'Align Objects',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -373,6 +372,8 @@ export var AlignObjects =  __class__ ('AlignObjects', [Operator], {
 		}
 	});}
 });
+AlignObjects.__annotations__ = dict ({'bb_quality': BoolProperty (__kwargtrans__ ({py_name: 'High Quality', description: 'Enables high quality but slow calculation of the bounding box for perfect results on complex shape meshes with rotation/scale', py_default: true})), 'align_mode': EnumProperty (__kwargtrans__ ({py_name: 'Align Mode', description: 'Side of object to use for alignment', py_items: tuple ([tuple (['OPT_1', 'Negative Sides', '']), tuple (['OPT_2', 'Centers', '']), tuple (['OPT_3', 'Positive Sides', ''])]), py_default: 'OPT_2'})), 'relative_to': EnumProperty (__kwargtrans__ ({py_name: 'Relative To', description: 'Reference location to align to', py_items: tuple ([tuple (['OPT_1', 'Scene Origin', 'Use the scene origin as the position for the selected objects to align to']), tuple (['OPT_2', '3D Cursor', 'Use the 3D cursor as the position for the selected objects to align to']), tuple (['OPT_3', 'Selection', 'Use the selected objects as the position for the selected objects to align to']), tuple (['OPT_4', 'Active', 'Use the active object as the position for the selected objects to align to'])]), py_default: 'OPT_4'})), 'align_axis': EnumProperty (__kwargtrans__ ({py_name: 'Align', description: 'Align to axis', py_items: tuple ([tuple (['X', 'X', '']), tuple (['Y', 'Y', '']), tuple (['Z', 'Z', ''])]), options: new set (['ENUM_FLAG'])}))});
 export var classes = tuple ([AlignObjects]);
 
 //# sourceMappingURL=bl_operators.object_align.map
+export {BoolProperty, EnumProperty, Operator, Vector};

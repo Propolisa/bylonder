@@ -6,3 +6,4 @@ import {AddonPreferences, AssetShelf, Bone, BoneCollection, Collection, Composit
 var __name__ = '_bpy_types';
 
 //# sourceMappingURL=_bpy_types.map
+export {AddonPreferences, AssetShelf, Bone, BoneCollection, Collection, CompositorNode, Context, EditBone, FileHandler, GeometryNode, Gizmo, GizmoGroup, GreasePencilDrawing, Header, HydraRenderEngine, KeyingSetInfo, Library, Light, Macro, Material, Menu, Mesh, MeshEdge, MeshLoopTriangle, MeshPolygon, Node, NodeInternal, NodeSocket, NodeTree, NodeTreeInterfaceItem, NodeTreeInterfaceSocket, Object, Operator, Panel, PoseBone, PropertyGroup, RenderEngine, ShaderNode, Sound, Text, Texture, TextureNode, UIList, USDHook, WindowManager, WorkSpace, World, _GenericBone, _GenericUI, _RNAMeta, _RNAMetaPropGroup, _StructMetaPropGroup, _StructRNA, _name_convention_attribute_ensure, _name_convention_attribute_get, _name_convention_attribute_remove, _ord_ind, _sentinel};

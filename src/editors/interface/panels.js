@@ -6,7 +6,7 @@ import { __in__ } from '../../bl_ui/org.transcrypt.__runtime__.js';
 import { types as bpyTypes } from '../../bl_ui/bpy._app.js';
 import { Panel } from '../../bl_ui/bpy.types.js';
 import { UILayout, useContext } from './layout.js';
-import { rnaProperty, structName } from '../../makesrna/rna.js';
+import { blRna } from '../../makesrna/rna.js';
 
 // The order bl_ui/__init__.py registers Blender's script modules in.
 export const MODULES = ['properties_animviz', 'properties_constraint', 'properties_data_armature', 'properties_data_bone',
@@ -24,12 +24,7 @@ export const hasOption = (type, option) => !!type.bl_options && __in__(option, t
 
 // bpy.types as the scripts read it: the classes registered (Blender's and add-ons'), and any other name as the RNA
 // struct of that name (bpy.types.Object.bl_rna.properties['type'].enum_items).
-const rnaType = (identifier) => ({ bl_rna: { identifier, name: structName(identifier), properties: new Proxy({}, {
-  get: (target, name) => { const prop = typeof name === 'string' && rnaProperty(identifier, name); return prop ? rnaPropertyInfo(prop) : undefined; },
-}) } });
-const rnaPropertyInfo = (prop) => ({ ...prop, enum_items: (prop.items ?? []).filter(Boolean).map(([identifier, name, description, icon]) => ({ identifier, name, description, icon })),
-  get enum_items_static() { return this.enum_items; } });
-Object.setPrototypeOf(bpyTypes, new Proxy({}, { get: (target, name) => (typeof name === 'string' && !name.startsWith('__') ? rnaType(name) : undefined) }));
+Object.setPrototypeOf(bpyTypes, new Proxy({}, { get: (target, name) => (typeof name === 'string' && !name.startsWith('__') ? { bl_rna: blRna(name) } : undefined) }));
 export function registerClasses(modules) {
   for (const module of modules) for (const cls of module?.classes ?? []) bpyTypes[cls.bl_idname || cls.__name__] = cls;
 }

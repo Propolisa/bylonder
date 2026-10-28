@@ -632,5 +632,6 @@ export var PHYSICS_PT_cloth_field_weights =  __class__ ('PHYSICS_PT_cloth_field_
 	});}
 });
 export var classes = tuple ([CLOTH_PT_presets, PHYSICS_PT_cloth, PHYSICS_PT_cloth_physical_properties, PHYSICS_PT_cloth_stiffness, PHYSICS_PT_cloth_damping, PHYSICS_PT_cloth_internal_springs, PHYSICS_PT_cloth_pressure, PHYSICS_PT_cloth_cache, PHYSICS_PT_cloth_shape, PHYSICS_PT_cloth_collision, PHYSICS_PT_cloth_object_collision, PHYSICS_PT_cloth_self_collision, PHYSICS_PT_cloth_property_weights, PHYSICS_PT_cloth_field_weights]);
+export var _classes_in_order = ['CLOTH_PT_presets', 'PhysicButtonsPanel', 'PHYSICS_PT_cloth', 'PHYSICS_PT_cloth_physical_properties', 'PHYSICS_PT_cloth_stiffness', 'PHYSICS_PT_cloth_damping', 'PHYSICS_PT_cloth_internal_springs', 'PHYSICS_PT_cloth_pressure', 'PHYSICS_PT_cloth_cache', 'PHYSICS_PT_cloth_shape', 'PHYSICS_PT_cloth_collision', 'PHYSICS_PT_cloth_object_collision', 'PHYSICS_PT_cloth_self_collision', 'PHYSICS_PT_cloth_property_weights', 'PHYSICS_PT_cloth_field_weights'];
 
 //# sourceMappingURL=properties_physics_cloth.map

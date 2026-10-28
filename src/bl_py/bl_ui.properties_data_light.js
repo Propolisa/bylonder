@@ -439,7 +439,8 @@ export var DATA_PT_light_animation =  __class__ ('DATA_PT_light_animation', [Dat
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: 'Light'}));
 		self.draw_action_and_slot_selector (context, col, light);
-		if (node_treelight.node_tree) {
+		var node_tree = light.node_tree;
+		if (node_tree) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shader Node Tree'}));
 			self.draw_action_and_slot_selector (context, col, node_tree);
@@ -460,3 +461,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_light.map
+export {Panel, PropertiesAnimationMixin, PropertyPanel, i18n_contexts, register_class};

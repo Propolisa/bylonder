@@ -9,7 +9,7 @@ import {BoolProperty, CollectionProperty, EnumProperty, FloatVectorProperty, Int
 import {FileHandler, Operator, PropertyGroup} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.node';
 export var _merged = function () {
 	if (arguments.length) {
@@ -326,12 +326,11 @@ export var cast_value = function (source, target) {
 };
 export var NodeSetting =  __class__ ('NodeSetting', [PropertyGroup], {
 	__module__: __name__,
-	__annotations__: dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Python expression to be evaluated as the initial node setting', py_default: ''}))}),
 	__slots__: tuple ([])
 });
+NodeSetting.__annotations__ = dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Python expression to be evaluated as the initial node setting', py_default: ''}))});
 export var NodeOperator =  __class__ ('NodeOperator', [object], {
 	__module__: __name__,
-	__annotations__: dict ({'settings': CollectionProperty (__kwargtrans__ ({py_name: 'Settings', description: 'Settings to be applied on the newly created node', py_metatype: NodeSetting, options: new set (['SKIP_SAVE'])}))}),
 	get description () {return __getcm__ (this, function (cls, _context, properties) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -466,9 +465,9 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 		return node;
 	});}
 });
+NodeOperator.__annotations__ = dict ({'settings': CollectionProperty (__kwargtrans__ ({py_name: 'Settings', description: 'Settings to be applied on the newly created node', py_metatype: NodeSetting, options: new set (['SKIP_SAVE'])}))});
 export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 	__module__: __name__,
-	__annotations__: dict ({'use_transform': BoolProperty (__kwargtrans__ ({py_name: 'Use Transform', description: 'Start transform operator after inserting the node', py_default: false}))}),
 	get store_mouse_cursor () {return function (context, event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -540,6 +539,7 @@ export var NodeAddOperator =  __class__ ('NodeAddOperator', [NodeOperator], {
 		return result;
 	});}
 });
+NodeAddOperator.__annotations__ = dict ({'use_transform': BoolProperty (__kwargtrans__ ({py_name: 'Use Transform', description: 'Start transform operator after inserting the node', py_default: false}))});
 export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 	__module__: __name__,
 	properties_to_pass: tuple (['color', 'hide', 'label', 'mute', 'parent', 'show_options', 'show_preview', 'show_texture', 'use_alpha', 'use_clamp', 'use_custom_color', 'operation', 'domain', 'data_type', 'image', 'interpolation']),
@@ -1031,7 +1031,6 @@ export var NodeSwapOperator =  __class__ ('NodeSwapOperator', [NodeOperator], {
 });
 export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'type': StringProperty (__kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': StringProperty (__kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'node.add_node',
 	bl_label: 'Add Node',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -1052,7 +1051,8 @@ export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, 
 		}
 		if (self.properties.is_property_set ('type')) {
 			self.deselect_nodes (context);
-			if (nodeself.create_node (context, self.py_metatype)) {
+			var node = self.create_node (context, self.py_metatype);
+			if (node) {
 				self.apply_node_settings (node);
 				if (self.visible_output) {
 					for (var socket of node.outputs) {
@@ -1069,9 +1069,9 @@ export var NODE_OT_add_node =  __class__ ('NODE_OT_add_node', [NodeAddOperator, 
 		}
 	});}
 });
+NODE_OT_add_node.__annotations__ = dict ({'type': StringProperty (__kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': StringProperty (__kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))});
 export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'type': StringProperty (__kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': StringProperty (__kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'node.swap_node',
 	bl_label: 'Swap Node',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -1267,6 +1267,7 @@ export var NODE_OT_swap_node =  __class__ ('NODE_OT_swap_node', [NodeSwapOperato
 		return new set (['FINISHED']);
 	});}
 });
+NODE_OT_swap_node.__annotations__ = dict ({'type': StringProperty (__kwargtrans__ ({py_name: 'Node Type', description: 'Node type'})), 'visible_output': StringProperty (__kwargtrans__ ({py_name: 'Output Name', description: 'If provided, all outputs that are named differently will be hidden', options: new set (['SKIP_SAVE'])}))});
 export var NODE_OT_add_empty_group =  __class__ ('NODE_OT_add_empty_group', [NodeAddOperator, bpy.types.Operator], {
 	__module__: __name__,
 	bl_idname: 'node.add_empty_group',
@@ -1470,7 +1471,6 @@ export var NODE_OT_swap_typed_bundle =  __class__ ('NODE_OT_swap_typed_bundle', 
 });
 export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 	__module__: __name__,
-	__annotations__: dict ({'offset': FloatVectorProperty (__kwargtrans__ ({py_name: 'Offset', description: 'Offset of nodes from the cursor when added', size: 2, py_default: tuple ([150, 0])}))}),
 	_zone_tooltips: dict ({'GeometryNodeSimulationInput': n_ ('Simulate the execution of nodes across a time span'), 'GeometryNodeRepeatInput': n_ ('Execute nodes with a dynamic number of repetitions'), 'GeometryNodeForeachGeometryElementInput': n_ ('Perform operations separately for each geometry element (e.g. vertices, edges, etc.)'), 'NodeClosureInput': n_ ('Wrap nodes inside a closure that can be executed at a different part of the node-tree')}),
 	get description () {return __getcm__ (this, function (cls, _context, properties) {
 		if (arguments.length) {
@@ -1495,6 +1495,7 @@ export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 		return tip_ (cls._zone_tooltips.py_get (input_node_type, null));
 	});}
 });
+ZoneOperator.__annotations__ = dict ({'offset': FloatVectorProperty (__kwargtrans__ ({py_name: 'Offset', description: 'Offset of nodes from the cursor when added', size: 2, py_default: tuple ([150, 0])}))});
 export var NodeAddZoneOperator =  __class__ ('NodeAddZoneOperator', [ZoneOperator, NodeAddOperator], {
 	__module__: __name__,
 	add_default_geometry_link: true,
@@ -1552,14 +1553,13 @@ export var NodeAddZoneOperator =  __class__ ('NodeAddZoneOperator', [ZoneOperato
 });
 export var NODE_OT_add_zone =  __class__ ('NODE_OT_add_zone', [NodeAddZoneOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'input_node_type': StringProperty (__kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': StringProperty (__kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': BoolProperty (__kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))}),
 	bl_idname: 'node.add_zone',
 	bl_label: 'Add Zone',
 	bl_options: new set (['REGISTER', 'UNDO'])
 });
+NODE_OT_add_zone.__annotations__ = dict ({'input_node_type': StringProperty (__kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': StringProperty (__kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': BoolProperty (__kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))});
 export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, NodeSwapOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'input_node_type': StringProperty (__kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': StringProperty (__kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': BoolProperty (__kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))}),
 	bl_idname: 'node.swap_zone',
 	bl_label: 'Swap Zone',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -1775,6 +1775,7 @@ export var NODE_OT_swap_zone =  __class__ ('NODE_OT_swap_zone', [ZoneOperator, N
 		return new set (['FINISHED']);
 	});}
 });
+NODE_OT_swap_zone.__annotations__ = dict ({'input_node_type': StringProperty (__kwargtrans__ ({py_name: 'Input Node', description: 'Specifies the input node used by the created zone'})), 'output_node_type': StringProperty (__kwargtrans__ ({py_name: 'Output Node', description: 'Specifies the output node used by the created zone'})), 'add_default_geometry_link': BoolProperty (__kwargtrans__ ({py_name: 'Add Geometry Link', description: 'When enabled, create a link between geometry sockets in this zone', py_default: false}))});
 export var NODE_OT_add_simulation_zone =  __class__ ('NODE_OT_add_simulation_zone', [NodeAddZoneOperator, Operator], {
 	__module__: __name__,
 	bl_idname: 'node.add_simulation_zone',
@@ -1866,7 +1867,6 @@ export var NODE_OT_collapse_hide_unused_toggle =  __class__ ('NODE_OT_collapse_h
 });
 export var NODE_OT_tree_path_parent =  __class__ ('NODE_OT_tree_path_parent', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'parent_tree_index': IntProperty (__kwargtrans__ ({py_name: 'Parent Index', description: 'Parent index in context path', py_default: 0}))}),
 	bl_idname: 'node.tree_path_parent',
 	bl_label: 'Parent Node Tree',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -1911,6 +1911,7 @@ export var NODE_OT_tree_path_parent =  __class__ ('NODE_OT_tree_path_parent', [O
 		return new set (['FINISHED']);
 	});}
 });
+NODE_OT_tree_path_parent.__annotations__ = dict ({'parent_tree_index': IntProperty (__kwargtrans__ ({py_name: 'Parent Index', description: 'Parent index in context path', py_default: 0}))});
 export var NodeInterfaceOperator =  __class__ ('NodeInterfaceOperator', [object], {
 	__module__: __name__,
 	get poll () {return __getcm__ (this, function (cls, context) {
@@ -1940,7 +1941,6 @@ export var NodeInterfaceOperator =  __class__ ('NodeInterfaceOperator', [object]
 });
 export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new', [NodeInterfaceOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'item_type': EnumProperty (__kwargtrans__ ({py_name: 'Item Type', description: 'Type of the item to create', py_items: tuple ([tuple (['INPUT', 'Input', '']), tuple (['OUTPUT', 'Output', '']), tuple (['PANEL', 'Panel', ''])]), py_default: 'INPUT'}))}),
 	bl_idname: 'node.interface_item_new',
 	bl_label: 'New Item',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -2016,6 +2016,7 @@ export var NODE_OT_interface_item_new =  __class__ ('NODE_OT_interface_item_new'
 		return new set (['FINISHED']);
 	});}
 });
+NODE_OT_interface_item_new.__annotations__ = dict ({'item_type': EnumProperty (__kwargtrans__ ({py_name: 'Item Type', description: 'Type of the item to create', py_items: tuple ([tuple (['INPUT', 'Input', '']), tuple (['OUTPUT', 'Output', '']), tuple (['PANEL', 'Panel', ''])]), py_default: 'INPUT'}))});
 export var NODE_OT_interface_item_new_panel_toggle =  __class__ ('NODE_OT_interface_item_new_panel_toggle', [Operator], {
 	__module__: __name__,
 	bl_idname: 'node.interface_item_new_panel_toggle',
@@ -2370,7 +2371,6 @@ export var NODE_OT_interface_item_unlink_panel_toggle =  __class__ ('NODE_OT_int
 });
 export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_set', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'viewer_index': IntProperty (__kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))}),
 	bl_idname: 'node.viewer_shortcut_set',
 	bl_label: 'Fast Preview',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -2468,9 +2468,9 @@ export var NODE_OT_viewer_shortcut_set =  __class__ ('NODE_OT_viewer_shortcut_se
 		return new set (['FINISHED']);
 	});}
 });
+NODE_OT_viewer_shortcut_set.__annotations__ = dict ({'viewer_index': IntProperty (__kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))});
 export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_get', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'viewer_index': IntProperty (__kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))}),
 	bl_idname: 'node.viewer_shortcut_get',
 	bl_label: 'Fast Preview',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -2532,6 +2532,7 @@ export var NODE_OT_viewer_shortcut_get =  __class__ ('NODE_OT_viewer_shortcut_ge
 		return new set (['FINISHED']);
 	});}
 });
+NODE_OT_viewer_shortcut_get.__annotations__ = dict ({'viewer_index': IntProperty (__kwargtrans__ ({py_name: 'Viewer Index', description: 'Index corresponding to the shortcut, e.g. number key 1 corresponds to index 1 etc..'}))});
 export var NODE_FH_image_node =  __class__ ('NODE_FH_image_node', [FileHandler], {
 	__module__: __name__,
 	bl_idname: 'NODE_FH_image_node',
@@ -2559,3 +2560,4 @@ export var NODE_FH_image_node =  __class__ ('NODE_FH_image_node', [FileHandler],
 export var classes = tuple ([NodeSetting, NODE_FH_image_node, NODE_OT_add_node, NODE_OT_swap_node, NODE_OT_add_empty_group, NODE_OT_swap_empty_group, NODE_OT_add_zone, NODE_OT_swap_zone, NODE_OT_add_simulation_zone, NODE_OT_add_repeat_zone, NODE_OT_add_foreach_geometry_element_zone, NODE_OT_add_closure_zone, NODE_OT_add_typed_bundle, NODE_OT_swap_typed_bundle, NODE_OT_collapse_hide_unused_toggle, NODE_OT_interface_item_new, NODE_OT_interface_item_new_panel_toggle, NODE_OT_interface_item_duplicate, NODE_OT_interface_item_remove, NODE_OT_interface_item_make_panel_toggle, NODE_OT_interface_item_unlink_panel_toggle, NODE_OT_tree_path_parent, NODE_OT_viewer_shortcut_get, NODE_OT_viewer_shortcut_set]);
 
 //# sourceMappingURL=bl_operators.node.map
+export {BoolProperty, CollectionProperty, EnumProperty, FileHandler, FloatVectorProperty, IntProperty, Operator, PropertyGroup, StringProperty, Vector, _globals, _import, _lazy, _member, _module, data_, n_, rpt_, tip_};

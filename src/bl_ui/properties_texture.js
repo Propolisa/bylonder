@@ -513,6 +513,7 @@ export var TEXTURE_PT_image =  __class__ ('TEXTURE_PT_image', [TextureTypePanel,
 		else {
 		}
 		var layout = self.layout;
+		// pass;
 	});}
 });
 export var TEXTURE_PT_image_settings =  __class__ ('TEXTURE_PT_image_settings', [TextureTypePanel, Panel], {
@@ -674,6 +675,7 @@ export var TEXTURE_PT_image_mapping =  __class__ ('TEXTURE_PT_image_mapping', [T
 			col.prop (tex, 'use_checker_odd', __kwargtrans__ ({text: 'Odd'}));
 		}
 		else {
+			// pass;
 		}
 	});}
 });
@@ -1275,5 +1277,6 @@ export var TEXTURE_PT_custom_props =  __class__ ('TEXTURE_PT_custom_props', [Tex
 	});}
 });
 export var classes = tuple ([TEXTURE_MT_context_menu, TEXTURE_UL_texslots, TEXTURE_PT_preview, TEXTURE_PT_context, TEXTURE_PT_node, TEXTURE_PT_clouds, TEXTURE_PT_wood, TEXTURE_PT_marble, TEXTURE_PT_magic, TEXTURE_PT_blend, TEXTURE_PT_stucci, TEXTURE_PT_image, TEXTURE_PT_image_settings, TEXTURE_PT_image_alpha, TEXTURE_PT_image_mapping, TEXTURE_PT_image_mapping_crop, TEXTURE_PT_image_sampling, TEXTURE_PT_musgrave, TEXTURE_PT_voronoi, TEXTURE_PT_voronoi_feature_weights, TEXTURE_PT_distortednoise, TEXTURE_PT_influence, TEXTURE_PT_mapping, TEXTURE_PT_colors, TEXTURE_PT_colors_ramp, TEXTURE_PT_animation, TEXTURE_PT_custom_props]);
+export var _classes_in_order = ['TEXTURE_MT_context_menu', 'TEXTURE_UL_texslots', 'TextureButtonsPanel', 'TEXTURE_PT_preview', 'TEXTURE_PT_context', 'TEXTURE_PT_node', 'TextureTypePanel', 'TEXTURE_PT_clouds', 'TEXTURE_PT_wood', 'TEXTURE_PT_marble', 'TEXTURE_PT_magic', 'TEXTURE_PT_blend', 'TEXTURE_PT_stucci', 'TEXTURE_PT_image', 'TEXTURE_PT_image_settings', 'TEXTURE_PT_image_sampling', 'TEXTURE_PT_image_alpha', 'TEXTURE_PT_image_mapping', 'TEXTURE_PT_image_mapping_crop', 'TEXTURE_PT_musgrave', 'TEXTURE_PT_voronoi', 'TEXTURE_PT_voronoi_feature_weights', 'TEXTURE_PT_distortednoise', 'TextureSlotPanel', 'TEXTURE_PT_mapping', 'TEXTURE_PT_influence', 'TextureColorsPoll', 'TEXTURE_PT_colors', 'TEXTURE_PT_colors_ramp', 'TEXTURE_PT_animation', 'TEXTURE_PT_custom_props'];
 
 //# sourceMappingURL=properties_texture.map

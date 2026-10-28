@@ -157,7 +157,8 @@ export var WORLD_PT_animation =  __class__ ('WORLD_PT_animation', [WorldButtonsP
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: 'World'}));
 		self.draw_action_and_slot_selector (context, col, world);
-		if (node_treeworld.node_tree) {
+		var node_tree = world.node_tree;
+		if (node_tree) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shader Node Tree'}));
 			self.draw_action_and_slot_selector (context, col, node_tree);
@@ -490,3 +491,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_world.map
+export {Panel, PropertiesAnimationMixin, PropertyPanel, find_node_input, i18n_contexts, register_class};

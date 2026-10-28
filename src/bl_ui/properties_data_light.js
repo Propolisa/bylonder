@@ -451,5 +451,6 @@ export var DATA_PT_custom_props_light =  __class__ ('DATA_PT_custom_props_light'
 	_property_type: bpy.types.Light
 });
 export var classes = tuple ([DATA_PT_context_light, DATA_PT_preview, DATA_PT_light, DATA_PT_EEVEE_light, DATA_PT_spot, DATA_PT_EEVEE_light_shadow, DATA_PT_EEVEE_light_influence, DATA_PT_EEVEE_light_distance, DATA_PT_light_animation, DATA_PT_custom_props_light]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_light', 'DATA_PT_preview', 'DATA_PT_light', 'DATA_PT_EEVEE_light', 'DATA_PT_EEVEE_light_distance', 'DATA_PT_EEVEE_light_shadow', 'DATA_PT_EEVEE_light_influence', 'DATA_PT_spot', 'DATA_PT_light_animation', 'DATA_PT_custom_props_light'];
 
 //# sourceMappingURL=properties_data_light.map

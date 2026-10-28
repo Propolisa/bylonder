@@ -8,7 +8,7 @@ import {contexts as i18n_contexts} from './_bpy.app.translations.js';
 import {Context, Panel, UILayout} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_view3d_sidebar';
 export var GlobalTransformPanelMixin =  __class__ ('GlobalTransformPanelMixin', [object], {
 	__module__: __name__,
@@ -222,3 +222,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_view3d_sidebar.map
+export {Context, Panel, UILayout, _globals, _import, _lazy, _member, _module, i18n_contexts, register_class};

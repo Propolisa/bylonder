@@ -7,7 +7,7 @@ import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
 import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS } from '../../bmesh/bmesh-wasm.js';
 import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDBM_elem_to_index_any } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
-import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
+import { do_mesh_region_select, boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
 import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, toBlenderView, view3d_pixel_size } from '../transform/transform.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
@@ -253,12 +253,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   }
   const inset = () => em.edit.totals.totfacesel && meshModal('mesh.inset', inset_modal);
   const bevel = (affect) => meshModal('mesh.bevel', bevel_modal, { props: { affect } });
+  // Box, lasso and circle select: the elements in a region of the view, by eSelectOp.
+  const selectRegion = (view, region, mode) => { if (em && do_mesh_region_select(em.edit, em.mesh, viewAdapter(view ?? views.input), region, SEL_OPS[mode] ?? SEL_OPS.SET)) sync({ extract: EXTRACT_FLAGS }); };
   // view3d.select_box: a box gesture, begun at the drag's press or (from B) at the next press.
-  const MODES = { SET: SEL_OP_SET, ADD: SEL_OP_ADD, SUB: SEL_OP_SUB };
   const selectBox = (event, mode, begun = true) => startGestureBox(wm(), {
     begin: begun ? { x: event.x, y: event.y } : null,
     mode,
-    select: (rect, m) => { if (em && do_mesh_box_select(em.edit, em.mesh, viewAdapter(event.view ?? views.input), rect, MODES[m])) sync({ extract: EXTRACT_FLAGS }); },
+    select: (rect, m) => selectRegion(event.view, boxRegion(rect), m),
   });
   const selectPick = (event, toggle) => { if (EDBM_select_pick(em.edit, em.mesh, viewAdapter(event.view), [event.x, event.y], { toggle })) sync({ extract: EXTRACT_FLAGS }); };
   // mesh.loop_select and mesh.edgering_select pick the nearest edge, whatever the select mode.
@@ -272,7 +273,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   };
   const inView = (event) => !!event.view;
   // An operator's shortcut in Edit Mode's keymaps: the binding with its properties, else its plain one.
-  const keysOf = (idname, props) => operatorKeys(idname, props, [viewKeymap, toolKeymap]);
+  const keysOf = (idname, props) => operatorKeys(idname, props, [viewKeymap]);
   const menuApi = {
     context: () => world.blenderContext(views.input), edit: () => em.edit, exec, keys: keysOf, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type),
     extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
@@ -296,15 +297,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   });
   const viewKeymap = createKeymap([
     { blender: 'VIEW3D_MT_edit_mesh_context_menu', keys: 'RIGHTMOUSE', poll: inView, run: (event) => openMenu(menus.context(), { x: event.x, y: event.y }, '') },
-    { blender: 'view3d.select', keys: 'LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, false) },
-    { blender: 'view3d.select', keys: 'Shift LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, true) },
-    { blender: 'view3d.select_box', keys: 'B', run: (event) => selectBox(event, 'SET', false) },
   ], ['3D View']);
-  const toolKeymap = createKeymap([
-    { blender: 'view3d.select_box', keys: 'LEFTMOUSE CLICK_DRAG', poll: inView, run: (event) => selectBox(event, 'SET') },
-    { blender: 'view3d.select_box', keys: 'Shift LEFTMOUSE CLICK_DRAG', poll: inView, run: (event) => selectBox(event, 'ADD') },
-    { blender: 'view3d.select_box', keys: 'Ctrl LEFTMOUSE CLICK_DRAG', poll: inView, run: (event) => selectBox(event, 'SUB') },
-  ], ['3D View Tool: Select Box']);
   const modeKeys = createKeymap([
     { blender: 'object.mode_set', keys: 'Tab', poll: () => !!em || editable(activeObject()), run: () => (em ? exit() : enter()) },
   ], ['Object Non-modal']);
@@ -333,7 +326,15 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     // The 3D View's Edit Mode menus (view3d-menus-edit-mesh.js).
     menus,
     // Tab in both modes; picking and the Select Box tool in Edit Mode (Blender's Mesh keymap runs the rest).
-    keymap: (event) => modeKeys(event) || (!!em && (viewKeymap(event) || toolKeymap(event))),
+    keymap: (event) => modeKeys(event) || (!!em && viewKeymap(event)),
+    // view3d.select and view3d.select_box in Edit Mode, run with the event; a box begins at a drag's press, or from a
+    // key at the next press.
+    selectOperator(event, { toggle, select_passthrough }) {
+      selectPick(event, !!toggle);
+      return select_passthrough ? 'PASS_THROUGH' : 'FINISHED';
+    },
+    selectBox: (event, { mode = 'SET' }) => selectBox(event, mode, /mouse$/.test(event.type)),
+    selectRegion,
     // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.
     // `orient: 'NORMAL'` constrains to the selection's normal; `keep` records an undo step even when cancelled, for
     // the operator that ran first (extrude).

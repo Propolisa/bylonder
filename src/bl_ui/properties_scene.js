@@ -737,5 +737,6 @@ export var SCENE_PT_custom_props =  __class__ ('SCENE_PT_custom_props', [SceneBu
 	_property_type: bpy.types.Scene
 });
 export var classes = tuple ([SCENE_UL_keying_set_paths, SCENE_PT_context_scene, SCENE_PT_scene, SCENE_PT_unit, SCENE_PT_physics, SCENE_PT_simulation, SCENE_PT_keying_sets, SCENE_PT_keying_set_paths, SCENE_PT_keyframing_settings, SCENE_PT_audio, SCENE_PT_rigid_body_world, SCENE_PT_rigid_body_world_settings, SCENE_PT_rigid_body_cache, SCENE_PT_rigid_body_field_weights, SCENE_PT_eevee_light_probes, SCENE_PT_animation, SCENE_PT_custom_props]);
+export var _classes_in_order = ['SCENE_UL_keying_set_paths', 'SceneButtonsPanel', 'SCENE_PT_context_scene', 'SCENE_PT_scene', 'SCENE_PT_unit', 'SceneKeyingSetsPanel', 'SCENE_PT_keying_sets', 'SCENE_PT_keyframing_settings', 'SCENE_PT_keying_set_paths', 'SCENE_PT_audio', 'SCENE_PT_physics', 'SCENE_PT_simulation', 'SCENE_PT_rigid_body_world', 'RigidBodySubPanel', 'SCENE_PT_rigid_body_world_settings', 'SCENE_PT_rigid_body_cache', 'SCENE_PT_rigid_body_field_weights', 'SCENE_PT_eevee_light_probes', 'SCENE_PT_animation', 'SCENE_PT_custom_props'];
 
 //# sourceMappingURL=properties_scene.map

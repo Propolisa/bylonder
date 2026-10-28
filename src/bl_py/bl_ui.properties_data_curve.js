@@ -375,7 +375,8 @@ export var DATA_PT_curve_animation =  __class__ ('DATA_PT_curve_animation', [Cur
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: curve.bl_rna.py_name}));
 		self.draw_action_and_slot_selector (context, col, curve);
-		if (shape_keyscurve.shape_keys) {
+		var shape_keys = curve.shape_keys;
+		if (shape_keys) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shape Keys'}));
 			self.draw_action_and_slot_selector (context, col, shape_keys);
@@ -702,3 +703,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_curve.map
+export {Curve, Panel, PropertiesAnimationMixin, PropertyPanel, SurfaceCurve, TextCurve, register_class};

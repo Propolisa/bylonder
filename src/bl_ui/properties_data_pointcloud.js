@@ -252,5 +252,6 @@ export var DATA_PT_custom_props_pointcloud =  __class__ ('DATA_PT_custom_props_p
 	_property_type: (__t__ (hasattr (bpy.types, 'PointCloud')) ? bpy.types.PointCloud : null)
 });
 export var classes = tuple ([DATA_PT_context_pointcloud, DATA_PT_pointcloud_attributes, DATA_PT_custom_props_pointcloud, POINTCLOUD_MT_add_attribute, POINTCLOUD_MT_attribute_context_menu, POINTCLOUD_UL_attributes]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_pointcloud', 'POINTCLOUD_MT_attribute_context_menu', 'POINTCLOUD_MT_add_attribute', 'POINTCLOUD_UL_attributes', 'DATA_PT_pointcloud_attributes', 'DATA_PT_custom_props_pointcloud'];
 
 //# sourceMappingURL=properties_data_pointcloud.map

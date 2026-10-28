@@ -89,14 +89,6 @@ class Texture:
     pass
 
 
-class Context:
-    pass
-
-
-class WindowManager:
-    pass
-
-
 class Theme:
     pass
 
@@ -105,12 +97,19 @@ class AssetShelf:
     pass
 
 
-class UILayout:
-    pass
-
-
 class Operator:
     pass
+
+
+# The draw callbacks a tool adds for its cursor (Select Circle's circle); Bylonder's views draw tool cursors themselves.
+class WindowManager:
+    @staticmethod
+    def draw_cursor_add(callback, args, space_type, region_type):
+        return None
+
+    @staticmethod
+    def draw_cursor_remove(handle):
+        pass
 
 
 # Node types by idname (bpy._rna.nodes): their names and enums, which the Add menus read.
@@ -118,3 +117,16 @@ class Node:
     @classmethod
     def bl_rna_get_subclass(cls, idname):
         return _rna.nodes.get(idname)
+
+
+# Types the scripts name in annotations only.
+class Context:
+    pass
+
+
+class UILayout:
+    pass
+
+
+class ToolSettings:
+    bl_rna = _rna.ToolSettings

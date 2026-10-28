@@ -58,6 +58,8 @@ const SETUP = {
   "object-tab": (app) => propertiesTab(app, "Cube", "Object"),
   "light-data": (app) => propertiesTab(app, "Light", "Data"),
   "camera-data": (app) => propertiesTab(app, "Camera", "Data"),
+  toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
+  "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
 };
 
 // The object selected alone, and the Properties editor on a tab.

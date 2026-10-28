@@ -2,7 +2,7 @@
 import * as __self__ from './bl_keymap_utils.io.js';
 (globalThis.__py_modules ??= {})['bl_keymap_utils.io'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_keymap_utils.io';
 export var _merged = function () {
 	if (arguments.length) {
@@ -195,15 +195,18 @@ export var kmi_args_as_data = function (kmi) {
 	}
 	else {
 		for (var attr of tuple (['shift', 'ctrl', 'alt', 'oskey', 'hyper'])) {
-			if (modgetattr (kmi, attr)) {
+			var mod = getattr (kmi, attr);
+			if (mod) {
 				s.append (''.join (['"', _formatted (attr, '', ''.join (['s'])), '": ']) + (mod == -(1) ? '-1' : 'True'));
 			}
 		}
 	}
-	if (modkmi.key_modifier && mod != 'NONE') {
+	var mod = kmi.key_modifier;
+	if (mod && mod != 'NONE') {
 		s.append (''.join (['"key_modifier": \'', _formatted (mod, '', ''.join (['s'])), "'"]));
 	}
-	if (directionkmi.direction && direction != 'ANY') {
+	var direction = kmi.direction;
+	if (direction && direction != 'ANY') {
 		s.append (''.join (['"direction": \'', _formatted (direction, '', ''.join (['s'])), "'"]));
 	}
 	if (kmi.repeat) {
@@ -563,7 +566,7 @@ export var keyconfig_import_from_data = function (py_name, keyconfig_data) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'keyconfig_data': var keyconfig_data = __allkwargs0__ [__attrib0__]; break;
 					case 'keyconfig_version': var keyconfig_version = __allkwargs0__ [__attrib0__]; break;
 				}
@@ -626,3 +629,4 @@ export var keyconfig_merge = function (kc1, kc2) {
 };
 
 //# sourceMappingURL=bl_keymap_utils.io.map
+export {_globals, _import, _lazy, _member, _module};

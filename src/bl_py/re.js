@@ -443,7 +443,7 @@ export var Match =  __class__ ('Match', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+						case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -475,7 +475,7 @@ export var Match =  __class__ ('Match', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+						case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}

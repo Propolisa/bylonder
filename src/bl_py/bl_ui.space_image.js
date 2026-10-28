@@ -9,7 +9,7 @@ import {ToolActivePanelHelper} from './bl_ui.space_toolsystem_common.js';
 import {AnnotationDataPanel} from './bl_ui.properties_grease_pencil_common.js';
 import {BrushAssetShelf, BrushSelectPanel, ClonePanel, ColorPalettePanel, DisplayPanel, FalloffPanel, SmoothStrokePanel, StrokePanel, TextureMaskPanel, UnifiedPaintPanel, brush_basic_texpaint_settings, brush_settings, brush_settings_advanced, brush_texture_settings, draw_color_settings} from './bl_ui.properties_paint_common.js';
 import {AssetShelf, Header, Menu, Panel, UIList} from './_bpy.types.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_image';
 export var ImagePaintPanel =  __class__ ('ImagePaintPanel', [UnifiedPaintPanel], {
 	__module__: __name__,
@@ -2454,7 +2454,18 @@ export var IMAGE_PT_overlay_render_guides =  __class__ ('IMAGE_PT_overlay_render
 		else {
 		}
 		var sima = context.space_data;
-		return __in__ (sima.mode, new set (['MASK', 'VIEW'])) && imagesima.image !== null && image.source == 'VIEWER' && image.py_metatype == 'COMPOSITING';
+		var _walrus1 = __in__ (sima.mode, new set (['MASK', 'VIEW']));
+		if (_walrus1) {
+			var image = sima.image;
+			var _walrus1 = image !== null;
+		}
+		if (_walrus1) {
+			var _walrus1 = image.source == 'VIEWER';
+		}
+		if (_walrus1) {
+			var _walrus1 = image.py_metatype == 'COMPOSITING';
+		}
+		return _walrus1;
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -2548,3 +2559,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_image.map
+export {AnnotationDataPanel, AssetShelf, BrushAssetShelf, BrushSelectPanel, ClonePanel, ColorPalettePanel, DisplayPanel, FalloffPanel, Header, MASK_PT_animation, MASK_PT_display, MASK_PT_layers, MASK_PT_mask, MASK_PT_point, MASK_PT_spline, Menu, Panel, SmoothStrokePanel, StrokePanel, TextureMaskPanel, ToolActivePanelHelper, UIList, UnifiedPaintPanel, _globals, _import, _lazy, _member, _module, brush_basic_texpaint_settings, brush_settings, brush_settings_advanced, brush_texture_settings, draw_color_settings, i18n_contexts, iface_, register_class};

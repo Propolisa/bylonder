@@ -8,7 +8,7 @@ import {BoolProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.geometry_nodes';
 export var _merged = function () {
 	if (arguments.length) {
@@ -127,7 +127,7 @@ export var add_empty_geometry_node_group = function (py_name, add_geometry_input
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'add_geometry_input': var add_geometry_input = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
@@ -159,7 +159,7 @@ export var geometry_node_group_empty_new = function (py_name, add_geometry_input
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'add_geometry_input': var add_geometry_input = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
@@ -183,7 +183,7 @@ export var geometry_node_group_empty_modifier_new = function (py_name, add_geome
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'add_geometry_input': var add_geometry_input = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
@@ -373,7 +373,7 @@ export var get_enabled_socket_with_name = function (sockets, py_name) {
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
 					case 'sockets': var sockets = __allkwargs0__ [__attrib0__]; break;
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -507,7 +507,6 @@ export var create_wrapper_group = function (operator, modifier, old_group) {
 };
 export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'use_selected_objects': BoolProperty (__kwargtrans__ ({py_name: 'Selected Objects', description: 'Affect all selected objects instead of just the active object'}))}),
 	bl_idname: 'object.geometry_nodes_move_to_nodes',
 	bl_label: 'Move to Nodes',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -593,6 +592,7 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 		return new set (['FINISHED']);
 	});}
 });
+MoveModifierToNodes.__annotations__ = dict ({'use_selected_objects': BoolProperty (__kwargtrans__ ({py_name: 'Selected Objects', description: 'Affect all selected objects instead of just the active object'}))});
 export var NewGeometryNodesModifier =  __class__ ('NewGeometryNodesModifier', [Operator], {
 	__module__: __name__,
 	bl_idname: 'node.new_geometry_nodes_modifier',
@@ -790,3 +790,4 @@ export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 export var classes = tuple ([NewGeometryNodesModifier, NewGeometryNodeTreeAssign, NewGeometryNodeGroupTool, MoveModifierToNodes]);
 
 //# sourceMappingURL=bl_operators.geometry_nodes.map
+export {BoolProperty, Operator, _globals, _import, _lazy, _member, _module, data_};

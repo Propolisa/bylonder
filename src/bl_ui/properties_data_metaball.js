@@ -189,5 +189,6 @@ export var DATA_PT_custom_props_metaball =  __class__ ('DATA_PT_custom_props_met
 	_property_type: bpy.types.MetaBall
 });
 export var classes = tuple ([DATA_PT_context_metaball, DATA_PT_metaball, DATA_PT_mball_texture_space, DATA_PT_metaball_element, DATA_PT_metaball_animation, DATA_PT_custom_props_metaball]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_metaball', 'DATA_PT_metaball', 'DATA_PT_mball_texture_space', 'DATA_PT_metaball_element', 'DATA_PT_metaball_animation', 'DATA_PT_custom_props_metaball'];
 
 //# sourceMappingURL=properties_data_metaball.map

@@ -836,6 +836,7 @@ export var STRIP_PT_source =  __class__ ('STRIP_PT_source', [StripButtonsPanel, 
 				py_split.alignment = 'LEFT';
 				var channel_enum_items = sound.bl_rna.properties ['channels'].enum_items;
 				py_split.label (__kwargtrans__ ({text: channel_enum_items [channel_enum_items.find (sound.channels)].py_name}));
+				// pass;
 			}
 		}
 		else {
@@ -1597,5 +1598,6 @@ export var STRIP_PT_custom_props =  __class__ ('STRIP_PT_custom_props', [StripBu
 	_property_type: tuple ([bpy.types.Strip])
 });
 export var classes = tuple ([STRIP_PT_color_tag_picker, STRIP_PT_strip, STRIP_PT_effect, STRIP_PT_scene, STRIP_PT_scene_sound, STRIP_PT_mask, STRIP_PT_effect_text_style, STRIP_PT_effect_text_style_presets, STRIP_PT_effect_text_outline, STRIP_PT_effect_text_shadow, STRIP_PT_effect_text_box, STRIP_PT_effect_text_layout, STRIP_PT_movie_clip, STRIP_PT_adjust_comp, STRIP_PT_adjust_transform, STRIP_PT_adjust_crop, STRIP_PT_adjust_video, STRIP_PT_adjust_color, STRIP_PT_adjust_sound, STRIP_PT_time, STRIP_PT_source, STRIP_PT_custom_props]);
+export var _classes_in_order = ['StripButtonsPanel', 'StripColorTagPicker', 'STRIP_PT_effect_text_style_presets', 'STRIP_PT_color_tag_picker', 'STRIP_PT_strip', 'STRIP_PT_adjust_crop', 'STRIP_PT_effect', 'STRIP_PT_effect_text_layout', 'STRIP_PT_effect_text_style', 'STRIP_PT_effect_text_outline', 'STRIP_PT_effect_text_shadow', 'STRIP_PT_effect_text_box', 'STRIP_PT_source', 'STRIP_PT_movie_clip', 'STRIP_PT_scene', 'STRIP_PT_scene_sound', 'STRIP_PT_mask', 'STRIP_PT_time', 'STRIP_PT_adjust_sound', 'STRIP_PT_adjust_comp', 'STRIP_PT_adjust_transform', 'STRIP_PT_adjust_video', 'STRIP_PT_adjust_color', 'STRIP_PT_custom_props'];
 
 //# sourceMappingURL=properties_strip.map

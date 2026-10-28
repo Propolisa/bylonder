@@ -111,7 +111,8 @@ export var WORLD_OT_convert_volume_to_mesh =  __class__ ('WORLD_OT_convert_volum
 		}
 		else {
 		}
-		if (worldgetattr (context, 'world', null)) {
+		var world = getattr (context, 'world', null);
+		if (world) {
 			return world;
 		}
 		return context.scene.world;

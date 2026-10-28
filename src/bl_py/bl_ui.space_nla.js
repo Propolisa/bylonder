@@ -7,7 +7,7 @@ import {playback_controls} from './bl_ui.space_time.js';
 import {DopesheetActionPanelBase, DopesheetFilterPopoverBase, dopesheet_filter} from './bl_ui.space_dopesheet.js';
 import {contexts as i18n_contexts} from './_bpy.app.translations.js';
 import {Header, Menu, Panel} from './_bpy.types.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_nla';
 export var NLA_HT_header =  __class__ ('NLA_HT_header', [Header], {
 	__module__: __name__,
@@ -606,3 +606,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_nla.map
+export {DopesheetActionPanelBase, DopesheetFilterPopoverBase, Header, Menu, Panel, _globals, _import, _lazy, _member, _module, dopesheet_filter, i18n_contexts, playback_controls, register_class};

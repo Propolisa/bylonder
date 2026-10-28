@@ -7,7 +7,7 @@ import {BoolProperty, EnumProperty} from './_bpy.props.js';
 import {FileHandler, Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.view3d';
 export var _merged = function () {
 	if (arguments.length) {
@@ -197,7 +197,6 @@ export var VIEW3D_OT_edit_mesh_extrude_individual_move =  __class__ ('VIEW3D_OT_
 });
 export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_extrude_move', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'dissolve_and_intersect': BoolProperty (__kwargtrans__ ({py_name: 'Dissolve and Intersect', py_default: false, description: 'Dissolves adjacent faces and intersects new geometry'}))}),
 	bl_label: 'Extrude and Move on Normals',
 	bl_idname: 'view3d.edit_mesh_extrude_move_normal',
 	get poll () {return __getcm__ (this, function (cls, context) {
@@ -297,6 +296,7 @@ export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_e
 		return self.execute (context);
 	});}
 });
+VIEW3D_OT_edit_mesh_extrude_move.__annotations__ = dict ({'dissolve_and_intersect': BoolProperty (__kwargtrans__ ({py_name: 'Dissolve and Intersect', py_default: false, description: 'Dissolves adjacent faces and intersects new geometry'}))});
 export var VIEW3D_OT_edit_mesh_extrude_shrink_fatten =  __class__ ('VIEW3D_OT_edit_mesh_extrude_shrink_fatten', [Operator], {
 	__module__: __name__,
 	bl_label: 'Extrude and Move on Individual Normals',
@@ -418,7 +418,6 @@ export var VIEW3D_OT_edit_mesh_extrude_manifold_normal =  __class__ ('VIEW3D_OT_
 });
 export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizmo_set', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', py_default: false})), 'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TRANSLATE', 'Move', '']), tuple (['ROTATE', 'Rotate', '']), tuple (['SCALE', 'Scale', ''])]), options: new set (['ENUM_FLAG'])}))}),
 	bl_label: 'Transform Gizmo Set',
 	bl_options: new set (['REGISTER', 'UNDO']),
 	bl_idname: 'view3d.transform_gizmo_set',
@@ -501,6 +500,7 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 		return self.execute (context);
 	});}
 });
+VIEW3D_OT_transform_gizmo_set.__annotations__ = dict ({'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', py_default: false})), 'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TRANSLATE', 'Move', '']), tuple (['ROTATE', 'Rotate', '']), tuple (['SCALE', 'Scale', ''])]), options: new set (['ENUM_FLAG'])}))});
 export var VIEW3D_FH_empty_image =  __class__ ('VIEW3D_FH_empty_image', [FileHandler], {
 	__module__: __name__,
 	bl_idname: 'VIEW3D_FH_empty_image',
@@ -584,3 +584,4 @@ export var VIEW3D_FH_vdb_volume =  __class__ ('VIEW3D_FH_vdb_volume', [FileHandl
 export var classes = tuple ([VIEW3D_OT_edit_mesh_extrude_individual_move, VIEW3D_OT_edit_mesh_extrude_move, VIEW3D_OT_edit_mesh_extrude_shrink_fatten, VIEW3D_OT_edit_mesh_extrude_manifold_normal, VIEW3D_OT_transform_gizmo_set, VIEW3D_FH_camera_background_image, VIEW3D_FH_empty_image, VIEW3D_FH_vdb_volume]);
 
 //# sourceMappingURL=bl_operators.view3d.map
+export {BoolProperty, EnumProperty, FileHandler, Operator, _globals, _import, _lazy, _member, _module};

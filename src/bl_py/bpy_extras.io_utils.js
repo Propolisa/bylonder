@@ -7,7 +7,7 @@ import {pgettext_data as data_, contexts as i18n_contexts, pgettext_iface as ifa
 import {BoolProperty, EnumProperty, StringProperty} from './_bpy.props.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy_extras.io_utils';
 export var __all__ = tuple (['ExportHelper', 'ImportHelper', 'orientation_helper', 'axis_conversion', 'axis_conversion_ensure', 'create_derived_objects', 'poll_file_object_drop', 'unpack_list', 'unpack_face_list', 'path_reference', 'path_reference_copy', 'path_reference_mode', 'unique_name']);
 export var _check_axis_conversion = function (op) {
@@ -31,7 +31,6 @@ export var _check_axis_conversion = function (op) {
 };
 export var ExportHelper =  __class__ ('ExportHelper', [object], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({py_name: 'File Path', description: 'Filepath used for exporting the file', maxlen: 1024, subtype: 'FILE_PATH'})), 'check_existing': BoolProperty (__kwargtrans__ ({py_name: 'Check Existing', description: 'Check and warn on overwriting existing files', py_default: true, options: new set (['HIDDEN'])}))}),
 	check_extension: true,
 	get invoke () {return __get__ (this, function (self, context, event) {
 		if (arguments.length) {
@@ -97,9 +96,9 @@ export var ExportHelper =  __class__ ('ExportHelper', [object], {
 		return change_ext || change_axis;
 	});}
 });
+ExportHelper.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({py_name: 'File Path', description: 'Filepath used for exporting the file', maxlen: 1024, subtype: 'FILE_PATH'})), 'check_existing': BoolProperty (__kwargtrans__ ({py_name: 'Check Existing', description: 'Check and warn on overwriting existing files', py_default: true, options: new set (['HIDDEN'])}))});
 export var ImportHelper =  __class__ ('ImportHelper', [object], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({py_name: 'File Path', description: 'Filepath used for importing the file', maxlen: 1024, subtype: 'FILE_PATH', options: new set (['SKIP_PRESET', 'HIDDEN'])}))}),
 	get invoke () {return __get__ (this, function (self, context, event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -172,6 +171,7 @@ export var ImportHelper =  __class__ ('ImportHelper', [object], {
 		return _check_axis_conversion (self);
 	});}
 });
+ImportHelper.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({py_name: 'File Path', description: 'Filepath used for importing the file', maxlen: 1024, subtype: 'FILE_PATH', options: new set (['SKIP_PRESET', 'HIDDEN'])}))});
 export var orientation_helper = function (axis_forward, axis_up) {
 	if (typeof axis_forward == 'undefined' || (axis_forward != null && axis_forward.hasOwnProperty ("__kwargtrans__"))) {;
 		var axis_forward = 'Y';
@@ -631,7 +631,7 @@ export var unique_name = function (key, py_name, name_dict, name_max, clean_func
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
 					case 'key': var key = __allkwargs0__ [__attrib0__]; break;
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'name_dict': var name_dict = __allkwargs0__ [__attrib0__]; break;
 					case 'name_max': var name_max = __allkwargs0__ [__attrib0__]; break;
 					case 'clean_func': var clean_func = __allkwargs0__ [__attrib0__]; break;
@@ -669,3 +669,4 @@ export var unique_name = function (key, py_name, name_dict, name_max, clean_func
 };
 
 //# sourceMappingURL=bpy_extras.io_utils.map
+export {BoolProperty, EnumProperty, StringProperty, _globals, _import, _lazy, _member, _module, data_, i18n_contexts, iface_};

@@ -755,5 +755,6 @@ export var MATERIAL_PT_animation =  __class__ ('MATERIAL_PT_animation', [Materia
 	});}
 });
 export var classes = tuple ([MATERIAL_MT_context_menu, MATERIAL_UL_matslots, MATERIAL_PT_preview, EEVEE_MATERIAL_PT_context_material, EEVEE_MATERIAL_PT_surface, EEVEE_MATERIAL_PT_volume, EEVEE_MATERIAL_PT_displacement, EEVEE_MATERIAL_PT_thickness, EEVEE_MATERIAL_PT_settings, EEVEE_MATERIAL_PT_settings_surface, EEVEE_MATERIAL_PT_settings_volume, MATERIAL_PT_lineart, MATERIAL_PT_viewport, EEVEE_MATERIAL_PT_viewport_settings, MATERIAL_PT_animation, MATERIAL_PT_custom_props]);
+export var _classes_in_order = ['MATERIAL_MT_context_menu', 'MATERIAL_UL_matslots', 'MaterialButtonsPanel', 'MATERIAL_PT_preview', 'MATERIAL_PT_custom_props', 'EEVEE_MATERIAL_PT_context_material', 'EEVEE_MATERIAL_PT_surface', 'EEVEE_MATERIAL_PT_volume', 'EEVEE_MATERIAL_PT_displacement', 'EEVEE_MATERIAL_PT_thickness', 'EEVEE_MATERIAL_PT_viewport_settings', 'EEVEE_MATERIAL_PT_settings', 'EEVEE_MATERIAL_PT_settings_surface', 'EEVEE_MATERIAL_PT_settings_volume', 'MATERIAL_PT_viewport', 'MATERIAL_PT_lineart', 'MATERIAL_PT_animation'];
 
 //# sourceMappingURL=properties_material.map

@@ -978,5 +978,6 @@ export var DATA_PT_vertex_colors =  __class__ ('DATA_PT_vertex_colors', [MeshBut
 	});}
 });
 export var classes = tuple ([MESH_MT_vertex_group_context_menu, MESH_MT_shape_key_context_menu, MESH_MT_shape_key_tree_context_menu, MESH_MT_color_attribute_context_menu, MESH_MT_attribute_context_menu, MESH_UL_vgroups, MESH_UL_uvmaps, MESH_UL_attributes, DATA_PT_context_mesh, DATA_PT_vertex_groups, DATA_PT_shape_keys, DATA_PT_uv_texture, DATA_PT_vertex_colors, DATA_PT_mesh_attributes, DATA_PT_texture_space, DATA_PT_remesh, DATA_PT_customdata, DATA_PT_mesh_animation, DATA_PT_custom_props_mesh, MESH_UL_color_attributes, MESH_UL_color_attributes_selector]);
+export var _classes_in_order = ['MESH_MT_vertex_group_context_menu', 'MESH_MT_shape_key_context_menu', 'MESH_MT_shape_key_tree_context_menu', 'MESH_MT_color_attribute_context_menu', 'MESH_MT_attribute_context_menu', 'MESH_UL_vgroups', 'MESH_UL_uvmaps', 'MeshButtonsPanel', 'DATA_PT_context_mesh', 'DATA_PT_texture_space', 'DATA_PT_vertex_groups', 'DATA_PT_shape_keys', 'DATA_PT_uv_texture', 'DATA_PT_remesh', 'DATA_PT_customdata', 'DATA_PT_mesh_animation', 'DATA_PT_custom_props_mesh', 'MESH_UL_attributes', 'DATA_PT_mesh_attributes', 'ColorAttributesListBase', 'MESH_UL_color_attributes', 'MESH_UL_color_attributes_selector', 'DATA_PT_vertex_colors'];
 
 //# sourceMappingURL=properties_data_mesh.map

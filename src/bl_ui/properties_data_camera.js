@@ -878,5 +878,6 @@ export var DATA_PT_custom_props_camera =  __class__ ('DATA_PT_custom_props_camer
 	_property_type: bpy.types.Camera
 });
 export var classes = tuple ([CAMERA_PT_presets, CAMERA_PT_safe_areas_presets, DATA_PT_context_camera, DATA_PT_lens, DATA_PT_camera_dof, DATA_PT_camera_dof_aperture, DATA_PT_camera, DATA_PT_camera_stereoscopy, DATA_PT_camera_safe_areas, DATA_PT_camera_safe_areas_center_cut, DATA_PT_camera_background_image, DATA_PT_camera_display, DATA_PT_camera_display_composition_guides, DATA_PT_camera_animation, DATA_PT_custom_props_camera]);
+export var _classes_in_order = ['CameraButtonsPanel', 'CAMERA_PT_presets', 'CAMERA_PT_safe_areas_presets', 'DATA_PT_context_camera', 'DATA_PT_lens', 'DATA_PT_camera_stereoscopy', 'DATA_PT_camera', 'DATA_PT_camera_dof', 'DATA_PT_camera_dof_aperture', 'DATA_PT_camera_background_image', 'DATA_PT_camera_display', 'DATA_PT_camera_display_composition_guides', 'DATA_PT_camera_safe_areas', 'DATA_PT_camera_safe_areas_center_cut', 'DATA_PT_camera_animation', 'DATA_PT_custom_props_camera'];
 
 //# sourceMappingURL=properties_data_camera.map

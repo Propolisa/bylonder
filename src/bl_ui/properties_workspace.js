@@ -87,8 +87,10 @@ export var WORKSPACE_PT_addons =  __class__ ('WORKSPACE_PT_addons', [WorkSpaceBu
 		WORKSPACE_PT_addons.addon_map = (function () {
 			var __accu0__ = [];
 			for (var mod of list (addon_utils.modules ())) {
-				if (__t__ (!__in__ (module_namemod.__name__, addon_utils._addons_hidden_core))) {
-					__accu0__.append ([module_name, mod]);
+				for (var module_name of [mod.__name__]) {
+					if (__t__ (!__in__ (module_name, addon_utils._addons_hidden_core))) {
+						__accu0__.append ([module_name, mod]);
+					}
 				}
 			}
 			return dict (__accu0__);
@@ -288,5 +290,7 @@ export var WORKSPACE_PT_custom_props =  __class__ ('WORKSPACE_PT_custom_props', 
 	_property_type: bpy.types.WorkSpace
 });
 export var classes = tuple ([WORKSPACE_UL_addons_items, WORKSPACE_PT_main, WORKSPACE_PT_addons, WORKSPACE_PT_custom_props]);
+bpy.types.WorkSpace.active_addon = bpy.props.IntProperty (__kwargtrans__ ({py_name: 'Active Add-on', description: 'Active Add-on in the Workspace Add-ons filter'}));
+export var _classes_in_order = ['WorkSpaceButtonsPanel', 'WORKSPACE_PT_main', 'WORKSPACE_PT_addons', 'WORKSPACE_UL_addons_items', 'WORKSPACE_PT_custom_props'];
 
 //# sourceMappingURL=properties_workspace.map

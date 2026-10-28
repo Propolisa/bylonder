@@ -10,7 +10,6 @@ __nest__ (bpy, '', __module_bpy__);
 var __name__ = 'bl_operators.grease_pencil';
 export var GREASE_PENCIL_OT_relative_layer_mask_add =  __class__ ('GREASE_PENCIL_OT_relative_layer_mask_add', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'mode': EnumProperty (__kwargtrans__ ({py_name: 'Mode', py_items: tuple ([tuple (['ABOVE', 'Above', '']), tuple (['BELOW', 'Below', ''])]), description: 'Which relative layer (above or below) to use as a mask', py_default: 'ABOVE'}))}),
 	bl_idname: 'grease_pencil.relative_layer_mask_add',
 	bl_label: 'Mask with Layer Above/Below',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -29,7 +28,8 @@ export var GREASE_PENCIL_OT_relative_layer_mask_add =  __class__ ('GREASE_PENCIL
 		}
 		else {
 		}
-		return objcontext.active_object !== null && obj.is_editable && obj.py_metatype == 'GREASEPENCIL' && obj.data.layers.active !== null && obj.data.is_editable;
+		var obj = context.active_object;
+		return obj !== null && obj.is_editable && obj.py_metatype == 'GREASEPENCIL' && obj.data.layers.active !== null && obj.data.is_editable;
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -67,6 +67,8 @@ export var GREASE_PENCIL_OT_relative_layer_mask_add =  __class__ ('GREASE_PENCIL
 		return new set (['FINISHED']);
 	});}
 });
+GREASE_PENCIL_OT_relative_layer_mask_add.__annotations__ = dict ({'mode': EnumProperty (__kwargtrans__ ({py_name: 'Mode', py_items: tuple ([tuple (['ABOVE', 'Above', '']), tuple (['BELOW', 'Below', ''])]), description: 'Which relative layer (above or below) to use as a mask', py_default: 'ABOVE'}))});
 export var classes = tuple ([GREASE_PENCIL_OT_relative_layer_mask_add]);
 
 //# sourceMappingURL=bl_operators.grease_pencil.map
+export {EnumProperty, Operator};

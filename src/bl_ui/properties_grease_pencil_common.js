@@ -965,5 +965,6 @@ export var GREASE_PENCIL_MT_stroke_simplify =  __class__ ('GREASE_PENCIL_MT_stro
 	});}
 });
 export var classes = tuple ([GPENCIL_UL_annotation_layer, GREASE_PENCIL_MT_move_to_layer, GREASE_PENCIL_MT_move_to_layer_SEARCH, GREASE_PENCIL_MT_layer_group, GREASE_PENCIL_MT_layer_active, GREASE_PENCIL_MT_snap, GREASE_PENCIL_MT_snap_pie, GREASE_PENCIL_MT_draw_delete, GREASE_PENCIL_MT_stroke_simplify]);
+export var _classes_in_order = ['AnnotationDrawingToolsPanel', 'GreasePencilSculptAdvancedPanel', 'GreasePencilDisplayPanel', 'GreasePencilBrushFalloff', 'GREASE_PENCIL_MT_move_to_layer', 'GREASE_PENCIL_MT_layer_group', 'GREASE_PENCIL_MT_move_to_layer_SEARCH', 'GREASE_PENCIL_MT_layer_active', 'GPENCIL_UL_annotation_layer', 'AnnotationDataPanel', 'AnnotationOnionSkin', 'GreasePencilMaterialsPanel', 'GreasePencilSimplifyPanel', 'GREASE_PENCIL_MT_snap', 'GREASE_PENCIL_MT_snap_pie', 'GREASE_PENCIL_MT_draw_delete', 'GREASE_PENCIL_MT_stroke_simplify'];
 
 //# sourceMappingURL=properties_grease_pencil_common.map

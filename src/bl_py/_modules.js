@@ -51,5 +51,53 @@ export var _lazy = function (module_id) {
 	}
 	return new Proxy({}, {get: (target, key) => globalThis.__py_modules[module_id][key], has: (target, key) => key in globalThis.__py_modules[module_id]})
 };
+export var _import = function (py_name, globals, locals, fromlist, level) {
+	if (typeof globals == 'undefined' || (globals != null && globals.hasOwnProperty ("__kwargtrans__"))) {;
+		var globals = null;
+	};
+	if (typeof locals == 'undefined' || (locals != null && locals.hasOwnProperty ("__kwargtrans__"))) {;
+		var locals = null;
+	};
+	if (typeof fromlist == 'undefined' || (fromlist != null && fromlist.hasOwnProperty ("__kwargtrans__"))) {;
+		var fromlist = tuple ([]);
+	};
+	if (typeof level == 'undefined' || (level != null && level.hasOwnProperty ("__kwargtrans__"))) {;
+		var level = 0;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'globals': var globals = __allkwargs0__ [__attrib0__]; break;
+					case 'locals': var locals = __allkwargs0__ [__attrib0__]; break;
+					case 'fromlist': var fromlist = __allkwargs0__ [__attrib0__]; break;
+					case 'level': var level = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return _lazy (py_name);
+};
+export var _globals = function (module_id) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'module_id': var module_id = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return new Proxy({}, {get: (target, key) => { const own = globalThis.__py_modules[module_id]; return own && key in own ? own[key] : _lazy(module_id + "." + String(key)); }})
+};
 
 //# sourceMappingURL=_modules.map

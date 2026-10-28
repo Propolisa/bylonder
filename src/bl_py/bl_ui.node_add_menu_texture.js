@@ -343,3 +343,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.node_add_menu_texture.map
+export {Menu, i18n_contexts, register_class};

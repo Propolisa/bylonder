@@ -7,7 +7,7 @@ import {KeyingSetInfo} from './_bpy.types.js';
 import * as keyingsets_utils from './_keyingsets_utils.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'keyingsets_builtins';
 export var ANIM_KS_LOCATION_ID = 'Location';
 export var ANIM_KS_ROTATION_ID = 'Rotation';
@@ -826,3 +826,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=keyingsets_builtins.map
+export {KeyingSetInfo, _globals, _import, _lazy, _member, _module};

@@ -9,11 +9,45 @@ import * as types from './_bpy.types.js';
 import * as props from './_bpy.props.js';
 import * as msgbus from './_bpy.msgbus.js';
 import * as data from './_bpy.data.js';
-import * as context from './_bpy.context.js';
 import * as app from './_bpy.app.js';
-export {msgbus, ops, props, types, _utils_units, data, app, context, _utils_previews};
+export {msgbus, ops, props, types, _utils_units, data, app, _utils_previews};
 var __name__ = '_bpy';
 export var registered = dict ({});
+export var _contexts = [dict ({'preferences': dict ({'filepaths': dict ({'script_directories': []}), 'addons': dict ({}), 'view': dict ({}), 'experimental': dict ({})})})];
+export var context = null;
+context = new Proxy({}, {
+    get: (target, key) => _contexts.at(-1)[key] ?? null,
+    set: (target, key, value) => { _contexts.at(-1)[key] = value; return true; },
+});
+export var _context_push = function (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	_contexts.append (context);
+};
+export var _context_pop = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	_contexts.py_pop ();
+};
 export var register_class = function (cls) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -235,7 +269,7 @@ export var flip_name = function (py_name, strip_digits) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'strip_digits': var strip_digits = __allkwargs0__ [__attrib0__]; break;
 				}
 			}

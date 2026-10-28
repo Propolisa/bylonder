@@ -33,5 +33,6 @@ export var DATA_PT_shader_fx =  __class__ ('DATA_PT_shader_fx', [ShaderFxButtons
 	});}
 });
 export var classes = tuple ([DATA_PT_shader_fx]);
+export var _classes_in_order = ['ShaderFxButtonsPanel', 'DATA_PT_shader_fx'];
 
 //# sourceMappingURL=properties_data_shaderfx.map

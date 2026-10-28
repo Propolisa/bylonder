@@ -609,3 +609,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_lightprobe.map
+export {Panel, PropertiesAnimationMixin, i18n_contexts, register_class};

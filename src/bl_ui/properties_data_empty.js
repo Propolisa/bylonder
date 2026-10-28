@@ -120,5 +120,6 @@ export var DATA_PT_empty_image =  __class__ ('DATA_PT_empty_image', [DataButtons
 	});}
 });
 export var classes = tuple ([DATA_PT_empty, DATA_PT_empty_image]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_empty', 'DATA_PT_empty_image'];
 
 //# sourceMappingURL=properties_data_empty.map

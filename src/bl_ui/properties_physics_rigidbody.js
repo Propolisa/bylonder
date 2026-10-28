@@ -504,5 +504,6 @@ export var PHYSICS_PT_rigid_body_dynamics_deactivation =  __class__ ('PHYSICS_PT
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_rigid_body, PHYSICS_PT_rigid_body_settings, PHYSICS_PT_rigid_body_collisions, PHYSICS_PT_rigid_body_collisions_surface, PHYSICS_PT_rigid_body_collisions_sensitivity, PHYSICS_PT_rigid_body_collisions_collections, PHYSICS_PT_rigid_body_dynamics, PHYSICS_PT_rigid_body_dynamics_deactivation]);
+export var _classes_in_order = ['PHYSICS_PT_rigidbody_panel', 'PHYSICS_PT_rigid_body', 'PHYSICS_PT_rigid_body_settings', 'PHYSICS_PT_rigid_body_collisions', 'PHYSICS_PT_rigid_body_collisions_surface', 'PHYSICS_PT_rigid_body_collisions_sensitivity', 'PHYSICS_PT_rigid_body_collisions_collections', 'PHYSICS_PT_rigid_body_dynamics', 'PHYSICS_PT_rigid_body_dynamics_deactivation'];
 
 //# sourceMappingURL=properties_physics_rigidbody.map

@@ -130,5 +130,6 @@ export var MotionPathButtonsPanel_display =  __class__ ('MotionPathButtonsPanel_
 	});}
 });
 export var classes = tuple ([]);
+export var _classes_in_order = ['MotionPathButtonsPanel', 'MotionPathButtonsPanel_display'];
 
 //# sourceMappingURL=properties_animviz.map

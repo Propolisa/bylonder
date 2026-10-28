@@ -8,7 +8,7 @@ import {BoolProperty, CollectionProperty, EnumProperty, IntProperty, StringPrope
 import {Operator, OperatorFileListElement} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.userpref';
 export var _merged = function () {
 	if (arguments.length) {
@@ -161,8 +161,10 @@ export var _module_filesystem_remove = function (path_base, filenames) {
 	var module_names = (function () {
 		var __accu0__ = [];
 		for (var filename of filenames) {
-			if (filename_onlyos.path.splitext (filename) [0].isidentifier ()) {
-				__accu0__.append (filename_only);
+			for (var filename_only of [os.path.splitext (filename) [0]]) {
+				if (filename_only.isidentifier ()) {
+					__accu0__.append (filename_only);
+				}
 			}
 		}
 		return set (__accu0__);
@@ -225,7 +227,6 @@ export var _wm_wait_cursor = function (value) {
 };
 export var PREFERENCES_OT_keyconfig_activate =  __class__ ('PREFERENCES_OT_keyconfig_activate', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'}))}),
 	bl_idname: 'preferences.keyconfig_activate',
 	bl_label: 'Activate Keyconfig',
 	get execute () {return __get__ (this, function (self, _context) {
@@ -251,6 +252,7 @@ export var PREFERENCES_OT_keyconfig_activate =  __class__ ('PREFERENCES_OT_keyco
 		}
 	});}
 });
+PREFERENCES_OT_keyconfig_activate.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'}))});
 export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.copy_prev',
@@ -432,7 +434,6 @@ export var PREFERENCES_OT_keyconfig_test =  __class__ ('PREFERENCES_OT_keyconfig
 });
 export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconfig_import', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', py_default: 'keymap.py'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'keep_original': BoolProperty (__kwargtrans__ ({py_name: 'Keep Original', description: 'Keep original file after copying to configuration folder', py_default: true}))}),
 	bl_idname: 'preferences.keyconfig_import',
 	bl_label: 'Import Key Configuration...',
 	get _preset_prevent_name_collision () {return __getcm__ (this, function (cls, config_name) {
@@ -532,9 +533,9 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+PREFERENCES_OT_keyconfig_import.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', py_default: 'keymap.py'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'keep_original': BoolProperty (__kwargtrans__ ({py_name: 'Keep Original', description: 'Keep original file after copying to configuration folder', py_default: true}))});
 export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconfig_export', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'all': BoolProperty (__kwargtrans__ ({py_name: 'All Keymaps', py_default: false, description: 'Write all keymaps (not just user modified)'})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', py_default: ''})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])}))}),
 	bl_idname: 'preferences.keyconfig_export',
 	bl_label: 'Export Key Configuration...',
 	get execute () {return __get__ (this, function (self, context) {
@@ -590,9 +591,9 @@ export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconf
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+PREFERENCES_OT_keyconfig_export.__annotations__ = dict ({'all': BoolProperty (__kwargtrans__ ({py_name: 'All Keymaps', py_default: false, description: 'Write all keymaps (not just user modified)'})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', py_default: ''})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_keymap_restore =  __class__ ('PREFERENCES_OT_keymap_restore', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'all': BoolProperty (__kwargtrans__ ({py_name: 'All Keymaps', description: 'Restore all keymaps to default'}))}),
 	bl_idname: 'preferences.keymap_restore',
 	bl_label: 'Restore Key Map(s)',
 	get execute () {return __get__ (this, function (self, context) {
@@ -624,9 +625,9 @@ export var PREFERENCES_OT_keymap_restore =  __class__ ('PREFERENCES_OT_keymap_re
 		return new set (['FINISHED']);
 	});}
 });
+PREFERENCES_OT_keymap_restore.__annotations__ = dict ({'all': BoolProperty (__kwargtrans__ ({py_name: 'All Keymaps', description: 'Restore all keymaps to default'}))});
 export var PREFERENCES_OT_keyitem_restore =  __class__ ('PREFERENCES_OT_keyitem_restore', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'item_id': IntProperty (__kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to restore'}))}),
 	bl_idname: 'preferences.keyitem_restore',
 	bl_label: 'Restore Key Map Item',
 	get poll () {return __getcm__ (this, function (cls, context) {
@@ -671,6 +672,7 @@ export var PREFERENCES_OT_keyitem_restore =  __class__ ('PREFERENCES_OT_keyitem_
 		return new set (['FINISHED']);
 	});}
 });
+PREFERENCES_OT_keyitem_restore.__annotations__ = dict ({'item_id': IntProperty (__kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to restore'}))});
 export var PREFERENCES_OT_keyitem_add =  __class__ ('PREFERENCES_OT_keyitem_add', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.keyitem_add',
@@ -708,7 +710,6 @@ export var PREFERENCES_OT_keyitem_add =  __class__ ('PREFERENCES_OT_keyitem_add'
 });
 export var PREFERENCES_OT_keyitem_remove =  __class__ ('PREFERENCES_OT_keyitem_remove', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'item_id': IntProperty (__kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to remove'}))}),
 	bl_idname: 'preferences.keyitem_remove',
 	bl_label: 'Remove Key Map Item',
 	get poll () {return __getcm__ (this, function (cls, context) {
@@ -750,6 +751,7 @@ export var PREFERENCES_OT_keyitem_remove =  __class__ ('PREFERENCES_OT_keyitem_r
 		return new set (['FINISHED']);
 	});}
 });
+PREFERENCES_OT_keyitem_remove.__annotations__ = dict ({'item_id': IntProperty (__kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to remove'}))});
 export var PREFERENCES_OT_keyconfig_remove =  __class__ ('PREFERENCES_OT_keyconfig_remove', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.keyconfig_remove',
@@ -796,7 +798,6 @@ export var PREFERENCES_OT_keyconfig_remove =  __class__ ('PREFERENCES_OT_keyconf
 });
 export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enable', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to enable'}))}),
 	bl_idname: 'preferences.addon_enable',
 	bl_label: 'Enable Add-on',
 	get execute () {return __get__ (this, function (self, _context) {
@@ -860,9 +861,9 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 		return result;
 	});}
 });
+PREFERENCES_OT_addon_enable.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to enable'}))});
 export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disable', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to disable'}))}),
 	bl_idname: 'preferences.addon_disable',
 	bl_label: 'Disable Add-on',
 	get execute () {return __get__ (this, function (self, _context) {
@@ -915,9 +916,9 @@ export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disa
 		return new set (['FINISHED']);
 	});}
 });
+PREFERENCES_OT_addon_disable.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to disable'}))});
 export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_install', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing theme file if exists', py_default: true})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.xml', options: new set (['HIDDEN'])}))}),
 	bl_idname: 'preferences.theme_install',
 	bl_label: 'Install Theme...',
 	get execute () {return __get__ (this, function (self, _context) {
@@ -987,6 +988,7 @@ export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_inst
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+PREFERENCES_OT_theme_install.__annotations__ = dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing theme file if exists', py_default: true})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.xml', options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_addon_refresh =  __class__ ('PREFERENCES_OT_addon_refresh', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.addon_refresh',
@@ -1013,7 +1015,6 @@ export var PREFERENCES_OT_addon_refresh =  __class__ ('PREFERENCES_OT_addon_refr
 });
 export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_install', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing add-ons with the same ID', py_default: true})), 'enable_on_install': BoolProperty (__kwargtrans__ ({py_name: 'Enable on Install', description: 'Enable after installing', py_default: false})), 'target': EnumProperty (__kwargtrans__ ({py_name: 'Target Path', py_items: _target_path_items})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.py;*.zip', options: new set (['HIDDEN'])}))}),
 	bl_idname: 'preferences.addon_install',
 	bl_label: 'Install Add-on',
 	get _target_path_items () {return __get__ (this, function (_self, context) {
@@ -1231,9 +1232,9 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+PREFERENCES_OT_addon_install.__annotations__ = dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing add-ons with the same ID', py_default: true})), 'enable_on_install': BoolProperty (__kwargtrans__ ({py_name: 'Enable on Install', description: 'Enable after installing', py_default: false})), 'target': EnumProperty (__kwargtrans__ ({py_name: 'Target Path', py_items: PREFERENCES_OT_addon_install._target_path_items})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.py;*.zip', options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remove', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to remove'}))}),
 	bl_idname: 'preferences.addon_remove',
 	bl_label: 'Remove Add-on',
 	get path_from_addon () {return function (module) {
@@ -1357,9 +1358,9 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 		return wm.invoke_props_dialog (self, __kwargtrans__ ({width: 600}));
 	});}
 });
+PREFERENCES_OT_addon_remove.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to remove'}))});
 export var PREFERENCES_OT_addon_expand =  __class__ ('PREFERENCES_OT_addon_expand', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))}),
 	bl_idname: 'preferences.addon_expand',
 	bl_label: '',
 	bl_options: new set (['INTERNAL']),
@@ -1389,9 +1390,9 @@ export var PREFERENCES_OT_addon_expand =  __class__ ('PREFERENCES_OT_addon_expan
 		return new set (['FINISHED']);
 	});}
 });
+PREFERENCES_OT_addon_expand.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))});
 export var PREFERENCES_OT_addon_show =  __class__ ('PREFERENCES_OT_addon_show', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))}),
 	bl_idname: 'preferences.addon_show',
 	bl_label: '',
 	bl_options: new set (['INTERNAL']),
@@ -1434,9 +1435,9 @@ export var PREFERENCES_OT_addon_show =  __class__ ('PREFERENCES_OT_addon_show', 
 		return new set (['FINISHED']);
 	});}
 });
+PREFERENCES_OT_addon_show.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))});
 export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app_template_install', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing template with the same ID', py_default: true})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.zip', options: new set (['HIDDEN'])}))}),
 	bl_idname: 'preferences.app_template_install',
 	bl_label: 'Install Template from File...',
 	get execute () {return __get__ (this, function (self, _context) {
@@ -1548,9 +1549,9 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+PREFERENCES_OT_app_template_install.__annotations__ = dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing template with the same ID', py_default: true})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.zip', options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_studiolight_install =  __class__ ('PREFERENCES_OT_studiolight_install', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'files': CollectionProperty (__kwargtrans__ ({py_name: 'File Path', py_metatype: OperatorFileListElement})), 'directory': StringProperty (__kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.png;*.jpg;*.hdr;*.exr', options: new set (['HIDDEN'])})), 'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['MATCAP', 'MatCap', 'Install custom MatCaps']), tuple (['WORLD', 'World', 'Install custom HDRIs']), tuple (['STUDIO', 'Studio', 'Install custom Studio Lights'])])}))}),
 	bl_idname: 'preferences.studiolight_install',
 	bl_label: 'Install Light',
 	get execute () {return __get__ (this, function (self, context) {
@@ -1616,9 +1617,9 @@ export var PREFERENCES_OT_studiolight_install =  __class__ ('PREFERENCES_OT_stud
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+PREFERENCES_OT_studiolight_install.__annotations__ = dict ({'files': CollectionProperty (__kwargtrans__ ({py_name: 'File Path', py_metatype: OperatorFileListElement})), 'directory': StringProperty (__kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.png;*.jpg;*.hdr;*.exr', options: new set (['HIDDEN'])})), 'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['MATCAP', 'MatCap', 'Install custom MatCaps']), tuple (['WORLD', 'World', 'Install custom HDRIs']), tuple (['STUDIO', 'Studio', 'Install custom Studio Lights'])])}))});
 export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studiolight_new', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filename': StringProperty (__kwargtrans__ ({py_name: 'Name', py_default: 'StudioLight', subtype: 'FILE_NAME'}))}),
 	bl_idname: 'preferences.studiolight_new',
 	bl_label: 'Save Custom Studio Light',
 	ask_override: false,
@@ -1709,9 +1710,9 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 		return wm.invoke_props_dialog (self, __kwargtrans__ ({width: 320}));
 	});}
 });
+PREFERENCES_OT_studiolight_new.__annotations__ = dict ({'filename': StringProperty (__kwargtrans__ ({py_name: 'Name', py_default: 'StudioLight', subtype: 'FILE_NAME'}))});
 export var PREFERENCES_OT_studiolight_uninstall =  __class__ ('PREFERENCES_OT_studiolight_uninstall', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'index': IntProperty ()}),
 	bl_idname: 'preferences.studiolight_uninstall',
 	bl_label: 'Uninstall Studio Light',
 	get execute () {return __get__ (this, function (self, context) {
@@ -1744,9 +1745,9 @@ export var PREFERENCES_OT_studiolight_uninstall =  __class__ ('PREFERENCES_OT_st
 		return new set (['CANCELLED']);
 	});}
 });
+PREFERENCES_OT_studiolight_uninstall.__annotations__ = dict ({'index': IntProperty ()});
 export var PREFERENCES_OT_studiolight_copy_settings =  __class__ ('PREFERENCES_OT_studiolight_copy_settings', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'index': IntProperty ()}),
 	bl_idname: 'preferences.studiolight_copy_settings',
 	bl_label: 'Copy Studio Light Settings',
 	get execute () {return __get__ (this, function (self, context) {
@@ -1782,9 +1783,9 @@ export var PREFERENCES_OT_studiolight_copy_settings =  __class__ ('PREFERENCES_O
 		return new set (['CANCELLED']);
 	});}
 });
+PREFERENCES_OT_studiolight_copy_settings.__annotations__ = dict ({'index': IntProperty ()});
 export var PREFERENCES_OT_script_directory_new =  __class__ ('PREFERENCES_OT_script_directory_new', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'directory': StringProperty (__kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])}))}),
 	bl_idname: 'preferences.script_directory_add',
 	bl_label: 'Add Python Script Directory',
 	get execute () {return __get__ (this, function (self, context) {
@@ -1830,9 +1831,9 @@ export var PREFERENCES_OT_script_directory_new =  __class__ ('PREFERENCES_OT_scr
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+PREFERENCES_OT_script_directory_new.__annotations__ = dict ({'directory': StringProperty (__kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_script_directory_remove =  __class__ ('PREFERENCES_OT_script_directory_remove', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'index': IntProperty (__kwargtrans__ ({py_name: 'Index', description: 'Index of the script directory to remove'}))}),
 	bl_idname: 'preferences.script_directory_remove',
 	bl_label: 'Remove Python Script Directory',
 	get execute () {return __get__ (this, function (self, context) {
@@ -1860,6 +1861,8 @@ export var PREFERENCES_OT_script_directory_remove =  __class__ ('PREFERENCES_OT_
 		return new set (['FINISHED']);
 	});}
 });
+PREFERENCES_OT_script_directory_remove.__annotations__ = dict ({'index': IntProperty (__kwargtrans__ ({py_name: 'Index', description: 'Index of the script directory to remove'}))});
 export var classes = tuple ([PREFERENCES_OT_addon_disable, PREFERENCES_OT_addon_enable, PREFERENCES_OT_addon_expand, PREFERENCES_OT_addon_install, PREFERENCES_OT_addon_refresh, PREFERENCES_OT_addon_remove, PREFERENCES_OT_addon_show, PREFERENCES_OT_app_template_install, PREFERENCES_OT_copy_prev, PREFERENCES_OT_keyconfig_activate, PREFERENCES_OT_keyconfig_export, PREFERENCES_OT_keyconfig_import, PREFERENCES_OT_keyconfig_remove, PREFERENCES_OT_keyconfig_test, PREFERENCES_OT_keyitem_add, PREFERENCES_OT_keyitem_remove, PREFERENCES_OT_keyitem_restore, PREFERENCES_OT_keymap_restore, PREFERENCES_OT_theme_install, PREFERENCES_OT_studiolight_install, PREFERENCES_OT_studiolight_new, PREFERENCES_OT_studiolight_uninstall, PREFERENCES_OT_studiolight_copy_settings, PREFERENCES_OT_script_directory_new, PREFERENCES_OT_script_directory_remove]);
 
 //# sourceMappingURL=bl_operators.userpref.map
+export {BoolProperty, CollectionProperty, EnumProperty, IntProperty, Operator, OperatorFileListElement, StringProperty, _globals, _import, _lazy, _member, _module, iface_, rpt_};

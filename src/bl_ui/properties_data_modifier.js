@@ -519,5 +519,6 @@ export var AddModifierMenu =  __class__ ('AddModifierMenu', [Operator], {
 	});}
 });
 export var classes = tuple ([DATA_PT_modifiers, OBJECT_MT_modifier_add, OBJECT_MT_modifier_add_edit, OBJECT_MT_modifier_add_generate, OBJECT_MT_modifier_add_deform, OBJECT_MT_modifier_add_normals, OBJECT_MT_modifier_add_physics, OBJECT_MT_modifier_add_color, AddModifierMenu]);
+export var _classes_in_order = ['ModifierButtonsPanel', 'ModifierAddMenu', 'DATA_PT_modifiers', 'OBJECT_MT_modifier_add', 'OBJECT_MT_modifier_add_edit', 'OBJECT_MT_modifier_add_generate', 'OBJECT_MT_modifier_add_deform', 'OBJECT_MT_modifier_add_normals', 'OBJECT_MT_modifier_add_physics', 'OBJECT_MT_modifier_add_color', 'AddModifierMenu'];
 
 //# sourceMappingURL=properties_data_modifier.map

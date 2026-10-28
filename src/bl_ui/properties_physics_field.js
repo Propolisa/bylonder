@@ -187,6 +187,7 @@ export var PHYSICS_PT_field_settings =  __class__ ('PHYSICS_PT_field_settings', 
 			col.prop (field, 'use_smoke_density');
 		}
 		else {
+			// pass;
 			basic_force_field_settings_ui (self, field);
 		}
 	});}
@@ -666,5 +667,6 @@ export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_sof
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_field, PHYSICS_PT_field_settings, PHYSICS_PT_field_settings_kink, PHYSICS_PT_field_settings_texture_select, PHYSICS_PT_field_falloff, PHYSICS_PT_field_falloff_angular, PHYSICS_PT_field_falloff_radial, PHYSICS_PT_collision, PHYSICS_PT_collision_particle, PHYSICS_PT_collision_softbody]);
+export var _classes_in_order = ['PhysicButtonsPanel', 'PHYSICS_PT_field', 'PHYSICS_PT_field_settings', 'PHYSICS_PT_field_settings_kink', 'PHYSICS_PT_field_settings_texture_select', 'PHYSICS_PT_field_falloff', 'PHYSICS_PT_field_falloff_angular', 'PHYSICS_PT_field_falloff_radial', 'PHYSICS_PT_collision', 'PHYSICS_PT_collision_particle', 'PHYSICS_PT_collision_softbody'];
 
 //# sourceMappingURL=properties_physics_field.map

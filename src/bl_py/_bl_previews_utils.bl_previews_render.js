@@ -9,7 +9,7 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bl_previews_utils.bl_previews_render';
 export var _merged = function () {
 	if (arguments.length) {
@@ -878,3 +878,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=_bl_previews_utils.bl_previews_render.map
+export {Euler, Matrix, Vector, _globals, _import, _lazy, _member, _module};

@@ -614,3 +614,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_softbody.map
+export {Panel, effector_weights_ui, point_cache_ui, register_class};

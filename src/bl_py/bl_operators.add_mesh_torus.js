@@ -9,7 +9,7 @@ import {BoolProperty, EnumProperty, FloatProperty, IntProperty} from './_bpy.pro
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.add_mesh_torus';
 export var add_torus = function (major_rad, minor_rad, major_seg, minor_seg) {
 	if (arguments.length) {
@@ -127,7 +127,6 @@ export var add_uvs = function (mesh, minor_seg, major_seg) {
 };
 export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectHelper], {
 	__module__: __name__,
-	__annotations__: dict ({'major_segments': IntProperty (__kwargtrans__ ({py_name: 'Major Segments', description: 'Number of segments for the main ring of the torus', min: 3, max: 256, py_default: 48})), 'minor_segments': IntProperty (__kwargtrans__ ({py_name: 'Minor Segments', description: 'Number of segments for the minor ring of the torus', min: 3, max: 256, py_default: 12})), 'mode': EnumProperty (__kwargtrans__ ({py_name: 'Dimensions Mode', py_items: tuple ([tuple (['MAJOR_MINOR', 'Major/Minor', 'Use the major/minor radii for torus dimensions']), tuple (['EXT_INT', 'Exterior/Interior', 'Use the exterior/interior radii for torus dimensions'])]), py_update: AddTorus.mode_update_callback})), 'major_radius': FloatProperty (__kwargtrans__ ({py_name: 'Major Radius', description: 'Radius from the origin to the center of the cross sections', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.0, subtype: 'DISTANCE', unit: 'LENGTH'})), 'minor_radius': FloatProperty (__kwargtrans__ ({py_name: 'Minor Radius', description: "Radius of the torus's cross section", soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_major_rad': FloatProperty (__kwargtrans__ ({py_name: 'Exterior Radius', description: 'Total Exterior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_minor_rad': FloatProperty (__kwargtrans__ ({py_name: 'Interior Radius', description: 'Total Interior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.75, subtype: 'DISTANCE', unit: 'LENGTH'})), 'generate_uvs': BoolProperty (__kwargtrans__ ({py_name: 'Generate UVs', description: 'Generate a default UV map', py_default: true}))}),
 	bl_idname: 'mesh.primitive_torus_add',
 	bl_label: 'Add Torus',
 	bl_options: new set (['REGISTER', 'UNDO', 'PRESET']),
@@ -248,6 +247,8 @@ export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectH
 		return new set (['FINISHED']);
 	});}
 });
+AddTorus.__annotations__ = dict ({'major_segments': IntProperty (__kwargtrans__ ({py_name: 'Major Segments', description: 'Number of segments for the main ring of the torus', min: 3, max: 256, py_default: 48})), 'minor_segments': IntProperty (__kwargtrans__ ({py_name: 'Minor Segments', description: 'Number of segments for the minor ring of the torus', min: 3, max: 256, py_default: 12})), 'mode': EnumProperty (__kwargtrans__ ({py_name: 'Dimensions Mode', py_items: tuple ([tuple (['MAJOR_MINOR', 'Major/Minor', 'Use the major/minor radii for torus dimensions']), tuple (['EXT_INT', 'Exterior/Interior', 'Use the exterior/interior radii for torus dimensions'])]), py_update: AddTorus.mode_update_callback})), 'major_radius': FloatProperty (__kwargtrans__ ({py_name: 'Major Radius', description: 'Radius from the origin to the center of the cross sections', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.0, subtype: 'DISTANCE', unit: 'LENGTH'})), 'minor_radius': FloatProperty (__kwargtrans__ ({py_name: 'Minor Radius', description: "Radius of the torus's cross section", soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_major_rad': FloatProperty (__kwargtrans__ ({py_name: 'Exterior Radius', description: 'Total Exterior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_minor_rad': FloatProperty (__kwargtrans__ ({py_name: 'Interior Radius', description: 'Total Interior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.75, subtype: 'DISTANCE', unit: 'LENGTH'})), 'generate_uvs': BoolProperty (__kwargtrans__ ({py_name: 'Generate UVs', description: 'Generate a default UV map', py_default: true}))});
 export var classes = tuple ([AddTorus]);
 
 //# sourceMappingURL=bl_operators.add_mesh_torus.map
+export {BoolProperty, EnumProperty, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module, data_};

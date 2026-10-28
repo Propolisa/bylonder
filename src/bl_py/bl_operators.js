@@ -6,8 +6,8 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {reload} from './importlib.js';
-import {_lazy, _member, _module} from './_modules.js';
-export {_member, _lazy, reload, _module};
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+export {_lazy, _member, _import, reload, _module, _globals};
 var __name__ = 'bl_operators';
 if (false) {
 	_modules_loaded.__setslice__ (0, null, null, (function () {
@@ -22,8 +22,8 @@ export var _modules = ['add_mesh_torus', 'anim', 'assets', 'bone_selection_sets'
 if (bpy.app.build_options.freestyle) {
 	_modules.append ('freestyle');
 }
-__import__ (__kwargtrans__ ({py_name: __name__, fromlist: _modules}));
-export var _namespace = __all__;
+_import (__kwargtrans__ ({py_name: __name__, fromlist: _modules}));
+export var _namespace = _globals ('bl_operators');
 export var _modules_loaded = (function () {
 	var __accu0__ = [];
 	for (var py_name of _modules) {

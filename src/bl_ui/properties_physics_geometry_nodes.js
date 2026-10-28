@@ -89,5 +89,6 @@ export var PHYSICS_PT_geometry_nodes =  __class__ ('PHYSICS_PT_geometry_nodes', 
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_geometry_nodes]);
+export var _classes_in_order = ['PHYSICS_PT_geometry_nodes'];
 
 //# sourceMappingURL=properties_physics_geometry_nodes.map

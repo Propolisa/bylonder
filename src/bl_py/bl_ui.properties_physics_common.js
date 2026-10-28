@@ -41,8 +41,8 @@ export var physics_add = function (layout, md, py_name, py_metatype, typeicon, t
 				switch (__attrib0__) {
 					case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
 					case 'md': var md = __allkwargs0__ [__attrib0__]; break;
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
-					case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'type': case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
 					case 'typeicon': var typeicon = __allkwargs0__ [__attrib0__]; break;
 					case 'toggles': var toggles = __allkwargs0__ [__attrib0__]; break;
 				}
@@ -74,7 +74,7 @@ export var physics_add_special = function (layout, data, py_name, addop, removeo
 				switch (__attrib0__) {
 					case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
 					case 'data': var data = __allkwargs0__ [__attrib0__]; break;
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'addop': var addop = __allkwargs0__ [__attrib0__]; break;
 					case 'removeop': var removeop = __allkwargs0__ [__attrib0__]; break;
 					case 'typeicon': var typeicon = __allkwargs0__ [__attrib0__]; break;
@@ -415,3 +415,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_common.map
+export {Panel, i18n_contexts, register_class};

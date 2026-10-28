@@ -140,3 +140,4 @@ export var DiskFileHashBackend =  __class__ ('DiskFileHashBackend', [Protocol], 
 });
 
 //# sourceMappingURL=_bpy_internal.disk_file_hash_service.types.map
+export {Callable, Path, Protocol};

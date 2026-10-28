@@ -5,14 +5,14 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import * as utils from './bpy.utils.js';
 import * as path from './bpy.path.js';
 import * as ops from './bpy.ops.js';
+import {context} from './_bpy.js';
 import * as types from './_bpy.types.js';
 import * as props from './_bpy.props.js';
 import * as msgbus from './_bpy.msgbus.js';
 import * as data from './_bpy.data.js';
-import * as context from './_bpy.context.js';
 import * as app from './_bpy.app.js';
-import {_lazy, _member, _module} from './_modules.js';
-export {msgbus, _lazy, _member, ops, props, app, _module, utils, types, data, path, context};
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+export {msgbus, _lazy, _member, ops, props, app, _import, _module, utils, types, data, path, _globals, context};
 var __name__ = 'bpy';
 export var __all__ = tuple (['app', 'context', 'data', 'msgbus', 'ops', 'path', 'props', 'types', 'utils']);
 export var main = function () {

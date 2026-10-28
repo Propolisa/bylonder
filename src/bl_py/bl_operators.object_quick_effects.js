@@ -9,7 +9,7 @@ import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {Vector} from './mathutils.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.object_quick_effects';
 export var _merged = function () {
 	if (arguments.length) {
@@ -176,7 +176,6 @@ export var ObjectModeOperator =  __class__ ('ObjectModeOperator', [object], {
 });
 export var QuickFur =  __class__ ('QuickFur', [ObjectModeOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'density': EnumProperty (__kwargtrans__ ({py_name: 'Density', py_items: tuple ([tuple (['LOW', 'Low', '']), tuple (['MEDIUM', 'Medium', '']), tuple (['HIGH', 'High', ''])]), py_default: 'MEDIUM'})), 'length': FloatProperty (__kwargtrans__ ({py_name: 'Length', min: 0.001, max: 100, soft_min: 0.01, soft_max: 10, py_default: 0.1, subtype: 'DISTANCE'})), 'radius': FloatProperty (__kwargtrans__ ({py_name: 'Hair Radius', min: 0.0, max: 10, soft_min: 0.0001, soft_max: 0.1, py_default: 0.001, subtype: 'DISTANCE'})), 'view_percentage': FloatProperty (__kwargtrans__ ({py_name: 'View Percentage', min: 0.0, max: 1.0, py_default: 1.0, subtype: 'FACTOR'})), 'apply_hair_guides': BoolProperty (__kwargtrans__ ({py_name: 'Apply Hair Guides', py_default: true})), 'use_noise': BoolProperty (__kwargtrans__ ({py_name: 'Noise', py_default: true})), 'use_frizz': BoolProperty (__kwargtrans__ ({py_name: 'Frizz', py_default: true}))}),
 	bl_idname: 'object.quick_fur',
 	bl_label: 'Quick Fur',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -392,9 +391,9 @@ export var QuickFur =  __class__ ('QuickFur', [ObjectModeOperator, Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+QuickFur.__annotations__ = dict ({'density': EnumProperty (__kwargtrans__ ({py_name: 'Density', py_items: tuple ([tuple (['LOW', 'Low', '']), tuple (['MEDIUM', 'Medium', '']), tuple (['HIGH', 'High', ''])]), py_default: 'MEDIUM'})), 'length': FloatProperty (__kwargtrans__ ({py_name: 'Length', min: 0.001, max: 100, soft_min: 0.01, soft_max: 10, py_default: 0.1, subtype: 'DISTANCE'})), 'radius': FloatProperty (__kwargtrans__ ({py_name: 'Hair Radius', min: 0.0, max: 10, soft_min: 0.0001, soft_max: 0.1, py_default: 0.001, subtype: 'DISTANCE'})), 'view_percentage': FloatProperty (__kwargtrans__ ({py_name: 'View Percentage', min: 0.0, max: 1.0, py_default: 1.0, subtype: 'FACTOR'})), 'apply_hair_guides': BoolProperty (__kwargtrans__ ({py_name: 'Apply Hair Guides', py_default: true})), 'use_noise': BoolProperty (__kwargtrans__ ({py_name: 'Noise', py_default: true})), 'use_frizz': BoolProperty (__kwargtrans__ ({py_name: 'Frizz', py_default: true}))});
 export var QuickExplode =  __class__ ('QuickExplode', [ObjectModeOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'style': EnumProperty (__kwargtrans__ ({py_name: 'Explode Style', py_items: tuple ([tuple (['EXPLODE', 'Explode', '']), tuple (['BLEND', 'Blend', ''])]), py_default: 'EXPLODE'})), 'amount': IntProperty (__kwargtrans__ ({py_name: 'Number of Pieces', min: 2, max: 10000, soft_min: 2, soft_max: 10000, py_default: 100})), 'frame_duration': IntProperty (__kwargtrans__ ({py_name: 'Duration', min: 1, max: 300000, soft_min: 1, soft_max: 10000, py_default: 50})), 'frame_start': IntProperty (__kwargtrans__ ({py_name: 'Start Frame', min: 1, max: 300000, soft_min: 1, soft_max: 10000, py_default: 1})), 'frame_end': IntProperty (__kwargtrans__ ({py_name: 'End Frame', min: 1, max: 300000, soft_min: 1, soft_max: 10000, py_default: 10})), 'velocity': FloatProperty (__kwargtrans__ ({py_name: 'Outwards Velocity', min: 0, max: 300000, soft_min: 0, soft_max: 10, py_default: 1})), 'fade': BoolProperty (__kwargtrans__ ({py_name: 'Fade', description: 'Fade the pieces over time', py_default: true}))}),
 	bl_idname: 'object.quick_explode',
 	bl_label: 'Quick Explode',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -573,6 +572,7 @@ export var QuickExplode =  __class__ ('QuickExplode', [ObjectModeOperator, Opera
 		return self.execute (context);
 	});}
 });
+QuickExplode.__annotations__ = dict ({'style': EnumProperty (__kwargtrans__ ({py_name: 'Explode Style', py_items: tuple ([tuple (['EXPLODE', 'Explode', '']), tuple (['BLEND', 'Blend', ''])]), py_default: 'EXPLODE'})), 'amount': IntProperty (__kwargtrans__ ({py_name: 'Number of Pieces', min: 2, max: 10000, soft_min: 2, soft_max: 10000, py_default: 100})), 'frame_duration': IntProperty (__kwargtrans__ ({py_name: 'Duration', min: 1, max: 300000, soft_min: 1, soft_max: 10000, py_default: 50})), 'frame_start': IntProperty (__kwargtrans__ ({py_name: 'Start Frame', min: 1, max: 300000, soft_min: 1, soft_max: 10000, py_default: 1})), 'frame_end': IntProperty (__kwargtrans__ ({py_name: 'End Frame', min: 1, max: 300000, soft_min: 1, soft_max: 10000, py_default: 10})), 'velocity': FloatProperty (__kwargtrans__ ({py_name: 'Outwards Velocity', min: 0, max: 300000, soft_min: 0, soft_max: 10, py_default: 1})), 'fade': BoolProperty (__kwargtrans__ ({py_name: 'Fade', description: 'Fade the pieces over time', py_default: true}))});
 export var obj_bb_minmax = function (obj, min_co, max_co) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -618,7 +618,6 @@ export var grid_location = function (x, y) {
 };
 export var QuickSmoke =  __class__ ('QuickSmoke', [ObjectModeOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'style': EnumProperty (__kwargtrans__ ({py_name: 'Smoke Style', py_items: tuple ([tuple (['SMOKE', 'Smoke', '']), tuple (['FIRE', 'Fire', '']), tuple (['BOTH', 'Smoke & Fire', ''])]), py_default: 'SMOKE'})), 'show_flows': BoolProperty (__kwargtrans__ ({py_name: 'Render Smoke Objects', description: 'Keep the smoke objects visible during rendering', py_default: false}))}),
 	bl_idname: 'object.quick_smoke',
 	bl_label: 'Quick Smoke',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -700,9 +699,9 @@ export var QuickSmoke =  __class__ ('QuickSmoke', [ObjectModeOperator, Operator]
 		return new set (['FINISHED']);
 	});}
 });
+QuickSmoke.__annotations__ = dict ({'style': EnumProperty (__kwargtrans__ ({py_name: 'Smoke Style', py_items: tuple ([tuple (['SMOKE', 'Smoke', '']), tuple (['FIRE', 'Fire', '']), tuple (['BOTH', 'Smoke & Fire', ''])]), py_default: 'SMOKE'})), 'show_flows': BoolProperty (__kwargtrans__ ({py_name: 'Render Smoke Objects', description: 'Keep the smoke objects visible during rendering', py_default: false}))});
 export var QuickLiquid =  __class__ ('QuickLiquid', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'show_flows': BoolProperty (__kwargtrans__ ({py_name: 'Render Liquid Objects', description: 'Keep the liquid objects visible during rendering', py_default: false}))}),
 	bl_idname: 'object.quick_liquid',
 	bl_label: 'Quick Liquid',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -802,6 +801,8 @@ export var QuickLiquid =  __class__ ('QuickLiquid', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+QuickLiquid.__annotations__ = dict ({'show_flows': BoolProperty (__kwargtrans__ ({py_name: 'Render Liquid Objects', description: 'Keep the liquid objects visible during rendering', py_default: false}))});
 export var classes = tuple ([QuickExplode, QuickFur, QuickSmoke, QuickLiquid]);
 
 //# sourceMappingURL=bl_operators.object_quick_effects.map
+export {BoolProperty, EnumProperty, FloatProperty, IntProperty, Operator, Vector, _globals, _import, _lazy, _member, _module, data_, rpt_};

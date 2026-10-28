@@ -140,3 +140,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_animviz.map
+export {register_class};

@@ -481,5 +481,6 @@ export var WORLD_PT_viewport_display =  __class__ ('WORLD_PT_viewport_display', 
 	});}
 });
 export var classes = tuple ([WORLD_PT_context_world, EEVEE_WORLD_PT_surface, EEVEE_WORLD_PT_volume, EEVEE_WORLD_PT_mist, EEVEE_WORLD_PT_settings, EEVEE_WORLD_PT_lightprobe, EEVEE_WORLD_PT_sun, EEVEE_WORLD_PT_sun_shadow, WORLD_PT_viewport_display, WORLD_PT_animation, WORLD_PT_custom_props]);
+export var _classes_in_order = ['WorldButtonsPanel', 'WORLD_PT_context_world', 'EEVEE_WORLD_PT_mist', 'WORLD_PT_animation', 'WORLD_PT_custom_props', 'EEVEE_WORLD_PT_surface', 'EEVEE_WORLD_PT_volume', 'EEVEE_WORLD_PT_settings', 'EEVEE_WORLD_PT_lightprobe', 'EEVEE_WORLD_PT_sun', 'EEVEE_WORLD_PT_sun_shadow', 'WORLD_PT_viewport_display'];
 
 //# sourceMappingURL=properties_world.map

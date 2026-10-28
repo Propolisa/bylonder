@@ -11,14 +11,7 @@
 // active, enabled and alert apply to all it holds, as Blender applies them when the layout ends.
 
 import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js';
-
-// Python's keyword arguments: Transcrypt passes them as a last object marked __kwargtrans__.
-export function args(list, names) {
-  const last = list.at(-1), keywords = last && Object.hasOwn(last, '__kwargtrans__') ? last : {};
-  const positional = keywords === last ? list.slice(0, -1) : list;
-  // Transcrypt renames keyword arguments that are JS or runtime names (new as py_new).
-  return Object.fromEntries(names.map((name, i) => [name, keywords[name] ?? keywords['py_' + name] ?? positional[i]]));
-}
+import { pyArgs as args } from '../../makesrna/rna.js';
 
 // OperatorProperties: what a script sets on an operator button; a macro's operators (props.MESH_OT_rip) have their own.
 const MACRO_PART = /_OT_/;

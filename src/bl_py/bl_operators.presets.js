@@ -9,7 +9,7 @@ import {BoolProperty, CollectionProperty, StringProperty} from './_bpy.props.js'
 import {Menu, Operator, OperatorFileListElement, Panel, WindowManager} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.presets';
 WindowManager.preset_name = StringProperty (__kwargtrans__ ({py_name: 'Preset Name', description: 'Name for new preset', py_default: data_ ('New Preset')}));
 export var _call_preset_cb = function (fn, context, filepath) {
@@ -80,7 +80,6 @@ export var _is_path_readonly = function (path) {
 };
 export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 	__module__: __name__,
-	__annotations__: dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Name', description: 'Name of the preset, used to make the path name', maxlen: 64, options: new set (['SKIP_SAVE'])})), 'remove_name': BoolProperty (__kwargtrans__ ({py_default: false, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'remove_active': BoolProperty (__kwargtrans__ ({py_default: false, options: new set (['HIDDEN', 'SKIP_SAVE'])}))}),
 	bl_options: new set (['REGISTER', 'INTERNAL']),
 	get as_filename () {return function (py_name) {
 		if (arguments.length) {
@@ -89,7 +88,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -346,9 +345,9 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 		}
 	});}
 });
+AddPresetBase.__annotations__ = dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Name', description: 'Name of the preset, used to make the path name', maxlen: 64, options: new set (['SKIP_SAVE'])})), 'remove_name': BoolProperty (__kwargtrans__ ({py_default: false, options: new set (['HIDDEN', 'SKIP_SAVE'])})), 'remove_active': BoolProperty (__kwargtrans__ ({py_default: false, options: new set (['HIDDEN', 'SKIP_SAVE'])}))});
 export var ExecutePreset =  __class__ ('ExecutePreset', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])})), 'menu_idname': StringProperty (__kwargtrans__ ({py_name: 'Menu ID Name', description: 'ID name of the menu this was called from', options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'script.execute_preset',
 	bl_label: 'Execute a Python Preset',
 	get execute () {return __get__ (this, function (self, context) {
@@ -401,6 +400,7 @@ export var ExecutePreset =  __class__ ('ExecutePreset', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+ExecutePreset.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])})), 'menu_idname': StringProperty (__kwargtrans__ ({py_name: 'Menu ID Name', description: 'ID name of the menu this was called from', options: new set (['SKIP_SAVE'])}))});
 export var AddPresetTextStripStyle =  __class__ ('AddPresetTextStripStyle', [AddPresetBase, Operator], {
 	__module__: __name__,
 	bl_idname: 'sequencer.text_strip_style_preset_add',
@@ -442,7 +442,6 @@ export var AddPresetRender =  __class__ ('AddPresetRender', [AddPresetBase, Oper
 });
 export var AddPresetCamera =  __class__ ('AddPresetCamera', [AddPresetBase, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'use_focal_length': BoolProperty (__kwargtrans__ ({py_name: 'Include Focal Length', description: 'Include focal length into the preset', options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'camera.preset_add',
 	bl_label: 'Add Camera Preset',
 	preset_menu: 'CAMERA_PT_presets',
@@ -471,6 +470,7 @@ export var AddPresetCamera =  __class__ ('AddPresetCamera', [AddPresetBase, Oper
 	});}
 });
 globalThis.Object.defineProperty (AddPresetCamera, 'preset_values', property.call (AddPresetCamera, AddPresetCamera._get_preset_values));;
+AddPresetCamera.__annotations__ = dict ({'use_focal_length': BoolProperty (__kwargtrans__ ({py_name: 'Include Focal Length', description: 'Include focal length into the preset', options: new set (['SKIP_SAVE'])}))});
 export var AddPresetCameraSafeAreas =  __class__ ('AddPresetCameraSafeAreas', [AddPresetBase, Operator], {
 	__module__: __name__,
 	bl_idname: 'camera.safe_areas_preset_add',
@@ -518,7 +518,6 @@ export var AddPresetTextEditor =  __class__ ('AddPresetTextEditor', [AddPresetBa
 });
 export var AddPresetTrackingCamera =  __class__ ('AddPresetTrackingCamera', [AddPresetBase, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'use_focal_length': BoolProperty (__kwargtrans__ ({py_name: 'Include Focal Length', description: 'Include focal length into the preset', options: new set (['SKIP_SAVE']), py_default: true}))}),
 	bl_idname: 'clip.camera_preset_add',
 	bl_label: 'Add Camera Preset',
 	preset_menu: 'CLIP_PT_camera_presets',
@@ -547,6 +546,7 @@ export var AddPresetTrackingCamera =  __class__ ('AddPresetTrackingCamera', [Add
 	});}
 });
 globalThis.Object.defineProperty (AddPresetTrackingCamera, 'preset_values', property.call (AddPresetTrackingCamera, AddPresetTrackingCamera._get_preset_values));;
+AddPresetTrackingCamera.__annotations__ = dict ({'use_focal_length': BoolProperty (__kwargtrans__ ({py_name: 'Include Focal Length', description: 'Include focal length into the preset', options: new set (['SKIP_SAVE']), py_default: true}))});
 export var AddPresetTrackingTrackColor =  __class__ ('AddPresetTrackingTrackColor', [AddPresetBase, Operator], {
 	__module__: __name__,
 	bl_idname: 'clip.track_color_preset_add',
@@ -619,7 +619,6 @@ export var AddPresetInterfaceTheme =  __class__ ('AddPresetInterfaceTheme', [Add
 });
 export var RemovePresetInterfaceTheme =  __class__ ('RemovePresetInterfaceTheme', [AddPresetBase, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'remove_active': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])}))}),
 	bl_idname: 'wm.interface_theme_preset_remove',
 	bl_label: 'Remove Theme',
 	preset_menu: 'USERPREF_MT_interface_theme_presets',
@@ -666,9 +665,9 @@ export var RemovePresetInterfaceTheme =  __class__ ('RemovePresetInterfaceTheme'
 		bpy.ops.preferences.reset_default_theme ();
 	});}
 });
+RemovePresetInterfaceTheme.__annotations__ = dict ({'remove_active': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])}))});
 export var SavePresetInterfaceTheme =  __class__ ('SavePresetInterfaceTheme', [AddPresetBase, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'remove_active': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])}))}),
 	bl_idname: 'wm.interface_theme_preset_save',
 	bl_label: 'Save Theme',
 	preset_menu: 'USERPREF_MT_interface_theme_presets',
@@ -737,6 +736,7 @@ export var SavePresetInterfaceTheme =  __class__ ('SavePresetInterfaceTheme', [A
 		return context.window_manager.invoke_confirm (self, event, __kwargtrans__ ({title: 'Overwrite Custom Theme?', confirm_text: 'Save'}));
 	});}
 });
+SavePresetInterfaceTheme.__annotations__ = dict ({'remove_active': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])}))});
 export var AddPresetKeyconfig =  __class__ ('AddPresetKeyconfig', [AddPresetBase, Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.keyconfig_preset_add',
@@ -765,7 +765,6 @@ export var AddPresetKeyconfig =  __class__ ('AddPresetKeyconfig', [AddPresetBase
 });
 export var RemovePresetKeyconfig =  __class__ ('RemovePresetKeyconfig', [AddPresetBase, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'remove_active': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])}))}),
 	bl_idname: 'wm.keyconfig_preset_remove',
 	bl_label: 'Remove Keymap Configuration',
 	preset_menu: 'USERPREF_MT_keyconfigs',
@@ -834,9 +833,9 @@ export var RemovePresetKeyconfig =  __class__ ('RemovePresetKeyconfig', [AddPres
 		return context.window_manager.invoke_confirm (self, event, __kwargtrans__ ({title: 'Remove Keymap Configuration', confirm_text: 'Delete'}));
 	});}
 });
+RemovePresetKeyconfig.__annotations__ = dict ({'remove_active': BoolProperty (__kwargtrans__ ({py_default: true, options: new set (['HIDDEN', 'SKIP_SAVE'])}))});
 export var AddPresetOperator =  __class__ ('AddPresetOperator', [AddPresetBase, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'operator': StringProperty (__kwargtrans__ ({py_name: 'Operator', maxlen: 64, options: new set (['HIDDEN', 'SKIP_SAVE'])}))}),
 	bl_idname: 'wm.operator_preset_add',
 	bl_label: 'Operator Preset',
 	preset_menu: 'WM_MT_operator_presets',
@@ -910,6 +909,7 @@ export var AddPresetOperator =  __class__ ('AddPresetOperator', [AddPresetBase, 
 });
 globalThis.Object.defineProperty (AddPresetOperator, 'preset_values', property.call (AddPresetOperator, AddPresetOperator._get_preset_values));
 globalThis.Object.defineProperty (AddPresetOperator, 'preset_subdir', property.call (AddPresetOperator, AddPresetOperator._get_preset_subdir));;
+AddPresetOperator.__annotations__ = dict ({'operator': StringProperty (__kwargtrans__ ({py_name: 'Operator', maxlen: 64, options: new set (['HIDDEN', 'SKIP_SAVE'])}))});
 export var WM_MT_operator_presets =  __class__ ('WM_MT_operator_presets', [Menu], {
 	__module__: __name__,
 	bl_label: 'Operator Presets',
@@ -1013,7 +1013,6 @@ globalThis.Object.defineProperty (WM_PT_operator_presets, 'preset_add_operator_p
 globalThis.Object.defineProperty (WM_PT_operator_presets, 'preset_subdir', property.call (WM_PT_operator_presets, WM_PT_operator_presets._get_preset_subdir));;
 export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_cleanup', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'operator': StringProperty (__kwargtrans__ ({py_name: 'operator'})), 'properties': CollectionProperty (__kwargtrans__ ({py_name: 'properties', py_metatype: OperatorFileListElement}))}),
 	bl_idname: 'wm.operator_presets_cleanup',
 	bl_label: 'Clean Up Operator Presets',
 	get _cleanup_preset () {return __get__ (this, function (self, filepath, properties_exclude) {
@@ -1151,6 +1150,7 @@ export var WM_OT_operator_presets_cleanup =  __class__ ('WM_OT_operator_presets_
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_operator_presets_cleanup.__annotations__ = dict ({'operator': StringProperty (__kwargtrans__ ({py_name: 'operator'})), 'properties': CollectionProperty (__kwargtrans__ ({py_name: 'properties', py_metatype: OperatorFileListElement}))});
 export var AddPresetGpencilBrush =  __class__ ('AddPresetGpencilBrush', [AddPresetBase, Operator], {
 	__module__: __name__,
 	bl_idname: 'scene.gpencil_brush_preset_add',
@@ -1172,3 +1172,4 @@ export var AddPresetGpencilMaterial =  __class__ ('AddPresetGpencilMaterial', [A
 export var classes = tuple ([AddPresetCamera, AddPresetCloth, AddPresetFluid, AddPresetHairDynamics, AddPresetInterfaceTheme, RemovePresetInterfaceTheme, SavePresetInterfaceTheme, AddPresetKeyconfig, RemovePresetKeyconfig, AddPresetNodeColor, AddPresetOperator, AddPresetTextStripStyle, AddPresetRender, AddPresetCameraSafeAreas, AddPresetTextEditor, AddPresetTrackingCamera, AddPresetTrackingSettings, AddPresetTrackingTrackColor, AddPresetGpencilBrush, AddPresetGpencilMaterial, AddPresetEEVEERaytracing, AddPresetColorManagementWhiteBalance, ExecutePreset, WM_MT_operator_presets, WM_PT_operator_presets, WM_OT_operator_presets_cleanup]);
 
 //# sourceMappingURL=bl_operators.presets.map
+export {BoolProperty, CollectionProperty, Menu, Operator, OperatorFileListElement, Panel, PresetPanel, StringProperty, WindowManager, _globals, _import, _lazy, _member, _module, data_, rpt_};

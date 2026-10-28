@@ -604,5 +604,6 @@ export var PHYSICS_PT_softbody_field_weights =  __class__ ('PHYSICS_PT_softbody_
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_softbody, PHYSICS_PT_softbody_object, PHYSICS_PT_softbody_simulation, PHYSICS_PT_softbody_cache, PHYSICS_PT_softbody_goal, PHYSICS_PT_softbody_goal_settings, PHYSICS_PT_softbody_goal_strengths, PHYSICS_PT_softbody_edge, PHYSICS_PT_softbody_edge_aerodynamics, PHYSICS_PT_softbody_edge_stiffness, PHYSICS_PT_softbody_collision, PHYSICS_PT_softbody_solver, PHYSICS_PT_softbody_solver_diagnostics, PHYSICS_PT_softbody_solver_helpers, PHYSICS_PT_softbody_field_weights]);
+export var _classes_in_order = ['PhysicButtonsPanel', 'PHYSICS_PT_softbody', 'PHYSICS_PT_softbody_object', 'PHYSICS_PT_softbody_simulation', 'PHYSICS_PT_softbody_cache', 'PHYSICS_PT_softbody_goal', 'PHYSICS_PT_softbody_goal_strengths', 'PHYSICS_PT_softbody_goal_settings', 'PHYSICS_PT_softbody_edge', 'PHYSICS_PT_softbody_edge_aerodynamics', 'PHYSICS_PT_softbody_edge_stiffness', 'PHYSICS_PT_softbody_collision', 'PHYSICS_PT_softbody_solver', 'PHYSICS_PT_softbody_solver_diagnostics', 'PHYSICS_PT_softbody_solver_helpers', 'PHYSICS_PT_softbody_field_weights'];
 
 //# sourceMappingURL=properties_physics_softbody.map

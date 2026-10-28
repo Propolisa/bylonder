@@ -293,5 +293,6 @@ export var DATA_PT_custom_props_curves =  __class__ ('DATA_PT_custom_props_curve
 	_property_type: (__t__ (hasattr (bpy.types, 'Curves')) ? bpy.types.Curves : null)
 });
 export var classes = tuple ([DATA_PT_context_curves, DATA_PT_CURVES_attributes, DATA_PT_curves_surface, DATA_PT_curves_animation, DATA_PT_custom_props_curves, CURVES_MT_add_attribute, CURVES_MT_attribute_context_menu, CURVES_UL_attributes]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_curves', 'DATA_PT_curves_surface', 'CURVES_MT_attribute_context_menu', 'CURVES_MT_add_attribute', 'CURVES_UL_attributes', 'DATA_PT_CURVES_attributes', 'DATA_PT_curves_animation', 'DATA_PT_custom_props_curves'];
 
 //# sourceMappingURL=properties_data_curves.map

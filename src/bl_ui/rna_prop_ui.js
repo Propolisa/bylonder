@@ -38,13 +38,13 @@ export var rna_idprop_context_value = function (context, context_member, propert
 	else {
 	}
 	var space = context.space_data;
-	if (__t__ (__t__ (space === null) || isinstance (space, bpy.types.SpaceProperties))) {
+	if (space === null || isinstance (space, bpy.types.SpaceProperties)) {
 		var pin_id = space.pin_id;
 	}
 	else {
 		var pin_id = null;
 	}
-	if (__t__ (__t__ (pin_id) && isinstance (pin_id, property_type))) {
+	if (pin_id && isinstance (pin_id, property_type)) {
 		var rna_item = pin_id;
 		var context_member = 'space_data.pin_id';
 	}
@@ -52,6 +52,23 @@ export var rna_idprop_context_value = function (context, context_member, propert
 		var rna_item = context.path_resolve (context_member);
 	}
 	return tuple ([rna_item, context_member]);
+};
+export var rna_idprop_has_properties = function (rna_item) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'rna_item': var rna_item = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var py_keys = rna_item.py_keys ();
+	return bool (py_keys);
 };
 export var draw = function (layout, context, context_member, property_type) {
 	var use_edit = true;
@@ -75,26 +92,27 @@ export var draw = function (layout, context, context_member, property_type) {
 	var __left0__ = rna_idprop_context_value (context, context_member, property_type);
 	var rna_item = __left0__ [0];
 	var context_member = __left0__ [1];
-	if (__t__ (!__t__ ((rna_item)))) {
+	if (!(rna_item)) {
 		return ;
 	}
-	if (__t__ (rna_item.id_data.library !== null)) {
+	if (rna_item.id_data.library !== null) {
 		var use_edit = false;
 	}
-	var is_lib_override = __t__ (rna_item.id_data.override_library) && rna_item.id_data.override_library.reference;
+	var is_lib_override = rna_item.id_data.override_library && rna_item.id_data.override_library.reference;
 	var py_items = list (rna_item.py_items ());
 	py_items.py_sort ();
-	if (__t__ (__t__ (use_edit) && !__t__ ((is_lib_override)))) {
+	if (use_edit && !(is_lib_override)) {
 		var row = layout.row ();
 		var props = row.operator ('wm.properties_add', __kwargtrans__ ({text: 'New', icon: 'ADD'}));
 		props.data_path = context_member;
+		// pass;
 		layout.separator ();
 	}
 	var show_developer_ui = context.preferences.view.show_developer_ui;
-	var rna_properties = (__t__ (py_items) ? (function () {
+	var rna_properties = (py_items ? (function () {
 		var __accu0__ = [];
 		for (var prop of rna_item.bl_rna.properties) {
-			if (__t__ (prop.is_runtime)) {
+			if (prop.is_runtime) {
 				__accu0__.append (prop.identifier);
 			}
 		}
@@ -103,16 +121,16 @@ export var draw = function (layout, context, context_member, property_type) {
 	layout.use_property_decorate = false;
 	for (var [key, value] of py_items) {
 		var is_rna = __in__ (key, rna_properties);
-		if (__t__ (__t__ (is_rna) && !__t__ ((show_developer_ui)))) {
+		if (is_rna && !(show_developer_ui)) {
 			continue;
 		}
 		var to_dict = getattr (value, 'to_dict', null);
 		var to_list = getattr (value, 'to_list', null);
-		var is_datablock = __t__ (value === null) || isinstance (value, bpy.types.ID);
-		if (__t__ (to_dict)) {
+		var is_datablock = value === null || isinstance (value, bpy.types.ID);
+		if (to_dict) {
 			var value = to_dict ();
 		}
-		else if (__t__ (to_list)) {
+		else if (to_list) {
 			var value = to_list ();
 		}
 		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.4, align: true}));
@@ -121,16 +139,16 @@ export var draw = function (layout, context, context_member, property_type) {
 		label_row.label (__kwargtrans__ ({text: key, translate: false}));
 		var value_row = py_split.row (__kwargtrans__ ({align: true}));
 		var value_column = value_row.column (__kwargtrans__ ({align: true}));
-		var is_long_array = __t__ (to_list) && len (value) >= MAX_DISPLAY_ROWS;
-		if (__t__ (is_rna)) {
+		var is_long_array = to_list && len (value) >= MAX_DISPLAY_ROWS;
+		if (is_rna) {
 			value_column.prop (rna_item, key, __kwargtrans__ ({text: ''}));
 		}
-		else if (__t__ (__t__ (to_dict) || is_long_array)) {
+		else if (to_dict || is_long_array) {
 			var props = value_column.operator ('wm.properties_edit_value', __kwargtrans__ ({text: 'Edit Value'}));
 			props.data_path = context_member;
 			props.property_name = key;
 		}
-		else if (__t__ (is_datablock)) {
+		else if (is_datablock) {
 			value_column.template_ID (rna_item, rna_idprop_quote_path (key), __kwargtrans__ ({text: ''}));
 		}
 		else {
@@ -138,12 +156,12 @@ export var draw = function (layout, context, context_member, property_type) {
 		}
 		var operator_row = value_row.row (__kwargtrans__ ({align: true}));
 		operator_row.alignment = 'RIGHT';
-		operator_row.enabled = !__t__ ((__t__ (is_lib_override) && __in__ (key, rna_item.id_data.override_library.reference)));
-		if (__t__ (use_edit)) {
-			if (__t__ (is_rna)) {
+		operator_row.enabled = !(is_lib_override && __in__ (key, rna_item.id_data.override_library.reference));
+		if (use_edit) {
+			if (is_rna) {
 				operator_row.label (__kwargtrans__ ({text: 'API Defined'}));
 			}
-			else if (__t__ (is_lib_override)) {
+			else if (is_lib_override) {
 				operator_row.active = false;
 				operator_row.label (__kwargtrans__ ({text: '', icon: 'DECORATE_LIBRARY_OVERRIDE'}));
 			}
@@ -201,5 +219,6 @@ export var PropertyPanel =  __class__ ('PropertyPanel', [object], {
 		draw (self.layout, context, self._context_path, self._property_type);
 	});}
 });
+export var _classes_in_order = ['PropertyPanel'];
 
 //# sourceMappingURL=rna_prop_ui.map

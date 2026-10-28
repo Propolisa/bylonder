@@ -495,5 +495,6 @@ export var MATERIAL_PT_gpencil_material_presets =  __class__ ('MATERIAL_PT_gpenc
 	preset_add_operator: 'scene.gpencil_material_preset_add'
 });
 export var classes = tuple ([GPENCIL_UL_matslots, GREASE_PENCIL_MT_material_context_menu, MATERIAL_PT_gpencil_slots, MATERIAL_PT_gpencil_preview, MATERIAL_PT_gpencil_material_presets, MATERIAL_PT_gpencil_surface, MATERIAL_PT_gpencil_strokecolor, MATERIAL_PT_gpencil_random, MATERIAL_PT_gpencil_fillcolor, MATERIAL_PT_gpencil_settings, MATERIAL_PT_gpencil_animation, MATERIAL_PT_gpencil_custom_props]);
+export var _classes_in_order = ['GREASE_PENCIL_MT_material_context_menu', 'GPENCIL_UL_matslots', 'GPMaterialButtonsPanel', 'MATERIAL_PT_gpencil_slots', 'MATERIAL_PT_gpencil_surface', 'MATERIAL_PT_gpencil_strokecolor', 'MATERIAL_PT_gpencil_random', 'MATERIAL_PT_gpencil_fillcolor', 'MATERIAL_PT_gpencil_animation', 'MATERIAL_PT_gpencil_preview', 'MATERIAL_PT_gpencil_custom_props', 'MATERIAL_PT_gpencil_settings', 'MATERIAL_PT_gpencil_material_presets'];
 
 //# sourceMappingURL=properties_material_gpencil.map

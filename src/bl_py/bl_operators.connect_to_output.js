@@ -2,14 +2,14 @@
 import * as __self__ from './bl_operators.connect_to_output.js';
 (globalThis.__py_modules ??= {})['bl_operators.connect_to_output'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {NodeEditorBase, force_update, get_group_output_node, get_internal_socket, get_output_location, is_viewer_link, is_visible_socket, node_editor_poll, node_space_type_poll} from './bl_operators.node_editor.node_functions.js';
 import {pgettext_data as data_} from './_bpy.app.translations.js';
 import {BoolProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.connect_to_output';
 export var _merged = function () {
 	if (arguments.length) {
@@ -120,7 +120,6 @@ export var _joined = function () {
 };
 export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', [Operator, NodeEditorBase], {
 	__module__: __name__,
-	__annotations__: dict ({'run_in_geometry_nodes': BoolProperty (__kwargtrans__ ({py_name: 'Run in Geometry Nodes Editor', py_default: true}))}),
 	bl_idname: 'node.connect_to_output',
 	bl_label: 'Connect to Output',
 	bl_description: 'Connect active node to the active output node of the node tree',
@@ -134,7 +133,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 					}
 				}
 				delete kwargs.__kwargtrans__;
@@ -698,6 +697,8 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 		return new set (['FINISHED']);
 	});}
 });
+NODE_OT_connect_to_output.__annotations__ = dict ({'run_in_geometry_nodes': BoolProperty (__kwargtrans__ ({py_name: 'Run in Geometry Nodes Editor', py_default: true}))});
 export var classes = tuple ([NODE_OT_connect_to_output]);
 
 //# sourceMappingURL=bl_operators.connect_to_output.map
+export {BoolProperty, NodeEditorBase, Operator, _globals, _import, _lazy, _member, _module, data_, force_update, get_group_output_node, get_internal_socket, get_output_location, is_viewer_link, is_visible_socket, node_editor_poll, node_space_type_poll};

@@ -4,6 +4,9 @@ var __name__ = 'math';
 export var pi = Math.PI;
 export var e = Math.E;
 export var exp = Math.exp;
+export var fmod = function (x, y) {
+	return x % y;
+};
 export var expm1 = function (x) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

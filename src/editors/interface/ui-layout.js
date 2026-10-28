@@ -7,6 +7,7 @@
 //   [identifier, name, description, icon], prop(data, name): a bound property as { label, get, set }.
 import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { UILayout, isLayout, operatorValues, useContext } from './layout.js';
+import { toolIconUrl } from './icon.js';
 
 const operatorName = (idname) => operators[idname]?.name ?? idname;
 // The properties whose value names an entry in Blender's coverage ids (KEYED_PROPS in tools/blender-reference/surface.py).
@@ -35,7 +36,9 @@ function entries(node, ui, enabled = true) {
   if (isLayout(node)) return node.children.flatMap((child) => entries(child, ui, enabled && node.enabled !== false));
   const enumEntries = () => ui.enumItems(node.operator, node.property).map(([value, label, , icon]) => entry(ui, enabled, node.operator, { [node.property]: value }, label, icon, value));
   switch (node.kind) {
-    case 'operator': return [entry(ui, enabled, node.operator, node.props, node.text ?? operatorName(node.operator), node.icon)];
+    // A tool's icon, which bpy.app.icons names.
+    case 'operator': return [{ ...entry(ui, enabled, node.operator, node.props, node.text ?? operatorName(node.operator), node.icon),
+      ...(typeof node.icon_value === 'string' && { image: toolIconUrl(node.icon_value) }) }];
     case 'operator_enum': return enumEntries();
     case 'operator_menu_enum': return [{ label: node.text ?? operatorName(node.operator), blender: node.operator, items: enumEntries() }];
     case 'menu': {
@@ -46,7 +49,7 @@ function entries(node, ui, enabled = true) {
     // A property of data the context gives, shown as a check item when Bylonder binds it (ui.prop).
     case 'prop': {
       const binding = ui.prop?.(node.data, node.property);
-      return binding ? [{ label: node.text ?? binding.label, blender: node.property, checked: () => !!binding.get(), enabled: () => enabled, run: () => binding.set(!binding.get()) }] : [];
+      return binding ? [{ label: node.text ?? binding.label, blender: node.property, keys: binding.keys, checked: () => !!binding.get(), enabled: () => enabled, run: () => binding.set(!binding.get()) }] : [];
     }
     case 'separator': return ['-'];
     // Labels, and the asset menus' node group assets, which Bylonder does not have.

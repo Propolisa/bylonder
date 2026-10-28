@@ -172,5 +172,6 @@ export var DATA_PT_custom_props_speaker =  __class__ ('DATA_PT_custom_props_spea
 	_property_type: bpy.types.Speaker
 });
 export var classes = tuple ([DATA_PT_context_speaker, DATA_PT_speaker, DATA_PT_distance, DATA_PT_cone, DATA_PT_speaker_animation, DATA_PT_custom_props_speaker]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_speaker', 'DATA_PT_speaker', 'DATA_PT_distance', 'DATA_PT_cone', 'DATA_PT_speaker_animation', 'DATA_PT_custom_props_speaker'];
 
 //# sourceMappingURL=properties_data_speaker.map

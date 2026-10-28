@@ -668,7 +668,8 @@ export var DATA_PT_mesh_animation =  __class__ ('DATA_PT_mesh_animation', [MeshB
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: 'Mesh'}));
 		self.draw_action_and_slot_selector (context, col, mesh);
-		if (shape_keysmesh.shape_keys) {
+		var shape_keys = mesh.shape_keys;
+		if (shape_keys) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shape Keys'}));
 			self.draw_action_and_slot_selector (context, col, shape_keys);
@@ -987,3 +988,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_mesh.map
+export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, iface_, register_class, rpt_};

@@ -2,7 +2,6 @@
 # are kept in `registered` by name, for Bylonder to draw and run; the scripts' paths are Blender's layout, with no
 # files behind them.
 import _bpy.app as app
-import _bpy.context as context
 import _bpy.data as data
 import _bpy.msgbus as msgbus
 import _bpy.props as props
@@ -12,6 +11,23 @@ import _bpy._utils_previews as _utils_previews
 import _bpy._utils_units as _utils_units
 
 registered = {}
+
+# bpy.context: the context Bylonder sets for the editor drawing or running (blenkernel/context.js), as Blender sets
+# the window manager's; with none set, Blender's empty preferences.
+_contexts = [{'preferences': {'filepaths': {'script_directories': []}, 'addons': {}, 'view': {}, 'experimental': {}}}]
+context = None
+__pragma__('js', '{}', '''context = new Proxy({}, {
+    get: (target, key) => _contexts.at(-1)[key] ?? null,
+    set: (target, key, value) => { _contexts.at(-1)[key] = value; return true; },
+});''')
+
+
+def _context_push(context):
+    _contexts.append(context)
+
+
+def _context_pop():
+    _contexts.pop()
 
 
 def register_class(cls):

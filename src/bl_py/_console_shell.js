@@ -8,7 +8,7 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_console_shell';
 export var __all__ = tuple (['autocomplete', 'banner', 'execute', 'language_id']);
 export var language_id = 'shell';
@@ -123,3 +123,4 @@ export var banner = function (context) {
 };
 
 //# sourceMappingURL=_console_shell.map
+export {_globals, _import, _lazy, _member, _module};

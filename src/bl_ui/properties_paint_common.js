@@ -294,6 +294,7 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
+		// pass;
 		layout.menu_contents ('VIEW3D_MT_brush_context_menu');
 	});},
 	get get_shelf_name_from_context () {return function (context) {
@@ -2410,5 +2411,6 @@ export var brush_basic_grease_pencil_vertex_settings = function (layout, context
 	}
 };
 export var classes = tuple ([VIEW3D_MT_tools_projectpaint_clone]);
+export var _classes_in_order = ['BrushAssetShelf', 'UnifiedPaintPanel', 'BrushPanel', 'BrushSelectPanel', 'ColorPalettePanel', 'ClonePanel', 'TextureMaskPanel', 'StrokePanel', 'SmoothStrokePanel', 'FalloffPanel', 'DisplayPanel', 'VIEW3D_MT_tools_projectpaint_clone'];
 
 //# sourceMappingURL=properties_paint_common.map

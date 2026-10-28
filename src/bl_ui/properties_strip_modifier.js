@@ -51,5 +51,6 @@ export var STRIP_PT_modifiers =  __class__ ('STRIP_PT_modifiers', [StripModButto
 	});}
 });
 export var classes = tuple ([STRIP_PT_modifiers]);
+export var _classes_in_order = ['StripModButtonsPanel', 'STRIP_PT_modifiers'];
 
 //# sourceMappingURL=properties_strip_modifier.map

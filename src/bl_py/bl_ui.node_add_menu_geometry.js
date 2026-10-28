@@ -1898,3 +1898,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.node_add_menu_geometry.map
+export {i18n_contexts, n_, register_class};

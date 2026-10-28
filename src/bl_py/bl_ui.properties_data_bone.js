@@ -839,3 +839,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_bone.map
+export {Panel, i18n_contexts, register_class};

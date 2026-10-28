@@ -143,6 +143,7 @@ export var COLLECTION_PT_importer =  __class__ ('COLLECTION_PT_importer', [Colle
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
 		layout.template_collection_importer ();
 	});}
@@ -268,5 +269,6 @@ export var COLLECTION_PT_collection_custom_props =  __class__ ('COLLECTION_PT_co
 	_property_type: Collection
 });
 export var classes = tuple ([COLLECTION_MT_context_menu_instance_offset, COLLECTION_PT_collection_flags, COLLECTION_PT_viewlayer_flags, COLLECTION_PT_instancing, COLLECTION_PT_lineart_collection, COLLECTION_PT_collection_custom_props, COLLECTION_PT_importer, COLLECTION_PT_exporters]);
+export var _classes_in_order = ['CollectionButtonsPanel', 'COLLECTION_PT_collection_flags', 'COLLECTION_PT_viewlayer_flags', 'COLLECTION_PT_importer', 'COLLECTION_PT_exporters', 'COLLECTION_MT_context_menu_instance_offset', 'COLLECTION_PT_instancing', 'COLLECTION_PT_lineart_collection', 'COLLECTION_PT_collection_custom_props'];
 
 //# sourceMappingURL=properties_collection.map

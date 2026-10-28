@@ -9,6 +9,14 @@ import * as bpyTypes from '../bl_ui/bpy.types.js';
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));
 
+// A function's arguments as Python passes them, positional and then keywords: Transcrypt passes keywords as a last
+// object marked __kwargtrans__, and renames the ones that are JS or runtime names (new as py_new).
+export function pyArgs(list, names) {
+  const last = list.at(-1), keywords = last && Object.hasOwn(last, '__kwargtrans__') ? last : {};
+  const positional = keywords === last ? list.slice(0, -1) : list;
+  return Object.fromEntries(names.map((name, i) => [name, keywords[name] ?? keywords['py_' + name] ?? positional[i]]));
+}
+
 function property(struct, name) {
   for (let s = structs[struct]; s; s = structs[s.base]) if (s.props[name]) return s.props[name];
   return null;
@@ -47,6 +55,32 @@ function resolvePath(struct, path) {
 export const baseOf = (struct) => structs[struct]?.base ?? null;
 export const structName = (struct) => ui?.[struct]?.name ?? struct;
 
+const TYPES = { B: 'BOOLEAN', I: 'INT', F: 'FLOAT', S: 'STRING', E: 'ENUM', P: 'POINTER', C: 'COLLECTION' };
+const blRnas = new Map();
+const propertyNames = (struct) => { const names = new Set(); for (let s = structs[struct]; s; s = structs[s.base]) Object.keys(s.props).forEach((n) => names.add(n)); return names; };
+
+// bpy_struct.bl_rna: a struct's RNA as Blender's scripts read it, its properties (its own and its bases') as
+// rnaProperty() gives them, in Blender's words. Kept once the interface metadata is loaded.
+export function blRna(struct) {
+  if (blRnas.has(struct)) return blRnas.get(struct);
+  const properties = [...propertyNames(struct)].map((identifier) => {
+    const p = rnaProperty(struct, identifier), pointer = p.type === 'P' || p.type === 'C';
+    return {
+      identifier, name: p.name, description: p.description ?? '', type: TYPES[p.type], default: pointer ? null : p.default, is_readonly: !!p.readonly,
+      subtype: p.subtype ?? 'NONE', unit: p.unit ?? 'NONE', icon: p.icon ?? 'NONE', array_length: p.array ?? 0, is_enum_flag: !!p.flag,
+      hard_min: p.min, hard_max: p.max, soft_min: p.soft_min, soft_max: p.soft_max, step: p.step, precision: p.precision,
+      enum_items: collection((p.items ?? []).filter(Boolean).map(([id, name, description, icon], value) => ({ identifier: id, name, description, icon, value }))),
+      get enum_items_static() { return this.enum_items; },
+      get fixed_type() { return pointer ? blRna(p.struct) : null; },
+    };
+  });
+  const list = collection(properties);
+  for (const p of properties) list[p.identifier] = p;
+  const result = { identifier: struct, name: structName(struct), description: '', get base() { return structs[struct]?.base ? blRna(structs[struct].base) : null; }, properties: list };
+  if (ui) blRnas.set(struct, result);
+  return result;
+}
+
 // A collection property (bpy_prop_collection) of structs: iterable, with Blender's collection attributes.
 // Transcrypt calls get and keys py_get and py_keys.
 export function collection(items = [], active = null) {
@@ -77,13 +111,13 @@ export function rna(struct, data = {}, { items = {}, channels = {}, owner = null
       const name = rnaName(key);
       if (name in target) return target[name];
       if (key in target) return target[key];
-      if (name === 'bl_rna') return { identifier: struct, name: structName(struct) };
+      if (name === 'bl_rna') return blRna(struct);
       if (name === 'path_resolve') return (path) => resolvePath(receiver, path);
       if (name === 'id_data') return receiver;
       // ID properties (custom properties), which Bylonder's data has none of.
       if (['keys', 'values', 'items'].includes(name)) return () => [];
       if (name === 'is_property_set') return (property) => info.bound.has(property);
-      if (name === 'rna_type') return { identifier: struct, name: structName(struct), properties: collection() };
+      if (name === 'rna_type') return blRna(struct);
       const prop = property(struct, name);
       // Context members outside Context's RNA (object, sculpt_object, ...) are None where the context lacks them.
       if (!prop) return struct === 'Context' ? null : undefined;

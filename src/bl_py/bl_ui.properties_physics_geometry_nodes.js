@@ -99,3 +99,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_geometry_nodes.map
+export {Panel, i18n_contexts, iface_, register_class};

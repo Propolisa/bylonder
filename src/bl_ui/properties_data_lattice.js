@@ -136,5 +136,6 @@ export var DATA_PT_custom_props_lattice =  __class__ ('DATA_PT_custom_props_latt
 	_property_type: bpy.types.Lattice
 });
 export var classes = tuple ([DATA_PT_context_lattice, DATA_PT_lattice, DATA_PT_lattice_animation, DATA_PT_custom_props_lattice]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_lattice', 'DATA_PT_lattice', 'DATA_PT_lattice_animation', 'DATA_PT_custom_props_lattice'];
 
 //# sourceMappingURL=properties_data_lattice.map

@@ -90,3 +90,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.asset_shelf.map
+export {Panel, register_class};

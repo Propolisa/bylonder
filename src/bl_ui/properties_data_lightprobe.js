@@ -599,5 +599,6 @@ export var DATA_PT_lightprobe_animation =  __class__ ('DATA_PT_lightprobe_animat
 	_animated_id_context_property: 'lightprobe'
 });
 export var classes = tuple ([DATA_PT_context_lightprobe, DATA_PT_lightprobe, DATA_PT_lightprobe_eevee, DATA_PT_lightprobe_capture, DATA_PT_lightprobe_bake, DATA_PT_lightprobe_bake_resolution, DATA_PT_lightprobe_bake_capture, DATA_PT_lightprobe_bake_clamping, DATA_PT_lightprobe_bake_offset, DATA_PT_lightprobe_visibility, DATA_PT_lightprobe_parallax, DATA_PT_lightprobe_display, DATA_PT_lightprobe_display_eevee, DATA_PT_lightprobe_animation]);
+export var _classes_in_order = ['DataButtonsPanel', 'DATA_PT_context_lightprobe', 'DATA_PT_lightprobe', 'DATA_PT_lightprobe_eevee', 'DATA_PT_lightprobe_visibility', 'DATA_PT_lightprobe_capture', 'DATA_PT_lightprobe_bake', 'DATA_PT_lightprobe_bake_resolution', 'DATA_PT_lightprobe_bake_capture', 'DATA_PT_lightprobe_bake_offset', 'DATA_PT_lightprobe_bake_clamping', 'DATA_PT_lightprobe_parallax', 'DATA_PT_lightprobe_display', 'DATA_PT_lightprobe_display_eevee', 'DATA_PT_lightprobe_animation'];
 
 //# sourceMappingURL=properties_data_lightprobe.map

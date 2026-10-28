@@ -134,7 +134,7 @@ export var CURVES_MT_add_attribute =  __class__ ('CURVES_MT_add_attribute', [Men
 					switch (__attrib0__) {
 						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
 						case 'curves': var curves = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'data_type': var data_type = __allkwargs0__ [__attrib0__]; break;
 						case 'domain': var domain = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -303,3 +303,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_curves.map
+export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};

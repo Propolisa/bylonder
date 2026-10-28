@@ -8,7 +8,7 @@ import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_n as n_} f
 import {Menu} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.node_add_menu';
 export var __all__ = tuple (['set_math_node_default_props', 'set_int_math_node_default_props', 'set_vector_math_node_defaults']);
 export var set_socket_default_value = function (settings, socket_identifier, socket_default_value) {
@@ -910,3 +910,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.node_add_menu.map
+export {Menu, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, n_, register_class};

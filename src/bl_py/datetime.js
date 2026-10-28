@@ -352,7 +352,7 @@ export var _check_tzname = function (py_name) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -372,7 +372,7 @@ export var _check_utc_offset = function (py_name, offset) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'offset': var offset = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
@@ -2093,7 +2093,7 @@ export var timezone =  __class__ ('timezone', [tzinfo], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'offset': var offset = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -2141,7 +2141,7 @@ export var timezone =  __class__ ('timezone', [tzinfo], {
 					switch (__attrib0__) {
 						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
 						case 'offset': var offset = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}

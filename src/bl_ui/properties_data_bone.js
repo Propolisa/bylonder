@@ -829,5 +829,6 @@ export var BONE_PT_custom_props =  __class__ ('BONE_PT_custom_props', [BoneButto
 	});}
 });
 export var classes = tuple ([BONE_PT_context_bone, BONE_PT_transform, BONE_PT_curved, BONE_PT_relations, BONE_PT_collections, BONE_PT_inverse_kinematics, BONE_PT_deform, BONE_PT_display, BONE_PT_display_custom_shape, BONE_PT_custom_props]);
+export var _classes_in_order = ['BoneButtonsPanel', 'BONE_PT_context_bone', 'BONE_PT_transform', 'BONE_PT_curved', 'BONE_PT_relations', 'BONE_PT_collections', 'BONE_PT_display', 'BONE_PT_display_custom_shape', 'BONE_PT_inverse_kinematics', 'BONE_PT_deform', 'BONE_PT_custom_props'];
 
 //# sourceMappingURL=properties_data_bone.map

@@ -3,14 +3,14 @@ import * as __self__ from './bl_operators.uvcalc_lightmap.js';
 (globalThis.__py_modules ??= {})['bl_operators.uvcalc_lightmap'] = __self__;
 var bpy = {};
 var mathutils = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {BoolProperty, FloatProperty, IntProperty} from './_bpy.props.js';
 import * as __module_mathutils__ from './mathutils.js';
 __nest__ (mathutils, '', __module_mathutils__);
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.uvcalc_lightmap';
 export var _merged = function () {
 	if (arguments.length) {
@@ -835,7 +835,7 @@ export var unwrap = function (operator, context) {
 				switch (__attrib0__) {
 					case 'operator': var operator = __allkwargs0__ [__attrib0__]; break;
 					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+					default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 				}
 			}
 			delete kwargs.__kwargtrans__;
@@ -855,8 +855,10 @@ export var unwrap = function (operator, context) {
 		var __accu0__ = [];
 		for (var obj of objects) {
 			if (obj.py_metatype == 'MESH') {
-				if (meobj.data.polygons && me.is_editable) {
-					__accu0__.append (me);
+				for (var me of [obj.data]) {
+					if (me.polygons && me.is_editable) {
+						__accu0__.append (me);
+					}
 				}
 			}
 		}
@@ -874,7 +876,6 @@ export var unwrap = function (operator, context) {
 };
 export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'PREF_CONTEXT': bpy.props.EnumProperty (__kwargtrans__ ({py_name: 'Selection', py_items: tuple ([tuple (['SEL_FACES', 'Selected Faces', 'Pack only selected faces']), tuple (['ALL_FACES', 'All Faces', 'Pack all faces in the mesh'])])})), 'PREF_PACK_IN_ONE': BoolProperty (__kwargtrans__ ({py_name: 'Share Texture Space', description: 'Objects share texture space, map all objects into a single UV map', py_default: true})), 'PREF_NEW_UVLAYER': BoolProperty (__kwargtrans__ ({py_name: 'New UV Map', description: 'Create a new UV map for every mesh packed', py_default: false})), 'PREF_BOX_DIV': IntProperty (__kwargtrans__ ({py_name: 'Pack Quality', description: 'Quality of the packing. Higher values will be slower but waste less space', min: 1, max: 48, py_default: 12})), 'PREF_MARGIN_DIV': FloatProperty (__kwargtrans__ ({py_name: 'Margin', description: 'Size of the margin as a division of the UV', min: 0.001, max: 1.0, py_default: 0.1}))}),
 	bl_idname: 'uv.lightmap_pack',
 	bl_label: 'Lightmap Pack',
 	bl_options: new set (['UNDO']),
@@ -978,6 +979,8 @@ export var LightMapPack =  __class__ ('LightMapPack', [Operator], {
 		return wm.invoke_props_dialog (self);
 	});}
 });
+LightMapPack.__annotations__ = dict ({'PREF_CONTEXT': bpy.props.EnumProperty (__kwargtrans__ ({py_name: 'Selection', py_items: tuple ([tuple (['SEL_FACES', 'Selected Faces', 'Pack only selected faces']), tuple (['ALL_FACES', 'All Faces', 'Pack all faces in the mesh'])])})), 'PREF_PACK_IN_ONE': BoolProperty (__kwargtrans__ ({py_name: 'Share Texture Space', description: 'Objects share texture space, map all objects into a single UV map', py_default: true})), 'PREF_NEW_UVLAYER': BoolProperty (__kwargtrans__ ({py_name: 'New UV Map', description: 'Create a new UV map for every mesh packed', py_default: false})), 'PREF_BOX_DIV': IntProperty (__kwargtrans__ ({py_name: 'Pack Quality', description: 'Quality of the packing. Higher values will be slower but waste less space', min: 1, max: 48, py_default: 12})), 'PREF_MARGIN_DIV': FloatProperty (__kwargtrans__ ({py_name: 'Margin', description: 'Size of the margin as a division of the UV', min: 0.001, max: 1.0, py_default: 0.1}))});
 export var classes = tuple ([LightMapPack]);
 
 //# sourceMappingURL=bl_operators.uvcalc_lightmap.map
+export {BoolProperty, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module};

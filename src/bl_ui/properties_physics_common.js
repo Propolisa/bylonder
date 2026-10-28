@@ -405,5 +405,6 @@ export var basic_force_field_falloff_ui = function (self, field) {
 	row.prop_decorator (field, 'distance_max');
 };
 export var classes = tuple ([PHYSICS_PT_add]);
+export var _classes_in_order = ['PhysicButtonsPanel', 'PHYSICS_PT_add'];
 
 //# sourceMappingURL=properties_physics_common.map

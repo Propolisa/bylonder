@@ -514,3 +514,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_view_layer.map
+export {Menu, Panel, PropertyPanel, UIList, ViewLayer, i18n_contexts, register_class};

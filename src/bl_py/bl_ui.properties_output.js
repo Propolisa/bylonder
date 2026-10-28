@@ -9,7 +9,7 @@ import {PresetPanel} from './bl_ui.utils.js';
 import {Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_output';
 export var RENDER_PT_format_presets =  __class__ ('RENDER_PT_format_presets', [PresetPanel, Panel], {
 	__module__: __name__,
@@ -1054,3 +1054,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_output.map
+export {Menu, Panel, PresetPanel, UIList, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, register_class};

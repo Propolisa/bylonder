@@ -67,7 +67,7 @@ export var fspath = function (py_name) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -87,7 +87,7 @@ export var getenv = function (key, py_default) {
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
 					case 'key': var key = __allkwargs0__ [__attrib0__]; break;
-					case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+					case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}

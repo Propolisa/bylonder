@@ -97,3 +97,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_operators.spreadsheet.map
+export {Operator, register_class};
