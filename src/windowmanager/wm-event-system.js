@@ -6,12 +6,15 @@
 // An event is { type, value, shift, ctrl, alt, oskey, x, y, press, view, native } with Blender's event types in
 // lower case ('a', 'leftmouse', 'wheelupmouse', 'left_ctrl') and values PRESS, RELEASE, CLICK, CLICK_DRAG.
 // A press that no handler uses becomes a CLICK on release, or a CLICK_DRAG once the mouse moves past the drag
-// threshold; `press` holds where the button went down.
+// threshold; `press` holds where the button went down and a CLICK_DRAG's `direction` which way it left.
 import { keyType } from './input/keymap.js';
 
 // U.drag_threshold_mouse, in pixels.
 export const WM_DRAG_THRESHOLD_MOUSE = 3;
 const BUTTONS = ['leftmouse', 'middlemouse', 'rightmouse', 'button4mouse', 'button5mouse'];
+// WM_event_drag_direction: the eighth of a turn the pointer left its press in (y up), from east counterclockwise.
+const DIRECTIONS = ['EAST', 'NORTH_EAST', 'NORTH', 'NORTH_WEST', 'WEST', 'SOUTH_WEST', 'SOUTH', 'SOUTH_EAST'];
+export const dragDirection = (dx, dy) => DIRECTIONS[(Math.round((4 * Math.atan2(-dy, dx)) / Math.PI) + 8) % 8];
 
 // `layers()` returns the handlers below the modal ones, top first; `viewAt(event)` the 3D View a pointer event is
 // over (or null); `accepts(event)` filters out keys meant for text fields and other editors.
@@ -62,7 +65,8 @@ export function createEventSystem({ layers, viewAt, accepts = () => true }) {
     if (!press || press.handled || press.dragged) return;
     if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < WM_DRAG_THRESHOLD_MOUSE) return;
     press.dragged = true;
-    dispatch(wmEvent(press.native, press.type, 'CLICK_DRAG', { view: press.view, press, x: press.x, y: press.y }));
+    const direction = dragDirection(e.clientX - press.x, e.clientY - press.y);
+    dispatch(wmEvent(press.native, press.type, 'CLICK_DRAG', { view: press.view, press, x: press.x, y: press.y, direction }));
   };
   const pointerup = (e) => {
     if (e.pointerType === 'touch') return;

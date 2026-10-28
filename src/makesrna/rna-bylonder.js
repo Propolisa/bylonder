@@ -261,10 +261,18 @@ const STRUCTS = {
     view_layers: (world, r) => collection((world.collections?.viewLayers() ?? []).map((layer) => r.pointer('ViewLayer', layer))),
     unit_settings: (world, r) => r.pointer('UnitSettings', world),
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
+    cursor: (world, r) => world.sceneSettings && r.pointer('View3DCursor', world),
     // The scene's orientation, then the Move, Rotate and Scale tools' (Default: the scene's), as the scene keeps them.
     transform_orientation_slots: (world) => (orientationSlots.get(world) ?? orientationSlots.set(world, collection([0, 1, 2, 3].map((slot) =>
       rna('TransformOrientationSlot', { type: slot ? 'DEFAULT' : 'GLOBAL' }, { items: { type: () => [...(slot ? [ORIENTATION_DEFAULT] : []),
         ...rnaProperty('TransformOrientationSlot', 'type').items] } })))).get(world)),
+  },
+  View3DCursor: {
+    location: array((world) => [...world.sceneSettings.state.cursor.location], (world, value) => world.sceneSettings.setCursor({ location: value })),
+    rotation_mode: { get: (world) => world.sceneSettings.state.cursor.rotation_mode, set: (world, rotation_mode) => world.sceneSettings.setCursor({ rotation_mode }) },
+    rotation_euler: array((world) => [...world.sceneSettings.state.cursor.rotation_euler], (world, value) => world.sceneSettings.setCursor({ rotation_euler: value })),
+    rotation_quaternion: array((world) => [...world.sceneSettings.state.cursor.rotation_quaternion],
+      (world, value) => world.sceneSettings.setCursor({ rotation_quaternion: value }), 'wxyz'),
   },
   ToolSettings: {
     workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },

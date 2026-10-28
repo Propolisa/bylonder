@@ -468,6 +468,12 @@ export function mid_v3_v3v3v3v3(v1, v2, v3, v4) {
   return v;
 }
 
+export function project_plane_v3_v3v3(p, v_plane) {
+  const mul = Math.fround(dot_v3(p, v_plane) / dot_v3(v_plane, v_plane));
+  const out = madd(p, v_plane, -mul);
+  return out;
+}
+
 export function ortho_basis_v3v3_v3(n) {
   const r_n1 = [0, 0, 0];
   const r_n2 = [0, 0, 0];

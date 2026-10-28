@@ -19,6 +19,16 @@ export function mul_v2_m3v3(M, a) {
   return r;
 }
 
+export function negate_m3(R) {
+  let i = 0;
+  let j = 0;
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      R[i][j] = Math.fround(R[i][j] * -1.0);
+    }
+  }
+}
+
 export function determinant_m3_array(m) {
   return Math.fround(
     Math.fround(

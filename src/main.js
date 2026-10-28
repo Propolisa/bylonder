@@ -49,6 +49,8 @@ import { createBlenderObjects } from "./editors/object/object-blender.js";
 import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
+import { cursor3d_update } from "./editors/space_view3d/view3d-cursor.js";
+import { viewProjection } from "./editors/space_view3d/view3d-project.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
 import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
@@ -168,7 +170,8 @@ const overlays = createViewportOverlays(scene, {
   sceneCamera: authored,
   visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),
   aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
-}, { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) });
+}, { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
+() => world.sceneSettings.state.cursor);
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
 world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
@@ -553,14 +556,25 @@ registerOperators({
       startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode, select: (center, r, m) => selectRegion(event.view ?? activeView(), circleRegion(center, r), m) });
     },
   },
-  // A transform from a key starts at the mouse, from a tool's drag at its press; release_confirm ends it on release.
+  // A transform from a key starts at the mouse, from a tool's drag at its press; release_confirm ends it on release,
+  // cursor_transform moves the 3D cursor.
   ...Object.fromEntries([["transform.translate", "move"], ["transform.rotate", "rotate"], ["transform.resize", "scale"]].map(([idname, type]) => [idname, {
-    poll: () => editor.selection.size > 0,
+    poll: (props) => editor.selection.size > 0 || !!props.cursor_transform,
     run: (props, event) => {
       creator.finish();
-      editor.start(type, { point: event?.press, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm });
+      editor.start(type, { point: event?.press, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm, cursor: !!props.cursor_transform });
     },
   }])),
+  // Returns PASS_THROUGH as Blender's does with FINISHED, so a drag from the same press moves the cursor.
+  "view3d.cursor3d": {
+    poll: (props, event) => !!(event?.view ?? activeView()),
+    run: ({ use_depth = true, orientation = "VIEW" }, event) => {
+      const view = event?.view ?? activeView(), mouse = event ?? editor.pointer;
+      cursor3d_update(viewProjection(view), [mouse.x, mouse.y], { use_depth, orientation }, world.sceneSettings);
+      views.wake();
+      return "PASS_THROUGH";
+    },
+  },
   // Blender's is Python setting the data path with exec; a path to a property Bylonder does not bind passes through.
   "wm.context_toggle": {
     run: ({ data_path }) => {

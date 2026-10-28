@@ -6,9 +6,10 @@ import { createOriginOverlay } from '../../draw/overlay-origin.js';
 
 // Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
 // and the extras of cameras, lights and empties. Each view's header, gizmo and shading live in view3d.js.
-//   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js)
-export function createViewportOverlays(scene, extras, origins) {
-  const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene), origin = createOriginOverlay(scene, origins);
+//   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js);
+//   view3dCursor(): the scene's 3D cursor
+export function createViewportOverlays(scene, extras, origins, view3dCursor) {
+  const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene, view3dCursor), origin = createOriginOverlay(scene, origins);
   const extra = createExtrasOverlay(scene, extras), meshes = [...grid.meshes, ...cursor.meshes];
   let shown = true;
   return {

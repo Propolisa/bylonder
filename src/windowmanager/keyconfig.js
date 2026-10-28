@@ -50,9 +50,9 @@ const EVENT_TYPES = { SPACEBAR: 'SPACE' };
 const KEYMAP_TYPES = { WHEELINMOUSE: 'WHEELUPMOUSE', WHEELOUTMOUSE: 'WHEELDOWNMOUSE' };
 const KM_ANY = -1;
 
-// wm_eventmatch for what Bylonder's events carry: no key modifiers or drag directions yet, and Cmd counted as Ctrl.
+// wm_eventmatch for what Bylonder's events carry: no key modifiers yet, and Cmd counted as Ctrl.
 function matches(kmi, event) {
-  if (kmi.key_modifier || (kmi.direction && kmi.direction !== 'ANY')) return false;
+  if (kmi.key_modifier || (kmi.direction && kmi.direction !== 'ANY' && kmi.direction !== event.direction)) return false;
   const type = event.type.toUpperCase();
   if ((KEYMAP_TYPES[kmi.type] ?? kmi.type) !== (EVENT_TYPES[type] ?? type)) return false;
   if (kmi.value !== 'ANY' && kmi.value !== event.value) return false;

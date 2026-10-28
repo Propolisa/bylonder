@@ -3,6 +3,7 @@ body>header,body>footer{display:none!important}
 #viewport-section,.viewport-area{background:var(--bl-viewport)}
 .viewport-area{position:relative;overflow:hidden}
 .viewport-area canvas.viewport-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none}
+.viewport-area canvas.tool-overlay{position:absolute;left:0;top:0;pointer-events:none;z-index:1}
 .engine-working-canvas{position:fixed;left:-100000px;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none}
 .view-label{top:8px;left:52px;display:flex;flex-direction:column;gap:3px;font:var(--bl-font);color:var(--bl-text);text-shadow:0 1px 2px #000a}
 .view-name{text-transform:none}

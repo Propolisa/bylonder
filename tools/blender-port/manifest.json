@@ -9,6 +9,14 @@
       ]
     },
     {
+      "source": "source/blender/blenlib/intern/math_rotation_c.cc",
+      "functions": ["quat_to_mat3", "mat3_normalized_to_quat", "eulO_to_mat3", "mat3_normalized_to_eulO", "mat3_normalized_to_compatible_eulO"]
+    },
+    {
+      "source": "source/blender/blenlib/intern/math_vector.cc",
+      "functions": ["axis_dominant_v3_ortho_single", "project_plane_v3_v3v3"]
+    },
+    {
       "source": "source/blender/bmesh/intern/bmesh_opdefines.cc",
       "constants": [
         "bmo_triangulate_def",
