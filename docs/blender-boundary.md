@@ -90,6 +90,12 @@ Babylon.
   collections and their objects and children, the scene's camera and world, and node trees: a Material is the
   Principled BSDF tree and a World the Background tree its RNA `node_tree` binding describes (`shaderTree`), built by
   idname (`BlenderMain.setNodeTree`); Blender's node types take them over when the file is read.
+- **The rule for relations.** An object's RNA pointer or collection property is one entry in `RELATIONS`
+  (`main-sync.js`): the IDs Babylon says it should hold (`babylon`), what Main holds (`main`), a `set` that calls the
+  BKE function Blender's RNA setter calls (`object_parent_set`, `BKE_object_material_array_assign`), and an `apply`
+  when Blender's code may change it. Push, write-back and `check()` go through that table, so a new kind adds no code
+  elsewhere. Debt: the modifier stack, bases, collections and node trees still have their own routines, and the module
+  has no RNA runtime to call Blender's generated setters by path.
 - **Babylon to Main.** `main-sync-hooks.js` wraps the setters an object's synced bindings read (a vector's or
   quaternion's dirty flag, a color's channels, `name`, `parent`, `metadata`, a light's or camera's fields, the enabled
   state): a write marks the object, and a microtask flushes the marked ones (`flush(false)`). `flush()` writes
@@ -100,6 +106,8 @@ Babylon.
   (this also catches what Blender's buttons write without a tag), through the bindings' setters, with hooks muted so
   nothing echoes. Editors that run Blender's code over several events call `flush()` before and `writeBack()` after.
   `revert()` makes Main Babylon's again (an operator Bylonder refuses).
+  Values Blender evaluates in Main (drivers, later) reach Babylon the same way: `pull(record, owner)` sets each synced
+  binding whose Main value changed.
 - **Geometry** (point 5): Main's Meshes are empty at rest. `run`'s `meshes`, `withMeshes(fn)` and `evaluatedMesh(node)`
   fill them from Babylon's Mesh data (`wbCreation.mesh`, or the edit mesh's while in Edit Mode, `editMode.meshOf`) or a
   curve's Curve data (`world.curves`) and release them after.
