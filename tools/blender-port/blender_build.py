@@ -26,19 +26,20 @@ SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
                    r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu)')
 # Host flags that have no meaning for wasm32 or name host paths.
-DROP = re.compile(r'^(-DFMT_SHARED|-DHAVE_EXECINFO_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
+DROP = re.compile(r'^(-DFMT_SHARED|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
 FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
-         '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-include', os.path.join(WASM, 'compat.h'),
+         '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-include', os.path.join(WASM, 'compat.h'),
          # Before any source includes it inside a namespace (makesrna.cc), where WASI's unistd.h declarations then clash.
          '-include', 'sys/stat.h']
 
 
-def dependency_includes(deps):
-    """The headers of the libraries Blender builds against, from the sources the module build fetches (wasm_module.dependencies),
-    in place of the host's /usr/include."""
-    manifest = json.load(open(os.path.join(os.path.dirname(__file__), 'manifest.json')))['modules']['bmesh/bmesh.wasm']['dependencies']
-    return [f'-I{os.path.join(deps, name + "-" + dep["tag"], dep.get("include", ""))}' for name, dep in sorted(manifest.items())]
+def module_inputs(host, out):
+    """What the module build gives every source: the libraries Blender builds against, fetched at the versions Blender pins
+    (wasm_module.dependencies) in place of the host's /usr/include, with Blender's tree and the module's spec."""
+    spec = json.load(open(os.path.join(os.path.dirname(__file__), 'manifest.json')))['modules']['bmesh/bmesh.wasm']
+    _, includes, _ = wasm_module.dependencies(out, spec['dependencies'])
+    return os.path.realpath(os.path.join(host, '..', 'blender')), spec, includes
 
 
 def target_of(output):
@@ -91,14 +92,26 @@ WASI_RUN = ("const { WASI } = require('node:wasi'); const fs = require('node:fs'
             "process.exitCode = wasi.start(instance);")
 
 
-def wasm_tool(host, out, name, libraries, by_any, extra):
+def wasm_tool(host, out, name, libraries, by_any, extra, link=True):
     """One of Blender's build tools (makesrna) built for wasm32 and run by Node's WASI, so what it generates is laid out
-    for the module's platform: its own target's objects and the libraries it links."""
+    for the module's platform: its own target's objects and the libraries it links. Without `link`, the archive of them
+    (for wasm_module.sdna's makesdna)."""
     objects = os.path.join(out, 'objects')
+    # Tools read Blender's sources: their <fstream> reads files through WASI's stdio.
+    extra = ['-I' + os.path.join(WASM, 'fstream-read'), *extra]
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get('JOBS', os.cpu_count()))) as pool:
-        built = [o for _, o, _ in pool.map(lambda e: compile_one(objects, e, extra), [e for t in [name, *libraries] for e in by_any.get(t, [])])]
-    if not all(built):
-        sys.exit(f'{name} does not build for wasm32')
+        done = list(pool.map(lambda e: compile_one(objects, e, extra), [e for t in [name, *libraries] for e in by_any.get(t, [])]))
+    built = [o for _, o, _ in done if o]
+    for source, _, error in done:
+        if error:
+            print(f'{name}: {os.path.basename(source)} left out: {first_error(error)}', file=sys.stderr)
+    if not link:
+        archive = os.path.join(out, 'archives', 'tool-' + name + '.a')
+        os.makedirs(os.path.dirname(archive), exist_ok=True)
+        if os.path.exists(archive):
+            os.remove(archive)
+        subprocess.run([shutil.which('llvm-ar') or shutil.which('llvm-ar-18'), 'rcs', archive, *built], check=True)
+        return [archive]
     tool = os.path.join(out, name + '.wasm')
     subprocess.run(['clang++', '--target=wasm32-wasi', *built, '-lwasi-emulated-process-clocks', '-Wl,--allow-undefined', '-o', tool], check=True)
     return tool
@@ -106,12 +119,13 @@ def wasm_tool(host, out, name, libraries, by_any, extra):
 
 def generate(host, out, missing, by_any, extra):
     """Blender's generated sources, by the commands its build runs (ninja -t commands), with makesrna built for wasm32 and
-    datatoc built for the host (it has no dependencies). makesdna's output is the module build's wasm32 one."""
-    module_sdna = extra[0][2:]
+    datatoc built for the host (it has no dependencies). makesdna is the module build's (wasm_module.sdna, which pads
+    Blender's DNA for wasm32), built from this build's blenlib."""
+    tree, spec, includes = module_inputs(host, out)
+    blenlib = wasm_tool(host, out, 'bf_blenlib', ['bf_intern_guardedalloc', 'bf_intern_clog'], by_any, extra, link=False)
+    wasm_module.sdna(tree, out, includes + wasm_module.flags(tree, spec), blenlib)
     for file in ('dna.cc', 'dna_struct_ids.cc', 'dna_verify.cc', 'dna_defaults.cc'):
-        target = os.path.join(host, 'source/blender/makesdna/intern', file)
-        if not os.path.exists(target):
-            shutil.copy(os.path.join(module_sdna, file), target)
+        shutil.copy(os.path.join(out, 'generated', 'sdna', file), os.path.join(host, 'source/blender/makesdna/intern', file))
     datatoc = os.path.join(out, 'datatoc')
     if not os.path.exists(datatoc):
         subprocess.run(['clang++', '-O2', os.path.join(host, '..', 'blender', 'source/blender/datatoc/datatoc.cc'), '-o', datatoc], check=True)
@@ -138,8 +152,8 @@ def first_error(stderr):
 def main():
     host = os.path.abspath(sys.argv[1])
     # The module build's directory: its fetched dependencies and its wasm32 makesdna output (wasm_module.sdna).
-    module_build = os.environ.get('BYLONDER_MODULE_BUILD', os.path.join(host, '..', '..', 'anim', 'b523-wasm-build'))
-    extra = [f'-I{os.path.join(module_build, "generated", "sdna")}', *dependency_includes(os.path.join(module_build, 'deps'))]
+    _, _, includes = module_inputs(host, out)
+    extra = [f'-I{os.path.join(out, "generated", "sdna")}', *includes]
     report = sys.argv[sys.argv.index('--report') + 1] if '--report' in sys.argv else os.path.join(host, '..', 'seam-report.json')
     out = os.path.join(host, '..', 'wasm-build')
     objects = os.path.join(out, 'objects')
