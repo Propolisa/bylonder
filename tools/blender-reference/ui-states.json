@@ -1,0 +1,8 @@
+[
+  { "id": "startup", "title": "Default startup scene" },
+  { "id": "object-menu", "title": "3D View header: Object menu open" },
+  { "id": "file-menu", "title": "Topbar: File menu open" },
+  { "id": "add-menu", "title": "Add menu (Shift A) over the 3D View" },
+  { "id": "edit-mode", "title": "Edit Mode on the default cube (Tab)" },
+  { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" }
+]
