@@ -17,9 +17,7 @@ import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperator, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
-import { createRedoPanel } from '../interface/redo-panel.js';
-import { operatorSchema } from './mesh-catalog.js';
-import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
+import { redoProperties } from '../interface/hud.js';
 import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js';
 import { objectMesh } from './object-mesh.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
@@ -53,7 +51,7 @@ function drawDashedLine(ctx, [[x0, y0], [x1, y1]]) {
 export function createEditMode({ world, editor, views, history, notify, changed }) {
   const { scene } = world;
   let em = null;
-  const redo = createRedoPanel(document.querySelector('#redo-panel'));
+  const redo = world.hud;
   // scene.tool_settings.mesh_select_mode, kept across Edit Mode sessions as in Blender.
   let selectmode = SCE_SELECT_VERTEX;
 
@@ -281,18 +279,18 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   function adjustLast(idname, before, props) {
     em.before?.free();
     em.before = null;
-    const schema = operatorSchema(idname);
-    if (!Object.keys(schema).length) { before.free(); adjustLast.apply = null; return; }
+    const names = redoProperties(idname);
+    if (!names.length) { before.free(); adjustLast.apply = null; return; }
     em.before = before;
-    const values = { ...Object.fromEntries(Object.entries(schema).map(([key, def]) => [key, def.default])), ...props };
+    const values = { ...Object.fromEntries(names.map((name) => [name, rnaOperators[idname].properties[name].default])), ...props };
     const apply = (next) => {
       em.edit.replace(before);
       runExec(idname, next);
       sync({ amend: true });
     };
-    adjustLast.apply = { idname, values, apply: (next) => { Object.assign(values, next); apply({ ...values }); redo.show(panel); } };
-    const panel = { title: rna[idname].name, schema, values, apply };
-    redo.show(panel);
+    const show = () => redo.show({ idname, values, apply: (next) => { Object.assign(values, next); apply({ ...values }); show(); } });
+    adjustLast.apply = { idname, values, apply: (next) => { Object.assign(values, next); apply({ ...values }); show(); } };
+    show();
   }
   const wm = () => world.wm;
   // Starts a modal tool as a window manager modal handler; `create(end)` builds it.
@@ -355,7 +353,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // Mesh keymap and menus. Transforms and box select stay the Object Mode operators, which start the same tools; adding
   // primitives stays the Add menu's.
   const inEdit = () => !!em;
-  const meshOperators = Object.keys(rna).filter((id) => id.startsWith('mesh.') && !id.startsWith('mesh.primitive_') && runsMeshOperator(id));
+  const meshOperators = Object.keys(rnaOperators).filter((id) => id.startsWith('mesh.') && !id.startsWith('mesh.primitive_') && runsMeshOperator(id));
   for (const idname of meshOperators) {
     const run = (props, event) => (MOUSE_OPERATORS.has(idname) && event?.view ? moduleOperator(idname, props, event) : exec(idname, props));
     registerOperator(idname, { poll: () => !!em && em.edit.poll(idname), run, enumItems: (prop) => em?.edit.enumItems(idname, prop) });
@@ -497,7 +495,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       endTool();
       if (em) { em.overlay.dispose(); freeEditMesh(); }
       em = null;
-      redo.dispose();
     },
   };
 }

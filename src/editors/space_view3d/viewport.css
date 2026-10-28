@@ -23,7 +23,8 @@
 .camera-view .nav-gizmo,.camera-view .nav-buttons,.camera-view .view-label .view-detail{display:none}
 #toast{left:50%;transform:translateX(-50%);bottom:10px;background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;color:var(--bl-text);font:var(--bl-font)}
 dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;font:var(--bl-font);box-shadow:0 6px 20px #0008}
-#creation-panel,#redo-panel{left:6px;bottom:6px;background:#303030f0;border:0;border-radius:5px;box-shadow:0 2px 8px #0006}
+/* The HUD region (ED_area_type_hud): Adjust Last Operation over the main region's bottom left corner. */
+#redo-panel{position:absolute;left:calc(var(--bl-row)*3.25);bottom:calc(var(--bl-row)*.5);width:calc(var(--bl-row)*13);max-height:70%;overflow:auto;z-index:12;border-radius:var(--bl-radius);background:color-mix(in srgb,var(--bl-region) 90%,transparent)}
 @media(pointer:coarse){.nav-gizmo{width:80px;height:80px;top:50px}.nav-buttons{display:none}.view-label{display:none}}
 #panel{background:var(--bl-back)}
 #pane{height:100%}

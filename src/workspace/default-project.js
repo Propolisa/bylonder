@@ -73,7 +73,7 @@ Use fetch(new URL('./data.json', import.meta.url)) for native assets.
 
 ## Reactive UI
 See examples/controls.js. Each workbench.controls({id,title,schema,connect}) creates an
-independent store and generated Tweakpane section. connect(store) returns optional cleanup.
+independent store and generated Properties section. connect(store) returns optional cleanup.
 store.set(key,value) validates, updates UI and invalidates dependent effects.
 Effects default to frame-coalesced execution. Options: mode 'immediate', 'frame', 'debounce',
 'manual'; delay; onStale. store.invalidate(key), store.flush(), store.stale are available.

@@ -10,6 +10,7 @@ import { applyRenderSettings } from "./workspace/render-settings.js";
 import { createObjectActions } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
+import { createHud } from "./editors/interface/hud.js";
 import { createOutliner } from "./editors/space_outliner/space-outliner.js";
 import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
@@ -317,6 +318,8 @@ const nav = { frame: (node) => activeView()?.nav.frame(node) };
 const commands = createObjectCommands(world, editor, history, () =>
   refreshUI(),
 );
+// The HUD region's Adjust Last Operation panel, for Add and Edit Mode operators.
+world.hud = createHud(document.querySelector("#redo-panel"));
 creator = createAddMesh(
   world,
   editor,
@@ -534,11 +537,6 @@ const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !docum
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event?.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
-// The Add panel's own keys while a new object waits for its settings.
-const creatorKeys = createKeymap([
-  { keys: "ESC", poll: () => creator.pending, run: () => creator.finish(false) },
-  { keys: "RET", poll: () => creator.pending, run: () => creator.finish() },
-]);
 // The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
 const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
 registerOperators({
@@ -623,7 +621,7 @@ const view3dArea = {
 const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
 // A menu of the 3D View opened as wm.call_menu opens it (the touch controls' long press), at a point of the page.
 world.callMenu = (name, at) => inArea(view3dArea, () => view3dArea.menu(name)?.(at));
-// The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
+// The handler stack below modal handlers: the gizmo map, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 // The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's transform gizmos drag
 // themselves; the tools' gizmos run their keymaps).
@@ -632,7 +630,7 @@ const gizmoKeys = (event) => (event.type === "leftmouse" && event.value === "PRE
 const keyLayers = () => {
   const view = activeView();
   if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
-  return [creatorKeys, gizmoKeys, world.editMode.keymap, blenderKeys, bylonderKeys];
+  return [gizmoKeys, world.editMode.keymap, blenderKeys, bylonderKeys];
 };
 
 let last = 0;
@@ -672,6 +670,7 @@ function dispose() {
   runningJobs.dispose();
   sdk.dispose();
   creator.dispose();
+  world.hud.dispose();
   tools.dispose();
   world.editMode.dispose();
   world.outliner.dispose();

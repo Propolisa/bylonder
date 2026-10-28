@@ -38,7 +38,6 @@
     "reka-ui": "2.11.0",
     "splitpanes": "4.1.2",
     "tailwind-merge": "3.7.0",
-    "tweakpane": "4.0.5",
     "vue": "3.5.22"
   },
   "devDependencies": {

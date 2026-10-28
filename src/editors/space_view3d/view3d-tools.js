@@ -1,7 +1,6 @@
 // The 3D View's tools beyond selection and the transform gizmos: their operators by Blender idname (view3d.cursor3d,
 // view3d.ruler_add and view3d.ruler_remove, gpencil.annotate, view3d.interactive_add, transform.from_gizmo) and the
 // gizmo map of the active tool's gizmo group (Measure's rulers, the Add Primitive grid, Edit Mode's handles).
-import { Quaternion, Matrix } from '@babylonjs/core';
 import { registerOperators, invokeOperator, inArea } from '../../windowmanager/wm-operators.js';
 import { keymapHandler } from '../../windowmanager/keyconfig.js';
 import { createGizmoMap } from '../../windowmanager/wm-gizmo-map.js';
@@ -16,7 +15,6 @@ import { createAnnotate } from '../gpencil/annotate.js';
 import { objectMesh } from '../object/object-mesh.js';
 import { worldAxes } from '../transform/transform-mesh.js';
 import { unit_m3 } from '../../blenlib/math-matrix.js';
-import { toBabylon } from '../transform/transform.js';
 
 // The drag actions of the Transform tool's gizmo group (VIEW3D_GGT_xform_gizmo's drag_action).
 const DRAG_ACTIONS = { TRANSLATE: ['transform.translate', 'move'], ROTATE: ['transform.rotate', 'rotate'], SCALE: ['transform.resize', 'scale'] };
@@ -53,10 +51,9 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
     placement: () => toolSettings().annotation_stroke_placement_view3d ?? 'CURSOR', wm: world.wm, commit, notify,
   });
   // A primitive the Add Primitive tools placed: Blender's operator, into the edit mesh in Edit Mode.
-  const addPrimitive = (idname, { location, rotation, matrix, scale, ...sizes }) => {
+  const addPrimitive = (idname, { location, rotation, scale, ...sizes }) => {
     if (world.editMode.active) { world.editMode.addPrimitive(idname, { location, rotation, scale, ...sizes }); return; }
-    const babylon = Matrix.FromArray([0, 2, 1].flatMap((c) => [...toBabylon(matrix[c]).asArray(), 0]).concat([0, 0, 0, 1]));
-    addPreset(idname, { options: { ...sizes, scale }, location, rotation: Quaternion.FromRotationMatrix(babylon) });
+    addPreset(idname, { options: { ...sizes, scale }, location, rotation });
   };
   const placement = createPlacement({
     region, sources, cursor: () => world.sceneSettings.state.cursor.location, settings: toolSettings, wm: world.wm,

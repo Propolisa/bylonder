@@ -2,7 +2,7 @@
 
 # Bylonder
 
-Full-viewport Babylon.js workspace with modular reactive systems, generated Tweakpane controls, transform tools and browser-local persistence. Licensed under GPL-3.0-or-later (see `LICENSE`). Dependencies are pinned; Inspector is loaded on demand.
+Full-viewport Babylon.js workspace with modular reactive systems, generated controls, transform tools and browser-local persistence. Licensed under GPL-3.0-or-later (see `LICENSE`). Dependencies are pinned; Inspector is loaded on demand.
 
 ## Develop / fork
 
@@ -148,7 +148,7 @@ Monaco includes all 2,125 pinned Babylon declaration files, typed SDK globals, l
 
 ## Object-mode tools
 
-Shift+A opens the mesh menu. A temporary Tweakpane panel edits creation arguments live; Apply creates one undo step, Cancel restores the previous scene. F9 reopens the last creation settings until another edit. Plane, Cube, Circle, Cylinder, Cone and Grid are Blender's own primitives, built by a port of Blender's BMesh operators and matching Blender 5.2 vertex for vertex; their fields are the operators' RNA properties (`src/makesrna/rna-operators.json`, written from Blender by `tools/blender-reference/operators.py`). UV Sphere, Ico Sphere and Torus still use Babylon builders, and Add > Mesh > Babylon has Babylon-only shapes, with arguments reflected from Babylon's TypeScript declarations (`scripts/mesh-schema.mjs`).
+Shift+A opens Blender's Add menu. The new object's Adjust Last Operation panel (the 3D View's HUD region) edits the operator's properties live, Align, Location and Rotation included; the next edit makes it one undo step. F9 reopens it until another edit. Plane, Cube, Circle, Cylinder, Cone and Grid are Blender's own primitives, built by a port of Blender's BMesh operators and matching Blender 5.2 vertex for vertex; their fields are the operators' RNA properties (`src/makesrna/rna-operators.json`, written from Blender by `tools/blender-reference/operators.py`). UV Sphere, Ico Sphere and Torus still use Babylon builders, and Add > Mesh > Babylon has Babylon-only shapes, with arguments reflected from Babylon's TypeScript declarations (`scripts/mesh-schema.mjs`).
 
 ```js
 workbench.meshTools({

@@ -61,7 +61,7 @@ export function cursorSnap(r, mval, { settings, sources, cursor, snap }) {
 }
 
 // `primitive()` names the active tool's primitive (builtin.primitive_*_add); `settings()` the scene's ToolSettings
-// placement values; `add(idname, { location, rotation, matrix, scale })` runs the primitive's operator.
+// placement values; `add(idname, { location, rotation, scale })` runs the primitive's operator.
 export function createPlacement({ region, sources, cursor, settings, wm, toolActive, tool, add, notify }) {
   let preview = null, ipd = null;
   const snapState = (r, mval, snap) => cursorSnap(r, mval, { settings: settings(), sources, cursor: cursor(), snap });
@@ -195,7 +195,7 @@ export function createPlacement({ region, sources, cursor, settings, wm, toolAct
         if (dot_v3(ipd.matrix_orient[ipd.orient_axis], sub_v3(bounds[0], bounds[4])) > 0) { m[2] = negate_v3(m[2]); m[1] = negate_v3(m[1]); }
         const scale = [3, 1, 4].map((i) => len_v3(sub_v3(bounds[0], bounds[i])) / 2);
         const matrix = m.map((axis) => normalize_v3(axis));
-        add(idname, { location: interp_v3(bounds[0], bounds[6], 0.5), rotation: mat3_normalized_to_eulO(1, matrix), matrix, scale, ...SIZES[primitive_type] });
+        add(idname, { location: interp_v3(bounds[0], bounds[6], 0.5), rotation: mat3_normalized_to_eulO(1, matrix), scale, ...SIZES[primitive_type] });
       }
       exit();
     };
