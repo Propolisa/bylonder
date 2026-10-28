@@ -1,3 +1,4 @@
+import { preloadIcons } from "./editors/interface/icon.js";
 import { mountNodeEditor } from './editors/space_node/node-editor.js';
 import { crossingLosses } from "./blenkernel/light/light-home.js";
 import { report } from "./windowmanager/wm-reports.js";
@@ -70,6 +71,7 @@ import { registerTextOperators } from "./editors/space_text/text-ops.js";
 import { mountConsole } from "./editors/space_console/console.js";
 import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
 import { mountInfo } from "./editors/space_info/info.js";
+await preloadIcons();
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;

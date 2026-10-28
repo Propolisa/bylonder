@@ -3,9 +3,10 @@ export function renderSettings(){
   try{const value=JSON.parse(localStorage.getItem(key));if(value?.mode==='custom'&&Number.isFinite(value.ratio)&&value.ratio>=0.25&&value.ratio<=4)return value;}catch{}
   return {mode:'native'};
 }
+// Babylon resizes on a new scaling level (the views then size the engine again), so an unchanged level costs nothing.
 export function applyRenderSettings(engine, settings=renderSettings()){
-  engine.setHardwareScalingLevel(settings.mode==='custom'?settings.ratio:1/(devicePixelRatio||1));
-  engine.resize();
+  const level=settings.mode==='custom'?settings.ratio:1/(devicePixelRatio||1);
+  if(engine.getHardwareScalingLevel()!==level)engine.setHardwareScalingLevel(level);
 }
 export function setupRenderSettings(onChange){
   const dialog=document.createElement('dialog');dialog.className='workbench-dialog';

@@ -1,9 +1,9 @@
+import { preloadIcons } from "../editors/interface/icon.js";
 import { renderSettings, setupRenderSettings } from "./render-settings.js";
 import { setupSharing } from "./share-ui.js";
 import { mountWorkspaceLayout } from "./layout.js";
 import { RUNTIME_LAYOUT_KEY } from "../editors/screen/model.js";
 import "./workspace.css";
-import "../theme.css";
 import { mountTopbar } from "./topbar.js";
 import { examples } from "./examples.js";
 import { monaco, language, setupIntelligence } from "./intelligence";
@@ -23,6 +23,10 @@ import { preferences, openPreferences } from "./preferences.js";
 import { menuButton } from "../editors/interface/menu.js";
 import { iconButton } from "../editors/interface/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
+await preloadIcons();
+// The window shows once the scene's interface has drawn, or failed to.
+const reveal = () => document.body.classList.remove("bl-loading");
+setTimeout(reveal, 8000);
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
 const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
@@ -79,6 +83,7 @@ function log(text, level = "log") {
   $("console-content").scrollTop = $("console-content").scrollHeight;
 }
 function failure(error) {
+  reveal();
   console.error(error);
   log(error.message || String(error), "error");
   $("save-status").textContent = error.message || String(error);
@@ -495,6 +500,7 @@ window.addEventListener("message", (e) => {
       location.origin,
     );
   if (type === "text") textChanged(payload);
+  if (type === "running" || type === "run-error") requestAnimationFrame(() => requestAnimationFrame(reveal));
   if (type === "running") { $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }
   if (type === "run-error") {
     $("run-status").textContent = "Run failed";

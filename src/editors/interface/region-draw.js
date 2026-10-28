@@ -5,7 +5,7 @@
 // multicolor one in its own colors with its themed groups recolored (icon_source_edit_cb).
 import { provided } from '../../port/wasm.js';
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
-import { iconUrl } from './icon.js';
+import { iconSvg } from './icon.js';
 
 const { exports: x } = blenderModule;
 const decoder = new TextDecoder();
@@ -36,9 +36,8 @@ function roundRect(ctx, left, top, right, bottom, radius, corners) {
   ctx.roundRect(left, top, right - left, bottom - top, [at(CNR_TOP_LEFT), at(CNR_TOP_RIGHT), at(CNR_BOTTOM_RIGHT), at(CNR_BOTTOM_LEFT)]);
 }
 
-// Icons: each SVG's text once, and its rasters by size, color and outline; while one loads, the redraws of the regions
-// that wanted it wait for it.
-const sources = new Map(), rasters = new Map(), waiting = new Map();
+// Icons: rasters by size, color and outline; while one decodes, the redraws of the regions that wanted it wait for it.
+const rasters = new Map(), waiting = new Map();
 // The regions an icon load tagged redraw once on the next frame, as ED_region_tag_redraw does.
 const tagged = new Set();
 const flush = () => { const redraws = [...tagged]; tagged.clear(); redraws.forEach((redraw) => redraw()); };
@@ -55,10 +54,6 @@ function loaded(map, key, promise) {
 function wanted(map, key, redraw) {
   if (!map.get(key)) waiting.get(key)?.add(redraw);
   return map.get(key);
-}
-function source(name, redraw) {
-  if (!sources.has(name)) loaded(sources, name, fetch(iconUrl(name)).then((r) => (r.ok ? r.text() : '')));
-  return wanted(sources, name, redraw);
 }
 
 // As icon_source_edit_cb and svg_replace_color_attributes recolor a multicolor icon: each group with a blender_ id
@@ -78,14 +73,14 @@ async function rasterize(svg, size, scale, multicolor) {
   const { width, height } = svgSize(svg);
   const pixels = size * scale;
   const destW = Math.ceil(width * pixels / 1600), destH = Math.ceil(height * pixels / 1600);
-  const canvas = new OffscreenCanvas(destW, destH), ctx = canvas.getContext('2d');
+  // Read back on the CPU: a GPU canvas would stall on every icon's getImageData.
+  const canvas = new OffscreenCanvas(destW, destH), ctx = canvas.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(image, 0, 0, destW, destH);
   if (!multicolor) {
-    const data = ctx.getImageData(0, 0, destW, destH);
-    for (let i = 0; i < data.data.length; i += 4) {
-      const [r, g, b, a] = data.data.subarray(i, i + 4);
-      const gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      data.data.set([255, 255, 255, Math.round(gray * a / 255)], i);
+    const data = ctx.getImageData(0, 0, destW, destH), px = data.data;
+    for (let i = 0; i < px.length; i += 4) {
+      px[i + 3] = Math.round((0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) * px[i + 3] / 255);
+      px[i] = px[i + 1] = px[i + 2] = 255;
     }
     ctx.putImageData(data, 0, 0);
   }
@@ -100,7 +95,7 @@ const svgSize = (svg) => {
 };
 
 function icon(name, size, scale, multicolor, colors, redraw) {
-  const svg = source(name.toLowerCase(), redraw);
+  const svg = iconSvg(name);
   if (!svg) return null;
   const key = `${name}|${size * scale}|${multicolor}`;
   if (!rasters.has(key)) loaded(rasters, key, rasterize(multicolor ? editSource(svg, colors) : svg, size, scale, multicolor));

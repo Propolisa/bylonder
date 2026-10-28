@@ -34,11 +34,8 @@ const [, FC_BEZT, FC_TOTVERT, FC_FLAG, FC_RNA_PATH, FC_ARRAY_INDEX, FC_COLOR, FC
   BEZT_SIZE, B_VEC, B_IPO, B_H1, B_H2, B_F1, B_F2, B_F3, B_EASING, B_BACK, B_AMPLITUDE, B_PERIOD, , B_HIDE] = L;
 
 // Blender's enum identifiers for BezTriple's and FCurve's values (rna_curve.cc, rna_fcurve.cc), in value order.
-export const INTERPOLATIONS = ['CONSTANT', 'LINEAR', 'BEZIER', 'BACK', 'BOUNCE', 'CIRC', 'CUBIC', 'ELASTIC', 'EXPO', 'QUAD', 'QUART', 'QUINT', 'SINE'];
-export const HANDLE_TYPES = ['FREE', 'AUTO', 'VECTOR', 'ALIGNED', 'AUTO_CLAMPED'];
-export const EASINGS = ['AUTO', 'EASE_IN', 'EASE_OUT', 'EASE_IN_OUT'];
-export const KEYFRAME_TYPES = ['KEYFRAME', 'EXTREME', 'BREAKDOWN', 'JITTER', 'MOVING_HOLD', 'GENERATED'];
-export const EXTRAPOLATIONS = ['CONSTANT', 'LINEAR'];
+import { INTERPOLATIONS, HANDLE_TYPES, EASINGS, KEYFRAME_TYPES, EXTRAPOLATIONS } from './saved.js';
+export { INTERPOLATIONS, HANDLE_TYPES, EASINGS, KEYFRAME_TYPES, EXTRAPOLATIONS };
 export const COLOR_MODES = ['AUTO_RAINBOW', 'AUTO_RGB', 'CUSTOM', 'AUTO_YRGB'];
 export const SMOOTHINGS = ['NONE', 'CONT_ACCEL'];
 const SELECT = 1;

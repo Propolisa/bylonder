@@ -1,4 +1,4 @@
-import { normalizeAnimation } from '../blenkernel/animation/model.js';
+import { normalizeAnimation } from '../blenkernel/animation/saved.js';
 import { gzipSync, Gunzip, strToU8, strFromU8 } from 'fflate';
 import { validateFiles, normalizePath } from './project-model.js';
 import { storedScenes } from './scenes.js';

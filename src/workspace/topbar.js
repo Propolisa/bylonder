@@ -134,7 +134,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     return label;
   }
 
-  // Laid out like Blender's splash: Blender's artwork (public/splash.png, release/datafiles/splash.png, with its logo and
+  // Laid out like Blender's splash: Blender's artwork (public/splash.webp from release/datafiles/splash.png, with its logo and
   // credit) and the version, New File and Recent Files, then Open and links.
   function splash() {
     const dialog = document.createElement('dialog');

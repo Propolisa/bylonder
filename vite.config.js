@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 import { scanImplemented } from "./scripts/blender-coverage.mjs";
+import { blenderIcons } from "./scripts/blender-icons.mjs";
 import { execFileSync } from "node:child_process";
 import pkg from "./package.json" with { type: "json" };
 
@@ -34,9 +35,18 @@ const blenderCoverage = () => ({
   },
 });
 
+// virtual:blender-icons is Blender's icon set as one module.
+const blenderIconSet = () => ({
+  name: "blender-icons",
+  resolveId: (id) => (id === "virtual:blender-icons" ? "\0blender-icons" : null),
+  async load(id) {
+    if (id === "\0blender-icons") return "export default " + JSON.stringify(await blenderIcons("public/icons/blender"));
+  },
+});
+
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
-  plugins: [vue(), tailwindcss(), blenderCoverage(), changelog()],
+  plugins: [vue(), tailwindcss(), blenderCoverage(), blenderIconSet(), changelog()],
   define: { __BYLONDER_VERSION__: JSON.stringify(pkg.version), __BYLONDER_CHANGE__: JSON.stringify(commits()[0] ?? null) },
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   build: {

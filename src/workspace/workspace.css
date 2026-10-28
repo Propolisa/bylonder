@@ -42,7 +42,7 @@ body{display:flex;flex-direction:column;height:100dvh}
 @media(pointer:coarse){#appbar{height:40px;overflow-x:auto}#appbar>*{flex-shrink:0}#workspace-tabs{display:none}#appbar .bl-pulldown{height:34px;padding:0 8px}footer.bl-statusbar{display:none}.bl-datablock select{max-width:110px}}
 .bl-splash{width:min(502px,calc(100vw - 24px));padding:0;border:0;border-radius:6px;background:var(--bl-region);color:var(--bl-text);font:var(--bl-font);box-shadow:var(--bl-shadow-popup);overflow:hidden}
 .bl-splash::backdrop{background:transparent}
-.bl-splash-banner{position:relative;aspect-ratio:2/1;background:url(/splash.png) center/cover}
+.bl-splash-banner{position:relative;aspect-ratio:2/1;background:url(/splash.webp) center/cover}
 .bl-splash-version{position:absolute;right:12px;top:10px;color:#fff;font-size:11px}
 .bl-splash-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 34px 12px}
 .bl-splash-links{margin:0 34px;padding:12px 0 18px;border-top:1px solid #ffffff14}

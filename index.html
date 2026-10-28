@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="logo/bylonder-32.svg"><link rel="icon" type="image/png" sizes="32x32" href="logo/bylonder-32.png"><link rel="apple-touch-icon" href="logo/bylonder-256.png">
     <title>Bylonder</title>
+    <link rel="stylesheet" href="/src/theme.css" />
+    <!-- The window stays empty, with the logo, until the scene's interface has drawn (app.js reveal). -->
+    <style>
+      body.bl-loading { background: var(--bl-gap); }
+      body.bl-loading > :not(#fatal) { visibility: hidden; }
+      body.bl-loading::after { content: ""; position: fixed; inset: 0; margin: auto; width: 64px; height: 64px; background: var(--bl-text-off); mask: url(logo/bylonder.svg) center / contain no-repeat; animation: bl-loading 1.2s ease-in-out infinite alternate; }
+      @keyframes bl-loading { from { opacity: 0.25; } to { opacity: 0.6; } }
+    </style>
   </head>
-  <body>
+  <body class="bl-loading">
     <header id="appbar">
       <span class="bl-logo"></span><nav id="topbar-menus" aria-label="Main menu"></nav>
       <nav id="workspace-tabs" aria-label="Workspaces"></nav>
