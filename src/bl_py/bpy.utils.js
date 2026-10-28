@@ -11,8 +11,8 @@ import * as _sys from './sys.js';
 import * as _os from './os.js';
 import {script_paths as _bpy_script_paths, user_resource as _user_resource, blend_paths, escape_identifier, flip_name, register_class, register_cli_command, resource_path, system_resource, unescape_identifier, unregister_class, unregister_cli_command} from './_bpy.js';
 import * as units from './_bpy._utils_units.js';
-import {_lazy, _member, _module} from './_modules.js';
-export {_sys, units, flip_name, _addon_utils, resource_path, _module, unregister_cli_command, unregister_class, register_cli_command, register_class, blend_paths, unescape_identifier, _lazy, _user_resource, _member, _bpy_script_paths, system_resource, escape_identifier, _os};
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+export {_sys, units, flip_name, _addon_utils, resource_path, _module, unregister_cli_command, unregister_class, _globals, register_cli_command, register_class, blend_paths, unescape_identifier, _lazy, _user_resource, _member, _import, _bpy_script_paths, system_resource, escape_identifier, _os};
 var __name__ = 'bpy.utils';
 export var __all__ = tuple (['blend_paths', 'escape_identifier', 'flip_name', 'unescape_identifier', 'keyconfig_init', 'keyconfig_set', 'load_scripts', 'modules_from_path', 'preset_find', 'preset_paths', 'refresh_script_paths', 'app_template_paths', 'register_class', 'register_cli_command', 'time_from_frame', 'unregister_cli_command', 'register_manual_map', 'unregister_manual_map', 'register_preset_path', 'unregister_preset_path', 'register_classes_factory', 'register_submodule_factory', 'register_tool', 'make_rna_paths', 'manual_map', 'manual_language_code', 'previews', 'resource_path', 'script_path_user', 'extension_path_user', 'script_paths', 'smpte_from_frame', 'smpte_from_seconds', 'units', 'unregister_class', 'unregister_tool', 'user_resource', 'execfile', 'expose_bundled_modules']);
 export var _bpy = __cycle0__;
@@ -87,7 +87,7 @@ export var _test_import = function (module_name, loaded_modules) {
 		var t = time.time ();
 	}
 	try {
-		var mod = __import__ (module_name);
+		var mod = _import (module_name);
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
@@ -428,7 +428,8 @@ export var _on_exit = function () {
 	try {
 		__withid0__.__enter__ ();
 		for (var mod_name of py_reversed (_registered_module_names)) {
-			if (mod_sys.modules.py_get (mod_name) === null) {
+			var mod = _sys.modules.py_get (mod_name);
+			if (mod === null) {
 				print ('Warning: module', repr (mod_name), 'not found in sys.modules');
 				continue;
 			}
@@ -515,7 +516,8 @@ export var script_paths_system_environment = function () {
 	}
 	else {
 	}
-	if (env_system_paths_os.environ.py_get ('BLENDER_SYSTEM_SCRIPTS')) {
+	var env_system_paths = _os.environ.py_get ('BLENDER_SYSTEM_SCRIPTS');
+	if (env_system_paths) {
 		return (function () {
 			var __accu0__ = [];
 			for (var p of list (env_system_paths.py_split (_os.pathsep))) {
@@ -558,7 +560,8 @@ export var script_paths = function () {
 	}
 	var base_paths = [];
 	if (check_all) {
-		if (path_localresource_path ('LOCAL')) {
+		var path_local = resource_path ('LOCAL');
+		if (path_local) {
 			base_paths.append (_os.path.join (path_local, 'scripts'));
 		}
 		if (use_user) {
@@ -956,7 +959,7 @@ export var preset_find = function (py_name, preset_path) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'preset_path': var preset_path = __allkwargs0__ [__attrib0__]; break;
 					case 'display_name': var display_name = __allkwargs0__ [__attrib0__]; break;
 					case 'ext': var ext = __allkwargs0__ [__attrib0__]; break;
@@ -1243,7 +1246,7 @@ export var register_submodule_factory = function (module_name, submodule_names) 
 		}
 		else {
 		}
-		module = __import__ (__kwargtrans__ ({py_name: module_name, fromlist: submodule_names}));
+		module = _import (__kwargtrans__ ({py_name: module_name, fromlist: submodule_names}));
 		submodules.__setslice__ (0, null, null, (function () {
 			var __accu0__ = [];
 			for (var mod_name of submodule_names) {
@@ -1649,7 +1652,7 @@ export var manual_language_code = function (py_default) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+					case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}

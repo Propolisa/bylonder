@@ -278,3 +278,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_collection.map
+export {Collection, Menu, Panel, PropertyPanel, register_class};

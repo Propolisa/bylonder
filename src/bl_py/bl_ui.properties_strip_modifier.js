@@ -61,3 +61,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_strip_modifier.map
+export {Panel, register_class};

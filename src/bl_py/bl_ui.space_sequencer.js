@@ -13,7 +13,7 @@ import {contexts as i18n_contexts, pgettext_iface as iface_} from './_bpy.app.tr
 import {Header, Menu, Panel} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_sequencer';
 export var _space_view_types = function (st) {
 	if (arguments.length) {
@@ -3258,3 +3258,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_sequencer.map
+export {AnnotationDataPanel, AnnotationOnionSkin, DATA_PT_camera_display_composition_guides, Header, Menu, Panel, PropertyPanel, ToolActivePanelHelper, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, playback_controls, register_class};

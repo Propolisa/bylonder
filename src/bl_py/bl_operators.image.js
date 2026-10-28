@@ -8,7 +8,7 @@ import {BoolProperty, CollectionProperty, StringProperty} from './_bpy.props.js'
 import {FileHandler, Operator, OperatorFileListElement} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.image';
 export var _merged = function () {
 	if (arguments.length) {
@@ -119,7 +119,6 @@ export var _joined = function () {
 };
 export var EditExternally =  __class__ ('EditExternally', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'}))}),
 	bl_idname: 'image.external_edit',
 	bl_label: 'Image Edit Externally',
 	bl_options: new set (['REGISTER']),
@@ -248,6 +247,7 @@ export var EditExternally =  __class__ ('EditExternally', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+EditExternally.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'}))});
 export var ProjectEdit =  __class__ ('ProjectEdit', [Operator], {
 	__module__: __name__,
 	bl_idname: 'image.project_edit',
@@ -371,7 +371,6 @@ export var ProjectApply =  __class__ ('ProjectApply', [Operator], {
 export var bl_file_extensions_image_movie = _joined (bpy.path.extensions_image, bpy.path.extensions_movie);
 export var IMAGE_OT_open_images =  __class__ ('IMAGE_OT_open_images', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'directory': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE', 'HIDDEN'])})), 'files': CollectionProperty (__kwargtrans__ ({py_metatype: OperatorFileListElement, options: new set (['SKIP_SAVE', 'HIDDEN'])})), 'relative_path': BoolProperty (__kwargtrans__ ({py_name: 'Relative Path', py_default: true})), 'use_sequence_detection': BoolProperty (__kwargtrans__ ({py_name: 'Detect Sequence', py_default: true})), 'use_udim_detection': BoolProperty (__kwargtrans__ ({py_name: 'Detect UDIM', py_default: true}))}),
 	bl_idname: 'image.open_images',
 	bl_label: 'Open Images',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -466,6 +465,7 @@ export var IMAGE_OT_open_images =  __class__ ('IMAGE_OT_open_images', [Operator]
 		return new set (['FINISHED']);
 	});}
 });
+IMAGE_OT_open_images.__annotations__ = dict ({'directory': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE', 'HIDDEN'])})), 'files': CollectionProperty (__kwargtrans__ ({py_metatype: OperatorFileListElement, options: new set (['SKIP_SAVE', 'HIDDEN'])})), 'relative_path': BoolProperty (__kwargtrans__ ({py_name: 'Relative Path', py_default: true})), 'use_sequence_detection': BoolProperty (__kwargtrans__ ({py_name: 'Detect Sequence', py_default: true})), 'use_udim_detection': BoolProperty (__kwargtrans__ ({py_name: 'Detect UDIM', py_default: true}))});
 export var IMAGE_FH_drop_handler =  __class__ ('IMAGE_FH_drop_handler', [FileHandler], {
 	__module__: __name__,
 	bl_idname: 'IMAGE_FH_drop_handler',
@@ -493,3 +493,4 @@ export var IMAGE_FH_drop_handler =  __class__ ('IMAGE_FH_drop_handler', [FileHan
 export var classes = tuple ([EditExternally, ProjectApply, IMAGE_OT_open_images, IMAGE_FH_drop_handler, ProjectEdit]);
 
 //# sourceMappingURL=bl_operators.image.map
+export {BoolProperty, CollectionProperty, FileHandler, Operator, OperatorFileListElement, StringProperty, _globals, _import, _lazy, _member, _module, rpt_};

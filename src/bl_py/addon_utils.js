@@ -2,8 +2,8 @@
 import * as __self__ from './addon_utils.js';
 (globalThis.__py_modules ??= {})['addon_utils'] = __self__;
 import * as __cycle0__ from './bpy.js';
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'addon_utils';
 export var _merged = function () {
 	if (arguments.length) {
@@ -142,7 +142,8 @@ export var _initialize_once = function () {
 		enable (module_name, __kwargtrans__ ({refresh_handled: true, default_set: false, persistent: true}));
 	}
 	for (var addon of _preferences.addons) {
-		if (__in__ (module_nameaddon.module, _addons_hidden_core)) {
+		var module_name = addon.module;
+		if (__in__ (module_name, _addons_hidden_core)) {
 			continue;
 		}
 		enable (module_name, __kwargtrans__ ({refresh_handled: true}));
@@ -383,10 +384,20 @@ export var modules_refresh = function () {
 					print ('multiple addons with the same name:\n  {!r}\n  {!r}'.format (mod.__file__, mod_path));
 					error_duplicates.append (tuple ([mod.bl_info ['name'], mod.__file__, mod_path]));
 				}
-				else if ((!(pkg_id) ? mod.__time__ != os.path.getmtime (metadata_pathmod_path) : mod.__time_manifest__ != os.path.getmtime (metadata_pathmod.__file_manifest__))) {
-					print ('reloading addon meta-data:', mod_name, repr (metadata_path), '(time-stamp change detected)');
-					module_cache.py_pop (mod_name);
-					var mod = null;
+				else {
+					if (!(pkg_id)) {
+						var metadata_path = mod_path;
+						var _walrus2 = mod.__time__ != os.path.getmtime (metadata_path);
+					}
+					else {
+						var metadata_path = mod.__file_manifest__;
+						var _walrus2 = mod.__time_manifest__ != os.path.getmtime (metadata_path);
+					}
+					if (_walrus2) {
+						print ('reloading addon meta-data:', mod_name, repr (metadata_path), '(time-stamp change detected)');
+						module_cache.py_pop (mod_name);
+						var mod = null;
+					}
 				}
 			}
 			if (mod === null) {
@@ -578,7 +589,8 @@ export var enable = function (module_name) {
 			else {
 			}
 			if (isinstance (ex, ImportError)) {
-				if (py_typeof (msgex.msg) === str && msg.startswith ('Add-on ')) {
+				var msg = ex.msg;
+				if (py_typeof (msg) === str && msg.startswith ('Add-on ')) {
 					print (msg);
 					return ;
 				}
@@ -587,12 +599,14 @@ export var enable = function (module_name) {
 			traceback.print_exc ();
 		};
 	}
-	if (is_extensionmodule_name.startswith (_ext_base_pkg_idname_with_dot)) {
+	var is_extension = module_name.startswith (_ext_base_pkg_idname_with_dot);
+	if (is_extension) {
 		if (!(refresh_handled)) {
 			extensions_refresh (__kwargtrans__ ({addon_modules_pending: [module_name], handle_error: handle_error}));
 		}
 		if (_extensions_incompatible) {
-			if (error_extensions_incompatible.py_get (module_name.__getslice__ (len (_ext_base_pkg_idname_with_dot), null, 1).partition ('.').__getslice__ (0, null, 2))) {
+			var error = _extensions_incompatible.py_get (module_name.__getslice__ (len (_ext_base_pkg_idname_with_dot), null, 1).partition ('.').__getslice__ (0, null, 2));
+			if (error) {
 				try {
 					var __except0__ = RuntimeError ('Extension {:s} is incompatible ({:s})'.format (module_name, error));
 					__except0__.__cause__ = null;
@@ -613,7 +627,15 @@ export var enable = function (module_name) {
 	}
 	var mod = sys.modules.py_get (module_name);
 	var mod_file = null;
-	if (mod !== null && mod_filemod.__file__ !== null && os.path.exists (mod_file)) {
+	var _walrus1 = mod !== null;
+	if (_walrus1) {
+		var mod_file = mod.__file__;
+		var _walrus1 = mod_file !== null;
+	}
+	if (_walrus1) {
+		var _walrus1 = os.path.exists (mod_file);
+	}
+	if (_walrus1) {
 		if (getattr (mod, '__addon_enabled__', false)) {
 			try {
 				mod.unregister ();
@@ -666,7 +688,8 @@ export var enable = function (module_name) {
 		__withid0__.__enter__ ();
 		try {
 			var mod = importlib.import_module (module_name);
-			if (mod_filemod.__file__ === null) {
+			var mod_file = mod.__file__;
+			if (mod_file === null) {
 				var __except0__ = ImportError ('module loaded with no associated file, __path__={!r}, aborting!'.format (getattr (mod, '__path__', null)), __kwargtrans__ ({py_name: module_name}));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -905,9 +928,11 @@ export var disable_all = function () {
 	var addon_modules = (function () {
 		var __accu0__ = [];
 		for (var item of list (modules.py_items ())) {
-			if (py_typeof (mod_dictgetattr (item [1], '__dict__', null)) === dict) {
-				if (mod_dict.py_get ('__addon_enabled__')) {
-					__accu0__.append (item);
+			for (var mod_dict of [getattr (item [1], '__dict__', null)]) {
+				if (py_typeof (mod_dict) === dict) {
+					if (mod_dict.py_get ('__addon_enabled__')) {
+						__accu0__.append (item);
+					}
 				}
 			}
 		}
@@ -1308,7 +1333,8 @@ export var _extension_compat_cache_update_needed = function (cache_data, blender
 			}
 			return true;
 		}
-		if (repo_directoryrepos_module_to_directory_map.py_get (repo_module, '')) {
+		var repo_directory = repos_module_to_directory_map.py_get (repo_module, '');
+		if (repo_directory) {
 			var pkg_manifest_filepath = join (repo_directory, pkg_id, _ext_manifest_filename_toml);
 		}
 		else {
@@ -1378,7 +1404,8 @@ export var _extension_compat_cache_create = function (blender_id, extensions_ena
 	var repos_module_to_directory_map = _extension_repos_module_to_directory_map ();
 	var bl_pkg = null;
 	for (var [repo_module, pkg_id] of extensions_enabled) {
-		if (repo_directoryrepos_module_to_directory_map.py_get (repo_module, '')) {
+		var repo_directory = repos_module_to_directory_map.py_get (repo_module, '');
+		if (repo_directory) {
 			var pkg_manifest_filepath = join (repo_directory, pkg_id, _ext_manifest_filename_toml);
 		}
 		else {
@@ -1432,7 +1459,8 @@ export var _extension_compat_cache_create = function (blender_id, extensions_ena
 					}
 				}
 			}
-			if (errorbl_pkg.manifest_compatible_with_wheel_data_or_error (pkg_manifest_filepath, repo_module, pkg_id, repo_directory, wheel_list) !== null) {
+			var error = bl_pkg.manifest_compatible_with_wheel_data_or_error (pkg_manifest_filepath, repo_module, pkg_id, repo_directory, wheel_list);
+			if (error !== null) {
 				incompatible.__setitem__ ([repo_module, pkg_id], error);
 			}
 		}
@@ -1592,7 +1620,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
-						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 					}
 				}
 				delete kwargs.__kwargtrans__;
@@ -1732,7 +1760,8 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 			throw __except0__;
 		}
 	}
-	if (valuedata.py_get ('name', null) === null) {
+	var value = data.py_get ('name', null);
+	if (value === null) {
 		print ('Error: missing "name" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
@@ -1741,7 +1770,8 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 		return tuple ([null, filepath_toml]);
 	}
 	bl_info ['name'] = value;
-	if (valuedata.py_get ('version', null) === null) {
+	var value = data.py_get ('version', null);
+	if (value === null) {
 		print ('Error: missing "version" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
@@ -1769,7 +1799,8 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 		}
 	}
 	bl_info ['version'] = value;
-	if (valuedata.py_get ('blender_version_min', null) === null) {
+	var value = data.py_get ('blender_version_min', null);
+	if (value === null) {
 		print ('Error: missing "blender_version_min" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
@@ -1797,7 +1828,8 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 		}
 	}
 	bl_info ['blender'] = value;
-	if (valuedata.py_get ('tagline', null) === null) {
+	var value = data.py_get ('tagline', null);
+	if (value === null) {
 		print ('Warning: missing "tagline" in', filepath_toml);
 	}
 	else if (py_typeof (value) !== str) {
@@ -1806,7 +1838,8 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 	else {
 		bl_info ['description'] = value;
 	}
-	if (valuedata.py_get ('maintainer', null) === null) {
+	var value = data.py_get ('maintainer', null);
+	if (value === null) {
 		print ('Error: missing "author" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
@@ -2343,7 +2376,8 @@ export var _initialize_extensions_site_packages = function () {
 	if (found) {
 		var getsitepackages = _member ('site', 'getsitepackages');
 		var index = null;
-		if (builtin_site_packagesset (getsitepackages ())) {
+		var builtin_site_packages = set (getsitepackages ());
+		if (builtin_site_packages) {
 			for (var [i, dirpath] of py_enumerate (sys.path)) {
 				if (__in__ (dirpath, builtin_site_packages)) {
 					var index = i;
@@ -2440,7 +2474,7 @@ export var _extensions_warnings_get = function () {
 	var os = _module ('os');
 	_extensions_warnings_get._is_first = false;
 	_extensions_warnings.py_clear ();
-	var dirs_skip_expected = _joined ([os.path.normpath (os.path.join (os.path.dirname (_bpy.__file__), '..')) + os.sep, os.path.normpath (os.path.join (os.path.dirname (__import__ ('bl_ui').__file__), '..')) + os.sep, os.path.normpath (os.path.dirname (os.__file__)) + os.sep], (function () {
+	var dirs_skip_expected = _joined ([os.path.normpath (os.path.join (os.path.dirname (_bpy.__file__), '..')) + os.sep, os.path.normpath (os.path.join (os.path.dirname (_import ('bl_ui').__file__), '..')) + os.sep, os.path.normpath (os.path.dirname (os.__file__)) + os.sep], (function () {
 		var __accu0__ = [];
 		for (var path of list (paths ())) {
 			__accu0__.append (os.path.normpath (path) + os.sep);
@@ -2566,3 +2600,4 @@ export var _is_first_reset = function () {
 };
 
 //# sourceMappingURL=addon_utils.map
+export {_globals, _import, _lazy, _member, _module};

@@ -6,7 +6,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt_} from './_bpy.app.translations.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'rna_keymap_ui';
 export var __all__ = tuple (['draw_entry', 'draw_km', 'draw_kmi', 'draw_filtered', 'draw_hierarchy', 'draw_keymaps']);
 export var _is_operator_available = function (idname) {
@@ -687,3 +687,4 @@ export var draw_keymaps = function (context, layout) {
 };
 
 //# sourceMappingURL=rna_keymap_ui.map
+export {_globals, _import, _lazy, _member, _module, i18n_contexts, iface_, rpt_};

@@ -9,7 +9,7 @@ import {AnnotationDataPanel, AnnotationDrawingToolsPanel} from './bl_ui.properti
 import {PresetPanel} from './bl_ui.utils.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt_} from './_bpy.app.translations.js';
 import {Header, Menu, Panel, UIList} from './_bpy.types.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_clip';
 export var CLIP_UL_tracking_objects =  __class__ ('CLIP_UL_tracking_objects', [UIList], {
 	__module__: __name__,
@@ -2887,3 +2887,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_clip.map
+export {AnnotationDataPanel, AnnotationDrawingToolsPanel, Header, MASK_PT_animation, MASK_PT_display, MASK_PT_layers, MASK_PT_mask, MASK_PT_point, MASK_PT_spline, MASK_PT_tools, MASK_PT_transforms, Menu, Panel, PresetPanel, UIList, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, register_class, rpt_};

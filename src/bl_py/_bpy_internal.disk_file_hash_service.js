@@ -14,8 +14,8 @@ import * as __module_threading__ from './threading.js';
 __nest__ (threading, '', __module_threading__);
 import * as __module_atexit__ from './atexit.js';
 __nest__ (atexit, '', __module_atexit__);
-import {_lazy, _member, _module} from './_modules.js';
-export {_lazy, TYPE_CHECKING, _member, _module};
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+export {_lazy, _member, _import, TYPE_CHECKING, _module, _globals};
 var __name__ = '_bpy_internal.disk_file_hash_service';
 export var __all__ = tuple (['get_service']);
 if (TYPE_CHECKING) {
@@ -208,3 +208,4 @@ export var _cleanup_all_services = function () {
 };
 
 //# sourceMappingURL=_bpy_internal.disk_file_hash_service.map
+export {};

@@ -12,3 +12,13 @@ def _member(module_id, member_id):
 
 def _lazy(module_id):
     return __pragma__('js', '{}', 'new Proxy({}, {get: (target, key) => globalThis.__py_modules[module_id][key], has: (target, key) => key in globalThis.__py_modules[module_id]})')
+
+
+def _import(name, globals=None, locals=None, fromlist=(), level=0):
+    """__import__: the tree's modules are all loaded by its entry, so this only looks the module up."""
+    return _lazy(name)
+
+
+def _globals(module_id):
+    """globals() of a module: its names, then its submodules (a package's `globals()[name]` after __import__)."""
+    return __pragma__('js', '{}', 'new Proxy({}, {get: (target, key) => { const own = globalThis.__py_modules[module_id]; return own && key in own ? own[key] : _lazy(module_id + "." + String(key)); }})')

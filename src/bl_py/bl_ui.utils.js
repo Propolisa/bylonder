@@ -75,3 +75,4 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 });
 
 //# sourceMappingURL=bl_ui.utils.map
+export {Menu};

@@ -6,7 +6,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {EnumProperty, FloatVectorProperty} from './_bpy.props.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy_extras.object_utils';
 export var __all__ = tuple (['add_object_align_init', 'object_data_add', 'AddObjectHelper', 'object_add_grid_scale', 'object_add_grid_scale_apply_operator', 'world_to_camera_view', 'object_report_if_active_shape_key_is_locked']);
 export var add_object_align_init = function (context, operator) {
@@ -90,7 +90,7 @@ export var object_data_add = function (context, obdata, operator, py_name) {
 					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
 					case 'obdata': var obdata = __allkwargs0__ [__attrib0__]; break;
 					case 'operator': var operator = __allkwargs0__ [__attrib0__]; break;
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -164,7 +164,6 @@ export var object_data_add = function (context, obdata, operator, py_name) {
 };
 export var AddObjectHelper =  __class__ ('AddObjectHelper', [object], {
 	__module__: __name__,
-	__annotations__: dict ({'align': EnumProperty (__kwargtrans__ ({py_name: 'Align', py_items: tuple ([tuple (['WORLD', 'World', 'Align the new object to the world']), tuple (['VIEW', 'View', 'Align the new object to the view']), tuple (['CURSOR', '3D Cursor', 'Use the 3D cursor orientation for the new object'])]), py_default: 'WORLD', py_update: AddObjectHelper.align_update_callback})), 'location': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', subtype: 'TRANSLATION'})), 'rotation': FloatVectorProperty (__kwargtrans__ ({py_name: 'Rotation', subtype: 'EULER'}))}),
 	get align_update_callback () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -202,6 +201,7 @@ export var AddObjectHelper =  __class__ ('AddObjectHelper', [object], {
 		return context.scene.library === null;
 	});}
 });
+AddObjectHelper.__annotations__ = dict ({'align': EnumProperty (__kwargtrans__ ({py_name: 'Align', py_items: tuple ([tuple (['WORLD', 'World', 'Align the new object to the world']), tuple (['VIEW', 'View', 'Align the new object to the view']), tuple (['CURSOR', '3D Cursor', 'Use the 3D cursor orientation for the new object'])]), py_default: 'WORLD', py_update: AddObjectHelper.align_update_callback})), 'location': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', subtype: 'TRANSLATION'})), 'rotation': FloatVectorProperty (__kwargtrans__ ({py_name: 'Rotation', subtype: 'EULER'}))});
 export var object_add_grid_scale = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -326,3 +326,4 @@ export var object_report_if_active_shape_key_is_locked = function (obj, operator
 };
 
 //# sourceMappingURL=bpy_extras.object_utils.map
+export {EnumProperty, FloatVectorProperty, _globals, _import, _lazy, _member, _module};

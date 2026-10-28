@@ -2,12 +2,12 @@
 import * as __self__ from './bl_operators.screen_play_rendered_anim.js';
 (globalThis.__py_modules ??= {})['bl_operators.screen_play_rendered_anim'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {pgettext_rpt as rpt_} from './_bpy.app.translations.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.screen_play_rendered_anim';
 export var _merged = function () {
 	if (arguments.length) {
@@ -214,7 +214,8 @@ export var guess_player_path = function (preset) {
 							}
 						}
 						index++;
-						if (versionextract_version (subkey_name) !== null) {
+						var version = extract_version (subkey_name);
+						if (version !== null) {
 							if (best_version === null || version > best_version) {
 								var best_subkey = subkey_name;
 								var best_version = version;
@@ -320,7 +321,7 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 					switch (__attrib0__) {
 						case 'rd': var rd = __allkwargs0__ [__attrib0__]; break;
 						case 'ch': var ch = __allkwargs0__ [__attrib0__]; break;
-						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 					}
 				}
 				delete kwargs.__kwargtrans__;
@@ -496,3 +497,4 @@ export var PlayRenderedAnim =  __class__ ('PlayRenderedAnim', [Operator], {
 export var classes = tuple ([PlayRenderedAnim]);
 
 //# sourceMappingURL=bl_operators.screen_play_rendered_anim.map
+export {Operator, _globals, _import, _lazy, _member, _module, rpt_};

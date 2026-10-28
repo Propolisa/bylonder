@@ -182,3 +182,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_speaker.map
+export {Panel, PropertiesAnimationMixin, PropertyPanel, i18n_contexts, register_class};

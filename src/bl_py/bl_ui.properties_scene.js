@@ -747,3 +747,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_scene.map
+export {Panel, PropertiesAnimationMixin, PropertyPanel, UIList, effector_weights_ui, iface_, point_cache_ui, register_class};

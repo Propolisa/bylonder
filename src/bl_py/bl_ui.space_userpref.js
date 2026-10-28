@@ -9,7 +9,7 @@ import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt
 import {Header, Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_userpref';
 export var _merged = function () {
 	if (arguments.length) {
@@ -1724,7 +1724,8 @@ export var USERPREF_PT_theme =  __class__ ('USERPREF_PT_theme', [ThemePanel, Pan
 		var layout = self.layout;
 		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.6}));
 		var row = py_split.row (__kwargtrans__ ({align: true}));
-		if (filepathcontext.preferences.themes [0].filepath) {
+		var filepath = context.preferences.themes [0].filepath;
+		if (filepath) {
 			var preset_label = bpy.path.display_name (os.path.basename (filepath));
 		}
 		else {
@@ -2691,7 +2692,8 @@ export var USERPREF_PT_saveload_autorun =  __class__ ('USERPREF_PT_saveload_auto
 		var prefs = context.preferences;
 		var paths = prefs.filepaths;
 		var text = iface_ ('Auto Run Python Scripts');
-		if (autoexec_overridebpy.app.autoexec_override !== null) {
+		var autoexec_override = bpy.app.autoexec_override;
+		if (autoexec_override !== null) {
 			if (autoexec_override) {
 				var text_warn = iface_ ('enabled on startup, overriding the preference');
 			}
@@ -3758,7 +3760,8 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		}
 		else {
 		}
-		if (drawgetattr (addon_preferences, 'draw', null) === null) {
+		var draw = getattr (addon_preferences, 'draw', null);
+		if (draw === null) {
 			return ;
 		}
 		var addon_preferences_class = py_typeof (addon_preferences);
@@ -3932,7 +3935,8 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 		var module_names = set ();
 		var user_addon_paths = [];
 		for (var mod of addon_utils.modules (__kwargtrans__ ({refresh: false}))) {
-			module_names.add (addon_module_namemod.__name__);
+			var addon_module_name = mod.__name__;
+			module_names.add (addon_module_name);
 			var bl_info = addon_utils.module_bl_info (mod);
 			var is_enabled = __in__ (addon_module_name, used_addon_module_name_map);
 			if (!__in__ (bl_info ['support'], support)) {
@@ -3962,12 +3966,14 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 			}
 			sub.label (__kwargtrans__ ({icon: self._support_icon_mapping.py_get (bl_info ['support'], 'QUESTION')}));
 			if (bl_info ['show_expanded']) {
-				if (valuebl_info ['description']) {
+				var value = bl_info ['description'];
+				if (value) {
 					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
 					py_split.label (__kwargtrans__ ({text: 'Description:'}));
 					py_split.label (__kwargtrans__ ({text: iface_ (value)}));
 				}
-				if (valuebl_info ['location']) {
+				var value = bl_info ['location'];
+				if (value) {
 					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
 					py_split.label (__kwargtrans__ ({text: 'Location:'}));
 					py_split.label (__kwargtrans__ ({text: iface_ (value)}));
@@ -3977,12 +3983,14 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					py_split.label (__kwargtrans__ ({text: 'File:'}));
 					py_split.label (__kwargtrans__ ({text: mod.__file__, translate: false}));
 				}
-				if (valuebl_info ['author']) {
+				var value = bl_info ['author'];
+				if (value) {
 					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
 					py_split.label (__kwargtrans__ ({text: 'Author:'}));
 					py_split.label (__kwargtrans__ ({text: value, translate: false}));
 				}
-				if (valuebl_info ['version']) {
+				var value = bl_info ['version'];
+				if (value) {
 					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
 					py_split.label (__kwargtrans__ ({text: 'Version:'}));
 					py_split.label (__kwargtrans__ ({text: '.'.join ((function () {
@@ -3993,7 +4001,8 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 						return __accu0__;
 					}) ()), translate: false}));
 				}
-				if (valuebl_info ['warning']) {
+				var value = bl_info ['warning'];
+				if (value) {
 					var py_split = colsub.row ().py_split (__kwargtrans__ ({factor: 0.15}));
 					py_split.label (__kwargtrans__ ({text: 'Warning:'}));
 					py_split.label (__kwargtrans__ ({text: '  ' + iface_ (value), icon: 'ERROR'}));
@@ -4016,7 +4025,8 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 					py_split.operator ('preferences.addon_remove', __kwargtrans__ ({text: 'Remove', icon: 'CANCEL'})).module = mod.__name__;
 				}
 				if (is_enabled) {
-					if (addon_preferencesused_addon_module_name_map [addon_module_name].preferences !== null) {
+					var addon_preferences = used_addon_module_name_map [addon_module_name].preferences;
+					if (addon_preferences !== null) {
 						self.draw_addon_preferences (col_box, context, addon_preferences);
 					}
 				}
@@ -4428,7 +4438,7 @@ export var _draw_experimental_items = function (layout, preferences, py_items, u
 				switch (__attrib0__) {
 					case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
 					case 'preferences': var preferences = __allkwargs0__ [__attrib0__]; break;
-					case 'py_items': var py_items = __allkwargs0__ [__attrib0__]; break;
+					case 'items': case 'py_items': var py_items = __allkwargs0__ [__attrib0__]; break;
 					case 'url_prefix': var url_prefix = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
@@ -4571,3 +4581,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_userpref.map
+export {Header, Menu, Panel, PresetPanel, UIList, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, register_class, rpt_};

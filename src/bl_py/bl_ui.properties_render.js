@@ -8,7 +8,7 @@ import {VIEW3D_PT_shading_cavity, VIEW3D_PT_shading_color, VIEW3D_PT_shading_lig
 import {GreasePencilSimplifyPanel} from './bl_ui.properties_grease_pencil_common.js';
 import {contexts as i18n_contexts} from './_bpy.app.translations.js';
 import {Panel} from './_bpy.types.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_render';
 export var RenderButtonsPanel =  __class__ ('RenderButtonsPanel', [object], {
 	__module__: __name__,
@@ -2187,3 +2187,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_render.map
+export {GreasePencilSimplifyPanel, Panel, PresetPanel, VIEW3D_PT_shading_cavity, VIEW3D_PT_shading_color, VIEW3D_PT_shading_lighting, VIEW3D_PT_shading_options, _globals, _import, _lazy, _member, _module, i18n_contexts, register_class};

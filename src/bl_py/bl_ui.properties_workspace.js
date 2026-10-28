@@ -9,7 +9,7 @@ import {pgettext_iface as iface_} from './_bpy.app.translations.js';
 import {Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_workspace';
 export var WorkSpaceButtonsPanel =  __class__ ('WorkSpaceButtonsPanel', [object], {
 	__module__: __name__,
@@ -92,8 +92,10 @@ export var WORKSPACE_PT_addons =  __class__ ('WORKSPACE_PT_addons', [WorkSpaceBu
 		WORKSPACE_PT_addons.addon_map = (function () {
 			var __accu0__ = [];
 			for (var mod of list (addon_utils.modules ())) {
-				if (!__in__ (module_namemod.__name__, addon_utils._addons_hidden_core)) {
-					__accu0__.append ([module_name, mod]);
+				for (var module_name of [mod.__name__]) {
+					if (!__in__ (module_name, addon_utils._addons_hidden_core)) {
+						__accu0__.append ([module_name, mod]);
+					}
 				}
 			}
 			return dict (__accu0__);
@@ -304,3 +306,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_workspace.map
+export {Panel, PropertyPanel, UIList, _globals, _import, _lazy, _member, _module, iface_, register_class};

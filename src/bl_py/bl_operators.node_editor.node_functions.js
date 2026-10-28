@@ -245,3 +245,4 @@ export var NodeEditorBase =  __class__ ('NodeEditorBase', [object], {
 });
 
 //# sourceMappingURL=bl_operators.node_editor.node_functions.map
+export {tip_};

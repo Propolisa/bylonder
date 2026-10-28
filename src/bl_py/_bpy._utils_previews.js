@@ -10,7 +10,7 @@ export var py_new = function (py_name) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -29,7 +29,7 @@ export var load = function (py_name, filepath, filetype, force_reload) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'filepath': var filepath = __allkwargs0__ [__attrib0__]; break;
 					case 'filetype': var filetype = __allkwargs0__ [__attrib0__]; break;
 					case 'force_reload': var force_reload = __allkwargs0__ [__attrib0__]; break;
@@ -48,7 +48,7 @@ export var release = function (py_name) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}

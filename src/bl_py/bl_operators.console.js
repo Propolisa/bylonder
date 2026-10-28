@@ -8,6 +8,7 @@ import {BoolProperty, StringProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.console';
 export var _lang_module_get = function (sc) {
 	if (arguments.length) {
@@ -23,11 +24,10 @@ export var _lang_module_get = function (sc) {
 	}
 	else {
 	}
-	return __import__ ('_console_' + sc.language, __kwargtrans__ ({level: 0}));
+	return _import ('_console_' + sc.language, __kwargtrans__ ({level: 0}));
 };
 export var ConsoleExec =  __class__ ('ConsoleExec', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'interactive': BoolProperty (__kwargtrans__ ({options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'console.execute',
 	bl_label: 'Console Execute',
 	bl_options: new set (['UNDO_GROUPED']),
@@ -75,6 +75,7 @@ export var ConsoleExec =  __class__ ('ConsoleExec', [Operator], {
 		}
 	});}
 });
+ConsoleExec.__annotations__ = dict ({'interactive': BoolProperty (__kwargtrans__ ({options: new set (['SKIP_SAVE'])}))});
 export var ConsoleAutocomplete =  __class__ ('ConsoleAutocomplete', [Operator], {
 	__module__: __name__,
 	bl_idname: 'console.autocomplete',
@@ -224,7 +225,6 @@ export var ConsoleBanner =  __class__ ('ConsoleBanner', [Operator], {
 });
 export var ConsoleLanguage =  __class__ ('ConsoleLanguage', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'language': StringProperty (__kwargtrans__ ({py_name: 'Language', translation_context: i18n_contexts.editor_python_console, maxlen: 32}))}),
 	bl_idname: 'console.language',
 	bl_label: 'Console Language',
 	get poll () {return __getcm__ (this, function (cls, context) {
@@ -266,6 +266,8 @@ export var ConsoleLanguage =  __class__ ('ConsoleLanguage', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+ConsoleLanguage.__annotations__ = dict ({'language': StringProperty (__kwargtrans__ ({py_name: 'Language', translation_context: i18n_contexts.editor_python_console, maxlen: 32}))});
 export var classes = tuple ([ConsoleAutocomplete, ConsoleBanner, ConsoleCopyAsScript, ConsoleExec, ConsoleLanguage]);
 
 //# sourceMappingURL=bl_operators.console.map
+export {BoolProperty, Operator, StringProperty, _globals, _import, _lazy, _member, _module, i18n_contexts};

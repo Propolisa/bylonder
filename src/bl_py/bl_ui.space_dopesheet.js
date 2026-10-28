@@ -11,7 +11,7 @@ import {GreasePencil_LayerAdjustmentsPanel, GreasePencil_LayerDisplayPanel, Grea
 import {Header, Menu, Panel} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_dopesheet';
 export var dopesheet_filter = function (layout, context) {
 	if (arguments.length) {
@@ -1480,3 +1480,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_dopesheet.map
+export {GreasePencil_LayerAdjustmentsPanel, GreasePencil_LayerDisplayPanel, GreasePencil_LayerMaskPanel, GreasePencil_LayerRelationsPanel, GreasePencil_LayerTransformPanel, Header, Menu, Panel, PropertyPanel, _globals, _import, _lazy, _member, _module, draw_shape_key_properties, playback_controls, register_class};

@@ -3167,3 +3167,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_particle.map
+export {Menu, Panel, PresetPanel, PropertiesAnimationMixin, PropertyPanel, UIList, basic_force_field_falloff_ui, basic_force_field_settings_ui, effector_weights_ui, i18n_contexts, iface_, point_cache_ui, register_class, rpt_};

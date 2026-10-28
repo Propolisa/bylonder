@@ -7,7 +7,7 @@ import {EnumProperty, IntProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.rigidbody';
 export var _merged = function () {
 	if (arguments.length) {
@@ -187,7 +187,6 @@ export var CopyRigidbodySettings =  __class__ ('CopyRigidbodySettings', [Operato
 });
 export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'frame_start': IntProperty (__kwargtrans__ ({py_name: 'Start Frame', description: 'Start frame for baking', min: 0, max: 300000, py_default: 1})), 'frame_end': IntProperty (__kwargtrans__ ({py_name: 'End Frame', description: 'End frame for baking', min: 1, max: 300000, py_default: 250})), 'step': IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Frame Step', min: 1, max: 120, py_default: 1}))}),
 	bl_idname: 'rigidbody.bake_to_keyframes',
 	bl_label: 'Bake to Keyframes',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -329,15 +328,9 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 		return wm.invoke_props_dialog (self);
 	});}
 });
+BakeToKeyframes.__annotations__ = dict ({'frame_start': IntProperty (__kwargtrans__ ({py_name: 'Start Frame', description: 'Start frame for baking', min: 0, max: 300000, py_default: 1})), 'frame_end': IntProperty (__kwargtrans__ ({py_name: 'End Frame', description: 'End frame for baking', min: 1, max: 300000, py_default: 250})), 'step': IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Frame Step', min: 1, max: 120, py_default: 1}))});
 export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'con_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', description: 'Type of generated constraint', py_items: tuple ((function () {
-		var __accu0__ = [];
-		for (var e of bpy.types.RigidBodyConstraint.bl_rna.properties ['type'].enum_items) {
-			__accu0__.append (tuple ([e.identifier, e.py_name, e.description, e.value]));
-		}
-		return __accu0__;
-	}) ()), py_default: 'FIXED'})), 'pivot_type': EnumProperty (__kwargtrans__ ({py_name: 'Location', description: 'Constraint pivot location', py_items: tuple ([tuple (['CENTER', 'Center', 'Pivot location is between the constrained rigid bodies']), tuple (['ACTIVE', 'Active', 'Pivot location is at the active object position']), tuple (['SELECTED', 'Selected', 'Pivot location is at the selected object position'])]), py_default: 'CENTER'})), 'connection_pattern': EnumProperty (__kwargtrans__ ({py_name: 'Connection Pattern', description: 'Pattern used to connect objects', py_items: tuple ([tuple (['SELECTED_TO_ACTIVE', 'Selected to Active', 'Connect selected objects to the active object']), tuple (['CHAIN_DISTANCE', 'Chain by Distance', 'Connect objects as a chain based on distance, starting at the active object'])]), py_default: 'SELECTED_TO_ACTIVE'}))}),
 	bl_idname: 'rigidbody.connect',
 	bl_label: 'Connect Rigid Bodies',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -480,6 +473,14 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 		}
 	});}
 });
+ConnectRigidBodies.__annotations__ = dict ({'con_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', description: 'Type of generated constraint', py_items: tuple ((function () {
+	var __accu0__ = [];
+	for (var e of bpy.types.RigidBodyConstraint.bl_rna.properties ['type'].enum_items) {
+		__accu0__.append (tuple ([e.identifier, e.py_name, e.description, e.value]));
+	}
+	return __accu0__;
+}) ()), py_default: 'FIXED'})), 'pivot_type': EnumProperty (__kwargtrans__ ({py_name: 'Location', description: 'Constraint pivot location', py_items: tuple ([tuple (['CENTER', 'Center', 'Pivot location is between the constrained rigid bodies']), tuple (['ACTIVE', 'Active', 'Pivot location is at the active object position']), tuple (['SELECTED', 'Selected', 'Pivot location is at the selected object position'])]), py_default: 'CENTER'})), 'connection_pattern': EnumProperty (__kwargtrans__ ({py_name: 'Connection Pattern', description: 'Pattern used to connect objects', py_items: tuple ([tuple (['SELECTED_TO_ACTIVE', 'Selected to Active', 'Connect selected objects to the active object']), tuple (['CHAIN_DISTANCE', 'Chain by Distance', 'Connect objects as a chain based on distance, starting at the active object'])]), py_default: 'SELECTED_TO_ACTIVE'}))});
 export var classes = tuple ([BakeToKeyframes, ConnectRigidBodies, CopyRigidbodySettings]);
 
 //# sourceMappingURL=bl_operators.rigidbody.map
+export {EnumProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module};

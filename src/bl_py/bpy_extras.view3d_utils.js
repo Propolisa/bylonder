@@ -2,7 +2,7 @@
 import * as __self__ from './bpy_extras.view3d_utils.js';
 (globalThis.__py_modules ??= {})['bpy_extras.view3d_utils'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy_extras.view3d_utils';
 export var __all__ = tuple (['region_2d_to_vector_3d', 'region_2d_to_origin_3d', 'region_2d_to_location_3d', 'location_3d_to_region_2d']);
 export var region_2d_to_vector_3d = function (region, rv3d, coord) {
@@ -125,7 +125,7 @@ export var location_3d_to_region_2d = function (region, rv3d, coord) {
 					case 'region': var region = __allkwargs0__ [__attrib0__]; break;
 					case 'rv3d': var rv3d = __allkwargs0__ [__attrib0__]; break;
 					case 'coord': var coord = __allkwargs0__ [__attrib0__]; break;
-					case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+					case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -145,3 +145,4 @@ export var location_3d_to_region_2d = function (region, rv3d, coord) {
 };
 
 //# sourceMappingURL=bpy_extras.view3d_utils.map
+export {_globals, _import, _lazy, _member, _module};

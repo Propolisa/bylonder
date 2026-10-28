@@ -207,7 +207,7 @@ export var rna_idprop_ui_create = function (item, prop) {
 				switch (__attrib0__) {
 					case 'item': var item = __allkwargs0__ [__attrib0__]; break;
 					case 'prop': var prop = __allkwargs0__ [__attrib0__]; break;
-					case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+					case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 					case 'min': var min = __allkwargs0__ [__attrib0__]; break;
 					case 'max': var max = __allkwargs0__ [__attrib0__]; break;
 					case 'soft_min': var soft_min = __allkwargs0__ [__attrib0__]; break;
@@ -218,7 +218,7 @@ export var rna_idprop_ui_create = function (item, prop) {
 					case 'step': var step = __allkwargs0__ [__attrib0__]; break;
 					case 'precision': var precision = __allkwargs0__ [__attrib0__]; break;
 					case 'id_type': var id_type = __allkwargs0__ [__attrib0__]; break;
-					case 'py_items': var py_items = __allkwargs0__ [__attrib0__]; break;
+					case 'items': case 'py_items': var py_items = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -421,3 +421,4 @@ export var PropertyPanel =  __class__ ('PropertyPanel', [object], {
 });
 
 //# sourceMappingURL=rna_prop_ui.map
+export {IDPropertyArray, IDPropertyGroup, Vector, bpy_prop_array};

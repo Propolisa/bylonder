@@ -7,18 +7,18 @@ import {BoolProperty, CollectionProperty, EnumProperty, IntProperty, StringPrope
 import {Operator, PropertyGroup} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.bone_selection_sets';
 export var SelectionEntry =  __class__ ('SelectionEntry', [PropertyGroup], {
 	__module__: __name__,
-	__annotations__: dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Bone Name', override: new set (['LIBRARY_OVERRIDABLE'])}))}),
 	__slots__: tuple ([])
 });
+SelectionEntry.__annotations__ = dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Bone Name', override: new set (['LIBRARY_OVERRIDABLE'])}))});
 export var SelectionSet =  __class__ ('SelectionSet', [PropertyGroup], {
 	__module__: __name__,
-	__annotations__: dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Set Name', override: new set (['LIBRARY_OVERRIDABLE'])})), 'bone_ids': CollectionProperty (__kwargtrans__ ({py_metatype: SelectionEntry, override: new set (['LIBRARY_OVERRIDABLE', 'USE_INSERTION'])})), 'is_selected': BoolProperty (__kwargtrans__ ({py_name: 'Include this selection set when copying to the clipboard. If none are specified, all sets will be copied.', override: new set (['LIBRARY_OVERRIDABLE'])}))}),
 	__slots__: tuple ([])
 });
+SelectionSet.__annotations__ = dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Set Name', override: new set (['LIBRARY_OVERRIDABLE'])})), 'bone_ids': CollectionProperty (__kwargtrans__ ({py_metatype: SelectionEntry, override: new set (['LIBRARY_OVERRIDABLE', 'USE_INSERTION'])})), 'is_selected': BoolProperty (__kwargtrans__ ({py_name: 'Include this selection set when copying to the clipboard. If none are specified, all sets will be copied.', override: new set (['LIBRARY_OVERRIDABLE'])}))});
 export var _PoseModeOnlyMixin =  __class__ ('_PoseModeOnlyMixin', [object], {
 	__module__: __name__,
 	get poll () {return __getcm__ (this, function (cls, context) {
@@ -124,7 +124,6 @@ export var POSE_OT_selection_set_remove_bones =  __class__ ('POSE_OT_selection_s
 });
 export var POSE_OT_selection_set_move =  __class__ ('POSE_OT_selection_set_move', [_NeedSelSetMixin, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'direction': EnumProperty (__kwargtrans__ ({py_name: 'Move Direction', description: 'Direction to move the active Selection Set: UP (default) or DOWN', py_items: [tuple (['UP', 'Up', '', -(1)]), tuple (['DOWN', 'Down', '', 1])], py_default: 'UP', options: new set (['HIDDEN'])}))}),
 	bl_idname: 'pose.selection_set_move',
 	bl_label: 'Move Selection Set in List',
 	bl_description: 'Move the active Selection Set up/down the list of sets',
@@ -176,6 +175,7 @@ export var POSE_OT_selection_set_move =  __class__ ('POSE_OT_selection_set_move'
 		return new set (['FINISHED']);
 	});}
 });
+POSE_OT_selection_set_move.__annotations__ = dict ({'direction': EnumProperty (__kwargtrans__ ({py_name: 'Move Direction', description: 'Direction to move the active Selection Set: UP (default) or DOWN', py_items: [tuple (['UP', 'Up', '', -(1)]), tuple (['DOWN', 'Down', '', 1])], py_default: 'UP', options: new set (['HIDDEN'])}))});
 export var POSE_OT_selection_set_add =  __class__ ('POSE_OT_selection_set_add', [_PoseModeOnlyMixin, Operator], {
 	__module__: __name__,
 	bl_idname: 'pose.selection_set_add',
@@ -326,7 +326,6 @@ export var POSE_OT_selection_set_unassign =  __class__ ('POSE_OT_selection_set_u
 });
 export var POSE_OT_selection_set_select =  __class__ ('POSE_OT_selection_set_select', [_NeedSelSetMixin, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'selection_set_index': IntProperty (__kwargtrans__ ({py_name: 'Selection Set Index', py_default: -(1), description: 'Which Selection Set to select; -1 uses the active Selection Set', options: new set (['HIDDEN'])}))}),
 	bl_idname: 'pose.selection_set_select',
 	bl_label: 'Select Selection Set',
 	bl_description: 'Select the bones from this Selection Set',
@@ -362,6 +361,7 @@ export var POSE_OT_selection_set_select =  __class__ ('POSE_OT_selection_set_sel
 		return new set (['FINISHED']);
 	});}
 });
+POSE_OT_selection_set_select.__annotations__ = dict ({'selection_set_index': IntProperty (__kwargtrans__ ({py_name: 'Selection Set Index', py_default: -(1), description: 'Which Selection Set to select; -1 uses the active Selection Set', options: new set (['HIDDEN'])}))});
 export var POSE_OT_selection_set_deselect =  __class__ ('POSE_OT_selection_set_deselect', [_NeedSelSetMixin, Operator], {
 	__module__: __name__,
 	bl_idname: 'pose.selection_set_deselect',
@@ -493,7 +493,7 @@ export var _uniqify = function (py_name, other_names) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'other_names': var other_names = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
@@ -622,3 +622,4 @@ export var unregister = function () {
 };
 
 //# sourceMappingURL=bl_operators.bone_selection_sets.map
+export {BoolProperty, CollectionProperty, EnumProperty, IntProperty, Operator, PropertyGroup, StringProperty, _globals, _import, _lazy, _member, _module};

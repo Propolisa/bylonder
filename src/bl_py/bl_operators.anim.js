@@ -8,11 +8,10 @@ import {BoolProperty, EnumProperty, IntProperty, StringProperty} from './_bpy.pr
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.anim';
 export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])}))}),
 	bl_idname: 'anim.keying_set_export',
 	bl_label: 'Export Keying Set...',
 	get execute () {return __get__ (this, function (self, context) {
@@ -162,9 +161,9 @@ export var ANIM_OT_keying_set_export =  __class__ ('ANIM_OT_keying_set_export', 
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+ANIM_OT_keying_set_export.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])}))});
 export var NLA_OT_bake =  __class__ ('NLA_OT_bake', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'frame_start': IntProperty (__kwargtrans__ ({py_name: 'Start Frame', description: 'Start frame for baking', min: 0, max: 300000, py_default: 1})), 'frame_end': IntProperty (__kwargtrans__ ({py_name: 'End Frame', description: 'End frame for baking', min: 1, max: 300000, py_default: 250})), 'step': IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Number of frames to skip forward while baking each frame', min: 1, max: 120, py_default: 1})), 'only_selected': BoolProperty (__kwargtrans__ ({py_name: 'Only Selected Bones', description: 'Only key selected bones (Pose baking only)', py_default: true})), 'visual_keying': BoolProperty (__kwargtrans__ ({py_name: 'Visual Keying', description: 'Keyframe from the final transformations (with constraints applied)', py_default: false})), 'clear_constraints': BoolProperty (__kwargtrans__ ({py_name: 'Clear Local Constraints', description: 'Remove all constraints from keyed object/bones. To get a correct bake with this setting Visual Keying should be enabled', py_default: false})), 'clear_parents': BoolProperty (__kwargtrans__ ({py_name: 'Clear Parents', description: 'Bake animation onto the object then clear parents (objects only)', py_default: false})), 'use_current_action': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite Current Action', description: 'Bake animation into current action, instead of creating a new one (useful for baking only part of bones in an armature)', py_default: false})), 'clean_curves': BoolProperty (__kwargtrans__ ({py_name: 'Clean Curves', description: 'After baking curves, remove redundant keys', py_default: false})), 'bake_types': EnumProperty (__kwargtrans__ ({py_name: 'Bake Data', translation_context: i18n_contexts.id_action, description: "Which data's transformations to bake", options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['POSE', 'Pose', 'Bake bones transformations']), tuple (['OBJECT', 'Object', 'Bake object transformations'])]), py_default: new set (['POSE'])})), 'channel_types': EnumProperty (__kwargtrans__ ({py_name: 'Channels', description: 'Which channels to bake', options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['LOCATION', 'Location', 'Bake location channels']), tuple (['ROTATION', 'Rotation', 'Bake rotation channels']), tuple (['SCALE', 'Scale', 'Bake scale channels']), tuple (['BBONE', 'B-Bone', 'Bake B-Bone channels']), tuple (['PROPS', 'Custom Properties', 'Bake custom properties'])]), py_default: new set (['LOCATION', 'ROTATION', 'SCALE', 'BBONE', 'PROPS'])}))}),
 	bl_idname: 'nla.bake',
 	bl_label: 'Bake Action',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -264,9 +263,9 @@ export var NLA_OT_bake =  __class__ ('NLA_OT_bake', [Operator], {
 		return wm.invoke_props_dialog (self);
 	});}
 });
+NLA_OT_bake.__annotations__ = dict ({'frame_start': IntProperty (__kwargtrans__ ({py_name: 'Start Frame', description: 'Start frame for baking', min: 0, max: 300000, py_default: 1})), 'frame_end': IntProperty (__kwargtrans__ ({py_name: 'End Frame', description: 'End frame for baking', min: 1, max: 300000, py_default: 250})), 'step': IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Number of frames to skip forward while baking each frame', min: 1, max: 120, py_default: 1})), 'only_selected': BoolProperty (__kwargtrans__ ({py_name: 'Only Selected Bones', description: 'Only key selected bones (Pose baking only)', py_default: true})), 'visual_keying': BoolProperty (__kwargtrans__ ({py_name: 'Visual Keying', description: 'Keyframe from the final transformations (with constraints applied)', py_default: false})), 'clear_constraints': BoolProperty (__kwargtrans__ ({py_name: 'Clear Local Constraints', description: 'Remove all constraints from keyed object/bones. To get a correct bake with this setting Visual Keying should be enabled', py_default: false})), 'clear_parents': BoolProperty (__kwargtrans__ ({py_name: 'Clear Parents', description: 'Bake animation onto the object then clear parents (objects only)', py_default: false})), 'use_current_action': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite Current Action', description: 'Bake animation into current action, instead of creating a new one (useful for baking only part of bones in an armature)', py_default: false})), 'clean_curves': BoolProperty (__kwargtrans__ ({py_name: 'Clean Curves', description: 'After baking curves, remove redundant keys', py_default: false})), 'bake_types': EnumProperty (__kwargtrans__ ({py_name: 'Bake Data', translation_context: i18n_contexts.id_action, description: "Which data's transformations to bake", options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['POSE', 'Pose', 'Bake bones transformations']), tuple (['OBJECT', 'Object', 'Bake object transformations'])]), py_default: new set (['POSE'])})), 'channel_types': EnumProperty (__kwargtrans__ ({py_name: 'Channels', description: 'Which channels to bake', options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['LOCATION', 'Location', 'Bake location channels']), tuple (['ROTATION', 'Rotation', 'Bake rotation channels']), tuple (['SCALE', 'Scale', 'Bake scale channels']), tuple (['BBONE', 'B-Bone', 'Bake B-Bone channels']), tuple (['PROPS', 'Custom Properties', 'Bake custom properties'])]), py_default: new set (['LOCATION', 'ROTATION', 'SCALE', 'BBONE', 'PROPS'])}))});
 export var ClearUselessActions =  __class__ ('ClearUselessActions', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'only_unused': BoolProperty (__kwargtrans__ ({py_name: 'Only Unused', description: 'Only unused (Fake User only) actions get considered', py_default: true}))}),
 	bl_idname: 'anim.clear_useless_actions',
 	bl_label: 'Clear Useless Actions',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -340,9 +339,9 @@ export var ClearUselessActions =  __class__ ('ClearUselessActions', [Operator], 
 		return new set (['FINISHED']);
 	});}
 });
+ClearUselessActions.__annotations__ = dict ({'only_unused': BoolProperty (__kwargtrans__ ({py_name: 'Only Unused', description: 'Only unused (Fake User only) actions get considered', py_default: true}))});
 export var ARMATURE_OT_copy_bone_color_to_selected =  __class__ ('ARMATURE_OT_copy_bone_color_to_selected', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'bone_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: _bone_type_enum}))}),
 	bl_idname: 'armature.copy_bone_color_to_selected',
 	bl_label: 'Copy Colors to Selected',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -437,6 +436,7 @@ export var ARMATURE_OT_copy_bone_color_to_selected =  __class__ ('ARMATURE_OT_co
 		return new set (['FINISHED']);
 	});}
 });
+ARMATURE_OT_copy_bone_color_to_selected.__annotations__ = dict ({'bone_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: ARMATURE_OT_copy_bone_color_to_selected._bone_type_enum}))});
 export var _armature_from_context = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -1008,3 +1008,4 @@ export var ANIM_OT_version_bone_hide_property =  __class__ ('ANIM_OT_version_bon
 export var classes = tuple ([ANIM_OT_keying_set_export, NLA_OT_bake, ClearUselessActions, ARMATURE_OT_copy_bone_color_to_selected, ARMATURE_OT_collection_show_all, ARMATURE_OT_collection_unsolo_all, ARMATURE_OT_collection_remove_unused, ANIM_OT_slot_new_for_id, ANIM_OT_slot_unassign_from_id, ANIM_OT_slot_unassign_from_nla_strip, ANIM_OT_slot_unassign_from_constraint, ANIM_OT_version_bone_hide_property]);
 
 //# sourceMappingURL=bl_operators.anim.map
+export {BoolProperty, EnumProperty, IntProperty, Operator, StringProperty, _globals, _import, _lazy, _member, _module, i18n_contexts, rpt_};

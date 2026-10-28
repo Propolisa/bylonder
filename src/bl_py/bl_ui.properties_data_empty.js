@@ -130,3 +130,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_empty.map
+export {Panel, i18n_contexts, register_class};

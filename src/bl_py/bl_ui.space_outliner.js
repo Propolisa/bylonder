@@ -824,3 +824,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_outliner.map
+export {Header, Menu, Panel, i18n_contexts, register_class};

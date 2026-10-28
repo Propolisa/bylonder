@@ -14,7 +14,7 @@ import * as __module_datetime__ from './datetime.js';
 __nest__ (datetime, '', __module_datetime__);
 import * as __module_contextlib__ from './contextlib.js';
 __nest__ (contextlib, '', __module_contextlib__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bpy_internal.disk_file_hash_service.backend_sqlite';
 export var _merged = function () {
 	if (arguments.length) {
@@ -512,3 +512,4 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 });
 
 //# sourceMappingURL=_bpy_internal.disk_file_hash_service.backend_sqlite.map
+export {Callable, Iterator, Path, _globals, _import, _lazy, _member, _module};

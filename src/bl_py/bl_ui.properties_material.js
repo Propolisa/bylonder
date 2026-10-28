@@ -749,7 +749,8 @@ export var MATERIAL_PT_animation =  __class__ ('MATERIAL_PT_animation', [Materia
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: 'Material'}));
 		self.draw_action_and_slot_selector (context, col, material);
-		if (node_treematerial.node_tree) {
+		var node_tree = material.node_tree;
+		if (node_tree) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shader Node Tree'}));
 			self.draw_action_and_slot_selector (context, col, node_tree);
@@ -764,3 +765,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_material.map
+export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, find_node_input, i18n_contexts, register_class};

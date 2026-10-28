@@ -1888,3 +1888,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_freestyle.map
+export {Menu, Panel, PropertiesAnimationMixin, UIList, register_class};

@@ -8,7 +8,7 @@ import {Matrix, Vector} from './mathutils.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_math__ from './math.js';
 __nest__ (math, '', __module_math__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.uvcalc_transform';
 export var __all__ = tuple (['classes', 'is_face_uv_selected_fn_from_context']);
 export var is_face_uv_selected_for_uv_select_sync_valid = function (face, any_edge) {
@@ -565,7 +565,6 @@ export var align_uv_rotation = function (context, method, axis, correct_aspect) 
 };
 export var AlignUVRotation =  __class__ ('AlignUVRotation', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'method': EnumProperty (__kwargtrans__ ({py_name: 'Method', description: 'Method to calculate rotation angle', py_items: tuple ([tuple (['AUTO', 'Auto', 'Align from all edges']), tuple (['EDGE', 'Edge', 'Only selected edges']), tuple (['GEOMETRY', 'Geometry', 'Align to Geometry axis'])])})), 'axis': EnumProperty (__kwargtrans__ ({py_name: 'Axis', description: 'Axis to align to', py_items: tuple ([tuple (['X', 'X', 'X axis']), tuple (['Y', 'Y', 'Y axis']), tuple (['Z', 'Z', 'Z axis'])])})), 'correct_aspect': BoolProperty (__kwargtrans__ ({py_name: 'Correct Aspect', description: 'Take image aspect ratio into account', py_default: false}))}),
 	bl_idname: 'uv.align_rotation',
 	bl_label: 'Align Rotation',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -626,6 +625,7 @@ export var AlignUVRotation =  __class__ ('AlignUVRotation', [Operator], {
 		return context.mode == 'EDIT_MESH';
 	});}
 });
+AlignUVRotation.__annotations__ = dict ({'method': EnumProperty (__kwargtrans__ ({py_name: 'Method', description: 'Method to calculate rotation angle', py_items: tuple ([tuple (['AUTO', 'Auto', 'Align from all edges']), tuple (['EDGE', 'Edge', 'Only selected edges']), tuple (['GEOMETRY', 'Geometry', 'Align to Geometry axis'])])})), 'axis': EnumProperty (__kwargtrans__ ({py_name: 'Axis', description: 'Axis to align to', py_items: tuple ([tuple (['X', 'X', 'X axis']), tuple (['Y', 'Y', 'Y axis']), tuple (['Z', 'Z', 'Z axis'])])})), 'correct_aspect': BoolProperty (__kwargtrans__ ({py_name: 'Correct Aspect', description: 'Take image aspect ratio into account', py_default: false}))});
 export var get_random_transform = function (transform_params, entropy) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -779,7 +779,6 @@ export var randomize_uv_transform = function (context, transform_params) {
 };
 export var RandomizeUVTransform =  __class__ ('RandomizeUVTransform', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'random_seed': IntProperty (__kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_loc': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: -(100.0), max: 100.0, size: 2, subtype: 'TRANSLATION', py_default: tuple ([0.0, 0.0])})), 'use_rot': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation value', py_default: true})), 'rot': FloatProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation', min: -(2.0) * math.pi, max: 2.0 * math.pi, subtype: 'ANGLE', py_default: 0.0})), 'use_scale': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': BoolProperty (__kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for both axes', py_default: false})), 'scale': FloatVectorProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: -(100.0), max: 100.0, py_default: tuple ([1.0, 1.0]), size: 2}))}),
 	bl_idname: 'uv.randomize_uv_transform',
 	bl_label: 'Randomize',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -824,6 +823,8 @@ export var RandomizeUVTransform =  __class__ ('RandomizeUVTransform', [Operator]
 		return randomize_uv_transform (context, transform_params);
 	});}
 });
+RandomizeUVTransform.__annotations__ = dict ({'random_seed': IntProperty (__kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_loc': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: -(100.0), max: 100.0, size: 2, subtype: 'TRANSLATION', py_default: tuple ([0.0, 0.0])})), 'use_rot': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation value', py_default: true})), 'rot': FloatProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation', min: -(2.0) * math.pi, max: 2.0 * math.pi, subtype: 'ANGLE', py_default: 0.0})), 'use_scale': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': BoolProperty (__kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for both axes', py_default: false})), 'scale': FloatVectorProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: -(100.0), max: 100.0, py_default: tuple ([1.0, 1.0]), size: 2}))});
 export var classes = tuple ([AlignUVRotation, RandomizeUVTransform]);
 
 //# sourceMappingURL=bl_operators.uvcalc_transform.map
+export {BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, Matrix, Operator, Vector, _globals, _import, _lazy, _member, _module};

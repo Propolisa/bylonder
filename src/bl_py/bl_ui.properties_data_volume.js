@@ -313,3 +313,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_volume.map
+export {Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};

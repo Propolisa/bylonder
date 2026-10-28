@@ -231,7 +231,7 @@ export var Token =  __class__ ('Token', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'paras': var paras = __allkwargs0__ [__attrib0__]; break;
 						case 'pure': var pure = __allkwargs0__ [__attrib0__]; break;
 					}

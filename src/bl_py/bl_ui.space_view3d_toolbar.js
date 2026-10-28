@@ -2,7 +2,7 @@
 import * as __self__ from './bl_ui.space_view3d_toolbar.js';
 (globalThis.__py_modules ??= {})['bl_ui.space_view3d_toolbar'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {register_class} from './bpy.utils.js';
 import {PresetPanel} from './bl_ui.utils.js';
 import {BrushSelectPanel, ClonePanel, ColorPalettePanel, DisplayPanel, FalloffPanel, SmoothStrokePanel, StrokePanel, TextureMaskPanel, UnifiedPaintPanel, brush_mask_texture_settings, brush_settings, brush_settings_advanced, brush_texture_settings, draw_color_settings} from './bl_ui.properties_paint_common.js';
@@ -11,7 +11,7 @@ import {contexts as i18n_contexts, pgettext_iface as iface_} from './_bpy.app.tr
 import {Menu, Panel, UIList, WindowManager} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_view3d_toolbar';
 export var VIEW3D_MT_brush_context_menu =  __class__ ('VIEW3D_MT_brush_context_menu', [Menu], {
 	__module__: __name__,
@@ -894,7 +894,7 @@ export var VIEW3D_PT_slots_paint_canvas =  __class__ ('VIEW3D_PT_slots_paint_can
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						default: _kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+						default: _kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 					}
 				}
 				delete _kwargs.__kwargtrans__;
@@ -1196,7 +1196,13 @@ export var VIEW3D_PT_tools_brush_texture =  __class__ ('VIEW3D_PT_tools_brush_te
 		}
 		else {
 		}
-		if (settingscls.paint_settings (context) && brushsettings.brush) {
+		var settings = cls.paint_settings (context);
+		var _walrus1 = settings;
+		if (_walrus1) {
+			var brush = settings.brush;
+			var _walrus1 = brush;
+		}
+		if (_walrus1) {
 			if (context.sculpt_object || context.vertex_paint_object) {
 				return true;
 			}
@@ -3687,3 +3693,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_view3d_toolbar.map
+export {BrushSelectPanel, ClonePanel, ColorPalettePanel, DisplayPanel, FalloffPanel, GreasePencilBrushFalloff, GreasePencilDisplayPanel, GreasePencilSculptAdvancedPanel, Menu, Panel, PresetPanel, SmoothStrokePanel, StrokePanel, TextureMaskPanel, UIList, UnifiedPaintPanel, WindowManager, _globals, _import, _lazy, _member, _module, brush_mask_texture_settings, brush_settings, brush_settings_advanced, brush_texture_settings, draw_color_settings, i18n_contexts, iface_, register_class};

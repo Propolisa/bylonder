@@ -9,7 +9,7 @@ import * as asset_utils from './bpy_extras.asset_utils.js';
 import {Header, Menu, Panel, UIList} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_filebrowser';
 export var FILEBROWSER_HT_header =  __class__ ('FILEBROWSER_HT_header', [Header], {
 	__module__: __name__,
@@ -1516,3 +1516,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_filebrowser.map
+export {Header, Menu, Panel, UIList, _globals, _import, _lazy, _member, _module, i18n_contexts, register_class};

@@ -7,7 +7,7 @@ import {playback_controls} from './bl_ui.space_time.js';
 import {DopesheetFilterPopoverBase, dopesheet_filter} from './bl_ui.space_dopesheet.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_} from './_bpy.app.translations.js';
 import {Header, Menu, Panel} from './_bpy.types.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_graph';
 export var drivers_editor_footer = function (layout, context) {
 	if (arguments.length) {
@@ -836,3 +836,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_graph.map
+export {DopesheetFilterPopoverBase, Header, Menu, Panel, _globals, _import, _lazy, _member, _module, dopesheet_filter, i18n_contexts, iface_, playback_controls, register_class};

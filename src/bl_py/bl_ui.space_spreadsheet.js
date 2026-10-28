@@ -131,3 +131,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_spreadsheet.map
+export {register_class};

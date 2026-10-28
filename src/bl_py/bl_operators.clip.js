@@ -9,7 +9,7 @@ import {FloatProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.clip';
 export var CLIP_spaces_walk = function (context, all_screens, tarea, tspace, callback) {
 	if (arguments.length) {
@@ -236,7 +236,6 @@ export var CLIP_default_settings_from_track = function (clip, track, framenr) {
 };
 export var CLIP_OT_filter_tracks =  __class__ ('CLIP_OT_filter_tracks', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'track_threshold': FloatProperty (__kwargtrans__ ({py_name: 'Track Threshold', description: 'Filter Threshold to select problematic tracks', py_default: 5.0}))}),
 	bl_label: 'Filter Tracks',
 	bl_idname: 'clip.filter_tracks',
 	bl_options: new set (['UNDO', 'REGISTER']),
@@ -373,6 +372,7 @@ export var CLIP_OT_filter_tracks =  __class__ ('CLIP_OT_filter_tracks', [Operato
 		return new set (['FINISHED']);
 	});}
 });
+CLIP_OT_filter_tracks.__annotations__ = dict ({'track_threshold': FloatProperty (__kwargtrans__ ({py_name: 'Track Threshold', description: 'Filter Threshold to select problematic tracks', py_default: 5.0}))});
 export var CLIP_OT_set_active_clip =  __class__ ('CLIP_OT_set_active_clip', [Operator], {
 	__module__: __name__,
 	bl_label: 'Set Active Clip',
@@ -1271,7 +1271,7 @@ export var CLIP_OT_setup_tracking_scene =  __class__ ('CLIP_OT_setup_tracking_sc
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'collection': var collection = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'vertices': var vertices = __allkwargs0__ [__attrib0__]; break;
 						case 'faces': var faces = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -1601,3 +1601,4 @@ export var CLIP_OT_track_settings_to_track =  __class__ ('CLIP_OT_track_settings
 export var classes = tuple ([CLIP_OT_bundles_to_mesh, CLIP_OT_constraint_to_fcurve, CLIP_OT_delete_proxy, CLIP_OT_filter_tracks, CLIP_OT_set_active_clip, CLIP_OT_set_viewport_background, CLIP_OT_setup_tracking_scene, CLIP_OT_track_settings_as_default, CLIP_OT_track_settings_to_track, CLIP_OT_track_to_empty]);
 
 //# sourceMappingURL=bl_operators.clip.map
+export {FloatProperty, Matrix, Operator, Vector, _globals, _import, _lazy, _member, _module, rpt_};

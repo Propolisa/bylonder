@@ -2378,3 +2378,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_fluid.map
+export {Panel, PresetPanel, effector_weights_ui, i18n_contexts, register_class};

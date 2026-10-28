@@ -975,3 +975,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_grease_pencil_common.map
+export {GreasePencil, GreasePencilLayer, GreasePencilLayerGroup, GreasePencilTreeNode, Menu, UILayout, UIList, i18n_contexts, iface_, register_class};

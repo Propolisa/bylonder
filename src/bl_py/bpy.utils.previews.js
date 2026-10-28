@@ -59,7 +59,7 @@ export var ImagePreviewCollection =  __class__ ('ImagePreviewCollection', [objec
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -76,7 +76,7 @@ export var ImagePreviewCollection =  __class__ ('ImagePreviewCollection', [objec
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -104,7 +104,7 @@ export var ImagePreviewCollection =  __class__ ('ImagePreviewCollection', [objec
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'filepath': var filepath = __allkwargs0__ [__attrib0__]; break;
 						case 'file_type': var file_type = __allkwargs0__ [__attrib0__]; break;
 						case 'force_reload': var force_reload = __allkwargs0__ [__attrib0__]; break;

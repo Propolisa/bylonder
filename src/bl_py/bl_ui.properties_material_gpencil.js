@@ -76,7 +76,8 @@ export var GPENCIL_UL_matslots =  __class__ ('GPENCIL_UL_matslots', [UIList], {
 		if (ma === null) {
 			return ;
 		}
-		if (gpcolorma.grease_pencil === null) {
+		var gpcolor = ma.grease_pencil;
+		if (gpcolor === null) {
 			return ;
 		}
 		var row = layout.row (__kwargtrans__ ({align: true}));
@@ -504,3 +505,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_material_gpencil.map
+export {GreasePencilMaterialsPanel, Menu, Panel, PresetPanel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};

@@ -49,7 +49,6 @@ export var CONSTRAINT_OT_add_target =  __class__ ('CONSTRAINT_OT_add_target', [O
 });
 export var CONSTRAINT_OT_remove_target =  __class__ ('CONSTRAINT_OT_remove_target', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'index': IntProperty ()}),
 	bl_idname: 'constraint.remove_target',
 	bl_label: 'Remove Target',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -91,6 +90,7 @@ export var CONSTRAINT_OT_remove_target =  __class__ ('CONSTRAINT_OT_remove_targe
 		return new set (['FINISHED']);
 	});}
 });
+CONSTRAINT_OT_remove_target.__annotations__ = dict ({'index': IntProperty ()});
 export var CONSTRAINT_OT_normalize_target_weights =  __class__ ('CONSTRAINT_OT_normalize_target_weights', [Operator], {
 	__module__: __name__,
 	bl_idname: 'constraint.normalize_target_weights',
@@ -205,3 +205,4 @@ export var CONSTRAINT_OT_disable_keep_transform =  __class__ ('CONSTRAINT_OT_dis
 export var classes = tuple ([CONSTRAINT_OT_add_target, CONSTRAINT_OT_remove_target, CONSTRAINT_OT_normalize_target_weights, CONSTRAINT_OT_disable_keep_transform]);
 
 //# sourceMappingURL=bl_operators.constraint.map
+export {IntProperty, Operator};

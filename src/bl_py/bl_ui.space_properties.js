@@ -296,3 +296,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_properties.map
+export {Header, Panel, PropertyPanel, iface_, register_class};

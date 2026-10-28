@@ -9,9 +9,163 @@ import * as handlers from './_bpy.app.handlers.js';
 export {handlers, icons, translations, timers};
 var __name__ = '_bpy.app';
 export var version = tuple ([5, 2, 3]);
-export var version_file = tuple ([5, 2, 3]);
-export var version_string = '5.2.3';
+export var version_file = tuple ([5, 2, 45]);
+export var version_string = '5.2.3 LTS';
+export var version_cycle = 'release';
 export var background = false;
-export var debug = false;
+export var factory_startup = false;
+export var portable = true;
+export var online_access = false;
+export var online_access_override = false;
+var __left0__ = false;
+export var debug = __left0__;
+export var debug_python = __left0__;
+export var debug_events = __left0__;
+export var debug_handlers = __left0__;
+export var debug_wm = __left0__;
+export var debug_io = __left0__;
+export var debug_freestyle = __left0__;
+export var debug_simdata = __left0__;
+var __left0__ = false;
+export var debug_depsgraph = __left0__;
+export var debug_depsgraph_build = __left0__;
+export var debug_depsgraph_eval = __left0__;
+export var debug_depsgraph_pretty = __left0__;
+export var debug_depsgraph_tag = __left0__;
+export var debug_depsgraph_time = false;
+export var debug_value = 0;
+var __left0__ = false;
+export var autoexec_fail = __left0__;
+export var autoexec_fail_quiet = __left0__;
+export var autoexec_fail_message = '';
+export var binary_path = '/blender/blender';
+export var tempdir = '/tmp/';
+export var cachedir = '/blender/cache/';
+export var render_icon_size = 32;
+export var render_preview_size = 128;
+export var use_event_simulate = false;
+export var use_userpref_skip_save_on_exit = true;
+export var python_args = tuple ([]);
+export var driver_namespace = dict ({});
+export var _Library =  __class__ ('_Library', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, supported, version) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'supported': var supported = __allkwargs0__ [__attrib0__]; break;
+						case 'version': var version = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __left0__ = tuple ([supported, version]);
+		self.supported = __left0__ [0];
+		self.version = __left0__ [1];
+		self.version_string = ', '.join ((function () {
+			var __accu0__ = [];
+			for (var v of version) {
+				__accu0__.append (str (v).rjust (2));
+			}
+			return __accu0__;
+		}) ());
+	});}
+});
+export var alembic = _Library (true, tuple ([1, 8, 3]));
+export var ocio = _Library (true, tuple ([2, 5, 0]));
+export var oiio = _Library (true, tuple ([3, 1, 13]));
+export var opensubdiv = _Library (true, tuple ([3, 7, 0]));
+export var openvdb = _Library (true, tuple ([13, 0, 0]));
+export var usd = _Library (true, tuple ([0, 26, 3]));
+export var sdl = _Library (false, tuple ([0, 0, 0]));
+export var ffmpeg = _Library (true, tuple ([62, 28, 100]));
+export var build_options =  __class__ ('build_options', [object], {
+	__module__: __name__,
+	bullet: true,
+	codec_avi: false,
+	codec_ffmpeg: true,
+	codec_sndfile: true,
+	compositor_cpu: true,
+	cycles: true,
+	cycles_osl: true,
+	freestyle: true,
+	image_cineon: true,
+	image_dds: true,
+	image_hdr: true,
+	image_openexr: true,
+	image_openjpeg: true,
+	image_tiff: true,
+	image_webp: true,
+	input_ndof: true,
+	audaspace: true,
+	international: true,
+	openal: true,
+	opensubdiv: true,
+	sdl: false,
+	coreaudio: false,
+	jack: true,
+	pulseaudio: true,
+	wasapi: false,
+	libmv: true,
+	mod_oceansim: true,
+	mod_remesh: true,
+	io_wavefront_obj: true,
+	io_ply: true,
+	io_stl: true,
+	io_fbx: true,
+	io_gpencil: true,
+	opencolorio: true,
+	openmp: false,
+	openvdb: true,
+	alembic: true,
+	usd: true,
+	fluid: true,
+	xr_openxr: true,
+	potrace: true,
+	pugixml: true,
+	haru: true,
+	experimental_features: false
+});
+export var is_job_running = function (job_type) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'job_type': var job_type = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return false;
+};
+export var help_text = function (all) {
+	if (typeof all == 'undefined' || (all != null && all.hasOwnProperty ("__kwargtrans__"))) {;
+		var all = false;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'all': var all = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return '';
+};
 
 //# sourceMappingURL=_bpy.app.map

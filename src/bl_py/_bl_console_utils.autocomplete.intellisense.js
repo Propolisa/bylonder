@@ -8,7 +8,7 @@ import * as __module_re__ from './re.js';
 __nest__ (re, '', __module_re__);
 import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_bl_console_utils.autocomplete.intellisense';
 export var RE_MODULE = re.compile ('^import(\\s|$)|from.+');
 export var RE_UNQUOTED_WORD = re.compile ('(?:^|[^"\'a-zA-Z0-9_])((?:\\w+(?:\\w|[.]|\\[.+?\\])*|)(?:\\[[^\\]]*$)?)$', re.UNICODE);
@@ -118,3 +118,4 @@ export var expand = function (line, cursor, namespace) {
 };
 
 //# sourceMappingURL=_bl_console_utils.autocomplete.intellisense.map
+export {_globals, _import, _lazy, _member, _module};

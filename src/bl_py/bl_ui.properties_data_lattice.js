@@ -125,7 +125,8 @@ export var DATA_PT_lattice_animation =  __class__ ('DATA_PT_lattice_animation', 
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: 'Lattice'}));
 		self.draw_action_and_slot_selector (context, col, lattice);
-		if (shape_keyslattice.shape_keys) {
+		var shape_keys = lattice.shape_keys;
+		if (shape_keys) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shape Keys'}));
 			self.draw_action_and_slot_selector (context, col, shape_keys);
@@ -145,3 +146,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_lattice.map
+export {Panel, PropertiesAnimationMixin, PropertyPanel, register_class};

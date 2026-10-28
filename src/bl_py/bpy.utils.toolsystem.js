@@ -7,3 +7,4 @@ var __name__ = 'bpy.utils.toolsystem';
 export var __all__ = tuple (['ToolDef']);
 
 //# sourceMappingURL=bpy.utils.toolsystem.map
+export {ToolDef};

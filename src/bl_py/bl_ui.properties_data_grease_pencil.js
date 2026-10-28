@@ -818,3 +818,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_grease_pencil.map
+export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};

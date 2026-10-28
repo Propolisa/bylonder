@@ -43,3 +43,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_shaderfx.map
+export {Panel, register_class};

@@ -8,7 +8,7 @@ import {pgettext_data as data_, pgettext_rpt as rpt_} from './_bpy.app.translati
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.assets';
 export var AssetBrowserMetadataOperator =  __class__ ('AssetBrowserMetadataOperator', [object], {
 	__module__: __name__,
@@ -322,3 +322,4 @@ export var ASSET_OT_browse_containing_blend_file =  __class__ ('ASSET_OT_browse_
 export var classes = tuple ([ASSET_OT_tag_add, ASSET_OT_tag_remove, ASSET_OT_open_containing_blend_file, ASSET_OT_browse_containing_blend_file]);
 
 //# sourceMappingURL=bl_operators.assets.map
+export {Operator, SpaceAssetInfo, _globals, _import, _lazy, _member, _module, data_, rpt_};

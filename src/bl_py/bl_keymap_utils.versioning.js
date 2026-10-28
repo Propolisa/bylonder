@@ -2,7 +2,7 @@
 import * as __self__ from './bl_keymap_utils.versioning.js';
 (globalThis.__py_modules ??= {})['bl_keymap_utils.versioning'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_keymap_utils.versioning';
 export var _merged = function () {
 	if (arguments.length) {
@@ -274,9 +274,11 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 		for (var [_km_name, _km_parms, km_items_data] of keyconfig_data) {
 			for (var [_item_op, item_event, _item_prop] of km_items_data ['items']) {
-				if (ty_newdict ({'EVT_TWEAK_L': 'LEFTMOUSE', 'EVT_TWEAK_M': 'MIDDLEMOUSE', 'EVT_TWEAK_R': 'RIGHTMOUSE'}).py_get (item_event.py_get ('type'))) {
+				var ty_new = dict ({'EVT_TWEAK_L': 'LEFTMOUSE', 'EVT_TWEAK_M': 'MIDDLEMOUSE', 'EVT_TWEAK_R': 'RIGHTMOUSE'}).py_get (item_event.py_get ('type'));
+				if (ty_new) {
 					item_event ['type'] = ty_new;
-					if (valueitem_event ['value'] != 'ANY') {
+					var value = item_event ['value'];
+					if (value != 'ANY') {
 						item_event ['direction'] = value;
 					}
 					item_event ['value'] = 'CLICK_DRAG';
@@ -291,7 +293,8 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 		for (var [_km_name, _km_parms, km_items_data] of keyconfig_data) {
 			for (var [_item_op, item_event, _item_prop] of km_items_data ['items']) {
-				if (ty_newdict ({'NDOF_BUTTON_ESC': 'ESC', 'NDOF_BUTTON_ALT': 'LEFT_ALT', 'NDOF_BUTTON_SHIFT': 'LEFT_SHIFT', 'NDOF_BUTTON_CTRL': 'LEFT_CTRL'}).py_get (item_event.py_get ('type'))) {
+				var ty_new = dict ({'NDOF_BUTTON_ESC': 'ESC', 'NDOF_BUTTON_ALT': 'LEFT_ALT', 'NDOF_BUTTON_SHIFT': 'LEFT_SHIFT', 'NDOF_BUTTON_CTRL': 'LEFT_CTRL'}).py_get (item_event.py_get ('type'));
+				if (ty_new) {
 					item_event ['type'] = ty_new;
 				}
 			}
@@ -302,7 +305,8 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
 			var has_copy = true;
 		}
-		if (km_items_dataget_transform_modal_map ()) {
+		var km_items_data = get_transform_modal_map ();
+		if (km_items_data) {
 			var km_items = km_items_data ['items'];
 			for (var [item_modal, item_event, _item_prop] of km_items) {
 				if (item_modal == 'TRANSLATE') {
@@ -320,14 +324,16 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
 			var has_copy = true;
 		}
-		if (km_items_dataget_transform_modal_map ()) {
+		var km_items_data = get_transform_modal_map ();
+		if (km_items_data) {
 			km_items_data ['items'].append (tuple (['EDIT_SNAP_SOURCE_ON', dict ({'type': 'B', 'value': 'PRESS'}), null]));
 			km_items_data ['items'].append (tuple (['EDIT_SNAP_SOURCE_OFF', dict ({'type': 'B', 'value': 'PRESS'}), null]));
 		}
 	}
 	if (keyconfig_version <= tuple ([4, 1, 5])) {
 		remove_properties (dict ({'transform.edge_slide': ['alt_navigation'], 'transform.resize': ['alt_navigation'], 'transform.rotate': ['alt_navigation'], 'transform.shrink_fatten': ['alt_navigation'], 'transform.transform': ['alt_navigation'], 'transform.translate': ['alt_navigation'], 'transform.vert_slide': ['alt_navigation'], 'view3d.edit_mesh_extrude_move_normal': ['alt_navigation'], 'armature.extrude_move': ['TRANSFORM_OT_translate'], 'curve.extrude_move': ['TRANSFORM_OT_translate'], 'gpencil.extrude_move': ['TRANSFORM_OT_translate'], 'mesh.rip_edge_move': ['TRANSFORM_OT_translate'], 'mesh.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move_linked': ['TRANSFORM_OT_translate']}));
-		if (km_items_dataget_transform_modal_map ()) {
+		var km_items_data = get_transform_modal_map ();
+		if (km_items_data) {
 			var use_alt_navigate = function () {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -426,7 +432,8 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 	if (keyconfig_version < tuple ([5, 1, 6])) {
 		var has_view_select = false;
 		var has_view_scroll = false;
-		if (km_ui_items_dataget_ui_keymap ()) {
+		var km_ui_items_data = get_ui_keymap ();
+		if (km_ui_items_data) {
 			for (var [item_op, _item_event, _item_prop] of km_ui_items_data ['items']) {
 				if (item_op == 'ui.view_item_select') {
 					var has_view_select = true;
@@ -489,3 +496,4 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 };
 
 //# sourceMappingURL=bl_keymap_utils.versioning.map
+export {_globals, _import, _lazy, _member, _module};

@@ -8,7 +8,7 @@ import {BoolProperty, BoolVectorProperty, CollectionProperty, EnumProperty, Floa
 import {Menu, Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.wm';
 export var _rna_path_prop_search_for_context_impl = function* (context, edit_text, unique_attrs) {
 	if (arguments.length) {
@@ -184,7 +184,11 @@ export var context_path_decompose = function (data_path) {
 	var path_split = decompose_data_path ('.' + data_path);
 	var value_prev = '';
 	var i = len (path_split);
-	while (ii - 1 >= 0) {
+	while (true) {
+		var i = i - 1;
+		if (!(i >= 0)) {
+			break;
+		}
 		var value = path_split [i];
 		if (value.startswith ('.')) {
 			if (!(value_prev.startswith ('('))) {
@@ -232,7 +236,13 @@ export var description_from_data_path = function (base, data_path) {
 	if (context_path_validate (base, data_path) === Ellipsis) {
 		return null;
 	}
-	if (rna_propcontext_path_to_rna_property (base, data_path) && descriptiontip_ (rna_prop.description)) {
+	var rna_prop = context_path_to_rna_property (base, data_path);
+	var _walrus1 = rna_prop;
+	if (_walrus1) {
+		var description = tip_ (rna_prop.description);
+		var _walrus1 = description;
+	}
+	if (_walrus1) {
 		var description = tip_ ('{:s}: {:s}').format (prefix, description);
 		if (value != Ellipsis) {
 			var description = '{:s}\n{:s}: {:s}'.format (description, tip_ ('Value'), str (value));
@@ -357,7 +367,6 @@ export var execute_context_assign = function (self, context) {
 };
 export var WM_OT_context_set_boolean =  __class__ ('WM_OT_context_set_boolean', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': BoolProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: true}))}),
 	bl_idname: 'wm.context_set_boolean',
 	bl_label: 'Context Set Boolean',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -381,9 +390,9 @@ export var WM_OT_context_set_boolean =  __class__ ('WM_OT_context_set_boolean', 
 	});},
 	execute: execute_context_assign
 });
+WM_OT_context_set_boolean.__annotations__ = dict ({'value': BoolProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: true}))});
 export var WM_OT_context_set_int =  __class__ ('WM_OT_context_set_int', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': IntProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 0}))}),
 	bl_idname: 'wm.context_set_int',
 	bl_label: 'Context Set',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -407,9 +416,9 @@ export var WM_OT_context_set_int =  __class__ ('WM_OT_context_set_int', [Operato
 	});},
 	execute: execute_context_assign
 });
+WM_OT_context_set_int.__annotations__ = dict ({'value': IntProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 0}))});
 export var WM_OT_context_scale_float =  __class__ ('WM_OT_context_scale_float', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': FloatProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0}))}),
 	bl_idname: 'wm.context_scale_float',
 	bl_label: 'Context Scale Float',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -458,9 +467,9 @@ export var WM_OT_context_scale_float =  __class__ ('WM_OT_context_scale_float', 
 		return operator_path_undo_return (context, data_path);
 	});}
 });
+WM_OT_context_scale_float.__annotations__ = dict ({'value': FloatProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0}))});
 export var WM_OT_context_scale_int =  __class__ ('WM_OT_context_scale_int', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': FloatProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0})), 'always_step': BoolProperty (__kwargtrans__ ({py_name: 'Always Step', description: "Always adjust the value by a minimum of 1 when 'value' is not 1.0", py_default: true, options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'wm.context_scale_int',
 	bl_label: 'Context Scale Int',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -522,9 +531,9 @@ export var WM_OT_context_scale_int =  __class__ ('WM_OT_context_scale_int', [Ope
 		return operator_path_undo_return (context, data_path);
 	});}
 });
+WM_OT_context_scale_int.__annotations__ = dict ({'value': FloatProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0})), 'always_step': BoolProperty (__kwargtrans__ ({py_name: 'Always Step', description: "Always adjust the value by a minimum of 1 when 'value' is not 1.0", py_default: true, options: new set (['SKIP_SAVE'])}))});
 export var WM_OT_context_set_float =  __class__ ('WM_OT_context_set_float', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': FloatProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: 0.0}))}),
 	bl_idname: 'wm.context_set_float',
 	bl_label: 'Context Set Float',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -548,9 +557,9 @@ export var WM_OT_context_set_float =  __class__ ('WM_OT_context_set_float', [Ope
 	});},
 	execute: execute_context_assign
 });
+WM_OT_context_set_float.__annotations__ = dict ({'value': FloatProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: 0.0}))});
 export var WM_OT_context_set_string =  __class__ ('WM_OT_context_set_string', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))}),
 	bl_idname: 'wm.context_set_string',
 	bl_label: 'Context Set String',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -574,9 +583,9 @@ export var WM_OT_context_set_string =  __class__ ('WM_OT_context_set_string', [O
 	});},
 	execute: execute_context_assign
 });
+WM_OT_context_set_string.__annotations__ = dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))});
 export var WM_OT_context_set_enum =  __class__ ('WM_OT_context_set_enum', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))}),
 	bl_idname: 'wm.context_set_enum',
 	bl_label: 'Context Set Enum',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -600,9 +609,9 @@ export var WM_OT_context_set_enum =  __class__ ('WM_OT_context_set_enum', [Opera
 	});},
 	execute: execute_context_assign
 });
+WM_OT_context_set_enum.__annotations__ = dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))});
 export var WM_OT_context_set_value =  __class__ ('WM_OT_context_set_value', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))}),
 	bl_idname: 'wm.context_set_value',
 	bl_label: 'Context Set Value',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -647,6 +656,7 @@ export var WM_OT_context_set_value =  __class__ ('WM_OT_context_set_value', [Ope
 		return operator_path_undo_return (context, data_path);
 	});}
 });
+WM_OT_context_set_value.__annotations__ = dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))});
 export var WM_OT_context_toggle =  __class__ ('WM_OT_context_toggle', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_toggle',
@@ -706,7 +716,6 @@ export var WM_OT_context_toggle =  __class__ ('WM_OT_context_toggle', [Operator]
 });
 export var WM_OT_context_toggle_enum =  __class__ ('WM_OT_context_toggle_enum', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value_1': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024})), 'value_2': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024}))}),
 	bl_idname: 'wm.context_toggle_enum',
 	bl_label: 'Context Toggle Values',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -762,6 +771,7 @@ export var WM_OT_context_toggle_enum =  __class__ ('WM_OT_context_toggle_enum', 
 		return operator_path_undo_return (context, data_path);
 	});}
 });
+WM_OT_context_toggle_enum.__annotations__ = dict ({'value_1': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024})), 'value_2': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024}))});
 export var WM_OT_context_cycle_int =  __class__ ('WM_OT_context_cycle_int', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_cycle_int',
@@ -1111,7 +1121,6 @@ export var WM_OT_context_pie_enum =  __class__ ('WM_OT_context_pie_enum', [Opera
 });
 export var WM_OT_operator_pie_enum =  __class__ ('WM_OT_operator_pie_enum', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'data_path': StringProperty (__kwargtrans__ ({py_name: 'Operator', description: 'Operator name (in Python as string)', maxlen: 1024})), 'prop_string': StringProperty (__kwargtrans__ ({py_name: 'Property', description: 'Property name (as a string)', maxlen: 1024}))}),
 	bl_idname: 'wm.operator_pie_enum',
 	bl_label: 'Operator Enum Pie',
 	bl_options: new set (['INTERNAL']),
@@ -1191,9 +1200,9 @@ export var WM_OT_operator_pie_enum =  __class__ ('WM_OT_operator_pie_enum', [Ope
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_operator_pie_enum.__annotations__ = dict ({'data_path': StringProperty (__kwargtrans__ ({py_name: 'Operator', description: 'Operator name (in Python as string)', maxlen: 1024})), 'prop_string': StringProperty (__kwargtrans__ ({py_name: 'Property', description: 'Property name (as a string)', maxlen: 1024}))});
 export var WM_OT_context_set_id =  __class__ ('WM_OT_context_set_id', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))}),
 	bl_idname: 'wm.context_set_id',
 	bl_label: 'Set Library ID',
 	bl_options: new set (['UNDO', 'INTERNAL']),
@@ -1232,12 +1241,12 @@ export var WM_OT_context_set_id =  __class__ ('WM_OT_context_set_id', [Operator]
 		return operator_path_undo_return (context, data_path);
 	});}
 });
+WM_OT_context_set_id.__annotations__ = dict ({'value': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))});
 export var doc_id = StringProperty (__kwargtrans__ ({py_name: 'Doc ID', maxlen: 1024, options: new set (['HIDDEN'])}));
 export var data_path_iter = StringProperty (__kwargtrans__ ({description: 'The data path relative to the context, must point to an iterable'}));
 export var data_path_item = StringProperty (__kwargtrans__ ({description: 'The data path from each iterable to the value (int or float)'}));
 export var WM_OT_context_collection_boolean_set =  __class__ ('WM_OT_context_collection_boolean_set', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TOGGLE', 'Toggle', '']), tuple (['ENABLE', 'Enable', '']), tuple (['DISABLE', 'Disable', ''])])}))}),
 	bl_idname: 'wm.context_collection_boolean_set',
 	bl_label: 'Context Collection Boolean Set',
 	bl_options: new set (['UNDO', 'REGISTER', 'INTERNAL']),
@@ -1304,9 +1313,9 @@ export var WM_OT_context_collection_boolean_set =  __class__ ('WM_OT_context_col
 		return operator_value_undo_return (item);
 	});}
 });
+WM_OT_context_collection_boolean_set.__annotations__ = dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TOGGLE', 'Toggle', '']), tuple (['ENABLE', 'Enable', '']), tuple (['DISABLE', 'Disable', ''])])}))});
 export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'header_text': StringProperty (__kwargtrans__ ({py_name: 'Header Text', description: 'Text to display in header during scale'})), 'input_scale': FloatProperty (__kwargtrans__ ({description: 'Scale the mouse movement by this value before applying the delta', py_default: 0.01, options: new set (['SKIP_SAVE'])})), 'invert': BoolProperty (__kwargtrans__ ({description: 'Invert the mouse input', py_default: false, options: new set (['SKIP_SAVE'])})), 'initial_x': IntProperty (__kwargtrans__ ({options: new set (['HIDDEN'])}))}),
 	bl_idname: 'wm.context_modal_mouse',
 	bl_label: 'Context Modal Mouse',
 	bl_options: new set (['GRAB_CURSOR', 'BLOCKING', 'UNDO', 'INTERNAL']),
@@ -1505,9 +1514,9 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 		}
 	});}
 });
+WM_OT_context_modal_mouse.__annotations__ = dict ({'header_text': StringProperty (__kwargtrans__ ({py_name: 'Header Text', description: 'Text to display in header during scale'})), 'input_scale': FloatProperty (__kwargtrans__ ({description: 'Scale the mouse movement by this value before applying the delta', py_default: 0.01, options: new set (['SKIP_SAVE'])})), 'invert': BoolProperty (__kwargtrans__ ({description: 'Invert the mouse input', py_default: false, options: new set (['SKIP_SAVE'])})), 'initial_x': IntProperty (__kwargtrans__ ({options: new set (['HIDDEN'])}))});
 export var WM_OT_url_open =  __class__ ('WM_OT_url_open', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'url': StringProperty (__kwargtrans__ ({py_name: 'URL', description: 'URL to open'}))}),
 	bl_idname: 'wm.url_open',
 	bl_label: '',
 	bl_options: new set (['INTERNAL']),
@@ -1578,9 +1587,9 @@ export var WM_OT_url_open =  __class__ ('WM_OT_url_open', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_url_open.__annotations__ = dict ({'url': StringProperty (__kwargtrans__ ({py_name: 'URL', description: 'URL to open'}))});
 export var WM_OT_url_open_preset =  __class__ ('WM_OT_url_open_preset', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Site', py_items: WM_OT_url_open_preset._wm_url_open_preset_type_items}))}),
 	bl_idname: 'wm.url_open_preset',
 	bl_label: 'Open Preset Website',
 	bl_options: new set (['INTERNAL']),
@@ -1661,7 +1670,6 @@ export var WM_OT_url_open_preset =  __class__ ('WM_OT_url_open_preset', [Operato
 		}
 		return 'https://docs.blender.org/api/{:d}.{:d}/'.format (...bpy.app.version.__getslice__ (null, 2, 1));
 	};},
-	preset_items: [tuple ([tuple (['BUG', iface_ ('Bug'), tip_ ('Report a bug with pre-filled version information')]), _url_from_bug]), tuple ([tuple (['RELEASE_NOTES', iface_ ('Release Notes'), tip_ ("Read about what's new in this version of Blender")]), _url_from_release_notes]), tuple ([tuple (['MANUAL', iface_ ('User Manual'), tip_ ('The reference manual for this version of Blender')]), _url_from_manual]), tuple ([tuple (['API', iface_ ('Python API Reference'), tip_ ('The API reference manual for this version of Blender')]), _url_from_api]), tuple ([tuple (['FUND', iface_ ('Development Fund'), tip_ ('The donation program to support maintenance and improvements')]), 'https://fund.blender.org']), tuple ([tuple (['BLENDER', 'blender.org', tip_ ("Blender's official web-site")]), 'https://www.blender.org']), tuple ([tuple (['CREDITS', iface_ ('Credits'), tip_ ("Lists committers to Blender's source code")]), 'https://www.blender.org/about/credits/']), tuple ([tuple (['EXTENSIONS', iface_ ('Extensions Platform'), tip_ ('Online directory of free and open source extensions')]), 'https://extensions.blender.org/'])],
 	get lookup_url_from_type () {return function (ty) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1705,9 +1713,10 @@ export var WM_OT_url_open_preset =  __class__ ('WM_OT_url_open_preset', [Operato
 		return bpy.ops.wm.url_open (__kwargtrans__ ({url: url}));
 	});}
 });
+WM_OT_url_open_preset.preset_items = [tuple ([tuple (['BUG', iface_ ('Bug'), tip_ ('Report a bug with pre-filled version information')]), WM_OT_url_open_preset._url_from_bug]), tuple ([tuple (['RELEASE_NOTES', iface_ ('Release Notes'), tip_ ("Read about what's new in this version of Blender")]), WM_OT_url_open_preset._url_from_release_notes]), tuple ([tuple (['MANUAL', iface_ ('User Manual'), tip_ ('The reference manual for this version of Blender')]), WM_OT_url_open_preset._url_from_manual]), tuple ([tuple (['API', iface_ ('Python API Reference'), tip_ ('The API reference manual for this version of Blender')]), WM_OT_url_open_preset._url_from_api]), tuple ([tuple (['FUND', iface_ ('Development Fund'), tip_ ('The donation program to support maintenance and improvements')]), 'https://fund.blender.org']), tuple ([tuple (['BLENDER', 'blender.org', tip_ ("Blender's official web-site")]), 'https://www.blender.org']), tuple ([tuple (['CREDITS', iface_ ('Credits'), tip_ ("Lists committers to Blender's source code")]), 'https://www.blender.org/about/credits/']), tuple ([tuple (['EXTENSIONS', iface_ ('Extensions Platform'), tip_ ('Online directory of free and open source extensions')]), 'https://extensions.blender.org/'])];
+WM_OT_url_open_preset.__annotations__ = dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Site', py_items: WM_OT_url_open_preset._wm_url_open_preset_type_items}))});
 export var WM_OT_path_open =  __class__ ('WM_OT_path_open', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'wm.path_open',
 	bl_label: '',
 	bl_options: new set (['INTERNAL']),
@@ -1763,6 +1772,7 @@ export var WM_OT_path_open =  __class__ ('WM_OT_path_open', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_path_open.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])}))});
 export var _wm_doc_get_id = function (doc_id) {
 	var do_url = true;
 	var url_prefix = '';
@@ -2036,7 +2046,6 @@ export var rna_id_type_items = tuple ((function () {
 }) ());
 export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'property_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: rna_custom_property_type_items, py_update: property_type_update_cb})), 'is_overridable_library': BoolProperty (__kwargtrans__ ({py_name: 'Library Overridable', description: 'Allow the property to be overridden when the data-block is linked', py_default: false})), 'description': StringProperty (__kwargtrans__ ({py_name: 'Description'})), 'use_soft_limits': BoolProperty (__kwargtrans__ ({py_name: 'Soft Limits', description: 'Limits the Property Value slider to a range, values outside the range must be inputted numerically'})), 'array_length': IntProperty (__kwargtrans__ ({py_name: 'Array Length', py_default: 3, min: 1, max: 32})), 'default_int': IntVectorProperty (__kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_int': IntProperty (__kwargtrans__ ({py_name: 'Min', py_default: -(10000)})), 'max_int': IntProperty (__kwargtrans__ ({py_name: 'Max', py_default: 10000})), 'soft_min_int': IntProperty (__kwargtrans__ ({py_name: 'Soft Min', py_default: -(10000)})), 'soft_max_int': IntProperty (__kwargtrans__ ({py_name: 'Soft Max', py_default: 10000})), 'step_int': IntProperty (__kwargtrans__ ({py_name: 'Step', min: 1, py_default: 1})), 'default_bool': BoolVectorProperty (__kwargtrans__ ({py_name: 'Default Value', size: 32})), 'default_float': FloatVectorProperty (__kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_float': FloatProperty (__kwargtrans__ ({py_name: 'Min', py_default: -(10000.0)})), 'max_float': FloatProperty (__kwargtrans__ ({py_name: 'Max', py_default: -(10000.0)})), 'soft_min_float': FloatProperty (__kwargtrans__ ({py_name: 'Soft Min', py_default: -(10000.0)})), 'soft_max_float': FloatProperty (__kwargtrans__ ({py_name: 'Soft Max', py_default: -(10000.0)})), 'precision': IntProperty (__kwargtrans__ ({py_name: 'Precision', py_default: 3, min: 0, max: 8})), 'step_float': FloatProperty (__kwargtrans__ ({py_name: 'Step', py_default: 0.1, min: 0.001})), 'subtype': EnumProperty (__kwargtrans__ ({py_name: 'Subtype', py_items: subtype_items_cb, translation_context: i18n_contexts.unit})), 'default_string': StringProperty (__kwargtrans__ ({py_name: 'Default Value', maxlen: 1024})), 'id_type': EnumProperty (__kwargtrans__ ({py_name: 'ID Type', py_items: rna_id_type_items, translation_context: i18n_contexts.id_id, py_default: 'OBJECT'})), 'eval_string': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Python value for unsupported custom property types'}))}),
 	bl_idname: 'wm.properties_edit',
 	bl_label: 'Edit Property',
 	bl_options: new set (['REGISTER', 'INTERNAL']),
@@ -2145,7 +2154,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'item': var item = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -2280,7 +2289,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'item': var item = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -2431,7 +2440,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'item': var item = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'prop_type_new': var prop_type_new = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -2472,7 +2481,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
 						case 'item': var item = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'prop_type_old': var prop_type_old = __allkwargs0__ [__attrib0__]; break;
 						case 'prop_type_new': var prop_type_new = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -2841,9 +2850,9 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		layout.prop (self, 'is_overridable_library');
 	});}
 });
+WM_OT_properties_edit.__annotations__ = dict ({'property_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: rna_custom_property_type_items, py_update: WM_OT_properties_edit.property_type_update_cb})), 'is_overridable_library': BoolProperty (__kwargtrans__ ({py_name: 'Library Overridable', description: 'Allow the property to be overridden when the data-block is linked', py_default: false})), 'description': StringProperty (__kwargtrans__ ({py_name: 'Description'})), 'use_soft_limits': BoolProperty (__kwargtrans__ ({py_name: 'Soft Limits', description: 'Limits the Property Value slider to a range, values outside the range must be inputted numerically'})), 'array_length': IntProperty (__kwargtrans__ ({py_name: 'Array Length', py_default: 3, min: 1, max: 32})), 'default_int': IntVectorProperty (__kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_int': IntProperty (__kwargtrans__ ({py_name: 'Min', py_default: -(10000)})), 'max_int': IntProperty (__kwargtrans__ ({py_name: 'Max', py_default: 10000})), 'soft_min_int': IntProperty (__kwargtrans__ ({py_name: 'Soft Min', py_default: -(10000)})), 'soft_max_int': IntProperty (__kwargtrans__ ({py_name: 'Soft Max', py_default: 10000})), 'step_int': IntProperty (__kwargtrans__ ({py_name: 'Step', min: 1, py_default: 1})), 'default_bool': BoolVectorProperty (__kwargtrans__ ({py_name: 'Default Value', size: 32})), 'default_float': FloatVectorProperty (__kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_float': FloatProperty (__kwargtrans__ ({py_name: 'Min', py_default: -(10000.0)})), 'max_float': FloatProperty (__kwargtrans__ ({py_name: 'Max', py_default: -(10000.0)})), 'soft_min_float': FloatProperty (__kwargtrans__ ({py_name: 'Soft Min', py_default: -(10000.0)})), 'soft_max_float': FloatProperty (__kwargtrans__ ({py_name: 'Soft Max', py_default: -(10000.0)})), 'precision': IntProperty (__kwargtrans__ ({py_name: 'Precision', py_default: 3, min: 0, max: 8})), 'step_float': FloatProperty (__kwargtrans__ ({py_name: 'Step', py_default: 0.1, min: 0.001})), 'subtype': EnumProperty (__kwargtrans__ ({py_name: 'Subtype', py_items: WM_OT_properties_edit.subtype_items_cb, translation_context: i18n_contexts.unit})), 'default_string': StringProperty (__kwargtrans__ ({py_name: 'Default Value', maxlen: 1024})), 'id_type': EnumProperty (__kwargtrans__ ({py_name: 'ID Type', py_items: rna_id_type_items, translation_context: i18n_contexts.id_id, py_default: 'OBJECT'})), 'eval_string': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Python value for unsupported custom property types'}))});
 export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_value', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'eval_string': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Value for custom property types that can only be edited as a Python expression'}))}),
 	bl_idname: 'wm.properties_edit_value',
 	bl_label: 'Edit Property Value',
 	bl_options: new set (['REGISTER', 'INTERNAL']),
@@ -2934,6 +2943,7 @@ export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_valu
 		}
 	});}
 });
+WM_OT_properties_edit_value.__annotations__ = dict ({'eval_string': StringProperty (__kwargtrans__ ({py_name: 'Value', description: 'Value for custom property types that can only be edited as a Python expression'}))});
 export var WM_OT_properties_add =  __class__ ('WM_OT_properties_add', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.properties_add',
@@ -2991,7 +3001,6 @@ export var WM_OT_properties_add =  __class__ ('WM_OT_properties_add', [Operator]
 });
 export var WM_OT_properties_context_change =  __class__ ('WM_OT_properties_context_change', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'context': StringProperty (__kwargtrans__ ({py_name: 'Context', maxlen: 64}))}),
 	bl_idname: 'wm.properties_context_change',
 	bl_label: '',
 	bl_options: new set (['INTERNAL']),
@@ -3014,6 +3023,7 @@ export var WM_OT_properties_context_change =  __class__ ('WM_OT_properties_conte
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_properties_context_change.__annotations__ = dict ({'context': StringProperty (__kwargtrans__ ({py_name: 'Context', maxlen: 64}))});
 export var WM_OT_properties_remove =  __class__ ('WM_OT_properties_remove', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.properties_remove',
@@ -3049,7 +3059,6 @@ export var WM_OT_properties_remove =  __class__ ('WM_OT_properties_remove', [Ope
 });
 export var WM_OT_sysinfo =  __class__ ('WM_OT_sysinfo', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'wm.sysinfo',
 	bl_label: 'Save System Info...',
 	get execute () {return __get__ (this, function (self, _context) {
@@ -3119,6 +3128,7 @@ export var WM_OT_sysinfo =  __class__ ('WM_OT_sysinfo', [Operator], {
 		return new set (['RUNNING_MODAL']);
 	});}
 });
+WM_OT_sysinfo.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])}))});
 export var WM_OT_operator_cheat_sheet =  __class__ ('WM_OT_operator_cheat_sheet', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.operator_cheat_sheet',
@@ -3161,7 +3171,6 @@ export var WM_OT_operator_cheat_sheet =  __class__ ('WM_OT_operator_cheat_sheet'
 });
 export var WM_OT_owner_enable =  __class__ ('WM_OT_owner_enable', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'owner_id': StringProperty (__kwargtrans__ ({py_name: 'UI Tag'}))}),
 	bl_idname: 'wm.owner_enable',
 	bl_label: 'Enable Add-on',
 	get execute () {return __get__ (this, function (self, context) {
@@ -3184,9 +3193,9 @@ export var WM_OT_owner_enable =  __class__ ('WM_OT_owner_enable', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_owner_enable.__annotations__ = dict ({'owner_id': StringProperty (__kwargtrans__ ({py_name: 'UI Tag'}))});
 export var WM_OT_owner_disable =  __class__ ('WM_OT_owner_disable', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'owner_id': StringProperty (__kwargtrans__ ({py_name: 'UI Tag'}))}),
 	bl_idname: 'wm.owner_disable',
 	bl_label: 'Disable Add-on',
 	get execute () {return __get__ (this, function (self, context) {
@@ -3210,9 +3219,9 @@ export var WM_OT_owner_disable =  __class__ ('WM_OT_owner_disable', [Operator], 
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_owner_disable.__annotations__ = dict ({'owner_id': StringProperty (__kwargtrans__ ({py_name: 'UI Tag'}))});
 export var WM_OT_tool_set_by_id =  __class__ ('WM_OT_tool_set_by_id', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Identifier', description: 'Identifier of the tool'})), 'cycle': BoolProperty (__kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'as_fallback': BoolProperty (__kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary tool', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])}))}),
 	bl_idname: 'wm.tool_set_by_id',
 	bl_label: 'Set Tool by Name',
 	get space_type_from_operator () {return function (op, context) {
@@ -3260,7 +3269,8 @@ export var WM_OT_tool_set_by_id =  __class__ ('WM_OT_tool_set_by_id', [Operator]
 		}
 		var activate_by_id = _member ('bl_ui.space_toolsystem_common', 'activate_by_id');
 		var activate_by_id_or_cycle = _member ('bl_ui.space_toolsystem_common', 'activate_by_id_or_cycle');
-		if (space_typeWM_OT_tool_set_by_id.space_type_from_operator (self, context) === null) {
+		var space_type = WM_OT_tool_set_by_id.space_type_from_operator (self, context);
+		if (space_type === null) {
 			return new set (['CANCELLED']);
 		}
 		var fn = (self.cycle ? activate_by_id_or_cycle : activate_by_id);
@@ -3277,9 +3287,9 @@ export var WM_OT_tool_set_by_id =  __class__ ('WM_OT_tool_set_by_id', [Operator]
 		}
 	});}
 });
+WM_OT_tool_set_by_id.__annotations__ = dict ({'name': StringProperty (__kwargtrans__ ({py_name: 'Identifier', description: 'Identifier of the tool'})), 'cycle': BoolProperty (__kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'as_fallback': BoolProperty (__kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary tool', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])}))});
 export var WM_OT_tool_set_by_index =  __class__ ('WM_OT_tool_set_by_index', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'index': IntProperty (__kwargtrans__ ({py_name: 'Index in Toolbar', py_default: 0})), 'cycle': BoolProperty (__kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'expand': BoolProperty (__kwargtrans__ ({description: 'Include tool subgroups', py_default: true, options: new set (['SKIP_SAVE'])})), 'as_fallback': BoolProperty (__kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])}))}),
 	bl_idname: 'wm.tool_set_by_index',
 	bl_label: 'Set Tool by Index',
 	get execute () {return __get__ (this, function (self, context) {
@@ -3301,7 +3311,8 @@ export var WM_OT_tool_set_by_index =  __class__ ('WM_OT_tool_set_by_index', [Ope
 		var activate_by_id_or_cycle = _member ('bl_ui.space_toolsystem_common', 'activate_by_id_or_cycle');
 		var item_from_index_active = _member ('bl_ui.space_toolsystem_common', 'item_from_index_active');
 		var item_from_flat_index = _member ('bl_ui.space_toolsystem_common', 'item_from_flat_index');
-		if (space_typeWM_OT_tool_set_by_id.space_type_from_operator (self, context) === null) {
+		var space_type = WM_OT_tool_set_by_id.space_type_from_operator (self, context);
+		if (space_type === null) {
 			return new set (['CANCELLED']);
 		}
 		var fn = (self.expand ? item_from_flat_index : item_from_index_active);
@@ -3324,9 +3335,9 @@ export var WM_OT_tool_set_by_index =  __class__ ('WM_OT_tool_set_by_index', [Ope
 		}
 	});}
 });
+WM_OT_tool_set_by_index.__annotations__ = dict ({'index': IntProperty (__kwargtrans__ ({py_name: 'Index in Toolbar', py_default: 0})), 'cycle': BoolProperty (__kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'expand': BoolProperty (__kwargtrans__ ({description: 'Include tool subgroups', py_default: true, options: new set (['SKIP_SAVE'])})), 'as_fallback': BoolProperty (__kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])}))});
 export var WM_OT_tool_set_by_brush_type =  __class__ ('WM_OT_tool_set_by_brush_type', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'brush_type': StringProperty (__kwargtrans__ ({py_name: 'Brush Type', description: 'Brush type identifier for which the most appropriate tool will be looked up'}))}),
 	bl_idname: 'wm.tool_set_by_brush_type',
 	bl_label: 'Set Tool by Brush Type',
 	get execute () {return __get__ (this, function (self, context) {
@@ -3346,7 +3357,8 @@ export var WM_OT_tool_set_by_brush_type =  __class__ ('WM_OT_tool_set_by_brush_t
 		}
 		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
 		var activate_by_id = _member ('bl_ui.space_toolsystem_common', 'activate_by_id');
-		if (space_typeWM_OT_tool_set_by_id.space_type_from_operator (self, context) === null) {
+		var space_type = WM_OT_tool_set_by_id.space_type_from_operator (self, context);
+		if (space_type === null) {
 			return new set (['CANCELLED']);
 		}
 		var tool_helper_cls = ToolSelectPanelHelper._tool_class_from_space_type (space_type);
@@ -3374,6 +3386,7 @@ export var WM_OT_tool_set_by_brush_type =  __class__ ('WM_OT_tool_set_by_brush_t
 		}
 	});}
 });
+WM_OT_tool_set_by_brush_type.__annotations__ = dict ({'brush_type': StringProperty (__kwargtrans__ ({py_name: 'Brush Type', description: 'Brush type identifier for which the most appropriate tool will be looked up'}))});
 export var WM_OT_toolbar =  __class__ ('WM_OT_toolbar', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.toolbar',
@@ -3720,12 +3733,11 @@ export var WM_OT_toolbar_prompt =  __class__ ('WM_OT_toolbar_prompt', [Operator]
 });
 export var BatchRenameAction =  __class__ ('BatchRenameAction', [bpy.types.PropertyGroup], {
 	__module__: __name__,
-	__annotations__: dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Operation', py_items: tuple ([tuple (['REPLACE', 'Find/Replace', 'Replace text in the name']), tuple (['SET', 'Set Name', 'Set a new name or prefix/suffix the existing one']), tuple (['STRIP', 'Strip Characters', 'Strip leading/trailing text from the name']), tuple (['CASE', 'Change Case', 'Change case of each name'])])})), 'set_name': StringProperty (__kwargtrans__ ({py_name: 'Name'})), 'set_method': EnumProperty (__kwargtrans__ ({py_name: 'Method', py_items: tuple ([tuple (['NEW', 'New', '']), tuple (['PREFIX', 'Prefix', '']), tuple (['SUFFIX', 'Suffix', ''])]), py_default: 'SUFFIX'})), 'strip_chars': EnumProperty (__kwargtrans__ ({py_name: 'Strip Characters', translation_context: i18n_contexts.id_text, options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['SPACE', 'Spaces', '']), tuple (['DIGIT', 'Digits', '']), tuple (['PUNCT', 'Punctuation', ''])])})), 'strip_part': EnumProperty (__kwargtrans__ ({py_name: 'Strip Part', options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['START', 'Start', '']), tuple (['END', 'End', ''])])})), 'replace_src': StringProperty (__kwargtrans__ ({py_name: 'Find'})), 'replace_dst': StringProperty (__kwargtrans__ ({py_name: 'Replace'})), 'replace_match_case': BoolProperty (__kwargtrans__ ({py_name: 'Case Sensitive'})), 'use_replace_regex_src': BoolProperty (__kwargtrans__ ({py_name: 'Regular Expression Find', description: "Use regular expressions to match text in the 'Find' field"})), 'use_replace_regex_dst': BoolProperty (__kwargtrans__ ({py_name: 'Regular Expression Replace', description: 'Use regular expression for the replacement text (supporting groups)'})), 'case_method': EnumProperty (__kwargtrans__ ({py_name: 'Case', py_items: tuple ([tuple (['UPPER', 'Upper Case', '']), tuple (['LOWER', 'Lower Case', '']), tuple (['TITLE', 'Title Case', ''])])})), 'op_add': BoolProperty (__kwargtrans__ ({py_name: 'Add', translation_context: i18n_contexts.operator_default})), 'op_remove': BoolProperty (__kwargtrans__ ({py_name: 'Remove', translation_context: i18n_contexts.operator_default}))}),
 	__slots__: tuple ([])
 });
+BatchRenameAction.__annotations__ = dict ({'type': EnumProperty (__kwargtrans__ ({py_name: 'Operation', py_items: tuple ([tuple (['REPLACE', 'Find/Replace', 'Replace text in the name']), tuple (['SET', 'Set Name', 'Set a new name or prefix/suffix the existing one']), tuple (['STRIP', 'Strip Characters', 'Strip leading/trailing text from the name']), tuple (['CASE', 'Change Case', 'Change case of each name'])])})), 'set_name': StringProperty (__kwargtrans__ ({py_name: 'Name'})), 'set_method': EnumProperty (__kwargtrans__ ({py_name: 'Method', py_items: tuple ([tuple (['NEW', 'New', '']), tuple (['PREFIX', 'Prefix', '']), tuple (['SUFFIX', 'Suffix', ''])]), py_default: 'SUFFIX'})), 'strip_chars': EnumProperty (__kwargtrans__ ({py_name: 'Strip Characters', translation_context: i18n_contexts.id_text, options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['SPACE', 'Spaces', '']), tuple (['DIGIT', 'Digits', '']), tuple (['PUNCT', 'Punctuation', ''])])})), 'strip_part': EnumProperty (__kwargtrans__ ({py_name: 'Strip Part', options: new set (['ENUM_FLAG']), py_items: tuple ([tuple (['START', 'Start', '']), tuple (['END', 'End', ''])])})), 'replace_src': StringProperty (__kwargtrans__ ({py_name: 'Find'})), 'replace_dst': StringProperty (__kwargtrans__ ({py_name: 'Replace'})), 'replace_match_case': BoolProperty (__kwargtrans__ ({py_name: 'Case Sensitive'})), 'use_replace_regex_src': BoolProperty (__kwargtrans__ ({py_name: 'Regular Expression Find', description: "Use regular expressions to match text in the 'Find' field"})), 'use_replace_regex_dst': BoolProperty (__kwargtrans__ ({py_name: 'Regular Expression Replace', description: 'Use regular expression for the replacement text (supporting groups)'})), 'case_method': EnumProperty (__kwargtrans__ ({py_name: 'Case', py_items: tuple ([tuple (['UPPER', 'Upper Case', '']), tuple (['LOWER', 'Lower Case', '']), tuple (['TITLE', 'Title Case', ''])])})), 'op_add': BoolProperty (__kwargtrans__ ({py_name: 'Add', translation_context: i18n_contexts.operator_default})), 'op_remove': BoolProperty (__kwargtrans__ ({py_name: 'Remove', translation_context: i18n_contexts.operator_default}))});
 export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'data_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['OBJECT', 'Objects', '', 'OBJECT_DATA', 0]), tuple (['COLLECTION', 'Collections', '', 'OUTLINER_COLLECTION', 1]), tuple (['MATERIAL', 'Materials', '', 'MATERIAL_DATA', 2]), null, tuple (['MESH', 'Meshes', '', 'MESH_DATA', 3]), tuple (['CURVE', 'Curves', '', 'CURVE_DATA', 4]), tuple (['META', 'Metaballs', '', 'META_DATA', 5]), tuple (['VOLUME', 'Volumes', '', 'VOLUME_DATA', 6]), tuple (['GREASEPENCIL', 'Grease Pencils', '', 'OUTLINER_DATA_GREASEPENCIL', 7]), tuple (['ARMATURE', 'Armatures', '', 'ARMATURE_DATA', 8]), tuple (['LATTICE', 'Lattices', '', 'LATTICE_DATA', 9]), tuple (['LIGHT', 'Lights', '', 'LIGHT_DATA', 10]), tuple (['LIGHT_PROBE', 'Light Probes', '', 'OUTLINER_DATA_LIGHTPROBE', 11]), tuple (['CAMERA', 'Cameras', '', 'CAMERA_DATA', 12]), tuple (['SPEAKER', 'Speakers', '', 'OUTLINER_DATA_SPEAKER', 13]), null, tuple (['BONE', 'Bones', '', 'BONE_DATA', 14]), tuple (['NODE', 'Nodes', '', 'NODETREE', 15]), tuple (['SEQUENCE_STRIP', 'Sequence Strips', '', 'SEQ_SEQUENCER', 16]), tuple (['ACTION_CLIP', 'Action Clips', '', 'ACTION', 17]), null, tuple (['SCENE', 'Scenes', '', 'SCENE_DATA', 18]), tuple (['BRUSH', 'Brushes', '', 'BRUSH_DATA', 19])]), translation_context: i18n_contexts.id_id, description: 'Type of data to rename'})), 'data_source': EnumProperty (__kwargtrans__ ({py_name: 'Source', py_items: tuple ([tuple (['SELECT', 'Selected', '']), tuple (['ALL', 'All', ''])])})), 'actions': CollectionProperty (__kwargtrans__ ({py_metatype: BatchRenameAction}))}),
 	bl_idname: 'wm.batch_rename',
 	bl_label: 'Batch Rename',
 	bl_options: new set (['UNDO']),
@@ -3775,9 +3787,11 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 		return tuple (set ((function () {
 			var __accu0__ = [];
 			for (var id_base of context.selected_ids) {
-				if (isinstance (id(isinstance (id_base, Object) ? id_base.data : id_base), ty)) {
-					if (id.is_editable) {
-						__accu0__.append (id);
+				for (var id of [(isinstance (id_base, Object) ? id_base.data : id_base)]) {
+					if (isinstance (id, ty)) {
+						if (id.is_editable) {
+							__accu0__.append (id);
+						}
 					}
 				}
 			}
@@ -3816,7 +3830,8 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 			if (isinstance (id_data, Action)) {
 				return id_data;
 			}
-			if (animation_datagetattr (id_data, 'animation_data', null) !== null) {
+			var animation_data = getattr (id_data, 'animation_data', null);
+			if (animation_data !== null) {
 				return animation_data.action;
 			}
 			return null;
@@ -3824,9 +3839,11 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 		return tuple (set ((function () {
 			var __accu0__ = [];
 			for (var id of context.selected_ids) {
-				if (actionaction_from_any_id (id) !== null) {
-					if (action.is_editable) {
-						__accu0__.append (action);
+				for (var action of [action_from_any_id (id)]) {
+					if (action !== null) {
+						if (action.is_editable) {
+							__accu0__.append (action);
+						}
 					}
 				}
 			}
@@ -3960,8 +3977,10 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				var data = tuple ([(only_selected ? tuple (set ((function () {
 					var __accu0__ = [];
 					for (var ob of context.selected_objects) {
-						if (ob.instance_type == 'COLLECTION' && collectionob.instance_collection !== null && collection.is_editable) {
-							__accu0__.append (ob.instance_collection);
+						for (var collection of [ob.instance_collection]) {
+							if (ob.instance_type == 'COLLECTION' && collection !== null && collection.is_editable) {
+								__accu0__.append (ob.instance_collection);
+							}
 						}
 					}
 					return __accu0__;
@@ -3980,8 +3999,10 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					var __accu0__ = [];
 					for (var ob of context.selected_objects) {
 						for (var slot of ob.material_slots) {
-							if (idslot.material !== null && id.is_editable) {
-								__accu0__.append (id);
+							for (var id of [slot.material]) {
+								if (id !== null && id.is_editable) {
+									__accu0__.append (id);
+								}
 							}
 						}
 					}
@@ -4000,8 +4021,12 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				var data = tuple ([(only_selected ? (space_type == 'OUTLINER' ? cls._selected_actions_from_outliner (context) : tuple (set ((function () {
 					var __accu0__ = [];
 					for (var ob of context.selected_objects) {
-						if (animation_dataob.animation_data !== null && actionanimation_data.action !== null && action.is_editable) {
-							__accu0__.append (action);
+						for (var animation_data of [ob.animation_data]) {
+							for (var action of [animation_data.action]) {
+								if (animation_data !== null && action !== null && action.is_editable) {
+									__accu0__.append (action);
+								}
+							}
 						}
 					}
 					return __accu0__;
@@ -4046,8 +4071,10 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 					var __accu0__ = [];
 					for (var ob of context.selected_objects) {
 						if (ob.py_metatype == data_type) {
-							if (idob.data !== null && id.is_editable) {
-								__accu0__.append (id);
+							for (var id of [ob.data]) {
+								if (id !== null && id.is_editable) {
+									__accu0__.append (id);
+								}
 							}
 						}
 					}
@@ -4085,7 +4112,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'actions': var actions = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -4442,6 +4469,7 @@ export var WM_OT_batch_rename =  __class__ ('WM_OT_batch_rename', [Operator], {
 		return wm.invoke_props_dialog (self, __kwargtrans__ ({width: 400}));
 	});}
 });
+WM_OT_batch_rename.__annotations__ = dict ({'data_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['OBJECT', 'Objects', '', 'OBJECT_DATA', 0]), tuple (['COLLECTION', 'Collections', '', 'OUTLINER_COLLECTION', 1]), tuple (['MATERIAL', 'Materials', '', 'MATERIAL_DATA', 2]), null, tuple (['MESH', 'Meshes', '', 'MESH_DATA', 3]), tuple (['CURVE', 'Curves', '', 'CURVE_DATA', 4]), tuple (['META', 'Metaballs', '', 'META_DATA', 5]), tuple (['VOLUME', 'Volumes', '', 'VOLUME_DATA', 6]), tuple (['GREASEPENCIL', 'Grease Pencils', '', 'OUTLINER_DATA_GREASEPENCIL', 7]), tuple (['ARMATURE', 'Armatures', '', 'ARMATURE_DATA', 8]), tuple (['LATTICE', 'Lattices', '', 'LATTICE_DATA', 9]), tuple (['LIGHT', 'Lights', '', 'LIGHT_DATA', 10]), tuple (['LIGHT_PROBE', 'Light Probes', '', 'OUTLINER_DATA_LIGHTPROBE', 11]), tuple (['CAMERA', 'Cameras', '', 'CAMERA_DATA', 12]), tuple (['SPEAKER', 'Speakers', '', 'OUTLINER_DATA_SPEAKER', 13]), null, tuple (['BONE', 'Bones', '', 'BONE_DATA', 14]), tuple (['NODE', 'Nodes', '', 'NODETREE', 15]), tuple (['SEQUENCE_STRIP', 'Sequence Strips', '', 'SEQ_SEQUENCER', 16]), tuple (['ACTION_CLIP', 'Action Clips', '', 'ACTION', 17]), null, tuple (['SCENE', 'Scenes', '', 'SCENE_DATA', 18]), tuple (['BRUSH', 'Brushes', '', 'BRUSH_DATA', 19])]), translation_context: i18n_contexts.id_id, description: 'Type of data to rename'})), 'data_source': EnumProperty (__kwargtrans__ ({py_name: 'Source', py_items: tuple ([tuple (['SELECT', 'Selected', '']), tuple (['ALL', 'All', ''])])})), 'actions': CollectionProperty (__kwargtrans__ ({py_metatype: BatchRenameAction}))});
 export var WM_MT_splash_quick_setup =  __class__ ('WM_MT_splash_quick_setup', [Menu], {
 	__module__: __name__,
 	bl_label: 'Quick Setup',
@@ -4765,7 +4793,6 @@ export var WM_MT_region_toggle_pie =  __class__ ('WM_MT_region_toggle_pie', [Men
 });
 export var WM_OT_drop_blend_file =  __class__ ('WM_OT_drop_blend_file', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])})), 'use_scripts': BoolProperty (__kwargtrans__ ({py_name: 'Trusted Source', description: 'Allow .blend file to execute scripts automatically, default available from system preferences', options: new set (['SKIP_SAVE'])}))}),
 	bl_idname: 'wm.drop_blend_file',
 	bl_label: 'Handle dropped .blend file',
 	bl_options: new set (['INTERNAL']),
@@ -4859,7 +4886,8 @@ export var WM_OT_drop_blend_file =  __class__ ('WM_OT_drop_blend_file', [Operato
 		}
 		else {
 		}
-		if (autoexec_overridebpy.app.autoexec_override !== null) {
+		var autoexec_override = bpy.app.autoexec_override;
+		if (autoexec_override !== null) {
 			self.use_scripts = autoexec_override;
 		}
 		else {
@@ -4868,6 +4896,8 @@ export var WM_OT_drop_blend_file =  __class__ ('WM_OT_drop_blend_file', [Operato
 		return context.window_manager.invoke_popup (self, __kwargtrans__ ({auto_keymap: true}));
 	});}
 });
+WM_OT_drop_blend_file.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', options: new set (['SKIP_SAVE'])})), 'use_scripts': BoolProperty (__kwargtrans__ ({py_name: 'Trusted Source', description: 'Allow .blend file to execute scripts automatically, default available from system preferences', options: new set (['SKIP_SAVE'])}))});
 export var classes = tuple ([WM_OT_context_collection_boolean_set, WM_OT_context_cycle_array, WM_OT_context_cycle_enum, WM_OT_context_cycle_int, WM_OT_context_menu_enum, WM_OT_context_modal_mouse, WM_OT_context_pie_enum, WM_OT_context_scale_float, WM_OT_context_scale_int, WM_OT_context_set_boolean, WM_OT_context_set_enum, WM_OT_context_set_float, WM_OT_context_set_id, WM_OT_context_set_int, WM_OT_context_set_string, WM_OT_context_set_value, WM_OT_context_toggle, WM_OT_context_toggle_enum, WM_OT_doc_view, WM_OT_doc_view_manual, WM_OT_drop_blend_file, WM_OT_operator_cheat_sheet, WM_OT_operator_pie_enum, WM_OT_path_open, WM_OT_properties_add, WM_OT_properties_context_change, WM_OT_properties_edit, WM_OT_properties_edit_value, WM_OT_properties_remove, WM_OT_sysinfo, WM_OT_owner_disable, WM_OT_owner_enable, WM_OT_url_open, WM_OT_url_open_preset, WM_OT_tool_set_by_id, WM_OT_tool_set_by_index, WM_OT_tool_set_by_brush_type, WM_OT_toolbar, WM_OT_toolbar_fallback_pie, WM_OT_toolbar_prompt, BatchRenameAction, WM_OT_batch_rename, WM_MT_splash_quick_setup, WM_MT_splash, WM_MT_splash_about, WM_MT_region_toggle_pie]);
 
 //# sourceMappingURL=bl_operators.wm.map
+export {BoolProperty, BoolVectorProperty, CollectionProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, Menu, Operator, StringProperty, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, n_, rpt_, tip_};

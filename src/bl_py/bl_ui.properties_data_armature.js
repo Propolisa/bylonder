@@ -668,3 +668,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_data_armature.map
+export {Menu, MotionPathButtonsPanel, MotionPathButtonsPanel_display, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};

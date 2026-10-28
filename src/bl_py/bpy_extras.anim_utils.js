@@ -13,7 +13,7 @@ import {Iterable} from './typing.js';
 import {dataclass} from './dataclasses.js';
 import * as __module_contextlib__ from './contextlib.js';
 __nest__ (contextlib, '', __module_contextlib__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bpy_extras.anim_utils';
 export var _merged = function () {
 	if (arguments.length) {
@@ -123,8 +123,8 @@ export var _joined = function () {
 	return result;
 };
 export var __all__ = tuple (['AutoKeying', 'action_get_channelbag_for_slot', 'action_get_first_suitable_slot', 'action_ensure_channelbag_for_slot', 'animdata_get_channelbag_for_assigned_slot', 'bake_action', 'bake_action_objects', 'bake_action_iter', 'bake_action_objects_iter', 'BakeOptions']);
-export var FCurveKey = tuple.__getitem__ ([str, int]);
-export var ListKeyframes = list [float];
+export var FCurveKey = tuple;
+export var ListKeyframes = list;
 export var BakeOptions =  __class__ ('BakeOptions', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, only_selected, do_pose, do_object, do_visual_keying, do_constraint_clear, do_parents_clear, do_clean, do_location, do_rotation, do_scale, do_bbone, do_custom_props) {
@@ -964,7 +964,7 @@ export var KeyframesCo =  __class__ ('KeyframesCo', [object], {
 						case 'rna_path': var rna_path = __allkwargs0__ [__attrib0__]; break;
 						case 'total_indices': var total_indices = __allkwargs0__ [__attrib0__]; break;
 						case 'frame': var frame = __allkwargs0__ [__attrib0__]; break;
-						case 'py_values': var py_values = __allkwargs0__ [__attrib0__]; break;
+						case 'values': case 'py_values': var py_values = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1491,3 +1491,4 @@ export var AutoKeying =  __class__ ('AutoKeying', [object], {
 });
 
 //# sourceMappingURL=bpy_extras.anim_utils.map
+export {ActionChannelbag, Iterable, Mapping, PoseBone, Sequence, _globals, _import, _lazy, _member, _module, dataclass, rna_idprop_value_to_python};

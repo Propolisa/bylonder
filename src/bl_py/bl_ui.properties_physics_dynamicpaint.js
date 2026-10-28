@@ -1520,3 +1520,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_dynamicpaint.map
+export {Panel, UIList, effector_weights_ui, i18n_contexts, point_cache_ui, register_class};

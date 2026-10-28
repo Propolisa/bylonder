@@ -11,7 +11,7 @@ import {Panel} from './_bpy.types.js';
 import {namedtuple} from './collections.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_toolsystem_toolbar';
 export var _merged = function () {
 	if (arguments.length) {
@@ -150,7 +150,7 @@ export var generate_from_enum_ex = function (_context) {
 					case '_context': var _context = __allkwargs0__ [__attrib0__]; break;
 					case 'idname_prefix': var idname_prefix = __allkwargs0__ [__attrib0__]; break;
 					case 'icon_prefix': var icon_prefix = __allkwargs0__ [__attrib0__]; break;
-					case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
+					case 'type': case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
 					case 'attr': var attr = __allkwargs0__ [__attrib0__]; break;
 					case 'options': var options = __allkwargs0__ [__attrib0__]; break;
 					case 'cursor': var cursor = __allkwargs0__ [__attrib0__]; break;
@@ -170,11 +170,13 @@ export var generate_from_enum_ex = function (_context) {
 	var enum_items = getattr (py_metatype.bl_rna.properties [attr], (use_separators ? 'enum_items_static_ui' : 'enum_items_static'));
 	for (var enum_ of enum_items) {
 		if (use_separators) {
-			if (!(py_nameenum_.py_name)) {
+			var py_name = enum_.py_name;
+			if (!(py_name)) {
 				tool_defs.append (null);
 				continue;
 			}
-			if (!(idnameenum_.identifier)) {
+			var idname = enum_.identifier;
+			if (!(idname)) {
 				continue;
 			}
 		}
@@ -5804,9 +5806,9 @@ export var IMAGE_PT_tools_active =  __class__ ('IMAGE_PT_tools_active', [ToolSel
 	_tools_mask_transform: tuple ([_defs_image_mask_transform.translate, _defs_image_mask_transform.rotate, _defs_image_mask_transform.scale, _defs_image_mask_transform.transform]),
 	_tools_mask_select: tuple ([tuple ([_defs_image_mask_select.select, _defs_image_mask_select.box, _defs_image_mask_select.circle, _defs_image_mask_select.lasso])]),
 	_tools_mask_primitive: tuple ([tuple ([_defs_image_mask_primitive.circle, _defs_image_mask_primitive.box])]),
-	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]),
-	_tools: dict ({null: [], 'VIEW': _joined ([_defs_image_generic.sample], _tools_annotate), 'UV': _joined (_tools_select, [_defs_image_generic.cursor, null], _tools_transform, [null], _tools_annotate, [null, _defs_image_uv_edit.rip_region, null, _defs_image_uv_sculpt.grab, _defs_image_uv_sculpt.relax, _defs_image_uv_sculpt.pinch]), 'MASK': _joined (_tools_mask_select, [_defs_image_generic.cursor, null], _tools_mask_transform, [null], _tools_annotate, [null]), 'PAINT': _joined ([_brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null], _tools_annotate)})
+	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])])
 });
+IMAGE_PT_tools_active._tools = dict ({null: [], 'VIEW': _joined ([_defs_image_generic.sample], IMAGE_PT_tools_active._tools_annotate), 'UV': _joined (IMAGE_PT_tools_active._tools_select, [_defs_image_generic.cursor, null], IMAGE_PT_tools_active._tools_transform, [null], IMAGE_PT_tools_active._tools_annotate, [null, _defs_image_uv_edit.rip_region, null, _defs_image_uv_sculpt.grab, _defs_image_uv_sculpt.relax, _defs_image_uv_sculpt.pinch]), 'MASK': _joined (IMAGE_PT_tools_active._tools_mask_select, [_defs_image_generic.cursor, null], IMAGE_PT_tools_active._tools_mask_transform, [null], IMAGE_PT_tools_active._tools_annotate, [null]), 'PAINT': _joined ([IMAGE_PT_tools_active._brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null], IMAGE_PT_tools_active._tools_annotate)});
 export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelectPanelHelper, Panel], {
 	__module__: __name__,
 	bl_space_type: 'NODE_EDITOR',
@@ -5869,9 +5871,9 @@ export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelec
 		}
 		yield* cls._tools.py_items ()});},
 	_tools_select: tuple ([tuple ([_defs_node_select.select, _defs_node_select.box, _defs_node_select.circle, _defs_node_select.lasso])]),
-	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]),
-	_tools: dict ({null: _joined (_tools_select, [null], _tools_annotate, [null, _defs_node_edit.links_cut, _defs_node_edit.links_mute, _defs_node_edit.add_reroute])})
+	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])])
 });
+NODE_PT_tools_active._tools = dict ({null: _joined (NODE_PT_tools_active._tools_select, [null], NODE_PT_tools_active._tools_annotate, [null, _defs_node_edit.links_cut, _defs_node_edit.links_mute, _defs_node_edit.add_reroute])});
 export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolSelectPanelHelper, Panel], {
 	__module__: __name__,
 	bl_space_type: 'VIEW_3D',
@@ -5936,115 +5938,115 @@ export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolS
 	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]),
 	_tools_grease_pencil_primitives: tuple ([tuple ([_defs_grease_pencil_paint.box, _defs_grease_pencil_paint.circle, _defs_grease_pencil_paint.line, _defs_grease_pencil_paint.polyline, _defs_grease_pencil_paint.arc, _defs_grease_pencil_paint.curve])]),
 	_tools_view3d_add: tuple ([_defs_view3d_add.cube_add, _defs_view3d_add.cone_add, _defs_view3d_add.cylinder_add, _defs_view3d_add.uv_sphere_add, _defs_view3d_add.ico_sphere_add]),
-	_tools_pose: tuple ([_defs_pose.breakdown, _defs_pose.push, _defs_pose.relax]),
-	_tools_default: _joined (_tools_select, [_defs_view3d_generic.cursor, null], _tools_transform, [null], _tools_annotate, [_defs_view3d_generic.ruler]),
-	_tools: dict ({null: [], 'OBJECT': _joined (_tools_default, [null, _tools_view3d_add, null, _tools_pose]), 'POSE': _joined (_tools_default, [null, _tools_pose]), 'EDIT_ARMATURE': _joined (_tools_default, [null, _defs_edit_armature.roll, tuple ([_defs_edit_armature.bone_size, _defs_edit_armature.bone_envelope]), null, tuple ([_defs_edit_armature.extrude, _defs_edit_armature.extrude_cursor]), _defs_transform.shear]), 'EDIT_MESH': _joined (_tools_default, [null, _tools_view3d_add, null, tuple ([_defs_edit_mesh.extrude, _defs_edit_mesh.extrude_manifold, _defs_edit_mesh.extrude_normals, _defs_edit_mesh.extrude_individual, _defs_edit_mesh.extrude_cursor]), _defs_edit_mesh.inset, _defs_edit_mesh.bevel, tuple ([_defs_edit_mesh.loopcut_slide, _defs_edit_mesh.offset_edge_loops_slide]), tuple ([_defs_edit_mesh.knife, _defs_edit_mesh.bisect]), _defs_edit_mesh.poly_build, _defs_edit_mesh.spin, tuple ([_defs_edit_mesh.vertex_smooth, _defs_edit_mesh.vertex_randomize]), tuple ([_defs_edit_mesh.edge_slide, _defs_edit_mesh.vert_slide]), tuple ([_defs_edit_mesh.shrink_fatten, _defs_edit_mesh.push_pull]), tuple ([_defs_transform.shear, _defs_edit_mesh.tosphere]), tuple ([_defs_edit_mesh.rip_region, _defs_edit_mesh.rip_edge])]), 'EDIT_CURVE': _joined (_tools_default, [null, _defs_edit_curve.draw, _defs_edit_curve.pen, tuple ([_defs_edit_curve.extrude, _defs_edit_curve.extrude_cursor]), null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt, null, _defs_transform.shear, _defs_edit_curve.curve_vertex_randomize]), 'EDIT_CURVES': _joined (_tools_default, [null, _defs_edit_curves.draw, _defs_edit_curves.pen, null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt]), 'EDIT_SURFACE': _joined (_tools_default, [null, _defs_transform.shear]), 'EDIT_METABALL': _joined (_tools_default, [null, _defs_transform.shear]), 'EDIT_LATTICE': _joined (_tools_default, [null, _defs_transform.shear]), 'EDIT_TEXT': _joined ([_defs_edit_text.select_text, _defs_view3d_generic.cursor, null], _tools_annotate, [_defs_view3d_generic.ruler]), 'EDIT_GREASE_PENCIL': _joined (_tools_select, [_defs_view3d_generic.cursor, null], _tools_transform, [null, _defs_grease_pencil_edit.pen, null, _defs_edit_curve.curve_radius, _defs_transform.bend, tuple ([_defs_grease_pencil_edit.shear, _defs_edit_mesh.tosphere]), null, _defs_grease_pencil_edit.interpolate, null, _defs_grease_pencil_edit.texture_gradient, null], _tools_annotate), 'EDIT_POINTCLOUD': _joined (_tools_select, [_defs_view3d_generic.cursor, null], _tools_transform, [null], _tools_annotate, [_defs_view3d_generic.ruler]), 'PARTICLE': _joined (_tools_select, [_defs_view3d_generic.cursor, null, _defs_particle.generate_from_brushes]), 'SCULPT': _joined ([_sculpt_tool, _defs_sculpt.paint, _defs_sculpt.mask, _defs_sculpt.draw_face_sets, (function __lambda__ (context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (_defs_sculpt.poll_dyntopo (context) ? tuple ([_defs_sculpt.dyntopo_density]) : tuple ([]));
-	}), (function __lambda__ (context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (_defs_sculpt.poll_multires (context) ? tuple ([_defs_sculpt.multires_eraser, _defs_sculpt.multires_smear]) : tuple ([]));
-	}), null, _tools_view3d_add, null, tuple ([_defs_sculpt.mask_border, _defs_sculpt.mask_lasso, _defs_sculpt.mask_line, _defs_sculpt.mask_polyline]), tuple ([_defs_sculpt.hide_border, _defs_sculpt.hide_lasso, _defs_sculpt.hide_line, _defs_sculpt.hide_polyline]), tuple ([_defs_sculpt.face_set_box, _defs_sculpt.face_set_lasso, _defs_sculpt.face_set_line, _defs_sculpt.face_set_polyline]), tuple ([_defs_sculpt.trim_box, _defs_sculpt.trim_lasso, _defs_sculpt.trim_line, _defs_sculpt.trim_polyline]), _defs_sculpt.project_line, null, _defs_sculpt.mesh_filter, _defs_sculpt.cloth_filter, _defs_sculpt.color_filter, null, _defs_sculpt.face_set_edit, _defs_sculpt.mask_by_color, null, _defs_transform.translate, _defs_transform.rotate, _defs_transform.scale, _defs_transform.transform, null], _tools_annotate), 'SCULPT_GREASE_PENCIL': _joined ([_sculpt_tool, _defs_grease_pencil_sculpt.clone, null], _tools_annotate, [(function __lambda__ (context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (_defs_grease_pencil_sculpt.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-	})]), 'PAINT_TEXTURE': _joined ([_brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null, (function __lambda__ (context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (_defs_texture_paint.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-	})], _tools_annotate), 'PAINT_VERTEX': _joined ([_brush_tool, _defs_vertex_paint.blur, _defs_vertex_paint.average, _defs_vertex_paint.smear, null, (function __lambda__ (context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (_defs_vertex_paint.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-	})], _tools_annotate), 'PAINT_WEIGHT': _joined ([_brush_tool, _defs_weight_paint.blur, _defs_weight_paint.average, _defs_weight_paint.smear, _defs_weight_paint.gradient, null, tuple ([_defs_weight_paint.sample_weight, _defs_weight_paint.sample_weight_group]), null, (function __lambda__ (context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (context === null || context.pose_object ? _joined ([_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform) : tuple ([]));
-	}), null, _defs_weight_paint.poll_select_tools], _tools_annotate), 'PAINT_GREASE_PENCIL': _joined ([_defs_view3d_generic.cursor, null, _draw_tool, _defs_grease_pencil_paint.erase, _defs_grease_pencil_paint.fill], _tools_grease_pencil_primitives, [null, _defs_grease_pencil_paint.trim, null, _defs_grease_pencil_paint.eyedropper, null, _defs_grease_pencil_paint.interpolate]), 'WEIGHT_GREASE_PENCIL': _joined ([_brush_tool, _defs_grease_pencil_weight.blur, _defs_grease_pencil_weight.average, _defs_grease_pencil_weight.smear, null], _tools_annotate), 'VERTEX_GREASE_PENCIL': _joined ([_brush_tool, _defs_grease_pencil_vertex.blur, _defs_grease_pencil_vertex.average, _defs_grease_pencil_vertex.smear, _defs_grease_pencil_vertex.py_replace, null], _tools_annotate, [null, (function __lambda__ (context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return (_defs_grease_pencil_vertex.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-	})]), 'SCULPT_CURVES': _joined ([_sculpt_tool, _defs_curves_sculpt.select, _defs_curves_sculpt.density, _defs_curves_sculpt.add, _defs_curves_sculpt.delete, null], _tools_annotate)})
+	_tools_pose: tuple ([_defs_pose.breakdown, _defs_pose.push, _defs_pose.relax])
 });
+VIEW3D_PT_tools_active._tools_default = _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform, [null], VIEW3D_PT_tools_active._tools_annotate, [_defs_view3d_generic.ruler]);
+VIEW3D_PT_tools_active._tools = dict ({null: [], 'OBJECT': _joined (VIEW3D_PT_tools_active._tools_default, [null, VIEW3D_PT_tools_active._tools_view3d_add, null, VIEW3D_PT_tools_active._tools_pose]), 'POSE': _joined (VIEW3D_PT_tools_active._tools_default, [null, VIEW3D_PT_tools_active._tools_pose]), 'EDIT_ARMATURE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_edit_armature.roll, tuple ([_defs_edit_armature.bone_size, _defs_edit_armature.bone_envelope]), null, tuple ([_defs_edit_armature.extrude, _defs_edit_armature.extrude_cursor]), _defs_transform.shear]), 'EDIT_MESH': _joined (VIEW3D_PT_tools_active._tools_default, [null, VIEW3D_PT_tools_active._tools_view3d_add, null, tuple ([_defs_edit_mesh.extrude, _defs_edit_mesh.extrude_manifold, _defs_edit_mesh.extrude_normals, _defs_edit_mesh.extrude_individual, _defs_edit_mesh.extrude_cursor]), _defs_edit_mesh.inset, _defs_edit_mesh.bevel, tuple ([_defs_edit_mesh.loopcut_slide, _defs_edit_mesh.offset_edge_loops_slide]), tuple ([_defs_edit_mesh.knife, _defs_edit_mesh.bisect]), _defs_edit_mesh.poly_build, _defs_edit_mesh.spin, tuple ([_defs_edit_mesh.vertex_smooth, _defs_edit_mesh.vertex_randomize]), tuple ([_defs_edit_mesh.edge_slide, _defs_edit_mesh.vert_slide]), tuple ([_defs_edit_mesh.shrink_fatten, _defs_edit_mesh.push_pull]), tuple ([_defs_transform.shear, _defs_edit_mesh.tosphere]), tuple ([_defs_edit_mesh.rip_region, _defs_edit_mesh.rip_edge])]), 'EDIT_CURVE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_edit_curve.draw, _defs_edit_curve.pen, tuple ([_defs_edit_curve.extrude, _defs_edit_curve.extrude_cursor]), null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt, null, _defs_transform.shear, _defs_edit_curve.curve_vertex_randomize]), 'EDIT_CURVES': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_edit_curves.draw, _defs_edit_curves.pen, null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt]), 'EDIT_SURFACE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_transform.shear]), 'EDIT_METABALL': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_transform.shear]), 'EDIT_LATTICE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_transform.shear]), 'EDIT_TEXT': _joined ([_defs_edit_text.select_text, _defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_annotate, [_defs_view3d_generic.ruler]), 'EDIT_GREASE_PENCIL': _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform, [null, _defs_grease_pencil_edit.pen, null, _defs_edit_curve.curve_radius, _defs_transform.bend, tuple ([_defs_grease_pencil_edit.shear, _defs_edit_mesh.tosphere]), null, _defs_grease_pencil_edit.interpolate, null, _defs_grease_pencil_edit.texture_gradient, null], VIEW3D_PT_tools_active._tools_annotate), 'EDIT_POINTCLOUD': _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform, [null], VIEW3D_PT_tools_active._tools_annotate, [_defs_view3d_generic.ruler]), 'PARTICLE': _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null, _defs_particle.generate_from_brushes]), 'SCULPT': _joined ([VIEW3D_PT_tools_active._sculpt_tool, _defs_sculpt.paint, _defs_sculpt.mask, _defs_sculpt.draw_face_sets, (function __lambda__ (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (_defs_sculpt.poll_dyntopo (context) ? tuple ([_defs_sculpt.dyntopo_density]) : tuple ([]));
+}), (function __lambda__ (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (_defs_sculpt.poll_multires (context) ? tuple ([_defs_sculpt.multires_eraser, _defs_sculpt.multires_smear]) : tuple ([]));
+}), null, VIEW3D_PT_tools_active._tools_view3d_add, null, tuple ([_defs_sculpt.mask_border, _defs_sculpt.mask_lasso, _defs_sculpt.mask_line, _defs_sculpt.mask_polyline]), tuple ([_defs_sculpt.hide_border, _defs_sculpt.hide_lasso, _defs_sculpt.hide_line, _defs_sculpt.hide_polyline]), tuple ([_defs_sculpt.face_set_box, _defs_sculpt.face_set_lasso, _defs_sculpt.face_set_line, _defs_sculpt.face_set_polyline]), tuple ([_defs_sculpt.trim_box, _defs_sculpt.trim_lasso, _defs_sculpt.trim_line, _defs_sculpt.trim_polyline]), _defs_sculpt.project_line, null, _defs_sculpt.mesh_filter, _defs_sculpt.cloth_filter, _defs_sculpt.color_filter, null, _defs_sculpt.face_set_edit, _defs_sculpt.mask_by_color, null, _defs_transform.translate, _defs_transform.rotate, _defs_transform.scale, _defs_transform.transform, null], VIEW3D_PT_tools_active._tools_annotate), 'SCULPT_GREASE_PENCIL': _joined ([VIEW3D_PT_tools_active._sculpt_tool, _defs_grease_pencil_sculpt.clone, null], VIEW3D_PT_tools_active._tools_annotate, [(function __lambda__ (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (_defs_grease_pencil_sculpt.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+})]), 'PAINT_TEXTURE': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null, (function __lambda__ (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (_defs_texture_paint.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+})], VIEW3D_PT_tools_active._tools_annotate), 'PAINT_VERTEX': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_vertex_paint.blur, _defs_vertex_paint.average, _defs_vertex_paint.smear, null, (function __lambda__ (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (_defs_vertex_paint.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+})], VIEW3D_PT_tools_active._tools_annotate), 'PAINT_WEIGHT': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_weight_paint.blur, _defs_weight_paint.average, _defs_weight_paint.smear, _defs_weight_paint.gradient, null, tuple ([_defs_weight_paint.sample_weight, _defs_weight_paint.sample_weight_group]), null, (function __lambda__ (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (context === null || context.pose_object ? _joined ([_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform) : tuple ([]));
+}), null, _defs_weight_paint.poll_select_tools], VIEW3D_PT_tools_active._tools_annotate), 'PAINT_GREASE_PENCIL': _joined ([_defs_view3d_generic.cursor, null, VIEW3D_PT_tools_active._draw_tool, _defs_grease_pencil_paint.erase, _defs_grease_pencil_paint.fill], VIEW3D_PT_tools_active._tools_grease_pencil_primitives, [null, _defs_grease_pencil_paint.trim, null, _defs_grease_pencil_paint.eyedropper, null, _defs_grease_pencil_paint.interpolate]), 'WEIGHT_GREASE_PENCIL': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_grease_pencil_weight.blur, _defs_grease_pencil_weight.average, _defs_grease_pencil_weight.smear, null], VIEW3D_PT_tools_active._tools_annotate), 'VERTEX_GREASE_PENCIL': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_grease_pencil_vertex.blur, _defs_grease_pencil_vertex.average, _defs_grease_pencil_vertex.smear, _defs_grease_pencil_vertex.py_replace, null], VIEW3D_PT_tools_active._tools_annotate, [null, (function __lambda__ (context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (_defs_grease_pencil_vertex.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+})]), 'SCULPT_CURVES': _joined ([VIEW3D_PT_tools_active._sculpt_tool, _defs_curves_sculpt.select, _defs_curves_sculpt.density, _defs_curves_sculpt.add, _defs_curves_sculpt.delete, null], VIEW3D_PT_tools_active._tools_annotate)});
 export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', [ToolSelectPanelHelper, Panel], {
 	__module__: __name__,
 	bl_space_type: 'SEQUENCE_EDITOR',
@@ -6103,9 +6105,9 @@ export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', 
 		else {
 		}
 		yield* cls._tools.py_items ()});},
-	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]),
-	_tools: dict ({null: [], 'PREVIEW': _joined ([tuple ([_defs_sequencer_select.select_preview, _defs_sequencer_select.box_preview, _defs_sequencer_select.circle_preview, _defs_sequencer_select.lasso_preview]), _defs_sequencer_generic.cursor, null, _defs_sequencer_generic.translate, _defs_sequencer_generic.rotate, _defs_sequencer_generic.scale, _defs_sequencer_generic.transform, null, _defs_sequencer_generic.sample], _tools_annotate), 'SEQUENCER': [tuple ([_defs_sequencer_select.box_timeline, _defs_sequencer_select.circle_timeline, _defs_sequencer_select.lasso_timeline]), _defs_sequencer_generic.blade, _defs_sequencer_generic.slip], 'SEQUENCER_PREVIEW': _joined ([_defs_sequencer_select.box_timeline], _tools_annotate, [null, _defs_sequencer_generic.blade])})
+	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])])
 });
+SEQUENCER_PT_tools_active._tools = dict ({null: [], 'PREVIEW': _joined ([tuple ([_defs_sequencer_select.select_preview, _defs_sequencer_select.box_preview, _defs_sequencer_select.circle_preview, _defs_sequencer_select.lasso_preview]), _defs_sequencer_generic.cursor, null, _defs_sequencer_generic.translate, _defs_sequencer_generic.rotate, _defs_sequencer_generic.scale, _defs_sequencer_generic.transform, null, _defs_sequencer_generic.sample], SEQUENCER_PT_tools_active._tools_annotate), 'SEQUENCER': [tuple ([_defs_sequencer_select.box_timeline, _defs_sequencer_select.circle_timeline, _defs_sequencer_select.lasso_timeline]), _defs_sequencer_generic.blade, _defs_sequencer_generic.slip], 'SEQUENCER_PREVIEW': _joined ([_defs_sequencer_select.box_timeline], SEQUENCER_PT_tools_active._tools_annotate, [null, _defs_sequencer_generic.blade])});
 export var classes = tuple ([IMAGE_PT_tools_active, NODE_PT_tools_active, VIEW3D_PT_tools_active, SEQUENCER_PT_tools_active]);
 if (__name__ == '__main__') {
 	for (var cls of classes) {
@@ -6114,3 +6116,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_toolsystem_toolbar.map
+export {BrushAssetShelf, Panel, ToolDef, ToolSelectPanelHelper, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, namedtuple, register_class, tip_};

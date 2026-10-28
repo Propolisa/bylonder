@@ -3,5 +3,407 @@ import * as __self__ from './threading.js';
 (globalThis.__py_modules ??= {})['threading'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 var __name__ = 'threading';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	for (var d of dicts) {
+		result.py_update (d);
+	}
+	return result;
+};
+export var _ellipsis = Symbol ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (conversion == 'r') {
+		var value = repr (value);
+	}
+	else if (conversion == 's') {
+		var value = str (value);
+	}
+	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	for (var py_items of lists) {
+		result.extend (list (py_items));
+	}
+	return result;
+};
+export var Lock =  __class__ ('Lock', [object], {
+	__module__: __name__,
+	get acquire () {return __get__ (this, function (self, blocking, timeout) {
+		if (typeof blocking == 'undefined' || (blocking != null && blocking.hasOwnProperty ("__kwargtrans__"))) {;
+			var blocking = true;
+		};
+		if (typeof timeout == 'undefined' || (timeout != null && timeout.hasOwnProperty ("__kwargtrans__"))) {;
+			var timeout = -(1);
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'blocking': var blocking = __allkwargs0__ [__attrib0__]; break;
+						case 'timeout': var timeout = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
+	});},
+	get release () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		// pass;
+	});},
+	get __enter__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
+	});},
+	get __exit__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var exception = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var exception = tuple ();
+		}
+		return false;
+	});}
+});
+var __left0__ = Lock;
+export var RLock = __left0__;
+export var Condition = __left0__;
+export var Event =  __class__ ('Event', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.flag = false;
+	});},
+	get set () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.flag = true;
+	});},
+	get py_clear () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.flag = false;
+	});},
+	get is_set () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.flag;
+	});},
+	get wait () {return __get__ (this, function (self, timeout) {
+		if (typeof timeout == 'undefined' || (timeout != null && timeout.hasOwnProperty ("__kwargtrans__"))) {;
+			var timeout = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'timeout': var timeout = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.flag;
+	});}
+});
+export var Thread =  __class__ ('Thread', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, group, target, py_name, args, kwargs, daemon) {
+		if (typeof group == 'undefined' || (group != null && group.hasOwnProperty ("__kwargtrans__"))) {;
+			var group = null;
+		};
+		if (typeof target == 'undefined' || (target != null && target.hasOwnProperty ("__kwargtrans__"))) {;
+			var target = null;
+		};
+		if (typeof py_name == 'undefined' || (py_name != null && py_name.hasOwnProperty ("__kwargtrans__"))) {;
+			var py_name = null;
+		};
+		if (typeof args == 'undefined' || (args != null && args.hasOwnProperty ("__kwargtrans__"))) {;
+			var args = tuple ([]);
+		};
+		if (typeof kwargs == 'undefined' || (kwargs != null && kwargs.hasOwnProperty ("__kwargtrans__"))) {;
+			var kwargs = null;
+		};
+		if (typeof daemon == 'undefined' || (daemon != null && daemon.hasOwnProperty ("__kwargtrans__"))) {;
+			var daemon = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'group': var group = __allkwargs0__ [__attrib0__]; break;
+						case 'target': var target = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'args': var args = __allkwargs0__ [__attrib0__]; break;
+						case 'kwargs': var kwargs = __allkwargs0__ [__attrib0__]; break;
+						case 'daemon': var daemon = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __left0__ = tuple ([target, args, kwargs || dict ({}), py_name || 'MainThread']);
+		self.target = __left0__ [0];
+		self.args = __left0__ [1];
+		self.kwargs = __left0__ [2];
+		self.py_name = __left0__ [3];
+	});},
+	get start () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.target) {
+			self.target (...self.args, __kwargtrans__ (_merged (self.kwargs)));
+		}
+	});},
+	get join () {return __get__ (this, function (self, timeout) {
+		if (typeof timeout == 'undefined' || (timeout != null && timeout.hasOwnProperty ("__kwargtrans__"))) {;
+			var timeout = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'timeout': var timeout = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		// pass;
+	});},
+	get is_alive () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return false;
+	});}
+});
+export var _main = Thread ();
+export var main_thread = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return _main;
+};
+export var current_thread = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return _main;
+};
 
 //# sourceMappingURL=threading.map

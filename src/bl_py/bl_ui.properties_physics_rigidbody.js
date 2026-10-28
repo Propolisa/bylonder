@@ -514,3 +514,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_rigidbody.map
+export {Panel, register_class};

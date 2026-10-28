@@ -42,6 +42,25 @@ PATCHES = [
 ]
 
 
+def finish(name, script):
+    """A module as Transcrypt wrote it, with PATCHES and runtime.js applied."""
+    for target, text, replacement, reason in PATCHES:
+        if target == name:
+            assert text in script, f'{name}: the patch for {reason} no longer applies'
+            script = script.replace(text, replacement)
+    if name == 'org.transcrypt.__runtime__.js':
+        script += open(os.path.join(HERE, 'runtime.js')).read()
+    # Keyword arguments reach a parameter Transcrypt renames (type as py_metatype, others with a py_ prefix) under
+    # its Python name too, as they do when they come from a dict (**kwargs).
+    script = re.sub(r"case 'py_(metatype|\w+)': var py_\1", lambda m: f"case '{'type' if m[1] == 'metatype' else m[1]}': case 'py_{m[1]}': var py_{m[1]}", script)
+    # **kwargs collects keyword arguments under their Python names.
+    script = re.sub(r"default: (\w+) \[(__attrib\d+__)\] = (__allkwargs\d+__) \[\2\]", r"default: \1 [__pyname__ (\2)] = \3 [\2]", script)
+    if '__pyname__ (' in script and name != 'org.transcrypt.__runtime__.js':
+        script = re.sub(r"^import \{(?=.*\} from './org\.transcrypt\.__runtime__\.js';$)", "import {__pyname__, ", script, count=1, flags=re.M)
+    # Transcrypt dates its output; without the date a rerun gives the same files.
+    return re.sub(r"^// Transcrypt'ed from Python, .*\n", '', script, flags=re.M)
+
+
 def fetch(path):
     """A Blender file at the tag, cached."""
     cache = os.path.join(os.path.expanduser('~/.cache/bylonder/blender'), TAG, path)
@@ -61,13 +80,13 @@ LOCAL_IMPORTABLE = {d for d in os.listdir(HERE) if os.path.exists(os.path.join(H
 SCRIPTS = {os.path.basename(path)[:-3] for path in json.load(open(os.path.join(HERE, 'manifest.json')))['scripts']}
 
 
-def defined_name(node):
-    """The name a module-level class, function or single-name assignment defines."""
+def defined_names(node):
+    """The names a module-level class, function or assignment to names (a = b = ...) defines."""
     if isinstance(node, (ast.ClassDef, ast.FunctionDef)):
-        return node.name
-    if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-        return node.targets[0].id
-    return None
+        return [node.name]
+    if isinstance(node, ast.Assign):
+        return [t.id for t in node.targets if isinstance(t, ast.Name)]
+    return []
 
 
 def extract(source, patterns):
@@ -77,8 +96,8 @@ def extract(source, patterns):
     tree.body = [node for statement in tree.body for node in flat_imports(statement)]
     defined = {}
     for node in tree.body:
-        if defined_name(node):
-            defined.setdefault(defined_name(node), []).append(node)
+        for name in defined_names(node):
+            defined.setdefault(name, []).append(node)
     wanted, todo = set(), [name for name in defined if any(fnmatch.fnmatchcase(name, p) for p in patterns)]
     while todo:
         name = todo.pop()
@@ -89,7 +108,7 @@ def extract(source, patterns):
     imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
                and all(alias.name.split('.')[0] in IMPORTABLE | SCRIPTS for alias in node.names if isinstance(node, ast.Import))
                and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] in IMPORTABLE)]
-    nodes = [node for node in tree.body if defined_name(node) in wanted]
+    nodes = [node for node in tree.body if wanted.intersection(defined_names(node))]
     # Only the imported names the taken code uses.
     used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
     for node in imports:
@@ -105,8 +124,119 @@ def uses_helpers(source):
     return re.search(r'\b_(merged|joined|formatted|ellipsis|property|new_object)\b', source) is not None
 
 
+class Walrus:
+    """Assignment expressions (x := v), which Transcrypt compiles wrong, as assignments in Python's evaluation order:
+    before the statement, in temporaries for the short-circuited operands of and/or, or (in a comprehension's
+    condition) as `for x in [v]`."""
+    SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
+    COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+
+    def __init__(self):
+        self.temporaries = 0
+
+    @staticmethod
+    def has(node):
+        return any(isinstance(n, ast.NamedExpr) for n in ast.walk(node))
+
+    def lower_module(self, tree):
+        for node in ast.walk(tree):
+            if isinstance(node, self.COMPREHENSIONS):
+                self.comprehension(node)
+        for node in list(ast.walk(tree)):
+            for field in ('body', 'orelse', 'finalbody'):
+                statements = getattr(node, field, None)
+                if isinstance(statements, list) and statements and isinstance(statements[0], ast.stmt):
+                    setattr(node, field, [lowered for s in statements for lowered in self.statement(s)])
+        return tree
+
+    def comprehension(self, node):
+        for generator in list(node.generators):
+            for index, condition in enumerate(generator.ifs):
+                named = [n for n in ast.walk(condition) if isinstance(n, ast.NamedExpr)]
+                if not named:
+                    continue
+                at = node.generators.index(generator) + 1
+                kept, generator.ifs = generator.ifs[index:], generator.ifs[:index]
+                for n in named:
+                    node.generators.insert(at, ast.comprehension(target=ast.Name(n.target.id, ast.Store()),
+                                                                 iter=ast.List([n.value], ast.Load()), ifs=[], is_async=0))
+                    at += 1
+                node.generators[at - 1].ifs = [self.replace_named(c) for c in kept]
+                break
+
+    @staticmethod
+    def replace_named(node):
+        class Replace(ast.NodeTransformer):
+            def visit_NamedExpr(self, n):
+                return ast.copy_location(ast.Name(n.target.id, ast.Load()), n)
+        return Replace().visit(node)
+
+    def statement(self, node):
+        fields = {ast.If: 'test', ast.While: 'test', ast.Return: 'value', ast.Expr: 'value', ast.Assign: 'value',
+                  ast.AugAssign: 'value', ast.AnnAssign: 'value', ast.For: 'iter'}
+        field = fields.get(type(node))
+        value = getattr(node, field, None) if field else None
+        if value is None or not self.has(value):
+            return [node]
+        before, lowered = self.expression(value)
+        setattr(node, field, lowered)
+        if isinstance(node, ast.While):
+            node.test = ast.Constant(True)
+            node.body = before + [ast.If(ast.UnaryOp(ast.Not(), lowered), [ast.Break()], [])] + node.body
+            return [node]
+        return before + [node]
+
+    def temporary(self):
+        self.temporaries += 1
+        return f'_walrus{self.temporaries}'
+
+    def assign(self, name, value):
+        return ast.Assign([ast.Name(name, ast.Store())], value, lineno=0)
+
+    def expression(self, node):
+        """(statements, expression): the statements run node's assignments; the expression gives its value."""
+        if not self.has(node) or isinstance(node, self.SCOPES + self.COMPREHENSIONS):
+            return [], node
+        if isinstance(node, ast.NamedExpr):
+            before, value = self.expression(node.value)
+            return before + [self.assign(node.target.id, value)], ast.Name(node.target.id, ast.Load())
+        if isinstance(node, ast.BoolOp) and any(self.has(v) for v in node.values[1:]):
+            result = self.temporary()
+            before, first = self.expression(node.values[0])
+            statements = before + [self.assign(result, first)]
+            for operand in node.values[1:]:
+                pending = ast.Name(result, ast.Load())
+                test = pending if isinstance(node.op, ast.And) else ast.UnaryOp(ast.Not(), pending)
+                inner, value = self.expression(operand)
+                statements.append(ast.If(test, inner + [self.assign(result, value)], []))
+            return statements, ast.Name(result, ast.Load())
+        if isinstance(node, ast.IfExp) and (self.has(node.body) or self.has(node.orelse)):
+            result = self.temporary()
+            before, test = self.expression(node.test)
+            body, value = self.expression(node.body)
+            orelse, other = self.expression(node.orelse)
+            return before + [ast.If(test, body + [self.assign(result, value)], orelse + [self.assign(result, other)])], \
+                ast.Name(result, ast.Load())
+        statements = []
+        for field, value in ast.iter_fields(node):
+            if isinstance(value, ast.expr):
+                before, lowered = self.expression(value)
+                statements += before
+                setattr(node, field, lowered)
+            elif isinstance(value, list):
+                for index, item in enumerate(value):
+                    if isinstance(item, ast.expr):
+                        before, value[index] = self.expression(item)
+                        statements += before
+        return statements, node
+
+
 class TranscryptFixes(ast.NodeTransformer):
     """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
+    def visit_Module(self, node):
+        self.generic_visit(Walrus().lower_module(node))
+        return node
+
     def visit_Dict(self, node):
         self.generic_visit(node)
         if None not in node.keys:
@@ -175,6 +305,12 @@ class TranscryptFixes(ast.NodeTransformer):
         self.generic_visit(node)
         return None if any(isinstance(t, ast.Attribute) and t.attr == '__doc__' for t in node.targets) else node
 
+    def visit_Subscript(self, node):
+        """A builtin type subscripted (dict[str, int], a type alias) is the type: Transcrypt's types are not generic."""
+        self.generic_visit(node)
+        generic = isinstance(node.value, ast.Name) and node.value.id in ('dict', 'list', 'tuple', 'set', 'frozenset', 'type')
+        return node.value if generic and isinstance(node.ctx, ast.Load) else node
+
     def visit_Compare(self, node):
         """Blender's reload idiom, `"name" in locals()`, is False: modules load once."""
         self.generic_visit(node)
@@ -214,24 +350,43 @@ class TranscryptFixes(ast.NodeTransformer):
         self.scopes.append('class')
         node = self.builtin_bases(self.dataclass(node))
         self.scopes.pop()
-        return self.annotations(node)
+        return self.class_body(node)
 
     @staticmethod
-    def annotations(node):
-        """Annotations in a class body: with a value, the assignment; property declarations (how Blender's classes declare
-        their properties), which Transcrypt cannot compile, as the __annotations__ dict Blender reads them from."""
+    def class_body(node):
+        """A class body as Transcrypt can compile it: annotations with a value as assignments; property declarations (how
+        Blender's classes declare their properties) as the __annotations__ dict Blender reads them from, other hints
+        dropped; and assignments using the body's earlier names after the class, as Python runs a class body in order
+        and Transcrypt makes it one object literal. Returns the class and what follows it."""
         node.body = [ast.copy_location(ast.Assign(targets=[s.target], value=s.value), s) if isinstance(s, ast.AnnAssign) and s.value is not None else s
                      for s in node.body]
         hints = [s for s in node.body if isinstance(s, ast.AnnAssign)]
         node.body = [s for s in node.body if s not in hints]
-        # Blender registers the annotations that are property declarations (calls such as BoolProperty(...)); type
-        # hints are dropped.
+        own = {d for s in node.body for d in defined_names(s)}
+        attribute = lambda name, ctx: ast.Attribute(ast.Name(node.name, ast.Load()), name, ctx)
+
+        class Qualify(ast.NodeTransformer):
+            def visit_Name(self, name):
+                return attribute(name.id, ast.Load()) if name.id in own and isinstance(name.ctx, ast.Load) else name
+        # Transcrypt compiles a property() of the body's methods itself.
+        uses = lambda statement, names: not (isinstance(statement.value, ast.Call) and getattr(statement.value.func, 'id', None) == 'property') \
+            and any(isinstance(n, ast.Name) and n.id in names for n in ast.walk(statement.value))
+        body, after, earlier = [], [], set()
+        for statement in node.body:
+            if isinstance(statement, ast.Assign) and len(statement.targets) == 1 and isinstance(statement.targets[0], ast.Name) \
+                    and uses(statement, earlier):
+                after.append(ast.copy_location(ast.Assign([attribute(statement.targets[0].id, ast.Store())], Qualify().visit(statement.value)), statement))
+            else:
+                body.append(statement)
+            earlier.update(defined_names(statement))
+        node.body = body or [ast.Pass()]
+        # Blender registers the annotations that are property declarations (calls such as BoolProperty(...)); after the
+        # class, as Python 3.14 evaluates annotations (PEP 649): they may name the class, and its own names.
         annotated = [s for s in hints if isinstance(s.target, ast.Name) and isinstance(s.annotation, ast.Call)]
-        if not annotated:
-            return ast.fix_missing_locations(node)
-        node.body.insert(0, ast.Assign(targets=[ast.Name('__annotations__', ast.Store())], value=ast.Dict(
-            keys=[ast.Constant(s.target.id) for s in annotated], values=[s.annotation for s in annotated])))
-        return ast.fix_missing_locations(node)
+        if annotated:
+            after.append(ast.copy_location(ast.Assign([attribute('__annotations__', ast.Store())], ast.Dict(
+                keys=[ast.Constant(s.target.id) for s in annotated], values=[Qualify().visit(s.annotation) for s in annotated])), node))
+        return [ast.fix_missing_locations(n) for n in [node, *after]]
 
     def visit_AnnAssign(self, node):
         """Other annotations: an assignment, or nothing without a value."""
@@ -525,15 +680,7 @@ def main():
                     outputs[name] = open(os.path.join(target, name)).read()
         os.makedirs(OUT, exist_ok=True)
         for name, script in outputs.items():
-            for target, text, replacement, reason in PATCHES:
-                if target == name:
-                    assert text in script, f'{name}: the patch for {reason} no longer applies'
-                    script = script.replace(text, replacement)
-            # Keyword arguments reach a parameter Transcrypt renames (type as py_metatype, others with a py_ prefix) under
-            # its Python name too, as they do when they come from a dict (**kwargs).
-            script = re.sub(r"case 'py_(metatype|\w+)': var py_\1", lambda m: f"case '{'type' if m[1] == 'metatype' else m[1]}': case 'py_{m[1]}': var py_{m[1]}", script)
-            # Transcrypt dates its output; without the date a rerun gives the same files.
-            script = re.sub(r"^// Transcrypt'ed from Python, .*\n", '', script, flags=re.M)
+            script = finish(name, script)
             header = f'// Generated by tools/blender-ui/transpile.py from Blender {TAG}; do not edit.\n'
             open(os.path.join(OUT, name), 'w').write(header + script)
             print('wrote', os.path.relpath(os.path.join(OUT, name), REPO))

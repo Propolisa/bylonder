@@ -8,7 +8,7 @@ import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_n as n_} f
 import {Menu} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_paint_common';
 export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 	__module__: __name__,
@@ -32,7 +32,8 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		return obgetattr (context, 'object', null) !== null && ob.mode == cls.mode;
+		var ob = getattr (context, 'object', null);
+		return ob !== null && ob.mode == cls.mode;
 	});},
 	get has_tool_with_brush_type () {return __getcm__ (this, function (cls, context, brush_type) {
 		if (arguments.length) {
@@ -600,7 +601,8 @@ export var ColorPalettePanel =  __class__ ('ColorPalettePanel', [BrushPanel], {
 			return false;
 		}
 		var settings = cls.paint_settings (context);
-		if (brushsettings.brush === null) {
+		var brush = settings.brush;
+		if (brush === null) {
 			return false;
 		}
 		if (context.space_data.py_metatype == 'IMAGE_EDITOR' || context.image_paint_object) {
@@ -2323,3 +2325,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_paint_common.map
+export {Menu, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, n_, register_class};

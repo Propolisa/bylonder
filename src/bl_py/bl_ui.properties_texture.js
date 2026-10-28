@@ -1040,7 +1040,7 @@ export var TEXTURE_PT_influence =  __class__ ('TEXTURE_PT_influence', [TextureSl
 							case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
 							case 'toggle': var toggle = __allkwargs0__ [__attrib0__]; break;
 							case 'factor': var factor = __allkwargs0__ [__attrib0__]; break;
-							case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+							case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						}
 					}
 				}
@@ -1234,7 +1234,8 @@ export var TEXTURE_PT_animation =  __class__ ('TEXTURE_PT_animation', [TextureBu
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var texture = context.texture;
-		if (texture_usercontext.texture_user) {
+		var texture_user = context.texture_user;
+		if (texture_user) {
 			var texture_user_id = texture_user.id_data;
 			if (hasattr (texture_user_id, 'animation_data')) {
 				var col = layout.column (__kwargtrans__ ({align: true}));
@@ -1245,7 +1246,8 @@ export var TEXTURE_PT_animation =  __class__ ('TEXTURE_PT_animation', [TextureBu
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: 'Texture'}));
 		self.draw_action_and_slot_selector (context, col, texture);
-		if (node_treetexture.node_tree) {
+		var node_tree = texture.node_tree;
+		if (node_tree) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shader Node Tree'}));
 			self.draw_action_and_slot_selector (context, col, node_tree);
@@ -1283,3 +1285,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.properties_texture.map
+export {Brush, FreestyleLineStyle, Menu, Panel, ParticleSettings, PropertiesAnimationMixin, PropertyPanel, Texture, UIList, brush_texture_settings, i18n_contexts, register_class};

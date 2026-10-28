@@ -11,7 +11,7 @@ import {BrushAssetShelf, UnifiedPaintPanel, brush_basic_grease_pencil_vertex_set
 import {Header, Menu, Panel, SurfaceCurve} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.space_view3d';
 export var _merged = function () {
 	if (arguments.length) {
@@ -11778,3 +11778,4 @@ if (__name__ == '__main__') {
 }
 
 //# sourceMappingURL=bl_ui.space_view3d.map
+export {AnnotationDataPanel, AnnotationOnionSkin, BrushAssetShelf, GreasePencilMaterialsPanel, Header, Menu, Panel, SurfaceCurve, ToolActivePanelHelper, UnifiedPaintPanel, _globals, _import, _lazy, _member, _module, brush_basic_grease_pencil_vertex_settings, brush_basic_grease_pencil_weight_settings, brush_basic_texpaint_settings, i18n_contexts, iface_, register_class, rpt_};

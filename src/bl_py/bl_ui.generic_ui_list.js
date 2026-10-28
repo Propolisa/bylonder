@@ -2,7 +2,7 @@
 import * as __self__ from './bl_ui.generic_ui_list.js';
 (globalThis.__py_modules ??= {})['bl_ui.generic_ui_list'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {EnumProperty, StringProperty} from './_bpy.props.js';
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
@@ -139,7 +139,7 @@ export var draw_ui_list = function (layout, context, class_name) {
 					case 'insertion_operators': var insertion_operators = __allkwargs0__ [__attrib0__]; break;
 					case 'move_operators': var move_operators = __allkwargs0__ [__attrib0__]; break;
 					case 'menu_class_name': var menu_class_name = __allkwargs0__ [__attrib0__]; break;
-					default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+					default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 				}
 			}
 			delete kwargs.__kwargtrans__;
@@ -265,7 +265,6 @@ export var _set_context_attr = function (context, data_path, value) {
 };
 export var GenericUIListOperator =  __class__ ('GenericUIListOperator', [object], {
 	__module__: __name__,
-	__annotations__: dict ({'list_path': StringProperty (), 'active_index_path': StringProperty ()}),
 	bl_options: new set (['REGISTER', 'UNDO', 'INTERNAL']),
 	get get_list () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -320,6 +319,7 @@ export var GenericUIListOperator =  __class__ ('GenericUIListOperator', [object]
 		_set_context_attr (context, self.active_index_path, index);
 	});}
 });
+GenericUIListOperator.__annotations__ = dict ({'list_path': StringProperty (), 'active_index_path': StringProperty ()});
 export var UILIST_OT_entry_remove =  __class__ ('UILIST_OT_entry_remove', [GenericUIListOperator, Operator], {
 	__module__: __name__,
 	bl_idname: 'uilist.entry_remove',
@@ -377,7 +377,6 @@ export var UILIST_OT_entry_add =  __class__ ('UILIST_OT_entry_add', [GenericUILi
 });
 export var UILIST_OT_entry_move =  __class__ ('UILIST_OT_entry_move', [GenericUIListOperator, Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'direction': EnumProperty (__kwargtrans__ ({py_name: 'Direction', py_items: tuple ([tuple (['UP', 'Up', 'Move the active entry up']), tuple (['DOWN', 'Down', 'Move the active entry down'])]), py_default: 'UP'}))}),
 	bl_idname: 'uilist.entry_move',
 	bl_label: 'Move Entry',
 	get execute () {return __get__ (this, function (self, context) {
@@ -404,9 +403,11 @@ export var UILIST_OT_entry_move =  __class__ ('UILIST_OT_entry_move', [GenericUI
 		return new set (['FINISHED']);
 	});}
 });
+UILIST_OT_entry_move.__annotations__ = dict ({'direction': EnumProperty (__kwargtrans__ ({py_name: 'Direction', py_items: tuple ([tuple (['UP', 'Up', 'Move the active entry up']), tuple (['DOWN', 'Down', 'Move the active entry down'])]), py_default: 'UP'}))});
 export var classes = tuple ([UILIST_OT_entry_remove, UILIST_OT_entry_add, UILIST_OT_entry_move]);
 var __left0__ = bpy.utils.register_classes_factory (classes);
 export var register = __left0__ [0];
 export var unregister = __left0__ [1];
 
 //# sourceMappingURL=bl_ui.generic_ui_list.map
+export {EnumProperty, Operator, StringProperty};

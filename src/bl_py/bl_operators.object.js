@@ -8,11 +8,10 @@ import {BoolProperty, EnumProperty, IntProperty, StringProperty} from './_bpy.pr
 import {Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
-import {_lazy, _member, _module} from './_modules.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.object';
 export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'pattern': StringProperty (__kwargtrans__ ({py_name: 'Pattern', translation_context: i18n_contexts.id_text, description: "Name filter using '*', '?' and '[abc]' unix style wildcards", maxlen: 256, py_default: '*'})), 'case_sensitive': BoolProperty (__kwargtrans__ ({py_name: 'Case Sensitive', description: 'Do a case sensitive compare', py_default: false})), 'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', description: 'Extend the existing selection', py_default: true}))}),
 	bl_idname: 'object.select_pattern',
 	bl_label: 'Select Pattern',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -160,9 +159,9 @@ export var SelectPattern =  __class__ ('SelectPattern', [Operator], {
 		return !(obj) || obj.mode == 'OBJECT' || obj.py_metatype == 'ARMATURE';
 	});}
 });
+SelectPattern.__annotations__ = dict ({'pattern': StringProperty (__kwargtrans__ ({py_name: 'Pattern', translation_context: i18n_contexts.id_text, description: "Name filter using '*', '?' and '[abc]' unix style wildcards", maxlen: 256, py_default: '*'})), 'case_sensitive': BoolProperty (__kwargtrans__ ({py_name: 'Case Sensitive', description: 'Do a case sensitive compare', py_default: false})), 'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', description: 'Extend the existing selection', py_default: true}))});
 export var SelectCamera =  __class__ ('SelectCamera', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', description: 'Extend the selection', py_default: false}))}),
 	bl_idname: 'object.select_camera',
 	bl_label: 'Select Camera',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -207,9 +206,9 @@ export var SelectCamera =  __class__ ('SelectCamera', [Operator], {
 		return new set (['CANCELLED']);
 	});}
 });
+SelectCamera.__annotations__ = dict ({'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', description: 'Extend the selection', py_default: false}))});
 export var SelectHierarchy =  __class__ ('SelectHierarchy', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'direction': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['PARENT', 'Parent', '']), tuple (['CHILD', 'Child', ''])]), py_name: 'Direction', description: 'Direction to select in the hierarchy', py_default: 'PARENT'})), 'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', description: 'Extend the existing selection', py_default: false}))}),
 	bl_idname: 'object.select_hierarchy',
 	bl_label: 'Select Hierarchy',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -309,9 +308,9 @@ export var SelectHierarchy =  __class__ ('SelectHierarchy', [Operator], {
 		return new set (['CANCELLED']);
 	});}
 });
+SelectHierarchy.__annotations__ = dict ({'direction': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['PARENT', 'Parent', '']), tuple (['CHILD', 'Child', ''])]), py_name: 'Direction', description: 'Direction to select in the hierarchy', py_default: 'PARENT'})), 'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', description: 'Extend the existing selection', py_default: false}))});
 export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'level': IntProperty (__kwargtrans__ ({py_name: 'Level', min: -(100), max: 100, soft_min: -(6), soft_max: 6, py_default: 1})), 'relative': BoolProperty (__kwargtrans__ ({py_name: 'Relative', description: 'Apply the subdivision surface level as an offset relative to the current level', py_default: false})), 'ensure_modifier': BoolProperty (__kwargtrans__ ({py_name: 'Ensure Modifier', description: 'Create the corresponding modifier if it does not exist', py_default: true, options: new set (['HIDDEN'])}))}),
 	bl_idname: 'object.subdivision_set',
 	bl_label: 'Subdivision Set',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -479,9 +478,9 @@ export var SubdivisionSet =  __class__ ('SubdivisionSet', [Operator], {
 		return new set (['FINISHED']);
 	});}
 });
+SubdivisionSet.__annotations__ = dict ({'level': IntProperty (__kwargtrans__ ({py_name: 'Level', min: -(100), max: 100, soft_min: -(6), soft_max: 6, py_default: 1})), 'relative': BoolProperty (__kwargtrans__ ({py_name: 'Relative', description: 'Apply the subdivision surface level as an offset relative to the current level', py_default: false})), 'ensure_modifier': BoolProperty (__kwargtrans__ ({py_name: 'Ensure Modifier', description: 'Create the corresponding modifier if it does not exist', py_default: true, options: new set (['HIDDEN'])}))});
 export var ShapeTransfer =  __class__ ('ShapeTransfer', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'mode': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['OFFSET', 'Offset', 'Apply the relative positional offset']), tuple (['RELATIVE_FACE', 'Relative Face', 'Calculate relative position (using faces)']), tuple (['RELATIVE_EDGE', 'Relative Edge', 'Calculate relative position (using edges)'])]), py_name: 'Transformation Mode', description: 'Relative shape positions to the new shape method', py_default: 'OFFSET'})), 'use_clamp': BoolProperty (__kwargtrans__ ({py_name: 'Clamp Offset', description: 'Clamp the transformation to the distance each vertex moves in the original shape', py_default: false}))}),
 	bl_idname: 'object.shape_key_transfer',
 	bl_label: 'Transfer Shape Key',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -561,7 +560,7 @@ export var ShapeTransfer =  __class__ ('ShapeTransfer', [Operator], {
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
 							case 'ob': var ob = __allkwargs0__ [__attrib0__]; break;
-							case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+							case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						}
 					}
 				}
@@ -740,6 +739,7 @@ export var ShapeTransfer =  __class__ ('ShapeTransfer', [Operator], {
 		return self._main (ob_act, objects, self.mode, self.use_clamp);
 	});}
 });
+ShapeTransfer.__annotations__ = dict ({'mode': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['OFFSET', 'Offset', 'Apply the relative positional offset']), tuple (['RELATIVE_FACE', 'Relative Face', 'Calculate relative position (using faces)']), tuple (['RELATIVE_EDGE', 'Relative Edge', 'Calculate relative position (using edges)'])]), py_name: 'Transformation Mode', description: 'Relative shape positions to the new shape method', py_default: 'OFFSET'})), 'use_clamp': BoolProperty (__kwargtrans__ ({py_name: 'Clamp Offset', description: 'Clamp the transformation to the distance each vertex moves in the original shape', py_default: false}))});
 export var JoinUVs =  __class__ ('JoinUVs', [Operator], {
 	__module__: __name__,
 	bl_idname: 'object.join_uvs',
@@ -1051,7 +1051,6 @@ export var ClearAllRestrictRender =  __class__ ('ClearAllRestrictRender', [Opera
 });
 export var TransformsToDeltas =  __class__ ('TransformsToDeltas', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'mode': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['ALL', 'All Transforms', 'Transfer location, rotation, and scale transforms']), tuple (['LOC', 'Location', 'Transfer location transforms only']), tuple (['ROT', 'Rotation', 'Transfer rotation transforms only']), tuple (['SCALE', 'Scale', 'Transfer scale transforms only'])]), py_name: 'Mode', description: 'Which transforms to transfer', py_default: 'ALL'})), 'reset_values': BoolProperty (__kwargtrans__ ({py_name: 'Reset Values', description: 'Clear transform values after transferring to deltas', py_default: true}))}),
 	bl_idname: 'object.transforms_to_deltas',
 	bl_label: 'Transforms to Deltas',
 	bl_options: new set (['REGISTER', 'UNDO']),
@@ -1183,6 +1182,7 @@ export var TransformsToDeltas =  __class__ ('TransformsToDeltas', [Operator], {
 		}
 	});}
 });
+TransformsToDeltas.__annotations__ = dict ({'mode': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['ALL', 'All Transforms', 'Transfer location, rotation, and scale transforms']), tuple (['LOC', 'Location', 'Transfer location transforms only']), tuple (['ROT', 'Rotation', 'Transfer rotation transforms only']), tuple (['SCALE', 'Scale', 'Transfer scale transforms only'])]), py_name: 'Mode', description: 'Which transforms to transfer', py_default: 'ALL'})), 'reset_values': BoolProperty (__kwargtrans__ ({py_name: 'Reset Values', description: 'Clear transform values after transferring to deltas', py_default: true}))});
 export var TransformsToDeltasAnim =  __class__ ('TransformsToDeltasAnim', [Operator], {
 	__module__: __name__,
 	bl_idname: 'object.anim_transforms_to_deltas',
@@ -1385,7 +1385,6 @@ export var DupliOffsetFromObject =  __class__ ('DupliOffsetFromObject', [Operato
 });
 export var OBJECT_OT_assign_property_defaults =  __class__ ('OBJECT_OT_assign_property_defaults', [Operator], {
 	__module__: __name__,
-	__annotations__: dict ({'process_data': BoolProperty (__kwargtrans__ ({py_name: 'Process data properties', py_default: true})), 'process_bones': BoolProperty (__kwargtrans__ ({py_name: 'Process bone properties', py_default: true}))}),
 	bl_idname: 'object.assign_property_defaults',
 	bl_label: 'Assign Custom Property Values as Default',
 	bl_options: new set (['UNDO', 'REGISTER']),
@@ -1470,6 +1469,8 @@ export var OBJECT_OT_assign_property_defaults =  __class__ ('OBJECT_OT_assign_pr
 		return new set (['FINISHED']);
 	});}
 });
+OBJECT_OT_assign_property_defaults.__annotations__ = dict ({'process_data': BoolProperty (__kwargtrans__ ({py_name: 'Process data properties', py_default: true})), 'process_bones': BoolProperty (__kwargtrans__ ({py_name: 'Process bone properties', py_default: true}))});
 export var classes = tuple ([ClearAllRestrictRender, DupliOffsetFromCursor, DupliOffsetToCursor, DupliOffsetFromObject, IsolateTypeRender, JoinUVs, MakeDupliFace, SelectCamera, SelectHierarchy, SelectPattern, ShapeTransfer, SubdivisionSet, TransformsToDeltas, TransformsToDeltasAnim, OBJECT_OT_assign_property_defaults]);
 
 //# sourceMappingURL=bl_operators.object.map
+export {BoolProperty, EnumProperty, IntProperty, Operator, StringProperty, _globals, _import, _lazy, _member, _module, i18n_contexts, rpt_};

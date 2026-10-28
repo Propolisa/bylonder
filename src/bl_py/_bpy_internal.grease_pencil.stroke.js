@@ -148,16 +148,17 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
-						case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
-						case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'type': case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
+						case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get (py_name)) {
+		var attribute = self._attributes.py_get (py_name);
+		if (attribute) {
 			if (__in__ (py_metatype, new set (['FLOAT', 'INT', 'STRING', 'BOOLEAN', 'INT8', 'INT32_2D', 'QUATERNION', 'FLOAT4X4']))) {
 				return attribute.data [self._index].value;
 			}
@@ -185,7 +186,7 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'attribute': var attribute = __allkwargs0__ [__attrib0__]; break;
 						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
-						case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
+						case 'type': case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
 						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -216,30 +217,34 @@ export var AttributeGetterSetter =  __class__ ('AttributeGetterSetter', [object]
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
-						case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'type': case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
 						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-						case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+						case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get (py_name)) {
-			self._set_attribute_value (attribute, self._index, py_metatype, value);
-		}
-		else if (attributeself._attributes.py_new (py_name, py_metatype, self._domain)) {
-			var num = self._attributes.domain_size (self._domain);
-			for (var i = 0; i < num; i++) {
-				self._set_attribute_value (attribute, i, py_metatype, py_default);
-			}
+		var attribute = self._attributes.py_get (py_name);
+		if (attribute) {
 			self._set_attribute_value (attribute, self._index, py_metatype, value);
 		}
 		else {
-			var __except0__ = Exception ('Could not create attribute {:s} of type {!r}'.format (py_name, py_metatype));
-			__except0__.__cause__ = null;
-			throw __except0__;
+			var attribute = self._attributes.py_new (py_name, py_metatype, self._domain);
+			if (attribute) {
+				var num = self._attributes.domain_size (self._domain);
+				for (var i = 0; i < num; i++) {
+					self._set_attribute_value (attribute, i, py_metatype, py_default);
+				}
+				self._set_attribute_value (attribute, self._index, py_metatype, value);
+			}
+			else {
+				var __except0__ = Exception ('Could not create attribute {:s} of type {!r}'.format (py_name, py_metatype));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
 		}
 	});}
 });
@@ -357,8 +362,8 @@ export var def_prop_for_attribute = function (attr_name, py_metatype, py_default
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
 					case 'attr_name': var attr_name = __allkwargs0__ [__attrib0__]; break;
-					case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
-					case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+					case 'type': case 'py_metatype': var py_metatype = __allkwargs0__ [__attrib0__]; break;
+					case 'default': case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
 					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
@@ -590,7 +595,8 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get ('position')) {
+		var attribute = self._attributes.py_get ('position');
+		if (attribute) {
 			return attribute.data [self._point_index].vector;
 		}
 		return tuple ([0.0, 0.0, 0.0]);
@@ -610,7 +616,8 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get ('position')) {
+		var attribute = self._attributes.py_get ('position');
+		if (attribute) {
 			attribute.data [self._point_index].vector = value;
 			self._drawing.tag_positions_changed ();
 		}
@@ -629,7 +636,8 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get ('.selection')) {
+		var attribute = self._attributes.py_get ('.selection');
+		if (attribute) {
 			if (attribute.domain == 'CURVE') {
 				return attribute.data [self._curve_index].value;
 			}
@@ -654,7 +662,8 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get ('.selection')) {
+		var attribute = self._attributes.py_get ('.selection');
+		if (attribute) {
 			if (attribute.domain == 'CURVE') {
 				attribute.data [self._curve_index].value = value;
 			}
@@ -662,8 +671,11 @@ export var GreasePencilStrokePoint =  DefAttributeGetterSetters ([tuple (['radiu
 				attribute.data [self._point_index].value = value;
 			}
 		}
-		else if (attributeself._attributes.py_new ('.selection', 'BOOLEAN', 'POINT')) {
-			attribute.data [self._point_index].value = value;
+		else {
+			var attribute = self._attributes.py_new ('.selection', 'BOOLEAN', 'POINT');
+			if (attribute) {
+				attribute.data [self._point_index].value = value;
+			}
 		}
 	});},
 	get _get_handle_left () {return __get__ (this, function (self) {
@@ -895,7 +907,8 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get ('.selection')) {
+		var attribute = self._attributes.py_get ('.selection');
+		if (attribute) {
 			if (attribute.domain == 'CURVE') {
 				return attribute.data [self._curve_index].value;
 			}
@@ -926,7 +939,8 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 		}
 		else {
 		}
-		if (attributeself._attributes.py_get ('.selection')) {
+		var attribute = self._attributes.py_get ('.selection');
+		if (attribute) {
 			if (attribute.domain == 'CURVE') {
 				attribute.data [self._curve_index].value = value;
 			}
@@ -936,8 +950,11 @@ export var GreasePencilStroke =  DefAttributeGetterSetters ([tuple (['cyclic', '
 				}
 			}
 		}
-		else if (attributeself._attributes.py_new ('.selection', 'BOOLEAN', 'CURVE')) {
-			attribute.data [self._curve_index].value = value;
+		else {
+			var attribute = self._attributes.py_new ('.selection', 'BOOLEAN', 'CURVE');
+			if (attribute) {
+				attribute.data [self._curve_index].value = value;
+			}
 		}
 	});}
 }));
@@ -1014,3 +1031,4 @@ export var GreasePencilStrokeSlice =  __class__ ('GreasePencilStrokeSlice', [Sli
 });
 
 //# sourceMappingURL=_bpy_internal.grease_pencil.stroke.map
+export {Enum};
