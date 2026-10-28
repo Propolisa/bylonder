@@ -1,3 +1,4 @@
+import { cross_v3, len_v3, dot_v3, normalize_v3, ortho_v3_v3 } from './math-geom.js';
 // From math_rotation_c.cc. Single precision like Blender's float math.
 const f32 = Math.fround;
 
@@ -28,3 +29,14 @@ export function axis_angle_normalized_to_mat3([x, y, z], angle) {
     [t * x * z + s * y, t * y * z - s * x, t * z * z + c],
   ];
 }
+
+// port-override: Blender's jumps back with a goto (the converter has none) for the half turn about an axis
+// orthogonal to v1.
+export function rotation_between_vecs_to_mat3(v1, v2) {
+  const axis = cross_v3(v1, v2), angle_sin = len_v3(axis), angle_cos = dot_v3(v1, v2);
+  if (angle_sin > 1.1920929e-7) return axis_angle_normalized_to_mat3(normalize_v3(axis), Math.atan2(angle_sin, angle_cos));
+  if (angle_cos > 0) return [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  return axis_angle_normalized_to_mat3(normalize_v3(ortho_v3_v3(v1)), Math.PI);
+}
+
+export * from './math-rotation.gen.js';

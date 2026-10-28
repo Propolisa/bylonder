@@ -21,6 +21,10 @@ export function createEditModes(mesh, curve) {
     selectBox: (...args) => current().selectBox(...args),
     selectRegion: (...args) => current().selectRegion(...args),
     modifiersChanged: () => mesh.modifiersChanged(),
+    // Edit Mesh's: the edited Mesh, the tools' gizmo center and normal, and a primitive added by its operator.
+    get mesh() { return mesh.mesh; },
+    gizmoStats: () => mesh.gizmoStats(),
+    addPrimitive: (...args) => mesh.addPrimitive(...args),
     reload() { mesh.reload(); curve.reload(); },
     dispose() { mesh.dispose(); curve.dispose(); },
   };

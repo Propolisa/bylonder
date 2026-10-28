@@ -11,6 +11,7 @@ import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
+import { createToolOverlay } from '../../draw/overlay-tool.js';
 // Blender's axes as Babylon directions (Babylon's (x, y, z) is Blender's (x, z, y)) and the view each axis's ball
 // aligns to (the opposite view for its negative ball).
 const axes = [
@@ -81,6 +82,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const navButtons = Object.assign(document.createElement('div'), { className: 'nav-buttons' });
   section.append(label, gizmo, navButtons);
 
+  const toolOverlay = createToolOverlay(view);
   const nav = createNavigation({ camera: editorCamera, engine: world.engine, canvas, capture: ctx.capture, enabled: () => !state.cameraView, onSync: () => sync() });
   view.nav = nav;
 
@@ -217,7 +219,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
   };
   view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; };
-  view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); };
+  view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); toolOverlay.tick(); };
   view.setDetail = text => { if (detail.textContent !== text) detail.textContent = text; };
   view.sync = sync;
   view.dispose = () => {
@@ -229,6 +231,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     toolbar.dispose();
     regions.dispose();
     for (const el of [label, gizmo, navButtons]) el.remove();
+    toolOverlay.dispose();
     ctx.shadingChanged();
   };
   sync();

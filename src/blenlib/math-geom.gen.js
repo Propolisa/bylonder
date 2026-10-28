@@ -448,6 +448,13 @@ export function axis_dominant_v3_single(vec) {
   return x > y ? (x > z ? 0 : 2) : y > z ? 1 : 2;
 }
 
+export function axis_dominant_v3_ortho_single(vec) {
+  const x = Math.fround(Math.abs(vec[0]));
+  const y = Math.fround(Math.abs(vec[1]));
+  const z = Math.fround(Math.abs(vec[2]));
+  return x < y ? (x < z ? 0 : 2) : y < z ? 1 : 2;
+}
+
 export function plane_point_side_v3(plane, co) {
   return Math.fround(dot_v3(co, plane) + plane[3]);
 }
@@ -466,6 +473,12 @@ export function mid_v3_v3v3v3v3(v1, v2, v3, v4) {
   v[1] = Math.fround(Math.fround(Math.fround(Math.fround(v1[1] + v2[1]) + v3[1]) + v4[1]) / 4.0);
   v[2] = Math.fround(Math.fround(Math.fround(Math.fround(v1[2] + v2[2]) + v3[2]) + v4[2]) / 4.0);
   return v;
+}
+
+export function project_plane_v3_v3v3(p, v_plane) {
+  const mul = Math.fround(dot_v3(p, v_plane) / dot_v3(v_plane, v_plane));
+  const out = madd(p, v_plane, -mul);
+  return out;
 }
 
 export function ortho_basis_v3v3_v3(n) {

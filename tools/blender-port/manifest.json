@@ -9,6 +9,22 @@
       ]
     },
     {
+      "source": "source/blender/blenlib/intern/math_rotation_c.cc",
+      "functions": ["quat_to_mat3", "mat3_normalized_to_quat", "eulO_to_mat3", "mat3_normalized_to_eulO", "mat3_normalized_to_compatible_eulO"]
+    },
+    {
+      "source": "source/blender/blenlib/intern/math_vector.cc",
+      "functions": ["project_plane_v3_v3v3"]
+    },
+    {
+      "source": "source/blender/blenlib/intern/math_geom_inline.cc",
+      "functions": ["axis_dominant_v3_ortho_single"]
+    },
+    {
+      "source": "source/blender/blenlib/intern/math_matrix_c.cc",
+      "functions": ["orthogonalize_m3"]
+    },
+    {
       "source": "source/blender/bmesh/intern/bmesh_opdefines.cc",
       "constants": [
         "bmo_triangulate_def",
@@ -25,11 +41,11 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "panel-layout.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "panel-layout.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "view3d-api.cc"],
       "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH", "WITH_OPENVDB"],
       "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "intern/openvdb", "extern/bullet2/src"],
-      "operators": ["source/blender/editors/mesh/mesh_intern.hh", "source/blender/editors/object/object_transform.cc", "source/blender/editors/curve/curve_intern.hh"],
+      "operators": ["source/blender/editors/mesh/mesh_intern.hh", "source/blender/editors/object/object_transform.cc", "source/blender/editors/object/object_random.cc", "source/blender/editors/curve/curve_intern.hh"],
       "datatoc": ["release/datafiles/bfont.pfb"],
       "dependencies": {
         "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
@@ -57,9 +73,13 @@
         "source/blender/editors/object/object_add.cc",
         "source/blender/editors/object/object_transform.cc",
         "source/blender/editors/object/object_utils.cc",
+        "source/blender/editors/object/object_random.cc",
+        "source/blender/editors/object/object_data_transform.cc",
+        "source/blender/windowmanager/intern/wm_operator_utils.cc",
         "source/blender/editors/object/object_select.cc",
         "source/blender/editors/object/object_relations.cc",
         "source/blender/editors/screen/screen_context.cc",
+        "source/blender/editors/space_view3d/view3d_project.cc",
         "source/blender/animrig/intern",
         {"path": "source/blender/editors/animation", "includes": ["source/blender/editors/space_graph", "source/blender/editors/asset"]},
         "source/blender/editors/space_graph",

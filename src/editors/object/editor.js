@@ -5,7 +5,9 @@ import { initTransform } from "../transform/transform.js";
 import { createTransObject } from "../transform/transform-object.js";
 import { createKeymap } from "../../windowmanager/input/keymap.js";
 import { startGestureBox } from "../../windowmanager/wm-gesture-box.js";
+import { dragStart } from "../../windowmanager/wm-event-system.js";
 import { boxRegion } from "../space_view3d/view3d-select.js";
+import { createTransCursor } from "../space_view3d/view3d-cursor.js";
 
 // Object-mode editing shared by every 3D Viewport: one selection, one tool mode, one gizmo set (drawn in every
 // view). Picking, projection and modal transforms use the view the gesture happens in (views.input).
@@ -121,23 +123,29 @@ export function createEditor(world, views, history, changed, notify, capture) {
     const session = initTransform(type, { ...data, apply: moved(data.apply), restore: moved(data.restore) }, view, last);
     return Object.assign(Object.create(session), { finish: (commit) => (commit ? history.commit() : session.cancel()) });
   };
+  // The 3D cursor as what moves (cursor_transform).
+  const cursorTransform = (type, view) => {
+    const data = createTransCursor(world.sceneSettings), session = initTransform(type, data, view, last);
+    return Object.assign(Object.create(session), { finish: (commit) => { if (!commit) session.cancel(); } });
+  };
   const start = (type, options = {}) => {
     const external = options.external ?? matchMedia("(pointer:coarse)").matches;
     if (options.point) last = {x:options.point.x,y:options.point.y};
-    if (!selection.size) return;
+    if (!selection.size && !options.cursor) return;
     if (capture.active && !modal) return;
     if (modal) finish(false);
     const view = options.view || views.input;
     if (!view) return;
     view.canvas.focus();
     const target = { camera: view.camera, canvas: view.canvas, project: (p) => project(p, view) };
-    const session = world.editMode?.active ? world.editMode.transform(COMPONENT_TYPES[type], target, last, options) : objectTransform(COMPONENT_TYPES[type], target);
+    const session = options.cursor ? cursorTransform(COMPONENT_TYPES[type], target)
+      : world.editMode?.active ? world.editMode.transform(COMPONENT_TYPES[type], target, last, options) : objectTransform(COMPONENT_TYPES[type], target);
     if (!session) return;
-    if (!world.editMode?.active) {
+    if (!world.editMode?.active && !options.cursor) {
       setMode(type);
       gizmos.attachToNode(null);
     }
-    modal = { view, type, session, point: { ...session.start }, center: session.center, releaseConfirm: !!options.releaseConfirm };
+    modal = { view, type, session, point: { ...session.start }, center: session.center, releaseConfirm: !!options.releaseConfirm, cursor: !!options.cursor };
     modal.removeHandler = world.wm?.addModal({ keymap: modalKeymap });
     if (!external) capture.begin(last, update, () => finish(false), view.canvas);
     showCursor();
@@ -149,7 +157,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     if (modal.session.setMode && type !== "edge_slide") {
       modal.type = type;
       modal.session.setMode(COMPONENT_TYPES[type]);
-      if (!world.editMode?.active) {
+      if (!world.editMode?.active && !modal.cursor) {
         setMode(type);
         gizmos.attachToNode(null);
       }
@@ -157,11 +165,11 @@ export function createEditor(world, views, history, changed, notify, capture) {
       return;
     }
     modal.session.cancel();
-    const { view, session } = modal;
+    const { view, session, cursor } = modal;
     modal.removeHandler?.();
     capture.release();
     modal = null;
-    start(type, { view, point: last, keep: session.keep });
+    start(type, { view, point: last, keep: session.keep, cursor });
   };
   // A Transform Modal Map item that changes the transform, then the header.
   const act = (fn) => () => { if (!modal) return; fn(modal.session); report(); };
@@ -289,7 +297,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     gizmoState,
     selectBox(event, { mode: op = "SET" }) {
       const view = event.view ?? views.input, dragged = /mouse$/.test(event.type);
-      startGestureBox(world.wm, { begin: dragged ? { x: event.x, y: event.y } : null, mode: op, select: (rect, m) => selectRegion(view, boxRegion(rect), op === "SET" || op === "ADD" ? m : op, true) });
+      startGestureBox(world.wm, { begin: dragged ? dragStart(event) : null, mode: op, select: (rect, m) => selectRegion(view, boxRegion(rect), op === "SET" || op === "ADD" ? m : op, true) });
     },
     selectRegion: (view, region, op) => selectRegion(view ?? views.input, region, op),
     // A view going away ends a transform running in it.

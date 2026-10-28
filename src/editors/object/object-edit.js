@@ -5,11 +5,14 @@ import { Matrix, Ray, Vector3 } from '@babylonjs/core';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
 import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
-import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS } from '../../bmesh/bmesh-wasm.js';
+import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS, OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from '../../bmesh/bmesh-wasm.js';
 import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDBM_elem_to_index_any } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
+import { dragStart } from '../../windowmanager/wm-event-system.js';
 import { do_mesh_region_select, boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
-import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, toBlenderView, view3d_pixel_size } from '../transform/transform.js';
+import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, view3d_pixel_size } from '../transform/transform.js';
+import { regionView3D, viewProjection } from '../space_view3d/view3d-project.js';
+import { modalItem } from '../../windowmanager/keyconfig.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperator, operatorPreview, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
@@ -29,6 +32,13 @@ import { editMeshMenus, editMeshActions } from '../space_view3d/view3d-menus-edi
 import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
 
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
+// Blender's event types where they differ from the window manager's (wm-event-system.js), and its modifier flags.
+const EVENT_TYPES = { SPACEBAR: 'SPACE' };
+// Operators a macro invokes with its event, since they act where the mouse is.
+const INVOKED = new Set(['mesh.rip', 'mesh.rip_edge']);
+// Operators whose invoke reads the mouse or the view, run with their event as Blender's window manager runs them.
+const MOUSE_OPERATORS = new Set([...INVOKED, 'mesh.knife_tool', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_delete_at_cursor', 'mesh.spin']);
+const modifierFlags = (e) => (e.shift ? 1 : 0) | (e.ctrl ? 2 : 0) | (e.alt ? 4 : 0) | (e.oskey ? 8 : 0);
 
 const MESH_MODES = ['OBJECT', 'EDIT', 'SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT'];
 
@@ -160,25 +170,68 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // Places the object for what operators do in world space.
   const place = () => {
     em.edit.objectToWorld = toBlenderMatrix(em.object.computeWorldMatrix(true));
-    if (views.input?.camera) em.edit.view = toBlenderView(views.input.camera.getViewMatrix());
+    if (views.input?.camera) em.edit.view = regionView3D(views.input);
   };
-  // An operator and then a transform of its result, as Blender's macros run (*_move, loopcut_slide): one undo step,
-  // kept when the transform is cancelled.
-  function operatorThen(transform, idname, props = {}, options = {}) {
+  // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
+  const extrudeMove = () => macro('mesh.extrude_region', {}, 'transform.translate', em.edit.totals.totfacesel ? { orient_type: 'NORMAL' } : {});
+  // One of Blender's operators run in the module's 3D View as its window manager runs it: invoked with the event
+  // (or the pointer), then given the following events while it runs modally, its modal keymap's items as items. The
+  // edit mesh redraws as it changes and the view's header shows its text. A finished run is one undo step, as is a
+  // cancelled one after an operator that ran first (`keep`); `then(status)` follows it, as a macro's next step.
+  function moduleOperator(idname, props, event, { keep = false, commit = true, then = () => {} } = {}) {
+    place();
+    const view = event?.view ?? views.input, r = viewProjection(view);
+    const blenderEvent = (e) => {
+      const [x, y] = r.toBlenderRegion([e.x, e.y]), type = e.type.toUpperCase();
+      return { type: EVENT_TYPES[type] ?? type, value: e.value, x, y, modifier: modifierFlags(e), text: e.native?.key?.length === 1 ? e.native.key : '' };
+    };
+    const end = (status) => {
+      selectmode = em.edit.selectmode;
+      notify('');
+      if (commit && (status & OPERATOR_FINISHED || keep)) sync();
+      else sync({ commit: false });
+      then(status);
+    };
+    const { status, op, keymap, report } = em.edit.invoke(idname, props, blenderEvent(event ?? { ...editor.pointer, type: 'mousemove', value: 'NOTHING' }));
+    if (report) notify(report);
+    if (!op) { end(status); return status; }
+    sync({ commit: false });
+    let remove = () => {};
+    const handle = (e) => {
+      const item = keymap && modalItem(keymap, e, (id) => em.edit.modalItem(op, id) >= 0);
+      const result = em.edit.modal(op, item ? { ...blenderEvent(e), modal: em.edit.modalItem(op, item) } : blenderEvent(e));
+      if (result & OPERATOR_RUNNING_MODAL) {
+        sync({ commit: false });
+        notify(em.edit.status);
+      } else { remove(); endTool = () => {}; end(result); }
+      return !(result & OPERATOR_PASS_THROUGH);
+    };
+    endTool();
+    remove = wm().addModal({ keymap: handle, mousemove: handle, passthrough: (e) => e.type === 'middlemouse' || e.type.startsWith('wheel'), cancel: () => handle({ ...editor.pointer, type: 'esc', value: 'PRESS' }) });
+    endTool = () => handle({ ...editor.pointer, type: 'esc', value: 'PRESS' });
+    // The window manager gives a modal operator the pointer's place at once (WM_event_add_mousemove).
+    handle({ ...(event ?? editor.pointer), type: 'mousemove', value: 'NOTHING' });
+    return status;
+  }
+  // A macro: an operator (invoked with the event when it reads the mouse, else run by its exec), then a transform of
+  // its result from the same event, Bylonder's own Move or Edge Slide or one of the module's, as one undo step kept when
+  // the transform is cancelled.
+  function macro(idname, props, transform, transformProps, event) {
+    const startTransform = () => {
+      const releaseConfirm = !!transformProps.release_confirm, point = event, view = event?.view;
+      if (transform === 'transform.translate' || transform === 'transform.edge_slide') {
+        const orient = transformProps.orient_type === 'NORMAL' ? 'NORMAL' : undefined;
+        editor.start(transform === 'transform.translate' ? 'move' : 'edge_slide', { point, view, releaseConfirm, orient, keep: true });
+        if (!editor.modal) sync();
+      } else moduleOperator(transform, transformProps, event, { keep: true });
+    };
+    if (INVOKED.has(idname)) { moduleOperator(idname, props, event, { commit: false, then: (status) => { if (status & OPERATOR_FINISHED) startTransform(); } }); return; }
     place();
     const report = meshOperator(em.edit, idname, props);
     if (report) { notify(report); return; }
     sync({ commit: false });
-    editor.start(transform, { ...options, keep: true });
-    if (!editor.modal) sync();
+    startTransform();
   }
-  // An operator and then a move of its result (`normal` moves along the selection's normal).
-  const operatorMove = (idname, props = {}, { normal = false } = {}) =>
-    operatorThen('move', idname, props, { orient: normal ? 'NORMAL' : undefined });
-  // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
-  const extrudeMove = () => operatorMove('mesh.extrude_region', {}, { normal: em.edit.totals.totfacesel > 0 });
-  // An operator and then Edge Slide (mesh.offset_edge_loops_slide).
-  const operatorSlide = (idname, props) => operatorThen('edge_slide', idname, props);
   // Runs an operator as one undo step; one with visible properties opens Adjust Last Operation, which re-runs it
   // from a copy of the edit mesh as it was before.
   function exec(idname, props = {}) {
@@ -217,7 +270,17 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     endTool = () => handler.cancel();
     handler.mousemove?.({ x: editor.pointer.x, y: editor.pointer.y, view: views.input, shift: false, ctrl: false, alt: false });
   }
-  const loopcut = () => startTool((end) => loopcut_modal({
+  // mesh.loopcut_slide: from a tool's press the cut at the edge ring under it at once, then Edge Slide from there;
+  // otherwise the ring under the mouse previewed until a click.
+  const loopcut = (event, slideProps = {}) => {
+    if (event?.view) {
+      const edge_index = EDBM_edge_find_nearest(em.mesh, viewAdapter(event.view), [event.x, event.y]);
+      if (edge_index >= 0) macro('mesh.loopcut', { object_index: 0, edge_index, number_cuts: 1 }, 'transform.edge_slide', slideProps, event);
+      return;
+    }
+    loopcutModal();
+  };
+  const loopcutModal = () => startTool((end) => loopcut_modal({
     mesh: em.mesh,
     bm: editBMesh(em.edit, em.mesh),
     owner: em.object,
@@ -225,11 +288,11 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     notify,
     end,
     // mesh.loopcut_slide: the cut, then Edge Slide.
-    confirm: (edge_index, number_cuts) => operatorThen('edge_slide', 'mesh.loopcut', { object_index: 0, edge_index, number_cuts }),
+    confirm: (edge_index, number_cuts) => macro('mesh.loopcut', { object_index: 0, edge_index, number_cuts }, 'transform.edge_slide', {}),
   }));
   // A modal mesh tool (mesh.inset, mesh.bevel): the median point of the selection on screen, previews of the edit
   // mesh as it is, then one undo step with its redo panel.
-  function meshModal(operator, modal, extra = {}) {
+  function meshModal(operator, modal, extra = {}, event = null) {
     const view = views.input, world_m = em.object.computeWorldMatrix(true);
     const { vert_positions, verts_num } = em.mesh, selected = em.mesh.attribute('.select_vert'), median = [0, 0, 0];
     let count = 0;
@@ -244,7 +307,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     startTool((end) => modal({
       ...extra,
       center: { x: screen[0], y: screen[1] },
-      mouse: [editor.pointer.x, editor.pointer.y],
+      mouse: event ? [event.x, event.y] : [editor.pointer.x, editor.pointer.y],
       pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
       preview(props) { run(props, (copy) => draw(copy.toMesh(), copy.history.at(-1), EXTRACT_ALL, copy)); changed(); },
       confirm(props) { exec(operator, props); },
@@ -254,13 +317,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       end,
     }));
   }
-  const inset = () => em.edit.totals.totfacesel && meshModal('mesh.inset', inset_modal);
-  const bevel = (affect) => meshModal('mesh.bevel', bevel_modal, { props: { affect } });
+  const inset = (event, { release_confirm, ...props } = {}) => em.edit.totals.totfacesel && meshModal('mesh.inset', inset_modal, { props, release_confirm }, event);
+  const bevel = (affect, event, { release_confirm, ...props } = {}) => meshModal('mesh.bevel', bevel_modal, { props: { ...props, affect }, release_confirm }, event);
   // Box, lasso and circle select: the elements in a region of the view, by eSelectOp.
   const selectRegion = (view, region, mode) => { if (em && do_mesh_region_select(em.edit, em.mesh, viewAdapter(view ?? views.input), region, SEL_OPS[mode] ?? SEL_OPS.SET)) sync({ extract: EXTRACT_FLAGS }); };
   // view3d.select_box: a box gesture, begun at the drag's press or (from B) at the next press.
   const selectBox = (event, mode, begun = true) => startGestureBox(wm(), {
-    begin: begun ? { x: event.x, y: event.y } : null,
+    begin: begun ? dragStart(event) : null,
     mode,
     select: (rect, m) => selectRegion(event.view, boxRegion(rect), m),
   });
@@ -278,7 +341,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // An operator's shortcut in Edit Mode's keymaps: the binding with its properties, else its plain one.
   const keysOf = (idname, props) => operatorKeys(idname, props, [viewKeymap]);
   const menuApi = {
-    context: () => world.blenderContext(views.input), edit: () => em.edit, exec, keys: keysOf, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type),
+    context: () => world.blenderContext(views.input), edit: () => em.edit, exec, keys: keysOf, macro, module: moduleOperator, start: (type, options) => editor.start(type, options),
     extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
   };
   const menus = editMeshMenus(menuApi);
@@ -288,12 +351,18 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   const inEdit = () => !!em;
   const meshOperators = Object.keys(rna).filter((id) => id.startsWith('mesh.') && !id.startsWith('mesh.primitive_') && runsMeshOperator(id));
   for (const idname of meshOperators) {
-    registerOperator(idname, { poll: () => !!em && em.edit.poll(idname), run: (props) => exec(idname, props), enumItems: (prop) => em?.edit.enumItems(idname, prop) });
+    const run = (props, event) => (MOUSE_OPERATORS.has(idname) && event?.view ? moduleOperator(idname, props, event) : exec(idname, props));
+    registerOperator(idname, { poll: () => !!em && em.edit.poll(idname), run, enumItems: (prop) => em?.edit.enumItems(idname, prop) });
   }
   const pick = (select) => ({ poll: (props, event) => !!em && !!event?.view, run: (props, event) => select(event, props) });
   registerOperators({
     ...Object.fromEntries(Object.entries(editMeshActions(menuApi))
-      .filter(([idname]) => !idname.startsWith('transform.') && idname !== 'view3d.select_box').map(([idname, run]) => [idname, { poll: inEdit, run }])),
+      .filter(([idname]) => !['transform.translate', 'transform.rotate', 'transform.resize', 'view3d.select_box'].includes(idname)).map(([idname, run]) => [idname, { poll: inEdit, run }])),
+    // A tool's drag adjusts the operator's value as it moves (WM_operator_type_modal_from_exec_for_object_edit_coords).
+    ...Object.fromEntries(['mesh.vertices_smooth', 'transform.vertex_random'].map((idname) => [idname, {
+      poll: () => !!em && em.edit.poll(idname),
+      run: (props, event) => (props.wait_for_input === false && event?.view ? moduleOperator(idname, props, event) : exec(idname, props)),
+    }])),
     'mesh.select_linked_pick': pick((event, { deselect }) => linkedPick(event, deselect)),
     'mesh.loop_select': pick((event, props) => loopPick(event, 'mesh.loop_select', props)),
     'mesh.edgering_select': pick((event, props) => loopPick(event, 'mesh.edgering_select', props)),
@@ -312,11 +381,34 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     { blender: 'object.mode_set', keys: 'Tab', poll: () => !!em || editable(activeObject()), run: () => (em ? exit() : enter()) },
   ], ['Object Non-modal']);
 
+  // calc_gizmo_stats for the tools' gizmos: the selected vertices' median point and the Normal orientation's Z (the
+  // selected faces' normals, else the selected vertices'), in Blender world space; null without a selection.
+  let stats = null;
+  function gizmoStats() {
+    const { mesh, object } = em, m = object.computeWorldMatrix(true), key = [mesh, ...m.m].join();
+    if (stats?.key === key) return stats.value;
+    const verts = mesh.attribute('.select_vert'), faces = mesh.attribute('.select_poly'), co = mesh.vert_positions, sum = [0, 0, 0], no = [0, 0, 0];
+    let count = 0;
+    for (let v = 0; v < mesh.verts_num; v++) if (verts[v]) { count++; for (let a = 0; a < 3; a++) sum[a] += co[v * 3 + a]; }
+    const add = (normals, selected, n) => { for (let i = 0; i < n; i++) if (selected[i]) for (let a = 0; a < 3; a++) no[a] += normals[i * 3 + a]; };
+    add(mesh.face_normals(), faces, mesh.faces_num);
+    if (!no.some(Boolean)) add(mesh.vert_normals(), verts, mesh.verts_num);
+    const center = count && toBlender(Vector3.TransformCoordinates(new Vector3(sum[0] / count, sum[2] / count, sum[1] / count), m));
+    const normal = toBlender(Vector3.TransformNormal(new Vector3(no[0], no[2], no[1]), m).normalize());
+    stats = { key, value: count ? { center, normal: normal.some(Boolean) ? normal : [0, 0, 1] } : null };
+    return stats.value;
+  }
+
   return {
     get active() { return !!em; },
+    gizmoStats: () => (em ? gizmoStats() : null),
+    // A primitive added to the edit mesh by its operator (mesh.primitive_cube_add), as the Add Primitive tools add it.
+    addPrimitive: (idname, props) => exec(idname, props),
     // Redraws the modifier result after the stack changed.
     modifiersChanged() { if (em) draw(em.mesh, em.edit.history.at(-1), EXTRACT_POSITIONS); },
     get object() { return em?.object ?? null; },
+    // The edit mesh's Mesh, as drawn.
+    get mesh() { return em?.mesh ?? null; },
     get selectmode() { return em?.edit.selectmode ?? selectmode; },
     // rna_Scene_editmesh_select_mode_set: the select mode, set on the edit mesh as the header buttons set it.
     set selectmode(mode) {
