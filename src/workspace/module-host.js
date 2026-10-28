@@ -104,6 +104,8 @@ export async function publishRun(project) {
     scene: activeScene(project),
     scenes: sceneRecords(project).map((s) => ({ ...s, overrides: project.settings.remember ? s.overrides : {} })),
     files: Object.keys(project.files),
+    // The text files, Blender's texts (bpy.data.texts) in the scene's window.
+    texts: Object.fromEntries(Object.entries(project.files).filter(([, file]) => file.kind === "text").map(([path, file]) => [path, file.content])),
   };
 }
 export async function removeRun(base) {

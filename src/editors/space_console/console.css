@@ -1,0 +1,7 @@
+/* The Python Console theme's line types (src/theme.css). */
+.bl-console-main{background:var(--bl-console-back)}
+.bl-console-view{padding-bottom:4px}
+.bl-console-view .is-output{color:var(--bl-console-output)}.bl-console-view .is-input{color:var(--bl-console-input)}
+.bl-console-view .is-info{color:var(--bl-console-info)}.bl-console-view .is-error{color:var(--bl-console-error)}
+.bl-console-view .is-selected{background:var(--bl-console-select)}
+.bl-console-cursor{position:absolute;width:2px;margin-left:-1px;height:var(--lh);background:var(--bl-console-cursor);pointer-events:none}

@@ -145,15 +145,35 @@ Consumers and running:
 
 ## Workspaces
 
-The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.
+The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs.
 
-- The topbar has Blender's eleven default workspace tabs. A tab opens the screen Bylonder has for it: Scripting opens the code workspace (Text Editor, File Browser, Console beside the scene), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, sculpt and paint modes).
+- The topbar has Blender's eleven default workspace tabs. A tab sets the scene window's screen (`dock.setScreen`, one layout per screen and profile over the same areas): Scripting opens startup.blend's Scripting screen (see Scripting), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, sculpt and paint modes). The project's JavaScript workbench (Monaco, files, the browser console) is Window > Toggle Project Code.
 - The Layout screen is startup.blend's: its split positions are read from the file's area vertices (1920 x 1080) and kept as fractions, which Blender scales with the window; areas stay at least one header high. The topbar and status bar are fixed heights in pixels at UI scale, as Blender's global areas.
 - Area geometry is Blender's (`areaSizes` in `editors/screen/dock.js`): a split's edge is a screen vertex at its fraction of the vertex range, rounded from the left or bottom (`screen_geom_vertices_scale`), and areas sit 2 px inside their vertices, 1 px below the topbar (`area_calc_totrct`), so areas are 3 px apart. At 1600 x 950 every area matches Blender's to the pixel.
 - An editor whose header overlaps its main region (the 3D Viewport) is a dock item with `overlap`: its main region spans the area under the header, which takes the theme's translucent header color, so the view's projection is Blender's.
 - The scene opens with the object that an add operator made last (`createPrimitive`) selected and active, as startup.blend's cube is, and a primitive's Mesh has all its elements selected, as `EDBM_op_call_and_selectf` leaves it.
 - The topbar's right region is Blender's: the Scene selector and the View Layer selector (the scene window's view layers, set through `send`).
-- Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Run is the Text Editor header's Run Script (Ctrl Enter, also Render > Run), as Blender runs a script from there. Project actions are File, Edit and Render menu entries.
+- Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Running the project's JavaScript is Render > Run (Ctrl Enter). Project actions are File, Edit and Render menu entries.
+
+## Scripting
+
+Decided 2026-10-28. The Scripting screen is startup.blend's: the 3D Viewport over the Python Console and Info, the Text Editor, the Outliner over the Properties editor (Blender's two Outliners are one), split at its area vertices as Layout is; Info has no header there, as in Blender. The three editors are Blender's spaces in the scene window, where `bpy.context` and RNA live.
+
+- Each draws Blender's header, menus and sidebar panels from the tree (`TEXT_HT_header`, `TEXT_HT_footer`, `TEXT_MT_*`, `TEXT_PT_*`, `CONSOLE_HT_header`, `INFO_HT_header`) through `editors/interface/area-ui.js`, and runs Blender's keymaps (Text Generic, Text, Console, Info, then Screen and Window) inside its area. Text input is the keymaps' `TEXTINPUT` items; repeated keys match only items with `repeat`.
+- Operators are registered by Blender's idnames (`text.*`, `console.*`, `info.*`); `ed.undo` in a Text Editor undoes the text, as `text_undo.cc` does. Their code is JS after Blender's C: texts follow `text.cc` (`blenkernel/texts.js`), highlighting `text_format_py.cc`, the Console's operators `console_ops.cc`, drawing `text_draw.cc` and `textview.cc`. These are stand-ins for building those sources into the module.
+- Texts are the project's text files: `bpy.data.texts` lists them (`index.js` too), a new text is a new file, and every edit is saved with the project, as a .blend holds its texts. All are internal (`filepath` empty): Save needs a file, so it is Save As, which downloads the text; Open reads a local file into a new text.
+- Reports: a finished operator with Blender's REGISTER option (`windowmanager/operator-register.json`, from `tools/blender-reference/operator-register.py`) reports its call as Python, Python operators report through `self.report`, and Run Script reports a failed script's traceback and moves the cursor to its line. Info lists them (`windowmanager/wm-reports.js`). `print` goes to the system console, the browser's, which the project's workbench shows.
+
+### Python
+
+CPython runs scripts and the console: Pyodide, CPython in WebAssembly, from cdn.jsdelivr.net at a pinned version (`python/pyodide.js`), loaded when a Python Console opens or a script first runs, never at startup.
+
+- `python/bridge.py` is the one bridge: a module CPython lacks (`bpy`, `mathutils`, `bpy_extras`, `bl_ui`, ...) imports from the tree's module registry as a JS-backed module, and its values are proxies that forward attribute access, calls, items, iteration and operators to the tree's own objects. `bpy.context`, `bpy.data`, `bpy.ops` and `bpy.types` are therefore the objects the interface uses: `bpy.ops.mesh.primitive_cube_add()` runs Bylonder's operator and `bpy.context.object.location.x = 2` writes through RNA. The bridge translates only conventions: Transcrypt's renamed names (`type` is `py_metatype`), keyword arguments (`__kwargtrans__`), None as null, negative indices and collection keys.
+- The console's language module and its completion run as Blender's own Python in CPython (`_console_python`, `_bl_console_utils`, copied unchanged into `src/python/scripts` by `tools/blender-ui/python_sources.py`), since they need `code.InteractiveConsole` and the console's live namespace. Bylonder registers `console.execute`, `console.autocomplete`, `console.banner` and `console.copy_as_script` to call it, as `bl_operators/console.py` does by the console's language.
+- Writes go through RNA's bindings only (the same mapping the interface writes through), never to Babylon objects from the bridge.
+- `foreach_get` and `foreach_set` copy a collection's property in one typed array each way (into NumPy arrays where the script passes one), never element by element. Large data stays with its one owner: `Mesh.vertices` reads and writes the Babylon mesh's position buffer (`co` in Blender's axes; Babylon's split vertices for now).
+- A script runs as `__main__` in the Text Editor's context and area.
+- Limits: classes defined in CPython cannot subclass `bpy.types` (no `register_class` of a script's operators or panels yet); `mathutils` is the boundary's; JS numbers come back as int or float by value; the Text Editor's own autocomplete and live edit are not there yet.
 
 ## Menus
 

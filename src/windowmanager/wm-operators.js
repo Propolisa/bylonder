@@ -5,6 +5,7 @@
 import { operatorKeys } from './input/keymap.js';
 import { blenderKeys } from './keyconfig.js';
 import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
+import { operatorFinished } from './wm-reports.js';
 
 const operators = new Map(), spaceOperators = new Map(), extensions = new Map();
 
@@ -24,7 +25,12 @@ export function registerOperators(table, space = null) {
 
 const operatorFor = (idname) => (area?.space && spaceOperators.get(area.space)?.get(idname)) ?? operators.get(idname);
 
-export const runOperator = (idname, props = {}) => operatorFor(idname).run(props);
+// A finished operator reports its call (wm-reports.js).
+const finished = (idname, props, result) => {
+  if ((result ?? 'FINISHED') === 'FINISHED') operatorFinished(idname, props);
+  return result;
+};
+export const runOperator = (idname, props = {}) => finished(idname, props, operatorFor(idname).run(props));
 export const hasOperator = (idname) => operators.has(idname);
 // Whether an operator is registered and can run now with those properties (WM_operator_poll).
 export const pollOperator = (idname, props = {}) => { const operator = operatorFor(idname); return !!operator && (operator.supports?.(props) ?? true) && (operator.poll?.(props) ?? true); };
@@ -38,9 +44,9 @@ export function invokeOperator(idname, props, event) {
   const operator = operatorFor(idname);
   if (!operator || !(operator.supports?.(props) ?? true) || !(operator.poll?.(props, event) ?? true)) return false;
   const confirm = operator.confirm && (props.confirm ?? rnaOperators[idname]?.properties.confirm?.default ?? true);
-  if (!confirm) return operator.run(props, event) ?? 'FINISHED';
+  if (!confirm) return finished(idname, props, operator.run(props, event)) ?? 'FINISHED';
   import('../editors/interface/menu.js').then(({ openMenu }) =>
-    openMenu([{ label: operator.confirm.button, run: () => operator.run(props, event) }], event, operator.confirm.title));
+    openMenu([{ label: operator.confirm.button, run: () => finished(idname, props, operator.run(props, event)) }], event, operator.confirm.title));
   return 'FINISHED';
 }
 

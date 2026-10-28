@@ -123,6 +123,7 @@ SETUP = {
     "sidebar-item": lambda: key("N", *view3d_point(*REST)),
     "curve-edit": lambda: add_and_edit("curve", "primitive_bezier_circle_add"),
     "text-edit": lambda: add_and_edit("object", "text_add"),
+    "scripting": lambda: setattr(window(), "workspace", bpy.data.workspaces["Scripting"]),
     "outliner-expanded": lambda: key("A", *outliner_point(0.5, 0.5), shift=True),
 }
 
