@@ -54,6 +54,14 @@ try {
   for (const id of headerMenus) {
     await step(`3D View ${id}`, async () => {
       assert.ok(await menuItems(frame, `.bl-pulldown[data-blender="${id}"]`) > 0, `${id} has items`);
+      // Hovering runs each item's poll, and opens submenus, whose items are hovered in turn.
+      const menu = frame.locator(".bl-menu").first();
+      for (const item of await menu.locator(".bl-menu-item").all()) {
+        if (!(await item.hover({ timeout: 3000 }).then(() => true, () => false))) continue;
+        const submenu = frame.locator(".bl-menu.submenu");
+        if (await submenu.count()) for (const sub of await submenu.last().locator(".bl-menu-item").all()) await sub.hover({ timeout: 3000 }).catch(() => {});
+      }
+      await page.keyboard.press("Escape");
       await page.keyboard.press("Escape");
       noErrors(id);
     });

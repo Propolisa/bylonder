@@ -47,7 +47,15 @@ function operatorInstance(cls, props) {
 for (const [idname, cls] of Object.entries(registered)) {
   if (!idname.includes('.') || hasOperator(idname)) continue;
   registerOperator(idname, {
-    poll: () => !cls.poll || !!cls.poll(_bpy.context),
+    poll: () => {
+      try {
+        return !cls.poll || !!cls.poll(_bpy.context);
+      } catch (error) {
+        // As bpy_class_call: an exception in poll is printed and the operator is unavailable.
+        console.error(`Python: ${idname}.poll`, error);
+        return false;
+      }
+    },
     run(props, event) {
       const operator = operatorInstance(cls, props);
       const result = event && operator.invoke ? operator.invoke(_bpy.context, event) : operator.execute?.(_bpy.context);
