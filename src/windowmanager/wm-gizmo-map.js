@@ -8,6 +8,7 @@
 // keymap for the highlighted part (its operator, or the tool's keymap for a tool's handle), draw draws in pixel space
 // (draw/overlay-tool.js).
 import { drawCallbackAdd, tagRedraw } from '../draw/overlay-tool.js';
+import { dragStart } from './wm-event-system.js';
 
 const types = new Map();
 
@@ -32,7 +33,7 @@ export function createGizmoMap({ group }) {
     state(event) {
       const type = active();
       if (!type || !event?.view) return { visible: !!type };
-      return { visible: true, highlight: type.test_select(event) !== null };
+      return { visible: true, highlight: type.test_select(dragStart(event)) !== null };
     },
     // Pointer motion: the highlighted part follows it.
     mousemove(event) {
@@ -43,7 +44,7 @@ export function createGizmoMap({ group }) {
     keymap(event) {
       const type = active();
       if (!type || !event.view) return false;
-      const part = highlight?.view === event.view ? highlight.part : type.test_select(event);
+      const part = highlight?.view === event.view ? highlight.part : type.test_select(dragStart(event));
       return part !== null && !!type.handle(event, part);
     },
     tag: tagRedraw,

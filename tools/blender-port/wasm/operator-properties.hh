@@ -1,6 +1,7 @@
 /* Operator properties without Blender's RNA runtime (operator-properties.cc). */
 #pragma once
 
+#include <cfloat>
 #include <memory>
 #include <optional>
 #include <string>
@@ -35,6 +36,9 @@ struct PropertyRNA {
   EnumPropertyItemFunc itemf = nullptr;
   PropertySubType subtype = PROP_NONE;
   int flag = 0;
+  /* A float's ranges, as RNA_def_property gives them until the definition sets its own. */
+  float hardmin = -FLT_MAX, hardmax = FLT_MAX, softmin = -10000.0f, softmax = 10000.0f, step = 10.0f;
+  int precision = 3;
 };
 
 /* An operator's properties, or (for the RNA_* type pointers code compares and stores) just a named type. */

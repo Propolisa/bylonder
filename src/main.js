@@ -18,7 +18,7 @@ import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
 import { createMouseCapture } from "./windowmanager/mouse-capture";
-import { createEventSystem } from "./windowmanager/wm-event-system.js";
+import { createEventSystem, dragStart } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
@@ -49,8 +49,7 @@ import { createBlenderObjects } from "./editors/object/object-blender.js";
 import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
-import { cursor3d_update } from "./editors/space_view3d/view3d-cursor.js";
-import { viewProjection } from "./editors/space_view3d/view3d-project.js";
+import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
 import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
@@ -287,7 +286,7 @@ history = createHistory(world.objects, () => {
 },beforeCommit:()=>{world.collections.adopt();animation.captureEdits();}});
 animation.setCommit(()=>history.commit());
 const capture = createMouseCapture(notify);
-world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e) });
+world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e) });
 const editor = createEditor(
   world,
   views,
@@ -343,6 +342,12 @@ const contextView = () => contextArea()?.space ?? activeView();
 world.toolsystem = createToolSystem({
   context: () => world.blenderContext(contextView()),
   changed: () => { applyTool(); viewports().forEach((view) => view.sync()); },
+});
+// The tools' operators and the active tool's gizmos in the 3D View under the pointer.
+const tools = createView3DTools({
+  world, editor, views, area: { get space() { return activeView(); }, menu: () => null }, mode: contextMode, commit, notify,
+  toolSettings: () => blenderRNA.pointer("ToolSettings", world),
+  addPreset: (idname, placement) => creator.add(creator.catalog.find((preset) => preset.operator === idname), placement),
 });
 const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify, ids: animation.ids, keying: (run) => animation.keying(run) });
 registerObjectOperators(world.objectActions, blenderObjects);
@@ -556,25 +561,16 @@ registerOperators({
       startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode, select: (center, r, m) => selectRegion(event.view ?? activeView(), circleRegion(center, r), m) });
     },
   },
-  // A transform from a key starts at the mouse, from a tool's drag at its press; release_confirm ends it on release,
-  // cursor_transform moves the 3D cursor.
+  // A transform starts at the mouse (initTransInfo), the 3D cursor's at a drag's press; release_confirm ends it on
+  // release, cursor_transform moves the 3D cursor.
   ...Object.fromEntries([["transform.translate", "move"], ["transform.rotate", "rotate"], ["transform.resize", "scale"]].map(([idname, type]) => [idname, {
     poll: (props) => editor.selection.size > 0 || !!props.cursor_transform,
     run: (props, event) => {
       creator.finish();
-      editor.start(type, { point: event?.press, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm, cursor: !!props.cursor_transform });
+      const point = event && (props.cursor_transform ? dragStart(event) : event);
+      editor.start(type, { point, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm, cursor: !!props.cursor_transform });
     },
   }])),
-  // Returns PASS_THROUGH as Blender's does with FINISHED, so a drag from the same press moves the cursor.
-  "view3d.cursor3d": {
-    poll: (props, event) => !!(event?.view ?? activeView()),
-    run: ({ use_depth = true, orientation = "VIEW" }, event) => {
-      const view = event?.view ?? activeView(), mouse = event ?? editor.pointer;
-      cursor3d_update(viewProjection(view), [mouse.x, mouse.y], { use_depth, orientation }, world.sceneSettings);
-      views.wake();
-      return "PASS_THROUGH";
-    },
-  },
   // Blender's is Python setting the data path with exec; a path to a property Bylonder does not bind passes through.
   "wm.context_toggle": {
     run: ({ data_path }) => {
@@ -602,7 +598,7 @@ const bylonderKeys = createKeymap([
 // Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode or Mesh), then the
 // 3D View's and the window's. Tool keymaps run with the tool's settings.
 const view3dKeys = keymapHandler(
-  (event) => [...world.toolsystem.keymaps(contextMode(), editor.gizmoState(event)), "Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (event) => [...world.toolsystem.keymaps(contextMode(), gizmoState(event)), "Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
   (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true,
   (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
@@ -613,8 +609,10 @@ const view3dArea = {
 const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
-// The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's gizmos drag themselves).
-const gizmoKeys = (event) => event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight;
+// The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's transform gizmos drag
+// themselves; the tools' gizmos run their keymaps).
+const gizmoState = (event) => (world.editMode.active || !TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ? tools.gizmoState(event) : editor.gizmoState(event));
+const gizmoKeys = (event) => (event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight) || tools.keymap(event);
 const keyLayers = () => {
   const view = activeView();
   if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
@@ -656,6 +654,7 @@ function dispose() {
   runningJobs.dispose();
   sdk.dispose();
   creator.dispose();
+  tools.dispose();
   world.editMode.dispose();
   world.outliner.dispose();
   world.contextMenu.dispose();

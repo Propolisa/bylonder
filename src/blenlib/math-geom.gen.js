@@ -448,6 +448,13 @@ export function axis_dominant_v3_single(vec) {
   return x > y ? (x > z ? 0 : 2) : y > z ? 1 : 2;
 }
 
+export function axis_dominant_v3_ortho_single(vec) {
+  const x = Math.fround(Math.abs(vec[0]));
+  const y = Math.fround(Math.abs(vec[1]));
+  const z = Math.fround(Math.abs(vec[2]));
+  return x < y ? (x < z ? 0 : 2) : y < z ? 1 : 2;
+}
+
 export function plane_point_side_v3(plane, co) {
   return Math.fround(dot_v3(co, plane) + plane[3]);
 }

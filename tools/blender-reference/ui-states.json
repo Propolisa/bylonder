@@ -11,5 +11,7 @@
   { "id": "light-data", "title": "Properties: Light data tab of the point light" },
   { "id": "camera-data", "title": "Properties: Camera data tab of the camera" },
   { "id": "toolbar", "title": "3D View toolbar: the Move tool chosen, with its tool settings and gizmo" },
+  { "id": "cursor-tool", "title": "Cursor tool: a click on the cube places the 3D cursor on its surface" },
+  { "id": "inset-tool", "title": "Edit Mode, everything selected (A), the Inset Faces tool with its settings and handle", "settle": 3 },
   { "id": "sidebar-item", "title": "3D View sidebar (N): the Item tab", "settle": 4 }
 ]

@@ -77,6 +77,15 @@ const SETUP = {
   "light-data": (app) => propertiesTab(app, "Light", "Data"),
   "camera-data": (app) => propertiesTab(app, "Camera", "Data"),
   toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
+  "cursor-tool": async (app) => { await app.locator('[data-tool="builtin.cursor"]').click(); await app.click(0.55, 0.42); },
+  "inset-tool": async (app) => {
+    await app.hover(...REST);
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    await app.page.keyboard.press("a");
+    await app.locator('[data-tool="builtin.inset_faces"]').click();
+    await app.hover(...REST);
+  },
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
 };
 

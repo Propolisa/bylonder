@@ -41,6 +41,7 @@
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
 #include "operator-properties.hh"
+#include "area.hh"
 #include "WM_api.hh"
 #include "WM_types.hh"
 
@@ -225,10 +226,7 @@ EXPORT(anim_scene_range) const int *anim_scene_range(Scene *scene)
 /* Editors. */
 
 /* An editor area: Blender's ScrArea with the space its type creates, holding that space's regions. */
-struct AnimArea {
-  ScrArea area = {};
-  std::string status;
-};
+struct AnimArea : BylonderArea {};
 
 static ARegion *area_region(AnimArea *a, int regiontype) { return BKE_area_find_region_type(&a->area, regiontype); }
 
@@ -667,7 +665,7 @@ namespace blender {
 void ED_area_status_text(ScrArea *area, const char *str)
 {
   if (area) {
-    reinterpret_cast<AnimArea *>(area)->status = str ? str : "";
+    reinterpret_cast<BylonderArea *>(area)->status = str ? str : "";
   }
 }
 

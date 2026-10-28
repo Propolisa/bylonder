@@ -8,6 +8,7 @@ import { mul_m3_v3, transpose_m3, unit_m3, orthogonalize_m3 } from '../../blenli
 import { mat3_normalized_to_eulO } from '../../blenlib/math-rotation.js';
 import { modalItem } from '../../windowmanager/keyconfig.js';
 import { registerGizmoGroupType } from '../../windowmanager/wm-gizmo-map.js';
+import { dragStart } from '../../windowmanager/wm-event-system.js';
 import { snap_object_project_view3d, SCE_SNAP_TO_FACE, SCE_SNAP_TO_GEOM } from '../transform/transform-snap-object.js';
 import { css, THEME, tagRedraw, drawCallbackAdd } from '../../draw/overlay-tool.js';
 
@@ -60,7 +61,7 @@ export function cursorSnap(r, mval, { settings, sources, cursor, snap }) {
 }
 
 // `primitive()` names the active tool's primitive (builtin.primitive_*_add); `settings()` the scene's ToolSettings
-// placement values; `add(idname, { location, rotation, scale })` runs the primitive's operator.
+// placement values; `add(idname, { location, rotation, matrix, scale })` runs the primitive's operator.
 export function createPlacement({ region, sources, cursor, settings, wm, toolActive, tool, add, notify }) {
   let preview = null, ipd = null;
   const snapState = (r, mval, snap) => cursorSnap(r, mval, { settings: settings(), sources, cursor: cursor(), snap });
@@ -118,8 +119,8 @@ export function createPlacement({ region, sources, cursor, settings, wm, toolAct
   }
 
   // view3d_interactive_add_begin from a drag's start, then the modal until the depth step's click.
-  function invoke(event) {
-    const r = region(event.view);
+  function invoke(drag) {
+    const event = dragStart(drag), r = region(event.view);
     if (!r) return false;
     const s = settings(), snap = snapState(r, [event.x, event.y], !!event.ctrl), plane_axis = AXES[s.plane_axis] ?? 2;
     const [primitive_type, idname] = PRIMITIVES[tool()] ?? PRIMITIVES['builtin.primitive_cube_add'];
@@ -193,8 +194,8 @@ export function createPlacement({ region, sources, cursor, settings, wm, toolAct
         if (ipd.orient_axis !== 2) { [m[2], m[ipd.orient_axis]] = [m[ipd.orient_axis], m[2]]; [m[0], m[1]] = [m[1], m[0]]; }
         if (dot_v3(ipd.matrix_orient[ipd.orient_axis], sub_v3(bounds[0], bounds[4])) > 0) { m[2] = negate_v3(m[2]); m[1] = negate_v3(m[1]); }
         const scale = [3, 1, 4].map((i) => len_v3(sub_v3(bounds[0], bounds[i])) / 2);
-        add(idname, { location: interp_v3(bounds[0], bounds[6], 0.5), rotation: mat3_normalized_to_eulO(1, m.map((axis) => normalize_v3(axis))), scale,
-          ...SIZES[primitive_type] });
+        const matrix = m.map((axis) => normalize_v3(axis));
+        add(idname, { location: interp_v3(bounds[0], bounds[6], 0.5), rotation: mat3_normalized_to_eulO(1, matrix), matrix, scale, ...SIZES[primitive_type] });
       }
       exit();
     };

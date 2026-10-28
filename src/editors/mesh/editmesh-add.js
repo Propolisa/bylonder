@@ -69,6 +69,7 @@ function operator_add(idname, props) {
   }
 }
 
-// Ported builders take every property; Blender's operator takes the ones set, as unset ones (scale) mean their own.
+// Ported builders take every property but scale; Blender's operator takes the ones set, as unset ones (scale) mean
+// their own, and builds a scaled primitive.
 export const primitive_add = (idname, props = {}) =>
-  (primitiveOperators[idname] ? primitiveOperators[idname](operatorProperties(idname, props)) : operator_add(idname, props));
+  (primitiveOperators[idname] && !props.scale ? primitiveOperators[idname](operatorProperties(idname, props)) : operator_add(idname, props));

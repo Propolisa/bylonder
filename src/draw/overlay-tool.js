@@ -37,7 +37,7 @@ export function createToolOverlay(view) {
     ctx.clearRect(0, 0, width, height);
     if (!callbacks.size || view.state.cameraView || !view.state.overlays) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const region = Object.assign(viewProjection(view), { toRegion: ([x, y]) => [x - rect.left, y - rect.top] });
+    const region = viewProjection(view);
     for (const draw of callbacks) {
       ctx.save();
       draw(ctx, region);

@@ -1,7 +1,7 @@
 // A 3D View's projection in Blender's terms (view3d_project.cc, view3d_utils.cc) over its Babylon camera: Blender world
 // points (Z up) to client pixels and back, and the view's axes (RegionView3D.viewinv).
 import { Matrix, Ray, Vector3 } from '@babylonjs/core';
-import { toBabylon, toBlender } from '../transform/transform.js';
+import { toBabylon, toBlender, toBlenderView } from '../transform/transform.js';
 import { worldAxes } from '../transform/transform-mesh.js';
 import { add_v3, mul_v3_fl, sub_v3, dot_v3, normalize_v3, isect_ray_plane_v3_factor } from '../../blenlib/math-geom.js';
 
@@ -18,6 +18,10 @@ export function viewProjection(view) {
   const unproject = (x, y, z) => toBlender(Vector3.Unproject(new Vector3(...toCanvas(x, y), z), width, height, Matrix.Identity(), camera.getViewMatrix(), camera.getProjectionMatrix()));
   const api = {
     view, rect, persp, viewinv,
+    // A client point in the region's pixels as Blender's events have it (y up), and back.
+    toBlenderRegion: ([x, y]) => [x - rect.left, rect.height - (y - rect.top)],
+    // A client point relative to the region's top left, as the tool overlay draws.
+    toRegion: ([x, y]) => [x - rect.left, y - rect.top],
     // RegionView3D.ofs negated: the point the view orbits.
     center: camera.target ? toBlender(camera.target) : add_v3(viewinv.position, mul_v3_fl(viewinv.back, -10)),
     // ED_view3d_project_float_global with V3D_PROJ_TEST_CLIP_NEAR: client pixels, or null behind the near plane.
@@ -70,3 +74,10 @@ export function viewProjection(view) {
 // What a depth read of the 3D View sees: drawn scene geometry, not overlays or helpers.
 export const drawn = (mesh) => mesh.isEnabled() && mesh.isVisible && mesh.isPickable !== false && !mesh.metadata?.overlay &&
   !mesh.name.startsWith('__') && mesh.getTotalVertices() > 0;
+
+// The view as Blender's RegionView3D has it: its view and window matrices (Blender's axes, column-major, the window
+// matrix Babylon's projection of a view looking down -Z), its size in pixels and whether it is a perspective view.
+export function regionView3D({ camera, canvas }) {
+  const winmat = Array.from(camera.getProjectionMatrix().m, (v, i) => (i >= 8 && i < 12 ? -v : v));
+  return { viewmat: toBlenderView(camera.getViewMatrix()), winmat, winx: canvas.clientWidth, winy: canvas.clientHeight, persp: camera.mode === 0 };
+}

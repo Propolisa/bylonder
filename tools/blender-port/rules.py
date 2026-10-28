@@ -38,7 +38,7 @@ CONSTANTS = {'M_PI': 'Math.PI', 'M_PI_2': 'Math.PI / 2', 'M_PI_4': 'Math.PI / 4'
              'M_SQRT3': 'Math.sqrt(3)', 'M_SQRT1_3': 'Math.sqrt(1 / 3)', 'FLT_MAX': 'Number.MAX_VALUE', 'DBL_MAX': 'Number.MAX_VALUE',
              'FLT_EPSILON': '1.1920929e-7', 'INT_MAX': '2147483647', 'UINT_MAX': '4294967295', 'M_2PI': '2 * Math.PI', '__func__': "''"}
 # Statements that have no JS counterpart: memory management (arenas and pools hand out JS objects) and debug checks.
-DROPPED_CALLS = {'UNUSED_VARS', 'MEM_freeN', 'MEM_SAFE_FREE', 'MEM_delete', 'MEM_delete_array'}
+DROPPED_CALLS = {'UNUSED_VARS', 'MEM_freeN', 'MEM_SAFE_FREE', 'MEM_delete', 'MEM_delete_array', '_BLI_assert_unreachable_print'}
 DROPPED_CALL_PREFIXES = ('BLI_memarena_', 'BLI_mempool_')
 DROPPED_FIELDS = {'mem_arena'}
 ALLOCATORS = {'BLI_memarena_alloc', 'BLI_memarena_calloc', 'BLI_mempool_alloc', 'BLI_mempool_calloc', 'MEM_mallocN', 'MEM_callocN', 'MEM_new_zeroed', 'MEM_new_uninitialized'}

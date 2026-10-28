@@ -1,17 +1,13 @@
 // Blender's animation data in the module's Blender world (anim-api.cc): AnimData, layered Actions and F-Curves on the
 // IDs of a BlenderMain, read and written in place as Blender's DNA (FCurve, BezTriple), and evaluated by Blender's
 // evaluate_fcurve. Animation editors' areas (AnimArea) live here too: see editors/animation/anim-area.js.
-import { blenderModule } from '../../bmesh/bmesh-wasm.js';
+import { blenderModule, enumTable } from '../../bmesh/bmesh-wasm.js';
 import rnaAnimated from '../../makesrna/rna-animated.json' with { type: 'json' };
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
 
-// Blender's enums by identifier (rna_enum_text): event types, event values and property subtypes.
-const enumTable = (which) => new Map(cString(x.rna_enum_text(which)).split('\n').filter(Boolean).map((line) => {
-  const [identifier, value] = line.split('\t');
-  return [identifier, Number(value)];
-}));
-export const EVENT_TYPES = enumTable(0), EVENT_VALUES = enumTable(1), PROPERTY_SUBTYPES = enumTable(2);
+export { EVENT_TYPES, EVENT_VALUES } from '../../bmesh/bmesh-wasm.js';
+export const PROPERTY_SUBTYPES = enumTable(2);
 export const PROPERTY_TYPES = { BOOLEAN: 0, INT: 1, FLOAT: 2, STRING: 3, ENUM: 4, POINTER: 5, COLLECTION: 6 };
 const ID_CODES = { OB: 0x424f, SC: 0x4353, WO: 0x4f57, MA: 0x414d, LA: 0x414c, CA: 0x4143 };
 

@@ -91,6 +91,27 @@ def click_tool():
                                 first_interval=0.1 + 0.3 * i)
 
 
+def set_tool(name):
+    with bpy.context.temp_override(window=window(), area=area("VIEW_3D")):
+        bpy.ops.wm.tool_set_by_id(name=name)
+
+
+# A step once the events sent before it are handled.
+def later(seconds, step):
+    bpy.app.timers.register(lambda: step() and None, first_interval=seconds)
+
+
+def cursor_tool():
+    set_tool("builtin.cursor")
+    click(*view3d_point(0.55, 0.42))
+
+
+def inset_tool():
+    key("TAB", *view3d_point(*REST))
+    later(0.5, lambda: key("A", *view3d_point(*REST)))
+    later(1.0, lambda: set_tool("builtin.inset_faces"))
+
+
 SETUP = {
     "startup": lambda: None,
     "object-menu": lambda: click(*OBJECT_MENU),
@@ -104,6 +125,8 @@ SETUP = {
     "light-data": properties_tab("Light", "DATA"),
     "camera-data": properties_tab("Camera", "DATA"),
     "toolbar": click_tool,
+    "cursor-tool": cursor_tool,
+    "inset-tool": inset_tool,
     "sidebar-item": lambda: key("N", *view3d_point(*REST)),
 }
 

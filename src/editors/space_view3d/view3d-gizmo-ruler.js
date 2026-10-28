@@ -7,6 +7,7 @@ import { mul_m3_v3, transpose_m3 } from '../../blenlib/math-matrix.js';
 import { axis_angle_normalized_to_mat3 } from '../../blenlib/math-rotation.js';
 import { modalItem } from '../../windowmanager/keyconfig.js';
 import { registerGizmoGroupType } from '../../windowmanager/wm-gizmo-map.js';
+import { dragStart } from '../../windowmanager/wm-event-system.js';
 import { snap_object_project_view3d, SCE_SNAP_TO_FACE } from '../transform/transform-snap-object.js';
 import { formatLength, formatAngle } from '../../blenkernel/unit.js';
 import { css, THEME } from '../../draw/overlay-tool.js';
@@ -121,8 +122,8 @@ export function createRuler({ world, region, sources, wm, commit, orientation, a
   }
 
   // view3d.ruler_add: a new item from the drag's start, its first point snapped with Ctrl, then its end dragged.
-  function add(event) {
-    const r = region(event.view);
+  function add(drag) {
+    const event = dragStart(drag), r = region(event.view);
     if (!r) return false;
     const item = { co: [[0, 0, 0], [0, 0, 0], [0, 0, 0]], flag: 0 };
     loaded().push(item);
@@ -136,8 +137,8 @@ export function createRuler({ world, region, sources, wm, commit, orientation, a
   }
 
   // gizmo_ruler_invoke on a picked part.
-  function invoke(event, { item, part }) {
-    const r = region(event.view);
+  function invoke(drag, { item, part }) {
+    const event = dragStart(drag), r = region(event.view);
     const inter = { co_index: part, drag_start_co: [0, 0, 0] };
     if (part === PART_LINE) {
       item.flag |= RULERITEM_USE_ANGLE;

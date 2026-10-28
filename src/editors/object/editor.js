@@ -5,6 +5,7 @@ import { initTransform } from "../transform/transform.js";
 import { createTransObject } from "../transform/transform-object.js";
 import { createKeymap } from "../../windowmanager/input/keymap.js";
 import { startGestureBox } from "../../windowmanager/wm-gesture-box.js";
+import { dragStart } from "../../windowmanager/wm-event-system.js";
 import { boxRegion } from "../space_view3d/view3d-select.js";
 import { createTransCursor } from "../space_view3d/view3d-cursor.js";
 
@@ -296,7 +297,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     gizmoState,
     selectBox(event, { mode: op = "SET" }) {
       const view = event.view ?? views.input, dragged = /mouse$/.test(event.type);
-      startGestureBox(world.wm, { begin: dragged ? { x: event.x, y: event.y } : null, mode: op, select: (rect, m) => selectRegion(view, boxRegion(rect), op === "SET" || op === "ADD" ? m : op, true) });
+      startGestureBox(world.wm, { begin: dragged ? dragStart(event) : null, mode: op, select: (rect, m) => selectRegion(view, boxRegion(rect), op === "SET" || op === "ADD" ? m : op, true) });
     },
     selectRegion: (view, region, op) => selectRegion(view ?? views.input, region, op),
     // A view going away ends a transform running in it.

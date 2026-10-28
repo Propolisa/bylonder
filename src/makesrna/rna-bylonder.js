@@ -473,7 +473,7 @@ const STRUCTS = {
     setup: (ref, r) => (...list) => r.world.toolsystem.setup(ref, pyArgs(list, TOOL_SETUP)),
     refresh_from_context: () => () => {},
     operator_properties: (ref, r) => (idname) => operatorProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
-    gizmo_group_properties: () => () => rna('GizmoGroupProperties'),
+    gizmo_group_properties: (ref, r) => (idname) => gizmoGroupProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
   },
   // A 3D Viewport (space_view3d/view3d.js): its regions, shading, overlays and view.
   SpaceView3D: {
@@ -517,6 +517,25 @@ const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'bru
 
 // A tool's orientation slot's own choice (rna_scene.cc: rna_TransformOrientation_with_scene_itemf).
 const ORIENTATION_DEFAULT = ['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN'];
+
+// The properties tools set on their gizmo groups (the groups' RNA_def_* in transform_gizmo_3d.cc,
+// transform_gizmo_extrude_3d.cc and view3d_gizmo_tool_generic.cc): default and enum items.
+const GIZMO_GROUP_PROPERTIES = {
+  VIEW3D_GGT_xform_gizmo: { drag_action: ['TRANSLATE', [['TRANSLATE', 'Move', '', 'NONE'], ['ROTATE', 'Rotate', '', 'NONE'], ['SCALE', 'Scale', '', 'NONE'], ['NONE', 'None', '', 'NONE']]] },
+  VIEW3D_GGT_xform_extrude: { axis_type: ['NORMAL', [['NORMAL', 'Normal', 'Only show normal axis', 'NONE'], ['XYZ', 'XYZ', 'Follow scene orientation', 'NONE']]] },
+  VIEW3D_GGT_tool_generic_handle_normal: { radius: [100] },
+  VIEW3D_GGT_tool_generic_handle_free: { radius: [36], backdrop_fill_alpha: [0.125] },
+};
+// A tool's properties of a gizmo group (WM_toolsystem_ref_properties_ensure_from_gizmo_group): the values set on it
+// over the group's defaults.
+export function gizmoGroupProperties(idname, values, host) {
+  const data = {}, items = {};
+  for (const [name, [def, enumItems]] of Object.entries(GIZMO_GROUP_PROPERTIES[idname] ?? {})) {
+    Object.defineProperty(data, name, { enumerable: true, get: () => values[name] ?? def, set: (value) => { values[name] = value; host?.update?.('GizmoGroupProperties', name, values); } });
+    if (enumItems) items[name] = () => enumItems;
+  }
+  return rna('GizmoGroupProperties', data, { items });
+}
 
 // An operator's properties (OperatorProperties) over the values stored for it: Blender's defaults (rna-operators.json)
 // until set. Writing one is an update (host.update), as a tool setting is.
