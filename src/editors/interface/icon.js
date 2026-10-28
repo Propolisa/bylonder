@@ -1,5 +1,7 @@
 // The app logo drawn as a monochrome icon, as Blender draws its own logo in the interface.
 export const iconUrl = name => import.meta.env.BASE_URL + (name === 'bylonder' ? 'logo/bylonder-20.svg' : `icons/blender/${name.toLowerCase()}.svg`);
+// A tool's icon (tools/blender-ui/icons.py), by the name bpy.app.icons gives it.
+export const toolIconUrl = (name) => import.meta.env.BASE_URL + `icons/blender/tools/${name}.svg`;
 export function iconEl(name, className = '') {
   const el = document.createElement('span');
   el.className = 'bl-icon ' + className;

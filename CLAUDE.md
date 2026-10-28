@@ -19,9 +19,12 @@ roots carry the `bl-ui` class, which scopes the reset. Icons are Blender's (`BlI
 ## Blender identifiers
 
 Name what mirrors Blender with Blender's identifiers so the Blender Coverage view (Splash Screen) counts it:
-menu, panel and header ids (`VIEW3D_MT_object`) as strings, `blender: 'object.delete'` on operator entries, and the
-Blender keymap names in `createKeymap(items, keymaps)`. Design decisions and equivalents go in
-`docs/blender-coverage.md`. Regenerate Blender's side with `tools/blender-reference/surface.py`.
+menu, panel and header ids (`VIEW3D_MT_object`) as strings, and operators registered by idname
+(`registerOperator('object.delete', ...)` in `src/windowmanager/wm-operators.js`). Keys come only from Blender's own
+keymaps (`keymapHandler` in `src/windowmanager/keyconfig.js`); `createKeymap(items, keymaps)` is for modal maps and
+Bylonder's own keys. The shared foundations every subsystem builds on are in `docs/blender-boundary.md`; design
+decisions and equivalents go in `docs/blender-coverage.md` and `docs/blender-boundary.md`. Regenerate Blender's side
+with `tools/blender-reference/surface.py`.
 
 ## Ports of Blender code
 

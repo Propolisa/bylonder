@@ -1,5 +1,10 @@
 import { mountDock } from './dock.js';
+import { RUNTIME_LAYOUT_KEY } from './model.js';
 import { treeTypes } from '../space_node/node-editor.js';
+// Split positions of the Layout screen in Blender's startup.blend, from its area vertices in pixels (1920 x 1080
+// window): Blender scales them with the window, so they are fractions here.
+const share=(a,b)=>[100*a/(a+b),100*b/(a+b)];
+const LAYOUT_SPLITS={root:share(1577,342),animation:share(958,77),inspector:share(193,842)};
 export function mountRuntimeLayout(){
   const host=document.querySelector('main');host.classList.add('runtime-dock');
   const viewport=document.createElement('section');viewport.id='viewport-section';
@@ -17,7 +22,7 @@ export function mountRuntimeLayout(){
   const files=document.createElement('section');files.id='files-section';
   const variants=Object.entries(treeTypes).map(([id,t])=>({label:t.label,icon:t.icon,run:()=>nodes.dispatchEvent(new CustomEvent('node-tree',{detail:id}))}));
   const items=[{id:'viewport',title:'3D Viewport',icon:'view3d',element:viewport},{id:'objects',title:'Outliner',icon:'outliner',element:panel},{id:'properties',title:'Properties',icon:'properties',element:properties},{id:'timeline',title:'Timeline',icon:'time',element:timeline},{id:'nodes',title:'Node Editor',icon:'nodetree',element:nodes,variants},{id:'sequencer',title:'Video Sequencer',icon:'sequence',element:sequencer},{id:'files',title:'File Browser',icon:'filebrowser',element:files}];
-  const dock = mountDock({host,items,storageKey:'workbench:layout:viewport:v1',tree:{id:'animation',children:[{id:'root',children:[0,{id:'inspector',children:[1,2]}]},3]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['nodes','sequencer','files']:['objects','properties','timeline','nodes','sequencer','files'],sizes:{animation:[76,24],root:[72,28],inspector:[45,55]},horizontal:{animation:true,root:profile==='portrait',inspector:true}})});
+  const dock = mountDock({host,items,storageKey:RUNTIME_LAYOUT_KEY,tree:{id:'root',children:[{id:'animation',children:[0,3]},{id:'inspector',children:[1,2]}]},defaults:profile=>({order:items.map(x=>x.id),hidden:profile==='desktop'?['nodes','sequencer','files']:['objects','properties','timeline','nodes','sequencer','files'],sizes:structuredClone(LAYOUT_SPLITS),horizontal:{animation:true,root:profile==='portrait',inspector:true}})});
   const menu=document.createElement('details');menu.className='scene-menu';
   const summary=document.createElement('summary');summary.textContent='⋯';summary.setAttribute('aria-label','Scene options');
   const content=document.createElement('div');content.className='scene-menu-content';

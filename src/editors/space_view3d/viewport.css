@@ -6,10 +6,6 @@ body>header,body>footer{display:none!important}
 .engine-working-canvas{position:fixed;left:-100000px;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none}
 .view-label{top:8px;left:52px;display:flex;flex-direction:column;gap:3px;font:var(--bl-font);color:var(--bl-text);text-shadow:0 1px 2px #000a}
 .view-name{text-transform:none}
-.tools{left:6px;top:6px;gap:0;padding:2px;background:#282828e6;border-radius:5px;box-shadow:0 1px 3px #0005}
-.tools button{display:flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--bl-text)}
-.tools button:hover{background:#ffffff1a}
-.tools button.active{background:var(--bl-select);color:#fff;border:0}
 .nav-gizmo{position:absolute;right:6px;top:6px;width:96px;height:96px;cursor:move;touch-action:none;z-index:3}
 .nav-gizmo-bg{fill:transparent;transition:fill .1s}.nav-gizmo:hover .nav-gizmo-bg{fill:#ffffff1a}
 .nav-axis{cursor:pointer}.nav-axis:hover circle{stroke:#fff;stroke-width:1.5}
@@ -18,7 +14,7 @@ body>header,body>footer{display:none!important}
 .nav-buttons .bl-icon-button{width:30px;height:30px;border-radius:50%;background:#00000033}
 .nav-buttons .bl-icon-button:hover{background:#ffffff26}
 .overlays-off .nav-gizmo,.overlays-off .nav-buttons,.overlays-off .view-label{display:none}
-.camera-view .nav-gizmo,.camera-view .nav-buttons,.camera-view .tools,.camera-view .view-label .view-detail{display:none}
+.camera-view .nav-gizmo,.camera-view .nav-buttons,.camera-view .view-label .view-detail{display:none}
 #toast{left:50%;transform:translateX(-50%);bottom:10px;background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;color:var(--bl-text);font:var(--bl-font)}
 dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;font:var(--bl-font);box-shadow:0 6px 20px #0008}
 #object-context{background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;padding:3px 0;box-shadow:0 4px 12px #0007}
@@ -32,9 +28,9 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #panel{background:var(--bl-back)}
 .dock-header-content .bl-search{flex:1;min-width:40px;max-width:260px;margin:0 2px}
 #panel>.section-label,#panel>.tree-tools,#tree-info{display:none}
-#tree-root{display:flex;align-items:center;gap:5px;height:var(--bl-row);padding:0 6px;color:var(--bl-text);background:transparent}
+#tree-root{display:flex;align-items:center;gap:5px;height:var(--bl-row);padding:0 6px 0 var(--bl-row);color:var(--bl-text);background:transparent}
 #objects{padding:0}
-#objects .object-row{min-height:var(--bl-row);height:var(--bl-row);gap:0;padding-right:4px;color:var(--bl-text)}
+#objects .object-row{min-height:var(--bl-row);height:var(--bl-row);gap:0;padding:0 calc(var(--bl-row)*.4) 0 calc(var(--depth,0)*var(--bl-row));color:var(--bl-text)}
 #objects .object-row:nth-child(even){background:#ffffff05}
 #objects .object-row:hover{background:var(--bl-hover)}
 #objects .object-row.active{background:var(--bl-list-select)}
@@ -44,16 +40,45 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #objects .object-row>button:hover{background:transparent}
 #objects .object-row>button:not(.tree-name) .bl-icon{opacity:.85}
 #objects .object-row>button:not(.tree-name):hover .bl-icon{opacity:1}
-#objects .tree-toggle{width:20px;margin-left:12px}
-#objects .tree-toggle .bl-icon{width:10px;height:10px}
+#objects .tree-toggle{width:var(--bl-row);margin-left:var(--bl-row)}
+#objects .object-row>.tree-restrict{flex:none;width:var(--bl-row);min-width:0;padding:0}
+#objects .data-row .tree-name{display:inline-flex;align-items:center}
 #objects .object-row .tree-name{flex:1;justify-content:flex-start;gap:5px;padding:0 2px;overflow:hidden}
 #objects .tree-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #objects .tree-data{width:14px;height:14px;margin-left:6px}
 @media(pointer:coarse){#panel>.section-label,#panel>.tree-tools{display:flex}#objects .object-row{height:auto}}
-#objects .collection-row .tree-exclude{min-width:18px}
-#objects .collection-row .tree-exclude .bl-icon{width:13px;height:13px}
 #objects .object-row.active-collection,#tree-root.active-collection{background:#ffffff14}
 #objects .object-row.active-collection .tree-label,#tree-root.active-collection span{color:#fff}
 #tree-root{cursor:default}
 
 .bl-select-box{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);background:var(--bl-hover)}
+.bl-select-circle{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);border-radius:50%}
+.bl-select-lasso{position:fixed;inset:0;width:100%;height:100%;z-index:20;pointer-events:none}
+.bl-select-lasso polygon{fill:var(--bl-hover);stroke:var(--bl-text);stroke-dasharray:4 4}
+/* The toolbar region (view3d-toolbar.js) as Blender draws it at its default width (UI_TOOLBAR_WIDTH): tool buttons
+   1.7 units tall in aligned columns 0.45 units in from the area's edge, groups 0.3 units apart, wcol_toolbar_item. */
+.bl-toolbar{--u:var(--bl-row);position:absolute;left:0;top:calc(var(--bl-header-h) + var(--u)*.5);z-index:3;display:flex;flex-direction:column;gap:calc(var(--u)*.3);box-sizing:border-box;max-height:calc(100% - var(--bl-header-h) - var(--u)*.5);padding:0 calc(var(--u)*.45);overflow:hidden;user-select:none;-webkit-user-select:none}
+.bl-toolbar[hidden]{display:none}
+.bl-toolbar-column{display:flex;flex-direction:column;gap:1px}
+.bl-toolbar-row{display:flex;gap:1px}
+.bl-tool{position:relative;display:flex;flex:1;align-items:center;justify-content:center;gap:calc(var(--u)*.3);min-width:0;height:calc(var(--u)*1.7);padding:0;border:0;border-radius:0;background:var(--bl-toolbar-item);color:var(--bl-toolbar-item-text);font:var(--bl-widget-font);cursor:default}
+.bl-toolbar-column>:first-child,.bl-toolbar-column>.bl-toolbar-row:first-child>:first-child{border-top-left-radius:calc(var(--u)*.2)}
+.bl-toolbar-column>:first-child,.bl-toolbar-column>.bl-toolbar-row:first-child>:last-child{border-top-right-radius:calc(var(--u)*.2)}
+.bl-toolbar-column>:last-child,.bl-toolbar-column>.bl-toolbar-row:last-child>:first-child{border-bottom-left-radius:calc(var(--u)*.2)}
+.bl-toolbar-column>:last-child,.bl-toolbar-column>.bl-toolbar-row:last-child>:last-child{border-bottom-right-radius:calc(var(--u)*.2)}
+.bl-tool:hover{background:color-mix(in srgb,var(--bl-toolbar-item) 90%,var(--bl-toolbar-item-text))}
+.bl-tool[aria-pressed=true]{background:var(--bl-toolbar-item-sel);color:#fff}
+.bl-tool img{width:calc(var(--u)*1.6);height:calc(var(--u)*1.6);flex-shrink:0;pointer-events:none}
+.bl-tool-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.bl-toolbar-text .bl-tool{justify-content:flex-start;padding-left:calc(var(--u)*.15)}
+.bl-tool-blank{flex:1}
+.bl-tool-hold{position:absolute;right:2px;bottom:2px;width:calc(var(--u)*.25);height:calc(var(--u)*.25);background:var(--bl-toolbar-item-mark);clip-path:polygon(100% 0,100% 100%,0 100%)}
+.bl-region-edge{position:absolute;top:0;right:0;bottom:0;width:4px;cursor:ew-resize}
+.bl-tooltip{position:fixed;z-index:1002;max-width:calc(var(--bl-row)*20);padding:calc(var(--bl-row)*.25) calc(var(--bl-row)*.4);border-radius:calc(var(--bl-row)*.2);background:var(--bl-tooltip);box-shadow:inset 0 0 0 1px var(--bl-tooltip-line),var(--bl-shadow-menu);color:var(--bl-tooltip-text);font:var(--bl-widget-font);pointer-events:none}
+.bl-tooltip[hidden]{display:none}
+.bl-tooltip-title{font-weight:600}.bl-tooltip-value{color:var(--bl-tooltip-value);margin-top:calc(var(--bl-row)*.2)}
+.bl-menu .bl-icon-image{background:none}
+.toolbar-shown .view-label{left:calc(var(--bl-row)*3.25)}
+.tool-header-shown .view-label{top:calc(var(--bl-header-h) + var(--bl-row)*.5)}
+.tool-header-shown .nav-gizmo{top:calc(var(--bl-header-h) + 6px)}.tool-header-shown .nav-buttons{top:calc(var(--bl-header-h) + 108px)}
+.sidebar-shown .nav-gizmo{right:calc(var(--bl-row)*13.5 + 6px)}.sidebar-shown .nav-buttons{right:calc(var(--bl-row)*13.5 + 38px)}

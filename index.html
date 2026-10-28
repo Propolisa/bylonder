@@ -11,10 +11,10 @@
       <span class="bl-logo"></span><nav id="topbar-menus" aria-label="Main menu"></nav>
       <nav id="workspace-tabs" aria-label="Workspaces"></nav>
       <span class="spacer"></span>
-      <label class="bl-datablock" title="Project"><span class="bl-icon" style="mask-image:url(icons/blender/file_blend.svg);-webkit-mask-image:url(icons/blender/file_blend.svg)"></span><select id="project" aria-label="Project"></select></label>
       <span class="bl-datablock bl-scene-selector" title="Scene"><span class="bl-icon" style="mask-image:url(icons/blender/scene_data.svg);-webkit-mask-image:url(icons/blender/scene_data.svg)"></span><select id="scene" aria-label="Scene"></select><span id="scene-actions"></span></span>
-      <button id="run" class="primary" title="Run (Ctrl Enter)">Run</button>
+      <span class="bl-datablock bl-scene-selector" title="View Layer"><span class="bl-icon" style="mask-image:url(icons/blender/renderlayers.svg);-webkit-mask-image:url(icons/blender/renderlayers.svg)"></span><select id="view-layer" aria-label="View Layer"></select><span id="view-layer-actions"></span></span>
       <details id="app-more" hidden><summary aria-label="Project actions">⋯</summary><div>
+        <select id="project" aria-label="Project"></select>
         <button id="share-project">Share project</button><button id="stop">Stop scene</button>
         <button id="new-project">New project</button><button id="fork-project">Fork project</button><button id="rename-project">Rename project</button>
         <button id="checkpoint">Checkpoint</button><button id="export">Export project ZIP</button><button id="import">Import project ZIP</button>
@@ -42,7 +42,7 @@
         </div>
       </aside>
       <section id="code-pane">
-        <div id="tabs"></div><div id="code-actions"><button data-code-action="undo">Undo</button><button data-code-action="redo">Redo</button><button data-code-action="editor.action.indentLines">Indent</button><button data-code-action="editor.action.outdentLines">Outdent</button><button data-code-action="editor.action.triggerSuggest">Suggest</button><button data-code-action="actions.find">Find</button><button data-code-action="editor.action.formatDocument">Format</button></div>
+        <div id="tabs"></div><div id="code-actions"><button id="run" title="Run Script (Ctrl Enter)"><span class="bl-icon" style="mask-image:url(icons/blender/play.svg);-webkit-mask-image:url(icons/blender/play.svg)"></span>Run Script</button><button data-code-action="undo">Undo</button><button data-code-action="redo">Redo</button><button data-code-action="editor.action.indentLines">Indent</button><button data-code-action="editor.action.outdentLines">Outdent</button><button data-code-action="editor.action.triggerSuggest">Suggest</button><button data-code-action="actions.find">Find</button><button data-code-action="editor.action.formatDocument">Format</button></div>
         <div id="editor-container"></div>
         <div id="diff-container" hidden></div>
         <div id="diff-actions" hidden>

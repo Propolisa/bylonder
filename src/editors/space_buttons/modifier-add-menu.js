@@ -1,11 +1,9 @@
-// Blender's Add Modifier menu (properties_data_modifier.py, compiled into src/bl_ui by tools/blender-ui), showing the
+// Blender's Add Modifier menu (properties_data_modifier.py, in Blender's Python tree), showing the
 // entries whose modifier Bylonder has.
-import * as properties from '../../bl_ui/properties_data_modifier.js';
+import { menus } from '../../python/bpy_interface.js';
 import { drawMenu, menuCoverage } from '../interface/ui-layout.js';
 import { modifierDefinitions } from '../../modifiers/stack.js';
-import { menuClasses } from '../../windowmanager/wm-operators.js';
 
-const menus = menuClasses(properties);
 // Blender's node group assets that are Bylonder modifiers, by asset name.
 const ASSETS = { Array: 'GN_ARRAY' };
 const modifierType = (idname, props) =>
@@ -13,7 +11,7 @@ const modifierType = (idname, props) =>
 
 const modifierAddUI = (world, node, added) => ({
   menus,
-  context: () => ({ object: { py_metatype: 'MESH' } }),
+  context: () => ({ object: { py_metatype: 'MESH', __bool__: () => true } }),
   supported: (idname, props) => world.modifiers.definitions.has(modifierType(idname, props)),
   poll: () => true,
   keys: () => undefined,

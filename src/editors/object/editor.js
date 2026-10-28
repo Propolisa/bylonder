@@ -4,6 +4,8 @@ import { wrap } from "../../windowmanager/gesture-math";
 import { initTransform } from "../transform/transform.js";
 import { createTransObject } from "../transform/transform-object.js";
 import { createKeymap } from "../../windowmanager/input/keymap.js";
+import { startGestureBox } from "../../windowmanager/wm-gesture-box.js";
+import { boxRegion } from "../space_view3d/view3d-select.js";
 
 // Object-mode editing shared by every 3D Viewport: one selection, one tool mode, one gizmo set (drawn in every
 // view). Picking, projection and modal transforms use the view the gesture happens in (views.input).
@@ -18,7 +20,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
   // One rule for what a click can select: live, unlocked, visible, and selectable through its collections.
   const selectable = (m) =>
     (m = owner(m), objects.includes(m)) && !m.metadata?.wbDeleted && !m.metadata?.wbLocked &&
-    m.isEnabled() && m.isVisible && (world.collections?.selectable(m) ?? true);
+    m.isEnabled() && m.isVisible !== false && (world.collections?.selectable(m) ?? true);
   const selected = selection.pivot;
   let mode = "select",
     modal = null;
@@ -31,10 +33,14 @@ export function createEditor(world, views, history, changed, notify, capture) {
     const p = Vector3.Project(point, Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
     return { x: rect.left + (p.x * rect.width) / width, y: rect.top + (p.y * rect.height) / height };
   };
-  // Client coordinates to the topmost selectable object in a view.
-  const pickIn = (view, clientX, clientY, predicate = selectable) => {
+  // Client coordinates to the selectable object under them in a view: an overlay extra (an empty) within reach, else
+  // the topmost mesh. Objects in a group pick as the group.
+  const pickIn = (view, clientX, clientY) => {
     const p = views.pickPoint(view, clientX, clientY);
-    return scene.pick(p.x, p.y, predicate, false, view.camera);
+    let node = world.pickExtra?.(p.x, p.y, view.camera, selectable);
+    if (!node) { const hit = scene.pick(p.x, p.y, selectable, false, view.camera); node = hit?.hit ? owner(hit.pickedMesh) : null; }
+    while (node?.parent?.metadata?.group && !node.parent.metadata.wbDeleted) node = node.parent;
+    return node;
   };
   const showCursor = () => {
     const rect = modal.view.canvas.getBoundingClientRect();
@@ -50,9 +56,10 @@ export function createEditor(world, views, history, changed, notify, capture) {
   const emitState = () => world.onEditorState?.({mode, count:selection.size, modal:!!modal});
   const setMode = (value) => {
     mode = value;
-    gizmos.positionGizmoEnabled = value === "move";
-    gizmos.rotationGizmoEnabled = value === "rotate";
-    gizmos.scaleGizmoEnabled = value === "scale";
+    // The Transform tool shows all three.
+    gizmos.positionGizmoEnabled = value === "move" || value === "transform";
+    gizmos.rotationGizmoEnabled = value === "rotate" || value === "transform";
+    gizmos.scaleGizmoEnabled = value === "scale" || value === "transform";
     gizmos.attachToNode(selection.size ? selected : null);
     for (const g of Object.values(gizmos.gizmos)) {
       if (!g || bound.has(g)) continue;
@@ -73,10 +80,6 @@ export function createEditor(world, views, history, changed, notify, capture) {
       });
       bound.add(g);
     }
-    document.querySelectorAll("[data-tool]").forEach((b) => {
-      b.classList.toggle("active", b.dataset.tool === value);
-      b.setAttribute("aria-pressed", String(b.dataset.tool === value));
-    });
     emitState();
   };
   const select = (m, add = false) => {
@@ -134,7 +137,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
       setMode(type);
       gizmos.attachToNode(null);
     }
-    modal = { view, type, session, point: { ...session.start }, center: session.center };
+    modal = { view, type, session, point: { ...session.start }, center: session.center, releaseConfirm: !!options.releaseConfirm };
     modal.removeHandler = world.wm?.addModal({ keymap: modalKeymap });
     if (!external) capture.begin(last, update, () => finish(false), view.canvas);
     showCursor();
@@ -165,36 +168,76 @@ export function createEditor(world, views, history, changed, notify, capture) {
   const track = (e) => {
     if (!modal && !capture.active) last = { x: e.clientX, y: e.clientY };
   };
-  // view3d.select in Object Mode: the object under the mouse, or nothing.
-  const selectPick = (event, toggle) => {
+  // view3d.select in Object Mode (ed_object_select_pick): the object under the mouse, made the only selected and
+  // active one, toggled or added to the selection; nothing under it deselects all when asked. With
+  // select_passthrough (the Tweak tool's press) an object already selected stays so, and the event goes on to start
+  // a drag.
+  // Whether the tool's gizmo shows, and is under the event's pointer (wm_gizmomap_highlight_get).
+  const gizmoState = (event) => {
+    const visible = mode !== "select" && selection.size > 0 && !world.editMode?.active && !!event?.view;
+    if (!visible) return { visible };
+    const p = views.pickPoint(event.view, event.x, event.y);
+    return { visible, highlight: !!gizmos.utilityLayer.utilityLayerScene.pick(p.x, p.y, undefined, false, event.view.camera)?.hit };
+  };
+  const selectOperator = (event, { toggle, extend, deselect, deselect_all, select_passthrough }) => {
     const view = event.view;
     view.canvas.focus();
     // Let the utility-layer gizmo keep its own clicks.
-    if (mode !== "select" && selection.size) {
-      const p = views.pickPoint(view, event.x, event.y);
-      if (gizmos.utilityLayer.utilityLayerScene.pick(p.x, p.y, undefined, false, view.camera)?.hit) return;
+    if (gizmoState(event).highlight) return "PASS_THROUGH";
+    const target = pickIn(view, event.x, event.y);
+    const passed = select_passthrough ? "PASS_THROUGH" : "FINISHED";
+    if (!target) {
+      if (deselect_all && selection.size) select(null);
+      return passed;
     }
-    const pick = pickIn(view, event.x, event.y);
-    let target = pick?.hit ? owner(pick.pickedMesh) : null;
-    while (target?.parent?.metadata?.group && !target.parent.metadata.wbDeleted) target = target.parent;
-    select(target, toggle);
+    if (select_passthrough && selection.has(target)) return "PASS_THROUGH";
+    const others = selection.nodes.filter((n) => n !== target);
+    const active = selection.nodes.at(-1) === target;
+    if (toggle) selectList(active ? others : [...others, target]);
+    else if (extend) selectList([...others, target]);
+    else if (deselect) selectList(others);
+    else selectList([target]);
+    return passed;
+  };
+  const selectList = (list) => {
+    if (modal) return;
+    world.beforeSelection?.();
+    selection.replace(list);
+    setMode(mode);
+    changed();
+  };
+  // view3d.select_box in Object Mode (do_object_box_select): objects drawn inside the box, by eSelectOp. An object
+  // counts when one of its vertices (or its origin, without any) projects inside; Blender reads its select buffer.
+  const OPS = {
+    SET: (was, inside) => inside, ADD: (was, inside) => was || inside, SUB: (was, inside) => was && !inside,
+    XOR: (was, inside) => was !== inside, AND: (was, inside) => was && inside,
+  };
+  // Box select counts an object when one of its vertices (or its origin, without any) projects inside; lasso and
+  // circle select test its origin, as do_lasso_select_objects and object_circle_select do.
+  const selectRegion = (view, region, op, vertices = false) => {
+    const inside = (p) => region.point([p.x, p.y]);
+    const drawnInside = (node) => {
+      const positions = vertices && node.getVerticesData?.("position"), m = node.computeWorldMatrix(true);
+      if (!positions?.length) return inside(project(node.getAbsolutePosition(), view));
+      for (let i = 0; i < positions.length; i += 3) {
+        if (inside(project(Vector3.TransformCoordinates(Vector3.FromArray(positions, i), m), view))) return true;
+      }
+      return false;
+    };
+    const candidates = objects.filter((n) => selectable(n) && n.isEnabled());
+    selectList(candidates.filter((n) => OPS[op](selection.has(n), drawnInside(n))));
   };
   const contextMenu = (event) => {
-    const pick = pickIn(event.view, event.x, event.y);
-    let target = owner(pick?.pickedMesh);
-    while (target?.parent?.metadata?.group) target = target.parent;
-    world.contextMenu?.open(event.native, target);
+    world.contextMenu?.open(event.native, pickIn(event.view, event.x, event.y));
   };
   const inView = (event) => !!event.view && !event.view.state.cameraView && !world.editMode?.active;
-  const selectKeymap = createKeymap([
-    { blender: "view3d.select", keys: "LEFTMOUSE CLICK", poll: inView, run: (event) => selectPick(event, false) },
-    { blender: "view3d.select", keys: "Shift LEFTMOUSE CLICK", poll: inView, run: (event) => selectPick(event, true) },
-  ], ["3D View"]);
   const contextKeymap = createKeymap([
     { blender: "VIEW3D_MT_object_context_menu", keys: "RIGHTMOUSE", poll: inView, run: contextMenu },
   ], ["Object Mode"]);
   // The Transform Modal Map. Edit Mode's G during Move starts Edge Slide.
   const transformModalKeymap = createKeymap([
+    // release_confirm: a transform a drag started (a tool's) ends where the button is let go.
+    { blender: "CONFIRM", keys: "Any LEFTMOUSE RELEASE", poll: () => !!modal?.releaseConfirm, run: () => finish(true) },
     { blender: "CONFIRM", keys: ["Any LEFTMOUSE", "Any RET", "Any NUMPAD_ENTER", "Any SPACE"], run: () => finish(true) },
     { blender: "CANCEL", keys: ["Any RIGHTMOUSE", "Any ESC"], run: () => finish(false) },
     ...["X", "Y", "Z"].flatMap((a) => [
@@ -237,12 +280,18 @@ export function createEditor(world, views, history, changed, notify, capture) {
     get mode() { return mode; },
     get pointer() { return last; },
     updateGesture: update,
-    pick(x,y,view=views.input) {
-      const hit=pickIn(view,x,y);
-      let node=owner(hit?.pickedMesh);while(node?.parent?.metadata?.group&&!node.parent.metadata.wbDeleted)node=node.parent;return node;
+    pick: (x, y, view = views.input) => pickIn(view, x, y),
+    // Object Mode's context menu (Object Mode keymap).
+    keymap: (event) => contextKeymap(event),
+    // view3d.select and view3d.select_box in Object Mode, run with the event: a box begins at a drag's press, or
+    // from a key at the next press.
+    selectOperator: (event, props) => (inView(event) ? selectOperator(event, props) : "PASS_THROUGH"),
+    gizmoState,
+    selectBox(event, { mode: op = "SET" }) {
+      const view = event.view ?? views.input, dragged = /mouse$/.test(event.type);
+      startGestureBox(world.wm, { begin: dragged ? { x: event.x, y: event.y } : null, mode: op, select: (rect, m) => selectRegion(view, boxRegion(rect), op === "SET" || op === "ADD" ? m : op, true) });
     },
-    // Object Mode keymaps: click select (3D View) and the context menu (Object Mode).
-    keymap: (event) => selectKeymap(event) || contextKeymap(event),
+    selectRegion: (view, region, op) => selectRegion(view ?? views.input, region, op),
     // A view going away ends a transform running in it.
     attach(view) {
       return () => { if (modal?.view === view) finish(false); };

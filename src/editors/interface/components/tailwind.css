@@ -4,6 +4,9 @@
 @import "tailwindcss/utilities.css" source(none);
 @source "./";
 @source "../../../coverage/";
+@source "../../space_node/";
+@source "../layout-view.js";
+@source "../../space_buttons/";
 @source "../../../workspace/changelog/";
 
 /* shadcn-vue's semantic tokens, defined by Bylonder's theme tokens (src/theme.css). */
@@ -33,6 +36,37 @@
   --color-status-alt: var(--bl-status-alt);
   --color-status-partial: var(--bl-status-partial);
   --color-status-track: var(--bl-status-track);
+  --color-wcol-outline: var(--bl-wcol-outline);
+  --color-wcol-emboss: var(--bl-wcol-emboss);
+  --color-wcol-hover: var(--bl-wcol-hover);
+  --color-wcol-num: var(--bl-wcol-num);
+  --color-wcol-num-sel: var(--bl-wcol-num-sel);
+  --color-wcol-num-item: var(--bl-wcol-num-item);
+  --color-wcol-option: var(--bl-wcol-option);
+  --color-wcol-option-sel: var(--bl-wcol-option-sel);
+  --color-wcol-option-item: var(--bl-wcol-option-item);
+  --color-wcol-toggle: var(--bl-wcol-toggle);
+  --color-wcol-toggle-sel: var(--bl-wcol-toggle-sel);
+  --color-wcol-tool: var(--bl-wcol-tool);
+  --color-wcol-tool-sel: var(--bl-wcol-tool-sel);
+  --color-wcol-menu: var(--bl-wcol-menu);
+  --color-wcol-menu-item: var(--bl-wcol-menu-item);
+  --color-wcol-text: var(--bl-wcol-text);
+  --color-wcol-text-sel: var(--bl-wcol-text-sel);
+  --color-wcol-text-item: var(--bl-wcol-text-item);
+  --color-wcol-text-cursor: var(--bl-wcol-text-cursor);
+  --color-wcol-box: var(--bl-wcol-box);
+  --color-wcol-list-sel: var(--bl-wcol-list-sel);
+  --color-wcol-tab: var(--bl-wcol-tab);
+  --color-wcol-tab-sel: var(--bl-wcol-tab-sel);
+  --color-wcol-tab-text: var(--bl-wcol-tab-text);
+  --color-panel-back: var(--bl-panel-back);
+  --color-panel-sub-back: var(--bl-panel-sub-back);
+  --color-panel-outline: var(--bl-panel-outline);
+  --color-panel-title: var(--bl-panel-title);
+  --color-text-sel: var(--bl-text-sel);
+  --color-region: var(--bl-region);
+  --spacing-unit: var(--bl-row);
   --radius-sm: 3px;
   --radius-md: var(--bl-radius);
   --radius-lg: 6px;

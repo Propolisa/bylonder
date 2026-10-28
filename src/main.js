@@ -1,4 +1,5 @@
 import { mountNodeEditor } from './editors/space_node/node-editor.js';
+import { syncLightDirections } from "./runtime/object-transform.js";
 import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
 import { createNodeContexts } from './editors/space_node/contexts.js';
 import { registerObjects, objectRefs } from './blenkernel/animation/bindings.js';
@@ -13,7 +14,9 @@ import {
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
 import { createOutliner } from "./editors/space_outliner/outliner";
-import { nodeId } from "./editors/object/identity";
+import { nodeId, visible, deleted } from "./editors/object/identity";
+import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
+import { createWorkbench } from "./draw/workbench.js";
 import { createMouseCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
@@ -42,8 +45,13 @@ import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
-import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
+import { createBlenderObjects } from "./editors/object/object-blender.js";
+import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
+import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
+import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
+import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
+import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
@@ -122,6 +130,11 @@ const commit = () => history?.commit();
 let views;
 // The 3D Viewports among the engine views (the compositor backdrop is the other kind).
 const viewports = () => views?.all.filter((view) => view.nav) || [];
+// The Properties editor and the 3D Views' regions drawn from Blender's scripts show the data anew.
+function refreshUI() {
+  ui?.refresh();
+  for (const view of viewports()) view.regions?.draw();
+}
 // Modifier evaluations off the main thread, shown with Cancel once they take long, asking before enormous ones.
 const jobs = createJobs({ ask: true });
 const runningJobs = createRunningJobs(document.body.appendChild(document.createElement("div")), jobs);
@@ -147,7 +160,17 @@ try {
 }
 const { world, sdk, animation, scene, objects, baseline, documentState } = built;
 const authored = () => built.authoredCamera;
-const overlays = createViewportOverlays(scene);
+// Theme wire color of an object (Resources::object_wire_theme_id): the active or selected color, else its type's.
+const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.nodes.at(-1) === node ? theme.object_active : theme.object_selected;
+const overlays = createViewportOverlays(scene, {
+  objects: () => world.objects,
+  color: wireColor,
+  sceneCamera: authored,
+  visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),
+  aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
+}, { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) });
+world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
+world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
 // particles, video; otherwise they stop until the next input or change.
 const observerCount = () => scene.onBeforeRenderObservable.observers.length + scene.onAfterRenderObservable.observers.length;
@@ -159,6 +182,7 @@ const live = () =>
   scene.animatables.length > 0 || scene.particleSystems.some((p) => p.isStarted?.() && p.isAlive?.()) ||
   scene.textures.some((t) => t.video && !t.video.paused);
 views = createViews({ engine, scene, live });
+syncLightDirections(scene);
 world.views = views;
 world.focusViewport = () => views.input?.canvas.focus();
 let creator;
@@ -220,6 +244,10 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "reset-layout") viewportDock.reset();
   if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
   if (e.data.type === "help") help.showModal();
+  if (e.data.type === "view-layer") {
+    const cols = world.collections, { op, id } = e.data.payload;
+    ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
+  }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
@@ -245,7 +273,7 @@ history = createHistory(world.objects, () => {
   registerObjects(animation, objects);
   world.modifiers.refresh();
   animation.changed();
-  ui?.refresh();
+  refreshUI();
 }, {capture:()=>({animation:animation.serialize(),stores:sdk.values(),document:documentState.capture(),properties:Object.fromEntries([...animation.channels].filter(([,ch])=>!ch.transform&&ch.available()).map(([ref,ch])=>[ref,ch.get()]))}),restore:data=>{
   registerObjects(animation, objects);
   for(const system of systems)for(const [key,value] of Object.entries(data?.stores?.[system.id]||{}))system.store.set(key,value);
@@ -261,7 +289,7 @@ const editor = createEditor(
   world,
   views,
   history,
-  () => { ui?.refresh(); views.wake(); },
+  () => { refreshUI(); views.wake(); },
   notify,
   capture,
 );
@@ -269,7 +297,7 @@ const activeView = () => views.input;
 // Object actions and menus act on the 3D Viewport under the pointer, as in Blender.
 const nav = { frame: (node) => activeView()?.nav.frame(node) };
 const commands = createObjectCommands(world, editor, history, () =>
-  ui?.refresh(),
+  refreshUI(),
 );
 creator = createAddMesh(
   world,
@@ -280,10 +308,11 @@ creator = createAddMesh(
   notify,
 );
 commands.setBefore(() => creator.finish());
-world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { ui?.refresh(); views.wake(); } });
+world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { refreshUI(); views.wake(); } });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
+  applyTool();
   viewports().forEach((view) => view.sync());
 };
 world.beforeSelection = () => creator.finish();
@@ -296,11 +325,24 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-registerObjectOperators(world.objectActions);
+const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit });
+// bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
+world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
+// The mode the tool system and Blender's keymaps go by (context.mode).
+const contextMode = () => (world.editMode.active ? "EDIT_MESH" : "OBJECT");
+// Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
+const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
+const applyTool = () => {
+  if (!editor.modal && !world.editMode.active) editor.setMode(TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ?? "select");
+};
+// The 3D View operators act on: the context area's (wm-operators.js), else the one under the pointer.
+const contextView = () => contextArea()?.space ?? activeView();
+world.toolsystem = createToolSystem({
+  context: () => world.blenderContext(contextView()),
+  changed: () => { applyTool(); viewports().forEach((view) => view.sync()); },
+});
+registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify }));
 registerAddOperators(creator);
-const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
-// bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
-world.blenderContext = (view) => createContext(blenderRNA, { space: view });
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
@@ -311,7 +353,7 @@ world.collections.subscribe(() => {
 });
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
-ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || []);
+ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || [], blenderRNA);
 const nodeSection = document.querySelector("#nodes-section");
 let shadingReady = false;
 const backdrop = createCompositorBackdrop({
@@ -332,7 +374,7 @@ const insertKeys = () => {registerObjects(animation, objects);animation.insert(o
 const timelineOptions = id => ({insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();},header:viewportDock.header(id),names:ref=>world.objects.find(n=>'object:'+nodeId(n)===ref)?.name});
 const timeline = mountTimeline(document.querySelector('#timeline-section'), animation, timelineOptions('timeline'));
 viewportDock.setFactory('timeline',(host,id)=>mountTimeline(host,animation,timelineOptions(id)));
-const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();ui?.refresh();} });
+const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();refreshUI();} });
 document.querySelector("#add-mesh").onclick = () => creator.show();
 document.querySelector("#delete-objects").onclick = () => commands.remove();
 document.querySelector("#duplicate-objects").onclick = () =>
@@ -389,10 +431,6 @@ const mountView = (options) => {
 };
 shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
-if (authored()) {
-  primary.editorCamera.setPosition(authored().position.clone());
-  primary.editorCamera.setTarget(authored().getTarget?.() || BABYLON.Vector3.Zero());
-}
 viewportDock.setFactory("viewport", (host, id) => mountView({ section: host, headerId: id, from: activeView()?.editorCamera || primary.editorCamera }));
 views.setInput(primary);
 views.onFocus = () => viewportCtx.shadingChanged();
@@ -471,6 +509,7 @@ const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !docum
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.timeline') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
+const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
 // The Add panel's own keys while a new object waits for its settings.
 const creatorKeys = createKeymap([
   { keys: "ESC", poll: () => creator.pending, run: () => creator.finish(false) },
@@ -497,7 +536,37 @@ registerOperators({
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(activeView().id) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(activeView().id, direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(activeView().id) },
-  "wm.call_menu": { supports: ({ name }) => !!activeView()?.menu(name), run: ({ name }) => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name)) },
+  // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
+  "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : editor).selectOperator(event, props) },
+  "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
+  "view3d.select_lasso": {
+    poll: (props, event) => inView(event),
+    run: ({ mode = "SET" }, event) => { startGestureLasso(world.wm, { begin: event, select: (path) => selectRegion(event.view, lassoRegion(path), mode) }); },
+  },
+  "view3d.select_circle": {
+    poll: (props, event) => !!(event?.view ?? activeView()),
+    run: ({ mode = "SET", radius = 25, wait_for_input = true }, event) => {
+      startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode, select: (center, r, m) => selectRegion(event.view ?? activeView(), circleRegion(center, r), m) });
+    },
+  },
+  // A transform from a key starts at the mouse, from a tool's drag at its press; release_confirm ends it on release.
+  ...Object.fromEntries([["transform.translate", "move"], ["transform.rotate", "rotate"], ["transform.resize", "scale"]].map(([idname, type]) => [idname, {
+    poll: () => editor.selection.size > 0,
+    run: (props, event) => {
+      creator.finish();
+      editor.start(type, { point: event?.press, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm });
+    },
+  }])),
+  // Blender's is Python setting the data path with exec; a path to a property Bylonder does not bind passes through.
+  "wm.context_toggle": {
+    run: ({ data_path }) => {
+      const path = data_path.split("."), key = path.pop();
+      const owner = path.reduce((data, name) => data?.[name], world.blenderContext(contextView()));
+      if (typeof owner?.[key] !== "boolean" || !Object.getOwnPropertyDescriptor(Object(owner), key)?.set) return "PASS_THROUGH";
+      owner[key] = !owner[key];
+    },
+  },
+  "wm.toolbar": { poll: () => !!contextView(), run: () => contextView().toolbar.popup(editor.pointer) },
   "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
   "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
 });
@@ -508,19 +577,30 @@ appendMenu("VIEW3D_MT_view", ({ layout }) => {
 });
 // Bylonder's own keys, below Blender's keymaps.
 const bylonderKeys = createKeymap([
-  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() || (!world.editMode.active && editor.setMode("select")) },
+  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs: the mode's (Object Mode or Mesh), then the 3D View's and the window's.
-const blenderKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true);
+// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode or Mesh), then the
+// 3D View's and the window's. Tool keymaps run with the tool's settings.
+const view3dKeys = keymapHandler(
+  (event) => [...world.toolsystem.keymaps(contextMode(), editor.gizmoState(event)), "Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true,
+  (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
+// The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
+const view3dArea = {
+  get space() { return activeView(); },
+  menu: (name) => activeView()?.menu(name) && (() => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name))),
+};
+const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
+// The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's gizmos drag themselves).
+const gizmoKeys = (event) => event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight;
 const keyLayers = () => {
   const view = activeView();
   if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
-  return [creatorKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap]), blenderKeys, ...(world.editMode.active ? [] : [world.objectActions.key]), bylonderKeys];
+  return [creatorKeys, gizmoKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap]), blenderKeys, ...(world.editMode.active ? [] : [world.objectActions.key]), bylonderKeys];
 };
 
 let last = 0;

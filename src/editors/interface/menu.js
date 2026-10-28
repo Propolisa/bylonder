@@ -63,7 +63,9 @@ function rowEl(menu, item, key, level) {
   b.setAttribute('role', 'menuitem');
   const checked = item.checked?.(), shortcut = keysLabel(item.keys);
   b.append(
-    checked === undefined ? item.icon ? iconEl(item.icon) : make('span', 'bl-icon blank') : iconEl(checked ? 'checkbox_hlt' : 'checkbox_dehlt'),
+    checked !== undefined ? iconEl(checked ? 'checkbox_hlt' : 'checkbox_dehlt')
+      : item.image ? Object.assign(make('img', 'bl-icon bl-icon-image'), { src: item.image, alt: '' })
+      : item.icon ? iconEl(item.icon) : make('span', 'bl-icon blank'),
     labelEl(item.label, key),
   );
   if (shortcut) b.append(make('kbd', '', shortcut));
@@ -80,13 +82,15 @@ function rowEl(menu, item, key, level) {
   return b;
 }
 
-function render(items, anchor, level, title) {
+// A menu that searches as it is typed in (SEARCH_ON_KEY_PRESS) has no accelerator keys.
+function render(items, anchor, level, title, search) {
   closeFrom(level);
   const menu = { el: make('div', 'bl-menu ' + anchor.kind), list: make('div', 'bl-menu-list'), rows: [], active: -1, anchor, level };
   menu.el.setAttribute('role', 'menu');
+  if (anchor.scale > 1) menu.el.style.setProperty('--u', `calc(var(--bl-row) * ${anchor.scale})`);
   menu.el.append(menu.list, make('div', 'bl-menu-scroll up'), make('div', 'bl-menu-scroll down'));
   if (title) menu.list.append(make('div', 'bl-menu-title', title), make('hr', 'bl-menu-sep'));
-  const entries = resolve(items).filter(Boolean), keys = accelerators(entries.filter(isRow));
+  const entries = resolve(items).filter(Boolean), keys = search ? new Map() : accelerators(entries.filter(isRow));
   menu.el.classList.toggle('has-sub', entries.some(item => item.items));
   for (const item of entries) {
     if (item === '-') menu.list.append(make('hr', 'bl-menu-sep'));
@@ -271,12 +275,43 @@ function step(menu, dir) {
   setActive(menu, next, true);
 }
 
-export function openMenu(items, at, title) {
+// At an element, a pull-down below it, or with `side` beside it (a toolbar button's, UI_DIR_RIGHT); at a point, a popup.
+// `scale` is the layout's scale_y; `hold` lets the press that opened it run the entry it is released over
+// (BLOCK_POPUP_HOLD). `search` makes the menu one Blender opens with SEARCH_ON_KEY_PRESS: typing searches what
+// search() gives, every entry of the menu and its sub-menus as { path: [sub-menu labels], item }.
+export function openMenu(items, at, title, { side = false, scale = 1, hold = false, search } = {}) {
   const anchor = at instanceof Element
-    ? { kind: 'pulldown', rect: pulldownRect(at) }
+    ? side ? { kind: 'submenu', rect: at.getBoundingClientRect() } : { kind: 'pulldown', rect: pulldownRect(at) }
     : { kind: 'popup', x: at.x, y: at.y, title: title ?? '' };
   closeMenus();
-  return render(items, anchor, 0, title).el;
+  dragOpened = hold;
+  const menu = render(items, { ...anchor, scale }, 0, title, search);
+  menu.search = search;
+  return menu.el;
+}
+
+// Blender's menu search (ui_searchbox, with the menu's entries as items): the query on top, then the entries whose
+// path and label hold every word typed, those whose label starts with the query first, each as its path, grey, then
+// its label.
+export function searchMenu(query, menu = levels[0]) {
+  if (!menu?.search) return;
+  closeFrom(menu.level + 1);
+  menu.query = query;
+  menu.entries ??= menu.search();
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean), text = (e) => [...e.path, e.item.label].join(' ').toLowerCase();
+  const score = (e) => (e.item.label.toLowerCase().startsWith(words[0] ?? '') ? 0 : 1) + (e.item.enabled?.() === false ? 4 : 0) + (e.item.weight ?? 0);
+  const hits = menu.entries.filter((e) => words.every((w) => text(e).includes(w))).sort((a, b) => score(a) - score(b)).slice(0, 40);
+  const field = make('div', 'bl-menu-search');
+  field.append(iconEl('viewzoom'), make('span', '', query), make('span', 'bl-menu-caret'));
+  menu.rows = [];
+  menu.list.replaceChildren(field, ...hits.map((hit) => {
+    const row = rowEl(menu, hit.item, null, menu.level);
+    row.querySelector('.bl-menu-label').prepend(...hit.path.map((part) => make('span', 'bl-menu-path', part + ' \u25B8 ')));
+    return row;
+  }));
+  menu.el.classList.add('searching');
+  Object.assign(menu.el.style, { width: '', height: '' });
+  setActive(menu, hits.length ? 0 : -1);
 }
 
 // Blender draws a header pull-down's highlight one pixel inside its button, which is what its menu attaches to.
@@ -336,6 +371,10 @@ function menuKey(e, menu) {
       if (menu.rows[menu.active]?.item.items) activate(level, menu.active, true);
       return true;
     }
+  }
+  if (menu.search && level === 0 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.key === 'Backspace' && menu.query !== undefined) { searchMenu(menu.query.slice(0, -1)); return true; }
+    if (e.key.length === 1 && (menu.query !== undefined || e.key !== ' ')) { searchMenu((menu.query ?? '') + e.key); return true; }
   }
   if (e.repeat || !plain) return false;
   const number = DIGITS[e.code] ?? DIGITS[e.code.replace('Numpad', 'Digit')];

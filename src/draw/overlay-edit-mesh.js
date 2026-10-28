@@ -52,6 +52,7 @@ export function createEditMeshOverlay(owner) {
     mesh.parent = owner;
     mesh.isPickable = false;
     mesh.alwaysSelectAsActiveMesh = true;
+    mesh.metadata = { overlay: true };
     // Keep points and lines in Wireframe shading, which otherwise forces every mesh to wireframe triangles.
     mesh._getRenderingFillMode = (fillMode) => fillMode;
     mesh.material = overlayMaterial(scene, owner.name + ' ' + name, options);

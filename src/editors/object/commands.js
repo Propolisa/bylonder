@@ -85,6 +85,9 @@ export function createObjectCommands(world, editor, history, refresh) {
     visibility(node) {
       transaction(() => node.setEnabled(!node.isEnabled(false)));
     },
+    hideRender(node) {
+      transaction(() => { node.metadata = { ...node.metadata, wbHideRender: !node.metadata?.wbHideRender }; });
+    },
     lock(node) {
       transaction(() => {
         node.metadata = {
@@ -92,16 +95,6 @@ export function createObjectCommands(world, editor, history, refresh) {
           wbLocked: !node.metadata?.wbLocked,
         };
         if ("isPickable" in node) node.isPickable = !node.metadata.wbLocked;
-      });
-    },
-    reset(property) {
-      transaction(() => {
-        for (const node of roots()) {
-          if (property === "rotation") {
-            node.rotationQuaternion = null;
-            node.rotation.setAll(0);
-          } else node[property].setAll(property === "scaling" ? 1 : 0);
-        }
       });
     },
     parent(parent) {

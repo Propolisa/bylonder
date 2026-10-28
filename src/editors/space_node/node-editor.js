@@ -51,13 +51,23 @@ export function mountNodeEditor({ world, host, header, contexts, backdrop, stora
     try { localStorage.setItem(storageKey + ':backdrop', backdropOn ? '1' : '0'); } catch {}
     syncBackdrop();
   };
+  // Babylon's own editor for the graph, in place of Bylonder's (Blender's), where both edit it.
+  let babylonEditor = false;
+  try { babylonEditor = localStorage.getItem(storageKey + ':babylon') === '1'; } catch {}
+  const babylonButton = Object.assign(document.createElement('button'), { type: 'button', className: 'bl-icon-button bl-text-toggle', textContent: 'Babylon Editor', title: "Edit the graph in Babylon's node editor" });
+  babylonButton.onclick = () => {
+    babylonEditor = !babylonEditor;
+    try { localStorage.setItem(storageKey + ':babylon', babylonEditor ? '1' : '0'); } catch {}
+    shown = null;
+    render(true);
+  };
   const syncBackdrop = () => {
     const compositor = type === 'compositor';
     backdropButton.hidden = !backdrop || !compositor;
     backdropButton.setAttribute('aria-pressed', String(backdropOn));
     if (backdrop) backdrop[compositor && backdropOn && contexts.compositor?.().graph ? 'show' : 'hide'](host);
   };
-  header.append(typeButton, view, title, Object.assign(document.createElement('span'), { className: 'spacer' }), actions, backdropButton);
+  header.append(typeButton, view, title, Object.assign(document.createElement('span'), { className: 'spacer' }), actions, babylonButton, backdropButton);
 
   const message = (text, buttons = []) => {
     empty.replaceChildren(Object.assign(document.createElement('p'), { textContent: text }), ...buttons.map(([label, run, icon]) => {
@@ -75,7 +85,11 @@ export function mountNodeEditor({ world, host, header, contexts, backdrop, stora
   const render = async (force = false) => {
     syncBackdrop();
     const tree = treeTypes[type], ctx = contexts[type]?.() || {};
-    const key = type + '|' + (ctx.key ?? ctx.graph?.uniqueId ?? '');
+    const both = !!(ctx.mount && tree.load);
+    babylonButton.hidden = !both;
+    babylonButton.setAttribute('aria-pressed', String(babylonEditor));
+    if (both && babylonEditor) delete ctx.mount;
+    const key = type + '|' + (ctx.key ?? ctx.graph?.uniqueId ?? '') + (both && babylonEditor ? '|babylon' : '');
     if (!force && key === lastKey) return;
     lastKey = key;
     typeButton.replaceChildren(iconEl(tree.icon));
@@ -89,9 +103,9 @@ export function mountNodeEditor({ world, host, header, contexts, backdrop, stora
       stage.replaceChildren();
       return message(ctx.message || 'Nothing to edit here.', ctx.buttons || []);
     }
-    if (shown?.graph === ctx.graph && shown.type === type) { empty.hidden = true; stage.hidden = false; return; }
+    if (shown?.graph === ctx.graph && shown.type === type && shown.mounted === !!ctx.mount) { empty.hidden = true; stage.hidden = false; return; }
     const mine = ++token;
-    shown = { graph: ctx.graph, type };
+    shown = { graph: ctx.graph, type, mounted: !!ctx.mount };
     empty.hidden = true;
     stage.hidden = false;
     const container = Object.assign(document.createElement('div'), { className: 'node-editor-root' });

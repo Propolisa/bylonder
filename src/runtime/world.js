@@ -1,4 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
+import { asObject } from "./object-transform.js";
 import { createModifierSystem, registerModifier } from "../modifiers/stack.js";
 import { createWorkerEvaluator } from "../modifiers/evaluator.js";
 import { createJobs } from "../windowmanager/wm-jobs.js";
@@ -83,10 +84,12 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   } else scene = new BABYLON.Scene(engine);
   let authoredCamera = scene.activeCamera;
   authoredCamera?.detachControl();
+  const authored = (n) => !n.name.startsWith("__") && n.metadata?.editable !== false;
   // Skyboxes (infinite-distance meshes) belong to the World, which shows them in rendered views only (world-babylon.js).
   const objects = [
     ...scene.meshes.filter((m) => hasMesh(m) && !m.infiniteDistance && m.metadata?.editable !== false),
-    ...scene.transformNodes.filter((n) => !n.name.startsWith("__") && n.metadata?.editable !== false),
+    ...scene.transformNodes.filter(authored),
+    ...[...scene.lights, ...scene.cameras].filter(authored).map(asObject),
   ];
   const names = new Set();
   for (const node of objects) {
