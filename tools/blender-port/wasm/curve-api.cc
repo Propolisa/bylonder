@@ -382,6 +382,88 @@ bool curve_select_pick(bContext *C, int x, int y, int dist_px, int sel_op, bool 
   return ED_curve_editnurb_select_pick(C, mval, dist_px, params);
 }
 
+/* Box, lasso and circle select in Edit Mode (do_nurbs_box_select, do_lasso_select_curve, nurbscurve_circle_select in
+ * view3d_select.cc), in two steps: curve_screen_verts gives the points nurbs_foreachScreenVert visits (region pixels,
+ * x then y), JS tests them against its gesture's shape, and curve_select_region selects by those results in the same
+ * order. */
+static void curve_foreach_screen_vert(bContext *C,
+                                      void (*fn)(void *, Nurb *, BPoint *, BezTriple *, int, bool, const float[2]),
+                                      void *user_data)
+{
+  ViewContext vc = ED_view3d_viewcontext_init(C, CTX_data_depsgraph_pointer(C));
+  ED_view3d_init_mats_rv3d(vc.obedit, vc.rv3d);
+  nurbs_foreachScreenVert(&vc, fn, user_data, V3D_PROJ_TEST_CLIP_DEFAULT);
+}
+
+struct ScreenVerts {
+  float *co;
+  int len, max;
+};
+EXPORT(curve_screen_verts) int curve_screen_verts(bContext *C, float *r_co, int max)
+{
+  ScreenVerts verts{r_co, 0, max};
+  curve_foreach_screen_vert(
+      C,
+      [](void *user_data, Nurb *, BPoint *, BezTriple *, int, bool, const float screen_co[2]) {
+        ScreenVerts &v = *static_cast<ScreenVerts *>(user_data);
+        if (v.len < v.max) {
+          copy_v2_v2(v.co + 2 * v.len, screen_co);
+        }
+        v.len++;
+      },
+      &verts);
+  return verts.len;
+}
+
+struct RegionSelect {
+  const uint8_t *inside;
+  int index;
+  eSelectOp sel_op;
+  bool circle;
+  short select_flag;
+  bool is_changed;
+};
+/* port-override: do_nurbs_box_select__doSelect and nurbscurve_circle_doSelect with the inside test made in JS. */
+static void region_select_vert(
+    void *user_data, Nurb *, BPoint *bp, BezTriple *bezt, int beztindex, bool handles_visible, const float[2])
+{
+  RegionSelect &data = *static_cast<RegionSelect *>(user_data);
+  const bool is_inside = data.inside[data.index++];
+  uint8_t *flag_p = bp ? &bp->f1 : reinterpret_cast<uint8_t *>(&bezt->f1) + (data.circle || handles_visible ? beztindex : 1);
+  if (data.circle) {
+    if (is_inside) {
+      SET_FLAG_FROM_TEST(*flag_p, data.sel_op != SEL_OP_SUB, data.select_flag);
+      data.is_changed = true;
+    }
+    return;
+  }
+  const int sel_op_result = ED_select_op_action_deselected(data.sel_op, *flag_p & SELECT, is_inside);
+  if (sel_op_result != -1) {
+    SET_FLAG_FROM_TEST(*flag_p, sel_op_result, data.select_flag);
+    data.is_changed = true;
+  }
+  if (bezt && !handles_visible) {
+    bezt->f1 = bezt->f3 = bezt->f2;
+  }
+}
+EXPORT(curve_select_region) bool curve_select_region(bContext *C, int sel_op, bool circle, const uint8_t *inside)
+{
+  Curve *curve = id_cast<Curve *>(CTX_data_edit_object(C)->data);
+  ListBaseT<Nurb> *nurbs = BKE_curve_editNurbs_get(curve);
+  RegionSelect data{inside, 0, eSelectOp(sel_op), circle, SELECT, false};
+  const bool deselect_all = data.sel_op == SEL_OP_SET;
+  if (deselect_all) {
+    BKE_nurbList_flag_set(nurbs, BEZT_FLAG_TEMP_TAG, false);
+    data.select_flag = BEZT_FLAG_TEMP_TAG;
+  }
+  curve_foreach_screen_vert(C, region_select_vert, &data);
+  if (deselect_all) {
+    data.is_changed |= BKE_nurbList_flag_set_from_flag(nurbs, BEZT_FLAG_TEMP_TAG, BEZT_FLAG_SELECT);
+  }
+  BKE_curve_nurb_vert_active_validate(curve);
+  return data.is_changed;
+}
+
 /* The enum property an operator's invoke offers as a menu (WM_menu_invoke on ot->prop: curve.handle_type_set's
  * type), or null when its invoke is not a menu. */
 EXPORT(operator_menu_property) const char *operator_menu_property(wmOperator *op)

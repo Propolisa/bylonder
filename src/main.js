@@ -336,7 +336,7 @@ const blenderRNA = createRNA({ world, selection: editor.selection, update: () =>
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
 // The mode the tool system and Blender's keymaps go by (context.mode).
-const contextMode = () => (world.editMode.active ? "EDIT_MESH" : "OBJECT");
+const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT_TEXT" }[world.editMode.kind] ?? "OBJECT");
 // Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
 const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
 const applyTool = () => {

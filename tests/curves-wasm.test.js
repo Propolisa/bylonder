@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { CurveObject, evaluateCurve } from '../src/blenkernel/curve/curve.js';
+import { CurveObject, View3DRegion, evaluateCurve } from '../src/blenkernel/curve/curve.js';
 
 // Blender's Curve and Text objects evaluated, edited and laid out by Blender's code in the module, against Blender
 // 5.2's results (tools/blender-reference/curve-fixtures.py): splines after Edit Mode operators and the evaluated mesh.
@@ -117,4 +117,32 @@ for (const file of fs.readdirSync(dir).sort()) {
 }
 assert.deepEqual(failed, [], 'Curve and text results that differ from Blender');
 assert.equal(known.length, Object.keys(KNOWN).length, 'A known difference is gone: remove it from KNOWN');
-console.log(`Curves and text: ${fs.readdirSync(dir).length} cases match Blender 5.2 (splines after Edit Mode operators and transforms, evaluated meshes, text layout, text on a curve and the Curve modifier); ${known.length} known differences`);
+// Region selects and the text cursor click in a top orthographic 3D View, 200 pixels across 10 units: Blender's
+// region select (nurbs_foreachScreenVert, eSelectOp) and font.selection_set run in the module.
+const region = new View3DRegion();
+region.set({ width: 200, height: 200, viewmat: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -10, 1], winmat: [0.2, 0, 0, 0, 0, 0.2, 0, 0, 0, 0, -0.01, 0, 0, 0, 0, 1] });
+const pixel = (x, y) => [100 + 20 * x, 100 + 20 * y];
+const circle = new CurveObject('CURVE');
+circle.enter();
+circle.run('curve.primitive_bezier_circle_add');
+const flags = () => circle.data.splines[0].bezier_points.map((p) => [p.select_left_handle, p.select_control_point, p.select_right_handle].map(Number).join(''));
+const inBox = ([x0, y0], [x1, y1]) => (x, y) => x >= x0 && x <= x1 && y >= y0 && y <= y1;
+// The right point's center alone: SET deselects its visible handles and every other point.
+assert.ok(circle.selectRegion(region, inBox(pixel(0.5, -0.2), pixel(1.5, 0.2))));
+assert.deepEqual(flags(), ['000', '000', '010', '000'], 'box select (SET) selects the center inside and deselects the rest');
+// Handles are drawn for selected points only (SELECTED), so the top point's handle-free center is tested alone.
+assert.ok(circle.selectRegion(region, inBox(pixel(-0.2, 0.8), pixel(0.8, 1.2)), { sel_op: 1 }));
+assert.deepEqual(flags(), ['000', '111', '010', '000'], 'box select (ADD) of a point whose handles are hidden selects all three');
+assert.ok(circle.selectRegion(region, (x, y) => Math.hypot(x - pixel(0, 1)[0], y - pixel(0, 1)[1]) <= 5, { sel_op: 2, circle: true }));
+assert.deepEqual(flags(), ['000', '101', '010', '000'], 'circle select (SUB) deselects the centers inside the circle');
+circle.free();
+const text = new CurveObject('FONT');
+text.enter();
+const clickAt = (x) => {
+  text.invoke(region, 'font.selection_set', { type: 'LEFTMOUSE', value: 'PRESS', x: pixel(x, 0.2)[0], y: pixel(x, 0.2)[1] });
+  text.modal(region, { type: 'LEFTMOUSE', value: 'RELEASE', x: pixel(x, 0.2)[0], y: pixel(x, 0.2)[1] });
+  return text.text.pos;
+};
+assert.deepEqual([0.1, 0.6, 1.2, 2].map(clickAt), [0, 1, 2, 4], 'a click puts the text cursor at the nearest character boundary');
+text.free();
+console.log(`Curves and text: ${fs.readdirSync(dir).length} cases match Blender 5.2 (splines after Edit Mode operators and transforms, evaluated meshes, text layout, text on a curve and the Curve modifier); ${known.length} known differences; region selects and the text cursor click by Blender's code`);

@@ -286,12 +286,18 @@ export class CurveObject {
   // view3d.select for a region pixel (sel_op an eSelectOp), as Blender picks in Edit Mode, in a 3D View region
   // (View3DRegion) given its size, view and window matrices.
   selectPick(region, [px, py], { dist = 75, sel_op = 1, deselect_all = true, select_passthrough = false } = {}) {
-    x.view3d_region_attach(this.main.C, region.address);
-    try {
-      return !!x.curve_select_pick(this.main.C, px, py, dist, sel_op, deselect_all, select_passthrough);
-    } finally {
-      x.view3d_region_attach(this.main.C, 0);
-    }
+    return this.#inRegion(region, (C) => !!x.curve_select_pick(C, px, py, dist, sel_op, deselect_all, select_passthrough));
+  }
+
+  // Box, lasso and circle select (circle: Blender's circle rule) of the points for which inside(x, y) holds, in region
+  // pixels, by an eSelectOp. Returns whether the selection changed.
+  selectRegion(region, inside, { sel_op = 3, circle = false } = {}) {
+    return this.#inRegion(region, (C) => {
+      const count = x.curve_screen_verts(C, 0, 0);
+      const co = withArrays([new Float32Array(2 * count)], ([p]) => { x.curve_screen_verts(C, p, count); return new Float32Array(x.memory.buffer, p, 2 * count).slice(); });
+      const flags = Uint8Array.from({ length: count }, (_, i) => inside(co[2 * i], co[2 * i + 1]));
+      return withArrays([flags], ([f]) => !!x.curve_select_region(C, sel_op, circle, f));
+    });
   }
 
   // An operator invoked by an event in a 3D View region (font.selection_set's click), as Blender's handlers invoke
@@ -336,7 +342,7 @@ export class CurveObject {
 // eSelectOp.
 export const SEL_OP_ADD = 1, SEL_OP_SUB = 2, SEL_OP_SET = 3, SEL_OP_XOR = 4;
 // View3DOverlay.display_handle.
-export const HANDLE_DISPLAY = { NONE: 0, SELECTED: 1, ALL: 2 };
+export const HANDLE_DISPLAY = { SELECTED: 0, ALL: 1, NONE: 2 };
 
 // A 3D View's window region in the module (view3d_region_new): its size and matrices (column-major, Blender's axes).
 export class View3DRegion {

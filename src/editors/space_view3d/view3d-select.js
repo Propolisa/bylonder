@@ -53,7 +53,7 @@ export const circleRegion = ([cx, cy], radius) => {
     const t = length ? Math.max(0, Math.min(1, ((cx - ax) * dx + (cy - ay) * dy) / length)) : 0;
     return point([ax + t * dx, ay + t * dy]);
   };
-  return { point, edge, edgesInsideFirst: false };
+  return { point, edge, edgesInsideFirst: false, circle: true };
 };
 
 // `view` as editmesh-select describes it; `region` one of the above in client pixels. Reads the edit mesh's Mesh

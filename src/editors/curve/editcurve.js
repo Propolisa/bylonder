@@ -16,6 +16,8 @@ import { createMesh } from '../../blenkernel/mesh/mesh.js';
 import { initTransform, toBlender, toBlenderView } from '../transform/transform.js';
 import { worldAxes } from '../transform/transform-mesh.js';
 import { createKeymap } from '../../windowmanager/input/keymap.js';
+import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
+import { boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
 import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
 import { curveData } from './curve-objects.js';
 
@@ -138,6 +140,21 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     if (hit) sync();
   }
 
+  // Box, lasso and circle select: the points Blender visits (nurbs_foreachScreenVert) inside a region of the view, in
+  // client pixels (view3d-select.js), by eSelectOp.
+  function selectRegion(view, shape, mode) {
+    const rect = ed?.kind === 'CURVE' && placeRegion(view ?? views.input);
+    if (!rect) return;
+    const inside = (x, y) => shape.point([rect.left + x, rect.bottom - y]);
+    if (ed.object.selectRegion(region, inside, { sel_op: SEL_OPS[mode] ?? SEL_OPS.SET, circle: !!shape.circle })) sync();
+  }
+  // view3d.select_box: a box gesture, begun at the drag's press or (from B) at the next press.
+  const selectBox = (event, { mode = 'SET' }) => startGestureBox(wm(), {
+    begin: /mouse$/.test(event.type) ? { x: event.x, y: event.y } : null,
+    mode,
+    select: (rect, m) => selectRegion(event.view, boxRegion(rect), m),
+  });
+
   // font.selection_set: a click puts the text cursor where Blender's layout has the character under the mouse, and a
   // drag selects up to where it is released.
   function textClick(event) {
@@ -248,12 +265,7 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     'font.text_paste': { poll: inText, run: async () => { const text = await globalThis.navigator?.clipboard?.readText(); if (text && ed) exec('font.text_insert', { text }); } },
   });
 
-  const inView = (event) => !!event.view && ed?.kind === 'CURVE';
-  const viewKeymap = createKeymap([
-    { blender: 'font.selection_set', keys: 'LEFTMOUSE PRESS', poll: (event) => !!event.view && ed?.kind === 'FONT', run: textClick },
-    { blender: 'view3d.select', keys: 'LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, false) },
-    { blender: 'view3d.select', keys: 'Shift LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, true) },
-  ], ['3D View']);
+  registerOperator('font.selection_set', { poll: (props, event) => !!event?.view && inText(), run: (props, event) => textClick(event) });
   const modeKeys = createKeymap([
     { blender: 'object.mode_set', keys: 'Tab', poll: () => !!ed || editable(activeObject()), run: () => (ed ? exit() : enter()) },
   ], ['Object Non-modal']);
@@ -268,8 +280,15 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     exit,
     toggle: () => (ed ? exit() : enter()),
     exec,
-    keymap: (event) => modeKeys(event) || (!!ed && (typed(event) || viewKeymap(event))),
+    keymap: (event) => modeKeys(event) || (!!ed && typed(event)),
     transform,
+    // view3d.select, view3d.select_box and the other region selects, as the tools' and 3D View's keymaps run them.
+    selectOperator(event, { toggle, select_passthrough }) {
+      if (ed?.kind === 'CURVE') selectPick(event, !!toggle);
+      return select_passthrough ? 'PASS_THROUGH' : 'FINISHED';
+    },
+    selectBox,
+    selectRegion,
     // Selected and total control points, as the status bar counts them.
     get stats() {
       if (!ed || ed.kind === 'FONT') return null;
