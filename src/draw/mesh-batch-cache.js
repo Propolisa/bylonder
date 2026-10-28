@@ -48,6 +48,49 @@ export function mesh_batch_cache_wire_indices(babylonMesh) {
   return lines;
 }
 
+// The triangles' edges with the corners opposite them (extract_mesh_ibo_lines_adjacency.cc): four Babylon vertices
+// per edge, the opposite corner of one triangle, the edge's two corners, the opposite corner of the other. Vertices at
+// the same position are one vertex, as Babylon splits Blender's vertices into face corners. An edge with one triangle,
+// or with triangles of mismatched winding, repeats the triangle's own corner.
+export function mesh_batch_cache_edge_detection(babylonMesh) {
+  const tris = babylonMesh.getIndices() ?? [], p = babylonMesh.getVerticesData('position') ?? [];
+  const welded = new Map(), vert = new Uint32Array(p.length / 3);
+  for (let c = 0; c < vert.length; c++) {
+    const key = p[c * 3] + ',' + p[c * 3 + 1] + ',' + p[c * 3 + 2];
+    if (!welded.has(key)) welded.set(key, welded.size);
+    vert[c] = welded.get(key);
+  }
+  const HANDLED = -1, edges = new Map(), vertToCorner = new Uint32Array(welded.size), out = [];
+  const add = (a, b, c, d) => out.push(a, b, c, d);
+  for (let t = 0; t < tris.length; t += 3) {
+    const corner = [tris[t], tris[t + 1], tris[t + 2]];
+    for (let e = 0; e < 3; e++) {
+      corner.unshift(corner.pop());
+      const v1 = vert[corner[1]], v2 = vert[corner[2]], inv = v1 > v2, key = inv ? v2 * welded.size + v1 : v1 * welded.size + v2;
+      const value = edges.get(key);
+      if (value === undefined) {
+        edges.set(key, inv ? -(corner[0] + 1) : corner[0] + 1);
+        vertToCorner[v1] = corner[1];
+        vertToCorner[v2] = corner[2];
+      } else if (value !== HANDLED) {
+        edges.set(key, HANDLED);
+        const opposite = Math.abs(value) - 1;
+        if ((value < 0) === inv) {
+          add(corner[0], corner[1], corner[2], corner[0]);
+          add(opposite, corner[1], corner[2], opposite);
+        } else add(corner[0], corner[1], corner[2], opposite);
+      }
+    }
+  }
+  for (const [key, value] of edges) {
+    if (value === HANDLED) continue;
+    let v2 = Math.floor(key / welded.size), v3 = key % welded.size;
+    if (value < 0) [v2, v3] = [v3, v2];
+    add(Math.abs(value) - 1, vertToCorner[v2], vertToCorner[v3], Math.abs(value) - 1);
+  }
+  return Uint32Array.from(out);
+}
+
 // Faces become the mesh's geometry; loose edges a line child that picks as its owner. With `topology` false only
 // positions changed since the last apply, so the buffers are updated in place.
 export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = {}) {

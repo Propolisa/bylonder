@@ -3,6 +3,7 @@ import { h,defineComponent,computed } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { Color3 } from '@babylonjs/core';
 import { icon,iconButton } from './icons.js';
+import { openMenu } from './menu.js';
 export const Panel=defineComponent({props:['title','panelId','state','subpanel','actions','defaultClosed'],setup(props,{slots}){
   const closed=computed(()=>props.defaultClosed?!props.state.opened?.includes(props.panelId):props.state.closed?.includes(props.panelId));
   const toggle=event=>{if(props.defaultClosed&&!event?.ctrlKey){props.state.opened=closed.value?[...(props.state.opened||[]),props.panelId]:props.state.opened.filter(id=>id!==props.panelId);return;}if(event?.ctrlKey){props.state.closed=closed.value?props.state.panels.filter(id=>id!==props.panelId):props.state.panels.filter(id=>id.startsWith(props.panelId+'.'));}else props.state.closed=closed.value?props.state.closed.filter(id=>id!==props.panelId):[...(props.state.closed||[]),props.panelId];};
@@ -22,9 +23,10 @@ export const PropertyRow=defineComponent({props:['field','animation','commit'],s
   const refs=()=>props.field.refs?.()||[];
   const keyframe=()=>props.animation?.insert(refs());
   const deleteKey=()=>props.animation?.deleteKeys(refs().map(ref=>({ref,frame:Math.round(props.animation.time.frame)})));
-  const context=e=>{e.preventDefault();const menu=document.createElement('dialog');menu.className='bl-context-menu';
-    const entries=[['Reset to Default Value',()=>set(props.field.default)],['Copy Data Path',()=>navigator.clipboard?.writeText(refs().join('\n'))],...(refs().length?[['Insert Keyframe',keyframe],['Delete Keyframe',deleteKey],['Clear Keyframes',()=>props.animation.clear(refs())]]:[])];
-    for(const [label,fn] of entries){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{fn();menu.close();};menu.append(b);}const close=document.createElement('button');close.textContent='Cancel';close.onclick=()=>menu.close();menu.append(close);menu.onclose=()=>menu.remove();document.body.append(menu);menu.showModal();};
+  // The button's context menu, as Blender's (ui_popup_context_menu_for_button).
+  const context=e=>{e.preventDefault();const keyed=refs().length&&props.animation.state(refs()[0])!=='none';
+    openMenu([...(refs().length?[{label:'Insert Keyframe',blender:'anim.keyframe_insert_button',keys:'I',run:keyframe},...(keyed?[{label:'Delete Keyframe',blender:'anim.keyframe_delete_button',keys:'Alt I',run:deleteKey},{label:'Clear Keyframes',blender:'anim.keyframe_clear_button',keys:'Shift Alt I',run:()=>props.animation.clear(refs())}]:[]),'-']:[]),
+      {label:'Reset to Default Value',blender:'ui.reset_default_button',keys:'Backspace',run:()=>set(props.field.default)},{label:'Copy Data Path',blender:'ui.copy_data_path_button',keys:'Shift Ctrl C',run:()=>navigator.clipboard?.writeText(refs().join('\n'))}],{x:e.clientX,y:e.clientY});};
   return()=>{
     const field=props.field,current=value(),list=refs(),status=list.length?props.animation.state(list[0]):'none',title=`${field.label}${field.description?'\n'+field.description:''}${list.length?'\n'+list.join('\n'):''}`;
     const number=typeof current==='number',disabled=field.disabled?.();

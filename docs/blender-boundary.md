@@ -51,9 +51,18 @@ no counterpart for; the overlap is kept equal both ways.
 3. **Blender to Babylon, by recalc tags.** After Blender's code runs, what it tagged (`ID_RECALC_TRANSFORM`,
    `_GEOMETRY`, `_SHADING`, `_SELECT`, ...) is written to Babylon through the same mapping, inside the operator's
    undo step. Writing back does not echo to Main.
-4. **Data only one side has.** Babylon's (node materials, GPU effects, what project code builds) stays Babylon's,
-   and is kept in Main as custom properties where a round trip needs it. Blender's (Actions, curves, text, modifiers,
-   collections) lives in Main, and Babylon holds its evaluated result.
+4. **Both models are accurate at every moment.** Everything but large buffers (point 5) is held live on both sides
+   and kept equal through the mapping: transforms and settings, curve and text data, modifiers, collections, textures,
+   material settings, animation. Babylon's own data (node materials, GPU effects, what project code builds) is in Main
+   as custom properties where a round trip needs it; Blender's own data is on the Babylon side in RNA's terms, on the
+   object or scene it belongs to, so Bylonder's undo and project save carry it. No state is filled in only on demand
+   except large buffers, so neither model is ever stale.
+   **Animation is Blender's.** Blender's animation system is the richer one, so Actions (layered, with slots, F-Curves,
+   F-Modifiers, drivers) are edited and evaluated by Blender's code in Main (`animrig`, `evaluate_fcurve`); the Babylon
+   side mirrors them live as their RNA record (for undo and save) and as Babylon Animations and AnimationGroups made
+   from them, so Babylon-native playback and export work without Blender's runtime. The viewport shows Blender's
+   evaluation; Babylon's animations are exactly derived from it, never edited on their own.
+   Decided 2026-10-28.
 5. **Large data has one owner.** Mesh geometry (and other large buffers: attributes, images) lives in the Babylon
    scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
    needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
@@ -343,6 +352,8 @@ CPython runs scripts and the console: Pyodide, CPython in WebAssembly, from cdn.
 ## Menus
 
 Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order. A binding gives an operator button its shortcut only when its properties are the ones the button sets, as Blender's buttons compare them (`WM_key_event_operator_string`, strict), then the ones set away from their defaults; an operator's own `keys(props)` binds the properties it reads (`menuUI` in `wm-operators.js`). So File > New's templates, which set `app_template`, show no Ctrl N; File's New entry shows the Ctrl N that opens it.
+
+Context menus are Blender's too, decided 2026-10-28: right click runs the editor's keymaps, whose `wm.call_menu` opens the context menu of the editor and mode (`VIEW3D_MT_object_context_menu`, `VIEW3D_MT_edit_mesh_context_menu`, `OUTLINER_MT_object`, `GRAPH_MT_context_menu`, `TEXT_MT_context_menu` and so on) from the context area's `menu(idname)`. A property button's right click is `ui_popup_context_menu_for_button`'s menu (`propertyMenu` in `layout-view.js`): keyframes, reset to default and copy data path. Not yet: the Node Editor's `NODE_MT_context_menu` and the area header's menu (`screen.region_context_menu`), which is still Bylonder's.
 
 ## 3D View regions
 

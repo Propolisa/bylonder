@@ -12,15 +12,8 @@ export function createAddMesh(
   notify,
 ) {
   const catalog = meshCatalog(config),
-    menu = document.querySelector("#add-menu"),
-    search = document.querySelector("#add-search"),
-    list = document.querySelector("#add-list"),
     panel = document.querySelector("#creation-panel");
   let pane, pending, lastOperation;
-  const close = () => {
-    menu.close();
-    world.focusViewport?.();
-  };
   const finish = (commit = true) => {
     if (!pending) return;
     if (commit) {
@@ -75,7 +68,6 @@ export function createAddMesh(
   // the object, as an Add operator's properties do, at the 3D cursor by default.
   const add = (preset, { options = {}, location = world.sceneSettings?.state.cursor.location, rotation } = {}) => {
     finish();
-    close();
     editor.finish(false);
     const before = snapshot(world.objects);
     const recipe = recipeOf(preset, { ...Object.fromEntries(Object.entries(preset.schema).map(([key, def]) => [key, def.default])), ...options });
@@ -96,25 +88,6 @@ export function createAddMesh(
     editor.reconcile();
     controls(node, preset, before);
   };
-  const render = () => {
-    list.replaceChildren();
-    for (const preset of catalog.filter((p) =>
-      p.title.toLowerCase().includes(search.value.toLowerCase()),
-    )) {
-      const b = document.createElement("button");
-      b.textContent = preset.title;
-      b.onclick = () => add(preset);
-      list.append(b);
-    }
-  };
-  search.oninput = render;
-  search.onkeydown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      list.querySelector("button")?.click();
-    }
-  };
-  document.querySelector("#add-close").onclick = close;
   return {
     catalog,
     add(preset, placement) {
@@ -123,17 +96,6 @@ export function createAddMesh(
     },
     get pending() {
       return pending;
-    },
-    get open() {
-      return menu.open;
-    },
-    show() {
-      finish();
-      render();
-      menu.showModal();
-      search.value = "";
-      render();
-      search.focus();
     },
     finish,
     reopen() {

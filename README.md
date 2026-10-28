@@ -47,7 +47,6 @@ File > New from Example (or the splash screen shown on first visit) creates a pr
 | Select / deselect                  | Click object; click selected object again to remove it |
 | Multi-select                       | Shift-click objects or scene rows                      |
 | Clear selection                    | Click empty viewport                                   |
-| Group / ungroup                    | Ctrl G / Ctrl Alt G, or scene panel buttons            |
 | Orbit / pan / zoom                 | MMB / Shift MMB / wheel                                |
 | Front / right / top                | Numpad 1 / 3 / 7 (number row also works)               |
 | Opposite view                      | Ctrl + view key                                        |
@@ -59,7 +58,8 @@ File > New from Example (or the splash screen shown on first visit) creates a pr
 | Reposition without applying motion | Hold Alt; release to start another sweep               |
 | Confirm / cancel                   | Enter or left-click / Escape or right-click            |
 | Undo / redo                        | Ctrl Z / Ctrl Shift Z                                  |
-| Babylon Inspector                  | Ctrl Shift I or Inspector button                       |
+| Context menu                       | Right-click (Blender's menu for the editor and mode)   |
+| Babylon Inspector                  | Ctrl Shift I, or View > Babylon Inspector              |
 
 No selection is active initially. Selected meshes show an orange outline. Clicking a mesh in a group selects its outermost group; the hierarchy list can select individual children. Grouping creates native Babylon `TransformNode` parents and preserves child world transforms. Ungrouping reparents children without recursively disposing them. Groups can nest.
 
@@ -71,7 +71,7 @@ Browsers may deny pointer lock (including restricted embeds). The app reports th
 
 `editors/object/selection.js` owns stable selection IDs, outlines, native groups and a transient `TransformNode` pivot. Multi-selection filters parent/child duplicates. The pivot's world delta is applied to selected root nodes and converted back to local space. It is never serialized. Gizmos, numeric fields and modal operations share this transform path. Babylon uses TRS decomposition; arbitrary shear from rotated non-uniform parent scaling is not supported. Grouping is organizational, not mesh merging or geometry editing.
 
-`editors/undo/storage.js` persists versioned node transforms and parent IDs, including groups. Version 1 flat snapshots migrate when read. Remember transforms is off by default. Enabling writes current and subsequent committed changes. Disabling/forgetting removes the saved snapshot without changing the current scene. Camera and system parameters remain session-only. Undo/redo covers 100 committed transform/group states; Inspector edits are direct advanced edits outside that history. Mesh names must be unique and stable; change the storage key for independently deployed projects.
+`editors/undo/storage.js` snapshots node transforms and parent IDs, including groups, for undo and the project's saved scene edits. Camera and system parameters remain session-only. Undo/redo covers 100 committed transform/group states; Inspector edits are direct advanced edits outside that history. Mesh names must be unique and stable; change the storage key for independently deployed projects.
 
 ## Reactive systems
 
@@ -164,7 +164,7 @@ Call this during createScene. Code builds the same primitives with `createPrimit
 
 Tab enters Edit Mode on the active mesh, with Blender's select modes (1, 2, 3, Shift to combine), click select (Shift toggles, clicking again cycles through overlapping elements), box select by dragging or B (Shift extends, Ctrl subtracts), A, Alt A, Ctrl I, H, Shift H and Alt H. G, R and S move, rotate and scale the selection about its median point, with X, Y and Z (Shift for a plane) constraining in Blender's axes. E extrudes and moves along the normal, I insets faces. Ctrl R cuts edge loops with Blender's preview and slides the new loop; GG slides selected edges. Edge > Subdivide subdivides, and its Adjust Last Operation panel re-runs it with new settings. X or Delete opens the Delete menu (Vertices, Edges, Faces, Only Edges & Faces, Only Faces, Dissolve Faces). Edits are stored as Mesh data on the object (`wbCreation.mesh`) and saved with scene edits, so they replace the geometry that code builds. Selection and every edit are undo steps.
 
-Object actions live in one registry (`src/editors/object/object-actions.js`), shared by keyboard shortcuts and the same context-menu renderer for viewport and outliner. Shift+D duplicates with independent geometry, then starts Move; cancelling Move keeps the duplicate. X/Delete removes selection, F2 renames, A/Alt+A/Ctrl+I selects/deselects/inverts, H/Shift+H/Alt+H controls visibility, / isolates, Alt+G/R/S resets transforms, Ctrl+P parents to the active object, and Alt+P unparents. Native groups remain available.
+Keys and right-click menus are Blender's: every editor runs Blender's keymaps, and right-click opens the editor's context menu through `wm.call_menu` (Object Mode's `VIEW3D_MT_object_context_menu`, Edit Mode's, the Outliner's, and so on); a property's right-click opens Blender's button context menu. Object Mode's operators that Bylonder runs itself are in `src/editors/object/object-actions.js`. Shift+D duplicates with independent geometry, then starts Move; cancelling Move keeps the duplicate. X/Delete removes selection, F2 renames, A/Alt+A/Ctrl+I selects/deselects/inverts, H/Shift+H/Alt+H controls visibility, / isolates, Alt+G/R/S resets transforms, Ctrl+P parents to the active object, and Alt+P unparents. Native groups remain available.
 
 The Outliner runs Blender's own outliner code (tree building, drawing, selection, restriction toggles, rename, drag and drop) in the WASM module over the shared Blender world.
 
@@ -172,7 +172,7 @@ Stable IDs separate object identity from display names. History and project over
 
 ## Text
 
-Shift+A > Text creates real extruded glyph outlines. Tab or the shared right-click **Edit Text** command edits the selected text. The font field searches the Google Fonts catalogue and accepts any family name; the preview uses the same downloaded font as the geometry. Weight, italic, size, depth, spacing, line height, alignment and curve resolution share `textSchema`. Unsupported styles report an error. Color-only glyphs cannot be extruded; outline fonts render as monochrome meshes. Text is capped at 2,000 characters per object.
+Shift+A > Text creates real extruded glyph outlines. Tab edits the selected text. The font field searches the Google Fonts catalogue and accepts any family name; the preview uses the same downloaded font as the geometry. Weight, italic, size, depth, spacing, line height, alignment and curve resolution share `textSchema`. Unsupported styles report an error. Color-only glyphs cannot be extruded; outline fonts render as monochrome meshes. Text is capped at 2,000 characters per object.
 
 Apply commits one undo step; Cancel restores the previous geometry. Saved overrides include baked geometry and text settings, so restoration does not need the font network request. Font requests use Google Fonts CSS2 and CacheStorage; the searchable catalogue comes from Fontsource. First use requires network access. Font loading uses Fontkit (WOFF2, TrueType and OpenType); Babylon PolygonMeshBuilder and Earcut preserve glyph holes.
 
@@ -276,7 +276,7 @@ Animation actions are project data: autosaved, versioned, undoable, forked, zipp
 
 ## Properties and modifiers
 
-Properties follows Blender's Object / Modifiers / Scene context structure. Add an array from **Modifiers > Add Modifier > Generate > Array**, or the object context menu. The modifier stack is independent of the original mesh, animatable, undoable, and retained with **Remember Scene Edits**. `Apply` writes evaluated geometry to the source; removing a modifier restores the input geometry.
+Properties follows Blender's Object / Modifiers / Scene context structure. Add an array from **Modifiers > Add Modifier > Generate > Array**. The modifier stack is independent of the original mesh, animatable, undoable, and retained with **Remember Scene Edits**. `Apply` writes evaluated geometry to the source; removing a modifier restores the input geometry.
 
 ```js
 workbench.addModifier(sphere, 'ARRAY', {

@@ -14,6 +14,8 @@ export const view_3d = {
   object_selected: [0.9294, 0.3412, 0, 1],
   object_active: [1, 0.6275, 0.1569, 1],
   object_origin_size: 6,
+  outline_width: 1,
+  transform: [1, 1, 1, 1],
   camera: [0, 0, 0, 1],
   light: [0, 0, 0, 0.3137],
   empty: [0, 0, 0, 1],

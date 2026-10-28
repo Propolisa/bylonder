@@ -208,8 +208,6 @@ export function createWorkbench(scene, { wireColor = () => theme.wire } = {}) {
   };
   const showWires = scene.onBeforeCameraRenderObservable.add((camera) => {
     const show = shaded.get(camera) === 'wire';
-    // Wireframe draws selected objects' edges in the selection colors instead of outlines.
-    if (scene.getOutlineRenderer) scene.getOutlineRenderer().enabled = !show;
     if (show) for (const mesh of scene.meshes) if (shadedMesh(mesh) && !wires.has(mesh)) edges(mesh);
     for (const [mesh, lines] of wires) {
       if (mesh.isDisposed()) { lines.dispose(); wires.delete(mesh); continue; }
