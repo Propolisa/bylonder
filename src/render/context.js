@@ -41,6 +41,7 @@ async function open(input, { width, height }, { camera: cameraName } = {}) {
   engine.setHardwareScalingLevel(1);
   built = await createWorld({ input, engine, canvas, hooks: { notify: text => warnings.push(String(text)) } });
   const { world, scene } = built;
+  world.collections.useRenderVisibility();
   engine.setSize(width, height);
   const camera = await useCamera(cameraName);
   world.beforeViewRender({ rendered: true, compositor: true });

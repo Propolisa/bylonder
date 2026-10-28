@@ -85,6 +85,9 @@ export function createObjectCommands(world, editor, history, refresh) {
     visibility(node) {
       transaction(() => node.setEnabled(!node.isEnabled(false)));
     },
+    hideRender(node) {
+      transaction(() => { node.metadata = { ...node.metadata, wbHideRender: !node.metadata?.wbHideRender }; });
+    },
     lock(node) {
       transaction(() => {
         node.metadata = {

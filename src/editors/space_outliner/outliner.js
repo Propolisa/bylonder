@@ -2,15 +2,19 @@ import { nodeId, deleted } from "../object/identity.js";
 import { iconEl } from "../interface/icon.js";
 import { menuButton, openMenu } from "../interface/menu.js";
 const kindIcons = { Mesh: ["outliner_ob_mesh", "obj", "mesh_data"], Empty: ["outliner_ob_empty", "obj"], Camera: ["outliner_ob_camera", "obj", "camera_data"], Light: ["outliner_ob_light", "obj", "light_data"] };
+// Restriction columns in Blender's order, with SpaceOutliner's defaults (show_restrict_column_*).
+const COLUMNS = [["enable", "Exclude Checkbox", true], ["select", "Selectable", false], ["hide", "Hide in Viewport", true], ["render", "Disable in Renders", true]];
 // Outliner in View Layer display mode: Scene Collection > collections > objects, objects nested under
-// their parents within the same collection. An object linked to several collections appears in each.
+// their parents within the same collection, and each object's data. An object linked to several collections appears
+// in each.
 export function createOutliner(world, editor, commands) {
   const root = document.querySelector("#objects"),
     search = document.querySelector("#tree-search"),
     filter = document.querySelector("#tree-filter"),
     info = document.querySelector("#tree-info");
   const cols = world.collections;
-  const collapsed = new Set();
+  const collapsed = new Set(), opened = new Set();
+  const columns = Object.fromEntries(COLUMNS.map(([id, , shown]) => [id, shown]));
   let signature = "",
     anchor = null,
     rowKeys = [];
@@ -75,7 +79,7 @@ export function createOutliner(world, editor, commands) {
       type = filter.value;
     const next =
       JSON.stringify(all.map((n) => [nodeId(n), n.name, n.parent?.uniqueId, n.isEnabled(false), n.metadata?.wbLocked, editor.selection.has(n)])) +
-      JSON.stringify(cols.state) + query + type + [...collapsed].join();
+      JSON.stringify(cols.state) + query + type + [...collapsed, ...opened].join() + JSON.stringify(columns) + all.map((n) => n.metadata?.wbHideRender ? 1 : 0).join("");
     if (!force && next === signature) return;
     signature = next;
     root.replaceChildren();
@@ -83,25 +87,33 @@ export function createOutliner(world, editor, commands) {
     const matching = (n) => (!query || n.name.toLowerCase().includes(query)) && (!type || kind(n) === type);
     const rows = [];
     const byId = new Map(all.map((n) => [nodeId(n), n]));
+    // The enabled restriction columns at the row's right; a row without one keeps its place empty.
+    const restrictions = (cells) => COLUMNS.filter(([id]) => columns[id]).map(([id]) => cells[id] || Object.assign(document.createElement("span"), { className: "tree-restrict" }));
+    const toggle = (title, icon, fn) => button(iconEl(icon), title, fn, "tree-restrict");
+    const disclosure = (expandable, open, fn) => button(expandable ? iconEl(open ? "downarrow_hlt" : "rightarrow") : "", "Expand/collapse", fn, "tree-toggle");
+    const indent = (row, depth) => row.style.setProperty("--depth", depth);
     const objectRow = (node, depth, members, key, dim) => {
       const id = nodeId(node),
-        children = all.filter((n) => n.parent === node && members.has(n)),
+        children = all.filter((n) => n.parent === node && members.has(n)).sort((a, b) => a.name.localeCompare(b.name)),
         included = (n) => matching(n) || all.some((c) => c.isDescendantOf(n) && members.has(c) && matching(c));
       if (!included(node)) return;
       const rowKey = key + "/" + id,
         row = document.createElement("div");
+      const [typeIcon, tint, dataIcon] = kindIcons[kind(node)];
+      // Child objects show unless collapsed; the object's data shows when expanded, as in Blender.
+      const open = children.length ? !collapsed.has(rowKey) : opened.has(rowKey);
       if (children.length) rowKeys.push(rowKey);
       row.className = "object-row" + (editor.selection.has(node) ? " active" : "") + (!node.isEnabled() || dim ? " dim" : "");
       row.dataset.id = id;
-      row.style.paddingLeft = depth * 12 + "px";
+      indent(row, depth);
       row.setAttribute("role", "treeitem");
       row.setAttribute("aria-selected", String(editor.selection.has(node)));
       row.tabIndex = 0;
-      const toggle = button(children.length ? iconEl(collapsed.has(rowKey) ? "disclosure_tri_right" : "disclosure_tri_down") : "", "Expand/collapse", () => {
-        collapsed.has(rowKey) ? collapsed.delete(rowKey) : collapsed.add(rowKey);
+      const expander = disclosure(children.length || dataIcon, open, () => {
+        const set = children.length ? collapsed : opened;
+        set.has(rowKey) ? set.delete(rowKey) : set.add(rowKey);
         refresh();
-      }, "tree-toggle");
-      const [typeIcon, tint, dataIcon] = kindIcons[kind(node)];
+      });
       const name = button(
         [iconEl(typeIcon, tint), Object.assign(document.createElement("span"), { className: "tree-label", textContent: node.name }), dataIcon ? iconEl(dataIcon, "data tree-data") : ""],
         kind(node),
@@ -125,13 +137,14 @@ export function createOutliner(world, editor, commands) {
         "tree-name",
       );
       name.ondblclick = () => { if (editable(node)) rename(node); };
-      row.append(toggle, name,
-        button(iconEl(node.isEnabled(false) ? "hide_off" : "hide_on"), "Hide in Viewport", () => {
+      row.append(expander, name, ...restrictions({
+        select: editable(node) && toggle("Disable Selection", node.metadata?.wbLocked ? "restrict_select_on" : "restrict_select_off", () => commands.lock(node)),
+        hide: toggle("Hide in Viewport", node.isEnabled(false) ? "hide_off" : "hide_on", () => {
           if (editable(node)) commands.visibility(node);
           else { node.setEnabled(!node.isEnabled(false)); refresh(true); }
-        }));
-      if (editable(node))
-        row.append(button(iconEl(node.metadata?.wbLocked ? "restrict_select_on" : "restrict_select_off"), "Disable Selection", () => commands.lock(node)));
+        }),
+        render: editable(node) && toggle("Disable in Renders", node.metadata?.wbHideRender ? "restrict_render_on" : "restrict_render_off", () => commands.hideRender(node)),
+      }));
       row.draggable = editable(node);
       row.ondragstart = (e) => {
         e.dataTransfer.setData("text/x-workbench-node", id);
@@ -149,11 +162,21 @@ export function createOutliner(world, editor, commands) {
       };
       root.append(row);
       rows.push(node);
-      if (!collapsed.has(rowKey) || query) children.forEach((n) => objectRow(n, depth + 1, members, rowKey, dim));
+      if (open && dataIcon) dataRow(node, dataIcon, depth + 1);
+      if (open || (query && children.length)) children.forEach((n) => objectRow(n, depth + 1, members, rowKey, dim));
+    };
+    const dataRow = (node, icon, depth) => {
+      const row = document.createElement("div");
+      row.className = "object-row data-row";
+      indent(row, depth);
+      row.setAttribute("role", "treeitem");
+      row.append(disclosure(false), Object.assign(document.createElement("span"), { className: "tree-name" }));
+      row.lastChild.append(iconEl(icon, "data"), Object.assign(document.createElement("span"), { className: "tree-label", textContent: node.name }));
+      root.append(row);
     };
     const objectsOf = (id) => {
       const list = cols.objects(id).map((o) => byId.get(o)).filter(Boolean);
-      if (id === cols.MASTER) for (const n of all) if (!editable(n)) list.push(n);
+      if (id === cols.home) for (const n of all) if (!editable(n)) list.push(n);
       return new Set(list);
     };
     const collectionRow = (id, depth, key, parentHidden) => {
@@ -162,19 +185,19 @@ export function createOutliner(world, editor, commands) {
         row = document.createElement("div");
       rowKeys.push(rowKey);
       row.className = "object-row collection-row" + (cols.active === id ? " active-collection" : "") + (flags.exclude || hidden ? " dim" : "");
-      row.style.paddingLeft = depth * 12 + "px";
+      indent(row, depth);
       row.setAttribute("role", "treeitem");
       row.tabIndex = 0;
       const open = !collapsed.has(rowKey) && !flags.exclude;
-      row.append(
-        button(iconEl(open ? "disclosure_tri_down" : "disclosure_tri_right"), "Expand/collapse", () => { collapsed.has(rowKey) ? collapsed.delete(rowKey) : collapsed.add(rowKey); refresh(); }, "tree-toggle"),
-        Object.assign(button(iconEl(flags.exclude ? "checkbox_dehlt" : "checkbox_hlt"), "Exclude from View Layer", () => cols.setLayer(id, { exclude: !flags.exclude })), { className: "tree-exclude" }),
-      );
+      row.append(disclosure(true, open, () => { collapsed.has(rowKey) ? collapsed.delete(rowKey) : collapsed.add(rowKey); refresh(); }));
       const name = button([iconEl("outliner_collection"), Object.assign(document.createElement("span"), { className: "tree-label", textContent: c.name })], "Collection · click to make active", () => cols.setActive(id), "tree-name");
       name.ondblclick = () => { const value = prompt("Collection name", c.name); if (value) cols.rename(id, value); };
-      row.append(name,
-        button(iconEl(flags.hideViewport ? "hide_on" : "hide_off"), "Hide in Viewport (this view layer)", () => cols.setLayer(id, { hideViewport: !flags.hideViewport })),
-        button(iconEl(c.hideSelect ? "restrict_select_on" : "restrict_select_off"), "Disable Selection", () => cols.set(id, { hideSelect: !c.hideSelect })));
+      row.append(name, ...restrictions({
+        enable: toggle("Exclude from View Layer", flags.exclude ? "checkbox_dehlt" : "checkbox_hlt", () => cols.setLayer(id, { exclude: !flags.exclude })),
+        select: toggle("Disable Selection", c.hideSelect ? "restrict_select_on" : "restrict_select_off", () => cols.set(id, { hideSelect: !c.hideSelect })),
+        hide: toggle("Hide in Viewport (this view layer)", flags.hideViewport ? "hide_on" : "hide_off", () => cols.setLayer(id, { hideViewport: !flags.hideViewport })),
+        render: toggle("Disable in Renders", c.hideRender ? "restrict_render_on" : "restrict_render_off", () => cols.set(id, { hideRender: !c.hideRender })),
+      }));
       row.draggable = true;
       row.ondragstart = (e) => e.dataTransfer.setData("text/x-workbench-collection", id);
       dropOnCollection(row, id);
@@ -184,8 +207,9 @@ export function createOutliner(world, editor, commands) {
     };
     const contents = (id, depth, key, hidden) => {
       for (const child of cols.byId(id).children) if (cols.byId(child)) collectionRow(child, depth, key, hidden);
-      const members = objectsOf(id);
-      for (const n of members) if (!members.has(n.parent)) objectRow(n, depth, members, key, hidden);
+      // Sorted alphabetically, as Blender's View Layer mode does by default.
+      const members = objectsOf(id), byName = [...members].sort((a, b) => a.name.localeCompare(b.name));
+      for (const n of byName) if (!members.has(n.parent)) objectRow(n, depth, members, key, hidden);
     };
     contents(cols.MASTER, 0, "", false);
     document.querySelector("#tree-count").textContent = all.length + " objects";
@@ -196,7 +220,13 @@ export function createOutliner(world, editor, commands) {
     const field = Object.assign(document.createElement("label"), { className: "bl-search", title: "Filter by name" });
     search.placeholder = "";
     field.append(iconEl("viewzoom"), search);
-    const types = () => [["", "All"], ...[...filter.options].slice(1).map((o) => [o.value, o.textContent])].map(([value, label]) => ({ label, checked: () => filter.value === value, run: () => { filter.value = value; refresh(); } }));
+    const types = () => [
+      { heading: "Restriction Toggles" },
+      ...COLUMNS.map(([id, label]) => ({ label, checked: () => columns[id], run: () => { columns[id] = !columns[id]; refresh(); } })),
+      "-",
+      { heading: "Object Type" },
+      ...[["", "All"], ...[...filter.options].slice(1).map((o) => [o.value, o.textContent])].map(([value, label]) => ({ label, checked: () => filter.value === value, run: () => { filter.value = value; refresh(); } })),
+    ];
     header.append(
       menuButton("", [{ label: "View Layer", icon: "outliner", checked: () => true }], { icon: "outliner", className: "bl-dropdown", title: "Display Mode" }),
       field,

@@ -220,6 +220,10 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "reset-layout") viewportDock.reset();
   if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
   if (e.data.type === "help") help.showModal();
+  if (e.data.type === "view-layer") {
+    const cols = world.collections, { op, id } = e.data.payload;
+    ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
+  }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
