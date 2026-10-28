@@ -209,6 +209,22 @@ const checks = {
     }
   } },
 
+  // A number field's drag changes the value by the pixels moved from the first move on: the End frame, an integer, by
+  // one frame per two pixels; a second drag back undoes it. Inside the window the pointer stays unlocked, so no lock's
+  // first move (Chromium's jump from the lock's origin) reaches the value.
+  async "dragging a number field changes it by the pixels moved"() {
+    const end = app.locator('[role="spinbutton"][aria-label="End"]');
+    for (const [dx, expected] of [[40, "270"], [-40, "250"]]) {
+      const box = await end.boundingBox(), x = box.x + box.width / 2, y = box.y + box.height / 2;
+      await app.page.mouse.move(x, y);
+      await app.page.mouse.down();
+      await app.page.mouse.move(x + dx, y, { steps: 10 });
+      assert.equal(await app.frame().evaluate(() => !!document.pointerLockElement), false);
+      await app.page.mouse.up();
+      assert.equal(await end.getAttribute("aria-valuenow"), expected);
+    }
+  },
+
   "a hemispheric light selects where it is drawn and moves with G X 2": { open: { example: null, node: "sphere" }, async run() {
     // The new project's light has a direction and no position of its own in Babylon.
     const at = () => app.bylonder((b) => {
