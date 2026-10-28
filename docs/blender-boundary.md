@@ -59,6 +59,10 @@ The app opens in the Layout workspace: the window is Blender's (topbar, editors,
 
 Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order.
 
+## Node editors
+
+The Shader Editor and Compositor build on the same foundations: Blender's node declarations and GLSL run as runtime-registered Babylon blocks, and the editor's Add menu and keys are Blender's menus and keymaps. See `docs/node-editors.md`.
+
 ## Using it
 
     const host = { world, selection: editor.selection, update: () => { ui.refresh(); views.wake(); }, undoPush: () => history.commit() };

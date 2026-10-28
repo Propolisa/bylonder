@@ -1,18 +1,6 @@
 import classes from './editor-classes.json';
+import { categoryOf } from './block-categories.js';
 
-const categories = [
-  ['output', /Output/],
-  ['input', /^(Input|NodeRenderGraphInput|GeometryInput|ParticleInput|Mesh|Contextual|SystemSource|Time|Random)Block$|Input|Source/],
-  ['texture', /Texture|Image|Reflection|Refraction|Planar|Noise|Voronoi|Worley|Perlin/],
-  ['shader', /PBR|Light|Sheen|ClearCoat|SubSurface|Anisotropy|Fragment|Shadow|Fog|Iridescence|Material/],
-  ['filter', /PostProcess|Renderer|Bloom|Blur|Glow|Highlight|Layer|Clear|Copy|Mipmap|Culling|Taa|Ssao|Ssr/],
-  ['particle', /Particle|Emitter|Update|Create|System|Shape/],
-  ['geometry', /Geometry|Instantiate|Merge|Mapping|Box|Sphere|Plane|Cylinder|Torus|Capsule|Disc|Grid|Points|Mesh|Extrude|Subdivide|Boolean|Optimize|Collection/],
-  ['color', /Color|Desaturate|Posterize|Gradient|Replace|Tone/],
-  ['vector', /Transform|Vector|Normal|Cross|Dot|Length|Distance|Rotate|Translate|Scale|Matrix|Position|Reflect|Refract/],
-  ['layout', /Elbow|Teleport|Frame|Debug|Comment/],
-];
-const categoryOf = name => categories.find(([, test]) => test.test(name))?.[0] || 'converter';
 
 const sel = token => {
   const [module, name] = token.slice(1).split('.');

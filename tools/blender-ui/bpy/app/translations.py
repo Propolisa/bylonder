@@ -21,3 +21,4 @@ class contexts:
     id_mesh = 'Mesh'
     id_windowmanager = 'WindowManager'
     editor_view3d = 'View3D'
+    id_nodetree = 'NodeTree'

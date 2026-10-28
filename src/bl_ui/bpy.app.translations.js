@@ -87,7 +87,8 @@ export var contexts =  __class__ ('contexts', [object], {
 	operator_default: 'Operator',
 	id_mesh: 'Mesh',
 	id_windowmanager: 'WindowManager',
-	editor_view3d: 'View3D'
+	editor_view3d: 'View3D',
+	id_nodetree: 'NodeTree'
 });
 
 //# sourceMappingURL=bpy.app.translations.map
