@@ -4,7 +4,7 @@ import { NullEngine, Scene, MeshBuilder } from '@babylonjs/core';
 import { createMesh } from '../src/blenkernel/mesh/mesh.js';
 import { evaluateBlenderModifiers, modifierPanel } from '../src/modifiers/blender.js';
 import { blenderModule } from '../src/bmesh/bmesh-wasm.js';
-import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings } from '../src/blenkernel/texture/texture.js';
+import { textureDefaults, textureValue, writeTexture, readTexture, textureSettings, texturePreview } from '../src/blenkernel/texture/texture.js';
 import { createTextures } from '../src/blenkernel/texture/textures.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -108,4 +108,13 @@ assert.notEqual(clouded, flat);
 world.textures.set(clouds, 'noise_scale', 0.3);
 assert.notEqual(height(), clouded);
 assert.equal(world.textures.users(clouds), 1);
+// Properties > Texture's preview samples the same Tex: the clouds' intensity as gray.
+const pixels = texturePreview(settings('clouds'), 16);
+assert.equal(pixels.length, 16 * 16 * 4);
+const corner = x.texture_new() >>> 0;
+writeTexture(corner, settings('clouds'));
+assert.equal(pixels[0], Math.round(255 * textureValue(corner, [-15 / 16, 15 / 16, 0])[0]));
+x.texture_free(corner);
+assert.ok(new Set(pixels.filter((_, i) => i % 4 === 0)).size > 8, 'the preview shows the clouds');
+
 console.log(`textures-wasm: ${Object.keys(fixture.samples).length} textures at ${fixture.points.length} points and ${stacks.length} displaced spheres match Blender`);

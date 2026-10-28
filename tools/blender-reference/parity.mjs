@@ -99,7 +99,14 @@ const SETUP = {
     await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console")?.textContent ?? ""), null, 180000);
   },
   "displaced-sphere": async (app) => { await displacedSphere(app); await app.hover(...REST); },
-  "lava-material": async (app) => { await displacedSphere(app); await lavaMaterial(app); await app.hover(...REST); },
+  // As ui-shots.py: View > Frame Selected frames the sphere (the keyboard is the Shader Editor's after the nodes).
+  "lava-material": async (app) => {
+    await displacedSphere(app);
+    await lavaMaterial(app);
+    await app.locator('[data-blender="VIEW3D_MT_view"]').click();
+    await app.frame().getByRole("menuitem", { name: "Frame Selected" }).first().click();
+    await app.hover(...REST);
+  },
   "outliner-expanded": async (app) => {
     const box = await app.locator(".bl-outliner-region").boundingBox();
     await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

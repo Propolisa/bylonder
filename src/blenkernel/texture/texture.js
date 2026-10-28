@@ -59,6 +59,23 @@ export function freeUnusedTextures() {
   for (const [key, tex] of outside) if (!x.texture_users(tex)) { x.texture_free(tex); outside.delete(key); }
 }
 
+// The texture's preview as Properties > Texture shows it: sampled over [-1, 1] in X and Y, its color, or its intensity
+// as gray (RGBA bytes, rows from the top).
+export function texturePreview(values, size = 128) {
+  const tex = x.texture_new() >>> 0, pixels = new Uint8ClampedArray(size * size * 4);
+  try {
+    writeTexture(tex, values);
+    for (let row = 0; row < size; row++) for (let column = 0; column < size; column++) {
+      const [tin, r, g, b] = textureValue(tex, [(2 * column + 1) / size - 1, 1 - (2 * row + 1) / size, 0]);
+      const color = r || g || b ? [r, g, b] : [tin, tin, tin];
+      pixels.set([...color.map((c) => 255 * c), 255], (row * size + column) * 4);
+    }
+  } finally {
+    x.texture_free(tex);
+  }
+  return pixels;
+}
+
 // The texture at a point as a modifier samples it (BKE_texture_get_value): intensity, then RGBA.
 export const textureValue = (tex, co) => withArrays([Float32Array.from(co), new Float32Array(5)], ([p, r]) => {
   x.texture_value(tex, p, r);

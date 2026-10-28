@@ -176,11 +176,15 @@ def lava_material():
     noise.noise_dimensions = detail.noise_dimensions = "4D"
     detail.inputs["Detail"].default_value = 8.0
     ramp.color_ramp.elements[1].color = (1.0, 0.117, 0.0, 1.0)
+    ramp.color_ramp.elements[0].position = 0.5
+    principled.inputs["Base Color"].default_value = (0.003, 0.003, 0.003, 1.0)
     for a, output, b, input in [(coord, "Object", noise, "Vector"), (coord, "Object", detail, "Vector"), (noise, "Fac", ramp, "Fac"),
                                 (ramp, "Color", principled, "Emission Color"), (noise, "Fac", principled, "Emission Strength"),
                                 (detail, "Fac", bump, "Height"), (bump, "Normal", principled, "Normal")]:
         links.new(a.outputs[output], b.inputs[input])
     window().workspace = bpy.data.workspaces["Shading"]
+    # The view framed on the sphere (View Selected over the 3D Viewport), so the material fills it.
+    later(1.0, lambda: key("NUMPAD_PERIOD", *view3d_point(0.5, 0.5)))
 
 
 SETUP = {

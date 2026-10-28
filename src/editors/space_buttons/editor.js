@@ -5,6 +5,7 @@
 import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { loadRNAUI, rnaProperty, INFO } from '../../makesrna/rna.js';
 import { createPreview } from '../../blenkernel/material/preview.js';
+import { texturePreview } from '../../blenkernel/texture/texture.js';
 import { panelTypes, drawPanels, headerLayout, drawType } from '../interface/panels.js';
 import { panels as blenderPanels, menus as blenderMenus, headers } from '../../python/bpy_interface.js';
 import { UILayout } from '../interface/layout.js';
@@ -40,6 +41,19 @@ function contextBar(context, space) {
 }
 
 // A header (bpy.types.Header) drawn into a layout.
+
+// A texture's preview image (texture.js), by its settings.
+const texturePreviews = new Map();
+function texturePreviewURL(values, size = 128) {
+  const key = JSON.stringify(values);
+  if (!texturePreviews.has(key)) {
+    const canvas = Object.assign(document.createElement('canvas'), { width: size, height: size });
+    canvas.getContext('2d').putImageData(new ImageData(texturePreview(values, size), size), 0, 0);
+    if (texturePreviews.size > 32) texturePreviews.clear();
+    texturePreviews.set(key, canvas.toDataURL());
+  }
+  return texturePreviews.get(key);
+}
 
 export function mountProperties(host, { world, editor, history, rna, systems, properties, storage, files = [] }, areaId = 'properties', headerHost) {
   const key = 'workbench:properties:' + areaId;
@@ -136,6 +150,8 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       // A material's preview, rendered by Bylonder's preview scene.
       template_preview: (node) => {
         const material = node.id?.[INFO]?.owner;
+        if (material?.values) return h('div', { class: 'bl-preview flex aspect-[1.6] max-h-[220px] items-center justify-center rounded-md' },
+          h('img', { class: 'h-full', src: texturePreviewURL(material.values), alt: material.name }));
         if (!material || !world.materials) return null;
         preview.request(material, (url) => { state.preview = url; });
         return h('div', { class: 'bl-preview flex aspect-[1.6] max-h-[220px] items-center justify-center rounded-md' }, state.preview ? h('img', { class: 'h-full', src: state.preview, alt: material.name }) : null);

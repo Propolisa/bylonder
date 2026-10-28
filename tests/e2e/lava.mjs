@@ -26,8 +26,8 @@ export async function displacedSphere(app) {
 }
 
 // The Shading workspace, New Material, and the lava nodes added with Shift A and linked by dragging: Texture Coordinate's
-// Object into two 4D Noise Textures, the first through a Color Ramp (black to orange) into Principled BSDF's Emission
-// Color and Strength, the second (Detail 8) through Bump into its Normal.
+// Object into two 4D Noise Textures, the first through a Color Ramp (black at 0.5 to orange) into Principled BSDF's
+// Emission Color and Strength, the second (Detail 8) through Bump into its Normal; a dark Base Color.
 export async function lavaMaterial(app) {
   await app.page.click('[data-workspace="shading"]');
   await app.until((b) => b.views.input.state.shading === "material");
@@ -79,4 +79,10 @@ export async function lavaMaterial(app) {
   const band = await ramp.getByLabel("Color ramp").boundingBox();
   await app.page.mouse.click(band.x + band.width - 3, band.y + band.height / 2);
   await ramp.locator('input[type="color"]').fill("#ff6000");
+  // Cracks: the black stop moved to the middle, and a dark surface around them.
+  await app.page.mouse.click(band.x + 3, band.y + band.height / 2);
+  await ramp.getByRole("button", { name: /^Pos/ }).click();
+  await ramp.locator("input:not([type])").fill("0.5");
+  await app.page.keyboard.press("Enter");
+  await principled.locator('input[type="color"]').first().fill("#0a0a0a");
 }
