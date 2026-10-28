@@ -7,8 +7,10 @@ names, as Clang parses the RNA definition files for the module's wasm32 target.
   takes too (rna_dna_fields in wasm_module.py).
 - src/makesrna/dna-curves.json: a Curve and its Nurb, BezTriple, BPoint, CharInfo and TextBox (rna_curve.cc); with
   rna-curves.json (tools/blender-reference/curves.py) it lets JS read and write curve and text data in the module.
+- src/makesrna/dna-data.json: the data the scene sync writes into Main by RNA name (main-sync.js): lights, cameras,
+  materials, worlds and the scene's settings.
 
-Usage: tools/blender-port/modifier_dna.py SRC   (SRC: Blender sources of the manifest's tag)
+Usage: tools/blender-port/modifier_dna.py SRC [OUTPUT]   (SRC: Blender sources of the manifest's tag; OUTPUT: one of them)
 """
 import ctypes
 import json
@@ -32,6 +34,11 @@ OUTPUTS = {
                           'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
                           'structs': ['Object', 'ObjectBase', 'Collection', 'LayerCollection', 'SpaceOutliner'], 'detail': True},
     'dna-curves.json': {'files': ['rna_curve.cc'], 'functions': lambda name: name == 'RNA_def_curve', 'structs': None, 'detail': True},
+    'dna-data.json': {'files': ['rna_light.cc', 'rna_camera.cc', 'rna_material.cc', 'rna_world.cc', 'rna_scene.cc', 'rna_color.cc'],
+                      'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
+                      'structs': ['Light', 'PointLight', 'SpotLight', 'SunLight', 'AreaLight', 'Camera', 'Material', 'World', 'Scene',
+                                  'RenderSettings', 'UnitSettings', 'ToolSettings', 'ColorManagedViewSettings', 'ColorManagedDisplaySettings'],
+                      'detail': True},
 }
 SDNA_CALL = re.compile(r'RNA_def_property_(boolean|boolean_negative|boolean_bitset_array|int|float|enum|enum_bitflag|pointer|string)_sdna$')
 # RNA_def_property and the shorthands that call it (RNA_def_boolean, RNA_def_float_vector, ...).
@@ -140,6 +147,8 @@ def definitions(tu, evaluate, files, walked, detail):
                     state['prop']['type'] = shorthand or {0: 'BOOLEAN', 1: 'INT', 2: 'FLOAT', 3: 'STRING', 4: 'ENUM', 5: 'POINTER'}.get(evaluate(args[2]))
                     if shorthand == 'ENUM':
                         state['prop']['items'] = enum_items(args[2], evaluate)
+                    if re.match(r'RNA_def_(float|int|boolean)_(vector|color|array|translation|rotation)', name):
+                        state['prop']['array'] = evaluate(args[2])
             elif state['prop'] is not None and (match := SDNA_CALL.match(name)):
                 if evaluate(args[1]) is not None:
                     state['prop']['struct'] = evaluate(args[1])
@@ -156,6 +165,8 @@ def definitions(tu, evaluate, files, walked, detail):
                 state['prop']['icon'], state['prop']['consecutive'] = evaluate(args[1]), evaluate(args[2])
             elif detail and state['prop'] is not None and name == 'RNA_def_property_enum_items':
                 state['prop']['items'] = enum_items(args[1], evaluate)
+            elif detail and state['prop'] is not None and name == 'RNA_def_property_array':
+                state['prop']['array'] = evaluate(args[1])
             elif state['prop'] is not None and name.startswith('RNA_def_property_') and name.endswith('_funcs'):
                 state['prop']['custom'] = True
             elif name in functions and name not in seen and name.startswith('rna_def_'):
@@ -183,7 +194,7 @@ def write(tree, args, output, spec):
         records.update({c.spelling: c.type for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.STRUCT_DECL and c.is_definition()})
         found.update(definitions(tu, evaluate, [file], spec['functions'], spec['detail']))
     out = {}
-    for rna, definition in sorted(found.items()):
+    for rna, definition in sorted((rna, definition) for rna, definition in found.items() if rna):
         sdna = definition.get('sdna')
         if sdna not in records or (spec['structs'] is not None and rna not in spec['structs']):
             continue
@@ -198,6 +209,9 @@ def write(tree, args, output, spec):
                 continue  # No DNA field of its own: a property whose functions compute it.
             keys = ('bit', 'bitset', 'negative', 'bitflag', 'custom') + (('type', 'icon', 'consecutive', 'items') if spec['detail'] else ())
             props[identifier] = {**located, **{k: prop[k] for k in keys if k in prop}}
+            # An RNA array over consecutive scalar fields (a light's r, g, b) has RNA's length.
+            if spec['detail'] and prop.get('array') and 'length' not in located and located['kind'] != 'struct':
+                props[identifier]['length'] = prop['array']
         out[rna] = {'sdna': sdna, 'size': records[sdna].get_size(), 'properties': props}
     path = os.path.join(convert.REPO, 'src', 'makesrna', output)
     json.dump(out, open(path, 'w'), indent=1)
@@ -212,7 +226,8 @@ def main():
     _, includes, _ = wasm_module.dependencies(tree + '-build', spec.get('dependencies', {}))
     args = [a for a in includes + wasm_module.flags(tree, spec) if a != '-O2'] + driver_includes() + ['-x', 'c++']
     for output, output_spec in OUTPUTS.items():
-        write(tree, args, output, output_spec)
+        if len(sys.argv) < 3 or sys.argv[2] == output:
+            write(tree, args, output, output_spec)
 
 
 if __name__ == '__main__':

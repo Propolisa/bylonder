@@ -447,6 +447,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     enter,
     exit,
     toggle: () => (em ? exit() : enter()),
+    // The Mesh of the object in Edit Mode, extracted from its edit mesh, which owns it while editing; null for another.
+    meshOf: (node) => (em?.object === node ? em.mesh : null),
     setSelectMode(type, extend = false) { if (em) run('mesh.select_mode', { type, use_extend: extend })(); },
     // The 3D View's Edit Mode menus (view3d-menus-edit-mesh.js).
     menus,

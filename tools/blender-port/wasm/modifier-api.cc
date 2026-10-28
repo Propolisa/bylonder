@@ -2,6 +2,7 @@
  * Blender's ModifierData (JS writes their settings at the offsets of their DNA structs), and mesh_create_eval_final
  * evaluates them as the depsgraph would. The result's arrays are read in place through an ExtractionHeader. */
 #include "BKE_attribute.hh"
+#include "BKE_node.hh"
 #include "BKE_cpp_types.hh"
 #include "BKE_customdata.hh"
 #include "BKE_idtype.hh"
@@ -17,13 +18,19 @@
 #include "BLI_math_base.h"
 #include "BLI_time.h"
 #include "BLO_readfile.hh"
+#include "BLT_translation.hh"
 #include "DEG_depsgraph.hh"
+#include "DNA_armature_types.h"
+#include "DNA_image_types.h"
 #include "DNA_mesh_types.h"
 #include "DNA_modifier_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
+#include "DNA_sound_types.h"
+#include "DNA_windowmanager_types.h"
 #include "GPU_platform_backend_enum.h"
 #include "MEM_guardedalloc.h"
+#include "NOD_shader.h"
 
 #include "extraction.hh"
 #include "modifier-standins.hh"
@@ -233,5 +240,62 @@ int get_render_subsurf_level(const RenderData *r, int lvl, bool for_render)
   return lvl;
 }
 float BKE_scene_ctime_get(const Scene *scene) { return (scene->r.cfra + scene->r.subframe) * scene->r.framelen; }
+
+
+/* An ID type whose source the module does not build: Main never holds one of it (the module makes none and reads no
+ * files), so it has only what Blender's tables of ID types list, and no callbacks. modifiers-only.cc has more. */
+IDTypeInfo id_type_without_data(short code, uint64_t filter, int index, size_t size, const char *name,
+                                       const char *name_plural, const char *context, uint32_t flags)
+{
+  IDTypeInfo info;
+  info.id_code = code;
+  info.id_filter = filter;
+  info.main_listbase_index = index;
+  info.struct_size = size;
+  info.name = name;
+  info.name_plural = name_plural;
+  info.translation_context = context;
+  info.flags = flags;
+  info.asset_type_info = nullptr;
+  info.init_data = nullptr;
+  info.copy_data = nullptr;
+  info.free_data = nullptr;
+  info.make_local = nullptr;
+  info.foreach_id = nullptr;
+  info.foreach_cache = nullptr;
+  info.foreach_path = nullptr;
+  info.foreach_working_space_color = nullptr;
+  info.owner_pointer_get = nullptr;
+  info.blend_write = nullptr;
+  info.blend_read_data = nullptr;
+  info.blend_read_after_liblink = nullptr;
+  info.blend_read_undo_preserve = nullptr;
+  info.lib_override_apply_post = nullptr;
+  return info;
+}
+
+IDTypeInfo IDType_ID_IM = id_type_without_data(ID_IM, FILTER_ID_IM, INDEX_ID_IM, sizeof(Image), "Image", "images",
+                                               BLT_I18NCONTEXT_ID_IMAGE, IDTYPE_FLAGS_NO_ANIMDATA | IDTYPE_FLAGS_APPEND_IS_REUSABLE);
+IDTypeInfo IDType_ID_SO = id_type_without_data(ID_SO, FILTER_ID_SO, INDEX_ID_SO, sizeof(bSound), "Sound", "sounds",
+                                               BLT_I18NCONTEXT_ID_SOUND, IDTYPE_FLAGS_NO_ANIMDATA | IDTYPE_FLAGS_APPEND_IS_REUSABLE);
+IDTypeInfo IDType_ID_AR = id_type_without_data(ID_AR, FILTER_ID_AR, INDEX_ID_AR, sizeof(bArmature), "Armature", "armatures",
+                                               BLT_I18NCONTEXT_ID_ARMATURE, IDTYPE_FLAGS_APPEND_IS_REUSABLE);
+/* The module's one window manager is its context's, outside Main. */
+IDTypeInfo IDType_ID_WM = id_type_without_data(ID_WM, FILTER_ID_WM, INDEX_ID_WM, sizeof(wmWindowManager), "WindowManager",
+                                               "window_managers", BLT_I18NCONTEXT_ID_WINDOWMANAGER,
+                                               IDTYPE_FLAGS_NO_COPY | IDTYPE_FLAGS_NO_LIBLINKING | IDTYPE_FLAGS_NO_ANIMDATA |
+                                                   IDTYPE_FLAGS_NO_MEMFILE_UNDO | IDTYPE_FLAGS_NEVER_UNUSED);
+
+/* As node_shader_tree.cc registers it, its identifiers only: the module has no shader nodes, and a new World's tree
+ * (world.cc) is named by it. */
+static bke::bNodeTreeType *shader_tree_type()
+{
+  static bke::bNodeTreeType type;
+  type.type = NTREE_SHADER;
+  type.idname = UString("ShaderNodeTree");
+  type.group_idname = UString("ShaderNodeGroup");
+  return &type;
+}
+bke::bNodeTreeType *ntreeType_Shader = shader_tree_type();
 
 }  // namespace blender

@@ -91,12 +91,12 @@ const modifiers = (e) => (e.shiftKey ? KM_SHIFT : 0) | (e.ctrlKey ? KM_CTRL : 0)
 
 //   section: the area's element; header: its header element; space: GRAPH_EDITOR or DOPESHEET_EDITOR; uiType: the
 //   Dope Sheet's (TIMELINE or DOPESHEET); animation: the scene's (blenkernel/animation/model.js); rna: createRNA(host)
-//   for the header's context; objects: the Object Mode mirror (its sync() puts the objects' bases in the module);
+//   for the header's context; sync: the scene's Main (blenkernel/main-sync.js), made current before Blender's code;
 //   commit(): an undo step.
 // A module operator's status as the registry's operators return it: the event goes on after a pass through or a cancel.
 const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' : status === OPERATOR_CANCELLED ? 'CANCELLED' : 'FINISHED');
 
-export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, objects, commit = () => {} }) {
+export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, sync: scene, commit = () => {} }) {
   // A Dope Sheet's space is made as the startup file's Timeline area's, whose Dope Sheet it becomes, keeping its regions
   // (channels and sidebar hidden), as Blender switches an area's sub-type.
   const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : -1);
@@ -192,21 +192,15 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   headerApp.mount(menus);
   loadRNAUI(() => import('../../makesrna/rna-ui.json')).then(() => { headerState.ready = true; });
 
-  // Before Blender's code reads them: the scene's time, and the objects' bases (selection, visibility).
+  // Before Blender's code reads them: the scene (its time, the objects' bases) made current in Main.
   function sync() {
-    objects?.sync?.();
-    animation.syncTime();
+    scene.flush();
   }
-  // After it ran: the keys it changed reach the channels, the frame it set reaches the scene, and a finished
-  // operator that is an undo step makes one.
+  // After it ran: the keys it changed reach the channels, what else it changed (the frame, the range, the selection)
+  // reaches the scene, and a finished operator that is an undo step makes one.
   function after(status) {
     animation.edited();
-    const next = animation.anim.frame;
-    if (Math.round(next) !== Math.round(animation.time.frame)) animation.time.seek(next);
-    const { start, end, previewStart, previewEnd, preview } = animation.anim.range, t = animation.time.state;
-    if (start !== t.frameStart || end !== t.frameEnd || preview !== t.usePreviewRange || (preview && (previewStart !== t.framePreviewStart || previewEnd !== t.framePreviewEnd))) {
-      animation.time.configure({ frameStart: start, frameEnd: end, usePreviewRange: preview, ...(preview ? { framePreviewStart: previewStart, framePreviewEnd: previewEnd } : {}) }, { record: false });
-    }
+    scene.writeBack();
     if (status & OPERATOR_FINISHED && area.undo) commit();
     redraw();
     return status;

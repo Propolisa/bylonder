@@ -12,3 +12,11 @@ class WindowManager:
     @staticmethod
     def draw_cursor_remove(handle):
         pass
+
+
+# rna_Operator_poll_message_set (rna_wm_api.cc): the reason a poll fails, which Blender shows in the disabled
+# button's tooltip; Bylonder's buttons do not show it yet.
+class Operator:
+    @classmethod
+    def poll_message_set(cls, message, *args):
+        pass

@@ -1,0 +1,47 @@
+// <fstream> for tools built to wasm32 that read whole files (makesdna reads Blender's DNA headers): wasi's libc++ is
+// built without a filesystem, so its <fstream> declares the streams without defining them. An input stream reads the
+// file through C's stdio, which WASI gives, into memory, and streams from there. Seen only by the sources that list
+// wasm/fstream-read as an include.
+#pragma once
+
+#include <cstdio>
+#include <istream>
+#include <sstream>
+#include <string>
+
+_LIBCPP_BEGIN_NAMESPACE_STD
+
+template<class C, class T> class basic_ifstream : public basic_istream<C, T> {
+  basic_stringbuf<C, T> buf_;
+
+ public:
+  basic_ifstream() : basic_istream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
+  explicit basic_ifstream(const char *path, ios_base::openmode mode = ios_base::in) : basic_istream<C, T>(&buf_) { open(path, mode); }
+  template<class Path, class = decltype(declval<const Path &>().c_str())>
+  explicit basic_ifstream(const Path &path, ios_base::openmode mode = ios_base::in) : basic_ifstream(path.c_str(), mode)
+  {
+  }
+  void open(const char *path, ios_base::openmode mode = ios_base::in)
+  {
+    FILE *file = fopen(path, "rb");
+    if (!file) {
+      this->setstate(ios_base::failbit);
+      return;
+    }
+    basic_string<C, T> text;
+    C chunk[4096];
+    for (size_t n; (n = fread(chunk, sizeof(C), 4096, file)) > 0;) {
+      text.append(chunk, n);
+    }
+    fclose(file);
+    buf_.str(text);
+    this->clear();
+    if (mode & ios_base::ate) {
+      this->seekg(0, ios_base::end);
+    }
+  }
+  bool is_open() const { return !this->fail(); }
+  void close() {}
+};
+
+_LIBCPP_END_NAMESPACE_STD

@@ -144,7 +144,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	else {
 	}
-	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
 
 export var bpy_struct =  __class__ ('bpy_struct', [object], {
@@ -5179,6 +5179,25 @@ export var Operator =  __class__ ('Operator', [_StructRNA], {
 			}
 			return dict (__accu0__);
 		}) ();
+	});},
+	get poll_message_set () {return __getcm__ (this, function (cls, message) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'message': var message = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var args = tuple ([].slice.apply (arguments).slice (2, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		// pass;
 	});}
 }, _RNAMeta);
 export var Macro =  __class__ ('Macro', [_StructRNA], {

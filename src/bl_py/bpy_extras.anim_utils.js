@@ -153,7 +153,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	else {
 	}
-	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
 export var __all__ = tuple (['AutoKeying', 'action_get_channelbag_for_slot', 'action_get_first_suitable_slot', 'action_ensure_channelbag_for_slot', 'animdata_get_channelbag_for_assigned_slot', 'bake_action', 'bake_action_objects', 'bake_action_iter', 'bake_action_objects_iter', 'BakeOptions']);
 export var FCurveKey = tuple;

@@ -1,4 +1,5 @@
-// <fstream> for sources whose debug paths write files (delaunay_2d.cc's SVG dumps): wasi's libc++ is built without a
+// <fstream> for sources whose debug paths write files (delaunay_2d.cc's SVG dumps) or that declare file streams they
+// do not use (BLI_fileops.hh's, in the .blend writer, which writes through POSIX calls): wasi's libc++ is built without a
 // filesystem, so its <fstream> declares the streams without defining them. The module has no files, so every stream
 // fails to open, as a file that cannot be opened does. Seen only by the libraries that list wasm/fstream as includes.
 #pragma once
@@ -40,6 +41,19 @@ template<class C, class T> class basic_ifstream : public basic_istream<C, T> {
   explicit basic_ifstream(const string &, ios_base::openmode = ios_base::in) : basic_ifstream() {}
   void open(const char *, ios_base::openmode = ios_base::in) { this->setstate(ios_base::failbit); }
   void open(const string &, ios_base::openmode = ios_base::in) { this->setstate(ios_base::failbit); }
+  bool is_open() const { return false; }
+  void close() {}
+};
+
+template<class C, class T> class basic_fstream : public basic_iostream<C, T> {
+  basic_filebuf<C, T> buf_;
+
+ public:
+  basic_fstream() : basic_iostream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
+  explicit basic_fstream(const char *, ios_base::openmode = ios_base::in | ios_base::out) : basic_fstream() {}
+  explicit basic_fstream(const string &, ios_base::openmode = ios_base::in | ios_base::out) : basic_fstream() {}
+  void open(const char *, ios_base::openmode = ios_base::in | ios_base::out) { this->setstate(ios_base::failbit); }
+  void open(const string &, ios_base::openmode = ios_base::in | ios_base::out) { this->setstate(ios_base::failbit); }
   bool is_open() const { return false; }
   void close() {}
 };

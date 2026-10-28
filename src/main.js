@@ -45,7 +45,7 @@ import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
-import { createBlenderObjects } from "./editors/object/object-blender.js";
+import { createMainSync } from "./blenkernel/main-sync.js";
 import { registerOperators, runOperator, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
@@ -59,6 +59,7 @@ import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
 import { exportScene } from "./io_scene_babylon/export.js";
+import { saveBlend } from "./windowmanager/wm-files.js";
 import { createTexts } from "./blenkernel/texts.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
 import { registerTextOperators } from "./editors/space_text/text-ops.js";
@@ -262,6 +263,9 @@ window.addEventListener("message", (e) => {
   }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "export") exportScene(world, e.data.payload).catch((error) => notify("Export failed: " + error.message));
+  if (e.data.type === "save-blend") {
+    try { notify(`Saved .blend (${Math.ceil(saveBlend(world) / 1024)} KiB)`); } catch (error) { console.error(error); notify("Save failed: " + error.message); }
+  }
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
     const requestId = e.data.payload.requestId;
@@ -361,11 +365,15 @@ const tools = createView3DTools({
   toolSettings: () => blenderRNA.pointer("ToolSettings", world),
   addPreset: (idname, placement) => creator.add(creator.catalog.find((preset) => preset.operator === idname), placement),
 });
-const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify, ids: animation.ids, keying: (run) => animation.keying(run) });
-registerObjectOperators(world.objectActions, blenderObjects);
+// Blender's Main, kept equal to the scene both ways (blenkernel/main-sync.js), which Blender's code runs on. Slices hooks
+// do not see (collections, materials, worlds, modifiers) mark it changed.
+world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
+for (const slice of [world.collections, world.materials, world.worlds, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
+world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
+registerObjectOperators(world.objectActions, { sync: world.mainSync, transaction: commands.transaction, notify, keying: (run) => animation.keying(run) });
 registerAddOperators(creator);
 world.dock = viewportDock;
-world.outliner = createOutliner({ world, editor, commands, objects: blenderObjects, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
+world.outliner = createOutliner({ world, editor, commands, sync: world.mainSync, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
 const touch = createViewportTouch(world, editor, creator, views);
 // Like Blender, objects hidden or excluded through their collections drop out of the selection.
 world.collections.subscribe(() => {
@@ -398,7 +406,7 @@ const insertKeys = () => {registerObjects(animation, objects);animation.insert(o
 // The Timeline, Dope Sheet and Graph Editor: Blender's animation editors, each area its own space (editors/animation).
 registerAnimOperators(animation);
 const ANIM_EDITORS = { timeline: ['DOPESHEET_EDITOR', 'TIMELINE'], dopesheet: ['DOPESHEET_EDITOR', 'DOPESHEET'], graph: ['GRAPH_EDITOR', 'FCURVES'] };
-const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDock.header(id), space: ANIM_EDITORS[type][0], uiType: ANIM_EDITORS[type][1], animation, rna: blenderRNA, objects: blenderObjects, commit });
+const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDock.header(id), space: ANIM_EDITORS[type][0], uiType: ANIM_EDITORS[type][1], animation, rna: blenderRNA, sync: world.mainSync, commit });
 const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, document.querySelector(`#${type}-section`), type));
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
 const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();refreshUI();} });
@@ -543,7 +551,7 @@ function undoRedo(redo) {
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
-const inView = (event) => !!event.view;
+const inView = (event) => !!event?.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
 // The Add panel's own keys while a new object waits for its settings.
 const creatorKeys = createKeymap([

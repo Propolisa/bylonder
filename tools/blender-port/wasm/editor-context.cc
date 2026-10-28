@@ -61,6 +61,7 @@
 #include "mesh_intern.hh"
 #include "object_intern.hh"
 #include "curve_intern.hh"
+#include "wm_files.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_enum_types.hh"
