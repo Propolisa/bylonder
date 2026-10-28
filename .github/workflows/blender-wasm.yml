@@ -1,0 +1,68 @@
+name: Blender WebAssembly build
+
+# Blender built as Blender builds itself, for wasm32 (tools/blender-port/blender_build.py): its libraries compiled in
+# parallel jobs, each keeping its objects in the Actions cache (an unchanged source is never compiled twice), then
+# linked and reported (seam-report.json: what does not compile and what nothing defines).
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tools/blender-port/**']
+
+env:
+  SHARDS: 8
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tools
+        run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1
+      - uses: actions/cache@v4
+        with:
+          path: work/wasm-build
+          key: blender-wasm-${{ matrix.shard }}-${{ github.sha }}
+          restore-keys: blender-wasm-${{ matrix.shard }}-
+      - name: Configure Blender
+        run: bash tools/blender-port/configure_host.sh work
+      - name: Compile shard ${{ matrix.shard }}
+        run: SHARD=${{ matrix.shard }}/$SHARDS python3 tools/blender-port/blender_build.py work/build-host
+      - uses: actions/upload-artifact@v4
+        with:
+          name: objects-${{ matrix.shard }}
+          path: work/wasm-build/objects
+          retention-days: 3
+
+  link:
+    needs: compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tools
+        run: sudo apt-get update -q && sudo apt-get install -y -q clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 libc++-18-dev-wasm32 libc++abi-18-dev-wasm32 ninja-build git-lfs && pip install libclang==18.1.1
+      - name: Configure Blender
+        run: bash tools/blender-port/configure_host.sh work
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: objects-*
+          path: work/wasm-build/objects
+          merge-multiple: true
+      - name: Link and report
+        run: python3 tools/blender-port/blender_build.py work/build-host --report seam-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blender-wasm
+          path: |
+            seam-report.json
+            work/wasm-build/*.wasm

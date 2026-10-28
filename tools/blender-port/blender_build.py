@@ -150,6 +150,27 @@ def generate(host, out, missing, by_any, extra):
             print(f'{os.path.relpath(path, host)}: generator failed\n{result.stdout[-1500:]}{result.stderr[-1500:]}', file=sys.stderr)
 
 
+# The module build's own sources that stand in for what this build compiles from Blender: RNA's runtime (its generated
+# definitions and rna_access) and the dependency graph.
+STAND_INS = {'operator-properties.cc', 'rna-fcurve.cc', 'rna-space.cc', 'no-depsgraph.cc'}
+
+
+def glue(host, out, entries, extra):
+    """Bylonder's API over Blender (the module build's `api` sources, without its stand-ins), compiled against Blender's
+    own headers as this build has them: every include directory Blender's sources use, the generated operator table
+    (wasm_module.operator_table) and the module's headers."""
+    tree, spec, includes = module_inputs(host, out)
+    directories = list(dict.fromkeys(a for e in entries for a in wasm_command(e, [])[1:] if a.startswith('-I')))
+    generated = os.path.join(out, 'generated')
+    args = [*extra, '-std=c++20', f'-I{generated}', f'-I{WASM}', *directories, *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
+    wasm_module.operator_table(tree, out, args + FLAGS, spec)
+    sources = [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc'] if f not in STAND_INS]
+    entry = lambda src: {'directory': host, 'file': src, 'command': ' '.join(['clang++', *args, '-c', src])}
+    objects = os.path.join(out, 'objects')
+    with concurrent.futures.ThreadPoolExecutor(int(os.environ.get('JOBS', os.cpu_count()))) as pool:
+        return list(pool.map(lambda src: compile_one(objects, entry(src), []), sources))
+
+
 def first_error(stderr):
     return next((line for line in (stderr or '').splitlines() if 'error:' in line), (stderr or '').strip()[:200])
 

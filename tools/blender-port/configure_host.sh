@@ -3,16 +3,18 @@
 # manifest's tag with its LFS datafiles, configured headless without the libraries on the far side of Bylonder's seams.
 # Usage: tools/blender-port/configure_host.sh DIR   (DIR/blender is the source tree, DIR/build-host the configure)
 set -euo pipefail
+mkdir -p "$1"
 DIR=$(realpath "$1")
 TAG=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['blender'])" "$(dirname "$0")/manifest.json")
 LFS=https://projects.blender.org/blender/blender.git/info/lfs
 
 # Headers the configure looks for. Ubuntu's OpenColorIO installs its CMake config one directory off, and OpenImageIO's
 # names an OpenCV include directory it does not install.
-apt-get install -y -q libjpeg-dev libpng-dev libfreetype-dev libepoxy-dev libtbb-dev libzstd-dev libbrotli-dev libfmt-dev \
+SUDO=$([ "$(id -u)" = 0 ] || echo sudo)
+$SUDO apt-get install -y -q libjpeg-dev libpng-dev libfreetype-dev libepoxy-dev libtbb-dev libzstd-dev libbrotli-dev libfmt-dev \
   libeigen3-dev libopenexr-dev libopenimageio-dev openimageio-tools libopencolorio-dev >/dev/null
-mkdir -p /usr/lib/x86_64-linux-gnu/cmake/OpenColorIO /usr/include/opencv4
-cp -n /usr/share/cmake/OpenColorIO*.cmake /usr/lib/x86_64-linux-gnu/cmake/OpenColorIO/ 2>/dev/null || true
+$SUDO mkdir -p /usr/lib/x86_64-linux-gnu/cmake/OpenColorIO /usr/include/opencv4
+$SUDO cp -n /usr/share/cmake/OpenColorIO*.cmake /usr/lib/x86_64-linux-gnu/cmake/OpenColorIO/ 2>/dev/null || true
 
 if [ ! -d "$DIR/blender/.git" ]; then
   GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 --branch "$TAG" https://github.com/blender/blender.git "$DIR/blender"
