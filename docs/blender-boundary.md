@@ -37,15 +37,32 @@ The module (`src/bmesh/bmesh.wasm`) runs Blender's C++ in two worlds. Both answe
 
 ### Who owns what
 
-Bylonder's Babylon scene owns all data; the module holds a mirror for as long as an operator needs it. Decided 2026-10-28.
+Decided 2026-10-28 (replaces the mirror made per operator). Bylonder's Babylon scene is the source of truth and
+renders; Blender's Main runs in parallel as a second, always accurate model of the same scene, so Blender's code
+(operators, editors, depsgraph, `.blend` writing) works on real data at any time. Each model holds what the other has
+no counterpart for; the overlap is kept equal both ways.
 
-1. **In, through RNA.** Before an operator polls or runs, each object goes in with the values its RNA struct gives (`rna-bylonder.js`), so a value Blender's C++ reads is the value Blender's scripts show: `location`, `rotation_mode`, `rotation_euler`, `rotation_quaternion`, `scale`, `mode`, its parent, and its base (collection visibility, `hide_get`, `hide_select`, `select_get`, active). Scene values come the same way (`scene.cursor.location`, `tool_settings.transform_pivot_point`). Axes are Blender's: Babylon's (x, y, z) is Blender's (x, z, y).
-2. **Object data.** `main_object_add(type, name)` makes an object with new data of its type as `BKE_object_add` does (`BKE_object_obdata_add_from_type`): a Mesh, Curve (text and curves), Light, Camera, or none for an empty. A subsystem then fills that data from Bylonder's: meshes do it with `object_mesh_set` and `object_mesh_attribute_add`, sent again only when the object's Mesh changed (`wbCreation`) and only for selected objects. Data a subsystem does not fill yet stays Blender's default.
-3. **Out, by tags.** After an operator, what it tagged comes back: `ID_RECALC_TRANSFORM` as the object's transform through RNA, `ID_RECALC_GEOMETRY` as its data (a Mesh becomes the object's Mesh data). An operator that changed data Bylonder does not take back yet changes nothing and says so.
-4. **No parent inverse.** Bylonder's objects have none, so one an operator sets folds into the object's own transform, keeping its world matrix (`object_parent_inverse_fold`). A child left sheared by a parent's uneven scale cannot be held that way; Blender holds it in `matrix_parent_inverse`.
-5. **One undo step** per operator, around the write back (`commands.transaction`).
+1. **One mapping, both directions.** Every synced property is declared once, by its RNA name, with its Babylon
+   accessor (`rna-bylonder.js` and the subsystem's bindings), in Blender's axes (Babylon's (x, y, z) is Blender's
+   (x, z, y)). The same declaration reads and writes in both directions; no subsystem has sync code of its own.
+2. **Babylon to Blender, by setter hooks.** A write to a synced Babylon value (an object's transform, a mesh's
+   geometry, a light's color) goes to Main at once, through the mapping. Objects and data that come or go in Babylon
+   are added to or removed from Main the same way.
+3. **Blender to Babylon, by recalc tags.** After Blender's code runs, what it tagged (`ID_RECALC_TRANSFORM`,
+   `_GEOMETRY`, `_SHADING`, `_SELECT`, ...) is written to Babylon through the same mapping, inside the operator's
+   undo step. Writing back does not echo to Main.
+4. **Data only one side has.** Babylon's (node materials, GPU effects, what project code builds) stays Babylon's,
+   and is kept in Main as custom properties where a round trip needs it. Blender's (Actions, curves, text, modifiers,
+   collections) lives in Main, and Babylon holds its evaluated result.
+5. **Checked.** A test mode compares the overlap of both models after every operator and edit; a difference is a bug.
 
-`editors/object/object-blender.js` does this for Object Mode; `editors/object/object-operators.js` registers the operators it runs.
+What this is for:
+- **Save a `.blend`** from Main with Blender's own writer, which renders well in desktop Blender.
+- **Export for Babylon:** a `.babylon` file, or JS initialization code per object, that runs anywhere Babylon does.
+  Modifiers are applied, as Blender's glTF exporter applies them; later, a polyfill of just the modifier kernels
+  can evaluate them live without the rest of Blender.
+
+Today `editors/object/object-blender.js` mirrors objects per operator (Object Mode), and the Outliner, animation, Edit Mode and curves each sync their own way; they move onto the one mapping above.
 
 ### Adding a subsystem
 
