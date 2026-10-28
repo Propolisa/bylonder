@@ -1,6 +1,6 @@
 // The 3D View's Edit Mode menus: Blender's own (space_view3d.py, compiled into src/bl_ui by tools/blender-ui) drawn
 // with Bylonder's UILayout, holding the operators Bylonder runs. `api` is Edit Mode's:
-//   edit(): the EditMesh, exec(idname, props): runs an operator as an undo step, keys(idname, props): its shortcut,
+//   context(): bpy.context (blenkernel/context.js), edit(): the EditMesh, exec(idname, props): runs an operator as an undo step, keys(idname, props): its shortcut,
 //   move(idname, props, { normal }) and slide(idname, props): an operator and then a move or Edge Slide, as Blender's
 //   macros run them, start(type): a transform, and the modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
@@ -35,22 +35,9 @@ export function editMeshMenus(api) {
     'mesh.bevel': (props) => api.bevel(props.affect ?? 'EDGES'),
     'mesh.inset': () => api.inset(),
   };
-  // bpy.context as the menus read it: one mesh object in Edit Mode; what is not bound reads as Blender's default.
-  function context() {
-    const edit = api.edit(), mode = edit.selectmode, { totvertsel, totedgesel, totfacesel } = edit.totals;
-    const data = rna('Mesh', {
-      total_vert_sel: totvertsel, total_edge_sel: totedgesel, total_face_sel: totfacesel,
-      count_selected_items: () => [totvertsel, totedgesel, totfacesel],
-    });
-    const object = rna('Object', { mode: 'EDIT', type: 'MESH', data });
-    return rna('Context', {
-      mode: 'EDIT_MESH', object, active_object: object, edit_object: object, objects_in_mode_unique_data: [object],
-      tool_settings: rna('ToolSettings', { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) }),
-    });
-  }
   const ui = {
     menus: MENUS,
-    context,
+    context: api.context,
     run: (idname, props) => (actions[idname] ? actions[idname](props) : api.exec(idname, props)),
     supported: (idname) => !!actions[idname] || runsMeshOperator(idname),
     poll: (idname) => !!actions[idname] || api.edit().poll(idname),
@@ -80,7 +67,7 @@ const DRAWN = ['select', 'mesh', 'vertex', 'edge', 'face', 'context'];
 // visit(item, selectmode); `api` is what the entries run. For the Coverage view and tests.
 export function visitEditMeshMenus(api, visit) {
   let edit;
-  const menus = editMeshMenus({ ...api, edit: () => edit });
+  const menus = editMeshMenus(Object.assign(api, { edit: () => edit }));
   const walk = (items, mode) => (typeof items === 'function' ? items() : items).filter(runs).forEach((item) => {
     visit(item, mode);
     if (item.items) walk(item.items, mode);
@@ -101,8 +88,19 @@ export function editMeshMenuCoverage() {
   return [...ids];
 }
 
-// An api whose entries do nothing, with `record` for what an operator entry runs.
+// An api whose entries do nothing, with `record` for what an operator entry runs, and a context of one mesh object
+// in Edit Mode (what is not bound reads as Blender's default).
 export function idleApi(record = () => {}) {
   const none = () => {};
-  return { exec: record, move: record, slide: record, keys: none, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
+  let api;
+  const context = () => {
+    const edit = api.edit(), mode = edit.selectmode, { totvertsel, totedgesel, totfacesel } = edit.totals;
+    const data = rna('Mesh', { total_vert_sel: totvertsel, total_edge_sel: totedgesel, total_face_sel: totfacesel, count_selected_items: () => [totvertsel, totedgesel, totfacesel] });
+    const object = rna('Object', { mode: 'EDIT', type: 'MESH', data });
+    return rna('Context', {
+      mode: 'EDIT_MESH', object, active_object: object, edit_object: object, objects_in_mode_unique_data: [object],
+      tool_settings: rna('ToolSettings', { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) }),
+    });
+  };
+  return api = { context, exec: record, move: record, slide: record, keys: none, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
 }

@@ -273,7 +273,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // An operator's shortcut in Edit Mode's keymaps: the binding with its properties, else its plain one.
   const keysOf = (idname, props) => operatorKeys(idname, props, [keymap, viewKeymap, toolKeymap]);
   const menus = editMeshMenus({
-    edit: () => em.edit, exec, keys: keysOf, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type),
+    context: () => world.blenderContext(views.input), edit: () => em.edit, exec, keys: keysOf, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type),
     extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
   });
   const keymap = createKeymap([

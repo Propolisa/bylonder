@@ -45,6 +45,7 @@ import { openMenu } from "./editors/interface/menu.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
+import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
 const viewportDock = mountRuntimeLayout();
@@ -298,6 +299,8 @@ world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 registerObjectOperators(world.objectActions);
 registerAddOperators(creator);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
+// bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
+world.blenderContext = (view) => createContext(blenderRNA, { space: view });
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
