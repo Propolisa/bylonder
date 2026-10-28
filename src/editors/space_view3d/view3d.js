@@ -118,6 +118,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.toolbar = toolbar;
   // The header, the tool settings and the sidebar, Blender's. Edit Mode's menus and operators are its own; its Add menu
   // adds Bylonder's primitives.
+  // Mesh Edit Mode's menus and Add menu are Bylonder's; curves and text in Edit Mode draw Blender's.
+  const editMesh = () => editMode() && (world.editMode.kind ?? 'MESH') === 'MESH';
   const meshItem = (p) => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
   const meshes = () => {
     const mesh = creator.catalog.filter((p) => p.id !== 'text'), babylon = mesh.filter((p) => p.group === 'babylon');
@@ -131,8 +133,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const regions = createRegions({
     view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
     ui: headerUI,
-    menu: (idname) => (!editMode() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname)),
-    templates: { template_header_3D_mode: () => (editMode() ? selectModeLayout(world.editMode.selectmode) : null) },
+    menu: (idname) => (!editMesh() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname)),
+    templates: { template_header_3D_mode: () => (editMesh() ? selectModeLayout(world.editMode.selectmode) : null) },
   });
   header.replaceChildren(regions.header);
   section.append(regions.toolHeader, regions.sidebar);

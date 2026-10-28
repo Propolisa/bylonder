@@ -78,7 +78,7 @@ Today `editors/object/object-blender.js` mirrors objects per operator (Object Mo
 
 ### Known limits
 
-Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Lights and cameras go in without their data too. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+Text and curve objects go in with their Curve data and come back with it when an operator tags their geometry (`docs/curves-and-text.md`). Lights and cameras go in without their data. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 
 ### Animation
 

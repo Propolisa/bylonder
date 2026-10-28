@@ -79,3 +79,8 @@ The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/spac
 ## VIEW3D_HT_header > *
 The transform settings (`draw_xform_template`) draw from Blender's Python. Transform orientation slots are stored but no transform uses them yet.
 
+## VIEW3D_MT_curve_add
+Blender's own primitive operators fill the curve, in the module (`ED_curve_add_nurbs_primitive`). Surfaces (Add > Surface) are not offered yet. See `docs/curves-and-text.md`.
+
+## object.text_add
+Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its built-in font, FreeType in the module. Fonts other than the built-in one load from their files' bytes; a font file picker is not offered yet.

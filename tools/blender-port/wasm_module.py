@@ -94,7 +94,8 @@ def patched_tree(root):
 
 def dependencies(build, deps):
     """Libraries Blender builds against, at the versions Blender pins (build_files/build_environment/cmake/versions.cmake),
-    fetched once; returns their directories, their include directories and a key of their versions."""
+    fetched once; returns their directories, the include directories and a key of the versions of those every source
+    sees. A `private` dependency is seen only by the libraries built from it or naming it in `uses` (library_flags)."""
     paths, includes = {}, []
     for name, dep in sorted(deps.items()):
         path = os.path.join(build, 'deps', f'{name}-{dep["tag"]}')
@@ -111,8 +112,61 @@ def dependencies(build, deps):
         for target, variables in dep.get('configure', {}).items():
             configure(os.path.join(path, target), variables)
         paths[name] = path
-        includes.append(f'-I{os.path.join(path, dep.get("include", ""))}')
-    return paths, includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()))
+        if not dep.get('private'):
+            includes.append(f'-I{os.path.join(path, dep.get("include", ""))}')
+    return paths, includes, ' '.join(f'{n}@{d["tag"]}' for n, d in sorted(deps.items()) if not d.get('private'))
+
+
+def library_flags(entry, tree, deps, spec):
+    """What one library entry adds to its sources' arguments (the include directories of the private dependencies it is
+    built from or `uses`, its own `includes` in Blender's tree, its `defines` and other `flags`), and to their cache key
+    (those dependencies' versions)."""
+    entry = entry if isinstance(entry, dict) else {}
+    specs = spec.get('dependencies', {})
+    used = [n for n in [entry.get('dependency'), *entry.get('uses', [])] if n and specs[n].get('private')]
+    # An include under wasm/ is the module's own (wasm/fstream), the rest are Blender's.
+    flags = ([f'-I{os.path.join(deps[n], specs[n].get("include", ""))}' for n in used]
+             + [f'-I{os.path.join(HERE if d.startswith("wasm/") else tree, d)}' for d in entry.get('includes', [])]
+             + [f'-D{d}' for d in entry.get('defines', [])] + entry.get('flags', []))
+    key = ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
+    if 'rename' in entry:
+        header = renamed_functions(tree, **entry['rename'])
+        flags += ['-include', header]
+        key += hashlib.sha1(open(header, 'rb').read()).hexdigest()
+    return flags, key
+
+
+def renamed_functions(tree, header, functions, prefix):
+    """A header renaming the functions a header declares whose names start with `functions` (BLF_api.hh's BLF_) to
+    `prefix` + name, so a library built with it (Blender's blenfont, for text objects) leaves those names to the
+    module's own definitions (region-draw.cc's)."""
+    text = open(os.path.join(tree, header)).read()
+    macros = set(re.findall(r'#define\s+(\w+)', text))
+    names = sorted(set(re.findall(rf'\b({re.escape(functions)}\w+)\s*\(', text)) - macros)
+    out = os.path.join(tree + '-build', 'generated', prefix + os.path.basename(header))
+    lines = ''.join(f'#define {name} {prefix}{name}\n' for name in names)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    if not os.path.exists(out) or open(out).read() != lines:
+        open(out, 'w').write(lines)
+    return out
+
+
+def datatoc(build, paths, tag):
+    """generated/datatoc.cc: each of Blender's data files (fetched into the build, outside the source tree) embedded as
+    Blender's datatoc embeds it (datatoc_bfont_pfb, datatoc_bfont_pfb_size)."""
+    root = os.path.join(build, 'datatoc')
+    fetch_blender_paths(root, paths, tag)
+    lines = []
+    for path in paths:
+        name = 'datatoc_' + re.sub(r'\W', '_', os.path.basename(path))
+        data = open(os.path.join(root, path), 'rb').read()
+        lines += [f'extern const int {name}_size = {len(data)};',
+                  f'extern const char {name}[] = {{' + ','.join(str(b if b < 128 else b - 256) for b in data) + ',0};']
+    out = os.path.join(build, 'generated', 'datatoc.cc')
+    text = '\n'.join(lines) + '\n'
+    if not os.path.exists(out) or open(out).read() != text:
+        open(out, 'w').write(text)
+    return out
 
 
 def configure(target, variables):
@@ -223,6 +277,13 @@ def own_headers():
     return hashlib.sha1(b''.join(open(p, 'rb').read() for p in paths if os.path.isfile(p))).hexdigest()
 
 
+def compiler(src, args):
+    """Clang for a source: a C source (FreeType's, curve_fit_nd's) as C, the rest as C++20."""
+    if src.endswith('.c'):
+        return ['clang', *(a for a in args if a not in ('-std=c++20', '-fignore-exceptions', '-Wno-c++11-narrowing'))]
+    return ['clang++', *args]
+
+
 def compile_all(build, sources, args, key):
     """Objects of the sources that build, by source; what does not build is left out (an archive member nothing needs)."""
     objects = os.path.join(build, 'objects')
@@ -240,9 +301,7 @@ def compile_all(build, sources, args, key):
             return src, obj
         if os.path.exists(obj + failed):
             return src, None
-        # A C source (Blender's data files) builds as C, as Blender's build compiles it.
-        language = ['-x', 'c', *(a.replace('-std=c++20', '-std=c11') for a in args)] if src.endswith('.c') else args
-        result = subprocess.run(['clang++', *language, '-c', src, '-o', obj], capture_output=True, text=True)
+        result = subprocess.run([*compiler(src, args), '-c', src, '-o', obj], capture_output=True, text=True)
         if result.returncode:
             open(obj + failed, 'w').write(result.stderr)
         return src, (obj if result.returncode == 0 else None)
@@ -284,16 +343,19 @@ def build(root, name, spec, tag):
     patches += versions
     generated, operators = operator_table(tree, out_dir, args, spec)
     archives, members = [], []
-    for lib in spec['libraries']:
-        # A library is a directory or a file, or {path, exclude, dependency, includes}: a directory without some of its
-        # files, in Blender's tree or in a dependency's, whose sources also see header directories of Blender's tree.
-        spec_lib = lib if isinstance(lib, dict) else {'path': lib}
+    for entry in spec['libraries']:
+        # A library is a directory or a file, or {path, exclude, sources, dependency, uses, includes, defines, rename}: a
+        # directory without some of its files, or some files of it, in Blender's tree or in a dependency's, whose sources
+        # also see header directories (library_flags).
+        spec_lib = entry if isinstance(entry, dict) else {'path': entry}
         lib, exclude = spec_lib['path'], set(spec_lib.get('exclude', []))
         base = deps[spec_lib['dependency']] if 'dependency' in spec_lib else tree
         sources = sorted(glob.glob(os.path.join(base, lib, '*.c*'))) if os.path.isdir(os.path.join(base, lib)) else [os.path.join(base, lib)]
         sources = [s for s in sources if os.path.basename(s) not in exclude]
-        lib_args = args + [f'-I{os.path.join(tree, d)}' for d in spec_lib.get('includes', [])]
-        objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], lib_args, patches)
+        if 'sources' in spec_lib:
+            sources = [os.path.join(base, lib, f) for f in spec_lib['sources']]
+        extra, key = library_flags(spec_lib, tree, deps, spec)
+        objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args + extra, patches + key)
         built = [o for o in objects.values() if o]
         archive = os.path.join(out_dir, lib.replace('/', '_') + '.a')
         if os.path.exists(archive):
@@ -306,7 +368,8 @@ def build(root, name, spec, tag):
     # sources need none of them.
     own_args = args + [f'-I{generated}', f'-I{WASM}', *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
     own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)]
-                      + fetched_files(out_dir, spec.get('fetch', []), tag),
+                      + fetched_files(out_dir, spec.get('fetch', []), tag)
+                      + ([datatoc(out_dir, spec['datatoc'], tag)] if spec.get('datatoc') else []),
                       own_args, patches + operators + rna_dna_fields(out_dir) + own_headers())
     failed = [src for src, obj in own.items() if obj is None]
     if failed:

@@ -15,6 +15,7 @@ import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { loadRNAUI, rnaProperty, INFO } from '../src/makesrna/rna.js';
 import { panelTypes, drawPanels } from '../src/editors/interface/panels.js';
 import { isLayout } from '../src/editors/interface/layout.js';
+import { CurveObject } from '../src/blenkernel/curve/curve.js';
 import { propertiesContext, propertiesTabs, TAB_CONTEXTS } from '../src/editors/space_buttons/buttons-context.js';
 import { asObject } from '../src/runtime/object-transform.js';
 
@@ -30,12 +31,13 @@ const sun = new DirectionalLight('Sun', new Vector3(0, -1, 0), scene), camera = 
 // Blender's default camera, as the Default Cube example builds it.
 camera.rotation = new Vector3((90 - 63.559) * Math.PI / 180, -46.692 * Math.PI / 180, 0);
 [point, spot, sun, camera].forEach(asObject);
-// A text object and a curve, as Bylonder's text tool and curve() make them.
-const text = new Mesh('Text', scene), curve = new TransformNode('Curve', scene);
+// A text object and a curve, with Curve data as Blender makes it (blenkernel/curve/curve.js).
+const text = new Mesh('Text', scene), curve = new Mesh('Curve', scene);
+const curveData = (type, settings) => { const object = new CurveObject(type); object.settings = settings; const data = object.data; object.free(); return data; };
 const objects = [cube, empty, point, spot, sun, camera, text, curve];
 objects.forEach((ob, i) => { ob.metadata = { wbId: 'ob' + i }; });
-text.metadata.wbCreation = { text: { text: 'Text', size: 1, depth: 0.2, align: 'center' } };
-curve.metadata.wbCurve = [{ closed: false, points: [[0, 0, 0], [1, 0, 1]] }];
+text.metadata.wbCreation = { curve: curveData('FONT', { align_x: 'CENTER', extrude: 0.1 }) };
+curve.metadata.wbCreation = { curve: curveData('CURVE', {}) };
 objects.scene = scene;
 const world = { scene, objects, animation: createAnimationModel() };
 world.sceneSettings = createSceneSettings(world);
@@ -85,7 +87,7 @@ const panelsOf = (ob, tab) => { selection.replace([ob]); context = propertiesCon
 assert.deepEqual(drawn_tabs.Text, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'COLLECTION', 'OBJECT', 'MODIFIER', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
 assert.ok(['DATA_PT_font', 'DATA_PT_paragraph', 'DATA_PT_text_boxes', 'DATA_PT_geometry_curve'].every((id) => panelsOf(text, 'DATA').includes(id)), "a text object's data is Blender's Font panels");
 assert.equal(context.curve.align_x, 'CENTER');
-assert.equal(context.curve.extrude, 0.1);
+assert.equal(context.curve.extrude, Math.fround(0.1));
 assert.ok(panelsOf(curve, 'DATA').includes('DATA_PT_shape_curve'), "a curve's data is Blender's Curve panels");
 // A material is a Principled BSDF over the Babylon material's inputs.
 selection.replace([cube]);

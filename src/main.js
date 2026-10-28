@@ -42,11 +42,14 @@ import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequence
 import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
+import { createEditModes } from "./editors/object/edit-modes.js";
+import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
+import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createBlenderObjects } from "./editors/object/object-blender.js";
-import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
+import { registerOperators, runOperator, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
@@ -197,7 +200,7 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Handle for debugging and the browser tests, which run against the production build.
-window.__bylonder ={ world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
+window.__bylonder ={ world, renderHost, runOperator, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
@@ -308,7 +311,11 @@ creator = createAddMesh(
   notify,
 );
 commands.setBefore(() => creator.finish());
-world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { refreshUI(); views.wake(); } });
+world.curves = createCurveObjects(world);
+const editModeOptions = { world, editor, views, history, notify, changed: () => { refreshUI(); views.wake(); } };
+const editCurve = createEditCurve({ ...editModeOptions, curves: world.curves });
+world.editMode = createEditModes(createEditMode(editModeOptions), editCurve);
+registerCurveAddOperators({ editor, history, commands, curves: world.curves, editCurve });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
@@ -329,7 +336,7 @@ const blenderRNA = createRNA({ world, selection: editor.selection, update: () =>
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
 // The mode the tool system and Blender's keymaps go by (context.mode).
-const contextMode = () => (world.editMode.active ? "EDIT_MESH" : "OBJECT");
+const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT_TEXT" }[world.editMode.kind] ?? "OBJECT");
 // Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
 const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
 const applyTool = () => {
@@ -507,6 +514,7 @@ function undoRedo(redo) {
   creator.finish();
   editor.finish(false);
   redo ? history.redo() : history.undo();
+  world.curves.refresh();
   editor.reconcile();
   world.editMode.reload();
 }
@@ -589,11 +597,12 @@ const bylonderKeys = createKeymap([
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode or Mesh), then the
+// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve or Font), then the
 // 3D View's and the window's. Tool keymaps run with the tool's settings.
 const view3dKeys = keymapHandler(
-  (event) => [...world.toolsystem.keymaps(contextMode(), editor.gizmoState(event)), "Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true,
+  (event) => [...world.toolsystem.keymaps(contextMode(), editor.gizmoState(event)), "Object Mode", "Mesh", "Curve", "Font", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.kind === "MESH", Curve: world.editMode.kind === "CURVE",
+    Font: world.editMode.kind === "FONT" })[name] ?? true,
   (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
 const view3dArea = {
