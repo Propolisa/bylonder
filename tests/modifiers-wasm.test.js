@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { NullEngine, Scene, MeshBuilder } from '@babylonjs/core';
+import { NullEngine, Scene, MeshBuilder, Matrix } from '@babylonjs/core';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { evaluateBlenderModifiers, evaluated, moduleModifiers, modifierPanel, evaluation, estimatedFaces } from '../src/modifiers/blender.js';
 import { evaluateHere } from '../src/modifiers/evaluator.js';
@@ -143,6 +143,22 @@ assert.equal(vase.getTotalIndices(), 8 * 2 * 6, 'Screw makes two quads per step'
 assert.ok(vase.getChildMeshes(true).every((wire) => !wire.isEnabled(false)), 'the profile\'s loose edges do not draw over the result');
 lathe.dispose();
 console.log('Modifiers: Screw turns a profile of edges from code, Shade Smooth clears sharp faces');
+
+// Thin instances placed by code stay: the evaluated mesh draws in each of them.
+engine.getCaps().instancedArrays = true;
+const studs = createPrimitive('Studs', 'mesh.primitive_cube_add', { size: 0.2 }, scene);
+studs.metadata.wbId = 'studs';
+studs.thinInstanceAdd([0, 1, 2].map((x) => Matrix.Translation(x, 0, 0)));
+const placed = createModifierSystem({ scene, objects: [studs], animation: createAnimationModel() });
+const bevel = placed.add(studs, 'BEVEL', { width: 0.02 });
+await placed.settled();
+assert.equal(studs.thinInstanceCount, 3, 'instances survive the evaluation');
+assert.deepEqual(studs.thinInstanceGetWorldMatrices().map((m) => m.m[12]), [0, 1, 2]);
+placed.remove(studs, bevel.id);
+await placed.settled();
+assert.equal(studs.thinInstanceCount, 3, 'and removing the modifier keeps them');
+placed.dispose();
+console.log('Modifiers: thin instances from code keep drawing the evaluated mesh');
 scene.dispose();
 engine.dispose();
 console.log(`Modifiers: ${known.length} results differ where known (${Object.values(KNOWN).join('; ')})`);
