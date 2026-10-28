@@ -19,7 +19,7 @@ export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISH
 const OPTYPE_UNDO = 1 << 1;
 const EVT_MODAL_MAP = 0x5022;
 // The popups an invoke can open (operator_popup), by number.
-const POPUPS = [null, 'CONFIRM', 'ENUM_MENU'];
+const POPUPS = [null, 'CONFIRM', 'ENUM_MENU', 'PROPS'];
 // The gestures an invoke can start (operator_gesture), by number.
 const GESTURES = [null, 'BOX', 'CIRCLE', 'LASSO'];
 // eAnimChannel_Settings, as bits of a channel's settings and values.

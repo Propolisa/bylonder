@@ -821,7 +821,7 @@ EXPORT(gesture_lasso_path_set) void gesture_lasso_path_set(const int2 *xy, int c
 
 /* Popups an invoke opens (wm_operators.cc): Bylonder's window manager shows them, then runs the operator's exec when
  * the user confirms, or sets the enum property and runs it when the user picks an item. */
-enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU };
+enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU, POPUP_PROPS };
 static Popup popup_opened = POPUP_NONE;
 static std::string popup_title, popup_text;
 
@@ -887,6 +887,20 @@ wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*e
     return op->type->exec(C, op);
   }
   return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop));
+}
+
+/* As wm_operator_utils.cc defines it (that file's modal wrappers would change the mesh operators' behavior here). */
+wmOperatorStatus WM_operator_flag_only_pass_through_on_press(wmOperatorStatus retval, const wmEvent *event)
+{
+  if (event->val != KM_PRESS && (retval & OPERATOR_PASS_THROUGH) && (retval & (OPERATOR_FINISHED | OPERATOR_CANCELLED))) {
+    retval &= ~OPERATOR_PASS_THROUGH;
+  }
+  return retval;
+}
+/* A properties popup (wm_operators.cc): Bylonder's window manager shows the operator's properties with OK. */
+wmOperatorStatus WM_operator_props_popup(bContext * /*C*/, wmOperator *op, const wmEvent * /*event*/)
+{
+  return popup_open(POPUP_PROPS, op->type->name, op->type->idname);
 }
 
 /* As wm_operators.cc defines them. */

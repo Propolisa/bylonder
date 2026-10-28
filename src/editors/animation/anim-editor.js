@@ -11,7 +11,7 @@ import theme from '../interface/theme-default.json' with { type: 'json' };
 import { newOperator, operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { keymapHandler, modalItem } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI } from '../../windowmanager/wm-operators.js';
+import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI, kw } from '../../windowmanager/wm-operators.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
@@ -20,7 +20,9 @@ import { LayoutView, RegionView, panelState } from '../interface/layout-view.js'
 import { GRAPH_PANELS } from './anim-buttons.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
-import { propBinding } from '../../makesrna/rna-bylonder.js';
+import { propBinding, operatorProperties } from '../../makesrna/rna-bylonder.js';
+import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
+import { UILayout } from '../interface/layout.js';
 import { createContext } from '../../blenkernel/context.js';
 import { createApp, h, reactive, markRaw } from 'vue';
 import '../interface/layout-view.css';
@@ -252,10 +254,46 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   // An invoke's popup (wm_operators.cc): a confirmation's one button, or the items of the enum property it asks for.
   function openPopup(idname, event) {
     const { type, title, text } = area.popup, finish = (props) => { after(area.finishPopup(props)); redraw(); };
+    if (type === 'PROPS') return openPropsPopup(idname, title, event, finish);
     const items = type === 'CONFIRM' ? [{ label: text, run: () => finish({}) }]
       : ui.enumItems(idname, text).map(([value, label, , icon]) => ({ label, icon: icon && icon !== 'NONE' ? icon : undefined, run: () => finish({ [text]: value }) }));
     const menu = openMenu(items, screenPoint(event), title);
     new MutationObserver((_, observer) => { if (!menu.isConnected) { observer.disconnect(); if (area.popup) area.finishPopup(null); } }).observe(menu.parentNode ?? document.body, { childList: true });
+  }
+
+  // WM_operator_props_popup: the operator's properties, drawn by the shared layout renderer, with OK to run it.
+  function openPropsPopup(idname, title, event, finish) {
+    const values = {}, state = reactive({ revision: 0 });
+    const props = operatorProperties(idname, values, { update: () => { state.revision++; } });
+    const popup = Object.assign(document.createElement('div'), { className: 'bl-ui anim-popup' });
+    const at = screenPoint(event);
+    Object.assign(popup.style, { left: at.x + 'px', top: at.y + 'px' });
+    const close = (run) => {
+      app.unmount();
+      popup.remove();
+      removeEventListener('pointerdown', outside, true);
+      run ? finish({ ...values }) : area.finishPopup(null);
+    };
+    const outside = (e) => { if (!popup.contains(e.target)) close(false); };
+    const popupUI = markRaw({ ...layoutUI, get revision() { return state.revision; }, undoPush: () => { state.revision++; } });
+    const app = createApp({ render: () => {
+      void state.revision;
+      const layout = new UILayout('root');
+      layout.label(kw({ text: title }));
+      for (const name of Object.keys(rnaOperators[idname]?.properties ?? {})) layout.prop(props, name);
+      return [h(LayoutView, { layout, ui: popupUI }),
+        h('button', { type: 'button', class: 'bl-tool flex h-unit w-full items-center justify-center rounded-md px-1.5 text-xs', onClick: () => close(true) }, 'OK')];
+    } });
+    app.mount(popup);
+    popup.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Escape') close(false);
+      if (e.key === 'Enter' && !e.target.closest('input')) close(true);
+    });
+    document.body.append(popup);
+    addEventListener('pointerdown', outside, true);
+    popup.tabIndex = -1;
+    popup.focus();
   }
 
   // Gestures (wm_gesture_ops.cc): box, circle and lasso, drawn here; on release their operator's properties are set
@@ -266,7 +304,8 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     gesture = { type: area.gesture.type, region: area.gesture.regionType, wait: !tweak, start: tweak ? at : null, end: at, radius: 25, path: tweak ? [at] : [], down: tweak };
     redraw();
   }
-  const GESTURE_MAPS = { BOX: 'Gesture Box', CIRCLE: 'Gesture Circle', LASSO: 'Gesture Lasso' };
+  // The modal maps wm_gesture_ops.cc assigns: circle select uses the 3D View's in every editor.
+  const GESTURE_MAPS = { BOX: 'Gesture Box', CIRCLE: 'View3D Gesture Circle', LASSO: 'Gesture Lasso' };
   function gestureEvent(event) {
     const item = modalItem(GESTURE_MAPS[gesture.type], event);
     const at = [event.x, event.y];
