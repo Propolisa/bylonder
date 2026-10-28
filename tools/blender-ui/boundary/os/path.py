@@ -8,6 +8,8 @@ for _file in files:
     for _end in range(2, len(_parts)):
         _directories.add('/'.join(_parts[:_end]))
 _files_set = set(files)
+# Install folders Blender always has that hold nothing Bylonder ships (its core add-ons).
+_directories.add('/blender/scripts/addons_core')
 sep = '/'
 
 

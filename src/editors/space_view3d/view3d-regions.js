@@ -6,7 +6,7 @@
 import { createApp, h, reactive, markRaw } from 'vue';
 import { panels, headers, menus } from '../../python/bpy_interface.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
-import { panelTypes, drawPanels, headerLayout, idname } from '../interface/panels.js';
+import { panelTypes, drawPanels, headerLayout, idname, drawType } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { VIEW3D_PT_transform } from './view3d-buttons.js';
@@ -71,7 +71,7 @@ export function createRegions({ view, context, ui, menu, templates, changed, und
     const ctx = context(region);
     return h(LayoutView, { layout: headerLayout(ctx, (layout) => draw(layout, ctx)), ui: layoutUI(region) });
   };
-  const drawHeaderType = (type) => (layout, ctx) => Object.assign(type(), { layout }).draw(ctx);
+  const drawHeaderType = (type) => (layout, ctx) => drawType(type, layout, ctx);
 
   const sidebarRegion = () => {
     const ctx = context('UI'), contexts = [MODE_CONTEXTS[ctx.mode]];

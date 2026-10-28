@@ -28,6 +28,11 @@ render_preview_size = 128
 use_event_simulate = False
 use_userpref_skip_save_on_exit = True
 python_args = ()
+# bytes in Blender; str stands in for bytes here.
+build_branch, build_hash, build_commit_date, build_commit_time = 'blender-v5.2-release', 'e13b728c6880', '2026-10-21', '09:21'
+build_commit_timestamp, build_date, build_time = 1792574515, '2026-10-22', '01:35:05'
+build_platform, build_type, build_system = 'Linux', 'Release', 'CMake'
+build_cflags = build_cxxflags = build_linkflags = ''
 driver_namespace = {}
 
 
