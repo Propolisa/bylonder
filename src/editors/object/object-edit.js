@@ -11,7 +11,7 @@ import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space
 import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, toBlenderView, view3d_pixel_size } from '../transform/transform.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
-import { meshOperator, operatorPreview, editBMesh } from '../mesh/editmesh-tools.js';
+import { meshOperator, operatorPreview, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
 import { inset_modal } from '../mesh/editmesh-inset.js';
 import { bevel_modal } from '../mesh/editmesh-bevel.js';
@@ -24,7 +24,8 @@ import { objectMesh } from './object-mesh.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap, operatorKeys } from '../../windowmanager/input/keymap.js';
-import { editMeshMenus } from '../space_view3d/view3d-menus-edit-mesh.js';
+import { editMeshMenus, editMeshActions } from '../space_view3d/view3d-menus-edit-mesh.js';
+import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
 
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
 
@@ -271,63 +272,28 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   };
   const inView = (event) => !!event.view;
   // An operator's shortcut in Edit Mode's keymaps: the binding with its properties, else its plain one.
-  const keysOf = (idname, props) => operatorKeys(idname, props, [keymap, viewKeymap, toolKeymap]);
-  const menus = editMeshMenus({
+  const keysOf = (idname, props) => operatorKeys(idname, props, [viewKeymap, toolKeymap]);
+  const menuApi = {
     context: () => world.blenderContext(views.input), edit: () => em.edit, exec, keys: keysOf, move: operatorMove, slide: operatorSlide, start: (type) => editor.start(type),
     extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
+  };
+  const menus = editMeshMenus(menuApi);
+  // Blender's mesh operators the module runs, and Edit Mode's macros, modal tools and picks, by idname, for Blender's
+  // Mesh keymap and menus. Transforms and box select stay the Object Mode operators, which start the same tools; adding
+  // primitives stays the Add menu's.
+  const inEdit = () => !!em;
+  const meshOperators = Object.keys(rna).filter((id) => id.startsWith('mesh.') && !id.startsWith('mesh.primitive_') && runsMeshOperator(id));
+  for (const idname of meshOperators) {
+    registerOperator(idname, { poll: () => !!em && em.edit.poll(idname), run: (props) => exec(idname, props), enumItems: (prop) => em?.edit.enumItems(idname, prop) });
+  }
+  const pick = (select) => ({ poll: (props, event) => !!em && !!event?.view, run: (props, event) => select(event, props) });
+  registerOperators({
+    ...Object.fromEntries(Object.entries(editMeshActions(menuApi))
+      .filter(([idname]) => !idname.startsWith('transform.') && idname !== 'view3d.select_box').map(([idname, run]) => [idname, { poll: inEdit, run }])),
+    'mesh.select_linked_pick': pick((event, { deselect }) => linkedPick(event, deselect)),
+    'mesh.loop_select': pick((event, props) => loopPick(event, 'mesh.loop_select', props)),
+    'mesh.edgering_select': pick((event, props) => loopPick(event, 'mesh.edgering_select', props)),
   });
-  const keymap = createKeymap([
-    { blender: 'mesh.select_mode', keys: '1', run: run('mesh.select_mode', { type: 'VERT' }) },
-    { blender: 'mesh.select_mode', keys: '2', run: run('mesh.select_mode', { type: 'EDGE' }) },
-    { blender: 'mesh.select_mode', keys: '3', run: run('mesh.select_mode', { type: 'FACE' }) },
-    { blender: 'mesh.select_mode', keys: 'Shift 1', run: run('mesh.select_mode', { type: 'VERT', use_extend: true }) },
-    { blender: 'mesh.select_mode', keys: 'Shift 2', run: run('mesh.select_mode', { type: 'EDGE', use_extend: true }) },
-    { blender: 'mesh.select_mode', keys: 'Shift 3', run: run('mesh.select_mode', { type: 'FACE', use_extend: true }) },
-    { blender: ['mesh.select_all', 'mesh.select_all:SELECT'], keys: 'A', run: run('mesh.select_all', { action: 'SELECT' }) },
-    { blender: ['mesh.select_all', 'mesh.select_all:DESELECT'], keys: 'Alt A', run: run('mesh.select_all', { action: 'DESELECT' }) },
-    { blender: ['mesh.select_all', 'mesh.select_all:INVERT'], keys: 'Ctrl I', run: run('mesh.select_all', { action: 'INVERT' }) },
-    { blender: 'mesh.select_more', keys: 'Ctrl NUMPAD_PLUS', run: () => exec('mesh.select_more') },
-    { blender: 'mesh.select_less', keys: 'Ctrl NUMPAD_MINUS', run: () => exec('mesh.select_less') },
-    { blender: 'mesh.select_linked', keys: 'Ctrl L', run: () => exec('mesh.select_linked') },
-    { blender: 'mesh.select_linked_pick', keys: 'L', poll: inView, run: (event) => linkedPick(event, false) },
-    { blender: 'mesh.select_linked_pick', keys: 'Shift L', poll: inView, run: (event) => linkedPick(event, true) },
-    { blender: 'mesh.dissolve_mode', keys: 'Ctrl X', run: () => exec('mesh.dissolve_mode') },
-    { blender: 'mesh.edge_face_add', keys: 'F', run: () => exec('mesh.edge_face_add') },
-    { blender: 'VIEW3D_MT_edit_mesh_merge', keys: 'M', run: () => openMenu(menus.merge(), editor.pointer, 'Merge') },
-    { blender: 'mesh.hide', keys: 'H', run: () => exec('mesh.hide') },
-    { blender: 'mesh.hide', keys: 'Shift H', props: { unselected: true }, run: () => exec('mesh.hide', { unselected: true }) },
-    { blender: 'mesh.reveal', keys: 'Alt H', run: () => exec('mesh.reveal') },
-    { blender: 'VIEW3D_MT_edit_mesh_delete', keys: ['X', 'Delete'], run: () => openMenu(menus.delete(), editor.pointer, 'Delete') },
-    { blender: 'view3d.edit_mesh_extrude_move_normal', keys: 'E', run: extrudeMove },
-    { blender: 'mesh.duplicate_move', keys: 'Shift D', run: () => operatorMove('mesh.duplicate') },
-    { blender: 'VIEW3D_MT_edit_mesh_extrude', keys: 'Alt E', run: () => openMenu(menus.extrude(), editor.pointer, 'Extrude') },
-    { blender: 'VIEW3D_MT_edit_mesh_select_similar', keys: 'Shift G', run: () => openMenu(menus.similar(), editor.pointer, 'Select Similar') },
-    { blender: 'VIEW3D_MT_edit_mesh_split', keys: 'Alt M', run: () => openMenu(menus.split(), editor.pointer, 'Split') },
-    { blender: 'VIEW3D_MT_edit_mesh_vertices', keys: 'Ctrl V', run: () => openMenu(menus.vertex(), editor.pointer, 'Vertex') },
-    { blender: 'VIEW3D_MT_edit_mesh_edges', keys: 'Ctrl E', run: () => openMenu(menus.edge(), editor.pointer, 'Edge') },
-    { blender: 'VIEW3D_MT_edit_mesh_faces', keys: 'Ctrl F', run: () => openMenu(menus.face(), editor.pointer, 'Face') },
-    { blender: 'mesh.vert_connect_path', keys: 'J', run: () => exec('mesh.vert_connect_path') },
-    { blender: 'mesh.split', keys: 'Y', run: () => exec('mesh.split') },
-    { blender: 'mesh.fill', keys: 'Alt F', run: () => exec('mesh.fill') },
-    { blender: 'mesh.beautify_fill', keys: 'Shift Alt F', run: () => exec('mesh.beautify_fill') },
-    { blender: 'mesh.loopcut_slide', keys: 'Ctrl R', run: loopcut },
-    { blender: 'mesh.inset', keys: 'I', run: inset },
-    { blender: 'mesh.bevel', keys: 'Ctrl B', props: { affect: 'EDGES' }, run: () => bevel('EDGES') },
-    { blender: 'mesh.quads_convert_to_tris', keys: 'Ctrl T', run: () => exec('mesh.quads_convert_to_tris', { quad_method: 'BEAUTY', ngon_method: 'BEAUTY' }) },
-    { blender: 'mesh.quads_convert_to_tris', keys: 'Shift Ctrl T', run: () => exec('mesh.quads_convert_to_tris', { quad_method: 'FIXED', ngon_method: 'CLIP' }) },
-    { blender: 'mesh.tris_convert_to_quads', keys: 'Alt J', run: () => exec('mesh.tris_convert_to_quads') },
-    { blender: 'mesh.normals_make_consistent', keys: 'Shift N', props: { inside: false }, run: () => exec('mesh.normals_make_consistent', { inside: false }) },
-    { blender: 'mesh.normals_make_consistent', keys: 'Shift Ctrl N', props: { inside: true }, run: () => exec('mesh.normals_make_consistent', { inside: true }) },
-    { blender: 'VIEW3D_MT_edit_mesh_normals', keys: 'Alt N', run: () => openMenu(menus.normals(), editor.pointer, 'Normals') },
-    { blender: 'mesh.bevel', keys: 'Shift Ctrl B', props: { affect: 'VERTICES' }, run: () => bevel('VERTICES') },
-    { blender: 'mesh.loop_select', keys: 'Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.loop_select', {}) },
-    { blender: 'mesh.loop_select', keys: 'Shift Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.loop_select', { toggle: true }) },
-    { blender: 'mesh.edgering_select', keys: 'Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.edgering_select', {}) },
-    { blender: 'mesh.edgering_select', keys: 'Shift Ctrl Alt LEFTMOUSE CLICK', poll: inView, run: (event) => loopPick(event, 'mesh.edgering_select', { toggle: true }) },
-    { blender: 'transform.translate', keys: 'G', run: () => editor.start('move') },
-    { blender: 'transform.rotate', keys: 'R', run: () => editor.start('rotate') },
-    { blender: 'transform.resize', keys: 'S', run: () => editor.start('scale') },
-  ], ['Mesh']);
   const viewKeymap = createKeymap([
     { blender: 'VIEW3D_MT_edit_mesh_context_menu', keys: 'RIGHTMOUSE', poll: inView, run: (event) => openMenu(menus.context(), { x: event.x, y: event.y }, '') },
     { blender: 'view3d.select', keys: 'LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, false) },
@@ -366,8 +332,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     setSelectMode(type, extend = false) { if (em) run('mesh.select_mode', { type, use_extend: extend })(); },
     // The 3D View's Edit Mode menus (view3d-menus-edit-mesh.js).
     menus,
-    // Tab in both modes; the Mesh, 3D View and Select Box tool keymaps in Edit Mode.
-    keymap: (event) => modeKeys(event) || (!!em && (keymap(event) || viewKeymap(event) || toolKeymap(event))),
+    // Tab in both modes; picking and the Select Box tool in Edit Mode (Blender's Mesh keymap runs the rest).
+    keymap: (event) => modeKeys(event) || (!!em && (viewKeymap(event) || toolKeymap(event))),
     // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.
     // `orient: 'NORMAL'` constrains to the selection's normal; `keep` records an undo step even when cancelled, for
     // the operator that ran first (extrude).

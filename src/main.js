@@ -512,9 +512,9 @@ const bylonderKeys = createKeymap([
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs, Object Mode's only outside Edit Mode, whose own keymap runs before them.
-const blenderKeys = keymapHandler(["Object Mode", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => name !== "Object Mode" || !world.editMode.active);
+// Blender's keymaps a 3D View runs: the mode's (Object Mode or Mesh), then the 3D View's and the window's.
+const blenderKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true);
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 const keyLayers = () => {

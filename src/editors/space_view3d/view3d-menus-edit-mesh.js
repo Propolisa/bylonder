@@ -16,25 +16,28 @@ import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../../bmesh
 const KEYMAPS = ['Mesh', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 const MENUS = Object.fromEntries(Object.entries(spaceView3d).filter(([name]) => name.includes('_MT_')));
 
+// What Edit Mode runs itself rather than as an operator's exec, by Blender idname: transforms, Blender's macros and modal
+// tools, run with the operator's properties.
+export const editMeshActions = (api) => ({
+  'transform.translate': () => api.start('move'),
+  'transform.rotate': () => api.start('rotate'),
+  'transform.resize': () => api.start('scale'),
+  'transform.edge_slide': () => api.start('edge_slide'),
+  'view3d.edit_mesh_extrude_move_normal': () => api.extrudeMove(),
+  'view3d.select_box': () => api.selectBox(),
+  'mesh.duplicate_move': () => api.move('mesh.duplicate'),
+  'mesh.extrude_vertices_move': () => api.move('mesh.extrude_verts_indiv'),
+  'mesh.extrude_edges_move': () => api.move('mesh.extrude_edges_indiv'),
+  // Stand-in: Blender follows extrude_faces_indiv with Shrink/Fatten, which moves each face along its own normal.
+  'mesh.extrude_faces_move': () => api.move('mesh.extrude_faces_indiv', {}, { normal: true }),
+  'mesh.offset_edge_loops_slide': () => api.slide('mesh.offset_edge_loops'),
+  'mesh.loopcut_slide': () => api.loopcut(),
+  'mesh.bevel': (props) => api.bevel(props.affect ?? 'EDGES'),
+  'mesh.inset': () => api.inset(),
+});
+
 export function editMeshMenus(api) {
-  // What the editor runs itself rather than as an operator's exec: transforms, Blender's macros and modal tools.
-  const actions = {
-    'transform.translate': () => api.start('move'),
-    'transform.rotate': () => api.start('rotate'),
-    'transform.resize': () => api.start('scale'),
-    'transform.edge_slide': () => api.start('edge_slide'),
-    'view3d.edit_mesh_extrude_move_normal': () => api.extrudeMove(),
-    'view3d.select_box': () => api.selectBox(),
-    'mesh.duplicate_move': () => api.move('mesh.duplicate'),
-    'mesh.extrude_vertices_move': () => api.move('mesh.extrude_verts_indiv'),
-    'mesh.extrude_edges_move': () => api.move('mesh.extrude_edges_indiv'),
-    // Stand-in: Blender follows extrude_faces_indiv with Shrink/Fatten, which moves each face along its own normal.
-    'mesh.extrude_faces_move': () => api.move('mesh.extrude_faces_indiv', {}, { normal: true }),
-    'mesh.offset_edge_loops_slide': () => api.slide('mesh.offset_edge_loops'),
-    'mesh.loopcut_slide': () => api.loopcut(),
-    'mesh.bevel': (props) => api.bevel(props.affect ?? 'EDGES'),
-    'mesh.inset': () => api.inset(),
-  };
+  const actions = editMeshActions(api);
   const ui = {
     menus: MENUS,
     context: api.context,
