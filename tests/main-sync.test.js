@@ -16,8 +16,10 @@ import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { mesh_serialize } from '../src/blenkernel/mesh/mesh.js';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { OPERATOR_FINISHED } from '../src/bmesh/bmesh-wasm.js';
-import { dnaGet } from '../src/makesrna/dna-struct.js';
+import { dnaGet, dnaSet } from '../src/makesrna/dna-struct.js';
+import { nodeId } from '../src/editors/object/identity.js';
 import { asObject } from '../src/runtime/object-transform.js';
+import { createHistory } from '../src/editors/undo/storage.js';
 
 const scene = new Scene(new NullEngine());
 const objects = [];
@@ -84,6 +86,16 @@ material.albedoColor.g = 0.5;
 sync.flush();
 assert(close(dnaGet('Material', sync.materialOf(material), 'diffuse_color'), [0.8, 0.5, 0.1, 1]));
 assert.equal(blender.materials(ob(cube))[0], sync.materialOf(material), "the cube's slot holds its material in Main");
+// Materials are Principled BSDF node trees in Main, built from the same RNA the Properties editor draws.
+const tree = blender.nodeTree(sync.materialOf(material));
+assert.deepEqual(tree.nodes.map((node) => node.idname), ['ShaderNodeOutputMaterial', 'ShaderNodeBsdfPrincipled']);
+assert.deepEqual(tree.links, [['Principled BSDF', 'BSDF', 'Material Output', 'Surface']]);
+const principled = tree.nodes[1].inputs;
+assert(close(principled['Base Color'], [0.8, 0.5, 0.1, 1]) && Math.abs(principled.Metallic - 0.2) < 1e-6 && Math.abs(principled.Roughness - 0.4) < 1e-6);
+material.roughness = 0.9;
+sync.flush();
+assert(Math.abs(blender.nodeTree(sync.materialOf(material)).nodes[1].inputs.Roughness - 0.9) < 1e-6);
+assert.deepEqual(blender.nodeTree(blender.world).nodes.map((node) => node.idname), ['ShaderNodeOutputWorld', 'ShaderNodeBackground'], "the scene's world is a Background");
 assert.deepEqual(sync.check(), []);
 
 // Main holds no geometry at rest; Blender's code gets it filled.
@@ -102,4 +114,72 @@ assert.deepEqual(cube.scaling.asArray(), [1, 1, 1]);
 assert.equal(JSON.parse(JSON.stringify(cube.metadata.wbCreation.mesh)).vert_positions.some((v) => Math.abs(v) === 2), true, 'the applied scale is in the geometry');
 assert.deepEqual(sync.check(), []);
 
-console.log('Scene sync: Babylon and Main stay equal');
+// A sequence of edits from both sides, each an undo step, then undone and redone: after every one the models are equal
+// (sync.debug checks after each flush and run, check() once more here).
+const ID_GR = 0x5247;
+const history = createHistory(objects, () => {}, { capture: () => world.collections.capture() ?? null, restore: (state) => world.collections.apply(state ?? undefined) });
+// Blender's code changing Main as its operators and buttons do: by its API, and DNA without a recalc tag.
+const blenderSide = (fn) => sync.run(fn);
+const steps = [
+  ['move and rotate', () => { cube.position.set(1, 1, 1); other.rotation.y = 0.5; }],
+  ['quaternion rotation', () => { other.rotationQuaternion = Quaternion.FromEulerAngles(0.1, 0.2, 0.3); }],
+  ['parent', () => { other.parent = cube; }],
+  ['rename to a taken name', () => { empty.name = 'Cube'; }],
+  ['hide in renders and viewport', () => { cube.metadata = { ...cube.metadata, wbHideRender: true }; empty.setEnabled(false); }],
+  ['light and camera values', () => { spot.diffuse.set(0.2, 0.4, 0.6); spot.angle = 0.8; camera.fov = 0.6; camera.maxZ = 500; }],
+  ['world color', () => world.worlds.set(world.worlds.active(), 'background.color', [0.1, 0.2, 0.3], false)],
+  ['new collection', () => { world.collections.create({ name: 'Props', objects: [nodeId(lamp)], move: true }); }],
+  ['exclude a collection', () => { world.collections.setLayer(world.collections.state.collections.at(-1).id, { exclude: true }); }],
+  ['a modifier', () => { addModifier(other, 'SUBSURF', { levels: 2 }); world.modifiers.refresh(); sync.changed(); }],
+  ['Blender: clear rotation', () => { selection.replace([other]); blenderSide(() => blender.run('object.rotation_clear')); }],
+  ['Blender: rename, flags and a collection flag without tags', () => blenderSide(() => {
+    blender.rename(ob(lamp), 'Lamp Renamed');
+    dnaSet('Object', ob(spot), 'hide_select', true);
+    dnaSet('Collection', blender.ids(ID_GR).find((c) => blender.name(c) === 'Props'), 'hide_render', true);
+  })],
+  ['Blender: select by base', () => blenderSide(() => { blender.setBase(ob(camera), { select: true, active: true }); blender.setBase(ob(other), { select: false }); }),
+    () => assert.deepEqual(selection.nodes.map((node) => node.name), ['Camera'], "the base's selection comes back")],
+  ['Blender: delete an object', () => blenderSide(() => blender.remove(ob(empty)))],
+  ['Blender: apply scale with geometry', () => { cube.scaling.set(1, 3, 1); selection.replace([cube]); sync.run(() => blender.run('object.transform_apply', { location: false, rotation: false, scale: true }), { meshes: [cube] }); }],
+  ['add an object', () => { box('Added', [0, 0, -4]); }],
+];
+for (const [name, edit, expect] of steps) {
+  edit();
+  sync.flush();
+  assert.deepEqual(sync.check(), [], `after ${name}`);
+  expect?.();
+  history.commit();
+}
+assert.equal(lamp.name, 'Lamp Renamed', "Blender's rename comes back");
+assert.equal(spot.metadata.wbLocked, true, "Blender's hide_select comes back without a tag");
+assert(world.collections.state.collections.at(-1).hideRender, "a collection's flag comes back");
+assert(empty.metadata.wbDeleted, 'an object Blender deleted is deleted');
+assert.deepEqual(other.rotationQuaternion.asArray().map(Math.abs), [0, 0, 0, 1], 'rotation_clear comes back');
+assert.equal(dnaGet('Object', ob(other), 'rotation_mode'), 'QUATERNION');
+
+// Writing back does not echo: the flush after it writes nothing more into Main.
+const writes = sync.writes;
+sync.flush();
+assert.equal(sync.writes, writes, 'no echo into Main');
+
+for (let i = 0; i < steps.length; i++) {
+  history.undo();
+  sync.flush();
+  assert.deepEqual(sync.check(), [], `after undoing ${steps.at(-1 - i)[0]}`);
+}
+for (const [name] of steps) {
+  history.redo();
+  sync.flush();
+  assert.deepEqual(sync.check(), [], `after redoing ${name}`);
+}
+
+// Hooks keep a transform drag cheap: one changed object among many reaches Main without the others being read.
+for (let i = 0; i < 300; i++) box('Many ' + i, [i, 0, 0]);
+sync.flush();
+const start = performance.now();
+for (let i = 0; i < 100; i++) { cube.position.x = i; await null; }
+const perEdit = (performance.now() - start) / 100;
+assert.equal(location(cube)[0], 99);
+assert(perEdit < 5, `an edit takes ${perEdit.toFixed(2)} ms to reach Main`);
+
+console.log(`Scene sync: Babylon and Main stay equal through ${steps.length} edits from both sides, undone and redone; an edit reaches Main in ${perEdit.toFixed(2)} ms among ${objects.length} objects`);

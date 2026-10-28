@@ -45,6 +45,32 @@ const sameName = (babylon, main) => main === babylon || main.replace(/\.\d{3}$/,
 // A value DNA can hold: an enum's identifier must be one of its items.
 const holds = (field, value) => field.type !== 'ENUM' || typeof value !== 'string' || field.items?.some(([, id]) => id === value);
 
+// The output each shader node RNA's node trees link from (rna-bylonder.js nodeTree), with its socket.
+const SHADER_OUTPUTS = { ShaderNodeBsdfPrincipled: 'BSDF', ShaderNodeBackground: 'Background', ShaderNodeVolumeScatter: 'Volume', ShaderNodeEmission: 'Emission' };
+const WIDTHS = { ShaderNodeBsdfPrincipled: 240 };
+
+// A shader node tree as Blender builds it (BlenderMain.setNodeTree), from the RNA of one (its output node and the nodes
+// linked into it), laid out right to left.
+export function shaderTree(tree) {
+  const nodes = [], links = [];
+  const add = (node, depth) => {
+    const idname = node[INFO].struct, output = SHADER_OUTPUTS[idname];
+    const entry = { idname, name: node.name, location: [-300 * depth, 0], width: WIDTHS[idname] ?? 140, inputs: [],
+      outputs: output ? [{ identifier: output, socket: 'NodeSocketShader' }] : [] };
+    nodes.push(entry);
+    for (const input of node.inputs) {
+      const from = input.is_linked ? input.links[0].from_node : null;
+      entry.inputs.push({ identifier: input.identifier, name: input.name, socket: input[INFO].struct, value: from ? null : plain(input.default_value) ?? null });
+      if (from) {
+        add(from, depth + 1);
+        links.push([from.name, SHADER_OUTPUTS[from[INFO].struct], node.name, input.identifier]);
+      }
+    }
+  };
+  add(tree.get_output_node(), 0);
+  return { nodes, links };
+}
+
 //   rna: createRNA(host), whose host has the world and selection; ids: the world's IDs in the module (blender-ids.js),
 //   shared with its animation.
 export function createMainSync({ rna, ids = createBlenderIDs() }) {
@@ -56,7 +82,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
   const sceneStruct = (name) => ({ struct: name, ptr: blender.scene + dnaProperty('Scene', { RenderSettings: 'render', UnitSettings: 'unit_settings' }[name]).offset, shadow: new Map() });
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings');
-  let applying = false, scheduled = false;
+  let applying = false, scheduled = false, sceneChanged = true;
   const filled = new Set();
 
   const objectType = (node) => rna.pointer('Object', node).type;
@@ -75,6 +101,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (!holds(field, value)) continue;
       dnaSet(record.struct, record.ptr, name, value);
       record.shadow.set(name, dnaGet(record.struct, record.ptr, name));
+      api.writes++;
     }
   }
   // A record's values that Blender's code changed in Main, written to Babylon.
@@ -115,7 +142,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   function changed(entry) {
     if (applying) return;
     if (entry) entry.dirty = true;
-    else for (const e of objects.values()) e.dirty = true;
+    else {
+      for (const e of objects.values()) e.dirty = true;
+      sceneChanged = true;
+    }
     if (!scheduled) {
       scheduled = true;
       queueMicrotask(() => { scheduled = false; flush(false); });
@@ -149,13 +179,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     entry.modifiers = signature;
     blender.setModifiers(entry.ob, moduleModifiers(stack));
   }
-  function pushBases() {
-    const active = selection.nodes.at(-1);
-    for (const [node, { ob }] of objects) {
-      const data = rna.pointer('Object', node), status = world.collections?.status(node) ?? { visible: true, selectable: true };
-      blender.setBase(ob, { visible: status.visible, hidden: data.hide_get(), hide_select: data.hide_select || !status.selectable,
-        select: data.select_get(), active: node === active });
-    }
+  // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
+  function pushBase({ node, ob }, active = selection.nodes.at(-1)) {
+    const data = rna.pointer('Object', node), status = world.collections?.status(node) ?? { visible: true };
+    blender.setBase(ob, { visible: status.visible, hidden: data.hide_get(), hide_select: data.hide_select, select: data.select_get(), active: node === active });
   }
 
   // The scene: its values, its camera and world, and what operators read of its tool settings.
@@ -181,7 +208,15 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (blender.name(record.ma) !== material.name && record.babylonName !== material.name) { blender.rename(record.ma, material.name); record.babylonName = material.name; }
       blender.setFakeUser(record.ma, !!material.metadata?.wbFakeUser);
       push(record, material);
+      pushTree(record, record.ma, rna.pointer('Material', material));
     }
+  }
+  // An ID's node tree, built again when the RNA of Bylonder's changed.
+  function pushTree(record, id, data) {
+    const tree = shaderTree(data.node_tree), signature = JSON.stringify(tree);
+    if (signature === record.tree) return;
+    blender.setNodeTree(id, tree);
+    record.tree = signature;
   }
   function pushWorlds() {
     const all = world.worlds?.all() ?? [], ids = new Set(all.map((entry) => entry.id));
@@ -193,6 +228,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (record.babylonName !== entry.name) { blender.rename(record.wo, entry.name); record.babylonName = entry.name; }
       blender.setFakeUser(record.wo, !!entry.fakeUser);
       push(record, entry);
+      pushTree(record, record.wo, rna.pointer('World', entry));
     }
   }
 
@@ -204,8 +240,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   function pushCollections() {
     const cols = slice();
     if (!cols) return;
-    const ids = [cols.MASTER, ...cols.state.collections.map((c) => c.id)];
-    const members = ids.map((id) => cols.objects(id).map((objectId) => [...objects.values()].find((e) => nodeId(e.node) === objectId)?.ob).filter(Boolean));
+    const ids = [cols.MASTER, ...cols.state.collections.map((c) => c.id)], byId = new Map([...objects.values()].map((e) => [nodeId(e.node), e.ob]));
+    const members = ids.map((id) => cols.objects(id).map((objectId) => byId.get(objectId)).filter(Boolean));
     const signature = JSON.stringify([cols.state, members]);
     if (signature === collectionsSynced) return;
     collectionsSynced = signature;
@@ -267,19 +303,31 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     collectionsSynced = '';
   }
 
-  // Babylon into Main: the objects hooks marked changed, or `all` of them (before Blender's code runs, so what no hook
-  // saw is in Main too), and the rest of the scene, which is compared with what was last synced.
+  // Babylon into Main: what hooks marked changed, or `all` of it before Blender's code runs (so what no hook sees, the
+  // selection and the slices' state, is in Main too), each value compared with what was last synced; then Main
+  // evaluated, as the depsgraph would.
   function flush(all = true) {
     if (applying) return;
     syncObjects();
-    pushMaterials();
-    pushWorlds();
-    for (const entry of objects.values()) if (entry.dirty || all) { pushObject(entry); entry.dirty = false; }
-    pushCollections();
-    pushBases();
-    pushScene();
+    if (all || sceneChanged) {
+      pushMaterials();
+      pushWorlds();
+    }
+    const active = selection.nodes.at(-1);
+    for (const entry of objects.values()) {
+      if (!entry.dirty && !all) continue;
+      pushObject(entry);
+      pushBase(entry, active);
+      entry.dirty = false;
+    }
+    if (all || sceneChanged) {
+      pushCollections();
+      pushScene();
+      sceneChanged = false;
+    }
+    if (!all) return;
     blender.evaluate();
-    if (api.debug && all) assertEqual('flush');
+    if (api.debug) assertEqual('flush');
   }
 
   // Fills objects' geometry from Babylon for code that needs it: a Mesh, or a curve's or text's Curve data (the edit
@@ -397,11 +445,28 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
           diffs.push(`${label}: geometry differs`);
       }
     }
+    // A node tree's input values, as Main holds them.
+    const compareTree = (label, id, data) => {
+      const main = blender.nodeTree(id), byName = new Map(main.nodes.map((node) => [node.name, node]));
+      for (const node of shaderTree(data.node_tree).nodes) {
+        const held = byName.get(node.name);
+        if (!held || held.idname !== node.idname) { diffs.push(`${label}.node_tree: no ${node.idname} "${node.name}" in Main`); continue; }
+        for (const { identifier, value } of node.inputs) if (value !== null && !same(value, held.inputs[identifier]))
+          diffs.push(`${label}.node_tree["${node.name}"].inputs["${identifier}"]: Babylon ${JSON.stringify(value)}, Main ${JSON.stringify(held.inputs[identifier])}`);
+      }
+    };
     for (const [material, record] of materials) {
-      if (!sameName(material.name, blender.name(record.ma))) diffs.push(`Material "${material.name}".name: Main "${blender.name(record.ma)}"`);
-      compare(`Material "${material.name}"`, record, material);
+      const label = `Material "${material.name}"`;
+      if (!sameName(material.name, blender.name(record.ma))) diffs.push(`${label}.name: Main "${blender.name(record.ma)}"`);
+      compare(label, record, material);
+      compareTree(label, record.ma, rna.pointer('Material', material));
     }
-    for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) compare(`World "${entry.name}"`, record, entry); }
+    for (const [id, record] of worlds) {
+      const entry = world.worlds.byId(id);
+      if (!entry) continue;
+      compare(`World "${entry.name}"`, record, entry);
+      compareTree(`World "${entry.name}"`, record.wo, rna.pointer('World', entry));
+    }
     compare('Scene', scene, world);
     if (world.renderSettings) compare('Scene.render', render, world);
     if (world.sceneSettings) compare('Scene.unit_settings', units, world);
@@ -442,6 +507,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       ...[...collections.values()].flatMap((c) => [c, c.layer])];
     records.forEach((record) => record.shadow.clear());
     for (const entry of objects.values()) [entry.babylonName, entry.modifiers] = [undefined, undefined];
+    for (const record of [...materials.values(), ...worlds.values()]) record.tree = undefined;
     collectionsSynced = '';
     flush();
   }
@@ -476,6 +542,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // A change Babylon makes that no hook sees (a slice's state): the next flush writes everything.
     changed: () => changed(null),
     debug: false,
+    // Values written into Main so far, to tell that writing back does not echo.
+    writes: 0,
   };
   return api;
 }

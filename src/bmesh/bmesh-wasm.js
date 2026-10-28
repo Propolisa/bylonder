@@ -356,6 +356,10 @@ const addresses = (fn) => {
 };
 
 const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num', CORNER: 'corners_num' };
+// Node sockets' eNodeSocketDatatype and PropertySubType by idname (SOCK_FLOAT, SOCK_VECTOR, SOCK_RGBA, SOCK_SHADER;
+// PROP_FACTOR, PROP_DIRECTION).
+const SOCKET_TYPES = { NodeSocketFloat: [0, 0], NodeSocketFloatFactor: [0, 15], NodeSocketVector: [1, 0], NodeSocketVectorDirection: [1, 22],
+  NodeSocketColor: [2, 0], NodeSocketShader: [3, 0] };
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
 
 // Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
@@ -466,6 +470,31 @@ export class BlenderMain {
   // An ID's custom string property (null when it has none), for what only Bylonder has.
   setProperty(id, name, value) { withString(name, (n) => withString(value, (v) => x.id_property_string_set(id, n, v))); }
   property(id, name) { const p = withString(name, (n) => x.id_property_string(id, n)) >>> 0; return p ? cString(p) : null; }
+
+  // A Material's or World's node tree, set whole from { nodes: [{ idname, name, location, width, inputs, outputs }],
+  // links: [[from node, output, to node, input]] }, a socket being { identifier, name, socket (its idname, as
+  // NodeSocketColor), value }; and as Main holds it ({ nodes: [{ idname, name, inputs: { identifier: value } }], links }).
+  setNodeTree(owner, { nodes, links }) {
+    x.node_tree_clear(this.#context, owner);
+    const made = new Map();
+    for (const { idname, name, location = [0, 0], width = 140, inputs = [], outputs = [] } of nodes) {
+      const node = withString(idname, (i) => withString(name, (n) => x.node_add(owner, i, n, location[0], location[1], width))) >>> 0;
+      const sockets = new Map();
+      for (const [output, list] of [[false, inputs], [true, outputs]]) for (const { identifier, name: label = identifier, socket, value } of list) {
+        const [type, subtype] = SOCKET_TYPES[socket];
+        const values = Float32Array.from(value === null || value === undefined ? [] : [value].flat());
+        const pointer = withString(identifier, (i) => withString(label, (n) => withArrays([values], ([v]) =>
+          x.node_socket_add(owner, node, output, type, subtype, i, n, values.length ? v : 0, values.length)))) >>> 0;
+        sockets.set((output ? 'out:' : 'in:') + identifier, pointer);
+      }
+      made.set(name, { node, sockets });
+    }
+    for (const [from, output, to, input] of links) {
+      const a = made.get(from), b = made.get(to);
+      x.node_link_add(owner, a.node, a.sockets.get('out:' + output), b.node, b.sockets.get('in:' + input));
+    }
+  }
+  nodeTree(owner) { return JSON.parse(cString(x.node_tree_describe(owner))); }
 
   // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
