@@ -3,7 +3,8 @@
 // over Bylonder's data through Blender's RNA (makesrna/rna-bylonder.js), in the context buttons_context.cc gives
 // (buttons-context.js). Bylonder's own panels go after Blender's in their tab, as add-ons' do.
 import { createApp, h, reactive, Teleport, markRaw } from 'vue';
-import { loadRNAUI, rnaProperty } from '../../makesrna/rna.js';
+import { loadRNAUI, rnaProperty, INFO } from '../../makesrna/rna.js';
+import { createPreview } from '../../blenkernel/material/preview.js';
 import { MODULES, panelTypes, drawPanels } from '../interface/panels.js';
 import { UILayout } from '../interface/layout.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
@@ -61,7 +62,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
     set search(value) { state.search = value; state.revision++; },
     tabs: () => propertiesTabs(context, rnaProperty('SpaceProperties', 'context').items),
   });
-  const panels = panelState(state, () => []);
+  const panels = panelState(state, () => []), preview = createPreview();
   const operatorUI = () => menuUI({ menus, context: () => context });
   const ob = () => editor.selection.nodes.at(-1);
   // A menu as a popup under the button that opened it, or at the pointer for a key.
@@ -75,6 +76,13 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       startFilter: () => host.querySelector('.bl-properties-header input, input[aria-label="Live search filtering string"]')?.focus(),
       clearFilter: () => { space.search = ''; },
       canAddModifier: () => space.context === 'MODIFIER' && !!ob()?.getTotalVertices?.(),
+      // The active object's material slots in the material library.
+      materials: () => {
+        const node = ob(), library = world.materials;
+        if (!node?.getTotalVertices || !library) return null;
+        return { count: () => library.slots(node).length, add: () => library.addSlot(node), remove: () => library.removeSlot(node),
+          move: (delta) => library.moveSlot(node, library.active(node), delta), newMaterial: () => library.newMaterial(node) };
+      },
     },
     modifier: () => {
       const node = ob(), id = hovered ?? world.modifiers?.stack(node ?? {})?.at(-1)?.id;
@@ -105,6 +113,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       World: () => world.worlds?.all().map((entry) => rna.pointer('World', entry)) ?? [],
       Collection: () => world.collections?.all().map((entry) => rna.pointer('Collection', entry)) ?? [],
       Scene: () => [context.scene],
+      Material: () => world.materials?.all().map((material) => rna.pointer('Material', material)) ?? [],
     })[struct]?.() ?? [],
     drawMenu: (idname) => drawMenu(idname, operatorUI()),
     animation: {
@@ -112,7 +121,16 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       insert: (refs) => { world.animation.insert(refs); history.commit(); },
       remove: (refs) => { world.animation.deleteKeys(refs.map((ref) => ({ ref, frame: Math.round(world.animation.time.frame) }))); history.commit(); },
     },
-    templates: { template_modifiers: modifierTemplates({ world, editor, rna, history }) },
+    templates: {
+      template_modifiers: modifierTemplates({ world, editor, rna, history }),
+      // A material's preview, rendered by Bylonder's preview scene.
+      template_preview: (node) => {
+        const material = node.id?.[INFO]?.owner;
+        if (!material || !world.materials) return null;
+        preview.request(material, (url) => { state.preview = url; });
+        return h('div', { class: 'bl-preview flex aspect-[1.6] max-h-[220px] items-center justify-center rounded-md' }, state.preview ? h('img', { class: 'h-full', src: state.preview, alt: material.name }) : null);
+      },
+    },
   };
 
   const region = () => {
@@ -156,7 +174,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
   return {
     refresh() { state.revision++; },
     context(id) { state.context = id; },
-    dispose() { unsubscribers.forEach((fn) => fn()); app.unmount(); },
+    dispose() { unsubscribers.forEach((fn) => fn()); preview.dispose(); app.unmount(); },
   };
 }
 

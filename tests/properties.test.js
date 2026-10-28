@@ -65,6 +65,7 @@ const check = (panel) => {
 const space = { context: 'OBJECT', pin: null, search: '', tabs: () => propertiesTabs(context, rnaProperty('SpaceProperties', 'context').items) };
 let context;
 const tabsOf = () => space.tabs().filter(Boolean).map(([id]) => id);
+world.materials.newMaterial(cube);
 const drawn_tabs = {};
 for (const ob of objects) {
   selection.replace([ob]);
@@ -85,6 +86,14 @@ assert.ok(['DATA_PT_font', 'DATA_PT_paragraph', 'DATA_PT_text_boxes', 'DATA_PT_g
 assert.equal(context.curve.align_x, 'CENTER');
 assert.equal(context.curve.extrude, 0.1);
 assert.ok(panelsOf(curve, 'DATA').includes('DATA_PT_shape_curve'), "a curve's data is Blender's Curve panels");
+// A material is a Principled BSDF over the Babylon material's inputs.
+selection.replace([cube]);
+context = propertiesContext(r, space);
+const principled = context.material.node_tree.get_output_node('EEVEE').inputs.get('Surface').links[0].from_node;
+assert.equal(principled.name, 'Principled BSDF');
+principled.inputs.get('Roughness').default_value = 0.25;
+assert.equal(world.materials.activeMaterial(cube).roughness, 0.25);
+assert.ok(panelsOf(cube, 'MATERIAL').includes('EEVEE_MATERIAL_PT_surface'));
 assert.deepEqual(drawn_tabs.Light, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'OBJECT', 'PHYSICS', 'CONSTRAINT', 'DATA']);
 
 // Light and camera data read and write through in Blender's units.

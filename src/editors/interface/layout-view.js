@@ -319,7 +319,14 @@ function templateNodeView(node, env) {
   return h('div', { class: 'flex flex-col gap-[var(--bl-button-gap)]' }, rows);
 }
 
-const TEMPLATES = { template_ID: templateID, template_list: templateList, template_node_view: templateNodeView,
+// template_image_settings: an image format's file format, color and quality.
+function templateImageSettings(node, env) {
+  const [settings] = node.args ?? [], prop = (property, extra = {}) => ({ kind: 'prop', data: settings, property, split: true, decorate: false, ...extra });
+  const quality = ['JPEG', 'WEBP'].includes(settings?.file_format) ? [prop('quality', { slider: true })] : [];
+  return settings ? layout({ kind: 'column', children: [prop('file_format'), prop('color_mode', { expand: true }), ...quality] }, env) : null;
+}
+
+const TEMPLATES = { template_image_settings: templateImageSettings, template_ID: templateID, template_list: templateList, template_node_view: templateNodeView,
   template_ID_preview: templateID, template_search: templateID };
 
 // ---- Layouts.

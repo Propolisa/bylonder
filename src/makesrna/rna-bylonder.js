@@ -133,6 +133,28 @@ function shaderNode(r, [name, type, inputs]) {
 }
 const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => shaderNode(r, output) });
 const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
+// A Babylon material's inputs as Principled BSDF sockets: a PBR material's own, a Standard material's color and alpha.
+const color3 = (owner, key) => ({ get: () => [owner[key].r, owner[key].g, owner[key].b, 1], set: ([red, green, blue]) => owner[key].set(red, green, blue) });
+const materialValue = (material, path) => {
+  const keys = path.split('.'), key = keys.pop(), owner = () => keys.reduce((o, k) => o?.[k], material);
+  return owner()?.[key] === undefined ? null : { get: () => owner()[key], set: (value) => { owner()[key] = value; } };
+};
+function principledInputs(material) {
+  const pbr = material.getClassName() === 'PBRMaterial', value = (path) => materialValue(material, path);
+  return [
+    ['Base Color', 'NodeSocketColor', color3(material, pbr ? 'albedoColor' : 'diffuseColor')],
+    ['Metallic', 'NodeSocketFloatFactor', pbr && value('metallic')],
+    ['Roughness', 'NodeSocketFloatFactor', pbr && value('roughness')],
+    ['IOR', 'NodeSocketFloat', pbr && value('indexOfRefraction')],
+    ['Alpha', 'NodeSocketFloatFactor', value('alpha')],
+    ['Normal', 'NodeSocketVector', null],
+    ['Specular IOR Level', 'NodeSocketFloatFactor', pbr && value('metallicF0Factor')],
+    ['Coat Weight', 'NodeSocketFloatFactor', pbr && value('clearCoat.intensity')],
+    ['Sheen Weight', 'NodeSocketFloatFactor', pbr && value('sheen.intensity')],
+    ['Emission Color', 'NodeSocketColor', material.emissiveColor && color3(material, 'emissiveColor')],
+    ['Emission Strength', 'NodeSocketFloat', pbr && value('emissiveIntensity')],
+  ].map(([name, socket, binding]) => [name, socket, binding || null]);
+}
 const worldValue = (r, entry, path) => ({ get: () => path.split('.').reduce((o, k) => o[k], entry), set: (value) => r.world.worlds.set(entry, path, value, false) });
 
 // A view layer's objects (LayerObjects): its collection, with the active object, which selecting makes.
@@ -189,7 +211,20 @@ const STRUCTS = {
     total_face_sel: (ob, r) => editTotals(ob, r).faces[0],
     count_selected_items: (ob, r) => () => { const t = editTotals(ob, r); return [t.verts[0], t.edges[0], t.faces[0]]; },
   },
-  Material: { name: (material) => material.name },
+  // A material of the material library (blenkernel/material/library.js): Babylon's PBR or Standard material as
+  // Blender's Principled BSDF, its settings as Blender's.
+  Material: {
+    name: { get: (material) => material.name, set: (material, name, r) => r.world.materials.rename(material, name) },
+    use_fake_user: { get: (material) => !!material.metadata?.wbFakeUser, set: (material, value, r) => { if (!!value !== !!material.metadata?.wbFakeUser) r.world.materials.toggleFakeUser(material); } },
+    use_nodes: () => true,
+    node_tree: (material, r) => nodeTree(r, ['Material Output', 'ShaderNodeOutputMaterial', [
+      ['Surface', 'NodeSocketShader', ['Principled BSDF', 'ShaderNodeBsdfPrincipled', principledInputs(material)]],
+      ['Volume', 'NodeSocketShader', null]]]),
+    use_backface_culling: settable('backFaceCulling'),
+    alpha_threshold: settable('alphaCutOff'),
+    surface_render_method: { get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
+      set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } },
+  },
   Modifier: (owner) => ({
     name: modifierFlag('name'),
     type: ({ modifier }) => modifierType(modifier),
@@ -230,6 +265,11 @@ const STRUCTS = {
       ['use_motion_blur', 'useMotionBlur'], ['motion_blur_shutter', 'motionBlurShutter'], ['use_sequencer', 'useSequencer']].map(([name, key]) => [name, {
       get: (world) => world.renderSettings?.state.render[key], set: (world, value) => world.renderSettings.set('render.' + key, value, false) }])),
     image_settings: (world, r) => r.pointer('ImageFormatSettings', world),
+    // Bylonder renders with Babylon, set up as Blender's EEVEE (render-babylon.js): the engines are Blender's, their
+    // choice decides which of Blender's render panels show.
+    engine: { ...sliceValue('renderSettings', 'render.blenderEngine'), get: (world) => world.renderSettings?.state.render.blenderEngine ?? 'BLENDER_EEVEE',
+      items: () => [['BLENDER_EEVEE', 'EEVEE', '', 'NONE'], ['BLENDER_WORKBENCH', 'Workbench', '', 'NONE'], ['CYCLES', 'Cycles', '', 'NONE']] },
+    has_multiple_engines: () => true,
     ffmpeg: (world, r) => r.pointer('FFmpegSettings', world),
   },
   UnitSettings: Object.fromEntries([['system', 'system'], ['scale_length', 'scale'], ['use_separate', 'separate'], ['system_rotation', 'rotation'],

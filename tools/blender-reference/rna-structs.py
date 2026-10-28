@@ -41,19 +41,22 @@ def ui(p):
     return d
 
 
-# The pointers set in the factory startup's data: (struct, property) found not None, walking from bpy.data.
-present, seen = set(), set()
+# The pointers set in the factory startup's data: (struct, property) found not None, and never None, walking from
+# bpy.data.
+present, absent, seen = set(), set(), set()
 
 
 def walk(value, depth=0):
     rna = getattr(value, "bl_rna", None)
-    if rna is None or depth > 4 or (rna.identifier, depth) in seen:
+    if rna is None or depth > 4 or id(value) in seen:
         return
-    seen.add((rna.identifier, depth))
+    seen.add(id(value))
     for p in rna.properties:
         if p.type == "POINTER" and p.identifier not in {"rna_type", "id_data", "original"}:
             target = getattr(value, p.identifier, None)
-            if target is not None:
+            if target is None:
+                absent.add((rna.identifier, p.identifier))
+            else:
                 present.add((rna.identifier, p.identifier))
                 walk(target, depth + 1)
 
@@ -76,7 +79,7 @@ for name in dir(bpy.types):
         entry = [p.type[0]]
         if p.type in {"POINTER", "COLLECTION"}:
             entry.append(p.fixed_type.identifier if p.fixed_type else None)
-            if p.type == "POINTER" and (p.is_never_none or (name, p.identifier) in present):
+            if p.type == "POINTER" and (p.is_never_none or (name, p.identifier) in present - absent):
                 entry.append(1)
         else:
             entry.append(default(p))

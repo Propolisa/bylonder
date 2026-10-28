@@ -11,12 +11,10 @@ import { geometryGraph } from '../../nodes/geometry-nodes.js';
 import { nodeId } from '../object/identity.js';
 import { particlePanels, compositingPanel } from './node-panels.js';
 import { materialPanels } from './material-panels.js';
-import { createPreview } from '../../blenkernel/material/preview.js';
 
 // The tab of a panel registered with Bylonder's earlier tab ids.
 const TABS = { object: 'OBJECT', modifiers: 'MODIFIER', particles: 'PARTICLES', material: 'MATERIAL', scene: 'SCENE', render: 'RENDER', output: 'OUTPUT',
   view_layer: 'VIEW_LAYER', world: 'WORLD', collection: 'COLLECTION', physics: 'PHYSICS', data: 'DATA', constraint: 'CONSTRAINT' };
-let preview = null;
 
 // A panel in Blender's chrome around Bylonder's rows; open state as Blender's panels keep it.
 function chrome(state, ui) {
@@ -68,10 +66,7 @@ export function addonPanels({ world, editor, history, systems, properties, stora
       h('button', { type: 'button', class: 'bl-widget bl-tool flex h-unit items-center justify-center rounded-md text-xs', onClick: () => storage.clear() }, 'Forget Saved Scene Edits')], { defaultClosed: true }));
   }
   if (tab === 'PARTICLES' && world.particles) out.push(...particlePanels({ world, node, row, panel }).filter(Boolean));
-  if (tab === 'MATERIAL' && world.materials && node?.getTotalVertices) {
-    preview ??= createPreview();
-    out.push(...materialPanels({ world, editor, node, row, panel, state, preview }).slice(2).filter(Boolean));
-  }
+  if (tab === 'MATERIAL' && world.materials && node?.getTotalVertices) out.push(...materialPanels({ world, node, row, panel }));
   out.push(...[...registered.values()].filter((p) => TABS[p.context] === tab || p.context === tab).filter((p) => !p.poll || p.poll({ world, node }))
     .map((p) => panel(p.id, p.title, () => p.render({ world, node, row, panel, commit }))));
   return out;
