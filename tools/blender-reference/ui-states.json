@@ -20,5 +20,8 @@
   { "id": "curve-edit", "title": "Edit Mode on a Bezier circle (the cube deleted, Add Curve Circle, Tab)" },
   { "id": "text-edit", "title": "Edit Mode on a text object (the cube deleted, Add Text, Tab)" },
   { "id": "scripting", "title": "Scripting workspace: Text Editor, Python Console with its banner, Info", "settle": 3 },
-  { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" }
+  { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" },
+  { "id": "outline-scale-3", "title": "The cube scaled by 3 (S 3 Enter): its outline as wide as at scale 1 (startup)", "settle": 2.5 },
+  { "id": "outline-active-selected", "title": "The cube duplicated 3 along Y (Shift D Y 3 Enter), then the original Shift clicked: one outline active, one selected", "settle": 4 },
+  { "id": "outline-occluded", "title": "The cube duplicated 3 along Y and moved -2 along X (Shift D Y 3 Enter, G X -2 Enter): the selected copy partly behind the original", "settle": 4.5 }
 ]

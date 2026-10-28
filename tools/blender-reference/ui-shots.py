@@ -48,11 +48,25 @@ def click(x, y):
     window().event_simulate(type="LEFTMOUSE", value="RELEASE", x=x, y=y)
 
 
+def shift_click(x, y):
+    move(x, y)
+    window().event_simulate(type="LEFTMOUSE", value="PRESS", x=x, y=y, shift=True)
+    window().event_simulate(type="LEFTMOUSE", value="RELEASE", x=x, y=y, shift=True)
+
+
+# The text a key types, which numeric input reads.
+TEXT = {"MINUS": "-", "ONE": "1", "TWO": "2", "THREE": "3", "FOUR": "4"}
+
+
+def text(type):
+    return {"unicode": TEXT[type]} if type in TEXT else {}
+
+
 # A key press with the mouse at (x, y): simulated events carry their own mouse position.
 def key(type, x, y, **modifiers):
     move(x, y)
     window().event_simulate(type=type, value="PRESS", x=x, y=y, **modifiers)
-    window().event_simulate(type=type, value="RELEASE", x=x, y=y, **modifiers)
+    window().event_simulate(type=type, value="RELEASE", x=x, y=y, **{k: v for k, v in modifiers.items() if k != "unicode"})
 
 
 # A point of the scene in window pixels, as the 3D View shows it.
@@ -147,6 +161,22 @@ def add_and_edit(module, name, **props):
         bpy.ops.object.mode_set(mode="EDIT")
 
 
+# Keys typed in turn with the mouse resting, as event types ("S", "THREE", "RET"), a quarter second apart so the view
+# and a modal operator are ready for each; `shift` holds Shift for the first. Returns the seconds they take.
+def keys(*types, start=0.0, shift=False):
+    for i, type in enumerate(types):
+        later(start + 0.25 * (i + 1), lambda type=type, i=i: key(type, *view3d_point(*REST), shift=shift and i == 0, **text(type)))
+    return start + 0.25 * len(types)
+
+
+# The cube duplicated and moved by typed values (Shift D, then axis and value keys). Returns the seconds it takes.
+def duplicate(*moves):
+    end = keys("D", *moves[0], "RET", shift=True)
+    for move in moves[1:]:
+        end = keys("G", *move, "RET", start=end)
+    return end
+
+
 SETUP = {
     "startup": lambda: None,
     "object-menu": lambda: click(*OBJECT_MENU),
@@ -170,6 +200,9 @@ SETUP = {
     "text-edit": lambda: add_and_edit("object", "text_add"),
     "scripting": lambda: setattr(window(), "workspace", bpy.data.workspaces["Scripting"]),
     "outliner-expanded": lambda: key("A", *outliner_point(0.5, 0.5), shift=True),
+    "outline-scale-3": lambda: keys("S", "THREE", "RET"),
+    "outline-active-selected": lambda: later(duplicate(("Y", "THREE")) + 0.5, lambda: shift_click(*view3d_point(0.5, 0.5))),
+    "outline-occluded": lambda: duplicate(("Y", "THREE"), ("X", "MINUS", "TWO")),
 }
 
 
@@ -185,6 +218,10 @@ def steps():
         SETUP[state["id"]]()
         # Seconds to settle: the sidebar fades in slowly under Xvfb.
         yield state.get("settle", 1.5)
+        # Draws what the last events changed: Blender redraws on events, and the last ones can be handled after.
+        for a in window().screen.areas:
+            a.tag_redraw()
+        yield 0.5
         subprocess.run(["import", "-window", "root", os.path.join(out, state["id"] + ".png")], check=True)
         areas[state["id"]] = [
             {"type": a.type, "x": a.x, "y": window().height - a.y - a.height, "width": a.width, "height": a.height}

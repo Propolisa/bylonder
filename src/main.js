@@ -176,13 +176,17 @@ const authored = () => built.authoredCamera;
 // Theme wire color of an object (Resources::object_wire_theme_id): the active or selected color, else its type's.
 const wireColor = (node, type = "wire") => !editor?.selection.has(node) ? theme[type] : editor.selection.nodes.at(-1) === node ? theme.object_active : theme.object_selected;
 const overlays = createViewportOverlays(scene, {
-  objects: () => world.objects,
-  color: wireColor,
-  sceneCamera: authored,
-  visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),
-  aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
-}, { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
-() => world.sceneSettings.state.cursor);
+  extras: {
+    objects: () => world.objects,
+    color: wireColor,
+    sceneCamera: authored,
+    visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),
+    aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
+  },
+  origins: { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
+  outlines: { outlined: () => editor?.selection.outlined() ?? new Map(), isActive: (node) => editor.selection.nodes.at(-1) === node, isTransform: () => !!editor?.modal && !editor.modal.cursor },
+  view3dCursor: () => world.sceneSettings.state.cursor,
+});
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
 world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,

@@ -412,6 +412,36 @@ const checks = {
     await app.until((b) => b.world.annotations.rulerLayer()?.frames?.some((f) => f.strokes.length));
   },
 
+  // The outline is drawn in screen space (overlay-outline.js): scaling the cube leaves its width in pixels as it was.
+  async "the selection outline keeps its pixel width when the cube is scaled by 3"() {
+    await app.click();
+    const width = async () => {
+      await app.until((b) => b.views.idle);
+      // Outline pixels (orange) on a row across the cube below its origin, as runs: one per silhouette edge it crosses.
+      const runs = await app.bylonder(async (b) => {
+        const { canvas } = b.views.input, { width, height } = canvas;
+        const context = new OffscreenCanvas(width, height).getContext("2d");
+        context.drawImage(await createImageBitmap(canvas), 0, 0);
+        const { data } = context.getImageData(0, Math.round(height * 0.55), width, 1), runs = [];
+        for (let x = 0, run = 0; x <= width; x++) {
+          const [r, g, b] = data.subarray(x * 4, x * 4 + 3), outline = x < width && r - b > 90 && r > 140 && b < 0.6 * g;
+          if (outline) run++;
+          else if (run) { runs.push(run); run = 0; }
+        }
+        return runs;
+      });
+      assert.equal(runs.length, 2, `outline runs ${runs}`);
+      return (runs[0] + runs[1]) / 2;
+    };
+    const unscaled = await width();
+    await app.hover(0.25, 0.75);
+    for (const key of ["s", "3", "Enter"]) await app.page.keyboard.press(key);
+    await app.until((b) => Math.abs(b.world.scene.getMeshByName("Cube").scaling.x - 3) < 1e-6);
+    const scaled = await width();
+    assert.ok(unscaled >= 1 && unscaled <= 4, `outline ${unscaled} px wide`);
+    assert.ok(Math.abs(scaled - unscaled) <= 0.5, `outline ${unscaled} px wide at scale 1, ${scaled} px at scale 3`);
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {
