@@ -461,11 +461,13 @@ export class BlenderMain {
   // NodeSocketColor), value }; and as Main holds it ({ nodes: [{ idname, name, inputs: { identifier: value } }], links }).
   setNodeTree(owner, { nodes, links }) {
     x.node_tree_clear(this.#context, owner);
-    const made = new Map();
+    const made = new Map(), linked = new Set(links.map(([, , to, input]) => `${to}:${input}`));
     for (const { idname, name, location = [0, 0], width = 140, inputs = [], outputs = [] } of nodes) {
       const node = withString(idname, (i) => withString(name, (n) => x.node_add(owner, i, n, location[0], location[1], width))) >>> 0;
       const sockets = new Map();
-      for (const [output, list] of [[false, inputs], [true, outputs]]) for (const { identifier, name: label = identifier, socket, value } of list) {
+      // An input without a value or link is left out: Blender's node type adds it with its default when the file is read.
+      const given = inputs.filter(({ identifier, value }) => (value ?? null) !== null || linked.has(`${name}:${identifier}`));
+      for (const [output, list] of [[false, given], [true, outputs]]) for (const { identifier, name: label = identifier, socket, value } of list) {
         const [type, subtype] = SOCKET_TYPES[socket];
         const values = Float32Array.from(value === null || value === undefined ? [] : [value].flat());
         const pointer = withString(identifier, (i) => withString(label, (n) => withArrays([values], ([v]) =>
