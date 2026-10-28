@@ -98,8 +98,14 @@ def bpy_types(build):
         if structs[name]['base']:
             visit(structs[name]['base'])
         order.append(name)
+    # The classes Blender's scripts define and register (TOPBAR_MT_file_new, ...): RNA lists them as structs, but bpy.types
+    # gives the registered class (its __getattr__ below).
+    scripts = {n.name for root, _, files in os.walk(build) if os.path.relpath(root, build).split(os.sep)[0] not in ('_bpy',)
+               for f in files if f.endswith('.py') and f != '_bpy_types.py'
+               for n in ast.walk(ast.parse(open(os.path.join(root, f)).read())) if isinstance(n, ast.ClassDef)}
     for name in sorted(structs):
-        visit(name)
+        if name not in scripts:
+            visit(name)
     additions = ast.parse(open(os.path.join(build, '_bpy_types.py')).read())
     functions = {c.name: c for c in ast.parse(open(os.path.join(HERE, 'rna_functions.py')).read()).body if isinstance(c, ast.ClassDef)}
     defined = [d for n in additions.body for d in transpile.defined_names(n)]

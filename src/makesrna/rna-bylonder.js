@@ -209,7 +209,13 @@ const STRUCTS = {
     material_slots: (ob, r) => collection((r.world.materials?.slots(ob) ?? []).map((material, slot_index) =>
       rna('MaterialSlot', { name: material?.name ?? '', material: r.pointer('Material', material), slot_index }))),
     active_material: (ob, r) => r.pointer('Material', r.world.materials?.activeMaterial(ob)),
-    hide_select: { get: (ob) => ob.isPickable === false, set: (ob, value) => { ob.isPickable = !value; } },
+    // Disable Selection is Bylonder's lock (commands.lock); Disable in Renders and in Viewports are kept with the object.
+    hide_select: { get: (ob) => ob.isPickable === false || !!ob.metadata?.wbLocked, set: (ob, value) => {
+      ob.metadata = { ...ob.metadata, wbLocked: !!value };
+      if ('isPickable' in ob) ob.isPickable = !value;
+    } },
+    hide_render: { get: (ob) => !!ob.metadata?.wbHideRender, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideRender: !!value }; } },
+    hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; } },
     hide_get: (ob) => () => !ob.isEnabled(false),
     hide_set: (ob, r) => (hide) => { ob.setEnabled(!hide); r.host.update?.('Object', 'hide', ob); },
     visible_get: (ob) => () => !deleted(ob) && ob.isEnabled() && ob.isVisible !== false,
@@ -525,10 +531,12 @@ const STRUCTS = {
   // A 3D Viewport (space_view3d/view3d.js): its regions, shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',
-    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header'].map((name) => [name,
+    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header', 'show_gizmo'].map((name) => [name,
       { get: (view) => view.state[name], set: (view, value) => setViewState(view, name, !!value) }])),
     shading: (view, r) => r.pointer('View3DShading', view),
     overlay: (view, r) => r.pointer('View3DOverlay', view),
+    // rna_SpaceView3D_icon_from_show_object_viewport_get, by name: every object type visible and selectable.
+    icon_from_show_object_viewport: () => 'VIS_SEL_11',
     region_3d: (view, r) => r.pointer('RegionView3D', view),
   },
   View3DShading: {
@@ -540,6 +548,9 @@ const STRUCTS = {
     view_perspective: (view) => (view.state.cameraView ? 'CAMERA' : view.editorCamera?.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'),
     is_perspective: (view) => view.editorCamera?.mode !== Camera.ORTHOGRAPHIC_CAMERA,
   },
+  // The Outliner's SpaceOutliner is Blender's, in the module (space_outliner/outliner-area.js): its DNA, read in place.
+  SpaceOutliner: (space) => ({ type: () => 'OUTLINER', ...Object.fromEntries(Object.keys(space).map((name) => [name,
+    { get: () => space[name], set: (owner, value) => { space[name] = value; } }])) }),
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
 // One of a text's lines (TextLine); writing its body edits the text.

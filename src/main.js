@@ -13,7 +13,7 @@ import {
 } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
-import { createOutliner } from "./editors/space_outliner/outliner";
+import { createOutliner } from "./editors/space_outliner/space-outliner.js";
 import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
@@ -358,7 +358,7 @@ const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: comm
 registerObjectOperators(world.objectActions, blenderObjects);
 registerAddOperators(creator);
 world.dock = viewportDock;
-world.outliner = createOutliner(world, editor, commands);
+world.outliner = createOutliner({ world, editor, commands, objects: blenderObjects, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
 const touch = createViewportTouch(world, editor, creator, views);
 // Like Blender, objects hidden or excluded through their collections drop out of the selection.
 world.collections.subscribe(() => {
@@ -535,7 +535,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.wm-area') && !help.open && !creator.open && !world.contextMenu.isOpen;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
@@ -559,6 +559,7 @@ registerOperators({
   "render.render": { run: ({ animation: all }) => (all ? renderHost.renderAnimation : renderHost.renderImage)() },
   "render.view_show": { run: () => renderHost.viewRender() },
   "view3d.view_camera": { run: () => activeView()?.toggleCameraView() },
+  "view3d.toggle_xray": { poll: () => !!activeView(), run: () => { const view = activeView(); view.state.xray = !view.state.xray; view.sync(); } },
   "view3d.view_persportho": { run: () => activeView()?.nav.toggle() },
   "view3d.view_axis": { supports: ({ type, align_active }) => !!AXIS_VIEWS[type] && !align_active, run: ({ type }) => activeView()?.nav.view(...AXIS_VIEWS[type]) },
   "view3d.view_selected": { supports: ({ use_all_regions }) => !use_all_regions, poll: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },

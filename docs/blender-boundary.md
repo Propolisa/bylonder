@@ -37,15 +37,38 @@ The module (`src/bmesh/bmesh.wasm`) runs Blender's C++ in two worlds. Both answe
 
 ### Who owns what
 
-Bylonder's Babylon scene owns all data; the module holds a mirror for as long as an operator needs it. Decided 2026-10-28.
+Decided 2026-10-28 (replaces the mirror made per operator). Bylonder's Babylon scene is the source of truth and
+renders; Blender's Main runs in parallel as a second, always accurate model of the same scene, so Blender's code
+(operators, editors, depsgraph, `.blend` writing) works on real data at any time. Each model holds what the other has
+no counterpart for; the overlap is kept equal both ways.
 
-1. **In, through RNA.** Before an operator polls or runs, each object goes in with the values its RNA struct gives (`rna-bylonder.js`), so a value Blender's C++ reads is the value Blender's scripts show: `location`, `rotation_mode`, `rotation_euler`, `rotation_quaternion`, `scale`, `mode`, its parent, and its base (collection visibility, `hide_get`, `hide_select`, `select_get`, active). Scene values come the same way (`scene.cursor.location`, `tool_settings.transform_pivot_point`). Axes are Blender's: Babylon's (x, y, z) is Blender's (x, z, y).
-2. **Object data.** `main_object_add(type, name)` makes an object with new data of its type as `BKE_object_add` does (`BKE_object_obdata_add_from_type`): a Mesh, Curve (text and curves), Light, Camera, or none for an empty. A subsystem then fills that data from Bylonder's: meshes do it with `object_mesh_set` and `object_mesh_attribute_add`, sent again only when the object's Mesh changed (`wbCreation`) and only for selected objects. Data a subsystem does not fill yet stays Blender's default.
-3. **Out, by tags.** After an operator, what it tagged comes back: `ID_RECALC_TRANSFORM` as the object's transform through RNA, `ID_RECALC_GEOMETRY` as its data (a Mesh becomes the object's Mesh data). An operator that changed data Bylonder does not take back yet changes nothing and says so.
-4. **No parent inverse.** Bylonder's objects have none, so one an operator sets folds into the object's own transform, keeping its world matrix (`object_parent_inverse_fold`). A child left sheared by a parent's uneven scale cannot be held that way; Blender holds it in `matrix_parent_inverse`.
-5. **One undo step** per operator, around the write back (`commands.transaction`).
+1. **One mapping, both directions.** Every synced property is declared once, by its RNA name, with its Babylon
+   accessor (`rna-bylonder.js` and the subsystem's bindings), in Blender's axes (Babylon's (x, y, z) is Blender's
+   (x, z, y)). The same declaration reads and writes in both directions; no subsystem has sync code of its own.
+2. **Babylon to Blender, by setter hooks.** A write to a synced Babylon value (an object's transform, a mesh's
+   geometry, a light's color) goes to Main at once, through the mapping. Objects and data that come or go in Babylon
+   are added to or removed from Main the same way.
+3. **Blender to Babylon, by recalc tags.** After Blender's code runs, what it tagged (`ID_RECALC_TRANSFORM`,
+   `_GEOMETRY`, `_SHADING`, `_SELECT`, ...) is written to Babylon through the same mapping, inside the operator's
+   undo step. Writing back does not echo to Main.
+4. **Data only one side has.** Babylon's (node materials, GPU effects, what project code builds) stays Babylon's,
+   and is kept in Main as custom properties where a round trip needs it. Blender's (Actions, curves, text, modifiers,
+   collections) lives in Main, and Babylon holds its evaluated result.
+5. **Large data has one owner.** Mesh geometry (and other large buffers: attributes, images) lives in the Babylon
+   scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
+   needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
+   after, and what the code changed goes back to Babylon. Edit Mode is the exception Blender itself makes: while a mesh
+   is edited, its BMEditMesh in the module owns it, Babylon's mesh is only drawn from it, and Babylon owns it again
+   on leaving Edit Mode.
+6. **Checked.** A test mode compares the overlap of both models after every operator and edit; a difference is a bug.
 
-`editors/object/object-blender.js` does this for Object Mode; `editors/object/object-operators.js` registers the operators it runs.
+What this is for:
+- **Save a `.blend`** from Main with Blender's own writer, which renders well in desktop Blender.
+- **Export for Babylon:** a `.babylon` file, or JS initialization code per object, that runs anywhere Babylon does.
+  Modifiers are applied, as Blender's glTF exporter applies them; later, a polyfill of just the modifier kernels
+  can evaluate them live without the rest of Blender.
+
+Today `editors/object/object-blender.js` mirrors objects per operator (Object Mode), and the Outliner, animation, Edit Mode and curves each sync their own way; they move onto the one mapping above.
 
 ### Adding a subsystem
 
@@ -55,13 +78,26 @@ Bylonder's Babylon scene owns all data; the module holds a mirror for as long as
 
 ### Known limits
 
-Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Lights and cameras go in without their data too. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 
 ### Animation
 
 Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel is a custom property of the Scene (`["<id, path>"]`). Keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings, values come out with `evaluate_fcurve`, and Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`).
 
 The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus), and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
+
+### Outliner
+
+Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outliner/tree` in the module, over the same Main: Blender's code builds the tree (`tree_display_view_layer.cc`, `tree_element_*.cc`), lays it out and draws it (`outliner_draw.cc`), and runs every Outliner operator (`outliner_select.cc`, `outliner_tools.cc`, `outliner_dragdrop.cc`, `outliner_edit.cc`, `outliner_collections.cc`). `tools/blender-port/wasm/outliner-api.cc` makes the area as `ED_area_newspace` does (the space type's own `create`), sets up its main region as `outliner_main_region_init` does, and draws it; JS `editors/space_outliner/outliner-area.js` holds it and `space-outliner.js` is its window manager.
+
+- **Collections are Blender's.** `collections-blender.js` mirrors Bylonder's collections into Main (children, objects, exclude and visibility flags, the active layer collection), so the View Layer tree, the exclude checkbox and the restriction toggles are Blender's own `layer.cc` results. What an operator changed comes back through `collections.assign`.
+- **Objects come back by name, base and parent.** After each operator or button: the selection and active object from the bases, hidden, `hide_select`, `hide_render` and `hide_viewport` from Object DNA, names, parents, and objects Blender's code deleted (`outliner.delete`), which leave the mirror (`forget`).
+- **DNA by name.** `tools/blender-port/modifier_dna.py` also writes `src/makesrna/dna-outliner.json` (Object, Base, Collection, LayerCollection and SpaceOutliner fields, with their RNA icons and enum items), read in place by `makesrna/dna-struct.js`. The header's `space_data` is the module's SpaceOutliner through it.
+- **Drawing.** `region-draw.cc` stands in for the GPU module, BLF and the button layer: `imm*`, the round box, text and icons are recorded as JSON with Blender's coordinates, text is measured by JS (`region_text_width`), and `editors/interface/region-draw.js` replays the recording on a canvas with Blender's SVG icons, tinted as `blf_glyph_cache_add_svg` does. Buttons (the toggles, the rename field) are recorded with their rectangles; a press runs `ui_apply_but` as Blender's handlers do (`region_button_press`, `region_button_text`), and dragging over a toggle column sets them alike.
+- **Events.** The canvas makes Blender's event values (PRESS, RELEASE, CLICK, DOUBLE_CLICK within 350 ms, CLICK_DRAG past 3 px) and runs the keymaps of the main region (`Outliner`, `View2D Buttons List`, `Screen`, `Window`) with the Outliner as the context area. Box gestures run through `startGestureBox`; a menu an operator calls (`WM_menu_name_call`, port-override) opens through `drawMenu`.
+- **Drag and drop.** `wm_dragdrop.cc` and `object_relations.cc` are compiled; `drag-drop.cc` runs the main region's dropbox handlers as `wm_event_system.cc` does, for the region JS gives (`drag_update`, `drag_drop`). Dropping on an object moves it into that object's collection, Shift parents it, Ctrl links it; dropping on a collection moves it there.
+- **Scene sync.** The module's Scene is not in Main's scenes, so `BKE_main_collection_sync` does not resync its view layer after an ID is deleted or remapped: the area resyncs it after every operator (`syncCollections`). Main's ID remapping reaches the area's tree store through `BKE_library_callback_remap_editor_id_reference_set`.
+- **Not yet:** the popup menus `outliner_operator_menu` builds (context menus on mesh data, materials and other IDs that are not objects or collections), the edge pan while dragging (`WM_operator_name_call_ptr` runs only an exec), scroll bars, the display modes other than View Layer, and Bylonder's materials as Material IDs under their meshes.
 
 ## Shared foundations
 
@@ -151,7 +187,7 @@ The toolbar, tool settings, header transform settings and sidebar are Blender's 
 - Tool icons are Blender's `.dat` triangle files, converted to SVG by `tools/blender-ui/tool_icons.py`.
 - The toolbar (`editors/space_view3d/view3d-toolbar.js`) records `draw_cls`'s layout calls and draws Blender's one icon column: groups open their flyout on a 0.2 s hold or a drag, the region snaps to Blender's widths.
 - The Transform panel is C (`view3d_buttons.cc`). It is ported as the layout calls it makes (`view3d-buttons.js`), not built to WASM: it only reads and writes RNA, so the layout calls are the whole of it.
-- The tool settings, the header's transform settings and the sidebar draw through the shared layout renderer (see Layouts and panels), with their popovers.
+- The header (`VIEW3D_HT_header`, with its visibility, gizmo, overlay and shading popovers), the tool settings and the sidebar draw through the shared layout renderer (see Layouts and panels), from `view3d-regions.js`. In Edit Mode the header's menus are Edit Mode's (`editMeshMenus`), its Add menu adds Bylonder's primitives, and `template_header_3D_mode` is the select mode buttons (`uiTemplateEditModeSelection`), a layout the template records. `object.mode_set` runs Object and Edit Mode; a mesh's other modes show greyed.
 - Transform orientation slots are stored per scene but no transform reads them yet.
 - Select Box, Circle and Lasso share `do_mesh_region_select` (`view3d-select.js`) in Edit Mode; in Object Mode box select tests vertices and circle and lasso the object origin, as Blender does. The gestures are `windowmanager/wm-gesture-*.js` with Blender's modal maps.
 

@@ -83,6 +83,11 @@ const SETUP = {
     await app.page.click('[data-workspace="scripting"]');
     await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console")?.textContent ?? ""), null, 180000);
   },
+  "outliner-expanded": async (app) => {
+    const box = await app.locator(".bl-outliner-region").boundingBox();
+    await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await app.page.keyboard.press("Shift+A");
+  },
 };
 
 // The object selected alone, and the Properties editor on a tab.

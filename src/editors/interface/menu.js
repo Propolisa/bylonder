@@ -314,11 +314,11 @@ export function searchMenu(query, menu = levels[0]) {
   setActive(menu, hits.length ? 0 : -1);
 }
 
-// Blender draws a header pull-down's highlight one pixel inside its button, which is what its menu attaches to.
+// A header pull-down's menu attaches one pixel out at its sides and at its bottom edge (measured on Blender 5.2.3).
 function pulldownRect(button) {
   const r = button.getBoundingClientRect(), text = button.textContent.trim();
   if (!button.classList.contains('bl-pulldown')) return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: text ? r.width : 0 };
-  return { left: r.left - 1, right: r.right + 1, top: r.top - 1, bottom: r.bottom + 1, width: text ? r.width + 2 : 0 };
+  return { left: r.left - 1, right: r.right + 1, top: r.top - 1, bottom: r.bottom, width: text ? r.width + 2 : 0 };
 }
 
 export function menuButton(label, items, { icon, className = '', title, blender } = {}) {

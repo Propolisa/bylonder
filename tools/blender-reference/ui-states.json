@@ -12,5 +12,6 @@
   { "id": "camera-data", "title": "Properties: Camera data tab of the camera" },
   { "id": "toolbar", "title": "3D View toolbar: the Move tool chosen, with its tool settings and gizmo" },
   { "id": "sidebar-item", "title": "3D View sidebar (N): the Item tab", "settle": 4 },
-  { "id": "scripting", "title": "Scripting workspace: Text Editor, Python Console with its banner, Info", "settle": 3 }
+  { "id": "scripting", "title": "Scripting workspace: Text Editor, Python Console with its banner, Info", "settle": 3 },
+  { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" }
 ]
