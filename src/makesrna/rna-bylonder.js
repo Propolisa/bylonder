@@ -101,7 +101,13 @@ const STRUCTS = {
     material_slots: (ob, r) => collection((r.world.materials?.slots(ob) ?? []).map((material, slot_index) =>
       rna('MaterialSlot', { name: material?.name ?? '', material: r.pointer('Material', material), slot_index }))),
     active_material: (ob, r) => r.pointer('Material', r.world.materials?.activeMaterial(ob)),
-    hide_select: { get: (ob) => ob.isPickable === false, set: (ob, value) => { ob.isPickable = !value; } },
+    // Disable Selection is Bylonder's lock (commands.lock); Disable in Renders and in Viewports are kept with the object.
+    hide_select: { get: (ob) => ob.isPickable === false || !!ob.metadata?.wbLocked, set: (ob, value) => {
+      ob.metadata = { ...ob.metadata, wbLocked: !!value };
+      if ('isPickable' in ob) ob.isPickable = !value;
+    } },
+    hide_render: { get: (ob) => !!ob.metadata?.wbHideRender, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideRender: !!value }; } },
+    hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; } },
     hide_get: (ob) => () => !ob.isEnabled(false),
     hide_set: (ob, r) => (hide) => { ob.setEnabled(!hide); r.host.update?.('Object', 'hide', ob); },
     visible_get: (ob) => () => !deleted(ob) && ob.isEnabled() && ob.isVisible !== false,
@@ -197,6 +203,9 @@ const STRUCTS = {
     view_perspective: (view) => (view.state.cameraView ? 'CAMERA' : view.editorCamera?.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'),
     is_perspective: (view) => view.editorCamera?.mode !== Camera.ORTHOGRAPHIC_CAMERA,
   },
+  // The Outliner's SpaceOutliner is Blender's, in the module (space_outliner/outliner-area.js): its DNA, read in place.
+  SpaceOutliner: (space) => ({ type: () => 'OUTLINER', ...Object.fromEntries(Object.keys(space).map((name) => [name,
+    { get: () => space[name], set: (owner, value) => { space[name] = value; } }])) }),
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
 // Scenes' transform orientation slots (Scene.transform_orientation_slots).

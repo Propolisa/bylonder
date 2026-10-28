@@ -45,6 +45,8 @@ IMPORT(region_font_descender) float region_font_descender(float size);
 /* The JSON of what one region draw recorded. */
 struct Recording {
   std::string draw, buttons;
+  /* The theme colors of multicolor icons' groups (blender_* ids), as "id":"rrggbbaa". */
+  std::string icon_colors;
   int winx = 0, winy = 0;
   /* The projection (wmOrtho2): which view rectangle maps to the region's pixels. */
   rctf ortho = {};
@@ -519,6 +521,38 @@ void BLF_draw(int fontid, const char *str, size_t str_len, ResultBLF * /*r_info*
   s += '}';
 }
 
+/* The colors an icon's edit (icon_source_edit_cb) gives its themed groups: it edits a probe with one group per id of
+ * svg_replace_color_attributes. */
+static void icon_colors_record(FunctionRef<void(std::string &)> edit_source_cb)
+{
+  static const char *ids[] = {"blender_white", "blender_black", "blender_logo_orange", "blender_logo_blue", "blender_selected",
+                              "blender_mesh_selected", "blender_back", "blender_text", "blender_text_hi", "blender_red_alert",
+                              "blender_error", "blender_warning", "blender_info", "blender_scene", "blender_collection",
+                              "blender_collection_color_01", "blender_collection_color_02", "blender_collection_color_03",
+                              "blender_collection_color_04", "blender_collection_color_05", "blender_collection_color_06",
+                              "blender_collection_color_07", "blender_collection_color_08", "blender_object", "blender_object_data",
+                              "blender_modifier", "blender_shading", "blender_folder", "blender_fund", "blender_autokey",
+                              "blender_tool_add", "blender_tool_remove", "blender_tool_select", "blender_tool_transform",
+                              "blender_tool_white", "blender_tool_red", "blender_bevel", "blender_crease", "blender_seam",
+                              "blender_sharp", "blender_ipo_linear", "blender_ipo_constant", "blender_ipo_other"};
+  std::string probe;
+  for (const char *id : ids) {
+    probe += std::string("<g id=\"") + id + "\" fill=\"?\"></g>";
+  }
+  edit_source_cb(probe);
+  for (const char *id : ids) {
+    const size_t at = probe.find(std::string("id=\"") + id + "\" fill=\"#");
+    if (at == std::string::npos) {
+      continue;
+    }
+    const size_t start = probe.find('#', at) + 1;
+    if (!rec.icon_colors.empty()) {
+      rec.icon_colors += ',';
+    }
+    rec.icon_colors += std::string("\"") + id + "\":\"" + probe.substr(start, probe.find('"', start) - start) + '"';
+  }
+}
+
 /* An SVG icon at a size in pixels, monochrome in a color (or its own colors), with an outline of some opacity. */
 void BLF_draw_svg_icon(uint icon_id,
                        float x,
@@ -527,8 +561,11 @@ void BLF_draw_svg_icon(uint icon_id,
                        const float color[4],
                        float outline_alpha,
                        bool multicolor,
-                       FunctionRef<void(std::string &)> /*edit_source_cb*/)
+                       FunctionRef<void(std::string &)> edit_source_cb)
 {
+  if (multicolor && edit_source_cb && rec.icon_colors.empty()) {
+    icon_colors_record(edit_source_cb);
+  }
   std::string &s = command("icon");
   string_json(s += ",\"icon\":", ui_icon_name(int(icon_id)));
   points_json(s, "at", {{x, y}});
@@ -598,7 +635,7 @@ static Vector<ui::Button *> &buttons()
 EXPORT(region_draw_end) const char *region_draw_end()
 {
   static std::string json;
-  json = "{\"draw\":[" + rec.draw + "],\"buttons\":[" + rec.buttons + "]}";
+  json = "{\"draw\":[" + rec.draw + "],\"buttons\":[" + rec.buttons + "],\"iconColors\":{" + rec.icon_colors + "}}";
   return json.c_str();
 }
 

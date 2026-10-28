@@ -70,6 +70,7 @@ static void layer_collection_exclude_update(bContext *C, PointerRNA *ptr)
 void outliner_operatortypes_ensure()
 {
   ed::outliner::outliner_operatortypes();
+  ui::ED_operatortypes_view2d();
   rna_property_update_set(RNA_LayerCollection, "exclude", layer_collection_exclude_update);
 }
 
@@ -88,6 +89,9 @@ EXPORT(outliner_new) ScrArea *outliner_new(bContext *C)
   area->spacetype = SPACE_OUTLINER;
   area->type = st;
   SpaceLink *sl = st->create(area, CTX_data_scene(C));
+  /* port-override: Bylonder's Outliner stands for the one of the file it opens, which syncs its selection from the
+   * view layer's only once that changes, rather than for one made at runtime, which syncs at once. */
+  reinterpret_cast<SpaceOutliner *>(sl)->sync_select_dirty = 0;
   BLI_addhead(&area->spacedata, sl);
   BLI_movelisttolist(&area->regionbase, &sl->regionbase);
   for (ARegion &region : area->regionbase) {

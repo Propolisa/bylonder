@@ -6,5 +6,6 @@
   { "id": "edit-mode", "title": "Edit Mode on the default cube (Tab)" },
   { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" },
   { "id": "toolbar", "title": "3D View toolbar: the Move tool chosen, with its tool settings and gizmo" },
-  { "id": "sidebar-item", "title": "3D View sidebar (N): the Item tab", "settle": 4 }
+  { "id": "sidebar-item", "title": "3D View sidebar (N): the Item tab", "settle": 4 },
+  { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" }
 ]

@@ -57,6 +57,11 @@ const SETUP = {
   },
   toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
+  "outliner-expanded": async (app) => {
+    const box = await app.locator(".bl-outliner-region").boundingBox();
+    await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await app.page.keyboard.press("Shift+A");
+  },
 };
 
 async function captureBylonder(browser, url, state) {

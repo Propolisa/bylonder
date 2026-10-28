@@ -273,7 +273,7 @@ EXPORT(main_base_get) int main_base_get(BlenderMain *ctx, Object *ob)
 }
 EXPORT(object_parent) Object *object_parent(Object *ob) { return ob->parent; }
 
-/* An object's base: its collection's visibility, whether it is hidden, unselectable or selected, and whether it is
+/* An object's base: whether it is kept out of view (not `visible`), hidden, unselectable or selected, and whether it is
  * the active object, with its flags evaluated as the view layer's sync evaluates them. */
 EXPORT(main_base_set)
 void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool hide_select, bool select, bool active)
@@ -282,9 +282,10 @@ void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool
   if (!base) {
     return; /* Linked only to collections excluded from the view layer. */
   }
-  base->flag_from_collection = visible ? BASE_ENABLED_VIEWPORT | BASE_ENABLED_AND_MAYBE_VISIBLE_IN_VIEWPORT |
-                                             BASE_ENABLED_AND_VISIBLE_IN_DEFAULT_VIEWPORT | BASE_SELECTABLE | BASE_ENABLED_RENDER :
-                                         BASE_ENABLED_RENDER;
+  /* Its collections' visibility is the view layer's sync's; an object they show can still be kept out of view. */
+  if (!visible) {
+    base->flag_from_collection = BASE_ENABLED_RENDER;
+  }
   SET_FLAG_FROM_TEST(base->flag, hidden, BASE_HIDDEN);
   SET_FLAG_FROM_TEST(base->flag, select, BASE_SELECTED);
   SET_FLAG_FROM_TEST(ob->visibility_flag, hide_select, OB_HIDE_SELECT);

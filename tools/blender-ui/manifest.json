@@ -13,6 +13,7 @@
     "scripts/startup/bl_ui/node_add_menu.py": ["AddNodeMenu", "classes", "generate_menus", "add_base_pathing_dict", "set_*"],
     "scripts/startup/bl_ui/node_add_menu_shader.py": ["add_menus"],
     "scripts/startup/bl_ui/node_add_menu_compositor.py": ["add_menus"],
-    "scripts/startup/bl_ui/space_node.py": ["NODE_MT_add"]
+    "scripts/startup/bl_ui/space_node.py": ["NODE_MT_add"],
+    "scripts/startup/bl_ui/space_outliner.py": ["OUTLINER_*"]
   }
 }

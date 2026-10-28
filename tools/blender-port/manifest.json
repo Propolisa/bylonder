@@ -56,6 +56,7 @@
         "source/blender/editors/interface/interface_style.cc",
         "source/blender/editors/interface/interface_icons.cc",
         "source/blender/editors/interface/view2d/view2d_ops.cc",
+        "source/blender/editors/interface/view2d/view2d_edge_pan.cc",
         "source/blender/windowmanager/intern/wm_event_query.cc",
         "source/blender/animrig/intern/keyframing.cc",
         "source/blender/animrig/intern/keyframing_auto.cc",

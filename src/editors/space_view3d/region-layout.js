@@ -87,6 +87,8 @@ export class RegionLayout {
     return props;
   }
   context_pointer_set() {}
+  // The editor type menu, which the dock's area header shows.
+  template_header() {}
   emboss_set(emboss) { this.emboss = emboss; }
 }
 
@@ -239,7 +241,7 @@ const WIDGETS = {
       checkbox.append(...[box, label(text)].filter(Boolean));
       return node.split ? splitRow('', checkbox) : checkbox;
     }
-    if (info.items && (typeof value === 'string' || value instanceof Set || Array.isArray(value) && info.flag)) {
+    if (info.items?.length && (typeof value === 'string' || value instanceof Set || Array.isArray(value) && info.flag)) {
       const items = info.items.filter(Boolean);
       if (node.expand) {
         const row = make('span', 'bl-enum-row bl-align');
@@ -275,9 +277,13 @@ const WIDGETS = {
       return fields;
     }
     if (typeof value === 'string') {
-      const field = Object.assign(make('input', 'bl-widget bl-text-field'), { value, title: info.description ?? '' });
+      // ui_but_placeholder_get: a search field (VIEWZOOM) says so when empty.
+      const field = Object.assign(make('input', 'bl-widget bl-text-field'), { value, title: info.description ?? '', placeholder: node.placeholder ?? (node.icon === 'VIEWZOOM' ? 'Search' : '') });
       field.onchange = () => write(field.value);
-      return labeled(field);
+      if (!icon(node.icon)) return labeled(field);
+      const search = make('label', 'bl-search');
+      search.append(icon(node.icon), field);
+      return labeled(search);
     }
     return labeled(make('span', 'bl-widget bl-pointer', value?.name ?? ''));
   },

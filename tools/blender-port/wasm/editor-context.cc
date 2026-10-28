@@ -519,6 +519,15 @@ static Gesture gesture_started = GESTURE_NONE;
 /* The gesture the last invoke started (Gesture), cleared by asking. */
 EXPORT(operator_gesture) int operator_gesture() { return std::exchange(gesture_started, GESTURE_NONE); }
 
+/* The menu the last operator called (WM_menu_name_call), which Bylonder's window manager opens, cleared by asking. */
+static std::string menu_called;
+EXPORT(operator_menu_called) const char *operator_menu_called()
+{
+  static std::string name;
+  name = std::exchange(menu_called, "");
+  return name.c_str();
+}
+
 /* What the operators reach of Blender beyond the module. */
 
 namespace blender {
@@ -532,6 +541,8 @@ static wmOperatorStatus gesture_start(bContext *C, wmOperator *op, Gesture gestu
 wmOperatorStatus WM_gesture_box_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/) { return gesture_start(C, op, GESTURE_BOX); }
 wmOperatorStatus WM_gesture_box_modal(bContext * /*C*/, wmOperator * /*op*/, const wmEvent * /*event*/) { return OPERATOR_PASS_THROUGH; }
 void WM_gesture_box_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
+/* port-override: Blender's menus are drawn by Bylonder's window manager (JS), which opens the menu named here. */
+void WM_menu_name_call(bContext * /*C*/, const char *menu_name, wm::OpCallContext /*context*/) { menu_called = menu_name; }
 
 /* As wm_operator_type.cc defines it, over the module's operator table. */
 wmOperatorType *WM_operatortype_find(const char *idname, bool /*quiet*/)
