@@ -4,6 +4,7 @@
 // default values. Bylonder's bindings are in rna-bylonder.js. What the interface shows of a property (name, ranges,
 // enum items, ...) is in rna-ui.json, loaded by loadRNAUI() before an editor first draws properties.
 import structs from './rna-structs.json' with { type: 'json' };
+import * as bpyTypes from '../bl_ui/bpy.types.js';
 
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));
@@ -70,6 +71,8 @@ export function rna(struct, data = {}, { items = {}, channels = {}, owner = null
       if (key === INFO) return info;
       // A struct is true in Python, whatever it holds (Transcrypt's truth test counts an object's keys).
       if (key === '__bool__') return () => true;
+      // type(data) in the scripts (`type(context.curve) is TextCurve`): the struct's bpy.types class.
+      if (key === '__class__') return bpyTypes[struct] ?? Object;
       if (typeof key !== 'string') return target[key];
       const name = rnaName(key);
       if (name in target) return target[name];
@@ -91,6 +94,6 @@ export function rna(struct, data = {}, { items = {}, channels = {}, owner = null
       return defaults.get(name);
     },
     set: (target, key, value) => Reflect.set(target, typeof key === 'string' ? rnaName(key) : key, value),
-    has: (target, key) => typeof key === 'string' && (rnaName(key) in target || !!property(struct, rnaName(key))),
+    has: (target, key) => typeof key === 'string' && (key === '__class__' ? !!bpyTypes[struct] : rnaName(key) in target || !!property(struct, rnaName(key))),
   });
 }

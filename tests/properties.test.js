@@ -2,7 +2,7 @@
 // Bylonder has draws its panels without errors over a NullEngine scene, each property a panel shows exists in Blender's
 // RNA, and bound properties read and write through.
 import assert from 'node:assert/strict';
-import { NullEngine, Scene, MeshBuilder, TransformNode, Vector3, PointLight, SpotLight, DirectionalLight, FreeCamera } from '@babylonjs/core';
+import { NullEngine, Scene, Mesh, MeshBuilder, TransformNode, Vector3, PointLight, SpotLight, DirectionalLight, FreeCamera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
 import { createRenderSettings } from '../src/blenkernel/scene/render.js';
@@ -29,8 +29,12 @@ const sun = new DirectionalLight('Sun', new Vector3(0, -1, 0), scene), camera = 
 // Blender's default camera, as the Default Cube example builds it.
 camera.rotation = new Vector3((90 - 63.559) * Math.PI / 180, -46.692 * Math.PI / 180, 0);
 [point, spot, sun, camera].forEach(asObject);
-const objects = [cube, empty, point, spot, sun, camera];
+// A text object and a curve, as Bylonder's text tool and curve() make them.
+const text = new Mesh('Text', scene), curve = new TransformNode('Curve', scene);
+const objects = [cube, empty, point, spot, sun, camera, text, curve];
 objects.forEach((ob, i) => { ob.metadata = { wbId: 'ob' + i }; });
+text.metadata.wbCreation = { text: { text: 'Text', size: 1, depth: 0.2, align: 'center' } };
+curve.metadata.wbCurve = [{ closed: false, points: [[0, 0, 0], [1, 0, 1]] }];
 objects.scene = scene;
 const world = { scene, objects, animation: createAnimationModel() };
 world.sceneSettings = createSceneSettings(world);
@@ -75,6 +79,12 @@ for (const ob of objects) {
 assert.deepEqual(errors, [], 'panels draw without errors');
 assert.deepEqual([...missing], [], "every property a panel shows is Blender's");
 assert.deepEqual(drawn_tabs.Cube, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'OBJECT', 'MODIFIER', 'PARTICLES', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
+const panelsOf = (ob, tab) => { selection.replace([ob]); context = propertiesContext(r, space); space.context = tab; return drawPanels(types, context, { contexts: [TAB_CONTEXTS[tab]] }).map((p) => p.id); };
+assert.deepEqual(drawn_tabs.Text, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'OBJECT', 'MODIFIER', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
+assert.ok(['DATA_PT_font', 'DATA_PT_paragraph', 'DATA_PT_text_boxes', 'DATA_PT_geometry_curve'].every((id) => panelsOf(text, 'DATA').includes(id)), "a text object's data is Blender's Font panels");
+assert.equal(context.curve.align_x, 'CENTER');
+assert.equal(context.curve.extrude, 0.1);
+assert.ok(panelsOf(curve, 'DATA').includes('DATA_PT_shape_curve'), "a curve's data is Blender's Curve panels");
 assert.deepEqual(drawn_tabs.Light, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'OBJECT', 'PHYSICS', 'CONSTRAINT', 'DATA']);
 
 // Light and camera data read and write through in Blender's units.
