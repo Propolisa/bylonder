@@ -299,7 +299,7 @@ function propItem(node, env) {
       chars.map((char, i) => widget(prop, node, { ...options, index: i, text: useSplit ? elementText(i, chars) : (name && char ? char : '') })));
     // ui_item_array: without the split, the name (with a colon, ui_item_name_add_colon) above the elements.
     if (!useSplit && name && !iconOnly) value = h('div', { class: 'flex min-w-0 flex-1 flex-col' }, [label(name + ':'), value]);
-  } else value = widget(prop, node, { ...options, text: useSplit && splitLabel ? '' : meta.type === 'E' || meta.type === 'S' || meta.type === 'P' ? '' : name });
+  } else value = widget(prop, node, { ...options, index, text: useSplit && splitLabel ? '' : meta.type === 'E' || meta.type === 'S' || meta.type === 'P' ? '' : name });
 
   if (!useSplit || (name === '' && !splitEmptyName)) {
     if (!useSplit && meta.type === 'E' && !node.expand && name && !node.icon_only) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(name), value]);
@@ -428,7 +428,10 @@ function item(node, env) {
     case 'prop_decorator': return decorator(resolve(node, env.ui), node.index ?? -1, env.ui);
     case 'operator': return operatorButton(node, env);
     case 'operator_menu_enum': case 'menu': case 'prop_with_menu': {
-      const items = node.kind === 'menu' ? () => env.ui.drawMenu?.(node.menu) ?? [] : () => [];
+      // An operator's enum as a menu of its items, each running the operator with that value.
+      const enumItems = () => (env.ui.enumItems?.(node.operator, node.property) ?? []).map(([value, label, , icon]) => ({ label, icon: icon && icon !== 'NONE' ? icon : undefined,
+        run: () => env.ui.run(node.operator, { [node.property]: value }) }));
+      const items = node.kind === 'menu' ? () => env.ui.drawMenu?.(node.menu) ?? [] : node.kind === 'operator_menu_enum' ? enumItems : () => [];
       if (node.kind === 'menu' && env.header) return pulldown({ text: node.text ?? env.ui.menuLabel?.(node.menu) ?? '', iconName: node.icon, items, disabled: !env.enabled, menu: node.menu });
       return menuButton({ text: node.text ?? (node.kind === 'menu' ? env.ui.menuLabel?.(node.menu) : null) ?? '', iconName: node.icon, items, disabled: !env.enabled });
     }

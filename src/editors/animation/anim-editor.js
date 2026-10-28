@@ -4,7 +4,7 @@
 // and Blender's operators run there in Blender's C, modal ones (transform, frame change, view panning) getting the
 // following events with modal keymaps applied. The window manager's part (gestures, event values, redraws) is here;
 // the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
-import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
+import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
 import { regionCanvas, drawGrid, drawFrameRange, drawScrubbing, drawChannels, channelRows, channelToggles, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
@@ -15,8 +15,9 @@ import { inArea, contextArea, registerOperator, registerOperators, runOperator, 
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
-import { headerLayout, drawPanels } from '../interface/panels.js';
-import { LayoutView } from '../interface/layout-view.js';
+import { headerLayout, drawPanels, panelTypes } from '../interface/panels.js';
+import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
+import { GRAPH_PANELS } from './anim-buttons.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
@@ -41,7 +42,7 @@ const KEYMAPS = {
 const HEADERS = { GRAPH_EDITOR: 'GRAPH_HT_header', DOPESHEET_EDITOR: 'DOPESHEET_HT_header' };
 const SPACE_TYPES = { GRAPH_EDITOR: SPACE_GRAPH, DOPESHEET_EDITOR: SPACE_ACTION };
 // The channel region's width (its region type's prefsizex): the Graph Editor's leaves room for its scroll bar.
-const CHANNELS_WIDTH = { GRAPH_EDITOR: 200 + 11, DOPESHEET_EDITOR: 200 };
+const CHANNELS_WIDTH = { GRAPH_EDITOR: 200 + 11, DOPESHEET_EDITOR: 200 }, UI_SIDEBAR_PANEL_WIDTH = 280;
 const BUTTONS = ['LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE', 'BUTTON4MOUSE', 'BUTTON5MOUSE'];
 const KEYMAP_EVENT_TYPES = { SPACEBAR: 'SPACE' };
 // The Blender operators this editor runs in the module, and Blender's macros of them (wm_operator_type.cc's macros
@@ -92,21 +93,30 @@ const modifiers = (e) => (e.shiftKey ? KM_SHIFT : 0) | (e.ctrlKey ? KM_CTRL : 0)
 const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' : status === OPERATOR_CANCELLED ? 'CANCELLED' : 'FINISHED');
 
 export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, objects, commit = () => {} }) {
-  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space]);
-  if (space === 'DOPESHEET_EDITOR') area.subtype = ACTION_MODES[uiType];
+  // A Dope Sheet's space is made as the startup file's Timeline area's, whose Dope Sheet it becomes, keeping its regions
+  // (channels and sidebar hidden), as Blender switches an area's sub-type.
+  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : -1);
+  if (uiType === 'DOPESHEET') {
+    area.subtype = ACTION_MODES.DOPESHEET;
+    area.show(RGN_TYPE_UI, false);
+  }
   const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR';
   section.classList.add('anim-editor');
   section.tabIndex = 0;
   const channelsCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-channels' });
   const mainCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-main' });
-  section.replaceChildren(...(timeline ? [] : [channelsCanvas]), mainCanvas);
+  const sidebar = Object.assign(document.createElement('div'), { className: 'bl-ui anim-sidebar' });
+  sidebar.setAttribute('aria-label', 'Sidebar');
+  // The sidebar's own events stay there, as a region's handlers take them.
+  for (const type of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'keydown', 'keyup', 'contextmenu']) sidebar.addEventListener(type, (e) => e.stopPropagation());
+  section.replaceChildren(channelsCanvas, mainCanvas, sidebar);
   const status = Object.assign(document.createElement('div'), { className: 'anim-status' });
   const menus = Object.assign(document.createElement('div'), { className: 'bl-ui anim-header' });
   header?.replaceChildren(menus, status);
 
-  let size = { width: 0, height: 0, channels: 0 }, frame = 0, gesture = null, press = null, hover = RGN_TYPE_WINDOW, pointer = { x: 0, y: 0, region: RGN_TYPE_WINDOW };
+  let size = { width: 0, height: 0, channels: 0, ui: 0 }, frame = 0, gesture = null, press = null, hover = RGN_TYPE_WINDOW, pointer = { x: 0, y: 0, region: RGN_TYPE_WINDOW };
   const editor = {
-    area, space, uiType,
+    area, space, uiType, rna,
     changed: () => redraw(),
   };
   // This editor as the context area: its space for its operators, and Blender's menus it has for wm.call_menu.
@@ -123,7 +133,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const headerState = reactive({ revision: 0, ready: false });
   const layoutUI = markRaw({
     get revision() { return headerState.revision; },
-    undoPush: () => { commit(); redraw(); },
+    undoPush: () => { animation.edited(); commit(); redraw(); },
     report: (error) => rna.host.notify?.(error.message),
     run: (idname, props) => ui.run(idname, props),
     supported: (idname, props) => ui.supported(idname, props),
@@ -132,6 +142,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     toggle: () => {},
     ids: () => [],
     drawMenu: (idname) => menuItems(idname),
+    enumItems: (idname, property) => ui.enumItems(idname, property),
     menuLabel: (idname) => MENUS[idname]?.bl_label,
     menuContents: (idname) => MENUS[idname] && markRaw(headerLayout(context(), drawHeaderType(MENUS[idname]))),
     popover: (id) => {
@@ -142,6 +153,34 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     },
   });
   const drawHeaderType = (type) => (layout) => Object.assign(type(), { layout }).draw(context());
+
+  // The sidebar (RGN_TYPE_UI): its tabs (the panels' bl_category) and the active tab's panels whose poll() passes,
+  // the Graph Editor's from graph_buttons.cc (anim-buttons.js), the Dope Sheet's from Blender's scripts.
+  const sidebarTypes = panelTypes(graph ? [{ classes: GRAPH_PANELS }] : [{ classes: Object.values(PANEL_TYPES) }], { space, region: 'UI' });
+  const sidebarState = reactive({ category: null, open: {} });
+  const sidebarPanels = panelState(sidebarState);
+  const sidebarContext = () => createContext(rna, { area: space, uiType, space: editor, region: 'UI', members: () => ({
+    get active_action() { const action = area.activeAction(); return action ? rna.pointer('Action', action) : null; },
+  }) });
+  const sidebarUI = markRaw({ ...layoutUI, isOpen: sidebarPanels.isOpen, toggle: (id, event, closed) => { sidebarPanels.toggle(id, event, closed); headerState.revision++; } });
+  const sidebarApp = createApp({ render: () => {
+    void headerState.revision;
+    if (!headerState.ready || sidebar.hidden) return null;
+    const ctx = sidebarContext(), polls = (type) => { try { return !type.poll || !!type.poll(ctx); } catch { return false; } };
+    const roots = sidebarTypes.roots.filter(({ type }) => polls(type));
+    // Tabs in registration order: C panels as graph_buttons_register adds them (no header-first sorting).
+    const ordered = graph ? GRAPH_PANELS.filter((type) => roots.some((root) => root.type === type)) : roots.map(({ type }) => type);
+    const categories = [...new Set(ordered.map((type) => type.bl_category))];
+    const category = categories.includes(sidebarState.category) ? sidebarState.category : categories[0];
+    const drawn = drawPanels({ roots: roots.filter(({ type }) => type.bl_category === category) }, ctx, { contexts: ['data'], open: sidebarPanels.isOpen });
+    return [
+      h(RegionView, { panels: drawn, ui: sidebarUI }),
+      h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {
+        type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category), onClick: () => { sidebarState.category = name; },
+      }, name))),
+    ];
+  } });
+  sidebarApp.mount(sidebar);
   const headerApp = createApp({ render: () => {
     void headerState.revision;
     return headerState.ready ? h(LayoutView, { layout: headerLayout(context(), drawHeaderType(HEADER_TYPES[HEADERS[space]])), ui: layoutUI }) : null;
@@ -357,14 +396,20 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   function layout() {
     const width = section.clientWidth, height = section.clientHeight;
     if (!width || !height) return false;
-    const channels = timeline ? 0 : Math.min(CHANNELS_WIDTH[space], Math.round(width / 3));
-    if (width !== size.width || height !== size.height || channels !== size.channels) {
-      size = { width, height, channels };
+    const channels = area.shown(RGN_TYPE_CHANNELS) ? Math.min(CHANNELS_WIDTH[space], Math.round(width / 3)) : 0;
+    // action_region_poll_hide_in_timeline: the Timeline has no sidebar.
+    const ui = !timeline && area.shown(RGN_TYPE_UI) ? Math.min(UI_SIDEBAR_PANEL_WIDTH, Math.round(width / 3)) : 0;
+    if (width !== size.width || height !== size.height || channels !== size.channels || ui !== size.ui) {
+      size = { width, height, channels, ui };
       area.layout(RGN_TYPE_CHANNELS, 0, 0, channels, height);
-      area.layout(RGN_TYPE_WINDOW, channels, 0, width - channels, height);
+      area.layout(RGN_TYPE_WINDOW, channels, 0, width - channels - ui, height);
+      area.layout(RGN_TYPE_UI, width - ui, 0, ui, height);
       area.sync();
+      channelsCanvas.hidden = !channels;
+      sidebar.hidden = !ui;
       Object.assign(channelsCanvas.style, { width: channels + 'px', height: height + 'px' });
-      Object.assign(mainCanvas.style, { left: channels + 'px', width: width - channels + 'px', height: height + 'px' });
+      Object.assign(mainCanvas.style, { left: channels + 'px', width: width - channels - ui + 'px', height: height + 'px' });
+      sidebar.style.width = ui + 'px';
     }
     return true;
   }
@@ -384,7 +429,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     const range = { start: t.frameStart, end: t.frameEnd, previewStart: t.framePreviewStart, previewEnd: t.framePreviewEnd, preview: t.usePreviewRange };
     const settings = area.settings, metrics = area.metrics(), v2d = area.v2d();
     const channels = area.channels();
-    const main = regionCanvas(mainCanvas, size.width - size.channels, size.height);
+    const main = regionCanvas(mainCanvas, size.width - size.channels - size.ui, size.height);
     const spaceTheme = graph ? theme.graph_editor : theme.dopesheet_editor;
     const back = spaceTheme.space.back;
     main.ctx.fillStyle = `rgb(${back.map((c) => Math.round(c * 255)).join(',')})`;
@@ -400,7 +445,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     }
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
     drawScrubbing(main, v2d, frame, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
-    if (!timeline) {
+    if (size.channels) {
       const view = regionCanvas(channelsCanvas, size.channels, size.height), chv = area.v2d(RGN_TYPE_CHANNELS);
       drawChannels(view, chv, channels, area.metrics(RGN_TYPE_CHANNELS), { graph, redraw });
       view.ctx.fillStyle = `rgb(${theme.regions.scrubbing.back.slice(0, 3).map((c) => Math.round(c * 255)).join(',')})`;
@@ -438,6 +483,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       resized.disconnect();
       cancelAnimationFrame(scheduled);
       headerApp.unmount();
+      sidebarApp.unmount();
       area.dispose();
     },
   };

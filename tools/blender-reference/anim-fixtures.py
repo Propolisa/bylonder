@@ -57,6 +57,13 @@ CASES = {
     "dopesheet-mirror": (DOPESHEET, TWO, "action.mirror", {"type": "CFRA"}),
     "dopesheet-snap": (DOPESHEET, TWO, "action.snap", {"type": "NEAREST_FRAME"}),
 }
+# The Graph Editor's Active Keyframe panel's edits: (F-Curve index, key index, property, value). Its update callback
+# (graphedit_activekey_update_cb) sorts the keys and recalculates handles, as FCurve.update() does.
+PANEL_CASES = {
+    "panel-co-ui": (0, 1, "co_ui", (12.0, 4.0)),
+    "panel-interpolation": (0, 1, "interpolation", "ELASTIC"),
+    "panel-easing": (1, 1, "easing", "EASE_IN"),
+}
 FRAME = 12
 
 r = lambda v: [round(x, 4) for x in v]
@@ -131,4 +138,13 @@ for name, (space, selection, idname, props) in CASES.items():
             "view": view, "keys": KEYS, "before": before, "after": keys()}
     with open(os.path.join(out_dir, name + ".json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))
-print("fixtures written", len(CASES))
+for name, (curve, key, prop, value) in PANEL_CASES.items():
+    build([])
+    before = keys()
+    fc = fcurves(bpy.data.objects["Empty"])[curve]
+    setattr(fc.keyframe_points[key], prop, value)
+    fc.update()
+    data = {"panel": [curve, key, prop, value], "keys": KEYS, "before": before, "after": keys()}
+    with open(os.path.join(out_dir, name + ".json"), "w") as f:
+        json.dump(data, f, separators=(",", ":"))
+print("fixtures written", len(CASES) + len(PANEL_CASES))

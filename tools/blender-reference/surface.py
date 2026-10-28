@@ -178,9 +178,17 @@ ADD_MENUS = {"modifier": ["OBJECT_MT_modifier_add"]}
 ADD_ENUMS = {"constraint": ("object.constraint_add", "type", "Add Object Constraint")}
 
 
-# Panels Blender registers in C, which bpy.types does not list (view3d_buttons_register).
-C_PANELS = [type(name, (), {"bl_space_type": "VIEW_3D", "bl_region_type": "UI", "bl_label": label, "bl_category": "Item"})
-            for name, label in [("VIEW3D_PT_transform", "Transform"), ("VIEW3D_PT_vgroup", "Vertex Weights"), ("VIEW3D_PT_curves", "Curve Data")]]
+# Panels Blender registers in C, which bpy.types does not list (view3d_buttons_register, graph_buttons_register).
+C_PANELS = [type(name, (), {"bl_space_type": space, "bl_region_type": "UI", "bl_label": label, "bl_category": category})
+            for space, name, label, category in [
+                ("VIEW_3D", "VIEW3D_PT_transform", "Transform", "Item"), ("VIEW_3D", "VIEW3D_PT_vgroup", "Vertex Weights", "Item"),
+                ("VIEW_3D", "VIEW3D_PT_curves", "Curve Data", "Item"),
+                ("GRAPH_EDITOR", "GRAPH_PT_properties", "Active F-Curve", "F-Curve"),
+                ("GRAPH_EDITOR", "GRAPH_PT_key_properties", "Active Keyframe", "F-Curve"),
+                ("GRAPH_EDITOR", "GRAPH_PT_driven_property", "Driven Property", "Drivers"),
+                ("GRAPH_EDITOR", "GRAPH_PT_drivers", "Driver", "Drivers"),
+                ("GRAPH_EDITOR", "GRAPH_PT_modifiers", "Modifiers", "Modifiers"),
+                ("GRAPH_EDITOR", "GRAPH_PT_view", "Show Cursor", "View")]]
 
 
 def panels_for(space, region=None, context=None):

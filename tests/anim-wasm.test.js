@@ -60,13 +60,28 @@ function setup(fixture, name) {
 }
 const read = (name) => JSON.parse(fs.readFileSync(new URL(name + '.json', dir)));
 
-const cases = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
+const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
+const cases = files.filter((f) => !f.startsWith('panel-')), panels = files.filter((f) => f.startsWith('panel-'));
 for (const file of cases) {
   const name = file.replace('.json', ''), fixture = read(name), { anim, ob, area } = setup(fixture, name);
   if (fixture.operator) {
     const status = area.run(newOperator(fixture.operator, fixture.props), RGN_TYPE_WINDOW);
     assert.ok(status & OPERATOR_FINISHED, `${name}: ${fixture.operator} finished (${status})`);
   }
+  compare(state(anim, ob), fixture.after, name);
+  area.dispose();
+}
+
+// The Graph Editor's Active Keyframe panel (anim-buttons.js) edits a key through the RNA bindings' paths: co_ui with
+// the panel's own update (anim_keyframe_edit), other properties written and the keys sorted and their handles
+// recalculated, as its update callback does.
+for (const file of panels) {
+  const name = file.replace('.json', ''), fixture = read(name), [curve, key, prop, value] = fixture.panel;
+  const view = { width: 800, height: 400, min: [0, -5], max: [40, 5] };
+  const { anim, ob, area } = setup({ ...fixture, space: 'GRAPH_EDITOR', selection: [], frame: 12, view }, name);
+  const fcurve = anim.fcurves(ob)[curve];
+  if (prop === 'co_ui') fcurve.editKeyPanel(key, prop, value);
+  else fcurve.editKey(key, (k) => { k[prop] = value; });
   compare(state(anim, ob), fixture.after, name);
   area.dispose();
 }
@@ -86,4 +101,4 @@ for (const [name, idname, key, axes, typed] of MODAL) {
   compare(state(anim, ob), fixture.after, `${name} (modal)`);
   area.dispose();
 }
-console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results and ${MODAL.length} modal transforms match Blender 5.2`);
+console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits and ${MODAL.length} modal transforms match Blender 5.2`);
