@@ -1,0 +1,687 @@
+{
+ "BezierSplinePoint": {
+  "sdna": "BezTriple",
+  "size": 72,
+  "properties": {
+   "select_left_handle": {
+    "offset": 51,
+    "size": 1,
+    "kind": "int",
+    "bit": 1
+   },
+   "select_right_handle": {
+    "offset": 53,
+    "size": 1,
+    "kind": "int",
+    "bit": 1
+   },
+   "select_control_point": {
+    "offset": 52,
+    "size": 1,
+    "kind": "int",
+    "bit": 1
+   },
+   "hide": {
+    "offset": 54,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 0
+   },
+   "handle_left_type": {
+    "offset": 49,
+    "size": 1,
+    "kind": "int"
+   },
+   "handle_right_type": {
+    "offset": 50,
+    "size": 1,
+    "kind": "int"
+   },
+   "tilt": {
+    "offset": 36,
+    "size": 4,
+    "kind": "float"
+   },
+   "weight_softbody": {
+    "offset": 40,
+    "size": 4,
+    "kind": "float"
+   },
+   "radius": {
+    "offset": 44,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "Curve": {
+  "sdna": "Curve",
+  "size": 684,
+  "properties": {
+   "shape_keys": {
+    "offset": 384,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "path_duration": {
+    "offset": 440,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "use_path": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8
+   },
+   "use_path_follow": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "use_path_clamp": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32
+   },
+   "use_stretch": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128
+   },
+   "use_deform_bounds": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "negative": true
+   },
+   "use_radius": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4096
+   },
+   "bevel_mode": {
+    "offset": 483,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "bevel_profile": {
+    "offset": 392,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "bevel_resolution": {
+    "offset": 444,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "offset": {
+    "offset": 452,
+    "size": 4,
+    "kind": "float",
+    "custom": true
+   },
+   "extrude": {
+    "offset": 456,
+    "size": 4,
+    "kind": "float"
+   },
+   "bevel_depth": {
+    "offset": 460,
+    "size": 4,
+    "kind": "float"
+   },
+   "resolution_u": {
+    "offset": 464,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "resolution_v": {
+    "offset": 466,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "render_resolution_u": {
+    "offset": 468,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "render_resolution_v": {
+    "offset": 470,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "eval_time": {
+    "offset": 660,
+    "size": 4,
+    "kind": "float"
+   },
+   "bevel_object": {
+    "offset": 372,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "taper_object": {
+    "offset": 376,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "dimensions": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "custom": true
+   },
+   "fill_mode": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "custom": true
+   },
+   "fill_solver": {
+    "offset": 485,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "fill_rule": {
+    "offset": 486,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "twist_mode": {
+    "offset": 430,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "taper_radius_mode": {
+    "offset": 484,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "bevel_factor_mapping_start": {
+    "offset": 672,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "bevel_factor_mapping_end": {
+    "offset": 673,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "twist_smooth": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float"
+   },
+   "use_fill_caps": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384
+   },
+   "use_map_taper": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32768
+   },
+   "use_auto_texspace": {
+    "offset": 422,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "texspace_location": {
+    "offset": 396,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "custom": true
+   },
+   "texspace_size": {
+    "offset": 408,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "custom": true
+   },
+   "bevel_factor_start": {
+    "offset": 664,
+    "size": 4,
+    "kind": "float"
+   },
+   "bevel_factor_end": {
+    "offset": 668,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "CurveSplines": {
+  "sdna": "Curve",
+  "size": 684,
+  "properties": {}
+ },
+ "Spline": {
+  "sdna": "Nurb",
+  "size": 64,
+  "properties": {
+   "tilt_interpolation": {
+    "offset": 56,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "radius_interpolation": {
+    "offset": 58,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "type": {
+    "offset": 8,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "point_count_u": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "point_count_v": {
+    "offset": 20,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   },
+   "order_u": {
+    "offset": 32,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "order_v": {
+    "offset": 34,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "resolution_u": {
+    "offset": 28,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "resolution_v": {
+    "offset": 30,
+    "size": 2,
+    "kind": "int",
+    "signed": true
+   },
+   "use_cyclic_u": {
+    "offset": 36,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_cyclic_v": {
+    "offset": 38,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_endpoint_u": {
+    "offset": 36,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_endpoint_v": {
+    "offset": 38,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_bezier_u": {
+    "offset": 36,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_bezier_v": {
+    "offset": 38,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_smooth": {
+    "offset": 14,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "hide": {
+    "offset": 12,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "material_index": {
+    "offset": 10,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "character_index": {
+    "offset": 60,
+    "size": 4,
+    "kind": "int",
+    "signed": true
+   }
+  }
+ },
+ "SplineBezierPoints": {
+  "sdna": "Nurb",
+  "size": 64,
+  "properties": {}
+ },
+ "SplinePoint": {
+  "sdna": "BPoint",
+  "size": 36,
+  "properties": {
+   "select": {
+    "offset": 24,
+    "size": 1,
+    "kind": "int",
+    "bit": 1
+   },
+   "hide": {
+    "offset": 26,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 0
+   },
+   "co": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "length": 4
+   },
+   "weight": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float"
+   },
+   "tilt": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float"
+   },
+   "weight_softbody": {
+    "offset": 20,
+    "size": 4,
+    "kind": "float"
+   },
+   "radius": {
+    "offset": 28,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "SplinePoints": {
+  "sdna": "Nurb",
+  "size": 64,
+  "properties": {}
+ },
+ "SurfaceCurve": {
+  "sdna": "Curve",
+  "size": 684,
+  "properties": {}
+ },
+ "TextBox": {
+  "sdna": "TextBox",
+  "size": 16,
+  "properties": {
+   "x": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float"
+   },
+   "y": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float"
+   },
+   "width": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float"
+   },
+   "height": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "TextCharacterFormat": {
+  "sdna": "CharInfo",
+  "size": 8,
+  "properties": {
+   "use_bold": {
+    "offset": 6,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1
+   },
+   "use_italic": {
+    "offset": 6,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2
+   },
+   "use_underline": {
+    "offset": 6,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4
+   },
+   "use_small_caps": {
+    "offset": 6,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16
+   },
+   "kerning": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float"
+   }
+  }
+ },
+ "TextCurve": {
+  "sdna": "Curve",
+  "size": 684,
+  "properties": {
+   "align_x": {
+    "offset": 481,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "align_y": {
+    "offset": 482,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "overflow": {
+    "offset": 480,
+    "size": 1,
+    "kind": "int",
+    "signed": true
+   },
+   "size": {
+    "offset": 500,
+    "size": 4,
+    "kind": "float"
+   },
+   "small_caps_scale": {
+    "offset": 436,
+    "size": 4,
+    "kind": "float"
+   },
+   "space_line": {
+    "offset": 492,
+    "size": 4,
+    "kind": "float"
+   },
+   "space_word": {
+    "offset": 504,
+    "size": 4,
+    "kind": "float"
+   },
+   "space_character": {
+    "offset": 488,
+    "size": 4,
+    "kind": "float"
+   },
+   "shear": {
+    "offset": 496,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset_x": {
+    "offset": 516,
+    "size": 4,
+    "kind": "float"
+   },
+   "offset_y": {
+    "offset": 520,
+    "size": 4,
+    "kind": "float"
+   },
+   "underline_position": {
+    "offset": 508,
+    "size": 4,
+    "kind": "float"
+   },
+   "underline_height": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float"
+   },
+   "active_textbox": {
+    "offset": 644,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true
+   },
+   "family": {
+    "offset": 556,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64
+   },
+   "body": {
+    "offset": 548,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "follow_curve": {
+    "offset": 380,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true
+   },
+   "font": {
+    "offset": 620,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "font_bold": {
+    "offset": 624,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "font_italic": {
+    "offset": 628,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "font_bold_italic": {
+    "offset": 632,
+    "size": 4,
+    "kind": "pointer"
+   },
+   "edit_format": {
+    "offset": 652,
+    "size": 8,
+    "kind": "struct"
+   },
+   "use_fast_edit": {
+    "offset": 448,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512
+   }
+  }
+ }
+}

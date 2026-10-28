@@ -1,8 +1,10 @@
-"""Where Blender stores each modifier property: the DNA field (offset, size, kind, bit) its RNA definition in
-rna_modifier.cc names, as Clang parses that file for the module's wasm32 target. Written to src/makesrna/dna-modifiers.json;
-with rna-modifiers.json (tools/blender-reference/modifiers.py) it lets JS read and write a ModifierData in the module.
+"""Where Blender stores each property of an RNA file's structs: the DNA field (offset, size, kind, bit) its RNA
+definition names, as Clang parses that file for the module's wasm32 target. Targets: modifiers (rna_modifier.cc, to
+src/makesrna/dna-modifiers.json, with rna-modifiers.json from tools/blender-reference/modifiers.py) and curves
+(rna_curve.cc, to dna-curves.json, with rna-curves.json from tools/blender-reference/curves.py); with them JS reads and
+writes a ModifierData, a Curve and its Nurb, BezTriple, BPoint, CharInfo and TextBox in the module.
 
-Usage: tools/blender-port/modifier_dna.py SRC   (SRC: Blender sources of the manifest's tag)
+Usage: tools/blender-port/modifier_dna.py SRC [TARGET]   (SRC: Blender sources of the manifest's tag; TARGET: modifiers)
 """
 import ctypes
 import json
@@ -16,7 +18,12 @@ import clang.cindex as ci
 import convert
 import wasm_module
 
-RNA = 'source/blender/makesrna/intern/rna_modifier.cc'
+# By target: the RNA file, which of its rna_def_* functions define structs, the output, and whether a struct without
+# RNA_def_struct_sdna is stored in the DNA struct of its own name (as makesrna takes it).
+TARGETS = {
+    'modifiers': ('rna_modifier.cc', lambda name: name.lower().startswith('rna_def_modifier'), 'dna-modifiers.json', False),
+    'curves': ('rna_curve.cc', lambda name: name == 'RNA_def_curve', 'dna-curves.json', True),
+}
 SDNA_CALL = re.compile(r'RNA_def_property_(boolean|boolean_negative|boolean_bitset_array|int|float|enum|enum_bitflag|pointer|string)_sdna$')
 # RNA_def_property and the shorthands that call it (RNA_def_boolean, RNA_def_float_vector, ...).
 PROPERTY_CALL = re.compile(r'RNA_def_(property|boolean|int|float|enum|string|pointer)\w*$')
@@ -85,11 +92,11 @@ def field(struct, path):
             **({'length': length} if length else {})}
 
 
-def definitions(tu, evaluate):
+def definitions(tu, evaluate, file, is_root):
     """{RNA struct: {sdna, properties: {identifier: {field, bit, negative, custom}}}} from the rna_def_* functions, following
     the helpers they call with the struct (rna_def_modifier_panel_open_prop and the like)."""
     functions = {c.spelling: c for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.FUNCTION_DECL and c.is_definition()
-                 and c.location.file and c.location.file.name.endswith('rna_modifier.cc')}
+                 and c.location.file and c.location.file.name.endswith(file)}
     structs, state = {}, {'struct': None, 'prop': None}
 
     def walk(function, seen):
@@ -119,10 +126,13 @@ def definitions(tu, evaluate):
             elif state['prop'] is not None and name.startswith('RNA_def_property_') and name.endswith('_funcs'):
                 state['prop']['custom'] = True
             elif name in functions and name not in seen and name.startswith('rna_def_'):
+                # A helper defining a struct of its own (rna_def_curve_splines) leaves the caller's as it was.
+                caller = dict(state)
                 walk(functions[name], seen | {name})
+                state.update(caller)
 
     for name, function in functions.items():
-        if name.lower().startswith('rna_def_modifier'):
+        if is_root(name):
             state.update(struct=None, prop=None)
             walk(function, {name})
     return structs
@@ -130,19 +140,21 @@ def definitions(tu, evaluate):
 
 def main():
     root = sys.argv[1]
+    file, is_root, output, default_sdna = TARGETS[sys.argv[2] if len(sys.argv) > 2 else 'modifiers']
+    rna_path = f'source/blender/makesrna/intern/{file}'
     manifest = json.load(open(os.path.join(wasm_module.HERE, 'manifest.json')))
     spec = manifest['modules']['bmesh/bmesh.wasm']
     tree, _ = wasm_module.patched_tree(root)
     _, includes, _ = wasm_module.dependencies(tree + '-build', spec.get('dependencies', {}))
     args = [a for a in includes + wasm_module.flags(tree, spec) if a != '-O2'] + driver_includes() + ['-x', 'c++']
-    tu = ci.Index.create().parse(os.path.join(tree, RNA), args=args)
+    tu = ci.Index.create().parse(os.path.join(tree, rna_path), args=args)
     errors = [d for d in tu.diagnostics if d.severity >= ci.Diagnostic.Error]
     if errors:
-        sys.exit(f'{RNA} does not parse:\n' + '\n'.join(str(d) for d in errors[:10]))
+        sys.exit(f'{rna_path} does not parse:\n' + '\n'.join(str(d) for d in errors[:10]))
     records = {c.spelling: c.type for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.STRUCT_DECL and c.is_definition()}
     out = {}
-    for rna, definition in sorted(definitions(tu, Evaluate()).items()):
-        sdna = definition.get('sdna')
+    for rna, definition in sorted(definitions(tu, Evaluate(), file, is_root).items()):
+        sdna = definition.get('sdna', rna if default_sdna else None)
         if sdna not in records:
             continue
         props = {}
@@ -156,7 +168,7 @@ def main():
                 continue  # No DNA field of its own: a property whose functions compute it.
             props[identifier] = {**located, **{k: prop[k] for k in ('bit', 'bitset', 'negative', 'bitflag', 'custom') if k in prop}}
         out[rna] = {'sdna': sdna, 'size': records[sdna].get_size(), 'properties': props}
-    path = os.path.join(convert.REPO, 'src', 'makesrna', 'dna-modifiers.json')
+    path = os.path.join(convert.REPO, 'src', 'makesrna', output)
     json.dump(out, open(path, 'w'), indent=1)
     print(f'{os.path.relpath(path, convert.REPO)}: {len(out)} structs, {sum(len(s["properties"]) for s in out.values())} properties')
 
