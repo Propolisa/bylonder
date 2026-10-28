@@ -91,6 +91,29 @@ const checks = {
     await expectStats(({ Verts }) => Verts > before);
   },
 
+  async "3D View draws Workbench shading and overlay extras, and an empty selects by its axes"() {
+    const drawn = await app.bylonder((b) => {
+      const { scene } = b.world, camera = b.views.input.camera;
+      return {
+        solid: scene.getMeshByName("Cube").getMaterialForRenderPass(camera.renderPassId)?.name,
+        extras: scene.meshes.filter((m) => m.name.startsWith("__extra ")).map((m) => m.name.slice(8)).sort(),
+      };
+    });
+    assert.equal(drawn.solid, "__workbenchSolid");
+    for (const shape of ["camera_frame", "camera_tria", "light_point_lines", "ground_line"]) assert.ok(drawn.extras.includes(shape), shape);
+    // A Plain Axes empty at Blender's (3, -3, 0): clicking its Z axis selects it.
+    const [fx, fy] = await app.bylonder((b) => {
+      const empty = new BABYLON.TransformNode("Empty", b.world.scene);
+      empty.position.set(3, 0, -3);
+      b.world.objects.push(empty);
+      const view = b.views.input, { width, height } = view.canvas;
+      const p = BABYLON.Vector3.Project(new BABYLON.Vector3(3, 0.6, -3), BABYLON.Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
+      return [p.x / width, p.y / height];
+    });
+    await app.click(fx, fy);
+    await app.until((b) => b.editor.selection.nodes.some((n) => n.name === "Empty"));
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {

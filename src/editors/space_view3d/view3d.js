@@ -7,6 +7,7 @@ import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
 import { createContext } from '../../blenkernel/context.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
+import { view_3d, user_interface, cssColor } from '../interface/userdef-default-theme.js';
 
 const toolIcons = {
   select: 'M5 2v14l3.6-3.4 2.6 5.6 2.2-1-2.6-5.5H16Z',
@@ -15,11 +16,16 @@ const toolIcons = {
   scale: 'M2 2h7L6.5 4.5 10 8 8 10 4.5 6.5 2 9Zm16 16h-7l2.5-2.5L10 12l2-2 3.5 3.5L18 11ZM2 12h2v4h4v2H2Zm16-4h-2V4h-4V2h6Z',
 };
 const toolTitles = { select: 'Select (Esc)', move: 'Move (G)', rotate: 'Rotate (R)', scale: 'Scale (S)' };
+// Blender's axes as Babylon directions (Babylon's (x, y, z) is Blender's (x, z, y)) and the view each axis's ball
+// aligns to (the opposite view for its negative ball).
 const axes = [
-  { id: 'x', dir: new Vector3(1, 0, 0), color: '#ff3352', dark: '#9a2335', view: ['right', false] },
-  { id: 'y', dir: new Vector3(0, 1, 0), color: '#8bdc00', dark: '#557d10', view: ['top', false] },
-  { id: 'z', dir: new Vector3(0, 0, 1), color: '#2890ff', dark: '#24548f', view: ['front', true] },
+  { id: 'x', dir: new Vector3(1, 0, 0), color: user_interface.axis_x, view: ['right', false] },
+  { id: 'y', dir: new Vector3(0, 0, 1), color: user_interface.axis_y, view: ['front', true] },
+  { id: 'z', dir: new Vector3(0, 1, 0), color: user_interface.axis_z, view: ['top', false] },
 ];
+// The navigation gizmo (view3d_gizmo_navigate_type.cc) at its default size, in pixels.
+const WIDGET_RADIUS = 40, AXIS_HANDLE_SIZE = 0.2, AXIS_LINE_WIDTH = 2, AXIS_RING_WIDTH = 80 / 60;
+const mixColor = (a, b, t) => cssColor([0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * t).concat(1));
 // The keymaps an Object Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 
@@ -36,7 +42,12 @@ const INFO_MT_area = Object.assign(() => ({
     layout.operator('screen.area_close', kw({ text: 'Close Area' }));
   },
 }), { bl_label: 'Area' });
-const theme = new Color4(0.239, 0.239, 0.239, 1);
+const background = new Color4(...view_3d.background);
+// Blender's startup 3D View (startup.blend: region_3d view_rotation, view_distance and view_location) as an orbit
+// around its location, and its lens: View3D.lens 50 mm on the 36 mm viewport sensor at the viewport's zoom of 2
+// (CAMERA_PARAM_ZOOM_INIT_PERSP), fitted to the longer side.
+const STARTUP_VIEW = { alpha: -0.415918, beta: 1.108752, radius: 18.388048, target: new Vector3(-0.020693, 0.000669, -0.046025) };
+const LENS_HALF_TAN = (36 / 2 / 50) * 2;
 
 // One 3D Viewport area: its canvas, editor camera, navigation, header menus, overlays and per-view state
 // (shading, overlays, camera view), as in Blender where each 3D Viewport has its own view and shading.
@@ -51,8 +62,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   canvas.classList.add('viewport-canvas');
   canvas.tabIndex = 0;
   canvas.setAttribute('aria-label', 'Interactive 3D viewport');
-  const editorCamera = new ArcRotateCamera(cameraName, -Math.PI / 2, Math.PI / 3, 12, new Vector3(0, 1, 0), scene);
-  Object.assign(editorCamera, { minZ: 0.01, lowerRadiusLimit: 0.1, upperRadiusLimit: 10000, inertia: 0 });
+  const editorCamera = new ArcRotateCamera(cameraName, STARTUP_VIEW.alpha, STARTUP_VIEW.beta, STARTUP_VIEW.radius, STARTUP_VIEW.target.clone(), scene);
+  Object.assign(editorCamera, { minZ: 0.01, maxZ: 1000, lowerRadiusLimit: 0.1, upperRadiusLimit: 10000, inertia: 0 });
   if (from) { editorCamera.alpha = from.alpha; editorCamera.beta = from.beta; editorCamera.radius = from.radius; editorCamera.target.copyFrom(from.target); editorCamera.mode = from.mode; }
   const state = { shading: 'solid', overlays: true, cameraView: false };
   const view = {
@@ -76,7 +87,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     tools.append(b);
   }
   const gizmo = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  gizmo.setAttribute('viewBox', '-50 -50 100 100');
+  gizmo.setAttribute('viewBox', '-48 -48 96 96');
   gizmo.classList.add('nav-gizmo');
   const navButtons = Object.assign(document.createElement('div'), { className: 'nav-buttons' });
   section.append(label, tools, gizmo, navButtons);
@@ -179,15 +190,22 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     const key = [editorCamera.alpha, editorCamera.beta, editorCamera.mode].join();
     if (key === drawn) return;
     drawn = key;
-    const m = editorCamera.getViewMatrix(), r = 34;
+    const m = editorCamera.getViewMatrix(), r = WIDGET_RADIUS * (1 - AXIS_HANDLE_SIZE), view = view_3d.background;
+    // Back to front; depth is toward the viewer.
     const items = axes.flatMap(a => {
       const v = Vector3.TransformNormal(a.dir, m);
-      return [{ a, x: v.x * r, y: -v.y * r, z: v.z, pos: true }, { a, x: -v.x * r, y: v.y * r, z: -v.z, pos: false }];
-    }).sort((p, q) => q.z - p.z);
-    gizmo.innerHTML = '<circle class="nav-gizmo-bg" r="49"/>' + items.map(p =>
-      (p.pos ? `<line x1="0" y1="0" x2="${p.x}" y2="${p.y}" stroke="${p.a.color}" stroke-width="2.4"/>` : '') +
-      `<g data-axis="${p.a.id}${p.pos ? '' : '-'}" class="nav-axis"><circle cx="${p.x}" cy="${p.y}" r="${p.pos ? 8 : 7}" fill="${p.pos ? p.a.color : p.a.dark}" ${p.pos ? '' : `stroke="${p.a.color}" stroke-width="1" fill-opacity=".55"`}/>` +
-      (p.pos ? `<text x="${p.x}" y="${p.y + 3.6}" text-anchor="middle">${p.a.id.toUpperCase()}</text>` : '') + '</g>').join('');
+      return [{ a, x: v.x * r, y: -v.y * r, depth: -v.z, pos: true }, { a, x: -v.x * r, y: v.y * r, depth: v.z, pos: false }];
+    }).sort((p, q) => p.depth - q.depth);
+    gizmo.innerHTML = `<circle class="nav-gizmo-bg" r="${WIDGET_RADIUS}"/>` + items.map(({ a, x, y, depth, pos }) => {
+      const fading = mixColor(view, a.color, (depth + 1) * 0.25 + 0.5), middle = mixColor(view, a.color, 0.75);
+      const rad = WIDGET_RADIUS * AXIS_HANDLE_SIZE * ((depth + 1) * 0.08 + 0.92), k = AXIS_LINE_WIDTH / WIDGET_RADIUS * 0.66 / (1 - AXIS_HANDLE_SIZE);
+      const id = `${headerId}-nav-${a.id}`;
+      const line = pos ? `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${-x * k}" y1="${-y * k}" x2="${x}" y2="${y}"><stop offset="0" stop-color="${middle}"/><stop offset="1" stop-color="${fading}"/></linearGradient>` +
+        `<line x1="${-x * k}" y1="${-y * k}" x2="${x}" y2="${y}" stroke="url(#${id})" stroke-width="${AXIS_LINE_WIDTH}" stroke-linecap="round"/>` : '';
+      const inner = pos ? fading : mixColor(view, a.color, 0.25), opacity = pos ? 1 : Math.min(depth + 1, 1);
+      return line + `<g data-axis="${a.id}${pos ? '' : '-'}" class="nav-axis"><circle cx="${x}" cy="${y}" r="${rad - AXIS_RING_WIDTH / 2}" fill="${inner}" fill-opacity="${opacity}" stroke="${fading}" stroke-width="${AXIS_RING_WIDTH}"/>` +
+        (pos ? `<text x="${x}" y="${y + 3.6}" text-anchor="middle">${a.id.toUpperCase()}</text>` : '') + '</g>';
+    }).join('');
     projection.replaceChildren(iconEl(editorCamera.mode === 0 ? 'view_perspective' : 'view_ortho'));
   };
 
@@ -205,16 +223,19 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     section.classList.toggle('camera-view', state.cameraView);
     shadingButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shading === state.shading)));
     overlayButton.setAttribute('aria-pressed', String(state.overlays));
+    world.workbench.setShading(editorCamera, view.rendered ? null : state.shading);
     views.wake();
   };
 
   // Per-view render state, applied by the view manager right before and after this view renders.
   let authored = null;
   view.beforeRender = () => {
+    const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+    editorCamera.fov = 2 * Math.atan(LENS_HALF_TAN / Math.max(1, aspect));
+    if (editorCamera.mode) nav.updateBounds();
     const rendered = view.rendered;
-    scene.forceWireframe = state.shading === 'wire';
     authored = null;
-    if (!rendered) { authored = scene.clearColor; scene.clearColor = theme; }
+    if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
     ctx.overlays.setEnabled(state.overlays && !rendered);
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
   };
@@ -226,6 +247,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     views.remove(view);
     if (state.cameraView) ctx.sceneCamera()?.detachControl();
     nav.dispose();
+    world.workbench.setShading(editorCamera, null);
     editorCamera.dispose();
     for (const el of [label, tools, gizmo, navButtons]) el.remove();
     ctx.shadingChanged();

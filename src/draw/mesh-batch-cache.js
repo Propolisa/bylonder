@@ -44,6 +44,28 @@ function setBounds(mesh, babylonMesh) {
   babylonMesh.subMeshes?.[0]?.setBoundingInfo(box());
 }
 
+// Each object's face edges as pairs of its Babylon vertices (face corners), for Wireframe shading: Blender draws a
+// mesh's edges, not the triangles its faces are drawn with.
+const faceEdges = new WeakMap();
+
+function face_edge_corners(mesh) {
+  const { face_offsets } = mesh, lines = new Uint32Array(mesh.corners_num * 2);
+  for (let f = 0; f < mesh.faces_num; f++) {
+    const start = face_offsets[f], end = face_offsets[f + 1];
+    for (let c = start; c < end; c++) { lines[c * 2] = c; lines[c * 2 + 1] = c + 1 < end ? c + 1 : start; }
+  }
+  return lines;
+}
+
+// The edges Wireframe shading draws for a Babylon mesh as vertex index pairs: its Mesh's face edges, or for geometry
+// Babylon built, its triangles' edges.
+export function mesh_batch_cache_wire_indices(babylonMesh) {
+  if (faceEdges.has(babylonMesh)) return faceEdges.get(babylonMesh);
+  const tris = babylonMesh.getIndices() ?? [], lines = new Uint32Array(tris.length * 2);
+  for (let t = 0; t < tris.length; t += 3) for (let i = 0; i < 3; i++) { lines[(t + i) * 2] = tris[t + i]; lines[(t + i) * 2 + 1] = tris[t + (i + 1) % 3]; }
+  return lines;
+}
+
 // Faces become the mesh's geometry; loose edges a line child that picks as its owner. With `topology` false only
 // positions changed since the last apply, so the buffers are updated in place.
 export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = {}) {
@@ -57,6 +79,7 @@ export function mesh_batch_cache_apply(mesh, babylonMesh, { topology = true } = 
   }
   babylonMesh.makeGeometryUnique?.();
   mesh_batch_cache_vertex_data(mesh).applyToMesh(babylonMesh, true);
+  faceEdges.set(babylonMesh, face_edge_corners(mesh));
   // A single submesh would keep its old index count when an edit changes the topology.
   if (babylonMesh.subMeshes?.length <= 1) babylonMesh._createGlobalSubMesh(true);
   babylonMesh.getChildMeshes(true).filter((child) => child.metadata?.drawOwner === babylonMesh).forEach((child) => child.dispose());

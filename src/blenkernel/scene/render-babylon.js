@@ -37,15 +37,21 @@ export function createRenderEngine(scene) {
   const usesGeometry = effects => !!(effects.ssao || effects.ssr || effects.motion);
   const ownGeometryBuffer = !scene.geometryBufferRenderer;
   // The geometry buffer renders once per scene render; only cameras with effects that read it need it filled.
-  const gateGeometryBuffer = scene.onBeforeRenderObservable.add(() => {
+  // The gate exists only while the buffer does, so an idle scene keeps no render observer (views.js stops rendering).
+  let gateGeometryBuffer = null;
+  const gate = () => {
     const buffer = scene.geometryBufferRenderer, effects = attached.get(scene.activeCamera)?.effects;
-    if (buffer && ownGeometryBuffer) buffer.renderList = effects && usesGeometry(effects) ? null : [];
-  });
+    if (buffer) buffer.renderList = effects && usesGeometry(effects) ? null : [];
+  };
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
     const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose();
     attached.delete(camera);
-    if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
+    if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) {
+      scene.disableGeometryBufferRenderer();
+      scene.onBeforeRenderObservable.remove(gateGeometryBuffer);
+      gateGeometryBuffer = null;
+    }
   };
   const build = (camera, settings, samples) => {
     const e = settings.eevee, r = settings.render, effects = {};
@@ -58,6 +64,7 @@ export function createRenderEngine(scene) {
     if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
     if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess(name('motionBlur'), scene, 1, camera, undefined, undefined, undefined, undefined, undefined, true);
     if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
+    if (usesGeometry(effects) && ownGeometryBuffer) gateGeometryBuffer ??= scene.onBeforeRenderObservable.add(gate);
     return effects;
   };
   return {
@@ -81,6 +88,6 @@ export function createRenderEngine(scene) {
         if (effects.motion) effects.motion.motionStrength = r.motionBlurShutter * 2;
       }
     },
-    dispose() { scene.onBeforeRenderObservable.remove(gateGeometryBuffer); for (const camera of [...attached.keys()]) drop(camera); },
+    dispose() { for (const camera of [...attached.keys()]) drop(camera); },
   };
 }
