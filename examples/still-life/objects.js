@@ -23,8 +23,8 @@ export const carafe = (scene) => turned('Carafe', [[0, 0.002], [0.05, 0], [0.072
 export const wine = (scene) => turned('Wine', [[0, 0.006], [0.066, 0.008], [0.077, 0.06], [0.069, 0.12], [0.05, 0.148], [0, 0.148]], scene, { steps: 48 });
 export const wineGlass = (scene) => turned('Wine Glass', [[0, 0], [0.038, 0.001], [0.036, 0.005], [0.006, 0.012], [0.004, 0.06], [0.006, 0.085], [0.03, 0.105], [0.042, 0.14], [0.04, 0.17], [0.034, 0.195]], scene, { wall: 0.0018, steps: 64 });
 export const bowl = (scene) => turned('Bowl', [[0, 0.004], [0.045, 0.004], [0.048, 0], [0.055, 0.004], [0.085, 0.03], [0.108, 0.062], [0.116, 0.074]], scene, { wall: 0.007, steps: 64 });
-export const candlestick = (scene) => turned('Candlestick', [[0, 0], [0.06, 0], [0.062, 0.008], [0.05, 0.016], [0.022, 0.03], [0.014, 0.06], [0.024, 0.075], [0.011, 0.09], [0.011, 0.2], [0.03, 0.215], [0.03, 0.222], [0.012, 0.226], [0.012, 0.25], [0, 0.25]], scene, { steps: 48 });
-export const candle = (scene) => turned('Candle', [[0, 0.25], [0.0105, 0.25], [0.0105, 0.33], [0.009, 0.336], [0, 0.333]], scene, { steps: 32 });
+export const candlestick = (scene) => turned('Candlestick', [[0, 0], [0.06, 0], [0.062, 0.008], [0.05, 0.016], [0.022, 0.03], [0.014, 0.06], [0.024, 0.075], [0.011, 0.09], [0.011, 0.16], [0.03, 0.175], [0.03, 0.182], [0.012, 0.186], [0.012, 0.21], [0, 0.21]], scene, { steps: 48 });
+export const candle = (scene) => turned('Candle', [[0, 0.21], [0.0105, 0.21], [0.0105, 0.29], [0.009, 0.296], [0, 0.293]], scene, { steps: 32 });
 
 // A lemon: an ellipse with a nipple at each end, lying on its side.
 export function lemonShape(scene, name) {
@@ -69,7 +69,7 @@ export function grapes(scene, material) {
 export function cloth(scene) {
   const cloth = createPrimitive('Cloth', 'mesh.primitive_grid_add', { x_subdivisions: 40, y_subdivisions: 40, size: 0.46 }, scene);
   shadeSmooth(cloth);
-  addModifier(cloth, 'WAVE', { use_x: true, use_y: true, height: 0.012, width: 0.12, narrowness: 1.5, speed: 0, start_position_x: -0.3, start_position_y: 0.1 });
+  addModifier(cloth, 'WAVE', { use_x: true, use_y: true, height: 0.025, width: 0.09, narrowness: 16, start_position_x: -0.4 });
   addModifier(cloth, 'SOLIDIFY', { thickness: 0.002 });
   addModifier(cloth, 'SUBSURF', { levels: 1 });
   return cloth;

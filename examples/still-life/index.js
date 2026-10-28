@@ -11,6 +11,7 @@ export const createScene = function () {
   scene.clearColor = new BABYLON.Color4(0.012, 0.01, 0.008, 1);
   scene.imageProcessingConfiguration.toneMappingEnabled = true;
   scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+  scene.imageProcessingConfiguration.contrast = 1.1;
   scene.imageProcessingConfiguration.exposure = 1.4;
   renderSettings({ eevee: { taaRenderSamples: 48 }, render: { useMotionBlur: true, motionBlurShutter: 0.5 } });
 
@@ -30,7 +31,7 @@ export const createScene = function () {
   const glass = place(make.wineGlass(scene), m.crystal, [0.06, 0, 0.04]);
   const bowl = place(make.bowl(scene), m.celadon, [0.27, 0, 0.26]);
   const candlestick = place(make.candlestick(scene), m.brass, [-0.34, 0, 0.36]);
-  const candle = place(make.candle(scene), m.linen, [-0.34, 0, 0.36]);
+  const candle = place(make.candle(scene), m.beeswax, [-0.34, 0, 0.36]);
   const grapes = place(make.grapes(scene, m.grape), m.grape, [0.24, 0.06, 0.24], 0.9);
   const lemons = [[-0.2, -0.08, 0.4], [-0.11, -0.15, -0.6], [0.16, -0.17, 1.9]].map(([x, z, turn], i) => place(make.lemonShape(scene, 'Lemon ' + (i + 1)), m.lemon, [x, 0.0272, z], turn));
   const pear = place(make.pearShape(scene, 'Pear'), m.pear, [0.25, 0.002, 0.04]);
@@ -41,7 +42,7 @@ export const createScene = function () {
   [table, wall, cloth].forEach((mesh) => { mesh.receiveShadows = true; });
   props.forEach((mesh) => { mesh.receiveShadows = true; });
   const { window } = windowLight(scene, m, props);
-  candleFlame(scene, new BABYLON.Vector3(-0.36, 0.336, 0.3));
+  candleFlame(scene, new BABYLON.Vector3(-0.34, 0.296, 0.36));
   bakeEnvironment(scene, [table, wall, cloth, window], new BABYLON.Vector3(0, 0.12, 0.05));
   seenThroughGlass(scene, [m.glass, m.crystal], [table, wall, cloth, wine, bowl, candlestick, candle, grapes, pear, ...lemons]);
 
@@ -69,7 +70,7 @@ export const createScene = function () {
     keys(shot, 'position.y', [[1, 0.2], [240, 0.27]]);
     keys(shot, 'position.z', [[1, -1.1], [240, -1.04]]);
     keys(shot, 'lockedTarget.x', [[1, -0.05], [240, 0.03]]);
-    keys(shot, 'lockedTarget.y', [[1, 0.09], [240, 0.11]]);
+    keys(shot, 'lockedTarget.y', [[1, 0.11], [240, 0.12]]);
     keys(focus, 'focusDistance', [[1, 960], [90, 970], [170, 1180], [240, 1190]]);
     keys(focus, 'fStop', [[1, 2.2], [240, 2.8]]);
     animation.time.configure({ frameStart: 1, frameEnd: 240, fps: 24 });

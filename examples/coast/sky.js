@@ -5,17 +5,18 @@ const direction = (azimuth, elevation) => new BABYLON.Vector3(Math.cos(elevation
 
 // The sky dome, the sun low over the sea and the light it gives: a warm key with long shadows, a violet sky fill, and
 // haze that thickens toward the horizon.
-export function createSky(scene, { sunAzimuth, sunElevation, horizon, zenith }) {
+export function createSky(scene, { sunAzimuth, sunElevation, horizon, dusk, zenith }) {
   const sunDirection = direction(sunAzimuth, sunElevation);
   const dome = BABYLON.MeshBuilder.CreateSphere('Sky', { diameter: 2000, segments: 32, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
   dome.infiniteDistance = true;
   dome.isPickable = false;
   const material = new BABYLON.ShaderMaterial('Sky', scene, { vertexSource: vertex, fragmentSource: fragment }, {
-    attributes: ['position'], uniforms: ['worldViewProjection', 'sunDirection', 'moonDirection', 'horizon', 'zenith', 'glow', 'cloudShift'],
+    attributes: ['position'], uniforms: ['worldViewProjection', 'sunDirection', 'moonDirection', 'horizon', 'dusk', 'zenith', 'glow', 'cloudShift'],
   });
   material.setVector3('sunDirection', sunDirection);
-  material.setVector3('moonDirection', direction(sunAzimuth + 2.3, 0.55));
+  material.setVector3('moonDirection', direction(sunAzimuth + 1.2, 0.4));
   material.setColor3('horizon', horizon);
+  material.setColor3('dusk', dusk);
   material.setColor3('zenith', zenith);
   material.setColor3('glow', new BABYLON.Color3(1, 0.5, 0.22));
   material.setFloat('cloudShift', 0);
@@ -33,8 +34,8 @@ export function createSky(scene, { sunAzimuth, sunElevation, horizon, zenith }) 
   sky.intensity = 0.55;
 
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.0022;
-  scene.fogColor = horizon.scale(0.8);
+  scene.fogDensity = 0.0011;
+  scene.fogColor = new BABYLON.Color3(0.3, 0.25, 0.38);
 
   // The sun's disc, which god rays stream from.
   const disc = BABYLON.MeshBuilder.CreatePlane('Sun Disc', { size: 60 }, scene);

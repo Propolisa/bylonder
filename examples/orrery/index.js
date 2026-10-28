@@ -12,18 +12,20 @@ export const createScene = function () {
   scene.clearColor = new BABYLON.Color4(0.006, 0.008, 0.016, 1);
   scene.imageProcessingConfiguration.toneMappingEnabled = true;
   scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-  scene.imageProcessingConfiguration.exposure = 1.2;
+  scene.imageProcessingConfiguration.contrast = 1.1;
+  scene.imageProcessingConfiguration.exposure = 1.5;
   scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
-  scene.fogStart = 2.5;
-  scene.fogEnd = 7;
+  scene.fogStart = 2.2;
+  scene.fogEnd = 4.4;
   scene.fogColor = new BABYLON.Color3(0.006, 0.008, 0.016);
-  renderSettings({ eevee: { taaRenderSamples: 32, useRaytracing: true, screenTraceQuality: 0.5, fastGiDistance: 0.3 }, render: { useMotionBlur: true, motionBlurShutter: 0.5 } });
+  renderSettings({ eevee: { taaRenderSamples: 32, useRaytracing: true, screenTraceQuality: 0.5, screenTraceThickness: 0.02, fastGiDistance: 0.3 }, render: { useMotionBlur: true, motionBlurShutter: 0.5 } });
 
   const m = createMaterials(scene);
   const orrery = createOrrery(scene, m);
-  const floor = createPrimitive('Floor', 'mesh.primitive_circle_add', { vertices: 64, radius: 12, fill_type: 'NGON' }, scene);
+  const floor = createPrimitive('Floor', 'mesh.primitive_circle_add', { vertices: 64, radius: 4.4, fill_type: 'NGON' }, scene);
   floor.material = m.lacquer;
   const meshes = scene.meshes.filter((mesh) => mesh !== floor);
+  backdrop(scene);
 
   const { shadows } = studioLights(scene, orrery.sun);
   meshes.forEach((mesh) => { shadows.addShadowCaster(mesh); mesh.receiveShadows = true; });
@@ -31,14 +33,14 @@ export const createScene = function () {
   studioEnvironment(scene, m);
 
   const camera = new BABYLON.TargetCamera('Camera', new BABYLON.Vector3(0.45, 0.24, -0.35), scene);
-  camera.fov = 2 * Math.atan(12 / 50);
+  camera.fov = 2 * Math.atan(12 / 40);
   camera.minZ = 0.02;
   camera.lockedTarget = new BABYLON.Vector3(0.08, 0.2, 0);
   const lens = new BABYLON.DefaultRenderingPipeline('Lens', true, scene, [camera]);
   lens.depthOfFieldEnabled = true;
-  Object.assign(lens.depthOfField, { focalLength: 50, fStop: 2.8, lensSize: 50 });
+  Object.assign(lens.depthOfField, { focalLength: 40, fStop: 2.8, lensSize: 50 });
   lens.bloomEnabled = true;
-  Object.assign(lens, { bloomThreshold: 0.9, bloomWeight: 0.3, bloomKernel: 64 });
+  Object.assign(lens, { bloomThreshold: 0.95, bloomWeight: 0.15, bloomKernel: 64 });
   lens.imageProcessing.vignetteEnabled = true;
   lens.imageProcessing.vignetteWeight = 1.6;
   // Autofocus on what the camera looks at.
@@ -52,30 +54,46 @@ export const createScene = function () {
 function studioLights(scene, sun) {
   const glow = new BABYLON.PointLight('Sun Light', sun.position.clone(), scene);
   glow.diffuse = new BABYLON.Color3(1, 0.62, 0.3);
-  glow.intensity = 0.25;
+  glow.intensity = 0.6;
   const glowLayer = new BABYLON.GlowLayer('Sun Glow', scene, { blurKernelSize: 64 });
-  glowLayer.intensity = 0.9;
+  glowLayer.intensity = 0.45;
   glowLayer.addIncludedOnlyMesh(sun);
 
   const key = new BABYLON.SpotLight('Key', new BABYLON.Vector3(1.2, 2.4, -1.4), new BABYLON.Vector3(-1.2, -2.2, 1.4), 0.7, 2, scene);
   key.diffuse = new BABYLON.Color3(1, 0.93, 0.85);
-  key.intensity = 18;
+  key.intensity = 120;
+  const fill = new BABYLON.HemisphericLight('Fill', new BABYLON.Vector3(0, 1, -0.3), scene);
+  fill.diffuse = new BABYLON.Color3(0.5, 0.55, 0.7);
+  fill.groundColor = new BABYLON.Color3(0.05, 0.04, 0.03);
+  fill.intensity = 0.25;
   const shadows = new BABYLON.ShadowGenerator(2048, key);
   shadows.usePercentageCloserFiltering = true;
   shadows.bias = 0.0005;
   for (const [x, z] of [[-1.6, 1.2], [1.4, 1.6]]) {
     const rim = new BABYLON.SpotLight('Rim', new BABYLON.Vector3(x, 1.2, z), new BABYLON.Vector3(-x, -0.9, -z), 0.6, 2, scene);
     rim.diffuse = new BABYLON.Color3(0.45, 0.75, 1);
-    rim.intensity = 12;
+    rim.intensity = 30;
   }
   return { shadows };
+}
+
+// A dark blue sweep behind the machine, so silhouettes stand out from the black.
+function backdrop(scene) {
+  const sweep = BABYLON.MeshBuilder.CreateCylinder('Backdrop', { diameter: 9, height: 5, tessellation: 64, cap: BABYLON.Mesh.NO_CAP, sideOrientation: BABYLON.Mesh.BACKSIDE }, scene);
+  sweep.position.y = 2.5;
+  const material = new BABYLON.StandardMaterial('Backdrop', scene);
+  Object.assign(material, { disableLighting: true, emissiveColor: new BABYLON.Color3(0.014, 0.02, 0.04) });
+  sweep.material = material;
+  sweep.applyFog = false;
+  sweep.isPickable = false;
+  sweep.metadata = { editable: false };
 }
 
 // Softboxes that only reflections see: they light the scene's environment, baked once into a cube map.
 function studioEnvironment(scene, m) {
   const hidden = 0x10000000;
   const box = (name, material, size, position) => {
-    const panel = BABYLON.MeshBuilder.CreatePlane(name, size, scene);
+    const panel = BABYLON.MeshBuilder.CreatePlane(name, { ...size, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
     panel.position = position;
     panel.lookAt(BABYLON.Vector3.Zero());
     panel.material = material;
@@ -93,6 +111,7 @@ function studioEnvironment(scene, m) {
   probe.refreshRate = BABYLON.RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
   probe.renderList.push(...panels);
   scene.environmentTexture = probe.cubeTexture;
+  scene.environmentIntensity = 1;
 }
 
 // Keyframes for every motion: the orbits and gears turn on linear curves, the camera moves on smooth ones.
@@ -117,10 +136,10 @@ function choreograph(camera, orrery) {
   keys(moonTrack, 'rotation.y', [[1, 0], [FRAMES, earth * 8]], 'LINEAR');
 
   const path = [
-    [1, [0.42, 0.25, -0.34], [0.06, 0.2, 0.02]],
-    [110, [0.75, 0.48, -0.95], [0, 0.32, 0]],
-    [230, [-0.35, 0.72, -1.35], [0, 0.36, 0]],
-    [FRAMES, [-1.25, 0.9, -0.55], [0, 0.36, 0]],
+    [1, [0.95, 0.3, -0.85], [0.05, 0.3, 0]],
+    [110, [0.72, 0.55, -0.7], [0.05, 0.42, 0]],
+    [230, [-0.4, 0.95, -0.95], [0, 0.32, 0]],
+    [FRAMES, [-1.15, 0.5, -0.5], [0, 0.36, 0]],
   ];
   ['x', 'y', 'z'].forEach((axis, i) => {
     keys(shot, 'position.' + axis, path.map(([frame, at]) => [frame, at[i]]));

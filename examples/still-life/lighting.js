@@ -6,7 +6,7 @@ import { animation } from '@workbench/sdk';
 export function windowLight(scene, materials, casters) {
   const key = new BABYLON.SpotLight('Window Light', new BABYLON.Vector3(-1.3, 0.95, -0.75), new BABYLON.Vector3(1.4, -0.95, 1.05), 1.1, 1.5, scene);
   key.diffuse = new BABYLON.Color3(1, 0.84, 0.64);
-  key.intensity = 16;
+  key.intensity = 12;
   key.shadowMinZ = 0.5;
   key.shadowMaxZ = 3.5;
   const shadows = new BABYLON.ShadowGenerator(2048, key);
@@ -26,7 +26,7 @@ export function windowLight(scene, materials, casters) {
   bounce.groundColor = new BABYLON.Color3(0.2, 0.12, 0.07);
   bounce.intensity = 0.12;
 
-  const window = BABYLON.MeshBuilder.CreatePlane('Window', { width: 0.9, height: 1.5 }, scene);
+  const window = BABYLON.MeshBuilder.CreatePlane('Window', { width: 0.9, height: 1.5, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
   window.position = new BABYLON.Vector3(-1.6, 0.8, -0.6);
   window.rotation.y = -Math.PI / 2 + 0.5;
   window.material = materials.window;
@@ -36,7 +36,7 @@ export function windowLight(scene, materials, casters) {
 
 // A beeswax candle flame that breathes: its light flickers with the scene frame, so renders repeat exactly.
 export function candleFlame(scene, top) {
-  const flame = BABYLON.MeshBuilder.CreateSphere('Flame', { diameter: 0.012, segments: 12 }, scene);
+  const flame = BABYLON.MeshBuilder.CreateSphere('Flame', { diameter: 0.009, segments: 12 }, scene);
   flame.scaling.y = 2.4;
   flame.position = top.add(new BABYLON.Vector3(0, 0.016, 0));
   const glow = new BABYLON.StandardMaterial('Flame', scene);
@@ -45,18 +45,18 @@ export function candleFlame(scene, top) {
   flame.material = glow;
   flame.isPickable = false;
 
-  const light = new BABYLON.PointLight('Candle Light', flame.position.clone(), scene);
+  const light = new BABYLON.PointLight('Candle Light', flame.position.add(new BABYLON.Vector3(0, 0.05, 0)), scene);
   light.diffuse = new BABYLON.Color3(1, 0.6, 0.28);
   light.range = 1.2;
   scene.onBeforeRenderObservable.add(() => {
     const t = animation.time.frame / 24;
     const flicker = 0.85 + 0.1 * Math.sin(t * 13.1) + 0.05 * Math.sin(t * 31.7 + 1.3);
-    light.intensity = 0.35 * flicker;
+    light.intensity = 0.12 * flicker;
     flame.scaling.y = 2.2 + 0.4 * flicker;
   });
 
   const layer = new BABYLON.GlowLayer('Flame Glow', scene, { blurKernelSize: 48 });
-  layer.intensity = 1.4;
+  layer.intensity = 0.9;
   layer.addIncludedOnlyMesh(flame);
   return flame;
 }

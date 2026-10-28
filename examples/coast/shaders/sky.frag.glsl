@@ -1,7 +1,7 @@
 precision highp float;
 // Dusk sky: a gradient from the glowing horizon to the night above, the sun's halo, a band of lit clouds, a crescent
 // moon and the first stars. Colors are display colors, matched to the scene's fog at the horizon.
-uniform vec3 sunDirection, moonDirection, horizon, zenith, glow;
+uniform vec3 sunDirection, moonDirection, horizon, dusk, zenith, glow;
 uniform float cloudShift;
 varying vec3 vDirection;
 
@@ -21,7 +21,10 @@ void main() {
   vec3 d = normalize(vDirection);
   float up = max(d.y, 0.0);
   float sun = max(dot(d, sunDirection), 0.0);
-  vec3 color = mix(horizon, zenith, pow(up, 0.45));
+  // The horizon glows orange toward the sun and fades to violet away from it.
+  float sunSide = max(dot(normalize(d.xz + 1e-4), normalize(sunDirection.xz)), 0.0);
+  vec3 low = mix(dusk, horizon, pow(sunSide, 3.0));
+  vec3 color = mix(low, zenith, pow(up, 0.38));
   color += glow * (pow(sun, 6.0) * 0.6 + pow(sun, 60.0) * 0.8) * (1.0 - up * 0.6);
   color += vec3(1.0, 0.85, 0.6) * smoothstep(0.9993, 0.9997, sun) * 3.0;
 

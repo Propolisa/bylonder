@@ -11,9 +11,10 @@ export const createScene = function () {
   scene.clearColor = new BABYLON.Color4(0.05, 0.04, 0.08, 1);
   scene.imageProcessingConfiguration.toneMappingEnabled = true;
   scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+  scene.imageProcessingConfiguration.contrast = 1.1;
   renderSettings({ eevee: { taaRenderSamples: 24 }, render: { useMotionBlur: true, motionBlurShutter: 0.5 } });
 
-  const sky = createSky(scene, { sunAzimuth: 0.62, sunElevation: 0.045, horizon: new BABYLON.Color3(0.95, 0.55, 0.38), zenith: new BABYLON.Color3(0.1, 0.12, 0.3) });
+  const sky = createSky(scene, { sunAzimuth: -0.72, sunElevation: 0.05, horizon: new BABYLON.Color3(1, 0.5, 0.28), dusk: new BABYLON.Color3(0.42, 0.3, 0.46), zenith: new BABYLON.Color3(0.04, 0.06, 0.2) });
   const terrain = createTerrain(scene);
   const lighthouse = createLighthouse(scene, [coastline(HEADLAND) - 16, HEADLAND]);
   const cottages = [[-60, 0.3], [-75, 0.1], [-95, -0.2], [-110, 0.25], [-122, 0.05], [-140, -0.15], [-158, 0.4], [-170, 0.1], [-185, -0.3]]
@@ -24,10 +25,12 @@ export const createScene = function () {
   const { sea, ripples } = createSea(scene, [sky.dome, terrain, ...tower, ...village]);
   skyEnvironment(scene, sky.dome);
 
+  // The lighthouse and cottages cast long shadows over the ground; the ground does not shadow itself, which a sun this
+  // low would only draw as stair steps at shadow map resolution.
   const shadows = new BABYLON.ShadowGenerator(2048, sky.sun);
   shadows.usePercentageCloserFiltering = true;
   shadows.bias = 0.002;
-  [terrain, ...tower, ...village].forEach((mesh) => shadows.addShadowCaster(mesh));
+  [...tower, ...village].forEach((mesh) => shadows.addShadowCaster(mesh));
   village.forEach((mesh) => { mesh.receiveShadows = true; });
 
   const camera = new BABYLON.TargetCamera('Camera', new BABYLON.Vector3(coastline(-280) + 60, 12, -280), scene);
@@ -58,12 +61,12 @@ export const createScene = function () {
       frames.forEach(([frame, value]) => animation.insert([track.ref(path)], frame, value));
       if (interpolation) animation.editKeys(frames.map(([frame]) => ({ ref: track.ref(path), frame })), { interpolation });
     };
-    keys(shot, 'position.x', [[1, coastline(-280) + 60], [150, coastline(-60) + 70], [300, coastline(70) + 80]]);
-    keys(shot, 'position.y', [[1, 9], [150, 22], [300, 38]]);
-    keys(shot, 'position.z', [[1, -280], [150, -60], [300, 70]]);
-    keys(shot, 'lockedTarget.x', [[1, coastline(BAY) - 40], [150, lighthouse.lantern.x + 30], [300, lighthouse.lantern.x]]);
-    keys(shot, 'lockedTarget.y', [[1, 6], [150, 18], [300, lighthouse.lantern.y - 4]]);
-    keys(shot, 'lockedTarget.z', [[1, BAY + 40], [150, HEADLAND - 20], [300, HEADLAND]]);
+    keys(shot, 'position.x', [[1, coastline(-210) + 70], [150, coastline(-30) + 60], [300, coastline(70) + 80]]);
+    keys(shot, 'position.y', [[1, 12], [150, 22], [300, 38]]);
+    keys(shot, 'position.z', [[1, -215], [150, -20], [300, 70]]);
+    keys(shot, 'lockedTarget.x', [[1, coastline(BAY) - 55], [150, lighthouse.lantern.x + 20], [300, lighthouse.lantern.x]]);
+    keys(shot, 'lockedTarget.y', [[1, 5], [150, 16], [300, lighthouse.lantern.y - 4]]);
+    keys(shot, 'lockedTarget.z', [[1, BAY + 10], [150, HEADLAND - 30], [300, HEADLAND]]);
     keys(beam, 'rotation.y', [[1, 0], [300, Math.PI * 2.5]], 'LINEAR');
     animation.time.configure({ frameStart: 1, frameEnd: 300, fps: 24 });
   }

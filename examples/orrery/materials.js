@@ -22,7 +22,7 @@ function marble(scene) {
     const vein = veins(u, v), gold = clamp01(fbm(u, v, { scale: 6, seed: 9 }) * 3 - 1.4);
     return mix(mix([0.012, 0.012, 0.014], [0.05, 0.048, 0.05], fbm(u, v, { scale: 8, seed: 2 })), mix([0.75, 0.74, 0.7], [0.8, 0.58, 0.25], gold), vein);
   });
-  return pbr(scene, 'Black Marble', { albedoTexture: albedo, metallic: 0, roughness: 0.25, clearCoat: { isEnabled: true, intensity: 1, roughness: 0.02 } });
+  return pbr(scene, 'Black Marble', { albedoTexture: albedo, metallic: 0, roughness: 0.3, clearCoat: { isEnabled: true, intensity: 0.5, roughness: 0.12 } });
 }
 
 // Brushed brass: anisotropic highlights stretched along the brushing.
@@ -55,14 +55,14 @@ const pearl = (scene) => pbr(scene, 'Pearl', {
 
 // The sun: molten amber light with a granular surface, glowing through the scene's glow layer.
 const sun = (scene) => pbr(scene, 'Sun', {
-  albedoColor: color(0, 0, 0), metallic: 0, roughness: 1, emissiveIntensity: 3,
+  albedoColor: color(0, 0, 0), metallic: 0, roughness: 1, emissiveIntensity: 1.6,
   emissiveTexture: texture(scene, 'Sun Surface', 256, (u, v) => mix([1, 0.38, 0.06], [1, 0.82, 0.45], Math.pow(fbm(u, v, { scale: 12, octaves: 4, seed: 6 }), 1.5))),
   emissiveColor: color(1, 1, 1),
 });
 
 // The floor: black lacquer that mirrors the brass.
 const lacquer = (scene) => pbr(scene, 'Black Lacquer', {
-  albedoColor: color(0.01, 0.012, 0.016), metallic: 0, roughness: 0.18,
+  albedoColor: color(0.01, 0.012, 0.016), metallic: 0, roughness: 0.18, environmentIntensity: 0.6,
   bumpTexture: normalMap(scene, 'Lacquer Ripple', 256, (u, v) => fbm(u, v, { scale: 4, octaves: 3, seed: 30 }), 0.4),
 });
 
@@ -73,6 +73,6 @@ export function createMaterials(scene) {
   return {
     marble: marble(scene), brass: brass(scene), gold: gold(scene), blued: blued(scene), silver: silver(scene),
     lapis: lapis(scene), malachite: malachite(scene), jasper: jasper(scene), pearl: pearl(scene), sun: sun(scene), lacquer: lacquer(scene),
-    warmBox: softbox(scene, 'Warm Softbox', [1, 0.9, 0.78], 3), coolBox: softbox(scene, 'Cool Strip', [0.55, 0.8, 1], 4),
+    warmBox: softbox(scene, 'Warm Softbox', [1, 0.9, 0.78], 4), coolBox: softbox(scene, 'Cool Strip', [0.55, 0.8, 1], 1.5),
   };
 }

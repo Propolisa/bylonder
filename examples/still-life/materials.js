@@ -45,7 +45,7 @@ function linen(scene) {
     const over = Math.sin(u * Math.PI * 128) * Math.sin(v * Math.PI * 128) > 0;
     return (over ? warp : weft) * (0.75 + 0.25 * noise(u * 64, v * 6, 64, 2));
   };
-  const albedo = texture(scene, 'Linen Color', 512, (u, v) => mix([0.42, 0.38, 0.31], [0.6, 0.56, 0.47], weave(u, v) * 0.35 + fbm(u, v, { scale: 6, seed: 7 }) * 0.65));
+  const albedo = texture(scene, 'Linen Color', 512, (u, v) => mix([0.3, 0.27, 0.21], [0.44, 0.4, 0.32], weave(u, v) * 0.35 + fbm(u, v, { scale: 6, seed: 7 }) * 0.65));
   return pbr(scene, 'Linen', {
     albedoTexture: tiled(albedo, 4), bumpTexture: tiled(normalMap(scene, 'Linen Normal', 512, weave, 0.8), 4), metallic: 0, roughness: 0.85,
     sheen: { isEnabled: true, intensity: 0.6, color: color(1, 0.95, 0.85), roughness: 0.4 },
@@ -104,6 +104,11 @@ const wine = (scene) => pbr(scene, 'Red Wine', {
   subSurface: { isTranslucencyEnabled: true, translucencyIntensity: 1, tintColor: color(0.75, 0.04, 0.08) },
 });
 
+const beeswax = (scene) => pbr(scene, 'Beeswax', {
+  albedoColor: color(0.75, 0.55, 0.3), metallic: 0, roughness: 0.5,
+  subSurface: { isTranslucencyEnabled: true, translucencyIntensity: 0.5, tintColor: color(1, 0.6, 0.25) },
+});
+
 const stem = (scene) => pbr(scene, 'Stem', { albedoColor: color(0.2, 0.13, 0.06), metallic: 0, roughness: 0.8 });
 
 // The window the light comes through, seen only in reflections.
@@ -112,7 +117,7 @@ const window_ = (scene) => pbr(scene, 'Window', { emissiveColor: color(1, 0.9, 0
 export function createMaterials(scene) {
   return {
     walnut: walnut(scene), plaster: plaster(scene), linen: linen(scene), celadon: celadon(scene),
-    glass: glass(scene, 'Glass', color(0.86, 0.95, 0.9)), crystal: glass(scene, 'Crystal', color(0.97, 0.98, 1)), wine: wine(scene),
+    glass: glass(scene, 'Glass', color(0.86, 0.95, 0.9)), crystal: glass(scene, 'Crystal', color(0.97, 0.98, 1)), wine: wine(scene), beeswax: beeswax(scene),
     brass: brass(scene), silver: silver(scene), lemon: lemon(scene), pear: pear(scene), grape: grape(scene), stem: stem(scene), window: window_(scene),
   };
 }

@@ -38,7 +38,7 @@ export function createLighthouse(scene, [x, z]) {
   addModifier(gallery, 'BEVEL', { width: 0.06, segments: 2 });
   const railing = part('Railing', 'mesh.primitive_cylinder_add', { vertices: 40, radius: 2.3, depth: 1.1, end_fill_type: 'NOTHING' }, scene, iron, root, height + 0.85, false);
   addModifier(railing, 'WIREFRAME', { thickness: 0.05 });
-  const lamp = glowing(scene, 'Lamp', [1, 0.78, 0.45], 4);
+  const lamp = glowing(scene, 'Lamp', [1, 0.78, 0.45], 8);
   part('Lantern', 'mesh.primitive_cylinder_add', { vertices: 16, radius: 1.15, depth: 1.8 }, scene, lamp, root, height + 1.25, false);
   part('Lantern Roof', 'mesh.primitive_cone_add', { vertices: 32, radius1: 1.55, radius2: 0.12, depth: 1.3 }, scene, red, root, height + 2.8);
   part('Finial', 'mesh.primitive_ico_sphere_add', { radius: 0.22, subdivisions: 2 }, scene, iron, root, height + 3.55);
@@ -53,18 +53,26 @@ function createBeam(scene, parent, y) {
   pivot.parent = parent;
   pivot.position.y = y;
   const material = new BABYLON.StandardMaterial('Beam Light', scene);
-  Object.assign(material, { disableLighting: true, emissiveColor: new BABYLON.Color3(1, 0.85, 0.6), alpha: 0.22, alphaMode: BABYLON.Engine.ALPHA_ADD, backFaceCulling: false });
+  Object.assign(material, { disableLighting: true, emissiveColor: new BABYLON.Color3(1, 0.85, 0.6), alpha: 0.5, alphaMode: BABYLON.Engine.ALPHA_ADD, backFaceCulling: false, opacityTexture: lengthFade(scene) });
   material.opacityFresnelParameters = Object.assign(new BABYLON.FresnelParameters(), { leftColor: BABYLON.Color3.Black(), rightColor: BABYLON.Color3.White(), power: 2, bias: 0 });
   for (const side of [1, -1]) {
-    const cone = BABYLON.MeshBuilder.CreateCylinder('Beam Cone', { height: 90, diameterTop: 0.6, diameterBottom: 16, tessellation: 32, cap: BABYLON.Mesh.NO_CAP }, scene);
+    const cone = BABYLON.MeshBuilder.CreateCylinder('Beam Cone', { height: 70, diameterTop: 0.5, diameterBottom: 9, tessellation: 32, cap: BABYLON.Mesh.NO_CAP }, scene);
     cone.material = material;
     cone.parent = pivot;
     cone.rotation.z = side * Math.PI / 2;
-    cone.position.x = -side * 45.6;
+    cone.position.x = -side * 35.6;
     cone.isPickable = false;
-    cone.applyFog = true;
   }
   return pivot;
+}
+
+// Opacity along a cone's length (v), strong at the lantern and gone at the far end.
+function lengthFade(scene) {
+  const size = 64, data = new Uint8Array(size * 4 * 4);
+  for (let v = 0; v < size; v++) for (let u = 0; u < 4; u++) data.set(Array(4).fill(Math.pow(v / (size - 1), 2) * 255), (v * 4 + u) * 4);
+  const fade = BABYLON.RawTexture.CreateRGBATexture(data, 4, size, scene, true);
+  fade.getAlphaFromRGB = true;
+  return fade;
 }
 
 // A cottage: whitewashed walls under a slate gable roof, its windows lit for the evening.
@@ -91,7 +99,7 @@ export function createVillage(scene, spots) {
   const { walls, roof, windows } = cottageMeshes(scene);
   walls.material = pbr(scene, 'Lime Wash', [0.72, 0.68, 0.6], 0.85);
   roof.material = pbr(scene, 'Slate', [0.08, 0.085, 0.1], 0.45);
-  windows.material = glowing(scene, 'Lit Window', [1, 0.62, 0.28], 3);
+  windows.material = glowing(scene, 'Lit Window', [1, 0.62, 0.28], 8);
   const panes = [];
   spots.forEach(([x, z, turn], i) => {
     const at = new BABYLON.Vector3(x, heightAt(x, z) - 0.3, z);

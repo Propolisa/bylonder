@@ -1,6 +1,6 @@
 import { fbm, noise, mix, clamp01, normalMap } from './lib/textures.js';
 
-const SIZE = 900, CELLS = 240;
+const SIZE = 800, CELLS = 360;
 const smoothstep = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
 // Where the land meets the sea: a coast running along z with bays and headlands. Land is at x < coastline(z).
@@ -15,7 +15,7 @@ export function heightAt(x, z) {
   const inland = coastline(z) - x;
   const bay = 1 - smoothstep(30, 90, Math.abs(z - BAY)), headland = Math.exp(-(((z - HEADLAND) / 110) ** 2));
   const hills = 22 * fbm(u, v, { scale: 3, octaves: 6, seed: 7 }) + 40 * smoothstep(40, 380, inland) * fbm(u, v, { scale: 2, octaves: 3, seed: 1 }) + 22 * headland;
-  const cliff = smoothstep(-6 - 20 * bay, 6 + 40 * bay, inland);
+  const cliff = smoothstep(-14 - 20 * bay, 16 + 40 * bay, inland + 8 * (noise(u * 40, v * 40, 40, 9) - 0.5));
   const shore = 1 - 0.85 * bay * (1 - smoothstep(30, 160, inland));
   return cliff * (1.5 + hills * shore) - (1 - cliff) * (3 + 8 * smoothstep(0, 120, -inland)) + (0.4 + 1.2 * cliff) * noise(u * 90, v * 90, 90, 4);
 }
@@ -76,7 +76,6 @@ export function createSea(scene, reflected) {
   const mirror = new BABYLON.MirrorTexture('Sea Reflection', 1024, scene, true);
   mirror.mirrorPlane = new BABYLON.Plane(0, -1, 0, 0);
   mirror.renderList.push(...reflected);
-  mirror.adaptiveBlurKernel = 24;
   material.reflectionTexture = mirror;
   material.reflectionColor = new BABYLON.Color3(0.9, 0.9, 0.9);
   sea.material = material;

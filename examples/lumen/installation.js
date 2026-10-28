@@ -26,9 +26,9 @@ export function helix(scene, material) {
   return ribbon;
 }
 
-// A ring of light bars standing around the center: one bar, arrayed on a circle.
-export function gate(scene, material) {
-  const bar = BABYLON.MeshBuilder.CreateBox('Light Bars', { width: 0.06, height: 3.2, depth: 0.06 }, scene);
+// A halo of light spokes around the lattice: one bar, arrayed on a circle and turned to point outward.
+export function halo(scene, material) {
+  const bar = BABYLON.MeshBuilder.CreateBox('Light Spokes', { width: 0.06, height: 3.2, depth: 0.06 }, scene);
   bar.position.set(0, 1.6, 0);
   addModifier(bar, 'GN_ARRAY', { shape: 'Circle', count: 28, radius: 4.2, centralAxis: 'Y', alignRotation: true });
   bar.material = material;
@@ -56,9 +56,8 @@ export function mirrorFloor(scene, reflected) {
   const mirror = new BABYLON.MirrorTexture('Floor Reflection', 1024, scene, true);
   mirror.mirrorPlane = new BABYLON.Plane(0, -1, 0, 0);
   mirror.renderList.push(...reflected);
-  mirror.adaptiveBlurKernel = 12;
   material.reflectionTexture = mirror;
-  material.reflectionColor = new BABYLON.Color3(0.7, 0.7, 0.75);
+  material.reflectionColor = new BABYLON.Color3(1.4, 1.4, 1.5);
   material.emissiveTexture = gridTexture(scene);
   material.emissiveTexture.uScale = material.emissiveTexture.vScale = 30;
   material.emissiveColor = new BABYLON.Color3(0.25, 0.3, 0.5);

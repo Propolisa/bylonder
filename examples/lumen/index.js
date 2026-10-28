@@ -1,17 +1,20 @@
 import { animate, animation, controls, renderSettings } from '@workbench/sdk';
-import { neon, geodesic, helix, gate, colonnade, mirrorFloor, chrome } from './installation.js';
+import { neon, geodesic, helix, halo, colonnade, mirrorFloor, chrome } from './installation.js';
 
 const FPS = 24, BEAT = 12, SHOT = 72, SHOTS = 4;
 
 // Lumen: a light installation in a dark hall, cut like a music video at 120 beats per minute. A lattice of light
-// turns above a black mirror, ringed by light bars and colonnades; four shots of three seconds, each with its own move.
+// turns above a black mirror, in a halo of light spokes between colonnades; four shots of three seconds, each with its
+// own move.
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(0.004, 0.003, 0.01, 1);
   scene.imageProcessingConfiguration.toneMappingEnabled = true;
   scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+  scene.imageProcessingConfiguration.contrast = 1.1;
+  scene.imageProcessingConfiguration.exposure = 1.4;
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.035;
+  scene.fogDensity = 0.02;
   scene.fogColor = new BABYLON.Color3(0.02, 0.01, 0.04);
   renderSettings({ eevee: { taaRenderSamples: 16 }, render: { useMotionBlur: true, motionBlurShutter: 0.8 } });
 
@@ -27,14 +30,14 @@ export const createScene = function () {
   heart.position.y = 2.2;
   const ribbon = helix(scene, colors.magenta);
   ribbon.position.y = 0.4;
-  const bars = gate(scene, colors.white);
+  const spokes = halo(scene, colors.white);
   const blades = colonnade(scene, colors.amber);
-  const lights = [lattice, ribbon, bars, blades];
+  const lights = [lattice, ribbon, spokes, blades];
   mirrorFloor(scene, [...lights, heart]);
   hallEnvironment(scene, lights);
 
-  const glow = new BABYLON.GlowLayer('Glow', scene, { blurKernelSize: 64 });
-  glow.intensity = 1.1;
+  const glow = new BABYLON.GlowLayer('Glow', scene, { blurKernelSize: 32 });
+  glow.intensity = 0.45;
   glow.addExcludedMesh(heart);
 
   const camera = new BABYLON.TargetCamera('Camera', new BABYLON.Vector3(0, 0.4, -9), scene);
@@ -43,9 +46,9 @@ export const createScene = function () {
   camera.lockedTarget = new BABYLON.Vector3(0, 2.2, 0);
   const lens = new BABYLON.DefaultRenderingPipeline('Lens', true, scene, [camera]);
   lens.bloomEnabled = true;
-  Object.assign(lens, { bloomThreshold: 0.6, bloomWeight: 0.6, bloomKernel: 96, bloomScale: 0.5 });
+  Object.assign(lens, { bloomThreshold: 0.9, bloomWeight: 0.25, bloomKernel: 64, bloomScale: 0.5 });
   lens.chromaticAberrationEnabled = true;
-  lens.chromaticAberration.aberrationAmount = 18;
+  lens.chromaticAberration.aberrationAmount = 8;
   lens.imageProcessing.vignetteEnabled = true;
   lens.imageProcessing.vignetteWeight = 2.5;
 
@@ -57,12 +60,12 @@ export const createScene = function () {
   scene.onBeforeRenderObservable.add(() => {
     const frame = animation.time.frame, beat = (frame - 1) % BEAT, bar = Math.floor((frame - 1) / BEAT) % 4;
     const flash = Math.exp(-beat / 3), { energy, swap } = mix.values;
-    const level = (offset) => energy * (0.55 + 0.9 * Math.exp(-(((frame - 1 + offset) % BEAT) / 3)));
+    const level = (offset) => energy * (0.6 + 1.0 * Math.exp(-(((frame - 1 + offset) % BEAT) / 3)));
     BABYLON.Color3.LerpToRef(colors.cyan.metadata.base, colors.magenta.metadata.base, swap, colors.cyan.emissiveColor);
     BABYLON.Color3.LerpToRef(colors.magenta.metadata.base, colors.cyan.metadata.base, swap, colors.magenta.emissiveColor);
-    colors.cyan.emissiveColor.scaleToRef(level(0) * 1.3, colors.cyan.emissiveColor);
-    colors.magenta.emissiveColor.scaleToRef(level(6) * 1.4, colors.magenta.emissiveColor);
-    colors.white.metadata.base.scaleToRef(energy * (bar === 3 ? 1.6 * flash + 0.3 : 0.5 + 0.4 * flash), colors.white.emissiveColor);
+    colors.cyan.emissiveColor.scaleToRef(level(0) * 0.9, colors.cyan.emissiveColor);
+    colors.magenta.emissiveColor.scaleToRef(level(6), colors.magenta.emissiveColor);
+    colors.white.metadata.base.scaleToRef(energy * (bar === 3 ? 1.6 * flash + 0.3 : 0.55 + 0.45 * flash), colors.white.emissiveColor);
     colors.amber.metadata.base.scaleToRef(level(3) * 0.9, colors.amber.emissiveColor);
     lattice.rotation.y = frame * 0.012;
     lattice.rotation.x = Math.sin(frame * 0.01) * 0.3;
@@ -105,7 +108,7 @@ function cut(camera, mix) {
     }
   });
   const levels = (name, frames) => frames.forEach(([frame, value]) => animation.insert([mix.ref(name)], frame, value));
-  levels('energy', [[1, 0.25], [60, 0.7], [73, 0.9], [144, 1], [145, 0.6], [216, 1.1], [217, 1.3], [288, 0.15]]);
+  levels('energy', [[1, 0.45], [60, 0.85], [73, 0.9], [144, 1], [145, 0.8], [216, 1.1], [217, 1.2], [288, 0.3]]);
   levels('swap', [[1, 0], [144, 0], [145, 1], [216, 1], [217, 0]]);
   animation.time.configure({ frameStart: 1, frameEnd: SHOT * SHOTS, fps: FPS });
   animation.seek(1);
