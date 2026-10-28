@@ -80,9 +80,9 @@ for (const ob of objects) {
 }
 assert.deepEqual(errors, [], 'panels draw without errors');
 assert.deepEqual([...missing], [], "every property a panel shows is Blender's");
-assert.deepEqual(drawn_tabs.Cube, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'OBJECT', 'MODIFIER', 'PARTICLES', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
+assert.deepEqual(drawn_tabs.Cube, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'COLLECTION', 'OBJECT', 'MODIFIER', 'PARTICLES', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
 const panelsOf = (ob, tab) => { selection.replace([ob]); context = propertiesContext(r, space); space.context = tab; return drawPanels(types, context, { contexts: [TAB_CONTEXTS[tab]] }).map((p) => p.id); };
-assert.deepEqual(drawn_tabs.Text, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'OBJECT', 'MODIFIER', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
+assert.deepEqual(drawn_tabs.Text, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'COLLECTION', 'OBJECT', 'MODIFIER', 'PHYSICS', 'CONSTRAINT', 'DATA', 'MATERIAL']);
 assert.ok(['DATA_PT_font', 'DATA_PT_paragraph', 'DATA_PT_text_boxes', 'DATA_PT_geometry_curve'].every((id) => panelsOf(text, 'DATA').includes(id)), "a text object's data is Blender's Font panels");
 assert.equal(context.curve.align_x, 'CENTER');
 assert.equal(context.curve.extrude, 0.1);
@@ -95,7 +95,7 @@ assert.equal(principled.name, 'Principled BSDF');
 principled.inputs.get('Roughness').default_value = 0.25;
 assert.equal(world.materials.activeMaterial(cube).roughness, 0.25);
 assert.ok(panelsOf(cube, 'MATERIAL').includes('EEVEE_MATERIAL_PT_surface'));
-assert.deepEqual(drawn_tabs.Light, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'OBJECT', 'PHYSICS', 'CONSTRAINT', 'DATA']);
+assert.deepEqual(drawn_tabs.Light, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', 'COLLECTION', 'OBJECT', 'PHYSICS', 'CONSTRAINT', 'DATA']);
 
 // Light and camera data read and write through in Blender's units.
 selection.replace([point]);

@@ -20,7 +20,7 @@ export function createCollections(world, { commit = () => {} } = {}) {
   const emit = () => listeners.forEach(fn => fn());
   const visibility = createCollectionVisibility(world);
   const ids = () => world.objects.filter(n => !deleted(n)).map(nodeId);
-  const baseline = { collections: [{ id: DEFAULT, name: 'Collection', objects: [], children: [], hideSelect: false, hideViewport: false, hideRender: false }], scene: { objects: [], children: [DEFAULT] }, viewLayers: [{ id: 'ViewLayer', name: 'ViewLayer', layers: {}, active: MASTER }], activeViewLayer: 'ViewLayer' };
+  const baseline = { collections: [{ id: DEFAULT, name: 'Collection', objects: [], children: [], hideSelect: false, hideViewport: false, hideRender: false }], scene: { objects: [], children: [DEFAULT] }, viewLayers: [{ id: 'ViewLayer', name: 'ViewLayer', layers: {}, active: DEFAULT }], activeViewLayer: 'ViewLayer' };
   let state = clone(baseline);
   const known = new Set(ids());
   let render = false;
@@ -135,6 +135,11 @@ export function createCollections(world, { commit = () => {} } = {}) {
       sync();
     },
     refresh: sync,
+    // A whole state from Blender's code (collections-blender.js), as one edit.
+    assign(next) {
+      if (JSON.stringify(next) === JSON.stringify(state)) return;
+      state = clone(next); changed();
+    },
     // A render's world shows what renders show.
     useRenderVisibility() { render = true; sync(); },
     capture() { return JSON.stringify(state) === JSON.stringify(baseline) ? undefined : clone(state); },

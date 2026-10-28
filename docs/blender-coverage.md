@@ -69,6 +69,10 @@ The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animat
 ## GRAPH_EDITOR > *
 Status: partial
 Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Its sidebar panels (graph_buttons.cc) are ported as their layout calls in `editors/animation/anim-buttons.js`. Drivers mode and the F-Modifier panels are not shown yet.
+## OUTLINER > *
+Status: partial
+Blender's `space_outliner` code in the module, drawn on a canvas from its own draw calls; see `docs/blender-boundary.md` (Outliner). View Layer display mode only; other display modes, context menus on IDs that are not objects or collections, and scroll bars are not shown yet.
+
 ## VIEW3D_PT_transform
 The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/space_view3d/view3d-buttons.js`. Edit Mode's Median panel is not ported yet.
 

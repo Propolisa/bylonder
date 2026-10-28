@@ -34,6 +34,8 @@ export function createBlenderIDs(blender = new BlenderMain()) {
         objects.delete(key);
       }
     },
+    // Drops the object for a key that Blender's code freed (an Outliner delete).
+    forget: (key) => objects.delete(key),
     entries: () => [...objects].map(([key, { ob, type }]) => ({ key, ob, type })),
   };
 }

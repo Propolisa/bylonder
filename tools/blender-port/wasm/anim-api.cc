@@ -998,7 +998,10 @@ void WM_operator_properties_free(PointerRNA *ptr)
   operator_values_free(ptr->data);
   ptr->data = nullptr;
 }
-std::string WM_operatortype_name(wmOperatorType *ot, PointerRNA * /*properties*/) { return ot->name ? ot->name : ""; }
+std::string WM_operatortype_name(wmOperatorType *ot, PointerRNA *properties)
+{
+  return ot->get_name && properties ? ot->get_name(ot, properties) : std::string(ot->name ? ot->name : "");
+}
 
 /* As screen_ops.cc defines the animation editors' polls. */
 static bool space_test(bContext *C, int spacetype)
@@ -1051,19 +1054,6 @@ bool ED_operator_region_animview_active(bContext *C)
   return true;
 }
 
-/* port-override: Bylonder draws text with the browser's fonts (JS), so the interface style's fonts are not loaded. */
-void BLF_unload_all() {}
-void BLF_cache_flush_set_fn(void (* /*cache_flush_fn*/)()) {}
-void BLF_enable(int /*fontid*/, FontFlags /*flag*/) {}
-void BLF_disable(int /*fontid*/, FontFlags /*flag*/) {}
-void BLF_default_size(float /*size*/) {}
-void BLF_default_set(int /*fontid*/) {}
-int BLF_load_default(bool /*unique*/) { return 0; }
-int BLF_load_mono_default(bool /*unique*/) { return 1; }
-void BLF_load_font_stack() {}
-int BLF_set_default() { return 0; }
-float BLF_width(int /*fontid*/, const char * /*str*/, size_t /*str_len*/, ResultBLF * /*r_info*/) { return 0.0f; }
-
 /* As scene.cc defines them. */
 double Scene::frames_per_second() const { return double(this->r.frs_sec) / double(this->r.frs_sec_base); }
 float BKE_scene_frame_get(const Scene *scene) { return scene->r.cfra + scene->r.subframe; }
@@ -1107,9 +1097,6 @@ wmPaintCursor *WM_paint_cursor_activate(short /*space_type*/, short /*region_typ
   return reinterpret_cast<wmPaintCursor *>(&cursor);
 }
 bool WM_paint_cursor_end(wmPaintCursor * /*handle*/) { return true; }
-
-/* port-override: the module's IDs have no node trees to list in the animation editors. */
-bNodeTree *bke::node_tree_from_id(ID * /*id*/) { return nullptr; }
 
 /* port-override: Bylonder lays out the editors' panels (JS), so panel types are not kept. */
 bool WM_paneltype_add(PanelType * /*pt*/) { return true; }
