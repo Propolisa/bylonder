@@ -16,7 +16,7 @@ export function mountRuntimeLayout(){
   const properties=document.createElement('section');properties.id='properties-section';properties.append(document.querySelector('#pane'));
   for(const child of [...host.children]){
     if(child===panel)continue;
-    if(['gesture-cursor','gesture-guide','object-context'].includes(child.id))document.body.append(child);
+    if(['gesture-cursor','gesture-guide'].includes(child.id))document.body.append(child);
     else viewport.append(child);
   }
   panel.querySelector('.panel-heading')?.remove();

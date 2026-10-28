@@ -17,7 +17,6 @@ import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
 import { meshOperator, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
-import { openMenu } from '../interface/menu.js';
 import { createRedoPanel } from '../interface/redo-panel.js';
 import { operatorSchema } from './mesh-catalog.js';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
@@ -25,7 +24,7 @@ import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js'
 import { objectMesh } from './object-mesh.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
-import { createKeymap, operatorKeys } from '../../windowmanager/input/keymap.js';
+import { createKeymap } from '../../windowmanager/input/keymap.js';
 import { editMeshMenus, editMeshActions } from '../space_view3d/view3d-menus-edit-mesh.js';
 import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
 import { drawCallbackAdd, tagRedraw, css, THEME } from '../../draw/overlay-tool.js';
@@ -347,11 +346,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     const hit = EDBM_unified_findnearest(em.mesh, viewAdapter(event.view), [event.x, event.y], em.edit.selectmode);
     if (hit) run('mesh.select_linked_pick', { object_index: 0, index: EDBM_elem_to_index_any(em.mesh, hit), deselect })();
   };
-  const inView = (event) => !!event.view;
-  // An operator's shortcut in Edit Mode's keymaps: the binding with its properties, else its plain one.
-  const keysOf = (idname, props) => operatorKeys(idname, props, [viewKeymap]);
   const menuApi = {
-    context: () => world.blenderContext(views.input), edit: () => em.edit, exec, keys: keysOf, macro, module: moduleOperator, start: (type, options) => editor.start(type, options),
+    context: () => world.blenderContext(views.input), edit: () => em.edit, exec, macro, module: moduleOperator, start: (type, options) => editor.start(type, options),
     extrudeMove, inset, bevel, loopcut, selectBox: () => selectBox(editor.pointer, 'SET', false),
   };
   const menus = editMeshMenus(menuApi);
@@ -384,9 +380,6 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       enumItems: (prop) => (prop === 'mode' ? rnaOperators['object.mode_set'].properties.mode.items.filter(([id]) => MESH_MODES.includes(id)) : []),
     },
   });
-  const viewKeymap = createKeymap([
-    { blender: 'VIEW3D_MT_edit_mesh_context_menu', keys: 'RIGHTMOUSE', poll: inView, run: (event) => openMenu(menus.context(), { x: event.x, y: event.y }, '') },
-  ], ['3D View']);
   const modeKeys = createKeymap([
     { blender: 'object.mode_set', keys: 'Tab', poll: () => !!em || editable(activeObject()), run: () => (em ? exit() : enter()) },
   ], ['Object Non-modal']);
@@ -458,7 +451,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     // The 3D View's Edit Mode menus (view3d-menus-edit-mesh.js).
     menus,
     // Tab in both modes; picking and the Select Box tool in Edit Mode (Blender's Mesh keymap runs the rest).
-    keymap: (event) => modeKeys(event) || (!!em && viewKeymap(event)),
+    keymap: (event) => modeKeys(event),
     // view3d.select and view3d.select_box in Edit Mode, run with the event; a box begins at a drag's press, or from a
     // key at the next press.
     selectOperator(event, { toggle, select_passthrough }) {

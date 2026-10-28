@@ -7,10 +7,7 @@ import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim
 import { mountRuntimeLayout } from "./editors/screen/runtime.js";
 import { createViewportTouch } from "./windowmanager/input/viewport-touch.js";
 import { applyRenderSettings } from "./workspace/render-settings.js";
-import {
-  createObjectActions,
-  createObjectContextMenu,
-} from "./editors/object/object-actions";
+import { createObjectActions } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
 import { createOutliner } from "./editors/space_outliner/space-outliner.js";
@@ -257,7 +254,7 @@ window.addEventListener("message", (e) => {
   )
     return;
   if (e.data.type === "reset-layout") viewportDock.reset();
-  if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
+  if (e.data.type === "invoke") runOperator(e.data.payload);
   if (e.data.type === "help") help.showModal();
   if (e.data.type === "view-layer") {
     const cols = world.collections, { op, id } = e.data.payload;
@@ -339,15 +336,7 @@ world.onModeChange = () => {
   viewports().forEach((view) => view.sync());
 };
 world.beforeSelection = () => creator.finish();
-world.objectActions = createObjectActions({
-  world,
-  editor,
-  commands,
-  creator,
-  history, nav,
-  inspect: () => inspector(),
-});
-world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
+world.objectActions = createObjectActions({ world, editor, commands, creator });
 // bpy.data.texts: the project's text files, each edit saved with the project.
 world.texts = createTexts({ files: input.texts, save: (name, content) => send("text", { name, content }) });
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit, notify });
@@ -537,8 +526,6 @@ document.querySelector("#scene-mode").onclick = () => activeView()?.toggleCamera
 document.querySelector("#opposite-view").onclick = () => activeView().nav.opposite();
 document.querySelector("#projection").onclick = () => activeView().nav.toggle();
 document.querySelector("#frame").onclick = () => nav.frame(editor.selected);
-document.querySelector("#group").onclick = () => world.objectActions.invoke("group");
-document.querySelector("#ungroup").onclick = () => world.objectActions.invoke("ungroup");
 document.querySelector("#panel-toggle").onclick = () => viewportDock.show("properties", viewportDock.profile !== "desktop");
 document
   .querySelectorAll("[data-view]")
@@ -554,7 +541,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open && !world.contextMenu.isOpen;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
@@ -642,9 +629,14 @@ const view3dKeys = keymapHandler(
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
 const view3dArea = {
   get space() { return activeView(); },
-  menu: (name) => activeView()?.menu(name) && (() => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name))),
+  menu: (name) => {
+    const menu = activeView()?.menu(name);
+    return menu && ((event) => openMenu(menu.items(), event ?? editor.pointer, menu.title));
+  },
 };
 const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
+// A menu of the 3D View opened as wm.call_menu opens it (the touch controls' long press), at a point of the page.
+world.callMenu = (name, at) => inArea(view3dArea, () => view3dArea.menu(name)?.(at));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 // The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's transform gizmos drag
@@ -654,7 +646,7 @@ const gizmoKeys = (event) => (event.type === "leftmouse" && event.value === "PRE
 const keyLayers = () => {
   const view = activeView();
   if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
-  return [creatorKeys, gizmoKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap]), blenderKeys, ...(world.editMode.active ? [] : [world.objectActions.key]), bylonderKeys];
+  return [creatorKeys, gizmoKeys, world.editMode.keymap, blenderKeys, bylonderKeys];
 };
 
 let last = 0;
@@ -697,7 +689,6 @@ function dispose() {
   tools.dispose();
   world.editMode.dispose();
   world.outliner.dispose();
-  world.contextMenu.dispose();
   nodeEditor.dispose();
   documentState.dispose();
   world.particles.dispose();

@@ -21,8 +21,7 @@ const ENUMS = {
 // Run by Blender's code in the module, matching Blender (tests/objects-wasm.test.js).
 const BLENDER_OPERATORS = ['object.transform_apply', 'object.origin_set', 'object.location_clear', 'object.rotation_clear', 'object.scale_clear'];
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
-const keyLabel = (keys) => keys?.replace(/\+/g, ' ');
-const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup', 'creation'];
+const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 
 export function registerObjectOperators(registry, blender) {
   for (const idname of BLENDER_OPERATORS) registerOperator(idname, { poll: () => blender.poll(idname), run: (props) => blender.run(idname, props) });
@@ -33,7 +32,6 @@ export function registerObjectOperators(registry, blender) {
     registerOperator(idname, {
       supports: (props) => !!action(props),
       poll: (props) => action(props)?.enabled?.() ?? true,
-      keys: (props) => keyLabel(action(props)?.keys[0]),
       enumItems: (prop) => ENUMS[idname]?.[prop],
       confirm: CONFIRM[idname],
       run: (props) => registry.invoke(action(props).id),
@@ -42,8 +40,10 @@ export function registerObjectOperators(registry, blender) {
   const extra = (id) => registry.actions.find((action) => action.id === id);
   const bylonder = (id) => 'bylonder.' + id.replace(/-/g, '_');
   for (const id of OBJECT_MENU_EXTRAS) {
-    registerOperator(bylonder(id), { poll: () => extra(id).enabled?.() ?? true, keys: () => keyLabel(extra(id).keys[0]), run: () => registry.invoke(id) });
+    registerOperator(bylonder(id), { poll: () => extra(id).enabled?.() ?? true, run: () => registry.invoke(id) });
   }
+  // F2's panel (TOPBAR_PT_name) renames the active object.
+  registerOperator('wm.call_panel', { supports: ({ name }) => name === 'TOPBAR_PT_name', poll: () => extra('rename').enabled(), run: () => registry.invoke('rename') });
   appendMenu('VIEW3D_MT_object', ({ layout }) => {
     layout.separator();
     for (const id of OBJECT_MENU_EXTRAS) layout.operator(bylonder(id), kw({ text: extra(id).label }));

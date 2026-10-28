@@ -24,12 +24,6 @@ body>header,body>footer{display:none!important}
 .camera-view .nav-gizmo,.camera-view .nav-buttons,.camera-view .view-label .view-detail{display:none}
 #toast{left:50%;transform:translateX(-50%);bottom:10px;background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;color:var(--bl-text);font:var(--bl-font)}
 dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;font:var(--bl-font);box-shadow:0 6px 20px #0008}
-#object-context{background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;padding:3px 0;box-shadow:0 4px 12px #0007}
-#object-context button{height:21px;margin:0 3px;width:calc(100% - 6px);padding:0 8px;border-radius:3px;background:transparent;color:var(--bl-text);font:var(--bl-font)}
-#object-context button:hover:not(:disabled),#object-context button:focus-visible{background:var(--bl-select);color:#fff;outline:none}
-#object-context kbd{font:var(--bl-font);color:var(--bl-text-dim)}
-.context-title{font-weight:400;color:var(--bl-text);padding:4px 10px;border-bottom:1px solid #ffffff12;margin-bottom:3px}
-.context-section{font-size:11px;color:var(--bl-text-dim);padding:5px 10px 2px;border-top:0;margin-top:2px}
 #creation-panel,#redo-panel{left:6px;bottom:6px;background:#303030f0;border:0;border-radius:5px;box-shadow:0 2px 8px #0006}
 @media(pointer:coarse){.nav-gizmo{width:80px;height:80px;top:50px}.nav-buttons{display:none}.view-label{display:none}}
 #panel{background:var(--bl-back)}

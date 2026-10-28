@@ -1,10 +1,12 @@
 import { reactive, createApp, h, Teleport } from 'vue';
 import { bindTouch } from './touch-session.js';
+import { runOperator } from '../wm-operators.js';
 // Touch gestures for every 3D Viewport (attach(view) per view) and the touch controls, mounted once.
 export function createViewportTouch(world, editor, creator, views){
+  // The mode's context menu, as right click opens it from Blender's keymaps.
+  const contextMenu=()=>({MESH:'VIEW3D_MT_edit_mesh_context_menu',CURVE:'VIEW3D_MT_edit_curve_context_menu',FONT:'VIEW3D_MT_edit_font_context_menu'})[world.editMode.kind]??'VIEW3D_MT_object_context_menu';
   const state=reactive({multi:false,snap:false,fine:false,axis:null,mode:editor.mode,count:editor.selection.size,modal:!!editor.modal});
   world.onEditorState=value=>Object.assign(state,value);
-  const eventAt=point=>({clientX:point.x,clientY:point.y,preventDefault(){}});
   const attach=view=>{
   const nav=view.nav,picked=point=>editor.pick(point.x,point.y,view);
   let operation=null;
@@ -15,7 +17,7 @@ export function createViewportTouch(world, editor, creator, views){
       if(double&&node){world.beforeSelection?.();editor.selection.replace([node]);editor.reconcile();nav.frame(editor.selected);}
       else editor.select(node,state.multi);
     },
-    hold(point){world.contextMenu.open(eventAt(point),picked(point));},
+    hold(point){views.setInput(view);world.callMenu(contextMenu(),point);},
     start(point){
       views.setInput(view);
       creator.finish();
@@ -51,8 +53,8 @@ export function createViewportTouch(world, editor, creator, views){
         ...[['select','Select / orbit'],['move','Move'],['rotate','Rotate'],['scale','Scale']].map(([value,label])=>h('option',{value,disabled:value!=='select'&&!state.count},label))
       ]),
       button('Multi',()=>state.multi=!state.multi,state.multi,'Toggle additive selection'),
-      button('Actions',()=>world.contextMenu.open({clientX:Math.min(innerWidth-240,60),clientY:70,preventDefault(){}},editor.selection.nodes.at(-1))),
-      button('↶',()=>world.objectActions.invoke('undo'),false,'Undo'),button('↷',()=>world.objectActions.invoke('redo'),false,'Redo')
+      button('Actions',()=>world.callMenu(contextMenu(),{x:60,y:70})),
+      button('↶',()=>runOperator('ed.undo'),false,'Undo'),button('↷',()=>runOperator('ed.redo'),false,'Redo')
     ])
   ]});app.mount(host);
   return {attach,dispose(){world.onEditorState=null;app.unmount();host.remove();graphControls.remove();}};

@@ -106,10 +106,6 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const blender = menuUI({ menus, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
-  const blenderMenu = (idname) => () => drawMenu(idname, blender);
-  // A Blender menu for wm.call_menu in this view (its items, or null without one) and its title.
-  view.menu = (idname) => (blender.menus[idname] ? drawMenu(idname, blender) : null);
-  view.menuTitle = (idname) => blender.menus[idname]?.bl_label ?? '';
   // The toolbar region, Blender's tool system's.
   const toolbar = createToolbar({
     panel: world.toolsystem.panel, ui: blender, run: blender.run,
@@ -118,15 +114,18 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   });
   section.append(toolbar.el);
   view.toolbar = toolbar;
-  // The header, the tool settings and the sidebar, Blender's. Edit Mode's menus and operators are its own; its Add menu
-  // adds Bylonder's primitives.
-  // Mesh Edit Mode's menus and Add menu are Bylonder's; curves and text in Edit Mode draw Blender's.
+  // The header, the tool settings and the sidebar, Blender's. Mesh Edit Mode runs its own operators in Blender's menus;
+  // curves and text in Edit Mode draw Blender's.
   const editMesh = () => editMode() && (world.editMode.kind ?? 'MESH') === 'MESH';
   const meshItem = (p) => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
   const meshes = () => {
     const mesh = creator.catalog.filter((p) => p.id !== 'text'), babylon = mesh.filter((p) => p.group === 'babylon');
     return [...mesh.filter((p) => !p.group).map(meshItem), ...(babylon.length ? ['-', { label: 'Babylon', icon: 'mesh_data', items: babylon.map(meshItem) }] : [])];
   };
+  // A Blender menu's items in this view's mode: Mesh Edit Mode's are its own; its Add menu adds Bylonder's primitives.
+  const menuItems = (idname) => (!editMesh() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname));
+  // A Blender menu for wm.call_menu in this view: its items and title, or null without one.
+  view.menu = (idname) => (blender.menus[idname] ? { items: () => menuItems(idname), title: blender.menus[idname].bl_label ?? '' } : null);
   const headerUI = {
     ...blender,
     run: (idname, props, event) => (idname === 'mesh.select_mode' ? world.editMode.setSelectMode(props.type, !!event?.shiftKey) : blender.run(idname, props)),
@@ -135,7 +134,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const regions = createRegions({
     view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
     ui: headerUI,
-    menu: (idname) => (!editMesh() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname)),
+    menu: menuItems,
     templates: { template_header_3D_mode: () => (editMesh() ? selectModeLayout(world.editMode.selectmode) : null) },
   });
   header.replaceChildren(regions.header);
