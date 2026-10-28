@@ -128,7 +128,11 @@ Input goes through a small window manager (`src/windowmanager/wm-event-system.js
 
 Splash Screen > Blender Coverage shows how much of Blender's interface Bylonder covers, per editor, down to menus, panels, operators and key bindings. Blender's side comes from Blender itself: `tools/blender-reference/surface.py` writes `src/coverage/blender-surface.json`. Bylonder's side is scanned from the Blender identifiers in `src/` (`scripts/blender-coverage.mjs`). Design decisions, equivalents and notes for whole subtrees are written by hand in [docs/blender-coverage.md](docs/blender-coverage.md). New UI uses shadcn-vue components on the theme's design tokens (`src/editors/interface/components/`).
 
-Tests cover store isolation/scheduling, gesture math, relative-input lifecycle, native grouping, multi-object transforms, undo and persistence reconstruction via Babylon's NullEngine. They do not replace browser/WebGL interaction tests. The development preview service was unavailable in the build environment, so browser interaction remains unverified.
+## Testing
+
+- `npm test` runs the unit tests in Node on Babylon's NullEngine: stores, gestures, transforms, undo and persistence, mesh ports against Blender fixtures, menus and keymaps.
+- `npm run test:e2e` runs the smoke tests (`tests/e2e/smoke.mjs`) in Chromium through Playwright, which is expected to be installed with its browser. They build `dist/` when a source file is newer, serve it with `vite preview`, and drive core flows with real mouse and keyboard input: boot, Render Image and Render Animation, the File and Object menus, view, select, delete and undo keys, Edit Mode extrude, adding a modifier, and splitting a 3D Viewport. Assertions read state through `window.__bylonder` in the 3D Viewport frame. `npm run test:e2e -- Render` runs the checks whose name contains `Render`; `E2E_URL` tests a running server instead.
+- `node tools/blender-reference/parity.mjs --out DIR` compares Bylonder with Blender 5.2.3. `tools/blender-reference/ui-shots.py` captures Blender under Xvfb in the UI states of `ui-states.json` (startup scene, menus, Edit Mode, the Modifiers tab), driven by simulated input; Playwright captures Bylonder in the same states on the Default Cube example, Blender's startup scene, at the same window size and UI scale. Each state gets both screenshots, a side-by-side and a diff image, and `report.json` holds the share of differing pixels overall and per Blender editor. The default output folder `.shots/parity/` is not committed.
 
 ## Browser project workspace
 
@@ -152,7 +156,7 @@ workbench.meshTools({
 });
 ```
 
-Call this during createScene. `workbench.meshBuilders` exposes the reflected parameter catalog. New numeric/boolean/string field subsets are validated against the actual builder signature. Avoid combining size and axis overrides unless intended; Babylon's axis-specific options take precedence.
+Call this during createScene. Code builds the same primitives with `createPrimitive('Cube', 'mesh.primitive_cube_add', { size: 2 }, scene)`, which Edit Mode edits as Blender's Mesh (quads, not Babylon's triangles). `workbench.meshBuilders` exposes the reflected parameter catalog. New numeric/boolean/string field subsets are validated against the actual builder signature. Avoid combining size and axis overrides unless intended; Babylon's axis-specific options take precedence.
 
 Tab enters Edit Mode on the active mesh, with Blender's select modes (1, 2, 3, Shift to combine), click select (Shift toggles, clicking again cycles through overlapping elements), box select by dragging or B (Shift extends, Ctrl subtracts), A, Alt A, Ctrl I, H, Shift H and Alt H. G, R and S move, rotate and scale the selection about its median point, with X, Y and Z (Shift for a plane) constraining in Blender's axes. E extrudes and moves along the normal, I insets faces. Ctrl R cuts edge loops with Blender's preview and slides the new loop; GG slides selected edges. Edge > Subdivide subdivides, and its Adjust Last Operation panel re-runs it with new settings. X or Delete opens the Delete menu (Vertices, Edges, Faces, Only Edges & Faces, Only Faces, Dissolve Faces). Edits are stored as Mesh data on the object (`wbCreation.mesh`) and saved with scene edits, so they replace the geometry that code builds. Selection and every edit are undo steps.
 
