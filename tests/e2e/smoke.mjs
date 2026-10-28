@@ -215,6 +215,30 @@ const checks = {
     await app.until((b) => b.editor.selection.nodes.some((n) => n.name === "Empty"));
   },
 
+  // The object follows the mouse from the first G on: its projection moves as far as the mouse did.
+  "G moves the object with the mouse, from the first G": { open: { example: null, node: "sphere" }, async run() {
+    const screen = () => app.bylonder((b) => {
+      const node = b.world.objects.find((o) => o.name === "sphere"), view = b.views.input, { width, height } = view.canvas;
+      const p = BABYLON.Vector3.Project(node.getAbsolutePosition(), BABYLON.Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
+      const scale = view.canvas.getBoundingClientRect().width / width;
+      return [p.x / width, p.y / height, p.x * scale, p.y * scale];
+    });
+    const [fx, fy] = await screen();
+    await app.click(fx, fy);
+    await app.until((b) => b.editor.selection.nodes.map((n) => n.name).join() === "sphere");
+    for (const dx of [60, -40]) {
+      const [gx, gy, x0, y0] = await screen(), [x, y] = await app.point(gx, gy);
+      await app.page.mouse.move(x + 5, y + 5, { steps: 5 });
+      await app.page.waitForTimeout(150);
+      await app.page.keyboard.press("g");
+      await app.page.mouse.move(x + 5 + dx, y + 5, { steps: 10 });
+      await app.page.mouse.click(x + 5 + dx, y + 5);
+      await app.until((b) => !b.editor.modal);
+      const [, , x1, y1] = await screen();
+      assert.ok(Math.abs(x1 - x0 - dx) < 2 && Math.abs(y1 - y0) < 2, `moved by ${[x1 - x0, y1 - y0]} px for ${dx} px`);
+    }
+  } },
+
   "a hemispheric light selects where it is drawn and moves with G X 2": { open: { example: null, node: "sphere" }, async run() {
     // The new project's light has a direction and no position of its own in Babylon.
     const at = () => app.bylonder((b) => {
