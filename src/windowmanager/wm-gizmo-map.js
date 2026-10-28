@@ -15,37 +15,45 @@ const types = new Map();
 // WM_gizmogrouptype_append.
 export const registerGizmoGroupType = (idname, type) => types.set(idname, type);
 
-// `group()` names the gizmo group the map shows (the active tool's), or ''.
-export function createGizmoMap({ group }) {
+// `groups()` names the gizmo groups the map shows: the active tool's first ('' for none), then those operators asked
+// for (their redo gizmos, MESH_GGT_spin_redo).
+export function createGizmoMap({ groups }) {
   let highlight = null;
-  const active = () => {
-    const type = types.get(group());
-    return type && type.poll() ? type : null;
+  const shown = () => groups().map((idname) => types.get(idname)).filter((type) => type?.poll());
+  // The part of a shown group under an event's pointer, as { type, part }, or null.
+  const find = (event) => {
+    for (const type of shown()) {
+      const part = type.test_select(event);
+      if (part !== null) return { type, part };
+    }
+    return null;
   };
-  const removeDraw = drawCallbackAdd((ctx, region) => active()?.draw(ctx, region, highlight?.view === region.view ? highlight.part : null));
+  const removeDraw = drawCallbackAdd((ctx, region) => {
+    for (const type of shown()) type.draw(ctx, region, highlight?.view === region.view && highlight.type === type ? highlight.part : null);
+  });
   const setHighlight = (next) => {
-    if (next?.part === highlight?.part && next?.view === highlight?.view) return;
+    if (next?.part === highlight?.part && next?.type === highlight?.type && next?.view === highlight?.view) return;
     highlight = next;
     tagRedraw();
   };
   return {
-    // Whether the group shows, and a part is under the event's pointer (for wm_event_get_keymap_from_toolsystem_ex).
+    // Whether the tool's group shows, and a part is under the event's pointer (for
+    // wm_event_get_keymap_from_toolsystem_ex).
     state(event) {
-      const type = active();
-      if (!type || !event?.view) return { visible: !!type };
-      return { visible: true, highlight: type.test_select(dragStart(event)) !== null };
+      const tool = types.get(groups()[0]), visible = !!tool?.poll();
+      if (!visible || !event?.view) return { visible };
+      return { visible, highlight: find(dragStart(event)) !== null };
     },
     // Pointer motion: the highlighted part follows it.
     mousemove(event) {
-      const type = active(), part = type && event.view ? type.test_select(event) : null;
-      setHighlight(part === null ? null : { part, view: event.view });
+      const found = event.view ? find(event) : null;
+      setHighlight(found && { ...found, view: event.view });
     },
     // The gizmo map's handler: an event on the highlighted part goes to its gizmo.
     keymap(event) {
-      const type = active();
-      if (!type || !event.view) return false;
-      const part = highlight?.view === event.view ? highlight.part : type.test_select(dragStart(event));
-      return part !== null && !!type.handle(event, part);
+      if (!event.view) return false;
+      const found = highlight?.view === event.view ? highlight : find(dragStart(event));
+      return !!found && !!found.type.handle(event, found.part);
     },
     tag: tagRedraw,
     dispose: removeDraw,

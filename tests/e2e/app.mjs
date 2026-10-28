@@ -18,10 +18,12 @@ const stale = () => {
   return files.some((file) => file && !/^(tests|tools)\/|\.md$/.test(file) && mtime(file) > built);
 };
 
-// Serves dist/ with vite preview, building it first when any app source file is newer. E2E_URL uses a running server instead.
-export async function startServer() {
+// Serves dist/ with vite preview, building it first when any app source file is newer (unless `build` is false: the
+// production check tests the dist/ it is given). E2E_URL uses a running server instead.
+export async function startServer({ build = true } = {}) {
   if (process.env.E2E_URL) return { url: process.env.E2E_URL, close() {} };
-  if (stale()) {
+  if (!build && !mtime("dist/index.html")) throw Error("No dist/: run npm run build first");
+  if (build && stale()) {
     console.log("Building dist/ ...");
     if (spawnSync("npm", ["run", "build"], { cwd: root, stdio: ["ignore", "ignore", "inherit"] }).status) throw Error("Build failed");
   }

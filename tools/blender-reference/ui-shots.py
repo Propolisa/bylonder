@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 import bpy
+from bpy_extras.view3d_utils import location_3d_to_region_2d
 
 args = sys.argv[sys.argv.index("--") + 1:]
 out, only = args[0], args[1:]
@@ -52,6 +53,14 @@ def key(type, x, y, **modifiers):
     move(x, y)
     window().event_simulate(type=type, value="PRESS", x=x, y=y, **modifiers)
     window().event_simulate(type=type, value="RELEASE", x=x, y=y, **modifiers)
+
+
+# A point of the scene in window pixels, as the 3D View shows it.
+def view3d_project(co):
+    view = area("VIEW_3D")
+    region = next(r for r in view.regions if r.type == "WINDOW")
+    p = location_3d_to_region_2d(region, view.spaces.active.region_3d, co)
+    return round(region.x + p.x), round(region.y + p.y)
 
 
 def outliner_point(fx, fy):
@@ -117,6 +126,16 @@ def inset_tool():
     later(1.0, lambda: set_tool("builtin.inset_faces"))
 
 
+# Edit Mode with everything selected and an Edit Mode tool, the mouse over `anchor` (a scene point) or resting.
+def edit_tool(name, anchor=None):
+    def setup():
+        key("TAB", *view3d_point(*REST))
+        later(0.5, lambda: key("A", *view3d_point(*REST)))
+        later(1.0, lambda: set_tool(name))
+        later(1.5, lambda: move(*(view3d_project(anchor) if anchor else view3d_point(*REST))))
+    return setup
+
+
 # The cube deleted, then an object added by its operator in the 3D View, then Edit Mode, as Delete, the Add menu and
 # Tab do in parity.mjs.
 def add_and_edit(module, name, **props):
@@ -143,6 +162,9 @@ SETUP = {
     "toolbar": click_tool,
     "cursor-tool": cursor_tool,
     "inset-tool": inset_tool,
+    "loop-cut-tool": edit_tool("builtin.loop_cut", (1, 1, 0)),
+    "spin-tool": edit_tool("builtin.spin"),
+    "poly-build-tool": edit_tool("builtin.poly_build", (1, 1, 0)),
     "sidebar-item": lambda: key("N", *view3d_point(*REST)),
     "curve-edit": lambda: add_and_edit("curve", "primitive_bezier_circle_add"),
     "text-edit": lambda: add_and_edit("object", "text_add"),

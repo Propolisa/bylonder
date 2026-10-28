@@ -475,9 +475,53 @@ def build(root, name, spec, tag):
     result = subprocess.run([*link, '-Wl,--allow-undefined', '-o', out], capture_output=True, text=True)
     if result.returncode:
         sys.exit(f'{name}: link failed\n{result.stderr}')
+    if spec.get('check'):
+        check_layouts(link, next(iter(own.values())), out, spec['check'], out_dir)
     missing = live_imports(out)
     print(f'built src/{name}: {os.path.getsize(out)} bytes, {operators.count(chr(10))} operators; {len(missing)} imports, which throw when '
           f'called:\n  ' + '\n  '.join(missing), file=sys.stderr)
+
+
+# Data sizes a module is linked with ahead of its own, for check_layouts. The first two move it across alignments
+# where a write past a block in the modifiers module showed (2026-10-28), the third by pages.
+LAYOUT_SHIFTS = (100, 4000, 70000)
+
+
+def check_layouts(link, first, out, script, build):
+    """Runs the module's check (manifest `check`: a script given the module's path, printing its results) on the module
+    and on copies linked with data ahead of its own, which moves all of its data and heap. They must print the same: a
+    module whose results depend on where its data lands reads or writes memory it does not own, which passes in one
+    build and corrupts another."""
+    name = os.path.relpath(out, convert.REPO)
+
+    def reject(message):
+        # A module that fails its check is not left where it would be committed.
+        os.remove(out)
+        sys.exit(f'{name}: {message}; the module was removed')
+
+    def run(wasm):
+        result = subprocess.run(['node', os.path.join(convert.REPO, script), wasm], capture_output=True, text=True)
+        if result.returncode:
+            reject(f'{script} fails on {os.path.basename(wasm)}:\n{result.stdout}{result.stderr[-3000:]}')
+        return result.stdout
+
+    expected = run(out)
+    at = link.index(first)
+    for shift in LAYOUT_SHIFTS:
+        source = os.path.join(build, 'generated', f'layout_shift_{shift}.c')
+        open(source, 'w').write(f'__attribute__((used)) const char layout_shift[{shift}] = {{1}};\n')
+        obj, shifted = source[:-2] + '.o', f'{out}.shift{shift}.wasm'
+        subprocess.run(['clang', '--target=wasm32-wasi', '-O2', '-c', source, '-o', obj], check=True)
+        try:
+            subprocess.run([*link[:at], obj, *link[at:], '-Wl,--export=layout_shift', '-Wl,--allow-undefined', '-o', shifted], check=True,
+                           capture_output=True)
+            if run(shifted) != expected:
+                reject(f'{script} prints other results with its data moved by {shift} bytes: the module reads or writes memory it does not own')
+        finally:
+            if os.path.exists(shifted):
+                os.remove(shifted)
+    print(f'{name}: {script} gives the same results with its data moved by {", ".join(map(str, LAYOUT_SHIFTS))} bytes',
+          file=sys.stderr)
 
 
 def main():

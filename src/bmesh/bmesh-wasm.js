@@ -100,11 +100,14 @@ export const EVENT_TYPES = enumTable(0), EVENT_VALUES = enumTable(1);
 // EVT_MODAL_MAP: a modal keymap item's event type.
 const EVT_MODAL_MAP = 0x5022;
 // The event an operator gets (wm_event_set): { type, value } by identifier or number, or { modal } for a modal keymap
-// item; x and y in region pixels, y up; modifier (KM_SHIFT | KM_CTRL | KM_ALT | KM_OSKEY); text.
-function wmEvent(C, { type, value = 'PRESS', modal, x: mx = 0, y: my = 0, modifier = 0, text = '', prevType = type, prevValue = value }) {
+// item; x and y in region pixels, y up; modifier (KM_SHIFT | KM_CTRL | KM_ALT | KM_OSKEY); text; a drag's `press`
+// ([x, y]), else its own place.
+function wmEvent(C, { type, value = 'PRESS', modal, x: mx = 0, y: my = 0, modifier = 0, text = '', prevType = type, prevValue = value, press }) {
   const code = (table, v) => (typeof v === 'number' ? v : table.get(v) ?? 0);
   const [t, v] = modal === undefined ? [code(EVENT_TYPES, type), code(EVENT_VALUES, value)] : [EVT_MODAL_MAP, modal];
-  return withString(text, (p) => x.wm_event_set(C, t, v, Math.round(mx), Math.round(my), modifier, p, code(EVENT_TYPES, prevType), code(EVENT_VALUES, prevValue))) >>> 0;
+  const event = withString(text, (p) => x.wm_event_set(C, t, v, Math.round(mx), Math.round(my), modifier, p, code(EVENT_TYPES, prevType), code(EVENT_VALUES, prevValue))) >>> 0;
+  if (press) x.wm_event_press_set(C, Math.round(press[0]), Math.round(press[1]));
+  return event;
 }
 
 // What changed since the last extraction (ExtractFlag in extraction.hh): topology, which refills everything, positions
@@ -139,6 +142,19 @@ const freeing = new FinalizationRegistry((context) => x.edit_context_free(contex
 // Blender's edit mesh (BMEditMesh) and the context its operators run in. Elements are named by type (BM_VERT, BM_EDGE,
 // BM_FACE) and index, in the order toMesh() writes them. free() releases it; one left to the garbage collector is
 // released then.
+// Preselection geometry from the module (edit_mesh_preselect_*): edges and preview lines as pairs of points, vertices,
+// preview triangles, as arrays of [x, y, z].
+function preselection(p) {
+  const [edges, verts, tris, lines] = new Float32Array(x.memory.buffer, p, 4);
+  let at = p + 16;
+  const points = (count) => {
+    const data = new Float32Array(x.memory.buffer, at, count * 3);
+    at += count * 12;
+    return Array.from({ length: count }, (_, i) => Array.from(data.subarray(i * 3, i * 3 + 3)));
+  };
+  return { edges: points(edges * 2), verts: points(verts), tris: points(tris * 3), lines: points(lines * 2) };
+}
+
 export class EditMesh {
   #context;
   #C;
@@ -198,20 +214,46 @@ export class EditMesh {
 
   // Invokes an operator with an event in the view (type and value by Blender's identifiers, x and y in region pixels
   // with y up, modifier flags): its status, and when it runs modally the operator to give the next events to with
-  // modal(), and its modal keymap's name.
+  // modal(), and its modal keymap's name. An operator that ended leaves the values it ran with in `lastValues`.
   invoke(idname, props, event) {
     const op = newOperator(idname, props);
     const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
     const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0;
-    if (!modal) { const report = operatorReport(op); x.operator_free(op); return { status, report }; }
+    if (!modal) { const report = operatorReport(op); this.#end(op); return { status, report }; }
     return { status, op, keymap: cString(x.operator_modal_keymap(op)) };
   }
   // Gives a running operator an event (`modal`: a modal keymap item's value): its status; it is freed once it ends.
   modal(op, event) {
     const status = x.operator_modal(this.#C, op, wmEvent(this.#C, event));
-    if (!(status & OPERATOR_RUNNING_MODAL)) x.operator_free(op);
+    if (!(status & OPERATOR_RUNNING_MODAL)) this.#end(op);
     return status;
   }
+  #end(op) {
+    this.lastValues = JSON.parse(cString(x.operator_values(op)));
+    x.operator_free(op);
+  }
+  // A running straight line gesture of an operator (Bisect's), in region pixels with y up: { active, start, end,
+  // side, flip }, or null.
+  gesture(op) {
+    const p = x.gesture_straightline(op) >>> 0;
+    if (!p) return null;
+    const [active, x0, y0, x1, y1, side, flip] = new Int32Array(x.memory.buffer, p, 7);
+    return { active: !!active, start: [x0, y0], end: [x1, y1], side: !!side, flip: !!flip };
+  }
+  // The point (region pixels, y up) a running operator draws a dashed line from to the mouse (Inset, Bevel), or null.
+  get mouseLine() {
+    const p = x.region_mouse_line() >>> 0;
+    return p ? Array.from(new Float32Array(x.memory.buffer, p, 2)) : null;
+  }
+  // The gizmo group of the active tool, as the module's operators see the gizmo map ('' for none).
+  set gizmoGroup(idname) { withString(idname, (p) => x.edit_context_gizmo_group_set(p)); }
+  // The gizmo groups operators asked for since the last call (their redo gizmos: MESH_GGT_spin_redo).
+  gizmoRequested() { return cString(x.edit_context_gizmo_requested()).split('\n').filter(Boolean); }
+  // The Loop Cut tool's preview of the edge ring from an edge with `cuts` cuts, in object space (Blender's axes).
+  preselectEdgeRing(edge, cuts) { return preselection(x.edit_mesh_preselect_edgering(this.#context, edge, cuts) >>> 0); }
+  // The Poly Build tool's preselection under the mouse (region pixels, y up; modifier flags), which its operators then
+  // act on, with its preview.
+  preselectElem(mx, my, modifier) { return preselection(x.edit_mesh_preselect_elem(this.#context, Math.round(mx), Math.round(my), modifier) >>> 0); }
   // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.
   modalItem(op, identifier) { return withString(identifier, (p) => x.operator_modal_item(op, p)); }
 

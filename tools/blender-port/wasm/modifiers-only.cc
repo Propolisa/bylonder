@@ -1,9 +1,11 @@
 /* The modifier kernels module (modifiers.wasm): modifier-api.cc without the rest of the scene module. It holds the
  * modifiers that evaluate on a mesh alone (MESH_ONLY in src/modifiers/blender.js); the other types are left out of its
- * library and are unknown here, as modifier-api.cc makes Geometry Nodes unknown. */
+ * library as stand-ins modifier_add refuses (modifier-standins.hh). Armature, Curve and Lattice stay real:
+ * BKE_modifier_init copies one of each whole into its virtual modifiers, which a stand-in's bare ModifierData is not. */
+#include "modifier-standins.hh"
+
 #include "BKE_global.hh"
 #include "BKE_idtype.hh"
-#include "BKE_modifier.hh"
 #include "BLT_translation.hh"
 #include "DNA_node_types.h"
 #include "DNA_scene_types.h"
@@ -25,65 +27,62 @@ IDTypeInfo IDType_ID_SCE = id_type_without_data(ID_SCE, FILTER_ID_SCE, INDEX_ID_
 IDTypeInfo IDType_ID_NT = id_type_without_data(ID_NT, FILTER_ID_NT, INDEX_ID_NT, sizeof(bNodeTree), "NodeTree", "node_groups",
                                                BLT_I18NCONTEXT_ID_NODETREE, IDTYPE_FLAGS_APPEND_IS_REUSABLE);
 
-ModifierTypeInfo modifierType_Armature = {};
-ModifierTypeInfo modifierType_Boolean = {};
-ModifierTypeInfo modifierType_Cloth = {};
-ModifierTypeInfo modifierType_Collision = {};
-ModifierTypeInfo modifierType_Curve = {};
-ModifierTypeInfo modifierType_DataTransfer = {};
-ModifierTypeInfo modifierType_DynamicPaint = {};
-ModifierTypeInfo modifierType_Explode = {};
-ModifierTypeInfo modifierType_Fluid = {};
-ModifierTypeInfo modifierType_GreasePencilArmature = {};
-ModifierTypeInfo modifierType_GreasePencilArray = {};
-ModifierTypeInfo modifierType_GreasePencilBuild = {};
-ModifierTypeInfo modifierType_GreasePencilColor = {};
-ModifierTypeInfo modifierType_GreasePencilDash = {};
-ModifierTypeInfo modifierType_GreasePencilEnvelope = {};
-ModifierTypeInfo modifierType_GreasePencilHook = {};
-ModifierTypeInfo modifierType_GreasePencilLattice = {};
-ModifierTypeInfo modifierType_GreasePencilLength = {};
-ModifierTypeInfo modifierType_GreasePencilMirror = {};
-ModifierTypeInfo modifierType_GreasePencilMultiply = {};
-ModifierTypeInfo modifierType_GreasePencilNoise = {};
-ModifierTypeInfo modifierType_GreasePencilOffset = {};
-ModifierTypeInfo modifierType_GreasePencilOpacity = {};
-ModifierTypeInfo modifierType_GreasePencilOutline = {};
-ModifierTypeInfo modifierType_GreasePencilShrinkwrap = {};
-ModifierTypeInfo modifierType_GreasePencilSimplify = {};
-ModifierTypeInfo modifierType_GreasePencilSmooth = {};
-ModifierTypeInfo modifierType_GreasePencilSubdiv = {};
-ModifierTypeInfo modifierType_GreasePencilTexture = {};
-ModifierTypeInfo modifierType_GreasePencilThickness = {};
-ModifierTypeInfo modifierType_GreasePencilTime = {};
-ModifierTypeInfo modifierType_GreasePencilTint = {};
-ModifierTypeInfo modifierType_GreasePencilWeightAngle = {};
-ModifierTypeInfo modifierType_GreasePencilWeightProximity = {};
-ModifierTypeInfo modifierType_Hook = {};
-ModifierTypeInfo modifierType_LaplacianDeform = {};
-ModifierTypeInfo modifierType_Lattice = {};
-ModifierTypeInfo modifierType_Mask = {};
-ModifierTypeInfo modifierType_MeshToVolume = {};
-ModifierTypeInfo modifierType_MeshCache = {};
-ModifierTypeInfo modifierType_MeshDeform = {};
-ModifierTypeInfo modifierType_MeshSequenceCache = {};
-ModifierTypeInfo modifierType_Multires = {};
-ModifierTypeInfo modifierType_NormalEdit = {};
-ModifierTypeInfo modifierType_Ocean = {};
-ModifierTypeInfo modifierType_ParticleInstance = {};
-ModifierTypeInfo modifierType_ParticleSystem = {};
-ModifierTypeInfo modifierType_Shrinkwrap = {};
-ModifierTypeInfo modifierType_Softbody = {};
-ModifierTypeInfo modifierType_Surface = {};
-ModifierTypeInfo modifierType_SurfaceDeform = {};
-ModifierTypeInfo modifierType_UVProject = {};
-ModifierTypeInfo modifierType_UVWarp = {};
-ModifierTypeInfo modifierType_VolumeDisplace = {};
-ModifierTypeInfo modifierType_VolumeToMesh = {};
-ModifierTypeInfo modifierType_Warp = {};
-ModifierTypeInfo modifierType_WeightVGEdit = {};
-ModifierTypeInfo modifierType_WeightVGMix = {};
-ModifierTypeInfo modifierType_WeightVGProximity = {};
+LEFT_OUT_MODIFIER(Boolean);
+LEFT_OUT_MODIFIER(Cloth);
+LEFT_OUT_MODIFIER(Collision);
+LEFT_OUT_MODIFIER(DataTransfer);
+LEFT_OUT_MODIFIER(DynamicPaint);
+LEFT_OUT_MODIFIER(Explode);
+LEFT_OUT_MODIFIER(Fluid);
+LEFT_OUT_MODIFIER(GreasePencilArmature);
+LEFT_OUT_MODIFIER(GreasePencilArray);
+LEFT_OUT_MODIFIER(GreasePencilBuild);
+LEFT_OUT_MODIFIER(GreasePencilColor);
+LEFT_OUT_MODIFIER(GreasePencilDash);
+LEFT_OUT_MODIFIER(GreasePencilEnvelope);
+LEFT_OUT_MODIFIER(GreasePencilHook);
+LEFT_OUT_MODIFIER(GreasePencilLattice);
+LEFT_OUT_MODIFIER(GreasePencilLength);
+LEFT_OUT_MODIFIER(GreasePencilMirror);
+LEFT_OUT_MODIFIER(GreasePencilMultiply);
+LEFT_OUT_MODIFIER(GreasePencilNoise);
+LEFT_OUT_MODIFIER(GreasePencilOffset);
+LEFT_OUT_MODIFIER(GreasePencilOpacity);
+LEFT_OUT_MODIFIER(GreasePencilOutline);
+LEFT_OUT_MODIFIER(GreasePencilShrinkwrap);
+LEFT_OUT_MODIFIER(GreasePencilSimplify);
+LEFT_OUT_MODIFIER(GreasePencilSmooth);
+LEFT_OUT_MODIFIER(GreasePencilSubdiv);
+LEFT_OUT_MODIFIER(GreasePencilTexture);
+LEFT_OUT_MODIFIER(GreasePencilThickness);
+LEFT_OUT_MODIFIER(GreasePencilTime);
+LEFT_OUT_MODIFIER(GreasePencilTint);
+LEFT_OUT_MODIFIER(GreasePencilWeightAngle);
+LEFT_OUT_MODIFIER(GreasePencilWeightProximity);
+LEFT_OUT_MODIFIER(Hook);
+LEFT_OUT_MODIFIER(LaplacianDeform);
+LEFT_OUT_MODIFIER(Mask);
+LEFT_OUT_MODIFIER(MeshToVolume);
+LEFT_OUT_MODIFIER(MeshCache);
+LEFT_OUT_MODIFIER(MeshDeform);
+LEFT_OUT_MODIFIER(MeshSequenceCache);
+LEFT_OUT_MODIFIER(Multires);
+LEFT_OUT_MODIFIER(NormalEdit);
+LEFT_OUT_MODIFIER(Ocean);
+LEFT_OUT_MODIFIER(ParticleInstance);
+LEFT_OUT_MODIFIER(ParticleSystem);
+LEFT_OUT_MODIFIER(Shrinkwrap);
+LEFT_OUT_MODIFIER(Softbody);
+LEFT_OUT_MODIFIER(Surface);
+LEFT_OUT_MODIFIER(SurfaceDeform);
+LEFT_OUT_MODIFIER(UVProject);
+LEFT_OUT_MODIFIER(UVWarp);
+LEFT_OUT_MODIFIER(VolumeDisplace);
+LEFT_OUT_MODIFIER(VolumeToMesh);
+LEFT_OUT_MODIFIER(Warp);
+LEFT_OUT_MODIFIER(WeightVGEdit);
+LEFT_OUT_MODIFIER(WeightVGMix);
+LEFT_OUT_MODIFIER(WeightVGProximity);
 
 }  // namespace blender
 

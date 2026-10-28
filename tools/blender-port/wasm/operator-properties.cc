@@ -479,6 +479,21 @@ PropertyRNA *RNA_def_enum_flag(StructOrFunctionRNA *cont, const char *identifier
   return RNA_def_enum(cont, identifier, items, default_value, ui_name, ui_description);
 }
 void RNA_def_property_enum_items(PropertyRNA *prop, const EnumPropertyItem *item) { prop->items = item; }
+/* As rna_access.cc defines them, over the property's own items; names are not translated. */
+bool RNA_property_enum_name(bContext * /*C*/, PointerRNA * /*ptr*/, PropertyRNA *prop, const int value, const char **r_name)
+{
+  for (const EnumPropertyItem *item = prop->items; item && item->identifier; item++) {
+    if (item->identifier[0] && item->value == value) {
+      *r_name = item->name;
+      return true;
+    }
+  }
+  return false;
+}
+bool RNA_property_enum_name_gettexted(bContext *C, PointerRNA *ptr, PropertyRNA *prop, const int value, const char **r_name)
+{
+  return RNA_property_enum_name(C, ptr, prop, value, r_name);
+}
 void RNA_def_property_enum_default(PropertyRNA *prop, int value) { prop->defaults = {double(value)}; }
 void RNA_def_property_float_default(PropertyRNA *prop, float value) { prop->defaults = {double(value)}; }
 
@@ -556,6 +571,48 @@ void RNA_enum_items_add_value(EnumPropertyItem **items, int *totitem, const Enum
       break;
     }
   }
+}
+
+std::string operator_values_json(PointerRNA *ptr)
+{
+  const OperatorValues &set = *static_cast<OperatorValues *>(ptr->data);
+  std::string json = "{";
+  const auto key = [&](const PropertyRNA *prop) {
+    json += (json.size() > 1 ? ",\"" : "\"") + prop->identifier + "\":";
+  };
+  for (const auto &[prop, numbers] : set.numbers) {
+    key(prop);
+    const EnumPropertyItem *item = prop->type == PROP_ENUM && prop->items ? prop->items : nullptr;
+    for (; item && item->identifier; item++) {
+      if (item->identifier[0] && item->value == int(numbers[0])) {
+        break;
+      }
+    }
+    if (item && item->identifier) {
+      json += std::string("\"") + item->identifier + "\"";
+      continue;
+    }
+    const auto number = [&](double x) {
+      char text[32];
+      snprintf(text, sizeof(text), prop->type == PROP_BOOLEAN ? (x != 0.0 ? "true" : "false") : "%.9g", x);
+      return std::string(text);
+    };
+    if (prop->length) {
+      json += "[";
+      for (size_t i = 0; i < numbers.size(); i++) {
+        json += (i ? "," : "") + number(numbers[i]);
+      }
+      json += "]";
+    }
+    else {
+      json += number(numbers[0]);
+    }
+  }
+  for (const auto &[prop, text] : set.strings) {
+    key(prop);
+    json += "\"" + text + "\"";
+  }
+  return json + "}";
 }
 
 /* Access by property. */

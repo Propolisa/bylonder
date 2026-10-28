@@ -38,7 +38,7 @@ The Node Editor area (pick it from any area's editor-type menu) hosts Babylon's 
 
 File > New from Example (or the splash screen shown on first visit) creates a project from one of the bundled demos in `src/workspace/examples.js`.
 
-`.github/workflows/pages.yml` tests, builds with a relative base (`BASE_PATH=./`) and deploys `dist/` to GitHub Pages on every push to `main`. Enable it under Settings > Pages > Source: GitHub Actions. Any sub-path works; the service worker scope follows the deployed directory.
+`.github/workflows/pages.yml` tests, builds with a relative base (`BASE_PATH=./`), checks the build in headless Chromium (`npm run test:prod`) and deploys `dist/` to GitHub Pages on every push to `main`. Enable it under Settings > Pages > Source: GitHub Actions. Any sub-path works; the service worker scope follows the deployed directory.
 
 ## Controls
 
@@ -133,6 +133,7 @@ Splash Screen > Blender Coverage shows how much of Blender's interface Bylonder 
 
 - `npm test` runs the unit tests in Node on Babylon's NullEngine: stores, gestures, transforms, undo and persistence, mesh ports against Blender fixtures, menus and keymaps.
 - `npm run test:e2e` runs the smoke tests (`tests/e2e/smoke.mjs`) in Chromium through Playwright, which is expected to be installed with its browser. They build `dist/` when a source file is newer, serve it with `vite preview`, and drive core flows with real mouse and keyboard input: boot, Render Image and Render Animation, the File and Object menus, view, select, delete and undo keys, Edit Mode extrude, adding a modifier, and splitting a 3D Viewport. Assertions read state through `window.__bylonder` in the 3D Viewport frame. `npm run test:e2e -- Render` runs the checks whose name contains `Render`; `E2E_URL` tests a running server instead.
+- `npm run test:prod` checks a built `dist/` (run `npm run build` first) in headless Chromium: it boots the app, opens the topbar menus (File, File > New, Edit, Render, Window, Help) and the 3D View header menus, switches to every workspace tab, and fails on any page or console error. CI runs it between the build and the deploy, since some failures only happen in the production build. `E2E_URL` checks a running server instead.
 - `node tools/blender-reference/parity.mjs --out DIR` compares Bylonder with Blender 5.2.3. `tools/blender-reference/ui-shots.py` captures Blender under Xvfb in the UI states of `ui-states.json` (startup scene, menus, Edit Mode, the Modifiers tab, the Move tool, the sidebar's Item tab), driven by simulated input; Playwright captures Bylonder in the same states on the Default Cube example, Blender's startup scene, at the same window size and UI scale. Each state gets both screenshots, a side-by-side and a diff image, and `report.json` holds the share of differing pixels overall and per Blender editor. The default output folder `.shots/parity/` is not committed.
 
 ## Browser project workspace

@@ -112,6 +112,28 @@ Babylon.
   collections, and geometry where Main holds it). With `debug` (`?sync-check` in the app) it throws after every full
   flush and run. `tests/main-sync.test.js` runs edits from both sides, undoes and redoes them, and checks each step.
 
+### .blend files
+
+File > Save As runs Blender's `wm.save_as_mainfile` (`wm_files.cc`, `writefile.cc` and the `blend_write` callbacks of
+each ID type) on Main, through `sync.writeBlend(path)`, which fills every object's geometry for the write and releases
+it after; `src/windowmanager/wm-files.js` downloads the bytes as `<project>.blend`. Bylonder's project is still saved
+as its own (File > Save Project As).
+
+- **SDNA.** The module builds `makesdna` for wasm32 and runs it under Node's WASI (`sdna()` in `wasm_module.py`), so the
+  file's struct layouts are the module's own: 4-byte pointers (Blender reads such files, as it reads 32-bit ones).
+  Where wasm32 aligns a 64-bit member after 4-byte pointers and Blender's 64-bit layout does not, `WASM32_PADS` gives
+  makesdna's copy of the header a pointer there; `dna_verify.cc` checks every struct against Clang's layout.
+- **The scene** is `BKE_scene_add`'s, in Main. A file has no window manager or screen (the module's are outside Main),
+  so Blender opens it with its own UI, as it does a file saved without UI.
+- **Files.** `src/port/wasm.js` gives the module an in-memory WASI file system (`files`); the writer writes there and
+  `writeBlend` reads the bytes back.
+- **Checked.** `tests/blend-write.test.js` saves a scene and reads it in the reference Blender
+  (`tools/blender-reference/blend-check.py`, which can also render it): objects, transforms, parents, geometry,
+  material slots and Principled BSDF inputs, modifiers, F-Curve keys, world and camera.
+- **Reading** a .blend is not built. It needs `readfile.cc` with versioning (`versioning_*.cc`), the `blend_read_*`
+  callbacks, linking and the lib-link and after-liblink passes, then a sync from Main to Babylon of whole IDs (objects,
+  meshes into Babylon's buffers, materials from node trees), which the write-back does only for values.
+
 ### Adding a subsystem
 
 - Its Blender sources go in the module's `libraries` (`tools/blender-port/manifest.json`); operators defined in a source listed under `operators` are registered by their own functions. A source that needs header directories of its own lists them as the library's `includes`, so the rest of the build stays cached.
@@ -186,8 +208,23 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   stand-in both modules share) and `modifiers-only.cc`. Its libraries are `bmesh.wasm`'s minus the editors,
   `animrig`, `windowmanager`, the interface and the Outliner, blenfont and FreeType, and OpenVDB (built without
   `WITH_OPENVDB`, so Remesh's Voxel mode reports that it is unavailable). Modifier types outside `MESH_ONLY`
-  (`src/modifiers/blender.js`) are left out of its `modifiers/intern` and declared empty in `modifiers-only.cc`, as
-  `modifier-api.cc` makes Geometry Nodes unknown. Archives are per module in the shared build directory.
+  (`src/modifiers/blender.js`) are left out of its `modifiers/intern` as stand-ins (`wasm/modifier-standins.hh`, used
+  by both modules for the types they leave out, Geometry Nodes and Line Art in the scene module): Blender's None type
+  under the type's name, a bare ModifierData that is always disabled, which `modifier_add` refuses. Blender's own code
+  that makes a left-out type gets a block of the right size. They were empty `ModifierTypeInfo`s, which
+  `BKE_modifier_get_info` does not know: `BKE_modifier_init` makes an Armature, Curve and Lattice modifier, read a null
+  type, and wrote the name past the end of an empty block (2026-10-28: the module passed or trapped depending on where
+  its data landed). Armature, Curve and Lattice stay real, as `BKE_modifier_init` copies them whole. Archives are per
+  module in the shared build directory.
+- **Layout check.** A module's manifest `check` runs after each link, on the module and on copies linked with 100,
+  4000 and 70000 bytes of data ahead of its own, and the build fails (and removes the module) unless all print the
+  same: a module whose results depend on where its data lands reads or writes memory it does not own. The modifiers
+  module's is `tools/blender-port/check-modifiers.mjs` (every offered modifier on Blender's cube); the scene module's
+  is `tools/blender-port/check-bmesh.mjs`, the unit tests that drive it (`editmesh-wasm`, `editmesh-menus`,
+  `tools-wasm`, `objects-wasm`, `modifiers-wasm`, `outliner`, `anim-wasm`, `curves-wasm`: startup, primitives, Edit
+  Mode and its tools, modifier stacks, Object Mode operators, the Outliner, the animation editors, curves and text),
+  run on the given build through `BYLONDER_BMESH_WASM`, about 8 s a run. `tests/export-live.test.js` runs the
+  modifiers check on the committed module.
 - **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`: 15.4 MB, 4.4 MB gzipped), with
   `modifiers.js` (4 KB) and the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
   3.1 MB gzipped: OpenVDB's templates alone were a third of its code. What remains is mostly what `BKE_idtype_init`
@@ -295,7 +332,7 @@ CPython runs scripts and the console: Pyodide, CPython in WebAssembly, from cdn.
 
 ## Menus
 
-Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order.
+Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order. A binding gives an operator button its shortcut only when its properties are the ones the button sets, as Blender's buttons compare them (`WM_key_event_operator_string`, strict), then the ones set away from their defaults; an operator's own `keys(props)` binds the properties it reads (`menuUI` in `wm-operators.js`). So File > New's templates, which set `app_template`, show no Ctrl N; File's New entry shows the Ctrl N that opens it.
 
 ## 3D View regions
 
@@ -316,7 +353,9 @@ Decided 2026-10-28. A tool is what Blender's is: its keymap, its gizmo group and
 - Gizmo map: `windowmanager/wm-gizmo-map.js` shows the active tool's gizmo group, highlights the part under the pointer and runs the group's handler before the region's keymaps, as `wm_gizmo_map.cc` does. Its state (shown, highlighted) feeds the tool system's keymap order. The groups are ports: `VIEW3D_GGT_ruler`, `VIEW3D_GGT_placement`, `VIEW3D_GGT_tool_generic_handle_free` and `_normal` (a handle runs the tool's own keymap, as `gz->keymap` does) and `VIEW3D_GGT_xform_extrude`. Babylon's gizmos stay the transform gizmos. Gizmos, rulers, annotations and the placement grid draw on one 2D canvas per view (`draw/overlay-tool.js`) in the theme's colors.
 - Object Mode tools: `editors/space_view3d/view3d-tools.js` registers `view3d.cursor3d` (`view3d-cursor.js`, with Blender's surface depth and orientations), `transform.from_gizmo`, `view3d.ruler_add` and `view3d.ruler_remove` (`view3d-gizmo-ruler.js`), `gpencil.annotate` (`editors/gpencil/annotate.js`, all four modes) and `view3d.interactive_add` (`view3d-placement.js`). The cursor is `scene.cursor` (`View3DCursor`), drawn by `draw/overlay-cursor.js`.
 - Annotations are Blender's data model in a document slice (`blenkernel/gpencil/annotations.js`): layers holding frames of strokes. Rulers are strokes of the hidden `RulerData3D` layer, as Blender stores them.
-- Edit Mode tools run Blender's modal operators in the module. The edit context has a 3D View (`edit_context_view_set`: window, screen, area, View3D, window region and a RegionView3D from the Babylon camera), so operators project the mouse as in Blender. `EditMesh.invoke` and `modal` give them events, and Bylonder's window manager matches the operator's modal keymap (`object-edit.js` `moduleOperator`). This runs Shrink/Fatten, Push/Pull, To Sphere, Shear, Vertex Slide, Smooth and Randomize (the generic value modal), Rip, Spin, Knife and Extrude to Cursor. Move, Rotate, Scale, Edge Slide, Inset, Bevel and Loop Cut stay Bylonder's JS ports. The module's own gizmos are off (`V3D_GIZMO_HIDE`): the gizmo map draws the view's.
+- Edit Mode tools run Blender's modal operators in the module. The edit context has a 3D View (`edit_context_view_set`: window, screen, area, View3D, window region and a RegionView3D from the Babylon camera), so operators project the mouse as in Blender. `EditMesh.invoke` and `modal` give them events, and Bylonder's window manager matches the operator's modal keymap (`object-edit.js` `moduleOperator`). This runs Shrink/Fatten, Push/Pull, To Sphere, Shear, Vertex Slide, Edge Slide, Smooth and Randomize (the generic value modal), Inset, Bevel, Rip, Spin, Bisect, Knife, Extrude to Cursor and Poly Build. Macros (Extrude Region, Extrude Manifold, Loop Cut and Slide, Poly Build's) run as Blender's macro does, each operator invoked with the event and the last one modal (`macro` in `object-edit.js`, steps from `MACROS` in `view3d-menus-edit-mesh.js`). Move, Rotate and Scale stay Bylonder's transform, with G G's Edge Slide its JS port; Ctrl R's Loop Cut preview is a JS port too, as `ringcut_invoke` draws its own preview, which the module does not pass on yet.
+- Gizmo bridge: the module's region has a stand-in gizmo map (`editor-context.cc`). `WM_gizmomap_group_find` answers for the group Bylonder shows (`edit_context_gizmo_group_set`, set from the tool's gizmo group on every hover and press), and `ED_view3d_gizmo_mesh_preselect_get_active` gives the element `edit_mesh_preselect_elem` found. Gizmo group types an operator asks for (`WM_gizmo_group_type_ensure`, Spin's and Bisect's redo gizmos) are recorded and read by `EditMesh.gizmoRequested()`, so Bylonder's gizmo map shows them after the operator. The groups' drawing is Bylonder's (`view3d-gizmo-mesh.js`): the edge ring and element preselection, `MESH_GGT_spin` and `MESH_GGT_spin_redo`. Each group type's properties are a struct named after it (`GIZMO_GROUP_PROPERTIES` in `rna-bylonder.js`), so tool settings draw them.
+- Straight-line gestures are `wm_gesture_ops.cc`'s (`gesture-api.cc`); Bylonder draws the line from `EditMesh.gesture(op)`, and the mouse line of Inset and Bevel from `ED_region_draw_mouse_line_cb`'s center.
 - A drag event (CLICK_DRAG) carries the mouse where the drag passed the threshold, as Blender's does; `dragStart(event)` gives the press, for what Blender places at the drag's start (rulers, placement, box gestures, the cursor's transform, gizmo highlighting). An operator returning `FINISHED|PASS_THROUGH` (Set 3D Cursor) handles a press as Blender's `WM_HANDLER_HANDLED` does: no click follows, a drag still can.
 - `tests/tools-wasm.test.js` drags the Edit Mode tools on Blender's startup cube as `tools/blender-reference/tool-fixtures.py` drags them in Blender (real input, Drag: Active Tool) and compares the meshes.
 

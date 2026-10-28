@@ -38,7 +38,7 @@ export async function loadRNAUI(load = () => import(/* @vite-ignore */ './rna-ui
 // precision, items ([identifier, name, description, icon], null for a separator), flag }, or null if the struct lacks it.
 export function rnaProperty(struct, name) {
   const [type, value] = property(struct, name) ?? [];
-  if (!type) return operatorProperty(struct, name);
+  if (!type) return operatorProperty(struct, name) ?? definedProperties.get(struct)?.[name] ?? null;
   let meta = {};
   for (let s = struct; s; s = structs[s]?.base) if (ui?.[s]?.props[name]) { meta = ui[s].props[name]; break; }
   return {
@@ -50,6 +50,11 @@ export function rnaProperty(struct, name) {
 // An operator's struct name (WM_operator_py_idname's inverse): view3d.select_box is VIEW3D_OT_select_box.
 export const operatorStruct = (idname) => idname.replace(/^(\w+)\./, (match, group) => group.toUpperCase() + '_OT_');
 export const operatorIdname = (struct) => struct.replace(/^(\w+?)_OT_/, (match, group) => group.toLowerCase() + '.');
+
+// Properties of structs Bylonder defines at run time, as a gizmo group type defines its own (RNA_def_struct_ptr):
+// { name: property as rnaProperty gives it }.
+const definedProperties = new Map();
+export const defineStructProperties = (struct, properties) => definedProperties.set(struct, properties);
 
 // A property of an operator's struct (OperatorProperties: VIEW3D_OT_select_box), from rna-operators.json.
 const OPERATOR_TYPES = { BOOLEAN: 'B', INT: 'I', FLOAT: 'F', STRING: 'S', ENUM: 'E', POINTER: 'P', COLLECTION: 'C' };

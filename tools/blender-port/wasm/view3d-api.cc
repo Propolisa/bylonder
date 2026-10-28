@@ -67,6 +67,17 @@ void GPU_matrix_project_3fv(const float world[3], const float model[4][4], const
   r_win[1] = view[1] + (view[3] * (v[1] + 1)) * 0.5f;
   r_win[2] = (v[2] + 1) * 0.5f;
 }
+void GPU_matrix_project_2fv(const float world[3], const float model[4][4], const float proj[4][4], const int view[4], float r_win[2])
+{
+  float v[4];
+  mul_v4_m4v3(v, model, world);
+  mul_m4_v4(proj, v);
+  if (v[3] != 0.0f) {
+    mul_v2_fl(v, 1.0f / v[3]);
+  }
+  r_win[0] = view[0] + (view[2] * (v[0] + 1)) * 0.5f;
+  r_win[1] = view[1] + (view[3] * (v[1] + 1)) * 0.5f;
+}
 bool GPU_matrix_unproject_3fv(const float win[3], const float model_inverted[4][4], const float proj[4][4], const int view[4], float r_world[3])
 {
   zero_v3(r_world);

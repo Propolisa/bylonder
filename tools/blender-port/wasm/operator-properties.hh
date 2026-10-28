@@ -59,6 +59,9 @@ void *operator_values_new();
 void *operator_values_copy(const void *values);
 void operator_values_free(void *values);
 bool operator_property_set(PointerRNA *ptr, const char *name, const double *numbers, int len, const char *enum_identifier);
+/* The values one call of an operator has set, as JSON: numbers (arrays for array properties), enum identifiers,
+ * strings; what the redo panel shows and a redo runs again. */
+std::string operator_values_json(PointerRNA *ptr);
 /* Gives a DNA struct's property the update function RNA_property_update runs after a button sets it. */
 /* An operator of a type, with its own copy of the values given (or the defaults). */
 struct wmOperator *operator_create(struct wmOperatorType *ot, const void *values = nullptr);

@@ -52,7 +52,7 @@ const strokePoints = (r, stroke) => (stroke.space === 'VIEW'
 // `cursor()` the 3D cursor's location, `placement()` the placement setting, `commit()` an undo step.
 export function createAnnotate({ annotations, region, cursor, placement, wm, commit, notify }) {
   // The stroke being made, drawn in screen space by the active layer's settings (annotation_draw_stroke_buffer).
-  let buffer = null, eraser = null;
+  let buffer = null, eraser = null, stabilizer = null;
   drawCallbackAdd((ctx, r) => {
     for (const { layer, frame } of annotations().visible()) for (const stroke of frame.strokes) drawStroke(ctx, r, layer, strokePoints(r, stroke));
     if (buffer?.view === r.view && buffer.points.length) drawStroke(ctx, r, annotations().activeEnsure(), buffer.points);
@@ -64,6 +64,23 @@ export function createAnnotate({ annotations, region, cursor, placement, wm, com
       ctx.fill();
       ctx.setLineDash([6, 6]);
       ctx.strokeStyle = 'rgb(255 99 99 / 0.78)';
+      ctx.stroke();
+    }
+    // annotation_draw_stabilizer: rings at the mouse and the rope from the stroke's last point.
+    if (stabilizer?.view === r.view && stabilizer.from && buffer?.points.length > 1) {
+      const [x, y] = r.toRegion(stabilizer.at), [fx, fy] = r.toRegion(stabilizer.from);
+      ctx.setLineDash([]);
+      ctx.lineWidth = 1.25;
+      for (const [radius, color] of [[4, 'rgb(255 99 99 / 0.8)'], [5, 'rgb(102 40 40 / 0.8)']]) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = 'rgb(255 99 99 / 0.8)';
       ctx.stroke();
     }
   });
@@ -95,11 +112,14 @@ export function createAnnotate({ annotations, region, cursor, placement, wm, com
   }
 
   // The operator's invoke and modal: painting begins at the event, `mode` DRAW, DRAW_STRAIGHT, DRAW_POLY or ERASER.
-  function invoke(event, { mode = 'DRAW' }) {
+  // Freehand strokes stabilize (lazy mouse) with use_stabilizer, or while Shift is held, which toggles it.
+  function invoke(event, { mode = 'DRAW', use_stabilizer = false, stabilizer_factor = 0.75, stabilizer_radius = 35 }) {
     const r = region(event.view);
     if (!r) return false;
     const layer = annotations().activeEnsure();
     let paintmode = mode, painting = false, straight = null, changed = false, poly = null, mvalo = null;
+    // GP_PAINTFLAG_USE_STABILIZER_TEMP: whether the stroke stabilizes now.
+    let stabilize = false;
     const space = placement() === 'VIEW' ? 'VIEW' : '3D';
     const convert = (m) => convertCoords(r, placement(), cursor(), m);
     // annotation_paint_initstroke and the stroke's first point.
@@ -117,6 +137,7 @@ export function createAnnotate({ annotations, region, cursor, placement, wm, com
       }
       mvalo = null;
       straight = null;
+      stabilize = paintmode === 'DRAW' && (use_stabilizer || !!e.shift);
       apply(e);
     };
     // annotation_draw_apply_event.
@@ -129,27 +150,43 @@ export function createAnnotate({ annotations, region, cursor, placement, wm, com
         tagRedraw();
         return;
       }
-      if (paintmode === 'DRAW' && (e.ctrl || e.alt) && mvalo) {
+      if (e.shift && paintmode === 'DRAW') stabilize = !use_stabilizer;
+      else if (paintmode === 'DRAW' && (e.ctrl || e.alt) && mvalo) {
         if (!straight) {
           const dx = Math.abs(Math.trunc(mval[0] - mvalo[0])), dy = Math.abs(Math.trunc(mval[1] - mvalo[1]));
           if (dx || dy) straight = dx >= dy ? { axis: 1, value: mval[1] } : { axis: 0, value: mval[0] };
         }
-      } else straight = null;
+      } else {
+        straight = null;
+        stabilize = paintmode === 'DRAW' && use_stabilizer;
+      }
+      stabilizer = stabilize && { view: r.view, at: [e.x, e.y], from: buffer?.points.at(-1) };
       if (straight) mval[straight.axis] = straight.value;
       const points = buffer.points;
       if (paintmode === 'DRAW_STRAIGHT') points.splice(Math.min(points.length, 1), 1, mval);
       else if (paintmode === 'DRAW_POLY') {
         points.splice(0, 1, mval);
         if (poly) poly.points[poly.points.length - 1] = convert(mval);
-      } else if (!points.length || filter(mval, mvalo)) {
-        points.push(mval);
-        for (let s = 0; s < 3; s++) smoothBuffer(points, 0.5 * ((3 - s) / 3), points.length - s);
-      } else return;
+      } else if (!points.length) points.push(mval);
+      else if (filter(mval, mvalo)) {
+        // The lazy mouse trails the pointer by the stabilizer factor, unsmoothed.
+        if (stabilize) {
+          const t = Math.min(stabilizer_factor, 0.995);
+          mval = [mval[0] + (mvalo[0] - mval[0]) * t, mval[1] + (mvalo[1] - mval[1]) * t];
+          points.push(mval);
+        } else {
+          points.push(mval);
+          for (let s = 0; s < 3; s++) smoothBuffer(points, 0.5 * ((3 - s) / 3), points.length - s);
+        }
+      } else { tagRedraw(); return; }
       mvalo = mval;
       tagRedraw();
     };
+    // annotation_stroke_filtermval: far enough from the last point to add one; a stabilized stroke waits outside its
+    // radius.
     const filter = (mval, prev) => {
       const dx = Math.trunc(Math.abs(mval[0] - prev[0])), dy = Math.trunc(Math.abs(mval[1] - prev[1]));
+      if (stabilize) return dx * dx + dy * dy > stabilizer_radius * stabilizer_radius;
       return (dx > MIN_MANHATTAN_PX && dy > MIN_MANHATTAN_PX) || dx * dx + dy * dy > MIN_EUCLIDEAN_PX * MIN_EUCLIDEAN_PX;
     };
     // annotation_paint_strokeend: the buffer becomes a stroke of the layer's frame at the current frame.
@@ -160,7 +197,7 @@ export function createAnnotate({ annotations, region, cursor, placement, wm, com
         else if (!poly) frame.strokes = [...frame.strokes, poly = { points: [convert(buffer.points[0])], thickness: layer.thickness, space }];
         changed = true;
       }
-      buffer = eraser = null;
+      buffer = eraser = stabilizer = null;
       painting = false;
       tagRedraw();
     };

@@ -26,9 +26,9 @@ const VIEW = {
   winmat: [2.4, 0, 0, 0, 0, 3.2, 0, 0, 0, 0, -1.002, -1, 0, 0, -0.2002, 0],
   winx: 800, winy: 600, persp: true,
 };
-// Operators with only an invoke (mesh.rip reads the mouse) run from a mouse move at the view's center; one that goes on
-// modally is cancelled.
-const invokeOnly = (idname) => ['mesh.rip', 'mesh.rip_edge'].includes(idname);
+// Operators with only an invoke (mesh.rip and mesh.dupli_extrude_cursor read the mouse) run from a mouse move at the
+// view's center; one that goes on modally is cancelled.
+const invokeOnly = (idname) => ['mesh.rip', 'mesh.rip_edge', 'mesh.dupli_extrude_cursor'].includes(idname);
 function invoke(edit, idname, props) {
   const event = { type: 'MOUSEMOVE', value: 'NOTHING', x: VIEW.winx / 2, y: VIEW.winy / 2 };
   const { status, op } = edit.invoke(idname, props, event);

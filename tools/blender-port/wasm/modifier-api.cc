@@ -33,6 +33,7 @@
 #include "NOD_shader.h"
 
 #include "extraction.hh"
+#include "modifier-standins.hh"
 
 #include <ctime>
 
@@ -126,7 +127,8 @@ EXPORT(modifier_object) Object *modifier_object(ModifierObject *mo) { return &mo
 EXPORT(modifier_add) ModifierData *modifier_add(Object *ob, int type)
 {
   types_ensure();
-  if (!BKE_modifier_get_info(ModifierType(type))) {
+  const ModifierTypeInfo *info = BKE_modifier_get_info(ModifierType(type));
+  if (!info || modifier_is_left_out(info)) {
     return nullptr;
   }
   ModifierData *md = BKE_modifier_new(type);
@@ -208,10 +210,11 @@ const ExtractionHeader *mesh_from_faces(int verts_num, const float3 *positions, 
 
 namespace blender {
 
-/* Modifier types the module leaves out (Geometry Nodes needs file streams, Line Art Grease Pencil): an empty name makes
- * BKE_modifier_get_info treat them as unknown. */
-ModifierTypeInfo modifierType_Nodes = {};
-ModifierTypeInfo modifierType_GreasePencilLineart = {};
+/* Modifier types the module leaves out (Geometry Nodes needs file streams, Line Art Grease Pencil), as stand-ins
+ * modifier_add refuses (modifier-standins.hh). */
+bool modifier_left_out_is_disabled(const Scene * /*scene*/, ModifierData * /*md*/, bool /*use_render_params*/) { return true; }
+LEFT_OUT_MODIFIER(Nodes);
+LEFT_OUT_MODIFIER(GreasePencilLineart);
 
 /* port-override: no GPU in the module, so subdivision is evaluated on the CPU. */
 GPUBackendType GPU_backend_get_type() { return GPU_BACKEND_NONE; }
