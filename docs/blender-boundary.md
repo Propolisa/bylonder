@@ -36,6 +36,16 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 - Next to mirror, as Bylonder gains them: `scene.unit_settings` (operators and `ED_scene_grid_scale` read `scene->unit`), proportional editing and snapping in ToolSettings, `frame_current` for operators that read time, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 - One list of RNA paths then names everything that crosses, so a value Blender's C++ reads is the value Blender's scripts show.
 
+## Shared foundations
+
+Every subsystem builds on these, one of each:
+
+- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry). `transpile.py`'s per-class manifest is the interim path until `src/bl_py` replaces `src/bl_ui`.
+- Blender's C: one WebAssembly module (`tools/blender-port`), with one Blender world in it (Main, Scene, ViewLayer, bContext stand-ins) that every subsystem's data (meshes, curves, text, animation) lives in.
+- Data: one RNA layer over Bylonder's data (`src/makesrna/rna-bylonder.js`) and one `bpy.context` (`src/blenkernel/context.js`).
+- Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps.
+- UI: menus through `src/editors/interface/ui-layout.js`; panels through one layout renderer, with one number field carrying Blender's drag behavior.
+
 ## Workspaces
 
 The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.

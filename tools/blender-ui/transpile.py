@@ -131,6 +131,8 @@ class TranscryptFixes(ast.NodeTransformer):
     def visit_Call(self, node):
         """f(a=1, **b) as f(**_merged({'a': 1}, b)): Transcrypt compiles the mix wrong, and marks the dict it unpacks,
         which may be shared, as keyword arguments."""
+        if isinstance(node.func, ast.Name) and node.func.id == 'super':
+            node.func._called = True
         self.generic_visit(node)
         if isinstance(node.func, ast.Name) and node.func.id == 'super':
             # super(Class, self) in Class's methods is super(), the only form Transcrypt compiles.
@@ -187,7 +189,7 @@ class TranscryptFixes(ast.NodeTransformer):
     def annotations(node):
         """Annotations without a value in a class body (how Blender's classes declare their properties), which
         Transcrypt cannot compile, as the __annotations__ dict Blender reads them from."""
-        node.body = [ast.Assign(targets=[s.target], value=s.value) if isinstance(s, ast.AnnAssign) and s.value is not None else s
+        node.body = [ast.copy_location(ast.Assign(targets=[s.target], value=s.value), s) if isinstance(s, ast.AnnAssign) and s.value is not None else s
                      for s in node.body]
         annotated = [s for s in node.body if isinstance(s, ast.AnnAssign) and isinstance(s.target, ast.Name)]
         if not annotated:
@@ -202,7 +204,7 @@ class TranscryptFixes(ast.NodeTransformer):
         self.generic_visit(node)
         if self.scopes and self.scopes[-1] == 'class':
             return node
-        return ast.Assign(targets=[node.target], value=node.value) if node.value is not None else None
+        return ast.copy_location(ast.Assign(targets=[node.target], value=node.value), node) if node.value is not None else None
 
     def dataclass(self, node):
         """@dataclass classes, which Transcrypt cannot compile, as classes with the __init__ dataclasses would make from
@@ -245,6 +247,73 @@ class TranscryptFixes(ast.NodeTransformer):
                 item.optional_vars = ast.Name(name, ast.Store())
         node.body = unpack + node.body
         return ast.fix_missing_locations(node)
+
+    # Python names JS reserves that Transcrypt does not rename (it renames case, default, new, switch and others to
+    # py_*), renamed alike wherever they are names: variables, parameters and keyword arguments.
+    JS_RESERVED = {'private', 'protected', 'public', 'package', 'interface', 'implements', 'static', 'let', 'var', 'super',
+                   'enum', 'await', 'void', 'typeof', 'instanceof', 'function', 'this', 'delete', 'catch', 'throw', 'const',
+                   'debugger', 'do', 'extends', 'export'}
+
+    def visit_Name(self, node):
+        if node.id in self.JS_RESERVED and not (node.id == 'super' and isinstance(node.ctx, ast.Load) and getattr(node, '_called', False)):
+            node.id += '_'
+        return node
+
+    def visit_arg(self, node):
+        if node.arg in self.JS_RESERVED:
+            node.arg += '_'
+        return node
+
+    def visit_keyword(self, node):
+        self.generic_visit(node)
+        if node.arg in self.JS_RESERVED:
+            node.arg += '_'
+        return node
+
+    def visit_Match(self, node):
+        """match statements, which Transcrypt cannot compile, as an if/elif chain on the subject."""
+        self.generic_visit(node)
+        subject = ast.Name('_match_subject', ast.Load())
+        chain = None
+        for case in reversed(node.cases):
+            test, binds = self.pattern(case.pattern, subject)
+            if case.guard is not None:
+                test = ast.BoolOp(ast.And(), [test, case.guard]) if not (isinstance(test, ast.Constant) and test.value is True) else case.guard
+            body = binds + case.body
+            if isinstance(test, ast.Constant) and test.value is True and not binds and chain is None:
+                chain = body
+                continue
+            chain = [ast.If(test=test, body=body, orelse=chain or [])]
+        out = [ast.Assign(targets=[ast.Name('_match_subject', ast.Store())], value=node.subject)] + (chain or [])
+        return [ast.fix_missing_locations(ast.copy_location(n, node)) for n in out]
+
+    def pattern(self, pattern, subject):
+        """A test of the subject and the assignments of the names the pattern captures."""
+        true = ast.Constant(True)
+        if isinstance(pattern, ast.MatchValue):
+            return ast.Compare(subject, [ast.Eq()], [pattern.value]), []
+        if isinstance(pattern, ast.MatchSingleton):
+            return ast.Compare(subject, [ast.Is()], [ast.Constant(pattern.value)]), []
+        if isinstance(pattern, ast.MatchAs):
+            test, binds = self.pattern(pattern.pattern, subject) if pattern.pattern else (true, [])
+            if pattern.name:
+                binds = binds + [ast.Assign(targets=[ast.Name(pattern.name, ast.Store())], value=subject)]
+            return test, binds
+        if isinstance(pattern, ast.MatchOr):
+            return ast.BoolOp(ast.Or(), [self.pattern(p, subject)[0] for p in pattern.patterns]), []
+        if isinstance(pattern, ast.MatchSequence):
+            tests = [ast.Call(ast.Name('isinstance', ast.Load()), [subject, ast.Tuple([ast.Name('list', ast.Load()), ast.Name('tuple', ast.Load())], ast.Load())], []),
+                     ast.Compare(ast.Call(ast.Name('len', ast.Load()), [subject], []), [ast.Eq()], [ast.Constant(len(pattern.patterns))])]
+            binds = []
+            for i, p in enumerate(pattern.patterns):
+                test, bound = self.pattern(p, ast.Subscript(subject, ast.Constant(i), ast.Load()))
+                if not (isinstance(test, ast.Constant) and test.value is True):
+                    tests.append(test)
+                binds += bound
+            return ast.BoolOp(ast.And(), tests), binds
+        if isinstance(pattern, ast.MatchClass):
+            return ast.Call(ast.Name('isinstance', ast.Load()), [subject, pattern.cls], []), []
+        raise NotImplementedError(f'match pattern {ast.dump(pattern)[:80]}')
 
     def visit_Constant(self, node):
         """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel object (identity holds within a module)."""

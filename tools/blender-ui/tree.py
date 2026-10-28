@@ -233,7 +233,8 @@ def prepare(build):
             source = 'from _modules import _module, _member, _lazy\n' + source
         source += transpile.HELPERS if transpile.uses_helpers(source) else ''
         open(module_path(build, name), 'w').write(source)
-    open(os.path.join(build, '__main__.py'), 'w').write(''.join(f'import {n}\n' for n in entry))
+    # Aliased: Transcrypt names an imported module by its name without underscores, so _bpy_types and bpy_types collide.
+    open(os.path.join(build, '__main__.py'), 'w').write(''.join(f'import {n} as _m{i}\n' for i, n in enumerate(entry)))
     return entry
 
 
