@@ -100,8 +100,8 @@ const checks = {
   },
 
   async "right click on an Outliner row opens Blender's Object menu"() {
-    const canvas = app.frame().locator(".bl-outliner-region");
-    const box = await canvas.boundingBox();
+    const region = app.frame().locator(".bl-outliner-region");
+    const box = await region.boundingBox();
     const [x, y] = await app.bylonder((b) => b.world.outliner.area.draw().draw.find((c) => c.op === "text" && c.text === "Cube").at);
     await rightClick(box.x + x + 5, box.y + box.height - y - 4);
     for (const item of ["Delete Hierarchy", "Select Hierarchy"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
@@ -183,20 +183,24 @@ const checks = {
   },
 
   async "Outliner: click selects, drag moves into a collection, X deletes, Ctrl Z undoes"() {
-    const canvas = app.frame().locator(".bl-outliner-region");
-    const box = await canvas.boundingBox();
+    const region = app.frame().locator(".bl-outliner-region");
+    const box = await region.boundingBox();
     // A row's place on the page, over its name, from the Outliner's own draw (region pixels, y up).
     const row = async (name) => {
       const [x, y] = await app.bylonder((b, name) => b.world.outliner.area.draw().draw.find((c) => c.op === "text" && c.text === name).at, name);
       return [box.x + x + 5, box.y + box.height - y - 4];
     };
-    // Its icons are painted once they load, in every region that drew them: the first collection icon has pixels.
-    await app.until((b) => {
-      const op = b.world.outliner.area.draw().draw.find((c) => c.op === "icon" && c.icon === "OUTLINER_COLLECTION");
-      const region = document.querySelector(".bl-outliner-region"), scale = region.width / region.clientWidth;
-      const size = Math.round(16 * scale), pixels = region.getContext("2d").getImageData(Math.round(op.at[0] * scale), Math.round((region.clientHeight - op.at[1] - 16) * scale), size, size).data;
-      return pixels.some((value, i) => i % 4 === 0 && value > 120);
-    });
+    // Its icons are painted where Blender places them: the first collection icon's square, as the page shows it, has
+    // the icon's light pixels.
+    const at = await app.bylonder((b) => b.world.outliner.area.draw().draw.find((c) => c.op === "icon" && c.icon === "OUTLINER_COLLECTION").at);
+    const shot = await app.page.screenshot({ clip: { x: box.x + at[0], y: box.y + box.height - at[1] - 16, width: 16, height: 16 } });
+    const bright = await app.page.evaluate(async (png) => {
+      const image = await createImageBitmap(await (await fetch(`data:image/png;base64,${png}`)).blob());
+      const ctx = new OffscreenCanvas(image.width, image.height).getContext("2d");
+      ctx.drawImage(image, 0, 0);
+      return ctx.getImageData(0, 0, image.width, image.height).data.some((value, i) => i % 4 === 0 && value > 120);
+    }, shot.toString("base64"));
+    assert.ok(bright, "the Outliner's collection icon is drawn");
     const cube = await row("Cube");
     await app.page.mouse.click(...cube);
     await app.until((b) => b.editor.selection.nodes.map((n) => n.name).join() === "Cube");

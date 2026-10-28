@@ -111,13 +111,20 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR', drivers = uiType === 'DRIVERS';
   section.classList.add('anim-editor');
   section.tabIndex = 0;
-  const channelsCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-channels' });
+  const svg = (className) => {
+    const view = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    view.setAttribute('class', className);
+    return view;
+  };
+  // The channel region is the module's drawing; the main region is Bylonder's (anim-draw.js), the module's over it.
+  const channelsView = svg('anim-channels');
   const mainCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-main' });
+  const mainOverlay = svg('anim-overlay');
   const sidebar = Object.assign(document.createElement('div'), { className: 'bl-ui anim-sidebar' });
   sidebar.setAttribute('aria-label', 'Sidebar');
   // The sidebar's own events stay there, as a region's handlers take them.
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'keydown', 'keyup', 'contextmenu']) sidebar.addEventListener(type, (e) => e.stopPropagation());
-  section.replaceChildren(channelsCanvas, mainCanvas, sidebar);
+  section.replaceChildren(channelsView, mainCanvas, mainOverlay, sidebar);
   const status = Object.assign(document.createElement('div'), { className: 'anim-status' });
   const menus = Object.assign(document.createElement('div'), { className: 'bl-ui anim-header' });
   header?.replaceChildren(menus, status);
@@ -469,10 +476,10 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       area.layout(RGN_TYPE_WINDOW, channels, 0, width - channels - ui, height);
       area.layout(RGN_TYPE_UI, width - ui, 0, ui, height);
       area.sync();
-      channelsCanvas.hidden = !channels;
+      channelsView.style.display = channels ? '' : 'none';
       sidebar.hidden = !ui;
-      Object.assign(channelsCanvas.style, { width: channels + 'px', height: height + 'px' });
-      Object.assign(mainCanvas.style, { left: channels + 'px', width: width - channels - ui + 'px', height: height + 'px' });
+      Object.assign(channelsView.style, { width: channels + 'px', height: height + 'px' });
+      for (const view of [mainCanvas, mainOverlay]) Object.assign(view.style, { left: channels + 'px', width: width - channels - ui + 'px', height: height + 'px' });
       sidebar.style.width = ui + 'px';
     }
     return true;
@@ -510,11 +517,10 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     if (markersShown() && !drivers) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
     if (!drivers) drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
-    drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW, true), { height: size.height, scale: globalThis.devicePixelRatio || 1, redraw });
+    drawRecording(mainOverlay, area.draw(RGN_TYPE_WINDOW, true), { width: main.width, height: size.height });
     if (size.channels) {
-      const view = regionCanvas(channelsCanvas, size.channels, size.height);
       channelRecording = area.draw(RGN_TYPE_CHANNELS);
-      drawRecording(view.ctx, channelRecording, { height: size.height, scale: globalThis.devicePixelRatio || 1, redraw });
+      drawRecording(channelsView, channelRecording, { width: size.channels, height: size.height });
       // The block layouts the draw made (the channel filter beside the scrubbing area), by the shared renderer.
       channelLayouts.value = channelRecording.draw.filter((op) => op.op === 'layout');
     }

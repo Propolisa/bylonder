@@ -1,7 +1,7 @@
 // The Outliner (editors/space_outliner), Blender's own: its tree is built, drawn, selected and edited by Blender's code
 // in the module (outliner-area.js) over Blender's Main, kept equal to the scene (blenkernel/main-sync.js). Its
-// header is Blender's script (OUTLINER_HT_header, drawn by the shared layout renderer); its main region is a canvas
-// the module's drawing is replayed on (region-draw.js). Events become Blender's: a button under the pointer applies as
+// header is Blender's script (OUTLINER_HT_header, drawn by the shared layout renderer); its main region is the module's
+// drawing as SVG (region-draw.js). Events become Blender's: a button under the pointer applies as
 // Blender's handlers apply it, the rest runs Blender's keymaps on the Outliner's operators, registered by idname and
 // run in the Outliner as the context area. After each, what Blender's code changed comes back to the scene.
 import { blenderModule, operatorNames, pollOperator } from '../../bmesh/bmesh-wasm.js';
@@ -35,11 +35,11 @@ const BUT_TEXT = 3, BUT_LABEL = 21, BUT_DRAG_LOCK = 1 << 12;
 //   element the main region fills; header: the area's header element.
 export function createOutliner({ world, editor, commands, sync: scene, rna, region, header }) {
   const area = new OutlinerArea(scene.blender);
-  const canvas = Object.assign(document.createElement('canvas'), { className: 'bl-ui bl-outliner-region' });
-  canvas.tabIndex = -1;
-  canvas.setAttribute('aria-label', 'Outliner');
-  region.replaceChildren(canvas);
-  const ctx = canvas.getContext('2d');
+  const view = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  view.classList.add('bl-ui', 'bl-outliner-region');
+  view.tabIndex = -1;
+  view.setAttribute('aria-label', 'Outliner');
+  region.replaceChildren(view);
   let recording = { draw: [], buttons: [] }, textField = null, pointer = [0, 0];
 
   // bpy.context in the Outliner, for its header, popover and menus.
@@ -115,7 +115,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     startGestureBox(world.wm, {
       begin,
       select({ xmin, xmax, ymin, ymax }, mode) {
-        const rect = canvas.getBoundingClientRect();
+        const rect = view.getBoundingClientRect();
         finished(area.finishGesture({ xmin: Math.round(xmin - rect.left), xmax: Math.round(xmax - rect.left), ymin: Math.round(rect.bottom - ymax),
           ymax: Math.round(rect.bottom - ymin), wait_for_input: false, mode: props.mode ?? (mode === 'SUB' ? 'SUB' : 'ADD') }));
       },
@@ -126,7 +126,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   // Events in the main region: presses, clicks, double clicks and drags as wm_event_system.cc makes them.
   let press = null, lastPress = null, lastClient = { clientX: 0, clientY: 0 }, dragToggle = null;
   const regionAt = (e) => {
-    const rect = canvas.getBoundingClientRect();
+    const rect = view.getBoundingClientRect();
     return [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
   };
   const wmEvent = (e, type, value, extra = {}) => ({
@@ -135,11 +135,11 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   });
   const handled = (e) => { e.preventDefault(); e.stopPropagation(); };
 
-  canvas.addEventListener('pointerdown', (e) => {
+  view.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'touch' || world.wm.modal) return;
     handled(e);
-    canvas.focus({ preventScroll: true });
-    canvas.setPointerCapture(e.pointerId);
+    view.focus({ preventScroll: true });
+    view.setPointerCapture(e.pointerId);
     pointer = regionAt(e);
     lastClient = e;
     if (textField) return finishTextEdit(true);
@@ -153,7 +153,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     press = { type, x: e.clientX, y: e.clientY, e, double, used, dragged: false };
     lastPress = double ? null : { type, x: e.clientX, y: e.clientY, time: e.timeStamp };
   });
-  canvas.addEventListener('pointermove', (e) => {
+  view.addEventListener('pointermove', (e) => {
     pointer = regionAt(e);
     if (world.wm.modal) return;
     if (dragToggle) return continueDragToggle(e);
@@ -170,7 +170,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     }
     if (!press) dispatch(wmEvent(e, 'MOUSEMOVE', 'NOTHING'));
   });
-  canvas.addEventListener('pointerup', (e) => {
+  view.addEventListener('pointerup', (e) => {
     pointer = regionAt(e);
     if (world.wm.modal) return;
     if (dragToggle) { dragToggle = null; return; }
@@ -184,15 +184,15 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     if (press && !press.used && !press.dragged && !press.double) dispatch(wmEvent(press.e, type, 'CLICK'));
     press = null;
   });
-  canvas.addEventListener('wheel', (e) => {
+  view.addEventListener('wheel', (e) => {
     handled(e);
     pointer = regionAt(e);
     dispatch(wmEvent(e, e.deltaY < 0 ? 'WHEELUPMOUSE' : 'WHEELDOWNMOUSE', 'PRESS'));
   }, { passive: false });
-  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-  canvas.addEventListener('pointerenter', () => canvas.focus({ preventScroll: true }));
-  canvas.addEventListener('pointerleave', () => { if (!press) dispatch({ type: 'mousemove', value: 'NOTHING', region: [-1, -1] }); });
-  canvas.addEventListener('keydown', (e) => {
+  view.addEventListener('contextmenu', (e) => e.preventDefault());
+  view.addEventListener('pointerenter', () => view.focus({ preventScroll: true }));
+  view.addEventListener('pointerleave', () => { if (!press) dispatch({ type: 'mousemove', value: 'NOTHING', region: [-1, -1] }); });
+  view.addEventListener('keydown', (e) => {
     if (world.wm.modal || (e.repeat && !/arrow|page/.test(keyType(e)))) return;
     if (area.dragging && e.key === 'Escape') return handled(e), endDrag(null);
     const event = { type: keyType(e), value: 'PRESS', native: e, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, oskey: e.metaKey, region: pointer, clientX: lastClient.clientX, clientY: lastClient.clientY };
@@ -241,7 +241,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
 
   // A text button being edited (an item's rename): Bylonder's field over it until Return applies or Escape cancels.
   function startTextEdit(button) {
-    const [x0, y0, x1, y1] = button.rect, height = canvas.clientHeight;
+    const [x0, y0, x1, y1] = button.rect, height = region.clientHeight;
     textField = Object.assign(document.createElement('input'), { className: 'bl-field bl-outliner-rename', value: button.text, maxLength: button.maxlength - 1 });
     Object.assign(textField.style, { left: `${x0}px`, top: `${height - y1}px`, width: `${x1 - x0}px`, height: `${y1 - y0}px` });
     textField.dataset.index = button.index;
@@ -264,7 +264,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     area.editText(Number(field.dataset.index), apply ? field.value : null);
     if (apply) commands.transaction(writeBack);
     draw();
-    canvas.focus({ preventScroll: true });
+    view.focus({ preventScroll: true });
   }
 
   // The header: OUTLINER_HT_header from Blender's script, drawn by the shared layout renderer, with its popovers'
@@ -303,16 +303,12 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   // Draws the main region from the module's recording; a text button being edited shows Bylonder's field.
   let signature = '';
   function draw() {
-    const width = canvas.clientWidth, height = canvas.clientHeight, scale = devicePixelRatio || 1;
+    const width = region.clientWidth, height = region.clientHeight;
     if (!width || !height) return;
     if (area.size[0] !== width || area.size[1] !== height) area.resize(width, height);
-    if (canvas.width !== Math.round(width * scale)) canvas.width = Math.round(width * scale);
-    if (canvas.height !== Math.round(height * scale)) canvas.height = Math.round(height * scale);
     sync();
     recording = area.draw();
-    ctx.setTransform(scale, 0, 0, scale, 0, 0);
-    const replay = () => drawRecording(ctx, recording, { height, scale, redraw: replay });
-    replay();
+    drawRecording(view, recording, { width, height });
     const editing = recording.buttons.find((b) => b.type === BUT_TEXT && b.active);
     if (editing && !textField) startTextEdit(editing);
     drawHeader();

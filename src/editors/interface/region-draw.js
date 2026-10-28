@@ -1,8 +1,6 @@
 // A region drawn by Blender's code in the module (tools/blender-port/wasm/region-draw.cc): its recording, in region
-// pixels with y up, replayed on a 2D canvas, and its buttons found by position. Text is measured and drawn with the
-// browser's fonts (theme.css's --bl-font-family) at Blender's sizes; icons are Blender's SVGs (icon.js), rasterized
-// as blf_glyph.cc rasterizes them: a monochrome icon as coverage tinted in the color Blender's code gives, a
-// multicolor one in its own colors with its themed groups recolored (icon_source_edit_cb).
+// pixels with y up, drawn as SVG (drawRecording), and its buttons found by position. Text is measured and drawn with
+// the browser's fonts (theme.css's --bl-font-family) at Blender's sizes; icons are Blender's SVGs (icon.js).
 import { provided } from '../../port/wasm.js';
 import { blenderModule } from '../../bmesh/bmesh-wasm.js';
 import { iconSvg } from './icon.js';
@@ -30,31 +28,14 @@ const css = ([r, g, b, a]) => `rgb(${Math.round(r * 255)} ${Math.round(g * 255)}
 
 // UI_CNR_*: which corners of a round box are round.
 const CNR_TOP_LEFT = 1, CNR_TOP_RIGHT = 2, CNR_BOTTOM_RIGHT = 4, CNR_BOTTOM_LEFT = 8;
-function roundRect(ctx, left, top, right, bottom, radius, corners) {
+const n = (v) => +v.toFixed(2);
+function roundRect(left, top, right, bottom, radius, corners) {
   const r = Math.max(0, Math.min(radius, (right - left) / 2, (bottom - top) / 2));
-  const at = (bit) => (corners & bit ? r : 0);
-  ctx.roundRect(left, top, right - left, bottom - top, [at(CNR_TOP_LEFT), at(CNR_TOP_RIGHT), at(CNR_BOTTOM_RIGHT), at(CNR_BOTTOM_LEFT)]);
+  const [tl, tr, br, bl] = [CNR_TOP_LEFT, CNR_TOP_RIGHT, CNR_BOTTOM_RIGHT, CNR_BOTTOM_LEFT].map((bit) => (corners & bit ? r : 0));
+  return `M${n(left + tl)} ${n(top)}H${n(right - tr)}A${tr} ${tr} 0 0 1 ${n(right)} ${n(top + tr)}V${n(bottom - br)}A${br} ${br} 0 0 1 ${n(right - br)} ${n(bottom)}`
+    + `H${n(left + bl)}A${bl} ${bl} 0 0 1 ${n(left)} ${n(bottom - bl)}V${n(top + tl)}A${tl} ${tl} 0 0 1 ${n(left + tl)} ${n(top)}Z`;
 }
-
-// Icons: rasters by size, color and outline; while one decodes, the redraws of the regions that wanted it wait for it.
-const rasters = new Map(), waiting = new Map();
-// The regions an icon load tagged redraw once on the next frame, as ED_region_tag_redraw does.
-const tagged = new Set();
-const flush = () => { const redraws = [...tagged]; tagged.clear(); redraws.forEach((redraw) => redraw()); };
-function loaded(map, key, promise) {
-  map.set(key, null);
-  waiting.set(key, new Set());
-  promise.then((value) => {
-    map.set(key, value);
-    if (!tagged.size) requestAnimationFrame(flush);
-    waiting.get(key).forEach((redraw) => tagged.add(redraw));
-    waiting.delete(key);
-  }, () => {});
-}
-function wanted(map, key, redraw) {
-  if (!map.get(key)) waiting.get(key)?.add(redraw);
-  return map.get(key);
-}
+const escape = (text) => text.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 
 // As icon_source_edit_cb and svg_replace_color_attributes recolor a multicolor icon: each group with a blender_ id
 // takes its theme color (given by the module) for its fills.
@@ -62,132 +43,83 @@ function editSource(svg, colors) {
   return svg.replace(/<g\b[^>]*\bid="(blender_\w+)"[\s\S]*?<\/g>/g, (group, id) =>
     colors[id] ? group.replace(/fill="[^"]*"/g, `fill="#${colors[id]}"`).replace(/fill:[^;"]*/g, `fill:#${colors[id]}`) : group);
 }
-
-// blf_glyph_cache_add_svg: the icon drawn at `size / 1600` of its SVG's size, placed in its size-square as Blender
-// places the glyph; monochrome icons keep coverage (gray times alpha) for the tint.
-async function rasterize(svg, size, scale, multicolor) {
-  const image = new Image();
-  image.src = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
-  await image.decode();
-  URL.revokeObjectURL(image.src);
-  const { width, height } = svgSize(svg);
-  const pixels = size * scale;
-  const destW = Math.ceil(width * pixels / 1600), destH = Math.ceil(height * pixels / 1600);
-  // Read back on the CPU: a GPU canvas would stall on every icon's getImageData.
-  const canvas = new OffscreenCanvas(destW, destH), ctx = canvas.getContext('2d', { willReadFrequently: true });
-  ctx.drawImage(image, 0, 0, destW, destH);
-  if (!multicolor) {
-    const data = ctx.getImageData(0, 0, destW, destH), px = data.data;
-    for (let i = 0; i < px.length; i += 4) {
-      px[i + 3] = Math.round((0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) * px[i + 3] / 255);
-      px[i] = px[i + 1] = px[i + 2] = 255;
-    }
-    ctx.putImageData(data, 0, 0);
-  }
-  const s = destW / width;
-  return { canvas, offsetX: Math.max(Math.round((pixels - width * s) / 2), Math.trunc(-100 * s)),
-    offsetY: Math.max(Math.ceil((pixels + destH) / 2), destH - Math.trunc(100 * s)) };
-}
 const svgSize = (svg) => {
   const tag = svg.match(/<svg\b[^>]*>/)?.[0] ?? '';
   const box = tag.match(/viewBox="([^"]*)"/)?.[1]?.split(/[\s,]+/).map(Number);
   return { width: box?.[2] ?? Number(tag.match(/\bwidth="([\d.]+)/)?.[1] ?? 1600), height: box?.[3] ?? Number(tag.match(/\bheight="([\d.]+)/)?.[1] ?? 1600) };
 };
+const dataUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(svg);
 
-function icon(name, size, scale, multicolor, colors, redraw) {
-  const svg = iconSvg(name);
-  if (!svg) return null;
-  const key = `${name}|${size * scale}|${multicolor}`;
-  if (!rasters.has(key)) loaded(rasters, key, rasterize(multicolor ? editSource(svg, colors) : svg, size, scale, multicolor));
-  return wanted(rasters, key, redraw);
-}
-
-// Draws a recording ({ draw: [...] }) on a 2D context scaled to device pixels by `scale`, for a region `height`
-// pixels high. `redraw()` is called when icons it waited for have loaded.
-export function drawRecording(ctx, { draw, iconColors = {} }, { height, scale = 1, redraw = () => {} }) {
+// Draws a recording ({ draw: [...] }) as the SVG `svg` of a region `width` by `height` pixels, in Blender's order. Text
+// is the browser's in the theme's font; an icon is Blender's SVG drawn as blf_glyph_cache_add_svg places it (`size /
+// 1600` of its document, in its size-square), a monochrome one as a luminance mask (coverage: gray times alpha) of its
+// color, a multicolor one in its own colors with its themed groups recolored.
+let drawings = 0;
+export function drawRecording(svg, { draw, iconColors = {} }, { width, height }) {
   const y = (v) => height - v;
-  const tint = new OffscreenCanvas(1, 1).getContext('2d');
-  for (const op of draw) {
-    ctx.save();
-    if (op.clip) {
-      const [x0, y0, x1, y1] = op.clip;
-      ctx.beginPath();
-      ctx.rect(x0, y(y1), x1 - x0, y1 - y0);
-      ctx.clip();
+  const id = (svg.dataset.drawing ??= `r${drawings++}`);
+  const defs = [], body = [], clips = new Map(), masks = new Map();
+  const clip = (rect) => {
+    if (!rect) return '';
+    const key = rect.join(',');
+    if (!clips.has(key)) {
+      const [x0, y0, x1, y1] = rect;
+      clips.set(key, `${id}c${clips.size}`);
+      defs.push(`<clipPath id="${clips.get(key)}"><rect x="${n(x0)}" y="${n(y(y1))}" width="${n(x1 - x0)}" height="${n(y1 - y0)}"/></clipPath>`);
     }
+    return ` clip-path="url(#${clips.get(key)})"`;
+  };
+  const family = fontFamily().replace(/"/g, "'");
+  for (const op of draw) {
+    let shape = '';
     if (op.op === 'clear') {
-      ctx.fillStyle = css(op.color);
-      ctx.fillRect(0, 0, ctx.canvas.width / scale, ctx.canvas.height / scale);
+      shape = `<rect width="${width}" height="${height}" fill="${css(op.color)}"/>`;
     } else if (op.op === 'tris') {
-      ctx.beginPath();
+      let d = '';
       for (let i = 0; i < op.points.length; i += 6) {
-        ctx.moveTo(op.points[i], y(op.points[i + 1]));
-        ctx.lineTo(op.points[i + 2], y(op.points[i + 3]));
-        ctx.lineTo(op.points[i + 4], y(op.points[i + 5]));
-        ctx.closePath();
+        d += `M${n(op.points[i])} ${n(y(op.points[i + 1]))}L${n(op.points[i + 2])} ${n(y(op.points[i + 3]))}L${n(op.points[i + 4])} ${n(y(op.points[i + 5]))}Z`;
       }
-      ctx.fillStyle = css(op.color);
-      ctx.fill();
+      shape = `<path d="${d}" fill="${css(op.color)}"/>`;
     } else if (op.op === 'lines') {
-      ctx.beginPath();
       // Lines sit on pixel centers, as the GPU rasterizes one-pixel lines.
+      let d = '';
       for (let i = 0; i < op.points.length; i += 4) {
-        ctx.moveTo(Math.floor(op.points[i]) + 0.5, Math.floor(y(op.points[i + 1])) + 0.5);
-        ctx.lineTo(Math.floor(op.points[i + 2]) + 0.5, Math.floor(y(op.points[i + 3])) + 0.5);
+        d += `M${Math.floor(op.points[i]) + 0.5} ${Math.floor(y(op.points[i + 1])) + 0.5}L${Math.floor(op.points[i + 2]) + 0.5} ${Math.floor(y(op.points[i + 3])) + 0.5}`;
       }
-      if (op.dash) ctx.setLineDash(op.dash);
-      ctx.lineWidth = op.width;
-      ctx.strokeStyle = css(op.color);
-      ctx.stroke();
+      shape = `<path d="${d}" fill="none" stroke="${css(op.color)}" stroke-width="${op.width}"${op.dash ? ` stroke-dasharray="${op.dash.join(' ')}"` : ''}/>`;
     } else if (op.op === 'roundbox') {
       const [x0, y0, x1, y1] = op.rect, w = op.outlineWidth;
-      ctx.beginPath();
-      roundRect(ctx, x0, y(y1), x1, y(y0), op.radius, op.corners);
-      if (op.outline[3] > 0 && w > 0) {
-        roundRect(ctx, x0 + w, y(y1) + w, x1 - w, y(y0) - w, op.radius - w, op.corners);
-        ctx.fillStyle = css(op.outline);
-        ctx.fill('evenodd');
-      }
-      if (op.inner[3] > 0) {
-        ctx.beginPath();
-        roundRect(ctx, x0 + w, y(y1) + w, x1 - w, y(y0) - w, op.radius - w, op.corners);
-        ctx.fillStyle = css(op.inner);
-        ctx.fill();
-      }
+      const inner = roundRect(x0 + w, y(y1) + w, x1 - w, y(y0) - w, op.radius - w, op.corners);
+      if (op.outline[3] > 0 && w > 0) shape += `<path d="${roundRect(x0, y(y1), x1, y(y0), op.radius, op.corners)}${inner}" fill-rule="evenodd" fill="${css(op.outline)}"/>`;
+      if (op.inner[3] > 0) shape += `<path d="${inner}" fill="${css(op.inner)}"/>`;
     } else if (op.op === 'text') {
-      if (op.textClip) {
-        const [x0, y0, x1, y1] = op.textClip;
-        ctx.beginPath();
-        ctx.rect(x0, y(y1), x1 - x0, y1 - y0);
-        ctx.clip();
-      }
-      ctx.font = fontOf(op.size);
-      ctx.fillStyle = css(op.color);
-      // BLF draws from the left of the baseline, whatever the canvas was drawing before.
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillText(op.text, Math.round(op.at[0]), Math.round(y(op.at[1])));
+      // BLF draws from the left of the baseline.
+      shape = `<text x="${Math.round(op.at[0])}" y="${Math.round(y(op.at[1]))}" font-size="${op.size}" font-family="${family}" fill="${css(op.color)}"`
+        + ` xml:space="preserve"${clip(op.textClip)}>${escape(op.text)}</text>`;
     } else if (op.op === 'icon') {
-      const raster = icon(op.icon, op.size, scale, !!op.multicolor, iconColors, redraw);
-      if (raster) {
-        const left = Math.round(op.at[0]) + raster.offsetX / scale, top = y(Math.round(op.at[1]) + raster.offsetY / scale);
-        if (op.multicolor) {
-          ctx.globalAlpha = op.color[3];
-          ctx.drawImage(raster.canvas, left, top, raster.canvas.width / scale, raster.canvas.height / scale);
-        } else {
-          tint.canvas.width = raster.canvas.width;
-          tint.canvas.height = raster.canvas.height;
-          tint.drawImage(raster.canvas, 0, 0);
-          tint.globalCompositeOperation = 'source-in';
-          tint.fillStyle = css(op.color);
-          tint.fillRect(0, 0, tint.canvas.width, tint.canvas.height);
-          tint.globalCompositeOperation = 'source-over';
-          ctx.drawImage(tint.canvas, left, top, raster.canvas.width / scale, raster.canvas.height / scale);
+      const source = iconSvg(op.icon);
+      if (!source) continue;
+      const { width: sw, height: sh } = svgSize(source), s = op.size / 1600, w = sw * s, h = sh * s;
+      const left = Math.round(op.at[0]) + Math.max((op.size - w) / 2, -100 * s);
+      const top = y(Math.round(op.at[1]) + Math.max((op.size + h) / 2, h - 100 * s));
+      if (op.multicolor) {
+        shape = `<image x="${n(left)}" y="${n(top)}" width="${n(w)}" height="${n(h)}" opacity="${op.color[3]}" href="${dataUrl(editSource(source, iconColors))}"/>`;
+      } else {
+        const key = `${op.icon}|${op.size}`;
+        if (!masks.has(key)) {
+          masks.set(key, `${id}m${masks.size}`);
+          defs.push(`<mask id="${masks.get(key)}"><image width="${n(w)}" height="${n(h)}" href="${dataUrl(source)}"/></mask>`);
         }
+        // The mask's image is at its user space's origin, so the masked rectangle is drawn there, moved into place.
+        shape = `<g transform="translate(${n(left)} ${n(top)})"><rect width="${n(w)}" height="${n(h)}" fill="${css(op.color)}" mask="url(#${masks.get(key)})"/></g>`;
       }
     }
-    ctx.restore();
+    if (shape) body.push(op.clip ? `<g${clip(op.clip)}>${shape}</g>` : shape);
   }
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.innerHTML = `<defs>${defs.join('')}</defs>${body.join('')}`;
 }
 
 // The button at a point in region pixels (y up), the last one defined there as Blender's handlers find it.

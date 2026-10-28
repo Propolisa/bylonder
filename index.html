@@ -15,6 +15,13 @@
     </style>
   </head>
   <body class="bl-loading">
+    <!-- Shown anyway when the app cannot start, so its error is seen. -->
+    <script>
+      const reveal = () => document.body.classList.remove("bl-loading");
+      addEventListener("error", reveal);
+      addEventListener("unhandledrejection", reveal);
+      setTimeout(reveal, 10000);
+    </script>
     <header id="appbar">
       <span class="bl-logo"></span><nav id="topbar-menus" aria-label="Main menu"></nav>
       <nav id="workspace-tabs" aria-label="Workspaces"></nav>

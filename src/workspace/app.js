@@ -24,9 +24,8 @@ import { menuButton } from "../editors/interface/menu.js";
 import { iconButton } from "../editors/interface/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 await preloadIcons();
-// The window shows once the scene's interface has drawn, or failed to.
+// The window shows once the scene's interface has drawn, or failed to (and in any case after a while: index.html).
 const reveal = () => document.body.classList.remove("bl-loading");
-setTimeout(reveal, 8000);
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
 const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
