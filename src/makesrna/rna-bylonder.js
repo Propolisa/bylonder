@@ -20,6 +20,8 @@ import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/in
 import { curveStructs } from './rna-curve.js';
 import { isSyntaxHighlightSupported } from '../editors/space_text/text-format.js';
 import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
+import { isBlenderLight, lightRecord, deriveBabylonLight, lightingMode, intensityOf, wattsOf } from '../blenkernel/light/light-home.js';
+import { lightFields } from '../blenkernel/light/light-fields.js';
 
 // Swapping two axes is its own inverse and flips handedness.
 const axes = ([x, y, z]) => [x, z, y];
@@ -86,7 +88,7 @@ const dimensions = (ob) => {
   return axes([size.x * Math.abs(ob.scaling.x), size.y * Math.abs(ob.scaling.y), size.z * Math.abs(ob.scaling.z)]);
 };
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
-const lightType = (light) => (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
+const lightType = (light) => lightRecord(light)?.type ?? (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
 const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
 const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve' };
 const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
@@ -118,9 +120,6 @@ const objectChannel = (property) => (ob, index) => address('object:' + nodeId(ob
 const transformLocks = (property) => array((ob) => [...'xzy'].map((axis) => !!ob.metadata?.wbTransformLocks?.[property + '.' + axis]), (ob, value) => {
   ob.metadata = { ...ob.metadata, wbTransformLocks: { ...ob.metadata?.wbTransformLocks, ...Object.fromEntries(value.map((locked, i) => [property + '.' + 'xzy'[i], !!locked])) } };
 });
-// A light's power in Blender's units from Babylon's intensity: watts for point, spot and area lights (1000 W, Blender's
-// default point light, as intensity 1) and irradiance in W/m² for the sun.
-const watts = (light) => (lightType(light) === 'SUN' ? 1 : 1000);
 // A camera's sensor along the fitted axis: Babylon fixes the horizontal or the vertical field of view.
 const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXED;
 const sensor = (camera) => (horizontal(camera) ? 36 : 24);
@@ -220,6 +219,25 @@ function layerObjects(r) {
   return rna('LayerObjects', objects);
 }
 
+const babylonLight = {
+  name: settable('name'),
+  type: synced(lightType),
+  color: synced(array((light) => light.diffuse.asArray(), (light, value) => light.diffuse.copyFromFloats(...value), 'rgb')),
+  energy: { get: (light) => wattsOf(lightType(light), light.intensity, lightingMode(light.getScene())),
+    set: (light, value) => { light.intensity = intensityOf(lightType(light), value, lightingMode(light.getScene())); }, sync: true },
+  shadow_soft_size: synced(settable('radius'), (light) => lightType(light) !== 'SUN'),
+  use_shadow: synced(settable('shadowEnabled')),
+  spot_size: synced(settable('angle'), (light) => lightType(light) === 'SPOT'),
+  spot_blend: { get: (light) => (light.angle ? 1 - light.innerAngle / light.angle : 0), set: (light, value) => { light.innerAngle = (1 - value) * light.angle; },
+    sync: (light) => lightType(light) === 'SPOT' },
+};
+// Every Light setting Blender's DNA has for the light's type, over its record.
+const blenderLight = (light) => {
+  const record = lightRecord(light);
+  const values = Object.fromEntries(lightFields(record.type).map((name) => [name, {
+    get: () => record[name], set: (owner, value) => { record[name] = value; deriveBabylonLight(owner); }, sync: name !== 'type' }]));
+  return { ...values, name: settable('name'), type: synced(() => record.type) };
+};
 const STRUCTS = {
   Object: {
     name: { get: (ob) => ob.name, set: (ob, name) => { ob.name = name; } },
@@ -440,17 +458,9 @@ const STRUCTS = {
     target_id_type: () => 'OBJECT',
     target_id_type_icon: (slot) => slot.icon,
   },
-  Light: {
-    name: settable('name'),
-    type: synced(lightType),
-    color: synced(array((light) => light.diffuse.asArray(), (light, value) => light.diffuse.copyFromFloats(...value), 'rgb')),
-    energy: { get: (light) => light.intensity * watts(light), set: (light, value) => { light.intensity = value / watts(light); }, sync: true },
-    shadow_soft_size: synced(settable('radius'), (light) => lightType(light) !== 'SUN'),
-    use_shadow: synced(settable('shadowEnabled')),
-    spot_size: synced(settable('angle'), (light) => lightType(light) === 'SPOT'),
-    spot_blend: { get: (light) => (light.angle ? 1 - light.innerAngle / light.angle : 0), set: (light, value) => { light.innerAngle = (1 - value) * light.angle; },
-      sync: (light) => lightType(light) === 'SPOT' },
-  },
+  // A light by its home world (blenkernel/light/light-home.js): a Blender light's settings are its own, a Babylon
+  // light's are Babylon's with Blender's derived as the glTF exporter derives them.
+  Light: (light) => (isBlenderLight(light) ? blenderLight(light) : babylonLight),
   Camera: {
     name: settable('name'),
     type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; }, sync: true },

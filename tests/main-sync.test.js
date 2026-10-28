@@ -86,7 +86,7 @@ await null;
 assert.equal(location(cube)[0], 5, 'a write to a Babylon vector reaches Main at the end of the task');
 lamp.intensity = 2;
 await null;
-assert.equal(dnaGet('PointLight', blender.data(ob(lamp)), 'energy'), 2000, "a light's intensity is Blender's watts");
+assert(close([dnaGet('PointLight', blender.data(ob(lamp)), 'energy')], [8 * Math.PI]), "a Babylon light's intensity is Blender's watts as the glTF exporter converts them (W / 4π)");
 material.albedoColor.g = 0.5;
 sync.flush();
 assert(close(dnaGet('Material', sync.materialOf(material), 'diffuse_color'), [0.8, 0.5, 0.1, 1]));

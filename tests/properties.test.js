@@ -103,9 +103,21 @@ assert.deepEqual(drawn_tabs.Light, ['TOOL', 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'S
 selection.replace([point]);
 context = propertiesContext(r, space);
 assert.equal(context.light.type, 'POINT');
-assert.equal(context.light.energy, 1000);
+// A Babylon light's power is Blender's as Blender's glTF exporter converts it (Unitless: W / 4π candela).
+assert.ok(Math.abs(context.light.energy - 4 * Math.PI) < 1e-9);
 context.light.energy = 500;
-assert.equal(point.intensity, 0.5);
+assert.ok(Math.abs(point.intensity - 500 / (4 * Math.PI)) < 1e-9);
+// A light Blender's code made keeps all of Blender's settings; its Babylon light is derived from them.
+const { makeBlenderLight, lightLosses } = await import('../src/blenkernel/light/light-home.js');
+const lamp = new PointLight('Lamp', Vector3.Zero(), scene);
+makeBlenderLight(lamp, 'POINT', { energy: 1000, exposure: 1, use_temperature: true });
+const lampData = r.pointer('PointLight', lamp);
+assert.equal(lampData.energy, 1000);
+assert.equal(lampData.exposure, 1);
+assert.ok(Math.abs(lamp.intensity - 2000 / (4 * Math.PI)) < 1e-9, 'exposure doubles it');
+lampData.energy = 400;
+assert.ok(Math.abs(lamp.intensity - 800 / (4 * Math.PI)) < 1e-9);
+assert.deepEqual(lightLosses(lamp), ['"' + lamp.name + '": its color temperature has no Babylon equivalent']);
 selection.replace([camera]);
 context = propertiesContext(r, space);
 context.camera.lens = 50;

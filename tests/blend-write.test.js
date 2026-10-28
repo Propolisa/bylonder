@@ -129,7 +129,7 @@ if (!reference) {
     const principled = read.materials.Red.tree.nodes['Principled BSDF'];
     assert(close(principled.inputs['Base Color'], [0.8, 0.1, 0.1, 1]) && Math.abs(principled.inputs.Metallic - 0.3) < 1e-5, JSON.stringify(principled));
     assert.equal(ob.Light.data.light, 'POINT');
-    assert.equal(ob.Light.data.energy, 1000);
+    assert(Math.abs(ob.Light.data.energy - 4 * Math.PI) < 1e-3, 'Babylon intensity 1 as Blender\'s glTF importer reads it (Unitless: 4π W)');
     assert.equal(ob.Camera.data.camera, 'PERSP');
     assert.equal(ob.Sun.data.light, 'SUN');
     assert.deepEqual(read.collections.Props, ['Cube']);

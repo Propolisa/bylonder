@@ -16,6 +16,7 @@ import { createBlenderIDs } from './blender-ids.js';
 import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
+import { createLight } from './light/light-home.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { moduleModifiers, blenderModifierDefinitions, asBlenderModifier } from '../modifiers/blender.js';
 import { mesh_serialize } from './mesh/mesh.js';
@@ -33,7 +34,7 @@ import { asObject } from '../runtime/object-transform.js';
 import { addModifier } from '../modifiers/stack.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
-import { Color3, DirectionalLight, FreeCamera, Material, Mesh, MultiMaterial, PBRMaterial, PointLight, SpotLight, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Color3, FreeCamera, Material, Mesh, MultiMaterial, PBRMaterial, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 
 // ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
@@ -52,12 +53,11 @@ const ROTATION_MODES = { QUATERNION: 0, XYZ: 1, XZY: 2, YXZ: 3, YZX: 4, ZXY: 5, 
 const MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
 // The Babylon objects a read Object becomes, by its type and its data's; a light of a type Babylon has no light for
 // becomes the nearest, with a warning.
-const LIGHTS = { POINT: PointLight, SUN: DirectionalLight, SPOT: SpotLight, AREA: PointLight };
 const MAKERS = {
   EMPTY: (scene, name) => new TransformNode(name, scene),
   CAMERA: (scene, name) => asObject(new FreeCamera(name, Vector3.Zero(), scene)),
-  LIGHT: (scene, name, type) => asObject(type === 'SPOT' ? new SpotLight(name, Vector3.Zero(), new Vector3(0, 0, 1), Math.PI / 4, 1, scene)
-    : type === 'SUN' ? new DirectionalLight(name, new Vector3(0, 0, 1), scene) : new PointLight(name, Vector3.Zero(), scene)),
+  // A light Blender's code made is Blender's (docs/blender-boundary.md point 4a); pull fills its settings from Main.
+  LIGHT: (scene, name, type) => createLight(name, type, {}, scene),
 };
 
 // A value as both models compare it: arrays plain, Main's floats being 32-bit.

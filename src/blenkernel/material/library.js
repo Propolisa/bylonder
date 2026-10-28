@@ -7,8 +7,20 @@ import { bindGraph } from '../../nodes/bindings.js';
 export const materialId = material => material.metadata?.wbId || material.name;
 const imageFile = /\.(png|jpe?g|webp|gif|bmp|ktx2?|dds|env|hdr)$/i;
 
+// What an object without a material shows: Blender's default surface (material_default_surface_init), a Principled
+// BSDF of base color 0.8 at the Principled's defaults, so it takes lights as Blender's materials do.
+function defaultSurface(scene) {
+  const material = new PBRMaterial('__defaultSurface', scene);
+  material.albedoColor = new Color3(0.8, 0.8, 0.8);
+  material.metallic = 0;
+  material.roughness = 0.5;
+  material.indexOfRefraction = 1.5;
+  return material;
+}
+
 export function createMaterialLibrary(world, { commit = () => {}, asset = path => path, files = [] } = {}) {
   const { scene, animation } = world;
+  scene.defaultMaterial = defaultSurface(scene);
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const internal = m => !m || m.name.startsWith('__') || m === scene._defaultMaterial || m instanceof MultiMaterial;

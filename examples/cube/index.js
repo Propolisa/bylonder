@@ -1,4 +1,4 @@
-import { createPrimitive } from '@workbench/sdk';
+import { createPrimitive, createLight } from '@workbench/sdk';
 
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
@@ -13,7 +13,8 @@ export const createScene = function () {
   camera.minZ = 0.1;
   camera.maxZ = 100;
 
-  const light = new BABYLON.PointLight('Light', new BABYLON.Vector3(4.0762, 5.9039, 1.0055), scene);
-  light.radius = 0.1;
+  // startup.blend's light: Blender's 1000 W point light.
+  const light = createLight('Light', 'POINT', { energy: 1000, shadow_soft_size: 0.1 }, scene);
+  light.position.set(4.0762, 5.9039, 1.0055);
   return scene;
 };

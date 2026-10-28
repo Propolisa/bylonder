@@ -8,6 +8,7 @@ import { createStore } from "./store";
 import { createMainSync } from "../blenkernel/main-sync.js";
 import { createRNA } from "../makesrna/rna-bylonder.js";
 import { report } from "../windowmanager/wm-reports.js";
+import { createLight } from "../blenkernel/light/light-home.js";
 export function createSDK(base, overrides, onChange, onAnimationChange = () => {}) {
   const animation = createAnimationModel(onAnimationChange);
   const properties = [];
@@ -22,6 +23,7 @@ export function createSDK(base, overrides, onChange, onAnimationChange = () => {
     animate(target, definition) { const binding = bindProperties(animation, target, definition); properties.push(binding); return binding; },
     createText,
     createPrimitive,
+    createLight,
     createMesh,
     shadeSmooth,
     updateText,

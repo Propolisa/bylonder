@@ -1,4 +1,6 @@
 import { mountNodeEditor } from './editors/space_node/node-editor.js';
+import { crossingLosses } from "./blenkernel/light/light-home.js";
+import { report } from "./windowmanager/wm-reports.js";
 import { syncLightDirections } from "./runtime/object-transform.js";
 import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
 import { createNodeContexts } from './editors/space_node/contexts.js';
@@ -265,8 +267,12 @@ window.addEventListener("message", (e) => {
     ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
   }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
-  if (e.data.type === "export") exportScene(world, e.data.payload).catch((error) => notify("Export failed: " + error.message));
+  if (e.data.type === "export") {
+    crossingLosses(world.objects, "BABYLON").forEach((loss) => report("WARNING", loss));
+    exportScene(world, e.data.payload).catch((error) => notify("Export failed: " + error.message));
+  }
   if (e.data.type === "save-blend") {
+    crossingLosses(world.objects, "BLENDER").forEach((loss) => report("WARNING", loss));
     try { notify(`Saved .blend (${Math.ceil(saveBlend(world) / 1024)} KiB)`); } catch (error) { console.error(error); notify("Save failed: " + error.message); }
   }
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();

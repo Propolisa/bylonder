@@ -36,15 +36,29 @@ function roundRect(ctx, left, top, right, bottom, radius, corners) {
   ctx.roundRect(left, top, right - left, bottom - top, [at(CNR_TOP_LEFT), at(CNR_TOP_RIGHT), at(CNR_BOTTOM_RIGHT), at(CNR_BOTTOM_LEFT)]);
 }
 
-// Icons: each SVG's text once, and its rasters by size, color and outline.
-const sources = new Map(), rasters = new Map();
-let changed = () => {};
-function source(name) {
-  if (!sources.has(name)) {
-    sources.set(name, null);
-    fetch(iconUrl(name)).then((r) => (r.ok ? r.text() : '')).then((text) => { sources.set(name, text); changed(); }, () => {});
-  }
-  return sources.get(name);
+// Icons: each SVG's text once, and its rasters by size, color and outline; while one loads, the redraws of the regions
+// that wanted it wait for it.
+const sources = new Map(), rasters = new Map(), waiting = new Map();
+// The regions an icon load tagged redraw once on the next frame, as ED_region_tag_redraw does.
+const tagged = new Set();
+const flush = () => { const redraws = [...tagged]; tagged.clear(); redraws.forEach((redraw) => redraw()); };
+function loaded(map, key, promise) {
+  map.set(key, null);
+  waiting.set(key, new Set());
+  promise.then((value) => {
+    map.set(key, value);
+    if (!tagged.size) requestAnimationFrame(flush);
+    waiting.get(key).forEach((redraw) => tagged.add(redraw));
+    waiting.delete(key);
+  }, () => {});
+}
+function wanted(map, key, redraw) {
+  if (!map.get(key)) waiting.get(key)?.add(redraw);
+  return map.get(key);
+}
+function source(name, redraw) {
+  if (!sources.has(name)) loaded(sources, name, fetch(iconUrl(name)).then((r) => (r.ok ? r.text() : '')));
+  return wanted(sources, name, redraw);
 }
 
 // As icon_source_edit_cb and svg_replace_color_attributes recolor a multicolor icon: each group with a blender_ id
@@ -85,21 +99,17 @@ const svgSize = (svg) => {
   return { width: box?.[2] ?? Number(tag.match(/\bwidth="([\d.]+)/)?.[1] ?? 1600), height: box?.[3] ?? Number(tag.match(/\bheight="([\d.]+)/)?.[1] ?? 1600) };
 };
 
-function icon(name, size, scale, multicolor, colors) {
-  const svg = source(name.toLowerCase());
+function icon(name, size, scale, multicolor, colors, redraw) {
+  const svg = source(name.toLowerCase(), redraw);
   if (!svg) return null;
   const key = `${name}|${size * scale}|${multicolor}`;
-  if (!rasters.has(key)) {
-    rasters.set(key, null);
-    rasterize(multicolor ? editSource(svg, colors) : svg, size, scale, multicolor).then((r) => { rasters.set(key, r); changed(); }, () => {});
-  }
-  return rasters.get(key);
+  if (!rasters.has(key)) loaded(rasters, key, rasterize(multicolor ? editSource(svg, colors) : svg, size, scale, multicolor));
+  return wanted(rasters, key, redraw);
 }
 
 // Draws a recording ({ draw: [...] }) on a 2D context scaled to device pixels by `scale`, for a region `height`
 // pixels high. `redraw()` is called when icons it waited for have loaded.
 export function drawRecording(ctx, { draw, iconColors = {} }, { height, scale = 1, redraw = () => {} }) {
-  changed = redraw;
   const y = (v) => height - v;
   const tint = new OffscreenCanvas(1, 1).getContext('2d');
   for (const op of draw) {
@@ -163,7 +173,7 @@ export function drawRecording(ctx, { draw, iconColors = {} }, { height, scale = 
       ctx.textBaseline = 'alphabetic';
       ctx.fillText(op.text, Math.round(op.at[0]), Math.round(y(op.at[1])));
     } else if (op.op === 'icon') {
-      const raster = icon(op.icon, op.size, scale, !!op.multicolor, iconColors);
+      const raster = icon(op.icon, op.size, scale, !!op.multicolor, iconColors, redraw);
       if (raster) {
         const left = Math.round(op.at[0]) + raster.offsetX / scale, top = y(Math.round(op.at[1]) + raster.offsetY / scale);
         if (op.multicolor) {
