@@ -63,8 +63,9 @@ function runOperator(C, idname, props) {
     for (const [name, value] of Object.entries(props)) {
       const numbers = Float64Array.from([value].flat(), Number);
       const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
+      // A string is an enum item's identifier, or else a string property's value (font.text_insert's text).
       const ok = withString(name, (namePointer) => items !== null
-        ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
+        ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item) || (typeof value === 'string' && (x.operator_string_set(op, namePointer, item), true)))
         : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
       if (!ok) throw new Error(`${idname} has no property ${name} = ${value}`);
     }
@@ -403,7 +404,16 @@ export class BlenderMain {
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
   data(ob) { return x.object_data(ob) >>> 0; }
 
+  // The context its operators run in (bContext).
+  get C() { return this.#C; }
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
   poll(idname) { return pollOperator(this.#C, idname); }
   enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
 }
+
+// The one Blender world every subsystem's data lives in (the module's Main); a realm makes it once.
+let shared = null;
+export const blenderMain = () => (shared ??= new BlenderMain());
+
+// What subsystems with exports of their own (blenkernel/curve) reach the module through.
+export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems };

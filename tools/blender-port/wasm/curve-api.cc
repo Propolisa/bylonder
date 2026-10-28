@@ -171,6 +171,14 @@ EXPORT(curve_nurbs_set) void curve_nurbs_set(Object *ob, int nurbs_num, const in
   cu.actvert = actvert;
 }
 
+/* What RNA's update does after a point of a spline changes (rna_Curve_update_points): its handles calculated again. */
+EXPORT(curve_nurb_handles_calc) void curve_nurb_handles_calc(Object *ob, int index)
+{
+  if (Nurb *nu = static_cast<Nurb *>(BLI_findlink(&nurbs_of(ob), index))) {
+    BKE_nurb_handles_calc(nu);
+  }
+}
+
 /* Text: its body (UTF-8; the edit text in Edit Mode), each character's format, the cursor and selection, the text
  * boxes, and in Edit Mode where the evaluated layout put the cursor and the selection boxes. */
 struct TextHeader {

@@ -2,7 +2,7 @@
 // Bylonder's scene owns the objects. Before an operator polls or runs, each object goes in through its RNA (Blender's
 // values and axes) with its parent, mode and base, and the selected meshes when their Mesh changed. After it runs,
 // what it tagged comes back the same way: transforms through RNA, a Mesh as the object's Mesh data.
-import { BlenderMain, OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
+import { blenderMain, OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
 import { mesh_serialize } from '../../blenkernel/mesh/mesh.js';
 import { objectMesh } from './object-mesh.js';
 import { rebuildMesh } from './mesh-catalog.js';
@@ -18,7 +18,7 @@ const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
 //   rna: createRNA(host), whose host has the world and selection; transaction(fn): an undo step around a change.
 export function createBlenderObjects({ rna, transaction, notify }) {
   const { world, selection } = rna.host;
-  const blender = new BlenderMain();
+  const blender = blenderMain();
   // Each node's object in the module: { ob, type, mesh (what its Mesh was made from) }.
   const mirrored = new Map();
 
