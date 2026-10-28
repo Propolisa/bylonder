@@ -63,6 +63,17 @@ no counterpart for; the overlap is kept equal both ways.
    from them, so Babylon-native playback and export work without Blender's runtime. The viewport shows Blender's
    evaluation; Babylon's animations are exactly derived from it, never edited on their own.
    Decided 2026-10-28.
+4a. **Similar is not equivalent; every object has a home.** A Blender light and a Babylon spot light are not the
+   same thing, and the mapping between them can lose information. So each object, and each property of it, belongs
+   to one world, the one whose native type it is, and is stored in that world's own rich representation in the
+   Bylonder project: a Blender light keeps all of Blender's light settings, a Babylon spot light all of Babylon's. The
+   other world gets the nearest equivalent through the mapping, marked as derived, and an edit there writes back
+   only what maps exactly; the rest stays as the owner has it. Where both worlds hold the same data exactly
+   (animation, transforms), the property belongs to both. Shared representations (mesh buffers) carry what both
+   use without mixing the source objects' own properties. Converting between worlds happens on export and import
+   (`.babylon`, JS, `.blend`), by the least lossy mapping, with user settings for the tradeoffs, and every loss is
+   reported in Blender's Info editor (a Babylon spot light written as a Blender spot light: its exponent and its
+   angle falloff approximated). Decided 2026-10-28.
 5. **Large data has one owner.** Mesh geometry (and other large buffers: attributes, images) lives in the Babylon
    scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
    needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
