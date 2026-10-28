@@ -16,7 +16,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -40,7 +40,7 @@ export var DATA_PT_context_light =  __class__ ('DATA_PT_context_light', [DataBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -72,7 +72,7 @@ export var DATA_PT_preview =  __class__ ('DATA_PT_preview', [DataButtonsPanel, P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -94,7 +94,7 @@ export var DATA_PT_light =  __class__ ('DATA_PT_light', [DataButtonsPanel, Panel
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -125,7 +125,7 @@ export var DATA_PT_EEVEE_light =  __class__ ('DATA_PT_EEVEE_light', [DataButtons
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -206,7 +206,7 @@ export var DATA_PT_EEVEE_light_distance =  __class__ ('DATA_PT_EEVEE_light_dista
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -225,7 +225,7 @@ export var DATA_PT_EEVEE_light_distance =  __class__ ('DATA_PT_EEVEE_light_dista
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -244,7 +244,7 @@ export var DATA_PT_EEVEE_light_distance =  __class__ ('DATA_PT_EEVEE_light_dista
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -272,7 +272,7 @@ export var DATA_PT_EEVEE_light_shadow =  __class__ ('DATA_PT_EEVEE_light_shadow'
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -290,7 +290,7 @@ export var DATA_PT_EEVEE_light_shadow =  __class__ ('DATA_PT_EEVEE_light_shadow'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -332,7 +332,7 @@ export var DATA_PT_EEVEE_light_influence =  __class__ ('DATA_PT_EEVEE_light_infl
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -371,7 +371,7 @@ export var DATA_PT_spot =  __class__ ('DATA_PT_spot', [DataButtonsPanel, Panel],
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -390,7 +390,7 @@ export var DATA_PT_spot =  __class__ ('DATA_PT_spot', [DataButtonsPanel, Panel],
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -417,7 +417,7 @@ export var DATA_PT_light_animation =  __class__ ('DATA_PT_light_animation', [Dat
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {

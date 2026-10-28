@@ -7,7 +7,7 @@ var __name__ = '__main__';
 export var cloth_panel_enabled = function (md) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -35,7 +35,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -58,7 +58,7 @@ export var PHYSICS_PT_cloth =  __class__ ('PHYSICS_PT_cloth', [PhysicButtonsPane
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -75,7 +75,7 @@ export var PHYSICS_PT_cloth =  __class__ ('PHYSICS_PT_cloth', [PhysicButtonsPane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -107,7 +107,7 @@ export var PHYSICS_PT_cloth_physical_properties =  __class__ ('PHYSICS_PT_cloth_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -141,7 +141,7 @@ export var PHYSICS_PT_cloth_stiffness =  __class__ ('PHYSICS_PT_cloth_stiffness'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -182,7 +182,7 @@ export var PHYSICS_PT_cloth_damping =  __class__ ('PHYSICS_PT_cloth_damping', [P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -223,7 +223,7 @@ export var PHYSICS_PT_cloth_internal_springs =  __class__ ('PHYSICS_PT_cloth_int
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -242,7 +242,7 @@ export var PHYSICS_PT_cloth_internal_springs =  __class__ ('PHYSICS_PT_cloth_int
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -287,7 +287,7 @@ export var PHYSICS_PT_cloth_pressure =  __class__ ('PHYSICS_PT_cloth_pressure', 
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -306,7 +306,7 @@ export var PHYSICS_PT_cloth_pressure =  __class__ ('PHYSICS_PT_cloth_pressure', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -349,7 +349,7 @@ export var PHYSICS_PT_cloth_cache =  __class__ ('PHYSICS_PT_cloth_cache', [Physi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -374,7 +374,7 @@ export var PHYSICS_PT_cloth_shape =  __class__ ('PHYSICS_PT_cloth_shape', [Physi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -426,7 +426,7 @@ export var PHYSICS_PT_cloth_collision =  __class__ ('PHYSICS_PT_cloth_collision'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -456,7 +456,7 @@ export var PHYSICS_PT_cloth_object_collision =  __class__ ('PHYSICS_PT_cloth_obj
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -475,7 +475,7 @@ export var PHYSICS_PT_cloth_object_collision =  __class__ ('PHYSICS_PT_cloth_obj
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -512,7 +512,7 @@ export var PHYSICS_PT_cloth_self_collision =  __class__ ('PHYSICS_PT_cloth_self_
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -531,7 +531,7 @@ export var PHYSICS_PT_cloth_self_collision =  __class__ ('PHYSICS_PT_cloth_self_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -569,7 +569,7 @@ export var PHYSICS_PT_cloth_property_weights =  __class__ ('PHYSICS_PT_cloth_pro
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -615,7 +615,7 @@ export var PHYSICS_PT_cloth_field_weights =  __class__ ('PHYSICS_PT_cloth_field_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {

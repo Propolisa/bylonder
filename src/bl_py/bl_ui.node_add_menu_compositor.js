@@ -128,6 +128,24 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var NODE_MT_compositor_node_input_base =  __class__ ('NODE_MT_compositor_node_input_base', [node_add_menu.NodeMenu], {
 	__module__: __name__,
 	bl_label: 'Input',
@@ -1614,6 +1632,7 @@ export function __py_setattr__ (key, value) {
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
 		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'NODE_MT_compositor_node_input_base': NODE_MT_compositor_node_input_base = value; break;
 		case 'NODE_MT_compositor_node_input_constant_base': NODE_MT_compositor_node_input_constant_base = value; break;
 		case 'NODE_MT_compositor_node_input_scene_base': NODE_MT_compositor_node_input_scene_base = value; break;

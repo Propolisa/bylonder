@@ -132,6 +132,24 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var add_empty_geometry_node_group = function (py_name, add_geometry_input) {
 	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && add_geometry_input.hasOwnProperty ("__kwargtrans__"))) {;
 		var add_geometry_input = true;
@@ -954,6 +972,7 @@ export function __py_setattr__ (key, value) {
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
 		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'add_empty_geometry_node_group': add_empty_geometry_node_group = value; break;
 		case 'geometry_node_group_empty_new': geometry_node_group_empty_new = value; break;
 		case 'geometry_node_group_empty_modifier_new': geometry_node_group_empty_modifier_new = value; break;
