@@ -16,14 +16,19 @@ import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js'
 export function args(list, names) {
   const last = list.at(-1), keywords = last && Object.hasOwn(last, '__kwargtrans__') ? last : {};
   const positional = keywords === last ? list.slice(0, -1) : list;
-  return Object.fromEntries(names.map((name, i) => [name, keywords[name] ?? positional[i]]));
+  // Transcrypt renames keyword arguments that are JS or runtime names (new as py_new).
+  return Object.fromEntries(names.map((name, i) => [name, keywords[name] ?? keywords['py_' + name] ?? positional[i]]));
 }
 
 // OperatorProperties: what a script sets on an operator button; a macro's operators (props.MESH_OT_rip) have their own.
 const MACRO_PART = /_OT_/;
+// A collection property the scripts add items to (node.add_node's settings: props.settings.add()).
+const COLLECTIONS = new Set(['settings']);
+const itemCollection = () => Object.assign([], { add() { const item = {}; this.push(item); return item; } });
 // A property read before it is set is an array the script sets elements of (props.constraint_axis[0] = True).
 export const operatorProperties = () => new Proxy({}, {
-  get: (target, key) => (MACRO_PART.test(key) ? (target[key] ??= operatorProperties()) : typeof key === 'string' ? (target[key] ??= []) : target[key]),
+  get: (target, key) => (MACRO_PART.test(key) ? (target[key] ??= operatorProperties())
+    : COLLECTIONS.has(key) ? (target[key] ??= itemCollection()) : typeof key === 'string' ? (target[key] ??= []) : target[key]),
 });
 // The values a script set, without a macro's parts. Transcrypt renames Python names its runtime uses (type becomes
 // py_metatype, clear py_clear); no operator property starts with py_.
