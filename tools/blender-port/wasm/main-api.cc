@@ -108,6 +108,8 @@ EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return &ctx->scene; }
 /* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }
 EXPORT(main_view_layer) ViewLayer *main_view_layer(BlenderMain *ctx) { return &ctx->view_layer; }
+/* The scene's active camera (an object, or null). */
+EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Object *camera) { ctx->scene.camera = camera; }
 
 static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(&ctx->view_layer, ob); }
 

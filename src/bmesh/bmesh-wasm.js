@@ -400,6 +400,8 @@ export class BlenderMain {
   // The scene's 3D cursor location and its pivot point (V3D_AROUND_*), which operators read.
   set cursor(location) { new Float32Array(x.memory.buffer, x.main_cursor(this.#context) >>> 0, 3).set(location); }
   set pivotPoint(pivot) { x.main_pivot_point_set(this.#context, pivot); }
+  // The scene's active camera object (or null).
+  set camera(ob) { x.main_scene_camera_set(this.#context, ob ?? 0); }
 
   // World matrices, parents first, as the depsgraph evaluates them; clears the tags.
   evaluate() { x.main_evaluate(this.#context); }

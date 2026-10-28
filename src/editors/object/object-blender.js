@@ -65,6 +65,7 @@ export function createBlenderObjects({ rna, transaction, notify, ids = createBle
     const scene = rna.pointer('Scene', world);
     blender.cursor = Array.from(scene.cursor.location);
     blender.pivotPoint = V3D_AROUND[scene.tool_settings.transform_pivot_point];
+    blender.camera = mirrored.get(world.sceneSettings?.camera())?.ob;
     blender.evaluate();
   }
 
