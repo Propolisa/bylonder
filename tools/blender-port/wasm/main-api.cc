@@ -92,7 +92,7 @@ EXPORT(main_new) BlenderMain *main_new()
   BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
   ctx->scene.master_collection = BKE_collection_master_add(&ctx->scene);
   ctx->scene.toolsettings = &ctx->tool_settings;
-  /* Auto keying is off until Bylonder sets its own (anim_scene_time_set). */
+  /* Auto keying is off until the scene sync sets Bylonder's. */
   ctx->tool_settings.autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;

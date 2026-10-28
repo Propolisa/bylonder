@@ -118,6 +118,7 @@ const watts = (light) => (lightType(light) === 'SUN' ? 1 : 1000);
 const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXED;
 const sensor = (camera) => (horizontal(camera) ? 36 : 24);
 const settable = (key) => ({ get: (owner) => owner[key], set: (owner, value) => { owner[key] = value; } });
+const subframe = (world) => world.animation.time.frame - Math.floor(world.animation.time.frame);
 const synced = (binding, sync = true) => ({ ...(typeof binding === 'function' ? { get: binding } : binding), sync });
 const quaternion = (ob) => !!ob.rotationQuaternion;
 // A setting of an editor's space data (SpaceText, SpaceConsole), which redraws it.
@@ -264,10 +265,12 @@ const STRUCTS = {
   }),
   Scene: {
     name: { get: (world) => world.sceneSettings?.state.name ?? 'Scene', set: (world, name) => world.sceneSettings.set('name', name, false) },
-    frame_current: { get: (world) => Math.round(world.animation.time.frame), set: (world, frame) => world.animation.time.configure({ frameCurrent: frame }, { record: false }) },
+    // The frame is Blender's whole frame and its subframe (playback that drops frames is between frames).
+    frame_current: { get: (world) => Math.floor(world.animation.time.frame), set: (world, frame) => world.animation.time.configure({ frameCurrent: frame + subframe(world) }, { record: false }), sync: true },
+    frame_subframe: { get: subframe, set: (world, value) => world.animation.time.configure({ frameCurrent: Math.floor(world.animation.time.frame) + value }, { record: false }), sync: true },
     ...Object.fromEntries([['frame_start', 'frameStart'], ['frame_end', 'frameEnd'], ['frame_step', 'frameStep'], ['use_preview_range', 'usePreviewRange'],
       ['frame_preview_start', 'framePreviewStart'], ['frame_preview_end', 'framePreviewEnd'], ['sync_mode', 'syncMode']].map(([name, key]) => [name, {
-      get: (world) => world.animation.time.state[key], set: (world, value) => world.animation.time.configure({ [key]: value }, { record: false }) }])),
+      get: (world) => world.animation.time.state[key], set: (world, value) => world.animation.time.configure({ [key]: value }, { record: false }), sync: name !== 'sync_mode' }])),
     camera: (world, r) => r.pointer('Object', world.sceneSettings?.camera()),
     objects: (world, r) => collection(r.objects().map((ob) => r.pointer('Object', ob))),
     use_gravity: { get: (world) => world.sceneSettings?.state.useGravity ?? true, set: (world, value) => world.sceneSettings.set('useGravity', value, false), sync: true },
@@ -292,7 +295,7 @@ const STRUCTS = {
       const mode = SELECT_BITS.reduce((mask, bit, i) => (value[i] ? mask | bit : mask), 0);
       if (mode && world.editMode) world.editMode.selectmode = mode;
     }, ''),
-    use_keyframe_insert_auto: { get: (world) => world.animation.time.state.autoKey, set: (world, value) => world.animation.time.configure({ autoKey: !!value }, { record: false }) },
+    use_keyframe_insert_auto: { get: (world) => world.animation.time.state.autoKey, set: (world, value) => world.animation.time.configure({ autoKey: !!value }, { record: false }), sync: true },
   },
   RenderSettings: {
     fps: { get: (world) => world.animation.time.state.fps, set: (world, fps) => world.animation.time.configure({ fps }, { record: false }), sync: true },

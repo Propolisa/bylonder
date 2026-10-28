@@ -156,18 +156,13 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     } finally { evaluating = false; }
     notify();
   };
-  const syncTime = () => {
-    const t = time.state;
-    anim.setTime({ frame: time.frame, start: t.frameStart, end: t.frameEnd, previewStart: t.framePreviewStart, previewEnd: t.framePreviewEnd, preview: t.usePreviewRange, fps: t.fps, autoKey: t.autoKey });
-  };
+  // The scene's time is in Main through the scene sync's mapping (Scene.frame_current and the rest, main-sync.js).
   time.subscribe(kind => {
     if (quiet) return;
-    syncTime();
     if (kind === 'frame') evaluate();
     else if (kind === 'settings') { changed(); commit(); }
     else notify();
   });
-  syncTime();
 
   // Keys from a saved track: v3's with Blender's settings, v2's inserted as Blender's keying inserts them.
   function loadTrack(track) {
@@ -279,7 +274,6 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
       parsed.action.tracks.forEach(loadTrack);
       curves = null;
       quiet = true; try { time.load(parsed.time); } finally { quiet = false; }
-      syncTime();
       if (apply) evaluate(); else { for (const [ref, ch] of channels) if (ch.available()) pose.set(ref, clone(ch.get())); notify(); }
     },
     // Runs an operator of another editor that may insert keys (auto keying): the animation takes those it inserted.
@@ -294,7 +288,6 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     // After Blender's operators changed the F-Curves (an animation editor): channels take the new values.
     changed() { changed(); },
     edited() { curves = null; evaluate(); onChange(api.serialize()); },
-    syncTime,
     mute(ref) { const t = trackFor(ref); if (t) { t.fcurve.flag ^= FCURVE.MUTED; changed(); evaluate(); commit(); } },
     // A Babylon AnimationGroup sampling each F-Curve at every frame of the scene range.
     toAnimationGroup(scene, groupName = name) {

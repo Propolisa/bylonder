@@ -33,6 +33,8 @@ const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, M
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
 const FLAGS = { hideSelect: 'hide_select', hideViewport: 'hide_viewport', hideRender: 'hide_render' };
+// Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
+export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material' };
 const LAYER_FLAGS = { exclude: 'exclude', hideViewport: 'hide_viewport' };
 
 // A value as both models compare it: arrays plain, Main's floats being 32-bit.
@@ -82,7 +84,12 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
   const sceneStruct = (name) => ({ struct: name, ptr: blender.scene + dnaProperty('Scene', { RenderSettings: 'render', UnitSettings: 'unit_settings' }[name]).offset, shadow: new Map() });
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings');
-  let applying = false, scheduled = false, sceneChanged = true;
+  const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), shadow: new Map() };
+  // The scene's records, over the world: the scene, its render, unit and tool settings, those whose slices it has.
+  const sceneRecords = () => [scene, ...(world.renderSettings ? [render] : []), ...(world.sceneSettings ? [units] : []), tools];
+  let applying = false, scheduled = false, sceneChanged = true, listed = -1;
+  // The objects hooks saw change since the last flush.
+  const dirty = new Set();
   const filled = new Set();
 
   const objectType = (node) => rna.pointer('Object', node).type;
@@ -124,6 +131,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     for (const [node, entry] of objects) {
       if (alive.has(node) && objectType(node) === entry.type) continue;
       objects.delete(node);
+      dirty.delete(entry);
       entry.unwatch();
       if (!alive.has(node)) ids.remove(entry.key);
     }
@@ -134,16 +142,16 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       entry.data = { struct: dataStruct(node), ptr: blender.data(entry.ob), shadow: new Map() };
       entry.name = blender.name(entry.ob);
       entry.unwatch = watchObject(node, () => changed(entry));
-      entry.dirty = true;
+      dirty.add(entry);
       objects.set(node, entry);
     }
   }
   // A hook saw an object change (or, without one, something no hook sees): it goes to Main at the end of the task.
   function changed(entry) {
     if (applying) return;
-    if (entry) entry.dirty = true;
+    if (entry) dirty.add(entry);
     else {
-      for (const e of objects.values()) e.dirty = true;
+      for (const e of objects.values()) dirty.add(e);
       sceneChanged = true;
     }
     if (!scheduled) {
@@ -161,6 +169,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     }
     blender.setParent(ob, objects.get(node.parent)?.ob);
     blender.setMode(ob, data.mode);
+    if (entry.id !== nodeId(node)) blender.setProperty(ob, PROPERTIES.id, (entry.id = nodeId(node)));
     push(entry, node);
     if (entry.data.ptr && entry.data.struct) push(entry.data, node);
     const slots = world.materials?.slots(node);
@@ -187,9 +196,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
 
   // The scene: its values, its camera and world, and what operators read of its tool settings.
   function pushScene() {
-    push(scene, world);
-    if (world.renderSettings) push(render, world);
-    if (world.sceneSettings) push(units, world);
+    for (const record of sceneRecords()) push(record, world);
     const settings = rna.pointer('Scene', world);
     blender.cursor = Array.from(settings.cursor.location);
     blender.pivotPoint = V3D_AROUND[settings.tool_settings.transform_pivot_point];
@@ -207,9 +214,17 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       record.ptr = record.ma;
       if (blender.name(record.ma) !== material.name && record.babylonName !== material.name) { blender.rename(record.ma, material.name); record.babylonName = material.name; }
       blender.setFakeUser(record.ma, !!material.metadata?.wbFakeUser);
+      if (!record.kept) keepMaterial(record, material);
       push(record, material);
       pushTree(record, record.ma, rna.pointer('Material', material));
     }
+  }
+  // What only Babylon has of a material, for a round trip: its kind, and a node material's graph as Babylon saves it.
+  function keepMaterial(record, material) {
+    const type = world.materials.type(material);
+    blender.setProperty(record.ma, PROPERTIES.material, type);
+    if (type === 'node') blender.setProperty(record.ma, PROPERTIES.graph, JSON.stringify(material.serialize()));
+    record.kept = true;
   }
   // An ID's node tree, built again when the RNA of Bylonder's changed.
   function pushTree(record, id, data) {
@@ -308,18 +323,21 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // evaluated, as the depsgraph would.
   function flush(all = true) {
     if (applying) return;
-    syncObjects();
+    // Objects come and go by the world's list and by deleting (metadata, which hooks see).
+    if (all || world.objects.length !== listed || [...dirty].some(({ node, type }) => deleted(node) || objectType(node) !== type)) {
+      syncObjects();
+      listed = world.objects.length;
+    }
     if (all || sceneChanged) {
       pushMaterials();
       pushWorlds();
     }
     const active = selection.nodes.at(-1);
-    for (const entry of objects.values()) {
-      if (!entry.dirty && !all) continue;
+    for (const entry of all ? objects.values() : dirty) {
       pushObject(entry);
       pushBase(entry, active);
-      entry.dirty = false;
     }
+    dirty.clear();
     if (all || sceneChanged) {
       pushCollections();
       pushScene();
@@ -361,6 +379,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
           node.metadata = { ...node.metadata, wbDeleted: true };
           node.setEnabled(false);
           objects.delete(node);
+          dirty.delete(entry);
           entry.unwatch();
           ids.forget(entry.key);
           continue;
@@ -384,9 +403,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       selection.replace([...chosen, ...active]);
       for (const [material, record] of materials) pull(record, material);
       for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) pull(record, entry); }
-      pull(scene, world);
-      if (world.renderSettings) pull(render, world);
-      if (world.sceneSettings) pull(units, world);
+      for (const record of sceneRecords()) pull(record, world);
       if (slice()) readCollections();
       blender.evaluate();
     } finally {
@@ -467,9 +484,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       compare(`World "${entry.name}"`, record, entry);
       compareTree(`World "${entry.name}"`, record.wo, rna.pointer('World', entry));
     }
-    compare('Scene', scene, world);
-    if (world.renderSettings) compare('Scene.render', render, world);
-    if (world.sceneSettings) compare('Scene.unit_settings', units, world);
+    for (const record of sceneRecords()) compare(record.struct, record, world);
     if (blender.world !== (worlds.get(world.worlds?.active()?.id)?.wo ?? 0)) diffs.push('Scene.world differs');
     const cols = slice();
     for (const c of cols?.state.collections ?? []) {
@@ -503,10 +518,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     .map(({ node, type }) => ({ node, type }));
   // Main made Babylon's again, undoing what Blender's code changed that Bylonder does not take.
   function revert() {
-    const records = [scene, render, units, ...objects.values(), ...[...objects.values()].map((e) => e.data), ...materials.values(), ...worlds.values(),
+    const records = [scene, render, units, tools, ...objects.values(), ...[...objects.values()].map((e) => e.data), ...materials.values(), ...worlds.values(),
       ...[...collections.values()].flatMap((c) => [c, c.layer])];
     records.forEach((record) => record.shadow.clear());
-    for (const entry of objects.values()) [entry.babylonName, entry.modifiers] = [undefined, undefined];
+    for (const entry of objects.values()) [entry.babylonName, entry.modifiers, entry.id] = [undefined, undefined, undefined];
     for (const record of [...materials.values(), ...worlds.values()]) record.tree = undefined;
     collectionsSynced = '';
     flush();

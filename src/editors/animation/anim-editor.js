@@ -149,21 +149,15 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   headerApp.mount(menus);
   loadRNAUI(() => import('../../makesrna/rna-ui.json')).then(() => { headerState.ready = true; });
 
-  // Before Blender's code reads them: the scene's time, and the objects' bases (selection, visibility).
+  // Before Blender's code reads them: the scene (its time, the objects' bases) made current in Main.
   function sync() {
-    scene?.flush();
-    animation.syncTime();
+    scene.flush();
   }
-  // After it ran: the keys it changed reach the channels, the frame it set reaches the scene, and a finished
-  // operator that is an undo step makes one.
+  // After it ran: the keys it changed reach the channels, what else it changed (the frame, the range, the selection)
+  // reaches the scene, and a finished operator that is an undo step makes one.
   function after(status) {
     animation.edited();
-    const next = animation.anim.frame;
-    if (Math.round(next) !== Math.round(animation.time.frame)) animation.time.seek(next);
-    const { start, end, previewStart, previewEnd, preview } = animation.anim.range, t = animation.time.state;
-    if (start !== t.frameStart || end !== t.frameEnd || preview !== t.usePreviewRange || (preview && (previewStart !== t.framePreviewStart || previewEnd !== t.framePreviewEnd))) {
-      animation.time.configure({ frameStart: start, frameEnd: end, usePreviewRange: preview, ...(preview ? { framePreviewStart: previewStart, framePreviewEnd: previewEnd } : {}) }, { record: false });
-    }
+    scene.writeBack();
     if (status & OPERATOR_FINISHED && area.undo) commit();
     redraw();
     return status;

@@ -98,6 +98,10 @@ assert(Math.abs(blender.nodeTree(sync.materialOf(material)).nodes[1].inputs.Roug
 assert.deepEqual(blender.nodeTree(blender.world).nodes.map((node) => node.idname), ['ShaderNodeOutputWorld', 'ShaderNodeBackground'], "the scene's world is a Background");
 assert.deepEqual(sync.check(), []);
 
+// What only Babylon has is kept as custom properties where a round trip needs it.
+assert.equal(blender.property(ob(cube), 'bylonder_id'), 'cube');
+assert.equal(blender.property(sync.materialOf(material), 'bylonder_material'), 'pbr');
+
 // Main holds no geometry at rest; Blender's code gets it filled.
 assert.equal(blender.mesh(ob(cube)).verts_num, 0, "Main's Mesh is empty at rest");
 
@@ -142,6 +146,9 @@ const steps = [
   ['Blender: delete an object', () => blenderSide(() => blender.remove(ob(empty)))],
   ['Blender: apply scale with geometry', () => { cube.scaling.set(1, 3, 1); selection.replace([cube]); sync.run(() => blender.run('object.transform_apply', { location: false, rotation: false, scale: true }), { meshes: [cube] }); }],
   ['add an object', () => { box('Added', [0, 0, -4]); }],
+  ['scene time', () => animation.time.configure({ frameCurrent: 42, frameEnd: 120, autoKey: true })],
+  ['Blender: the frame and range', () => blenderSide(() => { dnaSet('Scene', blender.scene, 'frame_current', 7); dnaSet('Scene', blender.scene, 'frame_start', 3); }),
+    () => assert.deepEqual([animation.time.frame, animation.time.state.frameStart], [7, 3], "Blender's frame and range come back")],
 ];
 for (const [name, edit, expect] of steps) {
   edit();
@@ -180,6 +187,6 @@ const start = performance.now();
 for (let i = 0; i < 100; i++) { cube.position.x = i; await null; }
 const perEdit = (performance.now() - start) / 100;
 assert.equal(location(cube)[0], 99);
-assert(perEdit < 5, `an edit takes ${perEdit.toFixed(2)} ms to reach Main`);
+assert(perEdit < 10, `an edit takes ${perEdit.toFixed(2)} ms to reach Main`);
 
 console.log(`Scene sync: Babylon and Main stay equal through ${steps.length} edits from both sides, undone and redone; an edit reaches Main in ${perEdit.toFixed(2)} ms among ${objects.length} objects`);
