@@ -526,6 +526,8 @@ export class BlenderMain {
   get activeCollection() { return x.layer_collection_collection(x.main_layer_collection_active(this.#context)) >>> 0; }
   set activeCollection(collection) { x.main_layer_collection_activate(this.#context, this.layerCollection(collection)); }
   syncCollections() { x.main_collections_sync(this.#context); }
+  // After Blender's code deleted objects: they leave the Scene Collection too, as they leave the scenes in Main.
+  cleanMasterCollection() { x.main_collection_master_clean(this.#context); }
   // An object's base (eBaseFlags, with ACTIVE when it is the active one), or null when it has none in the view layer,
   // and its parent.
   base(ob) {

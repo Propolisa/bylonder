@@ -20,6 +20,8 @@ import { dnaGet, dnaSet } from '../src/makesrna/dna-struct.js';
 import { nodeId } from '../src/editors/object/identity.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { createHistory } from '../src/editors/undo/storage.js';
+import '../src/editors/interface/region-draw.js';
+import { OutlinerArea } from '../src/editors/space_outliner/outliner-area.js';
 
 const scene = new Scene(new NullEngine());
 const objects = [];
@@ -163,6 +165,33 @@ assert(world.collections.state.collections.at(-1).hideRender, "a collection's fl
 assert(empty.metadata.wbDeleted, 'an object Blender deleted is deleted');
 assert.deepEqual(other.rotationQuaternion.asArray().map(Math.abs), [0, 0, 0, 1], 'rotation_clear comes back');
 assert.equal(dnaGet('Object', ob(other), 'rotation_mode'), 'QUATERNION');
+
+// The Outliner's operators run on the same Main: a click selects, X deletes, and both come back.
+{
+  const area = new OutlinerArea(blender);
+  area.resize(340, 600);
+  sync.flush();
+  const rowOf = (name) => { const row = area.draw().draw.find((c) => c.op === 'text' && c.text === name); return [row.at[0] + 5, row.at[1] + 4]; };
+  area.run('outliner.item_activate', { deselect_all: true }, { type: 'LEFTMOUSE', value: 'CLICK', region: rowOf('Added'), modifier: 0 });
+  sync.writeBack();
+  assert.deepEqual(selection.nodes.map((node) => node.name), ['Added'], 'an Outliner click selects');
+  sync.flush();
+  const event = (type, value, region) => ({ type, value, region, modifier: 0 });
+  area.run('outliner.item_drag_drop', {}, event('LEFTMOUSE', 'CLICK_DRAG', rowOf('Added')));
+  area.dragUpdate(event('MOUSEMOVE', 'NOTHING', rowOf('Scene Collection')));
+  area.drop(event('LEFTMOUSE', 'RELEASE', rowOf('Scene Collection')));
+  sync.writeBack();
+  assert(world.collections.state.scene.objects.includes('added'), 'dropping on the Scene Collection moves it there');
+  sync.flush();
+  // The Outliner redraws when the collections change, which writing back does.
+  const unsubscribe = world.collections.subscribe(() => area.draw());
+  area.run('outliner.delete', {});
+  sync.writeBack();
+  assert(objects.find((node) => node.name === 'Added').metadata.wbDeleted, 'the Outliner deletes');
+  assert.deepEqual(sync.check(), []);
+  unsubscribe();
+  area.cancel();
+}
 
 // Writing back does not echo: the flush after it writes nothing more into Main.
 const writes = sync.writes;

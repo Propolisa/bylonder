@@ -42,6 +42,7 @@
 #include "DNA_windowmanager_types.h"
 #include "DNA_workspace_types.h"
 #include "ED_screen.hh"
+#include "GPU_material.hh"
 #include "MEM_guardedalloc.h"
 #include "NOD_defaults.hh"
 #include "WM_api.hh"
@@ -175,6 +176,31 @@ EXPORT(main_collection_remove) void main_collection_remove(BlenderMain *ctx, Col
 }
 /* The Scene Collection. */
 EXPORT(main_collection_master) Collection *main_collection_master(BlenderMain *ctx) { return ctx->scene.master_collection; }
+
+/* Objects Blender's code deleted leave the Scene Collection, as remapping unlinks a deleted object from the scenes in
+ * Main (BKE_collections_object_remove_nulls), which the module's scene is not one of. Its object cache is made again. */
+EXPORT(main_collection_master_clean) void main_collection_master_clean(BlenderMain *ctx)
+{
+  Collection *master = ctx->scene.master_collection;
+  Set<const Object *> alive;
+  for (const Object &ob : ctx->bmain->objects) {
+    alive.add(&ob);
+  }
+  bool changed = false;
+  for (CollectionObject *cob = static_cast<CollectionObject *>(master->gobject.first), *next; cob; cob = next) {
+    next = cob->next;
+    if (!alive.contains(cob->ob)) {
+      BLI_freelinkN(&master->gobject, cob);
+      changed = true;
+    }
+  }
+  if (changed) {
+    MEM_delete(master->runtime->gobject_hash);
+    master->runtime->gobject_hash = nullptr;
+    BKE_collection_object_cache_free(ctx->bmain, master, 0);
+    collections_synced(ctx);
+  }
+}
 
 /* A collection's children: those given, in order. */
 EXPORT(collection_children_set) void collection_children_set(BlenderMain *ctx, Collection *parent, Collection **children, int count)
@@ -637,6 +663,37 @@ void BKE_scene_object_base_flag_sync_from_base(Base *base) { base->object->base_
 
 /* As wm_window.cc defines it for the one window, whose screen has no 3D View of the module's to sync. */
 void WM_windows_scene_data_sync(const ListBaseT<wmWindow> * /*win_lb*/, Scene * /*scene*/) {}
+
+/* port-override: node_tree_update.cc, which updates node trees by their node types' declarations: the module has no
+ * node types (Blender's are in its nodes module), so its node trees hold what Bylonder built and nothing updates them;
+ * Blender's node types take them over when a .blend is read. */
+void BKE_ntree_update_tag_all(bNodeTree *) {}
+void BKE_ntree_update_tag_node_property(bNodeTree *, bNode *) {}
+void BKE_ntree_update_tag_node_new(bNodeTree *, bNode *) {}
+void BKE_ntree_update_tag_node_removed(bNodeTree *) {}
+void BKE_ntree_update_tag_node_mute(bNodeTree *, bNode *) {}
+void BKE_ntree_update_tag_node_internal_link(bNodeTree *, bNode *) {}
+void BKE_ntree_update_tag_node_type(bNodeTree *, bNode *) {}
+void BKE_ntree_update_tag_socket_property(bNodeTree *, bNodeSocket *) {}
+void BKE_ntree_update_tag_socket_new(bNodeTree *, bNodeSocket *) {}
+void BKE_ntree_update_tag_socket_type(bNodeTree *, bNodeSocket *) {}
+void BKE_ntree_update_tag_socket_availability(bNodeTree *, bNodeSocket *) {}
+void BKE_ntree_update_tag_socket_removed(bNodeTree *) {}
+void BKE_ntree_update_tag_link_changed(bNodeTree *) {}
+void BKE_ntree_update_tag_link_removed(bNodeTree *) {}
+void BKE_ntree_update_tag_link_added(bNodeTree *, bNodeLink *) {}
+void BKE_ntree_update_tag_link_mute(bNodeTree *, bNodeLink *) {}
+void BKE_ntree_update_tag_active_output_changed(bNodeTree *) {}
+void BKE_ntree_update_tag_missing_runtime_data(bNodeTree *) {}
+void BKE_ntree_update_tag_parent_change(bNodeTree *, bNode *) {}
+void BKE_ntree_update_tag_id_changed(Main *, ID *) {}
+void BKE_ntree_update_tag_image_user_changed(bNodeTree *, ImageUser *) {}
+void BKE_ntree_update(Main & /*bmain*/, std::optional<Span<bNodeTree *>> /*modified_trees*/, const NodeTreeUpdateExtraParams & /*params*/) {}
+void BKE_ntree_update_after_single_tree_change(Main & /*bmain*/, bNodeTree & /*modified_tree*/, const NodeTreeUpdateExtraParams & /*params*/) {}
+void BKE_ntree_update_without_main(bNodeTree & /*tree*/) {}
+
+/* port-override: the module has no GPU materials, so a material's list of them is empty. */
+void GPU_material_free(ListBaseT<LinkData> * /*gpumaterial*/) {}
 
 /* As area.cc defines it for the regions Bylonder's areas have, none of which overlap. */
 bool ED_region_is_overlap(int /*spacetype*/, int /*regiontype*/) { return false; }

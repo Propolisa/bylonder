@@ -105,7 +105,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (!field || field.kind === 'pointer' || field.kind === 'struct') continue;
       const value = plain(binding.get());
       if (record.shadow.has(name) && same(record.shadow.get(name), value)) continue;
-      if (!holds(field, value)) continue;
+      if (!holds(field, value)) {
+        // An enum whose items Blender makes per call (a unit's): Main keeps its own.
+        (record.unheld ??= new Set()).add(name);
+        continue;
+      }
       dnaSet(record.struct, record.ptr, name, value);
       record.shadow.set(name, dnaGet(record.struct, record.ptr, name));
       api.writes++;
@@ -116,7 +120,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     let changed = false;
     for (const [name, binding] of syncBindings(rna, record.struct, owner)) {
       const field = dnaProperty(record.struct, name);
-      if (!field || field.kind === 'pointer' || field.kind === 'struct') continue;
+      if (!field || field.kind === 'pointer' || field.kind === 'struct' || record.unheld?.has(name)) continue;
       const value = dnaGet(record.struct, record.ptr, name);
       if (same(record.shadow.get(name), value)) continue;
       record.shadow.set(name, value);
@@ -374,6 +378,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     applying = true;
     try {
       const alive = new Set(blender.ids(ID_OB)), chosen = [], active = [];
+      blender.cleanMasterCollection();
       for (const [node, entry] of [...objects]) {
         if (!alive.has(entry.ob)) {
           node.metadata = { ...node.metadata, wbDeleted: true };
@@ -404,11 +409,12 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       for (const [material, record] of materials) pull(record, material);
       for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) pull(record, entry); }
       for (const record of sceneRecords()) pull(record, world);
-      if (slice()) readCollections();
       blender.evaluate();
     } finally {
       applying = false;
     }
+    // Last, as the collections' subscribers (the Outliner) draw from Main as soon as they change.
+    if (slice()) readCollections();
     world.modifiers?.refresh();
   }
 

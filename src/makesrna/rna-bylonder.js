@@ -144,7 +144,7 @@ function shaderNode(r, [name, type, inputs]) {
 const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => shaderNode(r, output) });
 const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
 // A Babylon material's inputs as Principled BSDF sockets: a PBR material's own, a Standard material's color and alpha.
-const color3 = (owner, key) => ({ get: () => [owner[key].r, owner[key].g, owner[key].b, 1], set: ([red, green, blue]) => owner[key].set(red, green, blue) });
+const color3 = (owner, key) => owner[key] && ({ get: () => [owner[key].r, owner[key].g, owner[key].b, 1], set: ([red, green, blue]) => owner[key].set(red, green, blue) });
 const baseColor = (material) => (material.getClassName() === 'PBRMaterial' ? material.albedoColor : material.diffuseColor ?? new Color3(0.8, 0.8, 0.8));
 // A PBR material's value, which other materials do without (Blender's default when read).
 const pbrValue = (key, fallback) => ({ get: (material) => (material.getClassName() === 'PBRMaterial' ? material[key] ?? fallback : fallback),
