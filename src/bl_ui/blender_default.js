@@ -7388,5 +7388,6 @@ export var generate_keymaps = function (params) {
 		return __accu0__;
 	}) (), [__call__ (km_sequencer_tool_blade, null, params), __call__ (km_sequencer_tool_slip, null, params), __call__ (km_sequencer_preview_tool_generic_cursor, null, params), __call__ (km_sequencer_preview_tool_sample, null, params), __call__ (km_sequencer_preview_tool_move, null, params), __call__ (km_sequencer_preview_tool_rotate, null, params), __call__ (km_sequencer_preview_tool_scale, null, params)]);
 };
+export var _classes_in_order = ['Params'];
 
 //# sourceMappingURL=blender_default.map

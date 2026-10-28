@@ -61,3 +61,16 @@ class Node:
     @classmethod
     def bl_rna_get_subclass(cls, idname):
         return _rna.nodes.get(idname)
+
+
+# Types the scripts name in annotations only.
+class Context:
+    pass
+
+
+class UILayout:
+    pass
+
+
+class ToolSettings:
+    bl_rna = _rna.ToolSettings

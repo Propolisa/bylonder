@@ -2,7 +2,7 @@
 colors per vertex; here each triangle takes its vertices' average color, triangles of one color forming one path.
 Writes public/icons/blender/tools/NAME.svg for the tools of the modes Bylonder has (from the transpiled toolbar).
 
-usage: python3 tools/blender-ui/icons.py   (after transpile.py)
+usage: python3 tools/blender-ui/tool_icons.py   (after transpile.py)
 """
 import json
 import os

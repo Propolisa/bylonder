@@ -76,3 +76,6 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 .bl-tooltip-title{font-weight:600}.bl-tooltip-value{color:var(--bl-tooltip-value);margin-top:calc(var(--bl-row)*.2)}
 .bl-menu .bl-icon-image{background:none}
 .toolbar-shown .view-label{left:calc(var(--bl-row)*3.25)}
+.tool-header-shown .view-label{top:calc(var(--bl-header-h) + var(--bl-row)*.5)}
+.tool-header-shown .nav-gizmo{top:calc(var(--bl-header-h) + 6px)}.tool-header-shown .nav-buttons{top:calc(var(--bl-header-h) + 108px)}
+.sidebar-shown .nav-gizmo{right:calc(var(--bl-row)*13.5 + 6px)}.sidebar-shown .nav-buttons{right:calc(var(--bl-row)*13.5 + 38px)}

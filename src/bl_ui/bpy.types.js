@@ -139,6 +139,16 @@ export var Node =  __class__ ('Node', [object], {
 		return _rna.nodes.py_get (idname);
 	});}
 });
+export var Context =  __class__ ('Context', [object], {
+	__module__: __name__,
+});
+export var UILayout =  __class__ ('UILayout', [object], {
+	__module__: __name__,
+});
+export var ToolSettings =  __class__ ('ToolSettings', [object], {
+	__module__: __name__,
+	bl_rna: _rna.ToolSettings
+});
 export var FunctionNodeInputBool = _rna.nodes ['FunctionNodeInputBool'];
 export var FunctionNodeInputInt = _rna.nodes ['FunctionNodeInputInt'];
 export var FunctionNodeInputMenu = _rna.nodes ['FunctionNodeInputMenu'];

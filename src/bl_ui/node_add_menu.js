@@ -899,5 +899,6 @@ export var generate_pathing_dict = function (pathing_dict, menus) {
 	}
 };
 export var classes = tuple ([generate_menu ('NODE_MT_group_add', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_group_base, pathing_dict: add_base_pathing_dict})), generate_menu ('NODE_MT_group_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_group_base, pathing_dict: swap_base_pathing_dict})), generate_menu ('NODE_MT_linked_group_add', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_linked_group_base, pathing_dict: add_base_pathing_dict})), generate_menu ('NODE_MT_linked_group_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_linked_group_base, pathing_dict: swap_base_pathing_dict})), generate_menu ('NODE_MT_category_layout', __kwargtrans__ ({template: AddNodeMenu, layout_base: NODE_MT_layout_base, pathing_dict: add_base_pathing_dict})), generate_menu ('NODE_MT_layout_swap', __kwargtrans__ ({template: SwapNodeMenu, layout_base: NODE_MT_layout_base, pathing_dict: swap_base_pathing_dict}))]);
+export var _classes_in_order = ['NodeMenu', 'AddNodeMenu', 'SwapNodeMenu', 'NODE_MT_group_base', 'NODE_MT_linked_group_base', 'NODE_MT_layout_base'];
 
 //# sourceMappingURL=node_add_menu.map

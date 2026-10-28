@@ -7,6 +7,7 @@ import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
 import { createToolbar } from './view3d-toolbar.js';
+import { createRegions } from './view3d-regions.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 
 const axes = [
@@ -117,6 +118,13 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   });
   section.append(toolbar.el);
   view.toolbar = toolbar;
+  // The tool settings, the header's transform settings and the sidebar, Blender's.
+  const regions = createRegions({
+    view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
+    ui: { run: blender.run, supported: blender.supported, menuItems: (idname) => drawMenu(idname, blender) },
+  });
+  section.append(regions.toolHeader, regions.sidebar);
+  view.regions = regions;
   const viewMenu = menuButton('View', blenderMenu('VIEW3D_MT_view'), { blender: 'VIEW3D_MT_view' });
   const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
@@ -141,7 +149,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   shading.append(...shadingButtons);
   const overlayButton = iconButton('overlay', 'Show Overlays', () => { state.overlays = !state.overlays; sync(); views.wake(); });
   const spacer = () => Object.assign(document.createElement('span'), { className: 'spacer' });
-  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, meshMenu, vertexMenu, edgeMenu, faceMenu, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
+  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, meshMenu, vertexMenu, edgeMenu, faceMenu, spacer(), regions.xform, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
 
   // Navigation gizmo and buttons, drawn from this view's camera.
   const drag = (el, fn) => {
@@ -203,6 +211,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     toolbar.el.hidden = !state.show_region_toolbar;
     if (state.show_region_toolbar) toolbar.draw();
     section.classList.toggle('toolbar-shown', state.show_region_toolbar);
+    section.classList.toggle('tool-header-shown', state.show_region_tool_header);
+    section.classList.toggle('sidebar-shown', state.show_region_ui);
+    regions.draw();
     views.wake();
   };
 
@@ -226,6 +237,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     nav.dispose();
     editorCamera.dispose();
     toolbar.dispose();
+    regions.dispose();
     for (const el of [label, gizmo, navButtons]) el.remove();
     ctx.shadingChanged();
   };

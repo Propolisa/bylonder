@@ -429,5 +429,6 @@ export var OBJECT_MT_modifier_add_color =  __class__ ('OBJECT_MT_modifier_add_co
 		layout.template_modifier_asset_menu_items (__kwargtrans__ ({catalog_path: self.bl_label}));
 	});}
 });
+export var _classes_in_order = ['ModifierAddMenu', 'OBJECT_MT_modifier_add', 'OBJECT_MT_modifier_add_edit', 'OBJECT_MT_modifier_add_generate', 'OBJECT_MT_modifier_add_deform', 'OBJECT_MT_modifier_add_normals', 'OBJECT_MT_modifier_add_physics', 'OBJECT_MT_modifier_add_color'];
 
 //# sourceMappingURL=properties_data_modifier.map

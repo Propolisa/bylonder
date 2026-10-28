@@ -178,8 +178,14 @@ ADD_MENUS = {"modifier": ["OBJECT_MT_modifier_add"]}
 ADD_ENUMS = {"constraint": ("object.constraint_add", "type", "Add Object Constraint")}
 
 
+# Panels Blender registers in C, which bpy.types does not list (view3d_buttons_register).
+C_PANELS = [type(name, (), {"bl_space_type": "VIEW_3D", "bl_region_type": "UI", "bl_label": label, "bl_category": "Item"})
+            for name, label in [("VIEW3D_PT_transform", "Transform"), ("VIEW3D_PT_vgroup", "Vertex Weights"), ("VIEW3D_PT_curves", "Curve Data")]]
+
+
 def panels_for(space, region=None, context=None):
-    panels = [p for p in bpy.types.Panel.__subclasses__() if getattr(p, "bl_space_type", None) == space]
+    panels = C_PANELS + [p for p in bpy.types.Panel.__subclasses__() if getattr(p, "bl_space_type", None) == space]
+    panels = [p for p in panels if getattr(p, "bl_space_type", None) == space]
     # Bylonder's engine stands in for EEVEE, so panels of other engines are left out.
     panels = [p for p in panels if not p.__name__.startswith(SKIP_PANEL_PREFIXES)
               and "BLENDER_EEVEE" in getattr(p, "COMPAT_ENGINES", {"BLENDER_EEVEE"})]
@@ -337,7 +343,7 @@ for ui_type, label, menus in EDITORS:
 
 with open(out_path, "w") as f:
     ids = sorted({m + "." + o for m in dir(bpy.ops) for o in dir(getattr(bpy.ops, m))}
-                 | {c.__name__ for c in bpy.types.Menu.__subclasses__() + bpy.types.Panel.__subclasses__() + bpy.types.Header.__subclasses__()}
+                 | {c.__name__ for c in bpy.types.Menu.__subclasses__() + bpy.types.Panel.__subclasses__() + bpy.types.Header.__subclasses__() + C_PANELS}
                  | {t for t in dir(bpy.types) if "_MT_" in t or "_PT_" in t or "_HT_" in t} | CALLED | MODAL_IDS)
     json.dump({"blender": bpy.app.version_string, "ids": ids, "tree": editors}, f, separators=(",", ":"))
 print("surface written", out_path)

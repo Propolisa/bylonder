@@ -2006,5 +2006,6 @@ export var _keymap_from_item = function (context, item) {
 	return null;
 };
 export var classes = tuple ([WM_MT_toolsystem_submenu]);
+export var _classes_in_order = ['ToolActivePanelHelper', 'ToolSelectPanelHelper', 'WM_MT_toolsystem_submenu'];
 
 //# sourceMappingURL=space_toolsystem_common.map

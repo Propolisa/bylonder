@@ -42,6 +42,12 @@ function array(get, set, names = 'xyz') {
   };
 }
 
+// Blender's axes X, Y, Z as Babylon's.
+const LOCK_AXES = ['x', 'z', 'y'];
+const dimensions = (ob) => {
+  const size = ob.getBoundingInfo?.().boundingBox.extendSize.scale(2) ?? { x: 0, y: 0, z: 0 };
+  return axes([size.x * Math.abs(ob.scaling.x), size.y * Math.abs(ob.scaling.y), size.z * Math.abs(ob.scaling.z)]);
+};
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
 const OBJECT_DATA = { MESH: 'Mesh' };
 const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.text ? 'FONT'
@@ -79,6 +85,16 @@ const STRUCTS = {
     rotation_quaternion: array((ob) => { const q = babylonQuaternion(ob); return [q.w, -q.x, -q.z, -q.y]; },
       (ob, [w, x, y, z]) => setRotation(ob, new Quaternion(-x, -z, -y, w)), 'wxyz'),
     scale: array((ob) => axes(ob.scaling.asArray()), (ob, value) => ob.scaling.copyFromFloats(...axes(value))),
+    // BKE_object_dimensions_get: the bounding box's size in the object's scale; setting it scales the object.
+    dimensions: array((ob) => dimensions(ob), (ob, value) => {
+      const now = dimensions(ob), scale = axes(ob.scaling.asArray());
+      ob.scaling.copyFromFloats(...axes(scale.map((s, i) => (now[i] ? (s * value[i]) / now[i] : s))));
+    }),
+    // The transform locks, which Bylonder keeps by Babylon's property and axis.
+    ...Object.fromEntries([['lock_location', 'position'], ['lock_rotation', 'rotation'], ['lock_scale', 'scaling']].map(([name, property]) => [name,
+      array((ob) => LOCK_AXES.map((axis) => !!ob.metadata?.wbTransformLocks?.[`${property}.${axis}`]), (ob, value) => {
+        ob.metadata = { ...ob.metadata, wbTransformLocks: { ...ob.metadata?.wbTransformLocks, ...Object.fromEntries(LOCK_AXES.map((axis, i) => [`${property}.${axis}`, !!value[i]])) } };
+      })])),
     parent: (ob, r) => (r.world.objects.includes(ob.parent) ? r.pointer('Object', ob.parent) : null),
     children: (ob, r) => collection(r.objects().filter((child) => child.parent === ob).map((child) => r.pointer('Object', child))),
     modifiers: (ob, r) => collection(modifierStack(ob).map((modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, modifier))),
@@ -121,6 +137,11 @@ const STRUCTS = {
     render: (world, r) => r.pointer('RenderSettings', world),
     unit_settings: (world, r) => r.pointer('UnitSettings', world),
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
+    // The scene's orientation, then the Move, Rotate and Scale tools' (Default: the scene's), as the scene keeps them.
+    transform_orientation_slots: (world) => (orientationSlots.get(world) ?? orientationSlots.set(world, collection([0, 1, 2, 3].map((slot) =>
+      rna('TransformOrientationSlot', Object.defineProperty({ type: slot ? 'DEFAULT' : 'GLOBAL' }, 'enum_items_of', {
+        value: (prop) => (prop === 'type' && slot ? [['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN']] : []),
+      }))))).get(world)),
   },
   ToolSettings: {
     workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },
@@ -178,6 +199,8 @@ const STRUCTS = {
   },
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
+// Scenes' transform orientation slots (Scene.transform_orientation_slots).
+const orientationSlots = new WeakMap();
 const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
 
 // An operator's struct name (WM_operator_py_idname's inverse): view3d.select_box is VIEW3D_OT_select_box.
