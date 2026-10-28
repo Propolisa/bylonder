@@ -55,7 +55,7 @@ Bylonder's Babylon scene owns all data; the module holds a mirror for as long as
 
 ### Known limits
 
-Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Blender's auto keying stays off in the module, which has no animation data yet. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+Text and curve objects go in with their Curve data and come back with it when an operator tags their geometry (`docs/curves-and-text.md`). Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Blender's auto keying stays off in the module, which has no animation data yet. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 
 ## Shared foundations
 
