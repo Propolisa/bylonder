@@ -468,7 +468,7 @@ const viewportCtx = {
     const preferred = backdrop.shown ? backdrop.view : views.focused;
     const compositorView = world.compositor.enabled ? (rendered.includes(preferred) ? preferred : rendered[0]) || null : null;
     for (const v of all) v.wantsCompositor = v === compositorView;
-    world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera });
+    world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera, preview: all.some((v) => v.preview && v.active !== false) });
     const cameraView = !!views.input?.state.cameraView;
     document.body.classList.toggle("scene-mode", cameraView);
     document.querySelector("#scene-mode").textContent = cameraView ? "Scene mode" : "Edit mode";

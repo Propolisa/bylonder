@@ -9,7 +9,10 @@ const root = new URL("../..", import.meta.url).pathname;
 // its CDN, through the environment's proxy where one is set (Chromium bypasses it for the local server).
 const playwright = createRequire(import.meta.url)("playwright");
 const proxy = process.env.HTTPS_PROXY && { proxy: { server: process.env.HTTPS_PROXY, bypass: "localhost,127.0.0.1" } };
-export const chromium = { launch: (options) => playwright.chromium.launch({ ...proxy, ...options }) };
+// Mesa's llvmpipe through ANGLE, as nodes-gpu.test.js runs: Chromium's default SwiftShader takes seconds a frame over
+// Blender's 4D noise.
+const gl = ["--use-gl=angle", "--use-angle=gl-egl", "--ignore-gpu-blocklist"];
+export const chromium = { launch: (options) => playwright.chromium.launch({ ...proxy, args: gl, ...options }) };
 
 const mtime = (file) => statSync(root + file, { throwIfNoEntry: false })?.mtimeMs ?? 0;
 const stale = () => {

@@ -129,13 +129,14 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   // (in one view at a time) the compositor. setViewShading runs when view shading or cameras change: it attaches
   // effects to the rendered cameras and binds the compositor camera. beforeViewRender runs per view, per frame,
   // and only flips switches.
-  world.setViewShading = ({ renderedCameras = [], compositorCamera = null }) => {
+  world.setViewShading = ({ renderedCameras = [], compositorCamera = null, preview = false }) => {
+    world.worlds.setPreview(preview && !renderedCameras.length);
     world.renderSettings.setRenderedCameras(renderedCameras);
     world.compositor?.bindCamera(compositorCamera);
   };
   world.beforeViewRender = ({ rendered, preview = false, compositor }) => {
     world.worlds.setViewportActive(rendered);
-    world.worlds.setPreview(preview);
+    world.worlds.showPreview(preview);
     world.compositor?.setViewportActive(compositor);
   };
   world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));

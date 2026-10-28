@@ -351,6 +351,23 @@ export class BlenderShaderBlock extends blenderShader(NodeMaterialBlock) {
   }
 }
 
+// Babylon's reflection block writes its code only when the scene has an environment at build time, while its defines
+// follow the scene's: it keeps the environment it was built with, and the material builds again when the scene's
+// changes (Material Preview), so code and defines agree.
+const ENVIRONMENT = Symbol('environment');
+function environmentOf(material) {
+  const scene = material.getScene();
+  if (!material[ENVIRONMENT]) {
+    const observer = scene.onEnvironmentTextureChangedObservable.add(() => {
+      if (scene.environmentTexture !== material[ENVIRONMENT].texture) buildMaterial(material);
+    });
+    material[ENVIRONMENT] = {};
+    material.onDisposeObservable.addOnce(() => scene.onEnvironmentTextureChangedObservable.remove(observer));
+  }
+  material[ENVIRONMENT].texture = scene.environmentTexture;
+  return () => material[ENVIRONMENT].texture;
+}
+
 // Babylon's PBR inputs a Principled BSDF's sockets give: the PBR input, the socket, and the conversion.
 const PRINCIPLED = [
   ['baseColor', 'Base Color', (v) => `${v}.rgb`],
@@ -385,6 +402,7 @@ export class ShaderNodeBsdfPrincipled extends blenderShader(PBRMetallicRoughness
     wire(geometryBlock(material, '__view').output, this.view);
     wire(geometryBlock(material, '__cameraPosition').output, this.cameraPosition);
     const reflection = helper(material, '__reflection', (name) => new ReflectionBlock(name));
+    reflection._getTexture = environmentOf(material);
     wire(position.output, reflection.position);
     wire(world.output, reflection.world);
     wire(reflection.reflection, this.reflection);

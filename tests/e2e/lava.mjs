@@ -35,21 +35,21 @@ export async function lavaMaterial(app) {
   const nodes = (idname) => app.frame().locator(`[data-node="${idname}"]`);
   await nodes("ShaderNodeOutputMaterial").waitFor();
   const box = await app.frame().locator(".bl-node-editor").boundingBox();
-  // Shift A over the editor, typed to search; a click places the node.
+  // Shift A over the editor, typed to search, Enter for the best match; a click places the node.
   const add = async (name, fx, fy) => {
     const at = [box.x + box.width * fx, box.y + box.height * fy];
     await app.page.mouse.move(...at);
     await app.page.keyboard.press("Shift+A");
     await app.page.keyboard.type(name);
-    await app.frame().getByRole("menuitem", { name, exact: true }).first().click();
+    await app.page.keyboard.press("Enter");
     await app.page.mouse.move(at[0] + 4, at[1] + 4);
     await app.page.mouse.click(at[0] + 4, at[1] + 4);
   };
-  await add("Texture Coordinate", 0.06, 0.15);
-  await add("Noise Texture", 0.2, 0.05);
-  await add("Color Ramp", 0.36, 0.05);
-  await add("Noise Texture", 0.2, 0.55);
-  await add("Bump", 0.36, 0.6);
+  await add("Texture Coordinate", 0.02, 0.2);
+  await add("Noise Texture", 0.12, 0.05);
+  await add("Color Ramp", 0.24, 0.05);
+  await add("Noise Texture", 0.12, 0.55);
+  await add("Bump", 0.24, 0.6);
   const socket = (node, side, id) => node.locator(`[data-socket="${side}:${id}"]`);
   const link = async (from, output, to, input) => {
     const a = await socket(from, "out", output).boundingBox(), b = await socket(to, "in", input).boundingBox();

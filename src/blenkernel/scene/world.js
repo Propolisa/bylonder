@@ -63,8 +63,9 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     // Per view: rendered shading or camera view shows the world background and volume. Cheap.
     setViewportActive(value) { renderer.setRendered(value); },
-    // Per view: Material Preview's studio lighting.
+    // Material Preview's studio lighting while a view shows it, and its background per view.
     setPreview(value) { renderer.setPreview(value); },
+    showPreview(value) { renderer.showPreview(value); },
     link(entry) { state.active = entry?.id ?? null; changed(); },
     unlink() { state.active = null; changed(); },
     // Blender's world.new copies the current world when there is one.
