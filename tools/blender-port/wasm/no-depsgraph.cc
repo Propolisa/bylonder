@@ -28,6 +28,7 @@ void DEG_make_active(Depsgraph * /*depsgraph*/) {}
 bool DEG_is_active(const Depsgraph * /*depsgraph*/) { return true; }
 void BKE_scene_graph_evaluated_ensure(Depsgraph * /*depsgraph*/, Main * /*bmain*/) {}
 void DEG_id_type_tag(Main * /*bmain*/, short /*id_type*/) {}
+void DEG_graph_free(Depsgraph * /*graph*/) {}
 void DEG_relations_tag_update(Main * /*bmain*/) {}
 Main *DEG_get_bmain(const Depsgraph *graph) { return no_depsgraph(graph).bmain; }
 Scene *DEG_get_input_scene(const Depsgraph *graph) { return no_depsgraph(graph).scene; }

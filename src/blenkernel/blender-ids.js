@@ -22,6 +22,12 @@ export function createBlenderIDs(blender = blenderMain()) {
       objects.set(key, { ob, type: type ?? 'EMPTY' });
       return ob;
     },
+    // An object Main already holds (a read file's) as the one for a key.
+    adopt(key, ob, type) { objects.set(key, { ob, type }); },
+    // The Main IDs a read file made Babylon's own of (materials, worlds), by their Babylon owner, for the scene sync
+    // to take; and whether a file's scene settings and collections wait for it.
+    adopted: new Map(),
+    read: false,
     has: (key) => objects.has(key),
     find: (key) => objects.get(key)?.ob ?? null,
     // Removes the object for a key; one that has animation stays, hidden, as Bylonder keeps keys of objects it lost.

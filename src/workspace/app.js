@@ -9,7 +9,7 @@ import { examples } from "./examples.js";
 import { monaco, language, setupIntelligence } from "./intelligence";
 import { openOPFS } from "./opfs";
 import { createRepository } from "./repository";
-import { defaultFiles } from "./default-project";
+import { defaultFiles, blendProjectSource } from "./default-project";
 import {
   normalizePath,
   validateFiles,
@@ -25,7 +25,7 @@ import { iconButton } from "../editors/interface/icon.js";
 import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 const $ = (id) => document.getElementById(id);
 const dock = mountWorkspaceLayout();
-const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
+const topbar = mountTopbar({ dock, examples, openExample: (example) => openExample(example), newProject: () => $("new-project").click(), recentProjects: () => repo.list(), openProject: (id) => { $("project").value = id; $("project").dispatchEvent(new Event("change")); }, openBlend: (file) => openBlend(file), send: (type, payload) => frame?.contentWindow.postMessage({ channel, type, payload }, location.origin) });
 let repo,
   project,
   active = "index.js",
@@ -733,6 +733,15 @@ $("new-project").onclick = action(async () => {
   if (!name) return;
   await save();
   const created = await repo.create(name, defaultFiles());
+  await load(created.id);
+});
+// File > Open of a .blend: a new project holding the file, whose code opens it (openBlend in @workbench/sdk), so
+// Bylonder's edits are kept over it as over any project.
+const openBlend = action(async (file) => {
+  await save();
+  const path = normalizePath(file.name.replace(/[^\w. -]/g, "_"));
+  const files = { "index.js": textFile(blendProjectSource(path)), [path]: importedFile(path, new Uint8Array(await file.arrayBuffer())) };
+  const created = await repo.create(file.name.replace(/\.blend$/i, ""), files);
   await load(created.id);
 });
 const openExample = action(async (example) => {

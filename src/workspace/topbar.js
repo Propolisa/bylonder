@@ -10,7 +10,7 @@ let topbarUI = null;
 // The topbar's Blender menus and entries Bylonder shows, for the Blender coverage view.
 export const topbarMenuCoverage = () => (topbarUI ? menuCoverage('TOPBAR_MT_editor_menus', topbarUI) : []);
 
-export function mountTopbar({ dock, send, examples, openExample, newProject, recentProjects, openProject }) {
+export function mountTopbar({ dock, send, examples, openExample, newProject, recentProjects, openProject, openBlend }) {
   const $ = id => document.getElementById(id);
   const click = id => () => $(id).click();
   const bar = $('appbar');
@@ -30,7 +30,13 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     sync();
   };
   const recent = [];
-  // Projects are Bylonder's .blend files: Open lists them.
+  // File > Open: a .blend file, read by Blender's reader into a new project (Open Recent lists the projects).
+  const chooseBlend = () => {
+    const input = Object.assign(document.createElement('input'), { type: 'file', accept: '.blend' });
+    input.onchange = () => input.files[0] && openBlend(input.files[0]);
+    input.click();
+  };
+  // Bylonder's projects, by name.
   const openProjects = () => Promise.resolve().then(recentProjects).then((projects) => openMenu(projects.map((p) => ({ label: p.name, icon: 'file_blend', run: () => openProject(p.id) })), { x: innerWidth / 2 - 100, y: 60 }, 'Open'));
   // Recent projects for Open Recent, read when the menus open: the app makes its project repository after the topbar.
   const refreshRecent = () => Promise.resolve().then(recentProjects).then((projects) => recent.splice(0, Infinity, ...projects.slice(0, 10)), () => {});
@@ -40,7 +46,8 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   const ids = workspaces.map((w) => w.id);
   registerOperators({
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
-    'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : openProjects()) },
+    'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : chooseBlend()) },
+    'bylonder.project_open': { run: openProjects },
     'wm.save_mainfile': { keys: () => 'Ctrl S', run: click('checkpoint') },
     // A .blend file of the scene, from Blender's writer in the scene window; a copy too, as the open project stays.
     'wm.save_as_mainfile': { keys: ({ copy }) => (copy ? undefined : 'Shift Ctrl S'), run: () => send('save-blend') },
@@ -80,7 +87,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     auto_run: { label: 'Auto-run', get: () => autoRun.checked, set: (value) => { autoRun.checked = value; autoRun.dispatchEvent(new Event('change')); } },
   } };
   const op = (layout, idname, text) => layout.operator(idname, kw({ text }));
-  appendMenu('TOPBAR_MT_file', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_fork', 'Save Project As...'); op(layout, 'bylonder.project_rename', 'Rename Project...'); op(layout, 'bylonder.project_share', 'Share Project Link...'); op(layout, 'bylonder.app_source', 'Download App Source'); });
+  appendMenu('TOPBAR_MT_file', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_open', 'Open Project...'); op(layout, 'bylonder.project_fork', 'Save Project As...'); op(layout, 'bylonder.project_rename', 'Rename Project...'); op(layout, 'bylonder.project_share', 'Share Project Link...'); op(layout, 'bylonder.app_source', 'Download App Source'); });
   appendMenu('TOPBAR_MT_file_import', ({ layout }) => op(layout, 'bylonder.project_import', 'Project ZIP (.zip)'));
   appendMenu('TOPBAR_MT_file_export', ({ layout }) => { op(layout, 'bylonder.export_babylon', 'Babylon (.babylon)'); op(layout, 'bylonder.export_js', 'JavaScript (.js)'); op(layout, 'bylonder.export_js_live', 'JavaScript, Live Modifiers (.zip)'); op(layout, 'bylonder.project_export', 'Project ZIP (.zip)'); });
   appendMenu('TOPBAR_MT_edit', ({ layout }) => { layout.separator(); layout.prop(settings, 'remember'); op(layout, 'bylonder.scene_edits_clear', 'Clear Scene Edits'); });

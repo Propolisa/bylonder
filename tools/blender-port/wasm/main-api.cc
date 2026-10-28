@@ -8,6 +8,13 @@
 #include "BKE_collection.hh"
 #include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
+#include "AS_asset_library.hh"
+#include "BKE_report.hh"
+#include "BKE_sound.hh"
+#include "NOD_socket.hh"
+#include "BKE_blendfile.hh"
+#include "RE_pipeline.h"
+#include "BLO_readfile.hh"
 #include "BKE_material.hh"
 #include "BKE_world.h"
 #include "BKE_node.hh"
@@ -34,6 +41,9 @@
 #include "BLI_filereader.h"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
+#include "BLI_generic_array.hh"
+#include "BLI_map.hh"
 #include "BLI_set.hh"
 #include "BLI_string.h"
 #include "DEG_depsgraph_query.hh"
@@ -53,6 +63,7 @@
 #include "IMB_colormanagement.hh"
 #include "MEM_guardedalloc.h"
 #include "NOD_defaults.hh"
+#include "SEQ_iterator.hh"
 #include "SEQ_sequencer.hh"
 #include "WM_api.hh"
 
@@ -153,6 +164,22 @@ EXPORT(main_object_add) Object *main_object_add(BlenderMain *ctx, int type, cons
 
 /* An object's data (Mesh, Curve, Light, Camera...), or null for an empty. */
 EXPORT(object_data) ID *object_data(Object *ob) { return ob->data; }
+
+/* Changes an object's rotation mode (eRotationModes) keeping its rotation, as Blender's Rotation Mode does
+ * (BKE_rotMode_change_values). */
+EXPORT(object_rotation_mode_set) void object_rotation_mode_set(Object *ob, int mode)
+{
+  float mat[3][3];
+  BKE_object_rot_to_mat3(ob, mat, false);
+  normalize_m3(mat);
+  if (mode > 0) {
+    mat3_normalized_to_compatible_eulO(ob->rot, ob->rot, mode, mat);
+  }
+  else {
+    mat3_normalized_to_quat(ob->quat, mat);
+  }
+  ob->rotmode = mode;
+}
 
 /* Removes an object and its data from its collections and Main; no other object may have it as parent. */
 EXPORT(main_object_remove) void main_object_remove(BlenderMain *ctx, Object *ob)
@@ -449,11 +476,22 @@ EXPORT(object_mesh_extract) const ExtractionHeader *object_mesh_extract(BlenderM
   return &ctx->extraction;
 }
 
-/* An attribute's values in a mesh object's Mesh, or null; valid until the Mesh changes. */
+/* An attribute's values in a mesh object's Mesh, or null; valid until the Mesh changes. One stored as a single value
+ * (a read file's flat shading of every face) is given as one value per element, kept by name until the next call. */
 EXPORT(object_mesh_attribute) const void *object_mesh_attribute(Object *ob, const char *name)
 {
+  static Map<std::string, GArray<>> materialized;
   const bke::GAttributeReader reader = id_cast<Mesh *>(ob->data)->attributes().lookup(name);
-  return reader && reader.varray.is_span() ? reader.varray.get_internal_span().data() : nullptr;
+  if (!reader) {
+    return nullptr;
+  }
+  if (reader.varray.is_span()) {
+    return reader.varray.get_internal_span().data();
+  }
+  GArray<> &values = materialized.lookup_or_add_default(name);
+  values = GArray<>(reader.varray.type(), reader.varray.size());
+  reader.varray.materialize(values.data());
+  return values.data();
 }
 
 /* A mesh object's Mesh without its geometry, as it is at rest: Bylonder's scene owns geometry, and fills the Mesh only
@@ -539,6 +577,40 @@ EXPORT(id_property_string) const char *id_property_string(const ID *id, const ch
 {
   const IDProperty *prop = id->properties ? IDP_GetPropertyTypeFromGroup(id->properties, name, IDP_STRING) : nullptr;
   return prop ? IDP_string_get(prop) : nullptr;
+}
+
+/* A .blend opened as Blender's File > Open does without its UI (wm_file_read_post with G_FILE_NO_UI): read
+ * (BLO_read_from_memory) and set up as the Main (BKE_blendfile_read_setup_readfile), whose scene and view layer become
+ * the context's. Returns the warnings Blender reported, one per line, or null when the file could not be read. */
+EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int size)
+{
+  static std::string warnings;
+  warnings.clear();
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  BlendFileReadReport read_report = {};
+  read_report.reports = &reports;
+  BlendFileData *bfd = BLO_read_from_memory(data, size, BLO_READ_SKIP_USERDEF, &reports);
+  if (bfd) {
+    BlendFileReadParams params = {};
+    params.skip_flags = BLO_READ_SKIP_USERDEF;
+    G.fileflags |= G_FILE_NO_UI;
+    /* The Main the file replaces, which setting it up frees. */
+    G_MAIN = ctx->bmain;
+    BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, nullptr, &read_report, false, nullptr);
+    ctx->bmain = G_MAIN;
+    ctx->scene = CTX_data_scene(ctx->C);
+    ctx->view_layer = BKE_view_layer_default_view(ctx->scene);
+    ctx->window.scene = ctx->scene;
+    collections_synced(ctx);
+  }
+  for (const Report &report : reports.list.items_mutable()) {
+    if (report.type >= RPT_WARNING) {
+      warnings += std::string(report.message) + "\n";
+    }
+  }
+  BKE_reports_free(&reports);
+  return bfd ? warnings.c_str() : nullptr;
 }
 
 /* What saving a .blend reads from the Preferences: no thumbnail (the module has no GPU) and no backups. */
@@ -741,6 +813,58 @@ SequencerToolSettings *seq::tool_settings_init()
   tool_settings->pivot_point = V3D_AROUND_LOCAL_ORIGINS;
   return tool_settings;
 }
+
+/* port-override: the module renders nothing and has no OpenColorIO, so opening a file frees no render results and
+ * checks no color configuration. */
+void RE_FreeAllRenderResults() {}
+void RE_FreeInteractiveCompositorRenders() {}
+void RE_FreeAllPersistentData() {}
+void IMB_colormanagement_working_space_check(Main * /*bmain*/, bool /*for_undo*/, bool /*have_editable_assets*/) {}
+void IMB_colormanagement_check_file_config(Main * /*bmain*/) {}
+
+/* As blender.cc defines it, for a file opened: the old Main is freed (BKE_blender_globals_clear). */
+void BKE_blender_globals_main_replace(Main *bmain)
+{
+  BKE_main_free(G_MAIN);
+  bmain->is_global_main = true;
+  G_MAIN = bmain;
+}
+
+/* As blender.cc defines it, for versioning that runs code on the Main it reads as the global one. */
+Main *BKE_blender_globals_main_swap(Main *new_gmain)
+{
+  Main *old_gmain = G_MAIN;
+  new_gmain->is_global_main = true;
+  G_MAIN = new_gmain;
+  old_gmain->is_global_main = false;
+  return old_gmain;
+}
+
+/* port-override: the module has no OpenColorIO, so a read file's colors stay in their working space (Blender's default,
+ * linear Rec.709, which Bylonder's colors are in). */
+void IMB_colormanagement_working_space_init_default(Main * /*bmain*/) {}
+void IMB_colormanagement_working_space_convert(Main * /*bmain*/, const Main * /*reference_bmain*/) {}
+
+/* port-override: the module has no asset libraries, whose import method a read file is checked against. */
+void AS_asset_library_import_method_ensure_valid(Main & /*bmain*/) {}
+
+/* port-override: the module has no node types (nodes module), so it leaves a read file's nodes as the file has them
+ * (node.cc would mark every one it does not know undefined) for the next file Blender reads to know them. */
+void bke::node_tree_update_all_new(Main & /*main*/) {}
+
+/* port-override: the module has no node types (nodes module), so a read node tree keeps the sockets the file has;
+ * the scene sync reads the inputs it maps. */
+void node_verify_sockets(Main * /*bmain*/, bNodeTree * /*ntree*/, bNode * /*node*/, bool /*do_id_user*/) {}
+
+/* port-override: a read file's scenes are freed without the sequencer, sound or depsgraphs the module does not have;
+ * Bylonder's scene keeps neither strips nor sounds. */
+void seq::editing_free(Scene * /*scene*/, bool /*do_id_user*/) {}
+void seq::tool_settings_free(SequencerToolSettings *tool_settings) { MEM_delete(tool_settings); }
+void BKE_sound_destroy_scene(Scene * /*scene*/) {}
+/* port-override: a read scene's strips are left out (their data is the sequencer's to read), as Bylonder has none. */
+void seq::blend_read(BlendDataReader * /*reader*/, ListBaseT<Strip> *seqbase) { BLI_listbase_clear(seqbase); }
+void seq::foreach_strip(ListBaseT<Strip> * /*seqbase*/, ForEachFunc /*callback*/, void * /*user_data*/) {}
+void seq::foreach_strip(ListBaseT<Strip> * /*seqbase*/, FunctionRef<bool(Strip *)> /*callback*/) {}
 
 /* port-override: the module's IDs are never assets, so none has an asset type's pre-save step (asset_mark_clear.cc). */
 namespace ed::asset {

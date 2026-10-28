@@ -17,6 +17,7 @@
 #include "BLI_listbase.h"
 #include "BLI_math_base.h"
 #include "BLI_time.h"
+#include "BLO_read_write.hh"
 #include "BLO_readfile.hh"
 #include "BLT_translation.hh"
 #include "DEG_depsgraph.hh"
@@ -145,6 +146,16 @@ EXPORT(modifier_clear) void modifier_clear(Object *ob) { modifiers_free(*ob); }
 /* What the modifier reported in its last evaluation (BKE_modifier_set_error), or null. */
 EXPORT(modifier_error) const char *modifier_error(const ModifierData *md) { return md->error; }
 
+/* An object's modifiers as Main holds them (a read file's), for the scene sync to read: the one at an index (or null),
+ * its type (ModifierType), name and mode (ModifierMode: shown in the viewport, in renders). */
+EXPORT(object_modifier) ModifierData *object_modifier(Object *ob, int index)
+{
+  return static_cast<ModifierData *>(BLI_findlink(&ob->modifiers, index));
+}
+EXPORT(modifier_type) int modifier_type(const ModifierData *md) { return md->type; }
+EXPORT(modifier_name) const char *modifier_name(const ModifierData *md) { return md->name; }
+EXPORT(modifier_mode) int modifier_mode(const ModifierData *md) { return md->mode; }
+
 /* Evaluates the stack as the viewport does and extracts the result, which stays until the next evaluation. */
 EXPORT(modifier_object_eval) const ExtractionHeader *modifier_object_eval(ModifierObject *mo)
 {
@@ -179,6 +190,13 @@ void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
   h.orig_index[0] = static_cast<const int *>(CustomData_get_layer(&mesh->vert_data, CD_ORIGINDEX));
   h.orig_index[1] = static_cast<const int *>(CustomData_get_layer(&mesh->edge_data, CD_ORIGINDEX));
   h.orig_index[2] = static_cast<const int *>(CustomData_get_layer(&mesh->face_data, CD_ORIGINDEX));
+  /* Flat shading's attributes, as Blender draws them; their absence is smooth. */
+  for (const auto [flag, name, domain] : {std::tuple{SHARP_FACE, "sharp_face", bke::AttrDomain::Face}, std::tuple{SHARP_EDGE, "sharp_edge", bke::AttrDomain::Edge}}) {
+    const VArray<bool> values = *mesh->attributes().lookup<bool>(name, domain);
+    if (values && values.is_span()) {
+      h.flags[flag] = const_cast<bool *>(values.get_internal_span().data());
+    }
+  }
   const VArray<float2> uvs = *mesh->attributes().lookup<float2>(mesh->active_or_default_uv_map_name(), bke::AttrDomain::Corner);
   if (uvs && uvs.is_span()) {
     h.uvs = reinterpret_cast<float(*)[2]>(const_cast<float2 *>(uvs.get_internal_span().data()));
@@ -227,10 +245,6 @@ double BLI_time_now_seconds()
   return ts.tv_sec + ts.tv_nsec * 1e-9;
 }
 
-/* As readfile.cc defines them for data not read from a file, which is all the module's data. */
-ID_Readfile_Data::Tags BLO_readfile_id_runtime_tags(const ID & /*id*/) { return {}; }
-void BLO_readfile_id_runtime_data_free(ID & /*id*/) {}
-
 /* As scene.cc defines them; scene.cc comes with Blender's scenes, which the module's one scene does without. */
 int get_render_subsurf_level(const RenderData *r, int lvl, bool for_render)
 {
@@ -242,8 +256,15 @@ int get_render_subsurf_level(const RenderData *r, int lvl, bool for_render)
 float BKE_scene_ctime_get(const Scene *scene) { return (scene->r.cfra + scene->r.subframe) * scene->r.framelen; }
 
 
-/* An ID type whose source the module does not build: Main never holds one of it (the module makes none and reads no
- * files), so it has only what Blender's tables of ID types list, and no callbacks. modifiers-only.cc has more. */
+/* A read ID of a type without its source keeps only its ID: the rest of it, the file's pointers among it, is cleared. */
+static void read_without_data(BlendDataReader * /*reader*/, ID *id)
+{
+  memset(reinterpret_cast<char *>(id) + sizeof(ID), 0, BKE_idtype_get_info_from_id(id)->struct_size - sizeof(ID));
+}
+
+/* An ID type whose source the module does not build: the module makes none, and one a file has is read as its ID alone
+ * (read_without_data), so it has what Blender's tables of ID types list and no other callbacks. modifiers-only.cc has
+ * more. */
 IDTypeInfo id_type_without_data(short code, uint64_t filter, int index, size_t size, const char *name,
                                        const char *name_plural, const char *context, uint32_t flags)
 {
@@ -267,7 +288,7 @@ IDTypeInfo id_type_without_data(short code, uint64_t filter, int index, size_t s
   info.foreach_working_space_color = nullptr;
   info.owner_pointer_get = nullptr;
   info.blend_write = nullptr;
-  info.blend_read_data = nullptr;
+  info.blend_read_data = read_without_data;
   info.blend_read_after_liblink = nullptr;
   info.blend_read_undo_preserve = nullptr;
   info.lib_override_apply_post = nullptr;

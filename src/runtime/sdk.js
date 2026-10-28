@@ -5,6 +5,9 @@ import { registerStore, bindProperties } from '../blenkernel/animation/bindings.
 import { createText, updateText, textSchema } from "../blenkernel/text/text.js";
 import { builderSchema, createPrimitive, createMesh, shadeSmooth } from "../editors/object/mesh-catalog";
 import { createStore } from "./store";
+import { createMainSync } from "../blenkernel/main-sync.js";
+import { createRNA } from "../makesrna/rna-bylonder.js";
+import { report } from "../windowmanager/wm-reports.js";
 export function createSDK(base, overrides, onChange, onAnimationChange = () => {}) {
   const animation = createAnimationModel(onAnimationChange);
   const properties = [];
@@ -66,6 +69,15 @@ export function createSDK(base, overrides, onChange, onAnimationChange = () => {
     },
     asset(path) {
       return new URL(path, location.origin + base).href;
+    },
+    // A .blend file of the project opened into a scene (File > Open): Blender's reader puts its data in Main and the
+    // scene sync makes it Babylon's (main-sync.js readBlend). What Bylonder cannot show is reported to the Info editor.
+    async openBlend(path, scene) {
+      const bytes = new Uint8Array(await (await fetch(this.asset(path))).arrayBuffer());
+      const sync = createMainSync({ rna: createRNA({ world: { scene, objects: [] } }), ids: animation.ids });
+      const { nodes, warnings } = sync.readBlend(bytes, scene);
+      for (const warning of warnings) report("WARNING", warning);
+      return nodes;
     },
     onDispose(fn) {
       cleanups.push(fn);
