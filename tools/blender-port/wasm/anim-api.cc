@@ -30,6 +30,7 @@
 #include "DNA_userdef_types.h"
 #include "ED_anim_api.hh"
 #include "ED_keyframes_keylist.hh"
+#include "ED_keyframing.hh"
 #include "ED_markers.hh"
 #include "ED_screen.hh"
 #include "ED_space_api.hh"
@@ -176,68 +177,6 @@ EXPORT(anim_fcurve_keys_set) void anim_fcurve_keys_set(FCurve *fcu, const BezTri
   }
   sort_time_fcurve(*fcu);
   BKE_fcurve_handles_recalc(*fcu);
-}
-
-/* The Graph Editor's Active Keyframe panel's edits (graph_buttons.cc), on the key at `index`: what (0) sets co_ui as
- * RNA's setter does (handles move with the key), (1, 2) a left or right handle's coordinates, (3, 4) a left or right
- * handle's type (values[0]); then its update callback runs. */
-static void activekey_update(FCurve *fcu)
-{
-  sort_time_fcurve(*fcu);
-  BKE_fcurve_handles_recalc(*fcu);
-}
-static void activekey_handles(FCurve *fcu, BezTriple *bezt)
-{
-  if (ELEM(bezt->h1, HD_AUTO, HD_AUTO_ANIM) && ELEM(bezt->h2, HD_AUTO, HD_AUTO_ANIM)) {
-    bezt->h1 = HD_ALIGN;
-    bezt->h2 = HD_ALIGN;
-  }
-  else {
-    BKE_nurb_bezt_handle_test(bezt, SELECT, NURB_HANDLE_TEST_EACH, false);
-  }
-  activekey_update(fcu);
-}
-/* graphedit_activekey_left_handle_coord_cb and its right twin: only the edited handle counts as selected meanwhile. */
-static void activekey_handle_coord(FCurve *fcu, BezTriple *bezt, bool left)
-{
-  const eBezTriple_Flag f1 = bezt->f1, f3 = bezt->f3;
-  SET_FLAG_FROM_TEST(bezt->f1, left, BEZT_FLAG_SELECT);
-  SET_FLAG_FROM_TEST(bezt->f3, !left, BEZT_FLAG_SELECT);
-  activekey_handles(fcu, bezt);
-  bezt->f1 = f1;
-  bezt->f3 = f3;
-}
-EXPORT(anim_keyframe_edit) void anim_keyframe_edit(FCurve *fcu, int index, int what, const float *values)
-{
-  BezTriple *bezt = &fcu->bezt[index];
-  switch (what) {
-    case 0: {
-      const float frame_delta = values[0] - bezt->vec[1][0], value_delta = values[1] - bezt->vec[1][1];
-      bezt->vec[0][0] += frame_delta;
-      bezt->vec[0][1] += value_delta;
-      bezt->vec[1][0] = values[0];
-      bezt->vec[1][1] = values[1];
-      bezt->vec[2][0] += frame_delta;
-      bezt->vec[2][1] += value_delta;
-      activekey_update(fcu);
-      break;
-    }
-    case 1:
-    case 2:
-      copy_v2_v2(bezt->vec[what == 1 ? 0 : 2], values);
-      activekey_handle_coord(fcu, bezt, what == 1);
-      break;
-    case 3:
-      bezt->h1 = eBezTriple_Handle(values[0]);
-      BKE_fcurve_update_handle_flag_from_opposite(*bezt, HandleSide::LEFT);
-      activekey_update(fcu);
-      break;
-    case 4:
-      bezt->h2 = eBezTriple_Handle(values[0]);
-      BKE_fcurve_update_handle_flag_from_opposite(*bezt, HandleSide::RIGHT);
-      activekey_update(fcu);
-      break;
-  }
 }
 
 EXPORT(anim_fcurve_evaluate) float anim_fcurve_evaluate(FCurve *fcu, float frame) { return evaluate_fcurve(fcu, frame); }
@@ -475,6 +414,34 @@ EXPORT(anim_area_settings_set) void anim_area_settings_set(AnimArea *a, int flag
 /* An FCurve's active keyframe (BKE_fcurve_active_keyframe_index), or -1. */
 EXPORT(anim_fcurve_active_key) int anim_fcurve_active_key(FCurve *fcu) { return BKE_fcurve_active_keyframe_index(fcu); }
 
+/* A driver on an ID's property (ANIM_add_driver), as Python's driver_add (flag 0) or the Add Driver button
+ * (CREATEDRIVER_WITH_DEFAULT_DVAR) makes it: its F-Curve, or null where the path does not resolve. */
+EXPORT(anim_driver_add) FCurve *anim_driver_add(ID *id, const char *rna_path, int index, int flag)
+{
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  const bool added = ANIM_add_driver(&reports, id, rna_path, index, short(flag), DRIVER_TYPE_PYTHON);
+  BKE_reports_free(&reports);
+  return added ? verify_driver_fcurve(id, rna_path, index, DRIVER_FCURVE_LOOKUP_ONLY) : nullptr;
+}
+/* An ID's drivers (AnimData.drivers): their count, written to r_fcurves when given. */
+EXPORT(anim_drivers) int anim_drivers(ID *id, FCurve **r_fcurves)
+{
+  AnimData *adt = BKE_animdata_from_id(id);
+  int count = 0;
+  for (FCurve &fcu : adt ? adt->drivers : ListBaseT<FCurve>{}) {
+    if (r_fcurves) {
+      r_fcurves[count] = &fcu;
+    }
+    count++;
+  }
+  return count;
+}
+EXPORT(anim_fcurve_active_key_set) void anim_fcurve_active_key_set(FCurve *fcu, int index)
+{
+  BKE_fcurve_active_keyframe_set(fcu, index < 0 ? nullptr : &fcu->bezt[index]);
+}
+
 /* The scene's markers (Scene.timeline_markers), in list order: their count, then one by one its frame and flag
  * (SELECT) and its name. */
 EXPORT(anim_markers) int anim_markers(Scene *scene) { return BLI_listbase_count(&scene->markers); }
@@ -591,32 +558,53 @@ static StructRNA *fmodifier_srna(const FModifier &fcm)
   }
 }
 
+/* A recorded panel as an element of a JSON array: its type's idname, label, category and flag, its F-Modifier's address
+ * for an instanced one, and what it draws. */
+static void panel_json(std::string &json, const bContext *C, PanelType *type, const PointerRNA &ptr, ui::Block *block)
+{
+  json += json.size() > 1 ? "," : "";
+  json += "{\"idname\":\"" + std::string(type->idname) + "\",\"label\":\"" + type->label + "\",\"category\":\"" +
+          type->category + "\",\"flag\":" + std::to_string(type->flag) + ",\"data\":" + std::to_string(uintptr_t(ptr.data)) +
+          ",\"panel\":" + ui::panel_record(C, type, ptr, block) + '}';
+}
+
 /* The context's active F-Curve's F-Modifier panels, as graph_panel_modifiers adds them (ANIM_fmodifier_panels, with
- * graph_fmodifier_panel_id's names): a JSON array of each modifier's panel recorded by panel-layout.cc, with the
- * modifier's address. Their buttons stay pressable (panel_button_press) until the next call. */
-EXPORT(anim_fmodifier_panels) const char *anim_fmodifier_panels(bContext *C)
+ * graph_fmodifier_panel_id's names). */
+static void fmodifier_panels_json(std::string &json, const bContext *C, ARegionType *art, ui::Block *block)
+{
+  bAnimContext ac;
+  bAnimListElem *ale = ANIM_animdata_get_context(C, &ac) ? get_active_fcurve_channel(&ac) : nullptr;
+  if (!ale) {
+    return;
+  }
+  for (FModifier &fcm : static_cast<FCurve *>(ale->data)->modifiers) {
+    const FModifierTypeInfo *fmi = get_fmodifier_typeinfo(fcm.type);
+    char idname[BKE_ST_MAXNAME];
+    SNPRINTF(idname, "GRAPH_PT_%s", fmi ? fmi->name : "");
+    if (PanelType *type = static_cast<PanelType *>(BLI_findstring(&art->paneltypes, idname, offsetof(PanelType, idname)))) {
+      panel_json(json, C, type, RNA_pointer_create_discrete(ale->fcurve_owner_id, fmodifier_srna(fcm), &fcm), block);
+    }
+  }
+  MEM_delete(ale);
+}
+
+/* The context region's panels (the sidebar's: graph_buttons.cc's), each registered type whose poll passes in
+ * registration order with its sub-panels, the instanced F-Modifier panels after the Modifiers panel, as recorded by
+ * panel-layout.cc: a JSON array (panel_json). Their buttons stay pressable (panel_button_press) until the next call. */
+EXPORT(anim_sidebar_panels) const char *anim_sidebar_panels(bContext *C)
 {
   static std::string json;
   json = "[";
-  bAnimContext ac;
-  bAnimListElem *ale = ANIM_animdata_get_context(C, &ac) ? get_active_fcurve_channel(&ac) : nullptr;
-  if (ale) {
-    FCurve *fcu = static_cast<FCurve *>(ale->data);
-    ARegionType *art = CTX_wm_region(C)->runtime->type;
-    ui::Block *block = ui::panel_block_new();
-    for (FModifier &fcm : fcu->modifiers) {
-      const FModifierTypeInfo *fmi = get_fmodifier_typeinfo(fcm.type);
-      char idname[BKE_ST_MAXNAME];
-      SNPRINTF(idname, "GRAPH_PT_%s", fmi ? fmi->name : "");
-      PanelType *type = static_cast<PanelType *>(BLI_findstring(&art->paneltypes, idname, offsetof(PanelType, idname)));
-      if (!type) {
-        continue;
-      }
-      const PointerRNA ptr = RNA_pointer_create_discrete(ale->fcurve_owner_id, fmodifier_srna(fcm), &fcm);
-      json += (json.size() > 1 ? ",{\"modifier\":" : "{\"modifier\":") + std::to_string(uintptr_t(&fcm)) +
-              ",\"panel\":" + ui::panel_record(C, type, ptr, block) + '}';
+  ARegionType *art = CTX_wm_region(C)->runtime->type;
+  ui::Block *block = ui::panel_block_new();
+  for (PanelType &type : art->paneltypes) {
+    if (type.parent || (type.flag & PANEL_TYPE_INSTANCED) || (type.poll && !type.poll(C, &type))) {
+      continue;
     }
-    MEM_delete(ale);
+    panel_json(json, C, &type, PointerRNA_NULL, block);
+    if (STREQ(type.idname, "GRAPH_PT_modifiers")) {
+      fmodifier_panels_json(json, C, art, block);
+    }
   }
   json += ']';
   return json.c_str();
@@ -1080,6 +1068,10 @@ void *ED_region_draw_cb_activate(ARegionType * /*art*/, void (* /*draw*/)(const 
   return &handle;
 }
 bool ED_region_draw_cb_exit(ARegionType * /*art*/, void * /*handle*/) { return true; }
+
+/* port-override: Bylonder's undo steps are made by the editor that ran a button or operator (its commit), not by
+ * Blender's undo stack. */
+void ED_undo_push(bContext * /*C*/, const char * /*str*/) {}
 
 /* port-override: Bylonder has no point caches, so the Timeline draws no cache lines (action_draw.cc). */
 void timeline_draw_cache(const SpaceAction * /*saction*/, const Object * /*ob*/, const Scene * /*scene*/) {}

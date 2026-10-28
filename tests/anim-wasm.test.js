@@ -3,9 +3,9 @@
 // operator in the editor's main region at the region's size and view, and records every F-Curve's keys.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { BlenderMain, newOperator } from '../src/bmesh/bmesh-wasm.js';
+import { BlenderMain, newOperator, blenderModule } from '../src/bmesh/bmesh-wasm.js';
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
-import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, ACTION_MODES, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL } from '../src/editors/animation/anim-area.js';
+import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, ACTION_MODES, GRAPH_MODES, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL } from '../src/editors/animation/anim-area.js';
 import { FCURVE } from '../src/blenkernel/animation/anim-blender.js';
 import { moduleStruct } from '../src/makesrna/rna-module.js';
 
@@ -63,7 +63,7 @@ function setup(fixture, name) {
 const read = (name) => JSON.parse(fs.readFileSync(new URL(name + '.json', dir)));
 
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
-const cases = files.filter((f) => !/^(panel|marker|fmod)-/.test(f)), panels = files.filter((f) => f.startsWith('panel-')), markers = files.filter((f) => f.startsWith('marker-'));
+const cases = files.filter((f) => !/^(panel|marker|fmod|driver)-/.test(f)), panels = files.filter((f) => f.startsWith('panel-')), markers = files.filter((f) => f.startsWith('marker-'));
 const fmods = files.filter((f) => f.startsWith('fmod-'));
 for (const file of cases) {
   const name = file.replace('.json', ''), fixture = read(name), { anim, ob, area } = setup(fixture, name);
@@ -75,16 +75,35 @@ for (const file of cases) {
   area.dispose();
 }
 
-// The Graph Editor's Active Keyframe panel (anim-buttons.js) edits a key through the RNA bindings' paths: co_ui with
-// the panel's own update (anim_keyframe_edit), other properties written and the keys sorted and their handles
-// recalculated, as its update callback does.
+// The Graph Editor's Active Keyframe panel (graph_buttons.cc, recorded) edits the active key: co_ui through its raw
+// buttons, whose update callbacks sort the keys and recalculate handles, other properties through the module's RNA
+// and then FCurve.update(), as the fixtures set them.
+const recordedNodes = (node, out = []) => { out.push(node); (node.children ?? []).forEach((child) => recordedNodes(child, out)); return out; };
 for (const file of panels) {
   const name = file.replace('.json', ''), fixture = read(name), [curve, key, prop, value] = fixture.panel;
   const view = { width: 800, height: 400, min: [0, -5], max: [40, 5] };
   const { anim, ob, area } = setup({ ...fixture, space: 'GRAPH_EDITOR', selection: [], frame: 12, view }, name);
   const fcurve = anim.fcurves(ob)[curve];
-  if (prop === 'co_ui') fcurve.editKeyPanel(key, prop, value);
-  else fcurve.editKey(key, (k) => { k[prop] = value; });
+  // The panel edits the active key while it is selected (BKE_fcurve_active_keyframe_index); the selection goes after.
+  const select = (on) => { fcurve.keys = fcurve.keys.map((k, j) => (j === key ? { ...k, select: [on, on, on] } : k)); };
+  for (const other of anim.fcurves(ob)) other.flag &= ~FCURVE.ACTIVE;
+  fcurve.flag |= FCURVE.ACTIVE | FCURVE.SELECTED;
+  select(true);
+  fcurve.active_key = key;
+  const nodes = area.sidebarPanels().flatMap(({ panel }) => recordedNodes(panel));
+  const buttons = nodes.filter((n) => n.button?.prop === prop).map((n) => n.button);
+  if (prop === 'co_ui') {
+    assert.equal(buttons.length, 2, `${name}: the panel's Key Frame and Value buttons`);
+    for (const button of buttons) {
+      const keyframe = moduleStruct(button.owner, button.pointer, { C: area.main.C, changed: () => area.panelButtonApplied(button.index) });
+      keyframe[prop] = keyframe[prop].map((v, i) => (i === button.element ? value[i] : v));
+    }
+  } else {
+    const { owner, pointer } = nodes.find((n) => n.owner === 'Keyframe' && n.pointer);
+    moduleStruct(owner, pointer, { C: area.main.C })[prop] = value;
+    blenderModule.exports.rna_fcurve_update(area.main.C, ob, fcurve.pointer);
+  }
+  select(false);
   compare(state(anim, ob), fixture.after, name);
   area.dispose();
 }
@@ -102,7 +121,7 @@ for (const file of fmods) {
   for (const type of fixture.modifiers) {
     assert.ok(area.run(newOperator('graph.fmodifier_add', { type, only_active: true }), RGN_TYPE_WINDOW) & OPERATOR_FINISHED, `${name}: add ${type}`);
   }
-  const modifiers = area.fmodifierPanels().map(({ panel }) => {
+  const modifiers = area.sidebarPanels().filter(({ data }) => data).map(({ panel }) => {
     const { owner, pointer } = recordedPointer(panel);
     return moduleStruct(owner, pointer, { C: area.main.C });
   });
@@ -111,6 +130,42 @@ for (const file of fmods) {
     for (const [prop, value] of Object.entries(expected)) assert.ok(near(modifiers[i][prop], value), `${name}: modifier ${i} ${prop}: ${modifiers[i][prop]} != ${value}`);
   });
   fixture.frames.forEach((frame, i) => close(fcurve.evaluate(frame), fixture.values[i], `${name}: value at ${frame}`));
+  area.dispose();
+}
+
+// A driver added on the empty's Y location (ANIM_add_driver, as Python's driver_add), then edited in the Drivers editor's
+// Driver panel (graph_buttons.cc, recorded): its Add Input Variable button, and its properties through the module's
+// RNA (rna_fcurve.cc's set functions and updates). Its settings, variables and their targets as the panel shows them.
+const drivers = files.filter((f) => f.startsWith('driver-'));
+const DRIVER_TARGET = ['id_type', 'data_path', 'bone_target', 'transform_type', 'rotation_mode', 'transform_space', 'use_fallback_value', 'fallback_value'];
+for (const file of drivers) {
+  const name = file.replace('.json', ''), fixture = read(name);
+  const view = { width: 800, height: 400, min: [0, -5], max: [40, 5] };
+  const { anim, ob, area } = setup({ ...fixture, space: 'GRAPH_EDITOR', selection: [], frame: 12, view }, name);
+  area.subtype = GRAPH_MODES.DRIVERS;
+  const fcurve = anim.addDriver(ob, ...fixture.driver, 0);
+  fcurve.flag |= FCURVE.ACTIVE | FCURVE.SELECTED;
+  // The panel's nodes, and the structs its properties show by owner, in the panel's order.
+  const panel = () => area.sidebarPanels().filter(({ category }) => category === 'Drivers').flatMap(({ panel: p }) => recordedNodes(p));
+  const structs = (owner) => {
+    const seen = new Map();
+    for (const node of panel()) if (node.owner === owner && node.pointer && !seen.has(node.pointer[2])) seen.set(node.pointer[2], node.pointer);
+    return [...seen.values()].map((pointer) => moduleStruct(owner, pointer, { C: area.main.C }));
+  };
+  for (const [kind, ...edit] of fixture.edits) {
+    if (kind === 'add_variable') area.pressPanelButton(panel().find((n) => n.button?.text === 'Add Input Variable').button.index);
+    else if (kind === 'driver') structs('Driver')[0][edit[0]] = edit[1];
+    else if (kind === 'var') structs('DriverVariable')[edit[0]][edit[1]] = edit[2];
+    else structs('DriverTarget')[edit[0] + edit[1]][edit[2]] = edit[3];
+  }
+  const [driver] = structs('Driver'), variables = structs('DriverVariable'), targets = structs('DriverTarget');
+  const ours = { type: driver.type, expression: driver.expression, use_self: driver.use_self,
+    variables: variables.map((v, i) => ({ name: v.name, type: v.type, is_name_valid: v.is_name_valid,
+      targets: targets.slice(i, i + fixture.after.variables[i].targets.length).map((t) => Object.fromEntries(DRIVER_TARGET.map((p) => [p, t[p]]))) })),
+    keys: fcurve.keys.map((k) => k.co) };
+  const { modifiers, ...expected } = fixture.after, rounded = (v) => (typeof v === 'number' ? Math.round(v * 1e4) / 1e4 : v);
+  assert.deepEqual(modifiers, [], `${name}: no F-Modifiers`);
+  assert.deepEqual(JSON.parse(JSON.stringify(ours, (k, v) => rounded(v))), expected, name);
   area.dispose();
 }
 
@@ -142,4 +197,4 @@ for (const [name, idname, key, axes, typed] of MODAL) {
   compare(state(anim, ob), fixture.after, `${name} (modal)`);
   area.dispose();
 }
-console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits, ${fmods.length} F-Modifier stacks, ${markers.length} marker operators and ${MODAL.length} modal transforms match Blender 5.2`);
+console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits, ${fmods.length} F-Modifier stacks, ${drivers.length} drivers, ${markers.length} marker operators and ${MODAL.length} modal transforms match Blender 5.2`);

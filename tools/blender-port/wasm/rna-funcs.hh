@@ -8,6 +8,12 @@ struct StructRNA;
 
 /* Which of PropertyRNA::funcs a function is. */
 enum RnaFuncMember {
+  RNA_FUNC_boolean_get,
+  RNA_FUNC_int_get,
+  RNA_FUNC_float_get,
+  RNA_FUNC_enum_get,
+  RNA_FUNC_string_get,
+  RNA_FUNC_string_length,
   RNA_FUNC_boolean_set,
   RNA_FUNC_int_set,
   RNA_FUNC_float_set,
@@ -29,6 +35,13 @@ struct RnaFunc {
   void (*func)();
 };
 
+/* An array property without a DNA field of its own, and its length. */
+struct RnaArray {
+  StructRNA **srna;
+  const char *identifier;
+  int type, length;
+};
+
 /* A struct type and the base whose properties it inherits. */
 struct RnaBase {
   StructRNA **srna, **base;
@@ -37,5 +50,6 @@ struct RnaBase {
 /* rna_fcurve.cc's, each ending with a null struct type. */
 extern const RnaFunc rna_fcurve_funcs[];
 extern const RnaBase rna_fcurve_bases[];
+extern const RnaArray rna_fcurve_arrays[];
 
 }  // namespace blender

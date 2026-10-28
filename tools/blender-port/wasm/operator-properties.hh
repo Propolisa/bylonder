@@ -16,7 +16,7 @@ struct Main;
 struct Scene;
 
 /* Where a property of a DNA struct (a modifier's) is stored, as rna_modifier.cc defines it (tools/blender-port/modifier_dna.py):
- * kind f (float), i (integer), p (pointer) or s (string); a boolean is a bit of an integer field (`bit`, shifted by the
+ * kind f (float), i (integer), p (pointer) or s (string, `size` its char array's); a boolean is a bit of an integer field (`bit`, shifted by the
  * element's index for a bitset array), or the whole field without one. A struct stored behind a pointer of its base
  * (RNA_def_struct_sdna_from: an F-Modifier's data) has that pointer's offset as `from`. */
 struct DnaField {
@@ -48,6 +48,12 @@ struct PropertyRNA {
   /* Blender's own RNA functions of the property (RNA_def_property_*_funcs, RNA_def_property_update), where the module
    * compiles an RNA file's runtime part (rna-fcurve.cc): they read and write instead of the DNA field. */
   struct {
+    bool (*boolean_get)(PointerRNA *);
+    int (*int_get)(PointerRNA *);
+    float (*float_get)(PointerRNA *);
+    int (*enum_get)(PointerRNA *);
+    void (*string_get)(PointerRNA *, char *);
+    int (*string_length)(PointerRNA *);
     void (*boolean_set)(PointerRNA *, bool);
     void (*int_set)(PointerRNA *, int);
     void (*float_set)(PointerRNA *, float);

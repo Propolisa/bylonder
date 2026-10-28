@@ -7,10 +7,13 @@ names, as Clang parses the RNA definition files for the module's wasm32 target.
   takes too (rna_dna_fields in wasm_module.py).
 - src/makesrna/dna-curves.json: a Curve and its Nurb, BezTriple, BPoint, CharInfo and TextBox (rna_curve.cc); with
   rna-curves.json (tools/blender-reference/curves.py) it lets JS read and write curve and text data in the module.
-- src/makesrna/dna-fcurve.json: the F-Modifiers (rna_fcurve.cc), each type's own properties stored in the struct its
-  FModifier's `data` points to (RNA_def_struct_sdna_from: `from`, that pointer's offset in the base struct), and the
-  names of the RNA functions each property has (`funcs`: get, set, range, length, update), which the module compiles from
-  rna_fcurve.cc's runtime part (wasm/rna-fcurve.cc).
+- src/makesrna/dna-anim.json: the animation editors' spaces (SpaceGraphEditor, SpaceDopeSheetEditor), which the
+  module's RNA takes too, for Blender's panels that read them.
+- src/makesrna/dna-fcurve.json: the F-Curve structs (rna_fcurve.cc: FCurve, Keyframe, the F-Modifiers, drivers), an
+  F-Modifier type's own properties stored in the struct its FModifier's `data` points to (RNA_def_struct_sdna_from:
+  `from`, that pointer's offset in the base struct), and the names of the RNA functions each property has (`funcs`:
+  get, set, range, length, update), which the module compiles from rna_fcurve.cc's runtime part (wasm/rna-fcurve.cc).
+  A property with functions and no DNA field of its own is kept with its type and array length.
 
 Usage: tools/blender-port/modifier_dna.py SRC   (SRC: Blender sources of the manifest's tag)
 """
@@ -36,10 +39,13 @@ OUTPUTS = {
                           'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
                           'structs': ['Object', 'ObjectBase', 'Collection', 'LayerCollection', 'SpaceOutliner'], 'detail': True},
     'dna-curves.json': {'files': ['rna_curve.cc'], 'functions': lambda name: name == 'RNA_def_curve', 'structs': None, 'detail': True},
+    'dna-anim.json': {'files': ['rna_space.cc'], 'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
+                      'structs': ['SpaceGraphEditor', 'SpaceDopeSheetEditor'], 'detail': True},
     'dna-fcurve.json': {'files': ['rna_fcurve.cc'], 'functions': lambda name: name == 'RNA_def_fcurve',
-                        'structs': ['FModifier', 'FModifierGenerator', 'FModifierFunctionGenerator', 'FModifierEnvelope',
+                        'structs': ['FCurve', 'Keyframe', 'Driver', 'DriverVariable', 'DriverTarget', 'FModifier', 'FModifierGenerator', 'FModifierFunctionGenerator', 'FModifierEnvelope',
                                     'FModifierEnvelopeControlPoint', 'FModifierCycles', 'FModifierLimits', 'FModifierNoise',
-                                    'FModifierStepped', 'FModifierSmooth'], 'detail': True, 'funcs': True},
+                                    'FModifierStepped', 'FModifierSmooth'], 'detail': True, 'funcs': True,
+                        'enum_files': ['rna_curve.cc', 'rna_ID.cc']},
 }
 SDNA_CALL = re.compile(r'RNA_def_property_(boolean|boolean_negative|boolean_bitset_array|int|float|enum|enum_bitflag|pointer|string)_sdna$')
 # RNA_def_property and the shorthands that call it (RNA_def_boolean, RNA_def_float_vector, ...).
@@ -114,10 +120,18 @@ def field(struct, path):
             **({'length': length} if length else {})}
 
 
+# Enum item arrays other RNA files define (an output's `enum_files`), by name, for the ones a file only declares.
+ENUM_DEFINITIONS = {}
+
+
+def initializer(decl):
+    return next((c for c in decl.get_children() if c.kind == ci.CursorKind.INIT_LIST_EXPR), None)
+
+
 def enum_items(cursor, evaluate):
     """[[value, identifier], ...] of an EnumPropertyItem array an expression names, without its separators."""
     decl = next((c.referenced for c in cursor.walk_preorder() if c.kind == ci.CursorKind.DECL_REF_EXPR), None)
-    init = next((c for c in decl.get_children() if c.kind == ci.CursorKind.INIT_LIST_EXPR), None) if decl else None
+    init = (initializer(decl) or ENUM_DEFINITIONS.get(decl.spelling)) if decl else None
     items = []
     for item in init.get_children() if init else []:
         values = [c.spelling[1:-1] if c.kind == ci.CursorKind.STRING_LITERAL else evaluate(c) for c in item.get_children()][:2]
@@ -177,6 +191,8 @@ def definitions(tu, evaluate, files, walked, detail):
                     names = [evaluate(a) for a in args[1:]]
                     roles = FUNC_ROLES.get(name, ())
                     state['prop'].setdefault('funcs', {}).update({role: n for role, n in zip(roles, names) if role and n})
+            elif detail and state['prop'] is not None and name == 'RNA_def_property_array':
+                state['prop']['array'] = evaluate(args[1])
             elif detail and state['prop'] is not None and name == 'RNA_def_property_update' and evaluate(args[2]):
                 state['prop'].setdefault('funcs', {})['update'] = evaluate(args[2])
             elif name in functions and name not in seen and name.startswith('rna_def_'):
@@ -196,6 +212,9 @@ def definitions(tu, evaluate, files, walked, detail):
 def write(tree, args, output, spec):
     evaluate = Evaluate()
     found, records = {}, {}
+    units = [ci.Index.create().parse(os.path.join(tree, INTERN, file), args=args) for file in spec.get('enum_files', [])]
+    ENUM_DEFINITIONS.update({c.spelling: initializer(c) for tu in units for c in tu.cursor.walk_preorder()
+                             if c.kind == ci.CursorKind.VAR_DECL and 'EnumPropertyItem' in c.type.spelling and initializer(c)})
     for file in spec['files']:
         tu = ci.Index.create().parse(os.path.join(tree, INTERN, file), args=args)
         errors = [d for d in tu.diagnostics if d.severity >= ci.Diagnostic.Error]
@@ -209,16 +228,17 @@ def write(tree, args, output, spec):
         if sdna not in records or (spec['structs'] is not None and rna not in spec['structs']):
             continue
         props = {}
+        keys = ('bit', 'bitset', 'negative', 'bitflag', 'custom') + (('type', 'icon', 'consecutive', 'items') if spec['detail'] else ())
+        keys += ('funcs', 'array') if spec.get('funcs') else ()
         for identifier, prop in definition['properties'].items():
-            if prop['field'] is None:
-                continue
-            struct = records[prop.get('struct', sdna)]
             try:
-                located = field(struct, prop['field'])
+                located = field(records[prop.get('struct', sdna)], prop['field']) if prop['field'] is not None else None
             except (StopIteration, ValueError):
-                continue  # No DNA field of its own: a property whose functions compute it.
-            keys = ('bit', 'bitset', 'negative', 'bitflag', 'custom') + (('type', 'icon', 'consecutive', 'items') if spec['detail'] else ()) + (('funcs',) if spec.get('funcs') else ())
-            props[identifier] = {**located, **{k: prop[k] for k in keys if k in prop}}
+                located = None
+            # No DNA field of its own: a property whose functions compute it, kept only with those.
+            if located is None and not (spec.get('funcs') and prop.get('funcs')):
+                continue
+            props[identifier] = {**(located or {}), **{k: prop[k] for k in keys if k in prop}}
         base = found.get(definition.get('base'), {})
         origin = {'base': definition['base'], 'from': field(records[base['sdna']], definition['from'])['offset']} if 'from' in definition else {}
         out[rna] = {'sdna': sdna, 'size': records[sdna].get_size(), **origin, 'properties': props}

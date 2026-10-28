@@ -656,6 +656,8 @@ struct Button {
   PointerRNA *opptr = nullptr;
   std::function<void(bContext &C, StringRefNull oldname)> rename_func;
   bool active_only = false;
+  /* The unit its number shows (button_unit_type_set: B_UNIT_*), or none for its property's. */
+  int unit_type = 0;
 };
 
 struct Block {
@@ -666,6 +668,9 @@ struct Block {
   Vector<std::unique_ptr<Button>> buttons;
   /* A panel's block whose buttons panel-layout.cc records into the panel's layouts (panel_block_new). */
   bool recorded_layout = false;
+  /* What runs after any of its buttons applies (block_func_handle_set), with the button's return value. */
+  BlockHandleFunc handle_func = nullptr;
+  void *handle_arg = nullptr;
 };
 
 void layout_record_button(Block *block, int index);
@@ -855,6 +860,19 @@ void button_flag_disable(Button *but, int flag) { but->flag &= ~flag; }
 void button_drawflag_enable(Button *but, int flag) { but->drawflag |= flag; }
 void button_label_alpha_factor_set(Button *but, float alpha_factor) { but->alpha_factor = alpha_factor; }
 void button_retval_set(Button *but, int retval) { but->retval = retval; }
+void button_unit_type_set(Button *but, int unit_type) { but->unit_type = uchar(RNA_SUBTYPE_UNIT_VALUE(unit_type)); }
+void block_func_handle_set(Block *block, BlockHandleFunc func, void *arg)
+{
+  block->handle_func = func;
+  block->handle_arg = arg;
+}
+Button *uiDefIconTextBut(Block *block, ButtonTypeWithPointerType but_and_ptr_type, int icon, StringRef str, int x, int y,
+                         short width, short height, void *poin, std::optional<StringRef> tip)
+{
+  Button *but = uiDefBut(block, but_and_ptr_type, str, x, y, width, height, poin, 0.0f, 0.0f, tip);
+  but->icon = icon;
+  return but;
+}
 void button_disable(Button *but, const char * /*disabled_hint*/) { but->flag |= BUT_DISABLED; }
 
 /* port-override: JS applies a button within the event that pressed it, so none stays active, nor shows a tooltip. */
@@ -1081,8 +1099,10 @@ std::string panel_button_json(int index)
 {
   const Button &but = *panel_block->buttons[index];
   std::string s;
-  char head[64];
-  SNPRINTF(head, "{\"index\":%d,\"type\":%d,\"icon\":%d", index, int(but.type), but.icon);
+  char head[96];
+  /* Its width in UI units: a button one unit wide shows its icon or box alone, its text clipped. */
+  SNPRINTF(head, "{\"index\":%d,\"type\":%d,\"icon\":%d,\"units\":%.2f", index, int(but.type), but.icon,
+           BLI_rctf_size_x(&but.rect) / UI_UNIT_X);
   s += head;
   string_json(s += ",\"text\":", but.str);
   if (!but.tip.empty()) {
@@ -1090,6 +1110,15 @@ std::string panel_button_json(int index)
   }
   if (but.optype) {
     string_json(s += ",\"operator\":", but.optype->idname);
+  }
+  if (but.rnaprop) {
+    /* A property's button (uiDefButR): its struct type, owner ID and data, property and element, and unit. */
+    char rna[160];
+    SNPRINTF(rna, ",\"pointer\":[%lu,%lu,%lu],\"owner\":\"%s\",\"element\":%d,\"unit\":%d", (unsigned long)uintptr_t(but.rnapoin.type),
+             (unsigned long)uintptr_t(but.rnapoin.owner_id), (unsigned long)uintptr_t(but.rnapoin.data),
+             RNA_struct_identifier(but.rnapoin.type), but.rnaindex, but.unit_type);
+    s += rna;
+    string_json(s += ",\"prop\":", RNA_property_identifier(but.rnaprop));
   }
   return s + '}';
 }
@@ -1136,6 +1165,9 @@ static int button_press(bContext *C, ui::Button *but, int value, int modifier)
   if (but->funcN) {
     but->funcN(C, but->func_argN, but->func_arg2);
   }
+  if (but->block->handle_func) {
+    but->block->handle_func(C, but->block->handle_arg, but->retval);
+  }
   if (but->rnaprop) {
     RNA_property_update(C, &but->rnapoin, but->rnaprop);
   }
@@ -1151,6 +1183,20 @@ EXPORT(region_button_press) int region_button_press(bContext *C, int index, int 
 EXPORT(panel_button_press) int panel_button_press(bContext *C, int index, int value, int modifier)
 {
   return button_press(C, panel_block->buttons[index].get(), value, modifier);
+}
+/* What runs after a recorded panel's property button set its value (rna_set): its functions and its block's. */
+EXPORT(panel_button_applied) void panel_button_applied(bContext *C, int index)
+{
+  ui::Button *but = panel_block->buttons[index].get();
+  if (but->func) {
+    but->func(C, but->func_arg1, but->func_arg2);
+  }
+  if (but->funcN) {
+    but->funcN(C, but->func_argN, but->func_arg2);
+  }
+  if (but->block->handle_func) {
+    but->block->handle_func(C, but->block->handle_arg, but->retval);
+  }
 }
 
 /* Applies a text button's edit (its new text), or cancels it (null), as its text editing ends. */

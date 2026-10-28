@@ -12,27 +12,49 @@
 #define rna_enum_driver_target_rotation_mode_items rna_enum_driver_target_rotation_mode_items_runtime
 #include "rna_fcurve.cc"
 
+#include "BKE_context.hh"
 #include "rna-funcs.hh"
 
 namespace blender {
 
 const RnaFunc rna_fcurve_funcs[] = {
 #define RNA_BASE(srna, base)
+#define RNA_ARRAY(srna, identifier, type, length)
 #define RNA_FUNC(srna, identifier, type, member, func) \
   {&srna, identifier, type, RNA_FUNC_##member, reinterpret_cast<void (*)()>(func)},
 #include "rna_fcurve_funcs.inc"
 #undef RNA_BASE
+#undef RNA_ARRAY
 #undef RNA_FUNC
     {nullptr, nullptr, 0, RNA_FUNC_update, nullptr},
 };
 
 const RnaBase rna_fcurve_bases[] = {
 #define RNA_BASE(srna, base) {&srna, &base},
+#define RNA_ARRAY(srna, identifier, type, length)
 #define RNA_FUNC(srna, identifier, type, member, func)
 #include "rna_fcurve_funcs.inc"
 #undef RNA_BASE
+#undef RNA_ARRAY
 #undef RNA_FUNC
     {nullptr, nullptr},
 };
+
+const RnaArray rna_fcurve_arrays[] = {
+#define RNA_BASE(srna, base)
+#define RNA_ARRAY(srna, identifier, type, length) {&srna, identifier, type, length},
+#define RNA_FUNC(srna, identifier, type, member, func)
+#include "rna_fcurve_funcs.inc"
+#undef RNA_BASE
+#undef RNA_ARRAY
+#undef RNA_FUNC
+    {nullptr, nullptr, 0, 0},
+};
+
+/* FCurve.update(): the keys sorted, duplicates removed and handles recalculated (rna_FCurve_update_data_ex). */
+extern "C" __attribute__((export_name("rna_fcurve_update"))) void rna_fcurve_update(bContext *C, ID *id, FCurve *fcu)
+{
+  rna_FCurve_update_data_ex(id, fcu, CTX_data_main(C));
+}
 
 }  // namespace blender

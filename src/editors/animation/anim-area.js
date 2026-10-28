@@ -14,6 +14,8 @@ export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_CHANNELS = 2, RG
 const RGN_FLAG_HIDDEN = 1 << 0;
 // Area.ui_type within a SpaceAction (its mode, eAnimEdit_Context).
 export const ACTION_MODES = { DOPESHEET: 0, ACTION: 1, SHAPEKEY: 2, GPENCIL: 3, MASK: 4, CACHEFILE: 5, TIMELINE: 6 };
+// SpaceGraph.mode (eGraphEdit_Mode) by Area.ui_type.
+export const GRAPH_MODES = { FCURVES: 0, DRIVERS: 1 };
 // wmEventModifierFlag and wmOperatorStatus.
 export const KM_SHIFT = 1, KM_CTRL = 2, KM_ALT = 4, KM_OSKEY = 8;
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4, OPERATOR_PASS_THROUGH = 8;
@@ -133,10 +135,13 @@ export class AnimArea {
       return fcurve ? { fcurve: new FCurve(fcurve), name: cString(name), icon: cString(x.anim_icon_name(new Int32Array(x.memory.buffer, icon, 1)[0])) } : null;
     }));
   }
-  // The active F-Curve's F-Modifier panels, drawn by fmodifier_ui.cc and recorded by panel-layout.cc:
-  // [{ modifier (its address), panel (the recorded panel tree) }]. pressPanelButton presses one of their raw buttons.
-  fmodifierPanels() { return this.inContext(RGN_TYPE_UI, (C) => JSON.parse(cString(x.anim_fmodifier_panels(C)))); }
+  // The sidebar's panels as Blender's code draws them, recorded by panel-layout.cc (anim_sidebar_panels):
+  // [{ idname, label, category, flag, data (an instanced panel's F-Modifier), panel (the recorded tree) }].
+  // pressPanelButton presses one of their raw buttons; panelButtonApplied runs a property button's functions after its
+  // value was set.
+  sidebarPanels() { return this.inContext(RGN_TYPE_UI, (C) => JSON.parse(cString(x.anim_sidebar_panels(C)))); }
   pressPanelButton(index) { this.inContext(RGN_TYPE_UI, (C) => x.panel_button_press(C, index, -1, 0)); }
+  panelButtonApplied(index) { this.inContext(RGN_TYPE_UI, (C) => x.panel_button_applied(C, index)); }
   // The context's active Action (context.active_action), or null.
   activeAction() {
     const action = this.inContext(RGN_TYPE_UI, (C) => x.anim_active_action(C) >>> 0);

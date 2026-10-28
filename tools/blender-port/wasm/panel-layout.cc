@@ -28,7 +28,8 @@ namespace blender::ui {
 
 /* What a layout or an item in it draws; a layout's own state (active, enabled) is read from it when written out. */
 struct Node {
-  std::string kind, prop, owner, heading;
+  /* An operator's enum property, for an operator's enum menu. */
+  std::string kind, prop, owner, heading, property;
   /* \x01: none, so the widget shows its RNA name. */
   std::string text = "\x01";
   int index = -1, flag = 0, icon = 0;
@@ -63,12 +64,17 @@ static Node &add(const Layout *parent, const char *kind)
   return node;
 }
 
+/* The layout raw buttons go into, as the block's current layout is Blender's: the last one made (block_layout_set_current
+ * in its making), or the one uiItemL_respect_property_split gives. */
+static const Layout *button_layout = nullptr;
+
 static Layout &sub_layout(const Layout *parent, const char *kind)
 {
   Layout &layout = *layouts.emplace_back(std::make_unique<Layout>(ItemType(0), nullptr));
   Node &node = add(parent, kind);
   node.layout = &layout;
   nodes[&layout] = &node;
+  button_layout = &layout;
   return layout;
 }
 
@@ -83,14 +89,9 @@ Layout::Layout(ItemType type, LayoutRoot *root) : Item(type)
 void Layout::estimate_impl() {}
 void Layout::resolve_impl() {}
 /* The block raw buttons go into while a panel is recorded with one (panel_record): a button made in it is recorded
- * in the layout whose block() gave it, as Blender adds it to the block's current layout. */
+ * in the block's current layout, as Blender adds it there. */
 static Block *recording_block = nullptr;
-static const Layout *button_layout = nullptr;
-Block *Layout::block() const
-{
-  button_layout = this;
-  return recording_block;
-}
+Block *Layout::block() const { return recording_block; }
 void layout_record_button(Block *block, int index)
 {
   if (block == recording_block && button_layout) {
@@ -149,17 +150,38 @@ void Layout::prop_search(PointerRNA *ptr, PropertyRNA *prop, PointerRNA *searchp
 void Layout::decorator(PointerRNA * /*ptr*/, PropertyRNA * /*prop*/, int /*index*/) {}
 void Layout::decorator(PointerRNA * /*ptr*/, std::optional<StringRefNull> /*propname*/, int /*index*/) {}
 void Layout::separator(float /*factor*/, LayoutSeparatorType /*type*/) { add(this, "separator"); }
-void Layout::label(StringRef name, int /*icon*/) { add(this, "label").text = name; }
+void Layout::label(StringRef name, int icon)
+{
+  Node &node = add(this, "label");
+  node.text = name;
+  node.icon = icon;
+}
 void Layout::menu_fn(StringRefNull name, int /*icon*/, MenuCreateFunc /*func*/, void * /*arg*/) { add(this, "menu").text = name; }
 
 /* Operators are recorded by name; the properties a panel sets on them go nowhere. */
-PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int /*icon*/, wm::OpCallContext /*context*/,
+PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int icon, wm::OpCallContext /*context*/,
                       eUI_Item_Flag /*flag*/)
 {
   Node &node = add(this, "operator");
   node.prop = opname;
-  node.text = name ? std::string(*name) : std::string();
+  node.icon = icon;
+  node.text = name ? std::string(*name) : std::string("\x01");
   return PointerRNA_NULL;
+}
+/* An operator's enum menu: its operator and property by name. */
+PointerRNA Layout::op_menu_enum(const bContext * /*C*/, StringRefNull opname, StringRefNull propname, StringRefNull name,
+                                int /*icon*/)
+{
+  Node &node = add(this, "operator_menu_enum");
+  node.prop = opname;
+  node.property = propname;
+  node.text = name;
+  return PointerRNA_NULL;
+}
+PointerRNA Layout::op_menu_enum(const bContext *C, wmOperatorType *ot, StringRefNull propname,
+                                std::optional<StringRefNull> name, int icon)
+{
+  return this->op_menu_enum(C, ot->idname, propname, name.value_or(""), icon);
 }
 PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int icon)
 {
@@ -196,6 +218,20 @@ PanelLayout Layout::panel_prop_with_bool_header(const bContext *C, PointerRNA *o
   return panel;
 }
 
+/* A label in a property split's label column, the items after it in its value column (where the block's buttons go
+ * next); without the split, a label. Decorators are not drawn. */
+Layout *uiItemL_respect_property_split(Layout *layout, StringRef text, int icon)
+{
+  if (!nodes.at(layout)->split) {
+    layout->label(text, icon);
+    return nullptr;
+  }
+  Layout &value = sub_layout(layout, "split_label");
+  nodes[&value]->text = text;
+  button_layout = &value;
+  return nullptr;
+}
+
 /* Blender's template widgets (a data-block selector, a curve editor), recorded by name and property for JS to draw. */
 static void template_node(Layout *layout, const char *name, PointerRNA *ptr, StringRefNull propname)
 {
@@ -203,6 +239,7 @@ static void template_node(Layout *layout, const char *name, PointerRNA *ptr, Str
   node.text = name;
   node.prop = propname;
   node.owner = owner(ptr);
+  node.pointer = *ptr;
 }
 void template_id(Layout *layout, const bContext * /*C*/, PointerRNA *ptr, StringRefNull propname, const char * /*newop*/,
                  const char * /*openop*/, const char * /*unlinkop*/, int /*filter*/, bool /*live_icon*/, std::optional<StringRef> /*text*/)
@@ -221,6 +258,16 @@ void template_curve_mapping(Layout *layout, PointerRNA *ptr, StringRefNull propn
 void template_color_ramp(Layout *layout, PointerRNA *ptr, StringRefNull propname, bool /*expand*/)
 {
   template_node(layout, "template_color_ramp", ptr, propname);
+}
+void template_any_id(Layout *layout, PointerRNA *ptr, StringRefNull propname, StringRefNull /*proptypename*/,
+                     std::optional<StringRef> /*text*/)
+{
+  template_node(layout, "template_any_ID", ptr, propname);
+}
+void template_path_builder(Layout *layout, PointerRNA *ptr, StringRefNull propname, PointerRNA * /*root_ptr*/,
+                           std::optional<StringRefNull> /*text*/)
+{
+  template_node(layout, "template_path_builder", ptr, propname);
 }
 
 /* The panel being drawn and the modifier it draws. */
@@ -251,7 +298,9 @@ static void write(std::ostringstream &out, const Node &node)
 {
   out << "{\"kind\":";
   quote(out, node.kind);
-  for (const auto &[key, value] : {std::pair{"prop", &node.prop}, {"owner", &node.owner}, {"heading", &node.heading}}) {
+  for (const auto &[key, value] :
+       {std::pair{"prop", &node.prop}, {"owner", &node.owner}, {"heading", &node.heading}, {"property", &node.property}})
+  {
     if (!value->empty()) {
       out << ",\"" << key << "\":";
       quote(out, *value);
@@ -312,11 +361,26 @@ static void draw_panel(const bContext *C, PanelType *type, Node &parent, bool ro
     part.layout = &layout;
     nodes[&layout] = &part;
     panel.layout = &layout;
+    button_layout = &layout;
     draw(C, &panel);
   }
   for (LinkData &link : type->children) {
     draw_panel(C, static_cast<PanelType *>(link.data), node, false);
   }
+}
+
+/* port-override: a region's instanced panels (the F-Modifiers' that ANIM_fmodifier_panels adds) are not kept: the
+ * sidebar records them after the panel that adds them (anim_sidebar_panels), so adding one only frees its data. */
+bool panel_list_matches_data(ARegion * /*region*/, ListBase * /*data*/, ListPanelIDFromDataFunc /*panel_idname_func*/)
+{
+  return false;
+}
+void panels_free_instanced(const bContext * /*C*/, ARegion * /*region*/) {}
+Panel *panel_add_instanced(const bContext * /*C*/, ARegion * /*region*/, ListBaseT<Panel> * /*panels*/,
+                           const char * /*panel_idname*/, PointerRNA *custom_data)
+{
+  MEM_delete(custom_data);
+  return nullptr;
 }
 
 /* A registered panel type with its header and sub-panels, as JSON, drawing `ptr` (its custom data, an instanced

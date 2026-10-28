@@ -13,6 +13,7 @@
 
 #include "BKE_context.hh"
 
+#include "BLI_string.h"
 #include "BLI_utildefines.h"
 
 #include "RNA_access.hh"
@@ -182,6 +183,9 @@ static void rna_fcurve_funcs_register()
   for (const RnaBase *b = rna_fcurve_bases; b->srna; b++) {
     (*b->srna)->base = *b->base;
   }
+  for (const RnaArray *a = rna_fcurve_arrays; a->srna; a++) {
+    rna_property_runtime(*a->srna, a->identifier, PropertyType(a->type))->length = a->length;
+  }
   for (const RnaFunc *f = rna_fcurve_funcs; f->srna; f++) {
     auto &funcs = rna_property_runtime(*f->srna, f->identifier, PropertyType(f->type))->funcs;
     switch (f->member) {
@@ -189,6 +193,12 @@ static void rna_fcurve_funcs_register()
   case RNA_FUNC_##name: \
     funcs.name = reinterpret_cast<decltype(funcs.name)>(f->func); \
     break;
+      MEMBER(boolean_get)
+      MEMBER(int_get)
+      MEMBER(float_get)
+      MEMBER(enum_get)
+      MEMBER(string_get)
+      MEMBER(string_length)
       MEMBER(boolean_set)
       MEMBER(int_set)
       MEMBER(float_set)
@@ -376,6 +386,12 @@ static std::vector<double> values(PointerRNA *ptr, const PropertyRNA *prop)
     prop->funcs.float_get_array(ptr, floats.data());
     return std::vector<double>(floats.begin(), floats.end());
   }
+  const auto &get = prop->funcs;
+  if (get.boolean_get || get.int_get || get.float_get || get.enum_get) {
+    return {get.boolean_get ? double(get.boolean_get(ptr)) : get.int_get ? double(get.int_get(ptr)) :
+            get.float_get   ? double(get.float_get(ptr)) :
+                              double(get.enum_get(ptr))};
+  }
   if (prop->dna) {
     const char *data = dna_struct(ptr, *prop);
     std::vector<double> out(std::max(prop->length, 1));
@@ -389,7 +405,9 @@ static std::vector<double> values(PointerRNA *ptr, const PropertyRNA *prop)
         out[i] = ((mask ? (word & mask) != 0 : word != 0) != prop->dna->negative);
       }
       else {
-        out[i] = double(read_int(data + offset, *prop->dna));
+        const long long word = read_int(data + offset, *prop->dna);
+        /* An enum stored as some bits of its field (enum_bitflag) reads them alone. */
+        out[i] = double(prop->type == PROP_ENUM && prop->dna->bit ? word & prop->dna->bit : word);
       }
     }
     return out;
@@ -440,6 +458,10 @@ static void set_values(PointerRNA *ptr, const PropertyRNA *prop, std::vector<dou
       else if (prop->type == PROP_BOOLEAN && mask) {
         const long long word = read_int(data + offset, *prop->dna);
         write_int(data + offset, *prop->dna, ((numbers[i] != 0.0) != prop->dna->negative) ? word | mask : word & ~mask);
+      }
+      else if (prop->type == PROP_ENUM && prop->dna->bit) {
+        const long long word = read_int(data + offset, *prop->dna);
+        write_int(data + offset, *prop->dna, (word & ~prop->dna->bit) | ((long long)(numbers[i]) & prop->dna->bit));
       }
       else {
         write_int(data + offset, *prop->dna, (long long)(numbers[i]));
@@ -753,6 +775,12 @@ static std::string string_value(PointerRNA *ptr, PropertyRNA *prop)
   if (!prop || !ptr->data) {
     return {};
   }
+  if (prop->funcs.string_get) {
+    std::string value(prop->funcs.string_length ? prop->funcs.string_length(ptr) : 0, '\0');
+    std::vector<char> buffer(value.size() + 1);
+    prop->funcs.string_get(ptr, buffer.data());
+    return buffer.data();
+  }
   if (prop->dna) {
     return dna_struct(ptr, *prop) + prop->dna->offset;
   }
@@ -779,8 +807,8 @@ void RNA_property_string_set_bytes(PointerRNA *ptr, PropertyRNA *prop, const cha
     prop->funcs.string_set(ptr, std::string(value, len).c_str());
     return;
   }
-  /* A DNA string without a set function is not written: its field's length is not kept. */
   if (prop->dna) {
+    BLI_strncpy(dna_struct(ptr, *prop) + prop->dna->offset, std::string(value, len).c_str(), size_t(prop->dna->size));
     return;
   }
   static_cast<OperatorValues *>(ptr->data)->strings[prop] = std::string(value, len);

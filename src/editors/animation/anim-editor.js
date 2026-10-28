@@ -4,7 +4,7 @@
 // and Blender's operators run there in Blender's C, modal ones (transform, frame change, view panning) getting the
 // following events with modal keymaps applied. The window manager's part (gestures, event values, redraws) is here;
 // the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
-import { AnimArea, iconName, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
+import { AnimArea, iconName, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
 import { regionCanvas, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
@@ -17,7 +17,7 @@ import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { headerLayout, drawPanels, panelTypes } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
-import { GRAPH_PANELS, drawFModifierPanels } from './anim-buttons.js';
+import { drawSidebarPanels } from './anim-buttons.js';
 import { drawRecording, buttonAt } from '../interface/region-draw.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
@@ -102,12 +102,13 @@ const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' 
 export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, objects, commit = () => {} }) {
   // A Dope Sheet's space is made as the startup file's Timeline area's, whose Dope Sheet it becomes, keeping its regions
   // (channels and sidebar hidden), as Blender switches an area's sub-type.
-  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : -1);
+  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : GRAPH_MODES[uiType]);
   if (uiType === 'DOPESHEET') {
     area.subtype = ACTION_MODES.DOPESHEET;
     area.show(RGN_TYPE_UI, false);
   }
-  const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR';
+  // The Drivers editor's X axis is a driver's input, not time: no scrubbing, frame range or markers.
+  const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR', drivers = uiType === 'DRIVERS';
   section.classList.add('anim-editor');
   section.tabIndex = 0;
   const channelsCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-channels' });
@@ -161,28 +162,31 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   });
   const drawHeaderType = (type) => (layout) => Object.assign(type(), { layout }).draw(context());
 
-  // The sidebar (RGN_TYPE_UI): its tabs (the panels' bl_category) and the active tab's panels whose poll() passes,
-  // the Graph Editor's from graph_buttons.cc (anim-buttons.js), the Dope Sheet's from Blender's scripts.
-  const sidebarTypes = panelTypes(graph ? [{ classes: GRAPH_PANELS }] : [{ classes: Object.values(PANEL_TYPES) }], { space, region: 'UI' });
+  // The sidebar (RGN_TYPE_UI): its tabs (the panels' categories) and the active tab's panels whose poll passes, the
+  // Graph Editor's drawn by Blender's C code in the module (anim-buttons.js), the Dope Sheet's from Blender's scripts.
+  const sidebarTypes = graph ? null : panelTypes([{ classes: Object.values(PANEL_TYPES) }], { space, region: 'UI' });
   const sidebarState = reactive({ category: null, open: {} });
   const sidebarPanels = panelState(sidebarState);
   const sidebarContext = () => createContext(rna, { area: space, uiType, space: editor, region: 'UI', members: () => ({
     get active_action() { const action = area.activeAction(); return action ? rna.pointer('Action', action) : null; },
   }) });
   const sidebarUI = markRaw({ ...layoutUI, isOpen: sidebarPanels.isOpen, toggle: (id, event, closed) => { sidebarPanels.toggle(id, event, closed); headerState.revision++; } });
+  const recordedSidebar = (ctx) => drawSidebarPanels(area, { isOpen: sidebarPanels.isOpen, changed: () => layoutUI.undoPush(),
+    bound: (struct) => ({ SpaceGraphEditor: ctx.space_data, Scene: ctx.scene })[struct] ?? null });
+  const scriptedSidebar = (ctx) => {
+    const polls = (type) => { try { return !type.poll || !!type.poll(ctx); } catch { return false; } };
+    const roots = sidebarTypes.roots.filter(({ type }) => polls(type));
+    return { categories: [...new Set(roots.map(({ type }) => type.bl_category))],
+      panels: (category) => drawPanels({ roots: roots.filter(({ type }) => type.bl_category === category) }, ctx, { contexts: ['data'], open: sidebarPanels.isOpen }) };
+  };
   const sidebarApp = createApp({ render: () => {
     void headerState.revision;
     if (!headerState.ready || sidebar.hidden) return null;
-    const ctx = sidebarContext(), polls = (type) => { try { return !type.poll || !!type.poll(ctx); } catch { return false; } };
-    const roots = sidebarTypes.roots.filter(({ type }) => polls(type));
-    // Tabs in registration order: C panels as graph_buttons_register adds them (no header-first sorting).
-    const ordered = graph ? GRAPH_PANELS.filter((type) => roots.some((root) => root.type === type)) : roots.map(({ type }) => type);
-    const categories = [...new Set(ordered.map((type) => type.bl_category))];
+    sync();
+    const ctx = sidebarContext(), { categories, panels } = (graph ? recordedSidebar : scriptedSidebar)(ctx);
     const category = categories.includes(sidebarState.category) ? sidebarState.category : categories[0];
-    const drawn = drawPanels({ roots: roots.filter(({ type }) => type.bl_category === category) }, ctx, { contexts: ['data'], open: sidebarPanels.isOpen });
-    if (graph && category === 'Modifiers') drawn.push(...drawFModifierPanels(area, { isOpen: sidebarPanels.isOpen, changed: () => layoutUI.undoPush() }));
     return [
-      h(RegionView, { panels: drawn, ui: sidebarUI }),
+      h(RegionView, { panels: category ? panels(category) : [], ui: sidebarUI }),
       h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {
         type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category), onClick: () => { sidebarState.category = name; },
       }, name))),
@@ -500,7 +504,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     const back = spaceTheme.space.back;
     main.ctx.fillStyle = `rgb(${back.map((c) => Math.round(c * 255)).join(',')})`;
     main.ctx.fillRect(0, 0, main.width, main.height);
-    drawFrameRange(main, v2d, range);
+    if (!drivers) drawFrameRange(main, v2d, range);
     if (graph) {
       drawGrid(main, v2d, spaceTheme.grid, { values: true, fps: t.fps });
       drawCurves(main, v2d, area.curves(), { showHandles: !(settings.flag & (1 << 2)), onlySelectedHandles: !!(settings.flag & (1 << 9)) });
@@ -509,9 +513,9 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       const { cur } = v2d, rows = channelRows(channels, v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
       drawKeyRows(main, v2d, rows, metrics, { backdrops: !timeline });
     }
-    if (markersShown()) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
+    if (markersShown() && !drivers) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
-    drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
+    if (!drivers) drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
     drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW, true), { height: size.height, scale: globalThis.devicePixelRatio || 1, redraw });
     if (size.channels) {
       const view = regionCanvas(channelsCanvas, size.channels, size.height);

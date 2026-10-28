@@ -15,9 +15,11 @@ its API, `fetch`, such as the default theme):
 Usage: tools/blender-port/wasm_module.py SRC [MODULE]   (SRC: Blender sources of the manifest's tag)
 """
 import concurrent.futures
+import functools
 import glob
 import hashlib
 import json
+import operator
 import os
 import re
 import shutil
@@ -229,22 +231,25 @@ def rna_prototypes(build, args):
 def rna_fcurve_funcs(build):
     """generated/rna_fcurve_funcs.inc: RNA_FUNC(struct type, identifier, property type, member, function) for each RNA
     function rna_fcurve.cc's runtime part gives a property (dna-fcurve.json, modifier_dna.py), for wasm/rna-fcurve.cc to
-    list for the module's properties: set and range functions by the property's type, a float array's get and length, and
-    updates;
-    and RNA_BASE(struct type, base type) for the structs that inherit their base's properties."""
+    list for the module's properties: get, set and range functions by the property's type, an array's or a string's
+    length, and updates; RNA_ARRAY(struct type, identifier, property type, length) for the arrays that have no DNA
+    field; and RNA_BASE(struct type, base type) for the structs that inherit their base's properties."""
     types = {'BOOLEAN': 'PROP_BOOLEAN', 'INT': 'PROP_INT', 'FLOAT': 'PROP_FLOAT', 'ENUM': 'PROP_ENUM', 'STRING': 'PROP_STRING'}
     lines = []
     for struct, info in json.load(open(os.path.join(convert.REPO, 'src', 'makesrna', 'dna-fcurve.json'))).items():
         if info.get('base'):
             lines.append(f'RNA_BASE(RNA_{struct}, RNA_{info["base"]})')
         for name, prop in info['properties'].items():
-            funcs, kind = prop.get('funcs', {}), prop.get('type')
+            funcs, kind = prop.get('funcs') or {}, prop.get('type')
             if kind not in types:
                 continue
-            array = 'length' in funcs or prop.get('length')
-            members = {'set': 'float_set_array' if kind == 'FLOAT' and array else kind.lower() + '_set', 'length': 'length',
-                       'update': 'update', **({'get': 'float_get_array'} if kind == 'FLOAT' and array else {}),
-                       **({'range': kind.lower() + '_range'} if kind in ('INT', 'FLOAT') else {})}
+            array = kind == 'FLOAT' and ('length' in funcs or prop.get('length') or prop.get('array'))
+            scalar = kind.lower()
+            members = {'get': 'float_get_array' if array else scalar + '_get', 'set': 'float_set_array' if array else scalar + '_set',
+                       'length': 'string_length' if kind == 'STRING' else 'length', 'update': 'update',
+                       **({'range': scalar + '_range'} if kind in ('INT', 'FLOAT') else {})}
+            if prop.get('array') and 'offset' not in prop:
+                lines.append(f'RNA_ARRAY(RNA_{struct}, "{name}", {types[kind]}, {prop["array"]})')
             lines += [f'RNA_FUNC(RNA_{struct}, "{name}", {types[kind]}, {members[role]}, {func})'
                       for role, func in funcs.items() if role in members]
     path = os.path.join(build, 'generated', 'rna_fcurve_funcs.inc')
@@ -264,6 +269,8 @@ def rna_dna_fields(build):
     dna = json.load(open(os.path.join(makesrna, 'dna-modifiers.json')))
     declared = open(os.path.join(HERE, 'include', 'RNA_prototypes.hh')).read()
     kinds = {'BOOLEAN': 'PROP_BOOLEAN', 'INT': 'PROP_INT', 'FLOAT': 'PROP_FLOAT', 'ENUM': 'PROP_ENUM', 'POINTER': 'PROP_POINTER', 'STRING': 'PROP_STRING'}
+    # A string's size is its char array's, which RNA's set writes at most.
+    size = lambda field: field.get('length', field['size']) if field['kind'] == 'int' and field['size'] == 1 and field.get('length') else field['size']
     lines = []
     for info in rna['types'].values():
         struct = info['struct']
@@ -276,22 +283,24 @@ def rna_dna_fields(build):
                 continue
             length = len(prop['default']) if isinstance(prop.get('default'), list) and prop['type'] != 'ENUM' else 0
             kind = 's' if prop['type'] == 'STRING' else field['kind'][0]
-            lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[prop["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
+            lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[prop["type"]]}, {length}, {field["offset"]}, {size(field)}, \'{kind}\', '
                          f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, {str("bitset" in field).lower()}, '
                          f'{str(field.get("negative", False)).lower()})')
-    # Structs whose properties dna-outliner.json and dna-fcurve.json describe whole (type, icon), with DNA_ICON(struct
+    # Structs whose properties dna-outliner.json, dna-anim.json and dna-fcurve.json describe whole (type, icon), with DNA_ICON(struct
     # type, identifier, icon, consecutive) for those that have an icon.
-    described = {**json.load(open(os.path.join(makesrna, 'dna-outliner.json'))), **json.load(open(os.path.join(makesrna, 'dna-fcurve.json')))}
+    # An enum stored as some bits of its field (RNA_def_property_enum_bitflag_sdna) is masked by its items' values.
+    bits = lambda field: functools.reduce(operator.or_, (v for v, _ in field.get('items', [])), 0) if field.get('bitflag') else field.get('bit', 0)
+    described = {k: v for name in ('dna-outliner.json', 'dna-anim.json', 'dna-fcurve.json') for k, v in json.load(open(os.path.join(makesrna, name))).items()}
     for struct, info in described.items():
         for name, field in info['properties'].items():
-            # Dynamic arrays (pointers to values) are read through their RNA functions, which the module lacks.
-            dynamic = field['kind'] == 'pointer' and field.get('type') != 'POINTER'
-            if field.get('type') not in kinds or field['kind'] == 'struct' or field.get('bitset') is not None or dynamic:
+            # Dynamic arrays (pointers to values) are read through their RNA functions (rna_fcurve_funcs.inc), or not at all.
+            dynamic = field.get('kind') == 'pointer' and field.get('type') != 'POINTER'
+            if field.get('type') not in kinds or 'offset' not in field or field['kind'] == 'struct' or field.get('bitset') is not None or dynamic:
                 continue
             length = 0 if field.get('type') == 'STRING' else field.get('length', 0)
             kind = 's' if field['type'] == 'STRING' else field['kind'][0]
-            lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[field["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
-                         f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, false, '
+            lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[field["type"]]}, {length}, {field["offset"]}, {size(field)}, \'{kind}\', '
+                         f'{str(field.get("signed", False)).lower()}, {bits(field)}LL, false, '
                          f'{str(field.get("negative", False)).lower()}, {info.get("from", -1)})')
             if field.get('icon'):
                 lines.append(f'DNA_ICON(RNA_{struct}, "{name}", {field["icon"]}, {field.get("consecutive", 0)})')

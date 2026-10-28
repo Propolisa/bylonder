@@ -80,6 +80,20 @@ FMOD_CASES = {
     "fmod-smooth": (["SMOOTH"], [(0, "sigma", 2.0), (0, "filter_width", 3), (0, "use_influence", True), (0, "influence", 0.5)]),
 }
 FMOD_FRAMES = list(range(-5, 40, 3))
+# A driver added on the empty's Y location as Python's driver_add adds it (ANIM_add_driver), then edited as the Drivers
+# editor's Driver panel edits it: ("add_variable"), ("driver", property, value), ("var", index, property, value) or
+# ("target", variable index, target index, property, value). The driver's settings, its variables and their targets
+# are compared.
+DRIVER_CASES = {
+    "driver-add": [],
+    "driver-expression": [("driver", "expression", "var * 2"), ("add_variable",), ("var", 0, "name", "height")],
+    "driver-transforms": [("add_variable",), ("var", 0, "type", "TRANSFORMS"), ("target", 0, 0, "transform_type", "ROT_Y"),
+                          ("target", 0, 0, "transform_space", "LOCAL_SPACE")],
+    "driver-averaged": [("driver", "type", "AVERAGE"), ("add_variable",), ("add_variable",), ("var", 1, "type", "LOC_DIFF"),
+                        ("var", 0, "name", "1st")],
+}
+DRIVER_TARGET = ("id_type", "data_path", "bone_target", "transform_type", "rotation_mode", "transform_space", "use_fallback_value",
+                 "fallback_value")
 
 # Marker operators in the Dope Sheet, on markers at frames 10 (selected), 30 and 45: (operator, properties).
 MARKER_CASES = {
@@ -201,6 +215,32 @@ for name, (types, edits) in FMOD_CASES.items():
         json.dump(data, f, separators=(",", ":"))
 
 
+def driver_state(fc):
+    driver = fc.driver
+    return {"type": driver.type, "expression": driver.expression, "use_self": driver.use_self,
+            "variables": [{"name": v.name, "type": v.type, "is_name_valid": v.is_name_valid,
+                           "targets": [{p: getattr(t, p) for p in DRIVER_TARGET} for t in v.targets]} for v in driver.variables],
+            "keys": [r(k.co) for k in fc.keyframe_points], "modifiers": [m.type for m in fc.modifiers]}
+
+
+for name, edits in DRIVER_CASES.items():
+    build([])
+    ob = bpy.data.objects["Empty"]
+    fc = ob.driver_add("location", 1)
+    for edit in edits:
+        if edit[0] == "add_variable":
+            fc.driver.variables.new()
+        elif edit[0] == "driver":
+            setattr(fc.driver, edit[1], edit[2])
+        elif edit[0] == "var":
+            setattr(fc.driver.variables[edit[1]], edit[2], edit[3])
+        else:
+            setattr(fc.driver.variables[edit[1]].targets[edit[2]], edit[3], edit[4])
+    data = {"driver": ["location", 1], "edits": edits, "keys": KEYS, "before": keys(), "after": driver_state(fc)}
+    with open(os.path.join(out_dir, name + ".json"), "w") as f:
+        json.dump(data, f, separators=(",", ":"))
+
+
 def markers():
     return [{"name": m.name, "frame": m.frame, "select": m.select} for m in bpy.context.scene.timeline_markers]
 
@@ -217,4 +257,4 @@ for name, (idname, props) in MARKER_CASES.items():
     data = {"markers_operator": idname, "props": props, "result": result, "frame": FRAME, "before": before, "after": markers()}
     with open(os.path.join(out_dir, name + ".json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))
-print("fixtures written", len(CASES) + len(PANEL_CASES) + len(MARKER_CASES) + len(FMOD_CASES))
+print("fixtures written", len(CASES) + len(PANEL_CASES) + len(MARKER_CASES) + len(FMOD_CASES) + len(DRIVER_CASES))

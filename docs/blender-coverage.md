@@ -68,7 +68,7 @@ The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animat
 
 ## GRAPH_EDITOR > *
 Status: partial
-Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Its sidebar panels (graph_buttons.cc) are ported as their layout calls in `editors/animation/anim-buttons.js`; the F-Modifier panels are Blender's own `fmodifier_ui.cc`, drawn in the module and recorded. Drivers mode is not shown yet.
+Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Its sidebar is Blender's own C panels (`graph_buttons.cc`, `fmodifier_ui.cc`), drawn in the module and recorded. The Drivers editor is the same space in its Drivers mode (Editor Type > Drivers). Adding a driver from a property's context menu, and driver values reaching Babylon's objects, are not done yet.
 ## OUTLINER > *
 Status: partial
 Blender's `space_outliner` code in the module, drawn on a canvas from its own draw calls; see `docs/blender-boundary.md` (Outliner). View Layer display mode only; other display modes, context menus on IDs that are not objects or collections, and scroll bars are not shown yet.

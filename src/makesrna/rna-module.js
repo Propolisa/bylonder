@@ -9,6 +9,8 @@ import fcurve from './dna-fcurve.json' with { type: 'json' };
 
 const { exports: x, withString, cString } = blenderModule;
 const TABLES = { ...fcurve };
+// The structs the module's RNA reads and writes.
+export const moduleStructs = new Set(Object.keys(TABLES));
 
 function enumItems(struct, name) {
   for (let s = struct; s; s = structs[s]?.base) {

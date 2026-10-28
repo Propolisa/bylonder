@@ -1,4 +1,715 @@
 {
+ "Driver": {
+  "sdna": "ChannelDriver",
+  "size": 288,
+  "properties": {
+   "type": {
+    "offset": 280,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AVERAGE"
+     ],
+     [
+      2,
+      "SUM"
+     ],
+     [
+      1,
+      "SCRIPTED"
+     ],
+     [
+      3,
+      "MIN"
+     ],
+     [
+      4,
+      "MAX"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_ChannelDriver_update_data"
+    }
+   },
+   "expression": {
+    "offset": 8,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 256,
+    "type": "STRING",
+    "funcs": {
+     "update": "rna_ChannelDriver_update_expr"
+    }
+   },
+   "variables": {
+    "offset": 0,
+    "size": 8,
+    "kind": "struct",
+    "type": null
+   },
+   "use_self": {
+    "offset": 284,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "is_valid": {
+    "offset": 284,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "is_simple_expression": {
+    "custom": true,
+    "type": "BOOLEAN",
+    "funcs": {
+     "get": "rna_ChannelDriver_is_simple_expression_get"
+    }
+   }
+  }
+ },
+ "DriverTarget": {
+  "sdna": "DriverTarget",
+  "size": 96,
+  "properties": {
+   "id": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER",
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "id_type": {
+    "offset": 84,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      17217,
+      "ACTION"
+     ],
+     [
+      21057,
+      "ARMATURE"
+     ],
+     [
+      21058,
+      "BRUSH"
+     ],
+     [
+      17987,
+      "CACHEFILE"
+     ],
+     [
+      16707,
+      "CAMERA"
+     ],
+     [
+      21063,
+      "COLLECTION"
+     ],
+     [
+      21827,
+      "CURVE"
+     ],
+     [
+      22083,
+      "CURVES"
+     ],
+     [
+      18006,
+      "FONT"
+     ],
+     [
+      17479,
+      "GREASEPENCIL"
+     ],
+     [
+      20551,
+      "GREASEPENCIL_V3"
+     ],
+     [
+      19785,
+      "IMAGE"
+     ],
+     [
+      17739,
+      "KEY"
+     ],
+     [
+      21580,
+      "LATTICE"
+     ],
+     [
+      18764,
+      "LIBRARY"
+     ],
+     [
+      16716,
+      "LIGHT"
+     ],
+     [
+      20556,
+      "LIGHT_PROBE"
+     ],
+     [
+      21324,
+      "LINESTYLE"
+     ],
+     [
+      21325,
+      "MASK"
+     ],
+     [
+      16717,
+      "MATERIAL"
+     ],
+     [
+      17741,
+      "MESH"
+     ],
+     [
+      16973,
+      "META"
+     ],
+     [
+      17229,
+      "MOVIECLIP"
+     ],
+     [
+      21582,
+      "NODETREE"
+     ],
+     [
+      16975,
+      "OBJECT"
+     ],
+     [
+      17232,
+      "PAINTCURVE"
+     ],
+     [
+      19536,
+      "PALETTE"
+     ],
+     [
+      16720,
+      "PARTICLE"
+     ],
+     [
+      21584,
+      "POINTCLOUD"
+     ],
+     [
+      17235,
+      "SCENE"
+     ],
+     [
+      21075,
+      "SCREEN"
+     ],
+     [
+      20307,
+      "SOUND"
+     ],
+     [
+      19283,
+      "SPEAKER"
+     ],
+     [
+      22612,
+      "TEXT"
+     ],
+     [
+      17748,
+      "TEXTURE"
+     ],
+     [
+      20310,
+      "VOLUME"
+     ],
+     [
+      19799,
+      "WINDOWMANAGER"
+     ],
+     [
+      21335,
+      "WORKSPACE"
+     ],
+     [
+      20311,
+      "WORLD"
+     ]
+    ],
+    "funcs": {
+     "set": "rna_DriverTarget_id_type_set",
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "data_path": {
+    "custom": true,
+    "type": "STRING",
+    "funcs": {
+     "get": "rna_DriverTarget_RnaPath_get",
+     "length": "rna_DriverTarget_RnaPath_length",
+     "set": "rna_DriverTarget_RnaPath_set",
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "bone_target": {
+    "offset": 8,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING",
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "transform_type": {
+    "offset": 72,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LOC_X"
+     ],
+     [
+      1,
+      "LOC_Y"
+     ],
+     [
+      2,
+      "LOC_Z"
+     ],
+     [
+      3,
+      "ROT_X"
+     ],
+     [
+      4,
+      "ROT_Y"
+     ],
+     [
+      5,
+      "ROT_Z"
+     ],
+     [
+      10,
+      "ROT_W"
+     ],
+     [
+      6,
+      "SCALE_X"
+     ],
+     [
+      7,
+      "SCALE_Y"
+     ],
+     [
+      8,
+      "SCALE_Z"
+     ],
+     [
+      9,
+      "SCALE_AVG"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "rotation_mode": {
+    "offset": 74,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "XYZ"
+     ],
+     [
+      2,
+      "XZY"
+     ],
+     [
+      3,
+      "YXZ"
+     ],
+     [
+      4,
+      "YZX"
+     ],
+     [
+      5,
+      "ZXY"
+     ],
+     [
+      6,
+      "ZYX"
+     ],
+     [
+      7,
+      "QUATERNION"
+     ],
+     [
+      8,
+      "SWING_TWIST_X"
+     ],
+     [
+      9,
+      "SWING_TWIST_Y"
+     ],
+     [
+      10,
+      "SWING_TWIST_Z"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "transform_space": {
+    "offset": 80,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "WORLD_SPACE"
+     ],
+     [
+      4,
+      "TRANSFORM_SPACE"
+     ],
+     [
+      12,
+      "LOCAL_SPACE"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "context_property": {
+    "offset": 88,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "ACTIVE_SCENE"
+     ],
+     [
+      1,
+      "ACTIVE_VIEW_LAYER"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "use_fallback_value": {
+    "offset": 82,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "fallback_value": {
+    "offset": 92,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_DriverTarget_update_data"
+    }
+   },
+   "is_fallback_used": {
+    "offset": 80,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "DriverVariable": {
+  "sdna": "DriverVar",
+  "size": 848,
+  "properties": {
+   "name": {
+    "offset": 8,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "STRING",
+    "funcs": {
+     "set": "rna_DriverVariable_name_set",
+     "update": "rna_DriverVariable_update_name"
+    }
+   },
+   "type": {
+    "offset": 841,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SINGLE_PROP"
+     ],
+     [
+      3,
+      "TRANSFORMS"
+     ],
+     [
+      1,
+      "ROTATION_DIFF"
+     ],
+     [
+      2,
+      "LOC_DIFF"
+     ],
+     [
+      4,
+      "CONTEXT_PROP"
+     ]
+    ],
+    "funcs": {
+     "set": "rna_DriverVariable_type_set",
+     "update": "rna_DriverVariable_update_data"
+    }
+   },
+   "targets": {
+    "offset": 72,
+    "size": 96,
+    "kind": "struct",
+    "length": 8,
+    "type": null
+   },
+   "is_name_valid": {
+    "offset": 842,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "negative": true,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "FCurve": {
+  "sdna": "FCurve",
+  "size": 92,
+  "properties": {
+   "extrapolation": {
+    "offset": 46,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "CONSTANT"
+     ],
+     [
+      1,
+      "LINEAR"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_FCurve_update_data"
+    }
+   },
+   "driver": {
+    "offset": 12,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "group": {
+    "offset": 8,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER",
+    "funcs": {}
+   },
+   "data_path": {
+    "custom": true,
+    "type": "STRING",
+    "funcs": {
+     "get": "rna_FCurve_RnaPath_get",
+     "length": "rna_FCurve_RnaPath_length",
+     "set": "rna_FCurve_RnaPath_set",
+     "update": "rna_FCurve_update_data_relations"
+    }
+   },
+   "array_index": {
+    "offset": 52,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT",
+    "funcs": {
+     "update": "rna_FCurve_update_data_relations"
+    }
+   },
+   "color_mode": {
+    "offset": 60,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO_RAINBOW"
+     ],
+     [
+      1,
+      "AUTO_RGB"
+     ],
+     [
+      3,
+      "AUTO_YRGB"
+     ],
+     [
+      2,
+      "CUSTOM"
+     ]
+    ]
+   },
+   "color": {
+    "offset": 64,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT",
+    "array": 3
+   },
+   "select": {
+    "offset": 44,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "lock": {
+    "offset": 44,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "mute": {
+    "offset": 44,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FCurve_update_eval"
+    }
+   },
+   "hide": {
+    "offset": 44,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "auto_smoothing": {
+    "offset": 48,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "CONT_ACCEL"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_FCurve_update_data"
+    }
+   },
+   "is_valid": {
+    "offset": 44,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "is_empty": {
+    "custom": true,
+    "type": "BOOLEAN",
+    "funcs": {
+     "get": "rna_FCurve_is_empty_get"
+    }
+   },
+   "modifiers": {
+    "offset": 16,
+    "size": 8,
+    "kind": "struct",
+    "type": null
+   }
+  }
+ },
  "FModifier": {
   "sdna": "FModifier",
   "size": 112,
@@ -494,7 +1205,8 @@
      "get": "rna_FModifierGenerator_coefficients_get",
      "set": "rna_FModifierGenerator_coefficients_set",
      "update": "rna_FModifier_verify_data_update"
-    }
+    },
+    "array": 32
    }
   }
  },
@@ -805,6 +1517,290 @@
      "range": "rna_FModifierStepped_end_frame_range",
      "update": "rna_FModifier_update"
     }
+   }
+  }
+ },
+ "Keyframe": {
+  "sdna": "BezTriple",
+  "size": 72,
+  "properties": {
+   "select_left_handle": {
+    "offset": 51,
+    "size": 1,
+    "kind": "int",
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "select_right_handle": {
+    "offset": 53,
+    "size": 1,
+    "kind": "int",
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "select_control_point": {
+    "offset": 52,
+    "size": 1,
+    "kind": "int",
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "handle_left_type": {
+    "offset": 49,
+    "size": 1,
+    "kind": "int",
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FREE"
+     ],
+     [
+      3,
+      "ALIGNED"
+     ],
+     [
+      2,
+      "VECTOR"
+     ],
+     [
+      1,
+      "AUTO"
+     ],
+     [
+      4,
+      "AUTO_CLAMPED"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "handle_right_type": {
+    "offset": 50,
+    "size": 1,
+    "kind": "int",
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FREE"
+     ],
+     [
+      3,
+      "ALIGNED"
+     ],
+     [
+      2,
+      "VECTOR"
+     ],
+     [
+      1,
+      "AUTO"
+     ],
+     [
+      4,
+      "AUTO_CLAMPED"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "interpolation": {
+    "offset": 48,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "CONSTANT"
+     ],
+     [
+      1,
+      "LINEAR"
+     ],
+     [
+      2,
+      "BEZIER"
+     ],
+     [
+      12,
+      "SINE"
+     ],
+     [
+      9,
+      "QUAD"
+     ],
+     [
+      6,
+      "CUBIC"
+     ],
+     [
+      10,
+      "QUART"
+     ],
+     [
+      11,
+      "QUINT"
+     ],
+     [
+      8,
+      "EXPO"
+     ],
+     [
+      5,
+      "CIRC"
+     ],
+     [
+      3,
+      "BACK"
+     ],
+     [
+      4,
+      "BOUNCE"
+     ],
+     [
+      7,
+      "ELASTIC"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "type": {
+    "offset": 54,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "KEYFRAME"
+     ],
+     [
+      2,
+      "BREAKDOWN"
+     ],
+     [
+      4,
+      "MOVING_HOLD"
+     ],
+     [
+      1,
+      "EXTREME"
+     ],
+     [
+      3,
+      "JITTER"
+     ],
+     [
+      5,
+      "GENERATED"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "easing": {
+    "offset": 55,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "EASE_IN"
+     ],
+     [
+      2,
+      "EASE_OUT"
+     ],
+     [
+      3,
+      "EASE_IN_OUT"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "back": {
+    "offset": 56,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "amplitude": {
+    "offset": 60,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "period": {
+    "offset": 64,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_Keyframe_update"
+    }
+   },
+   "handle_left": {
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "get": "rna_FKeyframe_handle1_get",
+     "set": "rna_FKeyframe_handle1_set",
+     "update": "rna_Keyframe_update"
+    },
+    "array": 2
+   },
+   "co": {
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "get": "rna_FKeyframe_ctrlpoint_get",
+     "set": "rna_FKeyframe_ctrlpoint_set",
+     "update": "rna_Keyframe_update"
+    },
+    "array": 2
+   },
+   "co_ui": {
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "get": "rna_FKeyframe_ctrlpoint_get",
+     "set": "rna_FKeyframe_ctrlpoint_ui_set",
+     "update": "rna_Keyframe_update"
+    },
+    "array": 2
+   },
+   "handle_right": {
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "get": "rna_FKeyframe_handle2_get",
+     "set": "rna_FKeyframe_handle2_set",
+     "update": "rna_Keyframe_update"
+    },
+    "array": 2
    }
   }
  }
