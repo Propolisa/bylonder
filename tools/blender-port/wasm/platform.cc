@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <new>
 
+#include "BLI_threads.h"
+
 void *operator new(std::size_t n)
 {
   void *p = std::malloc(n ? n : 1);
@@ -43,4 +45,9 @@ namespace blender {
 /* port-override: WASI has no threads; Blender's own task_range.cc runs ranges serially without TBB. */
 int BLI_system_thread_count() { return 1; }
 int BLI_thread_is_main() { return 1; }
+/* port-override: one thread holds every lock. */
+void BLI_spin_init(SpinLock * /*spin*/) {}
+void BLI_spin_lock(SpinLock * /*spin*/) {}
+void BLI_spin_unlock(SpinLock * /*spin*/) {}
+void BLI_spin_end(SpinLock * /*spin*/) {}
 }  // namespace blender
