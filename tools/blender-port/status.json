@@ -216,7 +216,9 @@
       "safe_acos_approx",
       "resolve_quad_uv_v2_deriv",
       "line_point_side_v2",
-      "interp_v2_v2v2"
+      "interp_v2_v2v2",
+      "project_plane_v3_v3v3",
+      "axis_dominant_v3_ortho_single"
     ],
     "shimmed": {
       "angle_v3v3": null,
@@ -247,7 +249,10 @@
       "invert_m3_m3",
       "copy_m3_m3",
       "adjoint_m3_m3",
-      "determinant_m3_array"
+      "determinant_m3_array",
+      "orthogonalize_m3",
+      "mat3_to_size",
+      "negate_m3"
     ],
     "shimmed": {
       "transpose_m3": null,
@@ -839,6 +844,27 @@
       "EIG_linear_solver_right_hand_side_add": null,
       "EIG_linear_solver_delete": null
     },
+    "excluded": {},
+    "missing": {}
+  },
+  "blenlib/math-rotation.js": {
+    "generated": [
+      "quat_to_mat3",
+      "mat3_normalized_to_quat",
+      "eulO_to_mat3",
+      "mat3_normalized_to_eulO",
+      "mat3_normalized_to_compatible_eulO",
+      "quat_to_mat3_no_error",
+      "mat3_normalized_to_quat_with_checks",
+      "get_rotation_order_info",
+      "mat3_normalized_to_eulo2",
+      "compatible_eul",
+      "mat3_normalized_to_quat_fast",
+      "dot_qtqt",
+      "normalize_qt",
+      "mul_qt_fl"
+    ],
+    "shimmed": {},
     "excluded": {},
     "missing": {}
   }

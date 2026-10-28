@@ -197,6 +197,15 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     },
     // Resolves once every object's stack is drawn as it now is, as a render needs it.
     async settled(){for(;;){api.refresh();const pending=[...requested.values()].filter(r=>!r.done).map(r=>r.promise);if(!pending.length)return;await Promise.all(pending);}},
+    // An object's stack as an export keeps it live (the modifier kernels polyfill): the Mesh Blender's modifiers start
+    // from, as the module takes it, and each modifier's type, settings and their DNA layouts; null unless all of the
+    // modifiers it shows are Blender's.
+    live(node){
+      const stack=modifierStack(node).filter(m=>m.showViewport),definitions=stack.map(m=>modifierDefinitions.get(m.type)?.mesh);
+      if(!stack.length||!definitions.every(Boolean))return null;
+      const mesh=objectMesh(node,VertexData.Parse(base(node)));
+      return {mesh,modifiers:stack.map((m,i)=>({id:m.id,kind:m.type,type:definitions[i].type,values:structuredClone(m.values),layouts:definitions[i].layouts(m.values)}))};
+    },
     source:node=>structuredClone(node.metadata?.wbModifierBase||VertexData.ExtractFromMesh(node).serialize()),
     dispose(){for(const node of requested.keys())jobs?.cancel(node);for(const [node] of cache)if(!node.isDisposed()){restoreInstances(node);if(node.metadata?.wbModifierBase)VertexData.Parse(node.metadata.wbModifierBase).applyToMesh(node);}cache.clear();listeners.clear();}
   };

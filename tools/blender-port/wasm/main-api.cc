@@ -40,6 +40,7 @@
 #include "DNA_scene_types.h"
 #include "DNA_screen_types.h"
 #include "DNA_windowmanager_types.h"
+#include "DNA_userdef_types.h"
 #include "DNA_workspace_types.h"
 #include "ED_screen.hh"
 #include "GPU_material.hh"
@@ -49,6 +50,7 @@
 
 #include "extraction.hh"
 
+#include <algorithm>
 #include <cfloat>
 #include <string>
 
@@ -123,7 +125,7 @@ EXPORT(main_scene_camera_set) void main_scene_camera_set(BlenderMain *ctx, Objec
 
 static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(&ctx->view_layer, ob); }
 
-/* port-override: the module's one scene is not in Main's scenes (scene.cc, which makes them, is not built), so
+/* port-override: the module's one scene is not in Main's scenes (but while a .blend is written), so
  * BKE_main_collection_sync does not reach its view layer: the collections' changes are synced to it here, after each
  * change, as BKE_main_collection_sync syncs a scene's. */
 static void collections_synced(BlenderMain *ctx)
@@ -533,6 +535,26 @@ EXPORT(id_property_string) const char *id_property_string(const ID *id, const ch
   return prop ? IDP_string_get(prop) : nullptr;
 }
 
+/* The module's Scene in Main's scenes, for Blender's code that reads them (the .blend writer, which writes Main's IDs),
+ * as the one scene, with one user; and out again. Saving makes no thumbnail (the module has no GPU) and no backups. */
+EXPORT(main_scene_adopt) void main_scene_adopt(BlenderMain *ctx, bool adopt)
+{
+  const bool adopted = BLI_findindex(&ctx->bmain->scenes, &ctx->scene) != -1;
+  if (adopt == adopted) {
+    return;
+  }
+  if (adopt) {
+    BKE_libblock_runtime_ensure(ctx->scene.id);
+    ctx->scene.id.us = std::max(ctx->scene.id.us, 1);
+    BLI_addtail(&ctx->bmain->scenes, &ctx->scene);
+    U.file_preview_type = USER_FILE_PREVIEW_NONE;
+    U.versions = 0;
+  }
+  else {
+    BLI_remlink(&ctx->bmain->scenes, &ctx->scene);
+  }
+}
+
 /* An ID's shader node tree (a Material's or World's), built node by node: nodes by idname, which Blender's node types
  * (not in the module) recognize when the file is read, their sockets by type and identifier with their values, and
  * links. */
@@ -658,8 +680,6 @@ namespace blender {
  * draw without one. */
 void nodes::node_tree_shader_default(const bContext * /*C*/, Main * /*bmain*/, ID * /*id*/) {}
 
-/* As scene.cc defines it. */
-void BKE_scene_object_base_flag_sync_from_base(Base *base) { base->object->base_flag = base->flag; }
 
 /* As wm_window.cc defines it for the one window, whose screen has no 3D View of the module's to sync. */
 void WM_windows_scene_data_sync(const ListBaseT<wmWindow> * /*win_lb*/, Scene * /*scene*/) {}

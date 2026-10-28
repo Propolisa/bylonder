@@ -6,3 +6,9 @@
 /* Header items keep their own widths (ED_region_header_layout), as the 3D View's header's do. */
 .anim-header>.bl-row{flex:1}
 .anim-header .bl-widget{flex:none}
+/* The sidebar (RGN_TYPE_UI) on the right: panels, and the category tabs on its right edge. */
+.anim-sidebar{position:absolute;top:0;right:0;bottom:0;display:flex;box-sizing:border-box;background:var(--bl-region);color:var(--bl-text);font:var(--bl-widget-font)}
+.anim-sidebar[hidden]{display:none}
+.anim-sidebar .bl-region-panels{flex:1;min-width:0;overflow:auto;padding-top:calc(var(--bl-row)*.2)}
+/* An operator's properties popup (WM_operator_props_popup), at the pointer. */
+.anim-popup{position:fixed;z-index:1000;display:flex;flex-direction:column;gap:var(--bl-row-gap);min-width:calc(var(--bl-row)*10);padding:calc(var(--bl-row)*.3);border-radius:var(--bl-radius);background:var(--bl-menu-back);color:var(--bl-text);font:var(--bl-widget-font);outline:none}

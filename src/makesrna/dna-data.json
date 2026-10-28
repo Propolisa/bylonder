@@ -582,6 +582,127 @@
    }
   }
  },
+ "ColorManagedDisplaySettings": {
+  "sdna": "ColorManagedDisplaySettings",
+  "size": 72,
+  "properties": {
+   "display_device": {
+    "offset": 0,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ]
+    ]
+   },
+   "emulation": {
+    "offset": 64,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "OFF"
+     ],
+     [
+      0,
+      "AUTO"
+     ]
+    ]
+   }
+  }
+ },
+ "ColorManagedViewSettings": {
+  "sdna": "ColorManagedViewSettings",
+  "size": 160,
+  "properties": {
+   "look": {
+    "offset": 8,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ]
+    ]
+   },
+   "view_transform": {
+    "offset": 72,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ]
+    ]
+   },
+   "exposure": {
+    "offset": 136,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "gamma": {
+    "offset": 140,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "curve_mapping": {
+    "offset": 152,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "use_curve_mapping": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "use_white_balance": {
+    "offset": 0,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "white_balance_temperature": {
+    "offset": 144,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "white_balance_tint": {
+    "offset": 148,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
  "Light": {
   "sdna": "Light",
   "size": 504,

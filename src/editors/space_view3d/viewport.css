@@ -4,6 +4,7 @@ body>header,body>footer{display:none!important}
 /* The main region spans the area under the header, which overlaps it (Blender's region overlap). */
 .viewport-area{position:relative;overflow:clip;overflow-clip-margin:var(--bl-header-h)}
 .viewport-area canvas.viewport-canvas{position:absolute;inset:calc(-1*var(--bl-header-h)) 0 0;width:100%;height:calc(100% + var(--bl-header-h));display:block;outline:none;touch-action:none}
+.viewport-area canvas.tool-overlay{position:absolute;left:0;top:calc(-1*var(--bl-header-h));pointer-events:none;z-index:1}
 .engine-working-canvas{position:fixed;left:-100000px;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none}
 .view-label{top:8px;left:52px;display:flex;flex-direction:column;gap:3px;font:var(--bl-font);color:var(--bl-text);text-shadow:0 1px 2px #000a}
 .view-name{text-transform:none}

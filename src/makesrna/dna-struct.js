@@ -23,6 +23,8 @@ export function dnaProperties(struct) {
 }
 // The property's field, or undefined when its DNA is not described.
 export const dnaProperty = (struct, name) => dnaProperties(struct)[name];
+// Whether a field holds text: a string, or an enum Blender stores by its identifier (the render engine).
+export const dnaIsText = (prop) => prop.type === 'STRING' || (prop.type === 'ENUM' && prop.size === 1 && prop.length > 1);
 
 function readInt(dv, at, { size, signed }) {
   if (size === 1) return signed ? dv.getInt8(at) : dv.getUint8(at);
@@ -54,7 +56,7 @@ function writeValue(dv, at, prop, value) {
 // The property's value in the struct at `pointer` (an array for an array property).
 export function dnaGet(struct, pointer, name) {
   const prop = dnaProperty(struct, name), dv = view(), at = pointer + prop.offset;
-  if (prop.type === 'STRING') {
+  if (dnaIsText(prop)) {
     const bytes = new Uint8Array(x.memory.buffer, at, prop.length ?? prop.size);
     return decoder.decode(bytes.subarray(0, Math.max(0, bytes.indexOf(0))));
   }
@@ -64,7 +66,7 @@ export function dnaGet(struct, pointer, name) {
 
 export function dnaSet(struct, pointer, name, value) {
   const prop = dnaProperty(struct, name), dv = view(), at = pointer + prop.offset;
-  if (prop.type === 'STRING') {
+  if (dnaIsText(prop)) {
     const bytes = new Uint8Array(x.memory.buffer, at, prop.length ?? prop.size);
     bytes.fill(0);
     bytes.set(encoder.encode(String(value)).subarray(0, bytes.length - 1));

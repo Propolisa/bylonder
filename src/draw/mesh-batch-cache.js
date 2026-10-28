@@ -8,31 +8,13 @@ import { CreateLineSystem } from '@babylonjs/core/Meshes/Builders/linesBuilder.j
 import { Color3 } from '@babylonjs/core/Maths/math.color.js';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector.js';
 import { BoundingInfo } from '@babylonjs/core/Culling/boundingInfo.js';
+import { mesh_batch_cache_vertex_buffers } from './mesh-batch-buffers.js';
 
 const babylonPoint = (p, v) => new Vector3(p[v * 3], p[v * 3 + 2], p[v * 3 + 1]);
 // Object Mode wire color of Blender's default theme.
 const WIRE = Color3.Black();
 
-export function mesh_batch_cache_vertex_data(mesh) {
-  const { vert_positions: p, corner_verts, face_offsets } = mesh;
-  const corners = mesh.corners_num;
-  const positions = new Float32Array(corners * 3), normals = new Float32Array(corners * 3);
-  const sharp_face = mesh.attribute('sharp_face');
-  const face_normals = mesh.face_normals(), vert_normals = sharp_face?.every(Boolean) ? null : mesh.vert_normals();
-  for (let f = 0; f < mesh.faces_num; f++) {
-    const flat = !vert_normals || sharp_face?.[f];
-    for (let c = face_offsets[f]; c < face_offsets[f + 1]; c++) {
-      const v = corner_verts[c] * 3, n = flat ? face_normals : vert_normals, i = flat ? f * 3 : v;
-      positions[c * 3] = p[v]; positions[c * 3 + 1] = p[v + 2]; positions[c * 3 + 2] = p[v + 1];
-      normals[c * 3] = n[i]; normals[c * 3 + 1] = n[i + 2]; normals[c * 3 + 2] = n[i + 1];
-    }
-  }
-  const data = new VertexData();
-  Object.assign(data, { positions, normals, indices: mesh.corner_tris() });
-  const uv = mesh.attribute('UVMap');
-  if (uv) data.uvs = uv;
-  return data;
-}
+export const mesh_batch_cache_vertex_data = (mesh) => Object.assign(new VertexData(), mesh_batch_cache_vertex_buffers(mesh));
 
 // The bounding box, for the mesh and its one submesh (which picking tests), from the Mesh's own bounds: Babylon's
 // refresh reads the vertex buffer back.

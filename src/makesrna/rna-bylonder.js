@@ -284,10 +284,18 @@ const STRUCTS = {
     view_layers: (world, r) => collection((world.collections?.viewLayers() ?? []).map((layer) => r.pointer('ViewLayer', layer))),
     unit_settings: (world, r) => r.pointer('UnitSettings', world),
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
+    cursor: (world, r) => r.pointer('View3DCursor', world),
     // The scene's orientation, then the Move, Rotate and Scale tools' (Default: the scene's), as the scene keeps them.
     transform_orientation_slots: (world) => (orientationSlots.get(world) ?? orientationSlots.set(world, collection([0, 1, 2, 3].map((slot) =>
       rna('TransformOrientationSlot', { type: slot ? 'DEFAULT' : 'GLOBAL' }, { items: { type: () => [...(slot ? [ORIENTATION_DEFAULT] : []),
         ...rnaProperty('TransformOrientationSlot', 'type').items] } })))).get(world)),
+  },
+  View3DCursor: {
+    location: array((world) => [...cursorOf(world).location], (world, value) => world.sceneSettings.setCursor({ location: value })),
+    rotation_mode: { get: (world) => cursorOf(world).rotation_mode, set: (world, rotation_mode) => world.sceneSettings.setCursor({ rotation_mode }) },
+    rotation_euler: array((world) => [...cursorOf(world).rotation_euler], (world, value) => world.sceneSettings.setCursor({ rotation_euler: value })),
+    rotation_quaternion: array((world) => [...cursorOf(world).rotation_quaternion],
+      (world, value) => world.sceneSettings.setCursor({ rotation_quaternion: value }), 'wxyz'),
   },
   ToolSettings: {
     workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },
@@ -305,7 +313,7 @@ const STRUCTS = {
     image_settings: (world, r) => r.pointer('ImageFormatSettings', world),
     // Bylonder renders with Babylon, set up as Blender's EEVEE (render-babylon.js): the engines are Blender's, their
     // choice decides which of Blender's render panels show.
-    engine: { ...sliceValue('renderSettings', 'render.blenderEngine'), get: (world) => world.renderSettings?.state.render.blenderEngine ?? 'BLENDER_EEVEE',
+    engine: { ...sliceValue('renderSettings', 'render.blenderEngine'), get: (world) => world.renderSettings?.state.render.blenderEngine ?? 'BLENDER_EEVEE', sync: true,
       items: () => [['BLENDER_EEVEE', 'EEVEE', '', 'NONE'], ['BLENDER_WORKBENCH', 'Workbench', '', 'NONE'], ['CYCLES', 'Cycles', '', 'NONE']] },
     has_multiple_engines: () => true,
     ffmpeg: (world, r) => r.pointer('FFmpegSettings', world),
@@ -317,6 +325,9 @@ const STRUCTS = {
   // A Graph Editor and a Dope Sheet (editors/animation/anim-editor.js): their space's flags, in the module (rna_space.cc).
   SpaceGraphEditor: {
     type: () => 'GRAPH_EDITOR',
+    show_region_ui: regionShown(4),
+    show_region_channels: regionShown(2),
+    cursor_position_y: { get: (editor) => editor.area.cursorValue, set: (editor, value) => { editor.area.cursorValue = value; editor.changed(); } },
     mode: (editor) => ['FCURVES', 'DRIVERS'][editor.area.settings.mode],
     ui_mode: (editor) => ['FCURVES', 'DRIVERS'][editor.area.settings.mode],
     show_handles: spaceFlag(1 << 2, true),
@@ -336,6 +347,8 @@ const STRUCTS = {
   },
   SpaceDopeSheetEditor: {
     type: () => 'DOPESHEET_EDITOR',
+    show_region_ui: regionShown(4),
+    show_region_channels: regionShown(2),
     mode: (editor) => ACTION_MODES[editor.area.settings.mode],
     ui_mode: (editor) => ACTION_MODES[editor.area.settings.mode],
     show_sliders: spaceFlag(1 << 1),
@@ -353,6 +366,38 @@ const STRUCTS = {
     show_only_selected: dopesheetFilter(1 << 0),
     show_hidden: dopesheetFilter(1 << 26),
     show_only_errors: dopesheetFilter(1 << 28),
+  },
+  // The module's animation data (blenkernel/animation/anim-blender.js): an F-Curve, a key of one ({ fcurve, index }),
+  // an Action and its active slot, as the animation editors' sidebars edit them (rna_fcurve.cc, rna_action.cc).
+  FCurve: {
+    data_path: (fcurve) => fcurve.rna_path,
+    array_index: (fcurve) => fcurve.array_index,
+    color_mode: settable('color_mode'),
+    color: array((fcurve) => fcurve.color, (fcurve, value) => { fcurve.color = value; }, 'rgb'),
+    auto_smoothing: settable('auto_smoothing'),
+    extrapolation: settable('extrapolation'),
+  },
+  Keyframe: {
+    ...Object.fromEntries(['interpolation', 'easing', 'type', 'back', 'amplitude', 'period'].map((name) => [name, {
+      get: ({ fcurve, index }) => fcurve.keys[index][name],
+      set: ({ fcurve, index }, value) => fcurve.editKey(index, (key) => { key[name] = value; }),
+    }])),
+    ...Object.fromEntries([['co_ui', 'co'], ['handle_left', 'handle_left'], ['handle_right', 'handle_right']].map(([name, field]) => [name,
+      array(({ fcurve, index }) => fcurve.keys[index][field], ({ fcurve, index }, value) => fcurve.editKeyPanel(index, name, value))])),
+    ...Object.fromEntries(['handle_left_type', 'handle_right_type'].map((name) => [name, {
+      get: ({ fcurve, index }) => fcurve.keys[index][name],
+      set: ({ fcurve, index }, value) => fcurve.editKeyPanel(index, name, value),
+    }])),
+  },
+  Action: {
+    name: (action) => action.name,
+    ...Object.fromEntries(['use_frame_range', 'use_cyclic', 'frame_start', 'frame_end'].map((name) => [name, settable(name)])),
+    slots: (action, r) => Object.assign(collection(), { active: action.activeSlot && r.pointer('ActionSlot', action.activeSlot) }),
+  },
+  ActionSlot: {
+    name_display: (slot) => slot.name_display,
+    target_id_type: () => 'OBJECT',
+    target_id_type_icon: (slot) => slot.icon,
   },
   Light: {
     name: settable('name'),
@@ -431,10 +476,10 @@ const STRUCTS = {
   ColorManagedViewSettings: {
     view_transform: { ...sliceValue('renderSettings', 'viewSettings.viewTransform'), items: choices(viewTransforms) },
     look: { ...sliceValue('renderSettings', 'viewSettings.look'), items: choices(looks, ([label]) => label) },
-    exposure: sliceValue('renderSettings', 'viewSettings.exposure'),
+    exposure: synced(sliceValue('renderSettings', 'viewSettings.exposure')),
   },
   ColorManagedDisplaySettings: {
-    display_device: { get: () => 'sRGB', items: () => [['sRGB', 'sRGB', '', 'NONE']] },
+    display_device: { get: () => 'sRGB', items: () => [['sRGB', 'sRGB', '', 'NONE']], sync: true },
   },
   ImageFormatSettings: {
     file_format: { ...sliceValue('renderSettings', 'render.imageSettings.fileFormat'), items: choices(fileFormats) },
@@ -474,7 +519,7 @@ const STRUCTS = {
     setup: (ref, r) => (...list) => r.world.toolsystem.setup(ref, pyArgs(list, TOOL_SETUP)),
     refresh_from_context: () => () => {},
     operator_properties: (ref, r) => (idname) => operatorProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
-    gizmo_group_properties: () => () => rna('GizmoGroupProperties'),
+    gizmo_group_properties: (ref, r) => (idname) => gizmoGroupProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
   },
   // A Text data-block (blenkernel/texts.js) and its lines; an edit saves the text with the project.
   Text: {
@@ -589,6 +634,10 @@ function spaceFlag(bit, inverted = false) {
     set: (editor, value) => { const { flag } = editor.area.settings; editor.area.settings = { flag: !!value !== inverted ? flag | bit : flag & ~bit }; editor.changed(); },
   };
 }
+// Whether an animation editor's region (RGN_TYPE_UI 4, RGN_TYPE_CHANNELS 2) shows.
+function regionShown(type) {
+  return { get: (editor) => editor.area.shown(type), set: (editor, value) => { editor.area.show(type, value); editor.changed(); } };
+}
 function dopesheetFilter(bit) {
   return {
     get: (editor) => !!(editor.area.settings.filterflag & bit),
@@ -599,10 +648,32 @@ const PIVOTS = ['BOUNDING_BOX_CENTER', 'CURSOR', 'INDIVIDUAL_ORIGINS'];
 const ACTION_MODES = ['ACTION', 'SHAPEKEY', 'GPENCIL', 'DOPESHEET', 'MASK', 'CACHEFILE', 'TIMELINE'];
 // Scenes' transform orientation slots (Scene.transform_orientation_slots).
 const orientationSlots = new WeakMap();
+// The scene's 3D cursor, or Blender's default one in a world without scene settings.
+const DEFAULT_CURSOR = { location: [0, 0, 0], rotation_mode: 'XYZ', rotation_euler: [0, 0, 0], rotation_quaternion: [1, 0, 0, 0] };
+const cursorOf = (world) => world.sceneSettings?.state.cursor ?? DEFAULT_CURSOR;
 const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
 
 // A tool's orientation slot's own choice (rna_scene.cc: rna_TransformOrientation_with_scene_itemf).
 const ORIENTATION_DEFAULT = ['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN'];
+
+// The properties tools set on their gizmo groups (the groups' RNA_def_* in transform_gizmo_3d.cc,
+// transform_gizmo_extrude_3d.cc and view3d_gizmo_tool_generic.cc): default and enum items.
+const GIZMO_GROUP_PROPERTIES = {
+  VIEW3D_GGT_xform_gizmo: { drag_action: ['TRANSLATE', [['TRANSLATE', 'Move', '', 'NONE'], ['ROTATE', 'Rotate', '', 'NONE'], ['SCALE', 'Scale', '', 'NONE'], ['NONE', 'None', '', 'NONE']]] },
+  VIEW3D_GGT_xform_extrude: { axis_type: ['NORMAL', [['NORMAL', 'Normal', 'Only show normal axis', 'NONE'], ['XYZ', 'XYZ', 'Follow scene orientation', 'NONE']]] },
+  VIEW3D_GGT_tool_generic_handle_normal: { radius: [100] },
+  VIEW3D_GGT_tool_generic_handle_free: { radius: [36], backdrop_fill_alpha: [0.125] },
+};
+// A tool's properties of a gizmo group (WM_toolsystem_ref_properties_ensure_from_gizmo_group): the values set on it
+// over the group's defaults.
+export function gizmoGroupProperties(idname, values, host) {
+  const data = {}, items = {};
+  for (const [name, [def, enumItems]] of Object.entries(GIZMO_GROUP_PROPERTIES[idname] ?? {})) {
+    Object.defineProperty(data, name, { enumerable: true, get: () => values[name] ?? def, set: (value) => { values[name] = value; host?.update?.('GizmoGroupProperties', name, values); } });
+    if (enumItems) items[name] = () => enumItems;
+  }
+  return rna('GizmoGroupProperties', data, { items });
+}
 
 // An operator's properties (OperatorProperties) over the values stored for it: Blender's defaults (rna-operators.json)
 // until set. Writing one is an update (host.update), as a tool setting is.

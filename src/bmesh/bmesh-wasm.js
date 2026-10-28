@@ -2,42 +2,19 @@
 // module, in a scene with its object in Edit Mode, and is the only one. Operators, selection and transforms change it;
 // drawing and picking read the Mesh arrays extracted from it, as Blender's draw cache extracts its buffers from the
 // BMesh.
-import { instantiate } from '../port/wasm.js';
+import { instantiate, files } from '../port/wasm.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { BMESH_WASM } from './bmesh-module.js';
+import { FLAGS, moduleMesh } from './module-mesh.js';
 
 const { exports: x } = await instantiate(BMESH_WASM);
+const { withArrays, cString, withString, bytes, meshArrays, extractedMesh, attachedMesh, setModifiers, evaluateModifiers, modifierObject } = moduleMesh(x, createMesh);
+// A detached extraction ({counts, buffers}) as the Mesh it was; Blender's modifier stack on a Mesh (modifier-api.cc),
+// whose result's arrays are valid until the next evaluation, with each modifier's error or null.
+export { attachedMesh, evaluateModifiers };
 
-// Copies arrays into module memory (null stays a null pointer), runs fn with their pointers, and frees them.
-function withArrays(arrays, fn) {
-  const pointers = arrays.map((a) => {
-    if (!a) return 0;
-    const p = x.malloc(a.byteLength) >>> 0;
-    new a.constructor(x.memory.buffer, p, a.length).set(a);
-    return p;
-  });
-  try {
-    return fn(pointers);
-  } finally {
-    pointers.forEach((p) => p && x.free(p));
-  }
-}
-// A WebAssembly pointer is an unsigned 32-bit address; exports return it as a signed int.
-const cString = (pointer) => {
-  const bytes = new Uint8Array(x.memory.buffer, pointer >>> 0);
-  return new TextDecoder().decode(bytes.subarray(0, bytes.indexOf(0)));
-};
-const withString = (text, fn) => withArrays([new TextEncoder().encode(text + '\0')], ([pointer]) => fn(pointer));
 // Reads the ints an export writes into a scratch array.
 const ints = (length, fn) => withArrays([new Int32Array(length)], ([p]) => { fn(p); return Array.from(new Int32Array(x.memory.buffer, p, length)); });
-
-// The boolean attributes Blender's edit mode reads and writes, in bmesh-api.cc's MeshFlag order, with their domains.
-const FLAGS = [['.select_vert', 'POINT'], ['.hide_vert', 'POINT'], ['.select_edge', 'EDGE'], ['.hide_edge', 'EDGE'], ['.uv_seam', 'EDGE'],
-  ['sharp_edge', 'EDGE'], ['.select_poly', 'FACE'], ['.hide_poly', 'FACE'], ['sharp_face', 'FACE']];
-const bytes = (data) => data && Uint8Array.from(data, Boolean);
-
-const meshArrays = (mesh) => [Float32Array.from(mesh.vert_positions), Int32Array.from(mesh.edges), Int32Array.from(mesh.face_offsets),
-  Int32Array.from(mesh.corner_verts), Int32Array.from(mesh.corner_edges), mesh.attribute('UVMap') && Float32Array.from(mesh.attribute('UVMap'))];
 
 // The BMesh of a Mesh with its UV map and flags, in a select mode (SCE_SELECT_*).
 function bmFromMesh(mesh, selectmode) {
@@ -112,92 +89,32 @@ function operatorEnumItems(C, idname, prop) {
 }
 
 // wmOperatorStatus flags.
-export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4;
+export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4, OPERATOR_PASS_THROUGH = 8;
+
+// Blender's enums by identifier (rna_enum_text): event types (0), event values (1) and property subtypes (2).
+export const enumTable = (which) => new Map(cString(x.rna_enum_text(which)).split('\n').filter(Boolean).map((line) => {
+  const [identifier, value] = line.split('\t');
+  return [identifier, Number(value)];
+}));
+export const EVENT_TYPES = enumTable(0), EVENT_VALUES = enumTable(1);
+// EVT_MODAL_MAP: a modal keymap item's event type.
+const EVT_MODAL_MAP = 0x5022;
+// The event an operator gets (wm_event_set): { type, value } by identifier or number, or { modal } for a modal keymap
+// item; x and y in region pixels, y up; modifier (KM_SHIFT | KM_CTRL | KM_ALT | KM_OSKEY); text.
+function wmEvent(C, { type, value = 'PRESS', modal, x: mx = 0, y: my = 0, modifier = 0, text = '', prevType = type, prevValue = value }) {
+  const code = (table, v) => (typeof v === 'number' ? v : table.get(v) ?? 0);
+  const [t, v] = modal === undefined ? [code(EVENT_TYPES, type), code(EVENT_VALUES, value)] : [EVT_MODAL_MAP, modal];
+  return withString(text, (p) => x.wm_event_set(C, t, v, Math.round(mx), Math.round(my), modifier, p, code(EVENT_TYPES, prevType), code(EVENT_VALUES, prevValue))) >>> 0;
+}
 
 // What changed since the last extraction (ExtractFlag in extraction.hh): topology, which refills everything, positions
 // (with normals and triangles), flags, or the UV map.
 export const EXTRACT_TOPOLOGY = 1, EXTRACT_POSITIONS = 2, EXTRACT_FLAGS = 4, EXTRACT_UV = 8, EXTRACT_ALL = 15;
 
-// The Mesh of an extraction (ExtractionHeader): counts, then buffer pointers. Its arrays are views made again when the
-// module's memory grows, which detaches the old ones. detach() copies them out, for attachedMesh in another realm.
-function extractedMesh(header) {
-  const words = Array.from(new Uint32Array(x.memory.buffer, header, 5 + 10 + FLAGS.length + 3));
-  const counts = words.slice(0, 5), [verts, edges, faces, corners, tris] = counts, at = (i) => words[5 + i];
-  const sizes = { POINT: verts, EDGE: edges, FACE: faces };
-  const layout = {
-    vert_positions: [Float32Array, at(0), verts * 3], vert_normals: [Float32Array, at(1), verts * 3], face_normals: [Float32Array, at(2), faces * 3],
-    edges: [Int32Array, at(3), edges * 2], face_offsets: [Int32Array, at(4), faces + 1], corner_verts: [Int32Array, at(5), corners],
-    corner_edges: [Int32Array, at(6), corners], corner_tris: [Int32Array, at(7), tris * 3], tri_faces: [Int32Array, at(8), tris],
-    UVMap: [Float32Array, at(9), corners * 2],
-    ...Object.fromEntries(FLAGS.map(([name, domain], i) => [name, [Uint8Array, at(10 + i), sizes[domain]]])),
-    ...Object.fromEntries(['POINT', 'EDGE', 'FACE'].map((domain, i) => [`orig_index_${domain}`, [Int32Array, at(10 + FLAGS.length + i), sizes[domain]]])),
-  };
-  let buffer = null, views = {};
-  const view = (name) => {
-    if (buffer !== x.memory.buffer) [buffer, views] = [x.memory.buffer, {}];
-    const [Type, pointer, length] = layout[name];
-    // A mesh without faces may have no offsets array; its one offset is 0.
-    return (views[name] ??= pointer ? new Type(buffer, pointer, length) : new Type(length));
-  };
-  const present = Object.keys(layout).filter((name) => layout[name][1]);
-  const mesh = meshOfBuffers(counts, present, view);
-  mesh.detach = () => ({ counts, buffers: Object.fromEntries(present.map((name) => [name, view(name).slice()])) });
-  return mesh;
-}
-
-// A detached extraction ({counts, buffers}) as the Mesh it was.
-export const attachedMesh = ({ counts, buffers }) => meshOfBuffers(counts, Object.keys(buffers), (name) => buffers[name]);
-
-// The Mesh of an extraction's counts and the buffers present in it, read through buffer(name).
-function meshOfBuffers([verts, edges, faces, corners], present, buffer) {
-  const has = (name) => present.includes(name);
-  const mesh = createMesh({});
-  for (const name of ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges']) Object.defineProperty(mesh, name, { get: () => buffer(name) });
-  Object.defineProperties(mesh, { verts_num: { value: verts }, edges_num: { value: edges }, faces_num: { value: faces }, corners_num: { value: corners } });
-  const attribute = (name, domain, type) => [name, { domain, type, get data() { return buffer(name); } }];
-  mesh.attributes = new Map([...FLAGS.filter(([name]) => has(name)).map(([name, domain]) => attribute(name, domain, 'BOOLEAN')),
-    ...(has('UVMap') ? [attribute('UVMap', 'CORNER', 'FLOAT2')] : [])]);
-  Object.assign(mesh, {
-    corner_tris: () => buffer('corner_tris'),
-    corner_tri_faces: () => buffer('tri_faces'),
-    face_normals: () => buffer('face_normals'),
-    vert_normals: () => buffer('vert_normals'),
-    // An evaluated mesh's original element of each of its own in a domain (CD_ORIGINDEX, -1 for none), or null.
-    orig_index: (domain) => (has(`orig_index_${domain}`) ? buffer(`orig_index_${domain}`) : null),
-  });
-  return mesh;
-}
-
-// Gives a module Object the modifier stack: each modifier is its type (ModifierType) and a function that writes its
-// settings into its ModifierData, given a DataView of the module's memory and the struct's address. Returns their
-// ModifierData and a function reading each one's error from its last evaluation, or null.
-function setModifiers(object, modifiers) {
-  x.modifier_clear(object);
-  const added = modifiers.map(({ type, write }) => {
-    const md = x.modifier_add(object, type) >>> 0;
-    if (!md) throw new Error(`Modifier type ${type} is not in this WebAssembly module`);
-    write(new DataView(x.memory.buffer), md);
-    return md;
-  });
-  return { added, errors: () => added.map((md) => (x.modifier_error(md) ? cString(x.modifier_error(md)) : null)) };
-}
-
-// Blender's modifier stack on an object's Mesh (modifier-api.cc), as setModifiers takes it. Returns the evaluated Mesh,
-// whose arrays are valid until the next evaluation, and each modifier's error or null.
-let modifierObject = 0;
-export function evaluateModifiers(mesh, modifiers) {
-  modifierObject ||= x.modifier_object_new();
-  withArrays(meshArrays(mesh), ([p, e, f, cv, ce, uv]) =>
-    x.modifier_object_mesh_set(modifierObject, mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce, uv));
-  const { errors } = setModifiers(x.modifier_object(modifierObject), modifiers);
-  return { mesh: extractedMesh(x.modifier_object_eval(modifierObject) >>> 0), errors: errors() };
-}
-
 // What Blender's panel of a modifier (as setModifiers takes it) draws with its settings: a tree of layouts and the
 // properties, labels and sub-panels in them (panel-layout.cc).
 export function drawModifierPanel(modifier) {
-  modifierObject ||= x.modifier_object_new();
-  const object = x.modifier_object(modifierObject);
+  const object = x.modifier_object(modifierObject());
   const { added: [md] } = setModifiers(object, [modifier]);
   return JSON.parse(cString(x.modifier_panel_draw(object, md)));
 }
@@ -267,10 +184,36 @@ export class EditMesh {
     withArrays([Float32Array.from(matrix)], ([p]) => x.edit_context_object_matrix_set(this.#context, p));
   }
 
-  // The 3D View's view matrix (column-major, Blender's axes), for what operators do along the view.
-  set view(matrix) {
-    withArrays([Float32Array.from(matrix)], ([p]) => x.edit_context_view_set(this.#context, p));
+  // The 3D View the operators act in: its view and window matrices (column-major, Blender's axes), size in pixels and
+  // projection, as regionView3D (editors/space_view3d/view3d-project.js) gives them.
+  set view({ viewmat, winmat, winx, winy, persp }) {
+    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.edit_context_view_set(this.#context, v, w, winx, winy, persp));
   }
+
+  // The scene's 3D cursor (Blender world), which operators place things at.
+  set cursor(location) { new Float32Array(x.memory.buffer, x.edit_context_cursor(this.#context) >>> 0, 3).set(location); }
+
+  // What the last operator showed in the view's header, or ''.
+  get status() { const p = x.edit_context_status(this.#context); return p ? cString(p) : ''; }
+
+  // Invokes an operator with an event in the view (type and value by Blender's identifiers, x and y in region pixels
+  // with y up, modifier flags): its status, and when it runs modally the operator to give the next events to with
+  // modal(), and its modal keymap's name.
+  invoke(idname, props, event) {
+    const op = newOperator(idname, props);
+    const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
+    const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0;
+    if (!modal) { const report = operatorReport(op); x.operator_free(op); return { status, report }; }
+    return { status, op, keymap: cString(x.operator_modal_keymap(op)) };
+  }
+  // Gives a running operator an event (`modal`: a modal keymap item's value): its status; it is freed once it ends.
+  modal(op, event) {
+    const status = x.operator_modal(this.#C, op, wmEvent(this.#C, event));
+    if (!(status & OPERATOR_RUNNING_MODAL)) x.operator_free(op);
+    return status;
+  }
+  // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.
+  modalItem(op, identifier) { return withString(identifier, (p) => x.operator_modal_item(op, p)); }
 
   get totals() {
     const [totvert, totvertsel, totedge, totedgesel, totface, totfacesel, totloop] = ints(7, (p) => x.bm_totals(this.#bm, p));
@@ -517,6 +460,21 @@ export class BlenderMain {
   }
   collectionChildren(collection) { return addresses((p) => x.collection_items(collection, false, p)); }
   collectionObjects(collection) { return addresses((p) => x.collection_items(collection, true, p)); }
+  // Main as a .blend file, written by Blender's own writer (writefile.cc and each ID type's blend_write) through its
+  // wm.save_as_mainfile operator, as a copy: the file's bytes.
+  writeBlend(filepath = '/untitled.blend') {
+    x.main_scene_adopt(this.#context, true);
+    try {
+      const { status, report } = this.run('wm.save_as_mainfile', { filepath, copy: true, check_existing: false, relative_remap: false, compress: false });
+      const bytes = files.get(filepath);
+      files.delete(filepath);
+      if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
+      return bytes;
+    } finally {
+      x.main_scene_adopt(this.#context, false);
+    }
+  }
+
   // Main's IDs of a type (ID_GR, ID_OB...).
   ids(type) { return addresses((p) => x.main_ids(this.#context, type, p)); }
   name(id) { return cString(x.id_name(id)); }

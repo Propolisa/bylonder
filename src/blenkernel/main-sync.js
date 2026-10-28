@@ -13,7 +13,7 @@
 //   its run (`meshes`), and only what the code changed comes back. In Edit Mode the module's edit mesh owns it.
 // - check() compares the overlap of both models; with `debug` on it runs after every flush and run.
 import { createBlenderIDs } from './blender-ids.js';
-import { dnaGet, dnaSet, dnaProperty } from '../makesrna/dna-struct.js';
+import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
 import { modifierStack } from '../modifiers/stack.js';
@@ -24,6 +24,7 @@ import { rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
 import { CurveObject } from './curve/curve.js';
+import { viewTransforms, looks } from './scene/render-babylon.js';
 
 // ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
 const ID_OB = 0x424f, ID_GR = 0x5247;
@@ -45,7 +46,7 @@ export const same = (a, b) => (Array.isArray(a) ? Array.isArray(b) && a.length =
 // A name as Blender keeps it, unique among its IDs: "Cube" may be "Cube.001".
 const sameName = (babylon, main) => main === babylon || main.replace(/\.\d{3}$/, '') === babylon.slice(0, 63);
 // A value DNA can hold: an enum's identifier must be one of its items.
-const holds = (field, value) => field.type !== 'ENUM' || typeof value !== 'string' || field.items?.some(([, id]) => id === value);
+const holds = (field, value) => field.type !== 'ENUM' || typeof value !== 'string' || dnaIsText(field) || field.items?.some(([, id]) => id === value);
 
 // The output each shader node RNA's node trees link from (rna-bylonder.js nodeTree), with its socket.
 const SHADER_OUTPUTS = { ShaderNodeBsdfPrincipled: 'BSDF', ShaderNodeBackground: 'Background', ShaderNodeVolumeScatter: 'Volume', ShaderNodeEmission: 'Emission' };
@@ -82,11 +83,18 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // Each synced owner's record: its RNA struct, its Main address and what was last synced, by RNA name.
   const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map();
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
-  const sceneStruct = (name) => ({ struct: name, ptr: blender.scene + dnaProperty('Scene', { RenderSettings: 'render', UnitSettings: 'unit_settings' }[name]).offset, shadow: new Map() });
+  const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings' };
+  const sceneStruct = (name) => ({ struct: name, ptr: blender.scene + dnaProperty('Scene', SCENE_STRUCTS[name]).offset, shadow: new Map() });
   const render = sceneStruct('RenderSettings'), units = sceneStruct('UnitSettings');
+  const view = sceneStruct('ColorManagedViewSettings'), display = sceneStruct('ColorManagedDisplaySettings');
   const tools = { struct: 'ToolSettings', ptr: dnaGet('Scene', blender.scene, 'tool_settings'), shadow: new Map() };
   // The scene's records, over the world: the scene, its render, unit and tool settings, those whose slices it has.
-  const sceneRecords = () => [scene, ...(world.renderSettings ? [render] : []), ...(world.sceneSettings ? [units] : []), tools];
+  const sceneRecords = () => [scene, ...(world.renderSettings ? [render, view] : []), ...(world.sceneSettings ? [units] : []), tools, display];
+  // The scene's view transform and look as Blender names them (Bylonder's are Babylon's tone maps).
+  const viewNames = () => {
+    const settings = rna.pointer('Scene', world).view_settings;
+    return { view_transform: viewTransforms[settings.view_transform]?.ocioView ?? 'Standard', look: looks[settings.look]?.[0] ?? 'None' };
+  };
   let applying = false, scheduled = false, sceneChanged = true, listed = -1;
   // The objects hooks saw change since the last flush.
   const dirty = new Set();
@@ -201,6 +209,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // The scene: its values, its camera and world, and what operators read of its tool settings.
   function pushScene() {
     for (const record of sceneRecords()) push(record, world);
+    if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) dnaSet('ColorManagedViewSettings', view.ptr, name, value);
     const settings = rna.pointer('Scene', world);
     blender.cursor = Array.from(settings.cursor.location);
     blender.pivotPoint = V3D_AROUND[settings.tool_settings.transform_pivot_point];
@@ -491,6 +500,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       compareTree(`World "${entry.name}"`, record.wo, rna.pointer('World', entry));
     }
     for (const record of sceneRecords()) compare(record.struct, record, world);
+    if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) {
+      if (dnaGet('ColorManagedViewSettings', view.ptr, name) !== value) diffs.push(`Scene.view_settings.${name}: Babylon "${value}", Main "${dnaGet('ColorManagedViewSettings', view.ptr, name)}"`);
+    }
     if (blender.world !== (worlds.get(world.worlds?.active()?.id)?.wo ?? 0)) diffs.push('Scene.world differs');
     const cols = slice();
     for (const c of cols?.state.collections ?? []) {
@@ -524,7 +536,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     .map(({ node, type }) => ({ node, type }));
   // Main made Babylon's again, undoing what Blender's code changed that Bylonder does not take.
   function revert() {
-    const records = [scene, render, units, tools, ...objects.values(), ...[...objects.values()].map((e) => e.data), ...materials.values(), ...worlds.values(),
+    const records = [scene, render, units, tools, view, display, ...objects.values(), ...[...objects.values()].map((e) => e.data), ...materials.values(), ...worlds.values(),
       ...[...collections.values()].flatMap((c) => [c, c.layer])];
     records.forEach((record) => record.shadow.clear());
     for (const entry of objects.values()) [entry.babylonName, entry.modifiers, entry.id] = [undefined, undefined, undefined];
@@ -545,12 +557,15 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     revert,
     check,
     evaluatedMesh,
-    // For code that reads Main's geometry (the .blend writer): fn runs with every mesh object's Mesh filled.
+    // For code that reads Main's geometry: fn runs with every object's geometry filled.
     withMeshes(fn, nodes = [...objects.keys()]) {
       flush();
       fill(nodes);
       try { return fn(); } finally { release(); }
     },
+    // The scene as a .blend file (its bytes), written by Blender's writer from Main, with the geometry filled as it
+    // writes.
+    writeBlend: (filepath) => api.withMeshes(() => blender.writeBlend(filepath)),
     // Whether Blender's code may change an object's data: its geometry is filled for it (lights and cameras are
     // Bylonder's objects of their own kind).
     holdsData: (node) => ['MESH', 'EMPTY', ...CURVE_TYPES].includes(objects.get(node)?.type),

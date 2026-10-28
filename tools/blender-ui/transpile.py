@@ -511,11 +511,17 @@ class TranscryptFixes(ast.NodeTransformer):
         class; other hints dropped. Returns the class and what follows it."""
         node.body = [ast.copy_location(ast.Assign(targets=[s.target], value=s.value), s) if isinstance(s, ast.AnnAssign) and s.value is not None else s
                      for s in node.body]
-        # A module function assigned in the body (execute = execute_context_assign) is a method in Python; Transcrypt
-        # binds self only to methods defined in the body, so it is one that calls the function.
-        node.body = [ast.copy_location(ast.parse(f'def {s.targets[0].id}(self, *args, **kwargs):\n    return {s.value.id}(self, *args, **kwargs)').body[0], s)
-                     if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name) and isinstance(s.value, ast.Name)
-                     and s.value.id in getattr(self, 'functions', ()) else s for s in node.body]
+        # A module function or another class's method assigned in the body (execute = execute_context_assign,
+        # draw = Menu.draw_preset) is a method in Python; Transcrypt binds self only to methods defined in the body, so
+        # it is one that calls the function.
+        def aliased(value):
+            if isinstance(value, ast.Name):
+                return value.id in getattr(self, 'functions', ())
+            return (isinstance(value, ast.Attribute) and isinstance(value.value, ast.Name) and value.value.id[:1].isupper()
+                    and value.attr.islower() and not value.attr.startswith(('bl_', '_')))
+        node.body = [ast.copy_location(ast.parse(f'def {s.targets[0].id}(self, *args, **kwargs):\n    return {ast.unparse(s.value)}(self, *args, **kwargs)').body[0], s)
+                     if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name) and aliased(s.value) else s
+                     for s in node.body]
         hints = [s for s in node.body if isinstance(s, ast.AnnAssign)]
         node.body = [s for s in node.body if s not in hints]
         own = {d for s in node.body for d in defined_names(s)}

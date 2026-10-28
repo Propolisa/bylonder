@@ -13,7 +13,7 @@ import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { openMenu } from '../interface/menu.js';
 import { buttonAt, drawRecording } from '../interface/region-draw.js';
-import { headerLayout, drawPanels } from '../interface/panels.js';
+import { headerLayout, drawPanels, drawType } from '../interface/panels.js';
 import { LayoutView } from '../interface/layout-view.js';
 import { menus, headers, panels } from '../../python/bpy_interface.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
@@ -270,7 +270,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   // The header: OUTLINER_HT_header from Blender's script, drawn by the shared layout renderer, with its popovers'
   // panels (OUTLINER_PT_filter).
   const headerState = reactive({ revision: 0 });
-  const drawType = (type) => (layout) => Object.assign(type(), { layout }).draw(context());
+  const drawInto = (type) => (layout) => drawType(type, layout, context());
   const layoutUI = markRaw({
     get revision() { return headerState.revision; },
     undoPush: () => { commands.transaction(() => {}); draw(); },
@@ -283,7 +283,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     ids: () => [],
     drawMenu: (idname) => inArea(outlinerArea, () => drawMenu(idname, ui)),
     menuLabel: (idname) => menus[idname]?.bl_label,
-    menuContents: (idname) => menus[idname] && markRaw(headerLayout(context(), drawType(menus[idname]))),
+    menuContents: (idname) => menus[idname] && markRaw(headerLayout(context(), drawInto(menus[idname]))),
     popover: (id) => {
       const type = panels[id];
       if (!type) return null;
@@ -295,7 +295,7 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
   header?.append(headerHost);
   const headerApp = createApp({ render: () => {
     void headerState.revision;
-    return h(LayoutView, { layout: headerLayout(context(), drawType(headers.OUTLINER_HT_header)), ui: layoutUI });
+    return h(LayoutView, { layout: headerLayout(context(), drawInto(headers.OUTLINER_HT_header)), ui: layoutUI });
   } });
   headerApp.mount(headerHost);
   const drawHeader = () => { headerState.revision++; };

@@ -9,6 +9,22 @@
       ]
     },
     {
+      "source": "source/blender/blenlib/intern/math_rotation_c.cc",
+      "functions": ["quat_to_mat3", "mat3_normalized_to_quat", "eulO_to_mat3", "mat3_normalized_to_eulO", "mat3_normalized_to_compatible_eulO"]
+    },
+    {
+      "source": "source/blender/blenlib/intern/math_vector.cc",
+      "functions": ["project_plane_v3_v3v3"]
+    },
+    {
+      "source": "source/blender/blenlib/intern/math_geom_inline.cc",
+      "functions": ["axis_dominant_v3_ortho_single"]
+    },
+    {
+      "source": "source/blender/blenlib/intern/math_matrix_c.cc",
+      "functions": ["orthogonalize_m3"]
+    },
+    {
       "source": "source/blender/bmesh/intern/bmesh_opdefines.cc",
       "constants": [
         "bmo_triangulate_def",
@@ -25,11 +41,12 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "panel-layout.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "anim-api.cc", "modifier-api.cc", "panel-layout.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc", "curve-api.cc", "view3d-api.cc", "no-depsgraph.cc"],
       "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH", "WITH_OPENVDB"],
       "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "intern/openvdb", "extern/bullet2/src"],
-      "operators": ["source/blender/editors/mesh/mesh_intern.hh", "source/blender/editors/object/object_transform.cc", "source/blender/editors/curve/curve_intern.hh"],
+      "operators": ["source/blender/editors/mesh/mesh_intern.hh", "source/blender/editors/object/object_transform.cc", "source/blender/editors/object/object_random.cc", "source/blender/editors/curve/curve_intern.hh", "source/blender/windowmanager/intern/wm_files.cc"],
+      "sdna": true,
       "datatoc": ["release/datafiles/bfont.pfb"],
       "dependencies": {
         "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
@@ -39,7 +56,9 @@
         "openvdb": {"url": "https://github.com/AcademySoftwareFoundation/openvdb.git", "tag": "v13.0.0", "include": "openvdb",
                     "configure": {"openvdb/openvdb/version.h": {"OpenVDB_MAJOR_VERSION": 13, "OpenVDB_MINOR_VERSION": 0, "OpenVDB_PATCH_VERSION": 0,
                                                                  "OPENVDB_ABI_VERSION_NUMBER": 13, "OPENVDB_PACKED_VERSION": 218103808}}},
-        "freetype": {"url": "https://github.com/freetype/freetype.git", "tag": "VER-2-13-3", "include": "include", "private": true}
+        "freetype": {"url": "https://github.com/freetype/freetype.git", "tag": "VER-2-13-3", "include": "include", "private": true},
+        "zstd": {"url": "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz", "tag": "1.5.7",
+                 "sha256": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3", "include": "lib", "private": true}
       },
       "libraries": [
         {"path": "source/blender/editors/curve", "includes": ["extern/curve_fit_nd"]},
@@ -57,9 +76,13 @@
         "source/blender/editors/object/object_add.cc",
         "source/blender/editors/object/object_transform.cc",
         "source/blender/editors/object/object_utils.cc",
+        "source/blender/editors/object/object_random.cc",
+        "source/blender/editors/object/object_data_transform.cc",
+        "source/blender/windowmanager/intern/wm_operator_utils.cc",
         "source/blender/editors/object/object_select.cc",
         "source/blender/editors/object/object_relations.cc",
         "source/blender/editors/screen/screen_context.cc",
+        "source/blender/editors/space_view3d/view3d_project.cc",
         "source/blender/animrig/intern",
         {"path": "source/blender/editors/animation", "includes": ["source/blender/editors/space_graph", "source/blender/editors/asset"]},
         "source/blender/editors/space_graph",
@@ -79,7 +102,13 @@
         "source/blender/bmesh/intern",
         "source/blender/bmesh/operators",
         "source/blender/bmesh/tools",
-        {"path": "source/blender/blenkernel/intern", "exclude": ["blender.cc", "scene.cc", "constraint.cc", "shader_fx.cc", "action.cc", "vfontdata_freetype.cc", "node.cc", "node_tree_update.cc"]},
+        {"path": "source/blender/blenkernel/intern", "exclude": ["blender.cc", "scene.cc", "constraint.cc", "shader_fx.cc", "action.cc", "vfontdata_freetype.cc", "node.cc", "node_tree_update.cc", "colortools.cc"]},
+        {"path": "source/blender/blenkernel/intern/scene.cc", "defines": ["BKE_scene_ensure_depsgraph=scene_cc_ensure_depsgraph", "BKE_scene_graph_evaluated_ensure=scene_cc_graph_evaluated_ensure",
+          "get_render_subsurf_level=scene_cc_get_render_subsurf_level", "BKE_scene_ctime_get=scene_cc_ctime_get", "BKE_scene_camera_switch_update=scene_cc_camera_switch_update"]},
+        {"path": "source/blender/blenkernel/intern/colortools.cc", "includes": ["intern/opencolorio"]},
+        {"path": "source/blender/blenloader/intern/writefile.cc", "uses": ["zstd"], "includes": ["source/blender/blenloader_core"]},
+        {"path": "source/blender/blenloader_core/intern", "includes": ["source/blender/blenloader_core"]},
+        {"path": "source/blender/windowmanager/intern/wm_files.cc", "uses": ["zstd"], "includes": ["source/blender/blenloader_core", "intern/ghost"]},
         {"path": "source/blender/blenkernel/intern/node.cc", "includes": ["source/blender/nodes/geometry/include"]},
         {"path": "source/blender/blenkernel/intern/constraint.cc", "includes": ["source/blender/ikplugin"]},
         {"path": "source/blender/blenkernel/intern/action.cc", "includes": ["source/blender/ikplugin"]},
@@ -110,6 +139,52 @@
         "source/blender/makesdna/intern/dna_utils.cc",
         {"path": "source/blender/makesrna/intern", "exclude": ["rna_access.cc", "rna_access_compare_override.cc", "rna_define.cc", "rna_path.cc",
                                                                "makesrna.cc", "makesrna_utils.cc"]},
+        {"path": "source/blender/blenlib/intern", "exclude": ["delaunay_2d.cc", "string_utf8.cc"]},
+        {"path": "source/blender/blenlib/intern/string_utf8.cc", "flags": ["-funsigned-char"]},
+        {"path": "source/blender/blenlib/intern/delaunay_2d.cc", "includes": ["wasm/fstream"]},
+        "intern/guardedalloc/intern",
+        "intern/clog",
+        "intern/eigen/intern",
+        "extern/wcwidth"
+      ]
+    },
+    "modifiers/modifiers.wasm": {
+      "api": ["modifier-api.cc", "no-depsgraph.cc", "modifiers-only.cc"],
+      "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH"],
+      "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "extern/bullet2/src"],
+      "dependencies": {
+        "fmt": {"url": "https://github.com/fmtlib/fmt.git", "tag": "12.1.0", "include": "include"},
+        "eigen": {"url": "https://gitlab.com/libeigen/eigen/-/archive/8a1083e9bf41b91fdea6546681f806154efdc25a/eigen-8a1083e9bf41b91fdea6546681f806154efdc25a.tar.gz",
+                  "tag": "8a1083e9", "sha256": "cc28a84fdec496c6777596350ea805519bf10f717d21044ae6ba3dd562183a26"},
+        "opensubdiv": {"url": "https://github.com/PixarAnimationStudios/OpenSubdiv.git", "tag": "v3_7_0"}
+      },
+      "libraries": [
+        "source/blender/bmesh/intern",
+        "source/blender/bmesh/operators",
+        "source/blender/bmesh/tools",
+        {"path": "source/blender/blenkernel/intern", "exclude": ["blender.cc", "scene.cc", "constraint.cc", "shader_fx.cc", "action.cc", "vfontdata_freetype.cc"]},
+        {"path": "source/blender/blenkernel/intern/constraint.cc", "includes": ["source/blender/ikplugin"]},
+        {"path": "source/blender/blenkernel/intern/action.cc", "includes": ["source/blender/ikplugin"]},
+        {"path": "source/blender/blenkernel/intern/shader_fx.cc", "includes": ["source/blender/shader_fx"]},
+        {"path": "source/blender/modifiers/intern", "exclude": ["MOD_nodes.cc", "MOD_lineart.cc", "MOD_armature.cc", "MOD_boolean.cc", "MOD_cloth.cc", "MOD_collision.cc", "MOD_curve.cc", "MOD_datatransfer.cc", "MOD_dynamicpaint.cc", "MOD_explode.cc", "MOD_fluid.cc", "MOD_grease_pencil_armature.cc", "MOD_grease_pencil_array.cc", "MOD_grease_pencil_build.cc", "MOD_grease_pencil_color.cc", "MOD_grease_pencil_dash.cc", "MOD_grease_pencil_envelope.cc", "MOD_grease_pencil_hook.cc", "MOD_grease_pencil_lattice.cc", "MOD_grease_pencil_length.cc", "MOD_grease_pencil_mirror.cc", "MOD_grease_pencil_multiply.cc", "MOD_grease_pencil_noise.cc", "MOD_grease_pencil_offset.cc", "MOD_grease_pencil_opacity.cc", "MOD_grease_pencil_outline.cc", "MOD_grease_pencil_shrinkwrap.cc", "MOD_grease_pencil_simplify.cc", "MOD_grease_pencil_smooth.cc", "MOD_grease_pencil_subdiv.cc", "MOD_grease_pencil_texture.cc", "MOD_grease_pencil_thickness.cc", "MOD_grease_pencil_time.cc", "MOD_grease_pencil_tint.cc", "MOD_grease_pencil_weight_angle.cc", "MOD_grease_pencil_weight_proximity.cc", "MOD_hook.cc", "MOD_laplaciandeform.cc", "MOD_lattice.cc", "MOD_mask.cc", "MOD_mesh_to_volume.cc", "MOD_meshcache.cc", "MOD_meshdeform.cc", "MOD_meshsequencecache.cc", "MOD_multires.cc", "MOD_normal_edit.cc", "MOD_ocean.cc", "MOD_particleinstance.cc", "MOD_particlesystem.cc", "MOD_shrinkwrap.cc", "MOD_softbody.cc", "MOD_surface.cc", "MOD_surfacedeform.cc", "MOD_uvproject.cc", "MOD_uvwarp.cc", "MOD_volume_displace.cc", "MOD_volume_to_mesh.cc", "MOD_warp.cc", "MOD_weightvgedit.cc", "MOD_weightvgmix.cc", "MOD_weightvgproximity.cc"]},
+        "source/blender/geometry/intern/mesh_merge_verts.cc",
+        "source/blender/geometry/intern/randomize.cc",
+        "intern/dualcon/intern",
+        "intern/rigidbody/rb_convex_hull_api.cpp",
+        "extern/bullet2/src/LinearMath",
+        "intern/opensubdiv/internal/base",
+        "intern/opensubdiv/internal/topology",
+        {"path": "intern/opensubdiv/internal/evaluator", "exclude": ["eval_output_gpu.cc", "gpu_compute_evaluator.cc", "gpu_patch_table.cc"]},
+        {"dependency": "opensubdiv", "path": "opensubdiv/far"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/sdc"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/vtr"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/bfr"},
+        {"dependency": "opensubdiv", "path": "opensubdiv/osd"},
+        "source/blender/blentranslation/intern",
+        "source/blender/functions/intern",
+        "source/blender/nodes/intern/geometry_nodes_bundle.cc",
+        "source/blender/makesdna/intern/dna_utils.cc",
+        {"path": "source/blender/makesrna/intern", "exclude": ["rna_access.cc", "rna_access_compare_override.cc", "rna_define.cc", "rna_path.cc", "makesrna.cc", "makesrna_utils.cc"]},
         {"path": "source/blender/blenlib/intern", "exclude": ["delaunay_2d.cc", "string_utf8.cc"]},
         {"path": "source/blender/blenlib/intern/string_utf8.cc", "flags": ["-funsigned-char"]},
         {"path": "source/blender/blenlib/intern/delaunay_2d.cc", "includes": ["wasm/fstream"]},

@@ -54,10 +54,10 @@ const EVENT_TYPES = { SPACEBAR: 'SPACE' };
 const KEYMAP_TYPES = { WHEELINMOUSE: 'WHEELUPMOUSE', WHEELOUTMOUSE: 'WHEELDOWNMOUSE' };
 const KM_ANY = -1;
 
-// wm_eventmatch for what Bylonder's events carry: no key modifiers or drag directions yet, and Cmd counted as Ctrl.
+// wm_eventmatch for what Bylonder's events carry: no key modifiers yet, and Cmd counted as Ctrl.
 // A repeated key matches only items that take repeats; text input is any key press that types a character (`text`).
 function matches(kmi, event) {
-  if (kmi.key_modifier || (kmi.direction && kmi.direction !== 'ANY')) return false;
+  if (kmi.key_modifier || (kmi.direction && kmi.direction !== 'ANY' && kmi.direction !== event.direction)) return false;
   if (event.repeat && !kmi.repeat) return false;
   if (kmi.type === 'TEXTINPUT') return event.value === 'PRESS' && !!event.text;
   const type = event.type.toUpperCase();
@@ -83,7 +83,8 @@ export function keymapHandler(names, active = () => true, defaults = () => ({}))
       for (const [idname, kmi, data] of keyconfig().get(name) ?? []) {
         if (!matches(kmi, event)) continue;
         const result = invokeOperator(idname, { ...defaults(name, idname), ...Object.fromEntries(data?.properties ?? []) }, event);
-        if (!result || result === 'CANCELLED' || result === 'PASS_THROUGH') continue;
+        if (result === 'FINISHED|PASS_THROUGH') event.handled = true;
+        if (!result || result === 'CANCELLED' || result === 'PASS_THROUGH' || result === 'FINISHED|PASS_THROUGH') continue;
         event.native?.preventDefault();
         return true;
       }

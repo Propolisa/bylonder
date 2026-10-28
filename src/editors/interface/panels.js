@@ -3,7 +3,7 @@
 // Blender's order, filtered by context and poll(), each drawn into layouts: draw_header, draw_header_preset and draw,
 // with its sub-panels (bl_parent_id).
 import { __in__ } from '../../bl_py/org.transcrypt.__runtime__.js';
-import { UILayout, useContext } from './layout.js';
+import { UILayout, useContext, pyCall } from './layout.js';
 
 export const hasOption = (type, option) => !!type.bl_options && __in__(option, type.bl_options);
 
@@ -49,6 +49,9 @@ export function headerLayout(context, draw) {
   draw(layout);
   return layout;
 }
+
+// A header's or menu's draw into a layout.
+export const drawType = (type, layout, context) => pyCall(`${idname(type)}.draw`, () => Object.assign(type(), { layout }).draw(context));
 
 // What a region shows: per panel whose context matches and whose poll() passes, its layouts. `open(panel)` tells
 // whether a panel is open (the editor's state, starting from DEFAULT_CLOSED); a closed panel draws its header only.

@@ -124,9 +124,9 @@ Text and curve objects get their Curve data for an operator and give it back whe
 
 ### Animation
 
-Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel is a custom property of the Scene (`["<id, path>"]`). Keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings, values come out with `evaluate_fcurve`, and Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`). The scene's time is in Main through the scene sync (`Scene.frame_current` and the rest); what the animation editors' operators change of it, and of the selection, comes back through its `writeBack`.
+Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling (meshes, empties, text, curves, cameras and lights, the Objects Object Mode mirrors) are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel is a custom property of the Scene (`["<id, path>"]`). Keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings, values come out with `evaluate_fcurve`, and Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`). The scene's time is in Main through the scene sync (`Scene.frame_current` and the rest); what the animation editors' operators change of it, and of the selection, comes back through its `writeBack`.
 
-The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus), and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
+The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus, operator properties), draws the sidebar's panels with the shared panel renderer (the Graph Editor's from `graph_buttons.cc`, ported in `anim-buttons.js`), and the scene's markers, and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
 
 ### Outliner
 
@@ -140,6 +140,81 @@ Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outlin
 - **Drag and drop.** `wm_dragdrop.cc` and `object_relations.cc` are compiled; `drag-drop.cc` runs the main region's dropbox handlers as `wm_event_system.cc` does, for the region JS gives (`drag_update`, `drag_drop`). Dropping on an object moves it into that object's collection, Shift parents it, Ctrl links it; dropping on a collection moves it there.
 - **Scene sync.** The module's Scene is not in Main's scenes, so `BKE_main_collection_sync` does not resync its view layer after an ID is deleted or remapped: the area resyncs it after every operator (`syncCollections`). Main's ID remapping reaches the area's tree store through `BKE_library_callback_remap_editor_id_reference_set`.
 - **Not yet:** the popup menus `outliner_operator_menu` builds (context menus on mesh data, materials and other IDs that are not objects or collections), the edge pan while dragging (`WM_operator_name_call_ptr` runs only an exec), scroll bars, the display modes other than View Layer, and Bylonder's materials as Material IDs under their meshes.
+
+### Export for Babylon
+
+Decided 2026-10-28. File > Export (`TOPBAR_MT_file_export`, Blender's menu) gets Babylon (.babylon) and JavaScript (.js),
+operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.js`), which the scene window runs
+(`src/io_scene_babylon`), and JavaScript with Live Modifiers (below).
+
+- **The evaluated scene, serialized in place.** The modifier stack draws its result into each object's Babylon mesh,
+  so that mesh is the evaluated, modifier-applied mesh, as Blender's glTF exporter exports the evaluated depsgraph.
+  Babylon's `SceneSerializer` writes it directly; no copy of the geometry is made besides the file's own (the JSON
+  arrays of `.babylon`, the base64 typed arrays of `.js`, read with `getVerticesData`). `evaluatedMesh(node)` in
+  `babylon-export.js` is where the sync layer's function for an object's evaluated mesh takes over when it lands.
+- **What goes in.** Every node except Bylonder's helpers (named `__`, `doNotSerialize`, deleted objects, a Mesh's
+  loose-edge line child, which glTF also leaves out by default), and only the materials those meshes use. Flags are
+  set for the serializer and restored after; ids are the objects' unique names for the export. Bylonder's metadata
+  (`wb*`) stays out. The scene camera is the active camera; a camera aimed with `lockedTarget` keeps the rotation it
+  looks with.
+- **Rendered state.** The environment is written as a URL the loader reads (public https URLs kept, others embedded as
+  data URLs), with `createDefaultSkybox` when the World shows a skybox; a reflection probe's cube is named
+  (`environmentProbe`). Textures without a public URL (blob, raw, procedural) are embedded as base64.
+- **Animation** is one Babylon AnimationGroup sampled at every frame of the scene range from Blender's F-Curves
+  (`animation.sample()`). Channels carry their Babylon target and property (`register({ target, property })`); a
+  material's property is animated through a mesh using it (`material.albedoColor`), a rotation on a quaternion node
+  as `rotationQuaternion`. Channels without a Babylon target (stores, `depthOfField`, modifier settings unless they are
+  live) stay out.
+- **Effects.** The scene camera's rendering pipelines (Bylonder's render effects and the project's own) go in
+  `renderingPipelines` and the scene's image processing in `imageProcessingConfiguration`, in Babylon's own
+  serialization; camera post-processes go in `postProcesses`, which Babylon's loader reads. Babylon's `.babylon`
+  loader ignores the first two and does not play animation groups: the `.js` export applies them all.
+- **JavaScript.** `createScene(engine, canvas)` builds each mesh and empty as code (geometry, transform, parent,
+  material, flags, thin instances), and parses materials, lights, cameras, shadows, effect layers, probes, particles,
+  pipelines and animation with Babylon's `Parse` functions, as the loader does. It imports `@babylonjs/core`, mapped
+  in a page to `cdn.jsdelivr.net/npm/@babylonjs/core@<the app's version>/+esm` (the header names the URL).
+- **Checked.** `tests/export.test.js` (NullEngine: serialize, reload with Babylon's loader and import the module,
+  compare geometry, material, camera and animation) and `tests/e2e/smoke.mjs` (File > Export in the app).
+
+### Modifier kernels polyfill
+
+Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Modifiers (.zip),
+`bylonder.export_js_live`, keeps them live instead, with a WebAssembly module of only Blender's modifier evaluation.
+
+- **The module.** `modifiers/modifiers.wasm` in `tools/blender-port/manifest.json`: `modifier-api.cc` (mesh arrays in,
+  `mesh_create_eval_final` over Blender's ModifierData, results read in place), `no-depsgraph.cc` (the depsgraph
+  stand-in both modules share) and `modifiers-only.cc`. Its libraries are `bmesh.wasm`'s minus the editors,
+  `animrig`, `windowmanager`, the interface and the Outliner, blenfont and FreeType, and OpenVDB (built without
+  `WITH_OPENVDB`, so Remesh's Voxel mode reports that it is unavailable). Modifier types outside `MESH_ONLY`
+  (`src/modifiers/blender.js`) are left out of its `modifiers/intern` and declared empty in `modifiers-only.cc`, as
+  `modifier-api.cc` makes Geometry Nodes unknown. Archives are per module in the shared build directory.
+- **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`: 15.4 MB, 4.4 MB gzipped), with
+  `modifiers.js` (4 KB) and the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
+  3.1 MB gzipped: OpenVDB's templates alone were a third of its code. What remains is mostly what `BKE_idtype_init`
+  and `BKE_modifier_init` reach (every ID type's code) and RNA's static definitions; narrowing those to Mesh and
+  Object is the next cut.
+- **Shared code.** The app and the polyfill run the same JS on their modules: `bmesh/module-mesh.js` (memory, the
+  extraction header, `evaluateModifiers`), `modifiers/dna-write.js` (settings into ModifierData by their DNA layouts)
+  and `draw/mesh-batch-buffers.js` (a Mesh's draw buffers, without Babylon). So a live result is the applied export's
+  geometry exactly. Two RNA properties can be one DNA field in two units (Bevel's `width` and `width_pct`): the
+  writer writes defaults first, so the setting changed from its default is the field's value.
+- **The polyfill.** Three files the zip puts in `bylonder-modifiers/` next to the module: `modifiers.js` (no imports:
+  `liveModifiers(scene, { url })`), `modifiers-worker.js` (`polyfill/worker.js` bundled by
+  `scripts/modifiers-polyfill.mjs` into `modifiers-worker.bundle.js`, which a test keeps current) and `modifiers.wasm`.
+  `createScene(engine, canvas, { modifiers })` imports it from that folder, or from the URL given, after building the
+  scene; if it cannot load, the applied geometry stays.
+- **What a live object carries.** An object whose shown modifiers are all Blender's (`modifiers.live(node)`) gets
+  `metadata.bylonderModifiers`: its base Mesh as the module takes it (positions, edges, face offsets, corner verts and
+  edges, UVs, base64) and its stack (ModifierType, settings by RNA path, and the DNA layouts of those settings, so the
+  polyfill needs neither RNA nor DNA tables). Its applied geometry is written too and shows until the first evaluation.
+  Objects with Bylonder's own modifiers (Array as Geometry Nodes) stay applied.
+- **Animation.** A keyed modifier setting is sampled into the scene's animation group at
+  `metadata.bylonderModifiers.stack.<index>.values.<path>`; booleans hold from key to key. The polyfill compares each
+  stack's settings before every frame and evaluates again in its worker when they changed, the newest settings winning;
+  integers round as Bylonder's channels do.
+- **Checked.** `tests/export-live.test.js` evaluates Subdivision Surface, Array, Bevel, Mirror and Solidify, and a keyed
+  Solidify thickness at another frame, through the exported module and the polyfill (its worker run in Node), and
+  compares them with the applied geometry; `tests/e2e/smoke.mjs` checks the zip.
 
 ## Shared foundations
 
@@ -194,6 +269,7 @@ The app opens in the Layout workspace: the window is Blender's (topbar, editors,
 - Area geometry is Blender's (`areaSizes` in `editors/screen/dock.js`): a split's edge is a screen vertex at its fraction of the vertex range, rounded from the left or bottom (`screen_geom_vertices_scale`), and areas sit 2 px inside their vertices, 1 px below the topbar (`area_calc_totrct`), so areas are 3 px apart. At 1600 x 950 every area matches Blender's to the pixel.
 - An editor whose header overlaps its main region (the 3D Viewport) is a dock item with `overlap`: its main region spans the area under the header, which takes the theme's translucent header color, so the view's projection is Blender's.
 - The scene opens with the object that an add operator made last (`createPrimitive`) selected and active, as startup.blend's cube is, and a primitive's Mesh has all its elements selected, as `EDBM_op_call_and_selectf` leaves it.
+- The status bar keeps Bylonder's richer text (run state, save state, type checking, scene statistics) where Blender shows its version only. Decided 2026-10-28.
 - The topbar's right region is Blender's: the Scene selector and the View Layer selector (the scene window's view layers, set through `send`).
 - Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Running the project's JavaScript is Render > Run (Ctrl Enter). Project actions are File, Edit and Render menu entries.
 
@@ -232,6 +308,17 @@ The toolbar, tool settings, header transform settings and sidebar are Blender's 
 - The header (`VIEW3D_HT_header`, with its visibility, gizmo, overlay and shading popovers), the tool settings and the sidebar draw through the shared layout renderer (see Layouts and panels), from `view3d-regions.js`. In Edit Mode the header's menus are Edit Mode's (`editMeshMenus`), its Add menu adds Bylonder's primitives, and `template_header_3D_mode` is the select mode buttons (`uiTemplateEditModeSelection`), a layout the template records. `object.mode_set` runs Object and Edit Mode; a mesh's other modes show greyed.
 - Transform orientation slots are stored per scene but no transform reads them yet.
 - Select Box, Circle and Lasso share `do_mesh_region_select` (`view3d-select.js`) in Edit Mode; in Object Mode box select tests vertices and circle and lasso the object origin, as Blender does. The gestures are `windowmanager/wm-gesture-*.js` with Blender's modal maps.
+
+## 3D View tools
+
+Decided 2026-10-28. A tool is what Blender's is: its keymap, its gizmo group and its stored settings. Its operators are registered by Blender idname; nothing is wired to a tool by name.
+
+- Gizmo map: `windowmanager/wm-gizmo-map.js` shows the active tool's gizmo group, highlights the part under the pointer and runs the group's handler before the region's keymaps, as `wm_gizmo_map.cc` does. Its state (shown, highlighted) feeds the tool system's keymap order. The groups are ports: `VIEW3D_GGT_ruler`, `VIEW3D_GGT_placement`, `VIEW3D_GGT_tool_generic_handle_free` and `_normal` (a handle runs the tool's own keymap, as `gz->keymap` does) and `VIEW3D_GGT_xform_extrude`. Babylon's gizmos stay the transform gizmos. Gizmos, rulers, annotations and the placement grid draw on one 2D canvas per view (`draw/overlay-tool.js`) in the theme's colors.
+- Object Mode tools: `editors/space_view3d/view3d-tools.js` registers `view3d.cursor3d` (`view3d-cursor.js`, with Blender's surface depth and orientations), `transform.from_gizmo`, `view3d.ruler_add` and `view3d.ruler_remove` (`view3d-gizmo-ruler.js`), `gpencil.annotate` (`editors/gpencil/annotate.js`, all four modes) and `view3d.interactive_add` (`view3d-placement.js`). The cursor is `scene.cursor` (`View3DCursor`), drawn by `draw/overlay-cursor.js`.
+- Annotations are Blender's data model in a document slice (`blenkernel/gpencil/annotations.js`): layers holding frames of strokes. Rulers are strokes of the hidden `RulerData3D` layer, as Blender stores them.
+- Edit Mode tools run Blender's modal operators in the module. The edit context has a 3D View (`edit_context_view_set`: window, screen, area, View3D, window region and a RegionView3D from the Babylon camera), so operators project the mouse as in Blender. `EditMesh.invoke` and `modal` give them events, and Bylonder's window manager matches the operator's modal keymap (`object-edit.js` `moduleOperator`). This runs Shrink/Fatten, Push/Pull, To Sphere, Shear, Vertex Slide, Smooth and Randomize (the generic value modal), Rip, Spin, Knife and Extrude to Cursor. Move, Rotate, Scale, Edge Slide, Inset, Bevel and Loop Cut stay Bylonder's JS ports. The module's own gizmos are off (`V3D_GIZMO_HIDE`): the gizmo map draws the view's.
+- A drag event (CLICK_DRAG) carries the mouse where the drag passed the threshold, as Blender's does; `dragStart(event)` gives the press, for what Blender places at the drag's start (rulers, placement, box gestures, the cursor's transform, gizmo highlighting). An operator returning `FINISHED|PASS_THROUGH` (Set 3D Cursor) handles a press as Blender's `WM_HANDLER_HANDLED` does: no click follows, a drag still can.
+- `tests/tools-wasm.test.js` drags the Edit Mode tools on Blender's startup cube as `tools/blender-reference/tool-fixtures.py` drags them in Blender (real input, Drag: Active Tool) and compares the meshes.
 
 ## Layouts and panels
 

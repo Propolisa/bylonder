@@ -310,6 +310,51 @@ def compile_all(build, sources, args, key):
         return dict(pool.map(one, sources))
 
 
+def sdna(tree, build, args, archives):
+    """makesdna's output for the module's target (generated/sdna): Blender's DNA as the .blend writer records it (dna.cc),
+    the struct ids BLO_write_struct takes (dna_struct_ids.cc) and the check of every struct's size and member offsets
+    against Clang's layout (dna_verify.cc). makesdna lays structs out for the platform it runs on, so it is built for
+    wasm32 too, from the module's archives, and run by Node's WASI. Returns the sources to build with the module."""
+    out = os.path.join(build, 'generated', 'sdna')
+    os.makedirs(out, exist_ok=True)
+    makesdna = os.path.join(tree, 'source/blender/makesdna')
+    listing = open(os.path.join(tree, 'source/blender/CMakeLists.txt')).read()
+    headers = re.findall(r'/makesdna/(DNA_\w+\.h)', listing[listing.index('set(SRC_DNA_INC'):listing.index('set(SRC_DNA_OTHER_INC')])
+    includes = {'dna_includes_all.h': ''.join(f'#include "{h}"\n' for h in headers),
+                'dna_includes_as_strings.h': ''.join(f'\t"{h}",\n' for h in headers)}
+    for file, text in includes.items():
+        path = os.path.join(out, file)
+        if not os.path.exists(path) or open(path).read() != text:
+            open(path, 'w').write(text)
+    sources = [os.path.join(makesdna, 'intern', f) for f in ('makesdna.cc', 'dna_parse.cc', 'dna_utils.cc')]
+    digest = hashlib.sha1(b''.join(open(p, 'rb').read() for p in [*sources, *(os.path.join(makesdna, h) for h in headers)])
+                          + ' '.join(args).encode()).hexdigest()[:16]
+    outputs = [os.path.join(out, f) for f in ('dna.cc', 'dna_type_offsets.h', 'dna_verify.cc', 'dna_struct_ids.cc', 'dna_defaults.cc')]
+    stamp = os.path.join(out, '.digest')
+    if not (os.path.exists(stamp) and open(stamp).read() == digest and all(map(os.path.exists, outputs))):
+        objects = compile_all(build, sources, args + [f'-I{out}', f'-I{os.path.join(makesdna, "intern")}'], digest)
+        if not all(objects.values()):
+            failed = next(s for s, o in objects.items() if not o)
+            result = subprocess.run(['clang++', *args, f'-I{out}', f'-I{os.path.join(makesdna, "intern")}', '-c', failed, '-o', os.devnull],
+                                    capture_output=True, text=True)
+            sys.exit(f'makesdna does not build:\n{result.stderr}')
+        tool = os.path.join(out, 'makesdna.wasm')
+        link = subprocess.run(['clang++', '--target=wasm32-wasi', '-O2', *objects.values(), *archives, *archives, '-lwasi-emulated-process-clocks',
+                               '-Wl,--allow-undefined', '-o', tool], capture_output=True, text=True)
+        if link.returncode:
+            sys.exit(f'makesdna does not link:\n{link.stderr}')
+        script = ("const { WASI } = require('node:wasi'); const fs = require('node:fs');"
+                  "const wasi = new WASI({ version: 'preview1', args: ['makesdna', ...process.argv.slice(2)], preopens: { '/': '/' }, returnOnExit: true });"
+                  "const instance = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(process.argv[1])), { wasi_snapshot_preview1: wasi.wasiImport,"
+                  " env: new Proxy({}, { get: (_, name) => () => { throw new Error(name); } }) });"
+                  "process.exitCode = wasi.start(instance);")
+        run = subprocess.run(['node', '-e', script, tool, *outputs, makesdna + '/'], capture_output=True, text=True)
+        if run.returncode:
+            sys.exit(f'makesdna failed:\n{run.stdout}{run.stderr}')
+        open(stamp, 'w').write(digest)
+    return [outputs[0], outputs[2], outputs[3], os.path.join(makesdna, 'intern', 'dna_genfile.cc')]
+
+
 def demangle(names):
     return subprocess.run(['c++filt'], input='\n'.join(names), capture_output=True, text=True).stdout.split('\n')[:len(names)]
 
@@ -357,7 +402,9 @@ def build(root, name, spec, tag):
         extra, key = library_flags(spec_lib, tree, deps, spec)
         objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args + extra, patches + key)
         built = [o for o in objects.values() if o]
-        archive = os.path.join(out_dir, lib.replace('/', '_') + '.a')
+        # Archives are per module: modules sharing the build (and objects) may be linked at the same time.
+        archive = os.path.join(out_dir, 'archives', name.replace('/', '_'), lib.replace('/', '_') + '.a')
+        os.makedirs(os.path.dirname(archive), exist_ok=True)
         if os.path.exists(archive):
             os.remove(archive)
         subprocess.run([shutil.which('llvm-ar') or shutil.which('llvm-ar-18'), 'rcs', archive, *built], check=True)
@@ -366,8 +413,9 @@ def build(root, name, spec, tag):
         print(f'{lib}: {len(built)} of {len(objects)} sources build', file=sys.stderr)
     # The module's own files also see wasm/, the generated operator table and the operators' editors' headers; Blender's
     # sources need none of them.
-    own_args = args + [f'-I{generated}', f'-I{WASM}', *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
-    own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)]
+    own_args = args + [f'-I{generated}', f'-I{os.path.join(generated, "sdna")}', f'-I{os.path.join(tree, "source/blender/makesdna/intern")}', f'-I{WASM}', *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
+    dna = sdna(tree, out_dir, args, archives) if spec.get('sdna') else []
+    own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)] + dna
                       + fetched_files(out_dir, spec.get('fetch', []), tag)
                       + ([datatoc(out_dir, spec['datatoc'], tag)] if spec.get('datatoc') else []),
                       own_args, patches + operators + rna_dna_fields(out_dir) + own_headers())

@@ -5,7 +5,7 @@
 import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { loadRNAUI, rnaProperty, INFO } from '../../makesrna/rna.js';
 import { createPreview } from '../../blenkernel/material/preview.js';
-import { panelTypes, drawPanels, headerLayout } from '../interface/panels.js';
+import { panelTypes, drawPanels, headerLayout, drawType } from '../interface/panels.js';
 import { panels as blenderPanels, menus as blenderMenus, headers } from '../../python/bpy_interface.js';
 import { UILayout } from '../interface/layout.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
@@ -144,7 +144,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       if (!state.ready) return h('section', { class: 'bl-ui bl-properties' });
       context = propertiesContext(rna, space);
       const nav = drawPanels(navigation, context, { contexts: [] });
-      const header = h(LayoutView, { layout: headerLayout(context, (layout) => menus.PROPERTIES_HT_header && Object.assign(menus.PROPERTIES_HT_header(), { layout }).draw(context)), ui });
+      const header = h(LayoutView, { layout: headerLayout(context, (layout) => menus.PROPERTIES_HT_header && drawType(menus.PROPERTIES_HT_header, layout, context)), ui });
       return h('section', { class: 'bl-ui bl-properties flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PROPERTIES', tabindex: -1, onKeydown,
         onPointerenter: (e) => e.currentTarget.focus({ preventScroll: true }) }, [
         headerHost ? h(Teleport, { to: headerHost }, [h('div', { class: 'bl-ui bl-properties-header flex min-w-0 flex-1 items-center' }, [header])]) : header,

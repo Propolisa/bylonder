@@ -6,7 +6,7 @@
 //   popup), keys(idname, props): its shortcut, if bound, enumItems(idname, prop): an enum's items as
 //   [identifier, name, description, icon], prop(data, name): a bound property as { label, get, set }.
 import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
-import { UILayout, isLayout, operatorValues, useContext } from './layout.js';
+import { UILayout, isLayout, operatorValues, useContext, pyCall } from './layout.js';
 import { toolIconUrl } from './icon.js';
 
 const operatorName = (idname) => operators[idname]?.name ?? idname;
@@ -65,9 +65,9 @@ export function drawMenu(idname, ui) {
   const layout = new UILayout('root', null, { operator_context: ui.operatorContext ?? 'INVOKE_REGION_WIN' });
   useContext(context);
   menu.layout = layout;
-  extend?.prepend.forEach((draw) => draw(menu, context));
-  menu.draw(context);
-  extend?.append.forEach((draw) => draw(menu, context));
+  extend?.prepend.forEach((draw) => pyCall(`${idname}.prepend`, () => draw(menu, context)));
+  pyCall(`${idname}.draw`, () => menu.draw(context));
+  extend?.append.forEach((draw) => pyCall(`${idname}.append`, () => draw(menu, context)));
   return entries(layout, ui).filter((item, i, all) => item !== '-' || (i > 0 && all[i - 1] !== '-' && all.slice(i + 1).some((next) => next !== '-')));
 }
 

@@ -42,7 +42,9 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
     'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : openProjects()) },
     'wm.save_mainfile': { keys: () => 'Ctrl S', run: click('checkpoint') },
-    'wm.save_as_mainfile': { keys: ({ copy }) => (copy ? undefined : 'Shift Ctrl S'), run: ({ copy }) => click(copy ? 'export' : 'fork-project')() },
+    // A .blend file of the scene, from Blender's writer in the scene window; a copy too, as the open project stays.
+    'wm.save_as_mainfile': { keys: ({ copy }) => (copy ? undefined : 'Shift Ctrl S'), run: () => send('save-blend') },
+    'bylonder.project_fork': { run: click('fork-project') },
     'ed.undo': { keys: () => 'Ctrl Z', run: () => send('invoke', 'undo') },
     'ed.redo': { keys: () => 'Shift Ctrl Z', run: () => send('invoke', 'redo') },
     'screen.userpref_show': { run: openPreferences },
@@ -57,6 +59,9 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     'bylonder.project_share': { run: click('share-project') },
     'bylonder.project_import': { run: click('import') },
     'bylonder.project_export': { run: click('export') },
+    'bylonder.export_babylon': { run: () => send('export', 'babylon') },
+    'bylonder.export_js': { run: () => send('export', 'js') },
+    'bylonder.export_js_live': { run: () => send('export', 'js-live') },
     'bylonder.app_source': { run: click('app-source') },
     'bylonder.scene_edits_clear': { run: click('clear-scene-edits') },
     'bylonder.run': { keys: () => 'Ctrl Enter', run: click('run') },
@@ -76,9 +81,9 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     auto_run: { label: 'Auto-run', get: () => autoRun.checked, set: (value) => { autoRun.checked = value; autoRun.dispatchEvent(new Event('change')); } },
   } };
   const op = (layout, idname, text) => layout.operator(idname, kw({ text }));
-  appendMenu('TOPBAR_MT_file', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_rename', 'Rename Project...'); op(layout, 'bylonder.project_share', 'Share Project Link...'); op(layout, 'bylonder.app_source', 'Download App Source'); });
+  appendMenu('TOPBAR_MT_file', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_fork', 'Save Project As...'); op(layout, 'bylonder.project_rename', 'Rename Project...'); op(layout, 'bylonder.project_share', 'Share Project Link...'); op(layout, 'bylonder.app_source', 'Download App Source'); });
   appendMenu('TOPBAR_MT_file_import', ({ layout }) => op(layout, 'bylonder.project_import', 'Project ZIP (.zip)'));
-  appendMenu('TOPBAR_MT_file_export', ({ layout }) => op(layout, 'bylonder.project_export', 'Project ZIP (.zip)'));
+  appendMenu('TOPBAR_MT_file_export', ({ layout }) => { op(layout, 'bylonder.export_babylon', 'Babylon (.babylon)'); op(layout, 'bylonder.export_js', 'JavaScript (.js)'); op(layout, 'bylonder.export_js_live', 'JavaScript, Live Modifiers (.zip)'); op(layout, 'bylonder.project_export', 'Project ZIP (.zip)'); });
   appendMenu('TOPBAR_MT_edit', ({ layout }) => { layout.separator(); layout.prop(settings, 'remember'); op(layout, 'bylonder.scene_edits_clear', 'Clear Scene Edits'); });
   prependMenu('TOPBAR_MT_render', ({ layout }) => { op(layout, 'bylonder.run', 'Run'); op(layout, 'bylonder.stop', 'Stop'); layout.prop(settings, 'auto_run'); layout.separator(); });
   appendMenu('TOPBAR_MT_render', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); });

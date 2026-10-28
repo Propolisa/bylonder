@@ -11,11 +11,13 @@
 #include "BKE_node.hh"
 #include "BLF_api.hh"
 #include "BKE_context.hh"
+#include "BKE_curve.hh"
 #include "BKE_fcurve.hh"
 #include "BKE_idtype.hh"
 #include "BLT_translation.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
+#include "BKE_scene.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_vector.h"
@@ -41,6 +43,7 @@
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
 #include "operator-properties.hh"
+#include "area.hh"
 #include "WM_api.hh"
 #include "WM_types.hh"
 
@@ -175,6 +178,68 @@ EXPORT(anim_fcurve_keys_set) void anim_fcurve_keys_set(FCurve *fcu, const BezTri
   BKE_fcurve_handles_recalc(*fcu);
 }
 
+/* The Graph Editor's Active Keyframe panel's edits (graph_buttons.cc), on the key at `index`: what (0) sets co_ui as
+ * RNA's setter does (handles move with the key), (1, 2) a left or right handle's coordinates, (3, 4) a left or right
+ * handle's type (values[0]); then its update callback runs. */
+static void activekey_update(FCurve *fcu)
+{
+  sort_time_fcurve(*fcu);
+  BKE_fcurve_handles_recalc(*fcu);
+}
+static void activekey_handles(FCurve *fcu, BezTriple *bezt)
+{
+  if (ELEM(bezt->h1, HD_AUTO, HD_AUTO_ANIM) && ELEM(bezt->h2, HD_AUTO, HD_AUTO_ANIM)) {
+    bezt->h1 = HD_ALIGN;
+    bezt->h2 = HD_ALIGN;
+  }
+  else {
+    BKE_nurb_bezt_handle_test(bezt, SELECT, NURB_HANDLE_TEST_EACH, false);
+  }
+  activekey_update(fcu);
+}
+/* graphedit_activekey_left_handle_coord_cb and its right twin: only the edited handle counts as selected meanwhile. */
+static void activekey_handle_coord(FCurve *fcu, BezTriple *bezt, bool left)
+{
+  const eBezTriple_Flag f1 = bezt->f1, f3 = bezt->f3;
+  SET_FLAG_FROM_TEST(bezt->f1, left, BEZT_FLAG_SELECT);
+  SET_FLAG_FROM_TEST(bezt->f3, !left, BEZT_FLAG_SELECT);
+  activekey_handles(fcu, bezt);
+  bezt->f1 = f1;
+  bezt->f3 = f3;
+}
+EXPORT(anim_keyframe_edit) void anim_keyframe_edit(FCurve *fcu, int index, int what, const float *values)
+{
+  BezTriple *bezt = &fcu->bezt[index];
+  switch (what) {
+    case 0: {
+      const float frame_delta = values[0] - bezt->vec[1][0], value_delta = values[1] - bezt->vec[1][1];
+      bezt->vec[0][0] += frame_delta;
+      bezt->vec[0][1] += value_delta;
+      bezt->vec[1][0] = values[0];
+      bezt->vec[1][1] = values[1];
+      bezt->vec[2][0] += frame_delta;
+      bezt->vec[2][1] += value_delta;
+      activekey_update(fcu);
+      break;
+    }
+    case 1:
+    case 2:
+      copy_v2_v2(bezt->vec[what == 1 ? 0 : 2], values);
+      activekey_handle_coord(fcu, bezt, what == 1);
+      break;
+    case 3:
+      bezt->h1 = eBezTriple_Handle(values[0]);
+      BKE_fcurve_update_handle_flag_from_opposite(*bezt, HandleSide::LEFT);
+      activekey_update(fcu);
+      break;
+    case 4:
+      bezt->h2 = eBezTriple_Handle(values[0]);
+      BKE_fcurve_update_handle_flag_from_opposite(*bezt, HandleSide::RIGHT);
+      activekey_update(fcu);
+      break;
+  }
+}
+
 EXPORT(anim_fcurve_evaluate) float anim_fcurve_evaluate(FCurve *fcu, float frame) { return evaluate_fcurve(fcu, frame); }
 
 /* Where an FCurve's and a BezTriple's fields are, for JS to read and write them in place (offsets in bytes). */
@@ -225,10 +290,7 @@ EXPORT(anim_scene_range) const int *anim_scene_range(Scene *scene)
 /* Editors. */
 
 /* An editor area: Blender's ScrArea with the space its type creates, holding that space's regions. */
-struct AnimArea {
-  ScrArea area = {};
-  std::string status;
-};
+struct AnimArea : BylonderArea {};
 
 static ARegion *area_region(AnimArea *a, int regiontype) { return BKE_area_find_region_type(&a->area, regiontype); }
 
@@ -239,11 +301,13 @@ static void space_types_ensure()
 }
 
 /* An area of a space type (SPACE_GRAPH, SPACE_ACTION), as ED_area_newspace makes one. */
-EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype)
+EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int subtype)
 {
   space_types_ensure();
   AnimArea *a = MEM_new<AnimArea>(__func__);
   SpaceType *st = BKE_spacetype_from_id(spacetype);
+  /* As ED_area_newspace: the space is made for the sub-type the area asks for, then set to it. */
+  a->area.butspacetype_subtype = short(subtype);
   SpaceLink *sl = st->create(&a->area, CTX_data_scene(C));
   BLI_addtail(&a->area.spacedata, sl);
   a->area.spacetype = char(spacetype);
@@ -253,8 +317,19 @@ EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype)
   for (ARegion &region : a->area.regionbase) {
     region.runtime->type = BKE_regiontype_from_id(st, region.regiontype);
   }
+  if (st->space_subtype_set && subtype >= 0) {
+    st->space_subtype_set(&a->area, subtype);
+  }
   return a;
 }
+
+/* A region's flags (RGN_FLAG_HIDDEN: shown or not), as the screen reads and sets them. */
+EXPORT(anim_region_flag) int anim_region_flag(ARegion *region) { return region ? region->flag : 0; }
+EXPORT(anim_region_flag_set) void anim_region_flag_set(ARegion *region, int flag) { region->flag = eRegion_Flag(flag); }
+
+/* The Graph Editor's 2D cursor value (SpaceGraph.cursorVal), the View panel's Cursor Y. */
+EXPORT(anim_graph_cursor) float anim_graph_cursor(AnimArea *a) { return static_cast<SpaceGraph *>(a->area.spacedata.first)->cursorVal; }
+EXPORT(anim_graph_cursor_set) void anim_graph_cursor_set(AnimArea *a, float value) { static_cast<SpaceGraph *>(a->area.spacedata.first)->cursorVal = value; }
 
 EXPORT(anim_area_free) void anim_area_free(AnimArea *a)
 {
@@ -361,6 +436,101 @@ EXPORT(anim_area_settings_set) void anim_area_settings_set(AnimArea *a, int flag
 
 /* An FCurve's active keyframe (BKE_fcurve_active_keyframe_index), or -1. */
 EXPORT(anim_fcurve_active_key) int anim_fcurve_active_key(FCurve *fcu) { return BKE_fcurve_active_keyframe_index(fcu); }
+
+/* The scene's markers (Scene.timeline_markers), in list order: their count, then one by one its frame and flag
+ * (SELECT) and its name. */
+EXPORT(anim_markers) int anim_markers(Scene *scene) { return BLI_listbase_count(&scene->markers); }
+EXPORT(anim_marker) const char *anim_marker(Scene *scene, int index, int *r_frame_flag)
+{
+  const TimeMarker *marker = static_cast<const TimeMarker *>(BLI_findlink(&scene->markers, index));
+  r_frame_flag[0] = marker->frame;
+  r_frame_flag[1] = int(marker->flag);
+  return marker->name;
+}
+/* Replaces the scene's markers, as loading a file does: none, then each added. */
+EXPORT(anim_markers_clear) void anim_markers_clear(Scene *scene)
+{
+  while (TimeMarker *marker = static_cast<TimeMarker *>(BLI_pophead(&scene->markers))) {
+    MEM_delete(marker);
+  }
+}
+EXPORT(anim_marker_add) void anim_marker_add(Scene *scene, int frame, int flag, const char *name)
+{
+  TimeMarker *marker = MEM_new<TimeMarker>(__func__);
+  marker->frame = frame;
+  marker->flag = uint(flag);
+  STRNCPY(marker->name, name);
+  BLI_addtail(&scene->markers, marker);
+}
+
+/* The context's active Action (screen_context.cc's active_action), or null. */
+EXPORT(anim_active_action) bAction *anim_active_action(bContext *C)
+{
+  return static_cast<bAction *>(CTX_data_pointer_get(C, "active_action").data);
+}
+
+/* bAction's fields the Dope Sheet's Action panel shows: flag, frame_start, frame_end, and the ID name. */
+EXPORT(anim_action_layout) const int *anim_action_layout()
+{
+  static const int layout[] = {int(offsetof(bAction, flag)), int(offsetof(bAction, frame_start)), int(offsetof(bAction, frame_end)),
+                               int(offsetof(bAction, id.name))};
+  return layout;
+}
+
+/* As rna_action.cc's use_frame_range setter: turning it on starts a blank range at the keys' range. */
+EXPORT(anim_action_use_frame_range_set) void anim_action_use_frame_range_set(bAction *dna_action, bool value)
+{
+  animrig::Action &action = dna_action->wrap();
+  if (value) {
+    if (action.frame_start == action.frame_end && action.frame_start == 0) {
+      const float2 frame_range = action.get_frame_range_of_keys(false);
+      action.frame_start = frame_range[0];
+      action.frame_end = frame_range[1];
+    }
+    action.flag |= ACT_FRAME_RANGE;
+  }
+  else {
+    action.flag &= ~ACT_FRAME_RANGE;
+  }
+}
+
+/* The Action's active slot (ActionSlot): its display name (the identifier without its ID type prefix), or null, and
+ * its target ID type's icon. */
+EXPORT(anim_action_slot) const char *anim_action_slot(bAction *dna_action, int *r_icon)
+{
+  static std::string name;
+  animrig::Slot *slot = dna_action->wrap().slot_active_get();
+  if (!slot) {
+    return nullptr;
+  }
+  *r_icon = ui::icon_from_idcode(slot->idtype);
+  name = slot->identifier_without_prefix();
+  return name.c_str();
+}
+
+namespace blender {
+/* graph_utils.cc (graph_intern.hh, internal to space_graph). */
+bAnimListElem *get_active_fcurve_channel(bAnimContext *ac);
+}  // namespace blender
+
+/* The context's active F-Curve, as the Graph Editor's sidebar panels find it (graph_panel_context), or null; its name
+ * and icon as their Active F-Curve panel shows them (getname_anim_fcurve, else the owner ID type's icon). */
+EXPORT(anim_active_fcurve) FCurve *anim_active_fcurve(bContext *C, char *r_name, int *r_icon)
+{
+  bAnimContext ac;
+  if (!ANIM_animdata_get_context(C, &ac)) {
+    return nullptr;
+  }
+  bAnimListElem *ale = get_active_fcurve_channel(&ac);
+  if (!ale) {
+    return nullptr;
+  }
+  FCurve *fcu = static_cast<FCurve *>(ale->data);
+  const std::optional<int> icon = getname_anim_fcurve(r_name, ale->id, fcu);
+  *r_icon = icon ? *icon : (ale->id ? RNA_struct_ui_icon(ID_code_to_RNA_type(GS(ale->id->name))) : ICON_NONE);
+  MEM_delete(ale);
+  return fcu;
+}
 
 /* The header text an operator shows while it runs (ED_area_status_text), or null. */
 EXPORT(anim_area_status) const char *anim_area_status(AnimArea *a) { return a->status.empty() ? nullptr : a->status.c_str(); }
@@ -649,7 +819,7 @@ EXPORT(gesture_lasso_path_set) void gesture_lasso_path_set(const int2 *xy, int c
 
 /* Popups an invoke opens (wm_operators.cc): Bylonder's window manager shows them, then runs the operator's exec when
  * the user confirms, or sets the enum property and runs it when the user picks an item. */
-enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU };
+enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU, POPUP_PROPS };
 static Popup popup_opened = POPUP_NONE;
 static std::string popup_title, popup_text;
 
@@ -667,7 +837,7 @@ namespace blender {
 void ED_area_status_text(ScrArea *area, const char *str)
 {
   if (area) {
-    reinterpret_cast<AnimArea *>(area)->status = str ? str : "";
+    reinterpret_cast<BylonderArea *>(area)->status = str ? str : "";
   }
 }
 
@@ -715,6 +885,12 @@ wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*e
     return op->type->exec(C, op);
   }
   return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop));
+}
+
+/* A properties popup (wm_operators.cc): Bylonder's window manager shows the operator's properties with OK. */
+wmOperatorStatus WM_operator_props_popup(bContext * /*C*/, wmOperator *op, const wmEvent * /*event*/)
+{
+  return popup_open(POPUP_PROPS, op->type->name, op->type->idname);
 }
 
 /* As wm_operators.cc defines them. */
@@ -868,24 +1044,9 @@ bool ED_operator_region_animview_active(bContext *C)
   return true;
 }
 
-/* As scene.cc defines them. */
-double Scene::frames_per_second() const { return double(this->r.frs_sec) / double(this->r.frs_sec_base); }
-float BKE_scene_frame_get(const Scene *scene) { return scene->r.cfra + scene->r.subframe; }
-
-/* port-override: scene.cc's Scene type without its data callbacks (the module world's Scene is main-api.cc's), so the
- * Scene is an ID that has animation data, as in Blender. */
-IDTypeInfo IDType_ID_SCE = {
-    .id_code = Scene::id_type,
-    .id_filter = FILTER_ID_SCE,
-    .dependencies_id_types = 0,
-    .main_listbase_index = INDEX_ID_SCE,
-    .struct_size = sizeof(Scene),
-    .name = "Scene",
-    .name_plural = N_("scenes"),
-    .translation_context = BLT_I18NCONTEXT_ID_SCENE,
-    .flags = IDTYPE_FLAGS_NEVER_UNUSED,
-    .asset_type_info = nullptr,
-};
+/* port-override: the module's markers have no cameras bound (Bylonder's scene camera is its own), so moving markers
+ * switches no camera. */
+bool BKE_scene_camera_switch_update(Scene * /*scene*/) { return false; }
 
 /* As wm_operators.cc defines it. */
 int WM_operator_smooth_viewtx_get(const wmOperator *op)

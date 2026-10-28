@@ -1,17 +1,13 @@
 // Blender's animation data in the module's Blender world (anim-api.cc): AnimData, layered Actions and F-Curves on the
 // IDs of a BlenderMain, read and written in place as Blender's DNA (FCurve, BezTriple), and evaluated by Blender's
 // evaluate_fcurve. Animation editors' areas (AnimArea) live here too: see editors/animation/anim-area.js.
-import { blenderModule } from '../../bmesh/bmesh-wasm.js';
+import { blenderModule, enumTable } from '../../bmesh/bmesh-wasm.js';
 import rnaAnimated from '../../makesrna/rna-animated.json' with { type: 'json' };
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
 
-// Blender's enums by identifier (rna_enum_text): event types, event values and property subtypes.
-const enumTable = (which) => new Map(cString(x.rna_enum_text(which)).split('\n').filter(Boolean).map((line) => {
-  const [identifier, value] = line.split('\t');
-  return [identifier, Number(value)];
-}));
-export const EVENT_TYPES = enumTable(0), EVENT_VALUES = enumTable(1), PROPERTY_SUBTYPES = enumTable(2);
+export { EVENT_TYPES, EVENT_VALUES } from '../../bmesh/bmesh-wasm.js';
+export const PROPERTY_SUBTYPES = enumTable(2);
 export const PROPERTY_TYPES = { BOOLEAN: 0, INT: 1, FLOAT: 2, STRING: 3, ENUM: 4, POINTER: 5, COLLECTION: 6 };
 const ID_CODES = { OB: 0x424f, SC: 0x4353, WO: 0x4f57, MA: 0x414d, LA: 0x414c, CA: 0x4143 };
 
@@ -34,7 +30,7 @@ export function defineCustomProperty(path, type, name) {
 
 // FCurve and BezTriple field offsets (anim_layout).
 const L = Array.from(new Int32Array(x.memory.buffer, x.anim_layout() >>> 0, 24));
-const [, FC_BEZT, FC_TOTVERT, FC_FLAG, FC_RNA_PATH, FC_ARRAY_INDEX, FC_COLOR, FC_EXTEND, , ,
+const [, FC_BEZT, FC_TOTVERT, FC_FLAG, FC_RNA_PATH, FC_ARRAY_INDEX, FC_COLOR, FC_EXTEND, FC_COLOR_MODE, FC_AUTO_SMOOTHING,
   BEZT_SIZE, B_VEC, B_IPO, B_H1, B_H2, B_F1, B_F2, B_F3, B_EASING, B_BACK, B_AMPLITUDE, B_PERIOD, , B_HIDE] = L;
 
 // Blender's enum identifiers for BezTriple's and FCurve's values (rna_curve.cc, rna_fcurve.cc), in value order.
@@ -43,6 +39,9 @@ export const HANDLE_TYPES = ['FREE', 'AUTO', 'VECTOR', 'ALIGNED', 'AUTO_CLAMPED'
 export const EASINGS = ['AUTO', 'EASE_IN', 'EASE_OUT', 'EASE_IN_OUT'];
 export const KEYFRAME_TYPES = ['KEYFRAME', 'EXTREME', 'BREAKDOWN', 'JITTER', 'MOVING_HOLD', 'GENERATED'];
 export const EXTRAPOLATIONS = ['CONSTANT', 'LINEAR'];
+const KEY_PANEL_EDITS = ['co_ui', 'handle_left', 'handle_right', 'handle_left_type', 'handle_right_type'];
+export const COLOR_MODES = ['AUTO_RAINBOW', 'AUTO_RGB', 'CUSTOM', 'AUTO_YRGB'];
+export const SMOOTHINGS = ['NONE', 'CONT_ACCEL'];
 const SELECT = 1;
 // eFCurve_Flags.
 export const FCURVE = { VISIBLE: 1 << 0, SELECTED: 1 << 1, ACTIVE: 1 << 2, PROTECTED: 1 << 3, MUTED: 1 << 4, DISABLED: 1 << 10 };
@@ -92,6 +91,14 @@ export class FCurve {
   get flag() { return this.#dv.getInt16(this.pointer + FC_FLAG, true); }
   set flag(value) { this.#dv.setInt16(this.pointer + FC_FLAG, value, true); }
   get color() { return [0, 1, 2].map((i) => this.#dv.getFloat32(this.pointer + FC_COLOR + i * 4, true)); }
+  set color(value) { value.forEach((v, i) => this.#dv.setFloat32(this.pointer + FC_COLOR + i * 4, v, true)); }
+  get color_mode() { return COLOR_MODES[this.#dv.getInt32(this.pointer + FC_COLOR_MODE, true)]; }
+  set color_mode(value) { this.#dv.setInt32(this.pointer + FC_COLOR_MODE, COLOR_MODES.indexOf(value), true); }
+  get auto_smoothing() { return SMOOTHINGS[this.#dv.getInt8(this.pointer + FC_AUTO_SMOOTHING)]; }
+  // Its auto handles recalculated, as RNA's update does.
+  set auto_smoothing(value) { this.#dv.setInt8(this.pointer + FC_AUTO_SMOOTHING, SMOOTHINGS.indexOf(value)); this.keys = this.keys; }
+  // The key Blender's panels edit (the active keyframe), or -1.
+  get active_key() { return x.anim_fcurve_active_key(this.pointer); }
   get extrapolation() { return EXTRAPOLATIONS[this.#dv.getInt8(this.pointer + FC_EXTEND)]; }
   set extrapolation(value) { this.#dv.setInt8(this.pointer + FC_EXTEND, EXTRAPOLATIONS.indexOf(value)); }
   get length() { return this.#dv.getInt32(this.pointer + FC_TOTVERT, true); }
@@ -107,10 +114,55 @@ export class FCurve {
     keys.forEach((key, i) => writeKey(dv, i * BEZT_SIZE, key));
     withArrays([bytes], ([p]) => x.anim_fcurve_keys_set(this.pointer, p, keys.length));
   }
+  // One key changed by `edit(key)`, then sorted and its handles recalculated, as the Graph Editor's panel updates do.
+  editKey(index, edit) {
+    const keys = this.keys;
+    edit(keys[index]);
+    this.keys = keys;
+  }
+  // The Graph Editor's Active Keyframe edits (anim_keyframe_edit): 'co_ui', 'handle_left', 'handle_right' (a frame and
+  // value) or 'handle_left_type', 'handle_right_type' (an identifier), with the panel's own updates.
+  editKeyPanel(index, what, value) {
+    const values = typeof value === 'string' ? [HANDLE_TYPES.indexOf(value), 0] : value;
+    withArrays([Float32Array.from(values)], ([p]) => x.anim_keyframe_edit(this.pointer, index, KEY_PANEL_EDITS.indexOf(what), p));
+  }
   evaluate(frame) { return x.anim_fcurve_evaluate(this.pointer, frame); }
   // Values at count frames from start, step apart.
   sample(start, step, count) {
     return withArrays([new Float32Array(count)], ([p]) => { x.anim_fcurve_sample(this.pointer, start, step, count, p); return Float32Array.from(new Float32Array(x.memory.buffer, p, count)); });
+  }
+}
+
+// One Action (bAction), by its address: what the Dope Sheet's Action panels show of it.
+const [ACT_FLAG, ACT_FRAME_START, ACT_FRAME_END, ACT_NAME] = Array.from(new Int32Array(x.memory.buffer, x.anim_action_layout() >>> 0, 4));
+const ACT_FRAME_RANGE = 1 << 12, ACT_CYCLIC = 1 << 13;
+export class Action {
+  constructor(pointer) { this.pointer = pointer; }
+  get #dv() { return view(); }
+  get name() { return cString(this.pointer + ACT_NAME + 2); }
+  get flag() { return this.#dv.getInt32(this.pointer + ACT_FLAG, true); }
+  set flag(value) { this.#dv.setInt32(this.pointer + ACT_FLAG, value, true); }
+  get use_frame_range() { return !!(this.flag & ACT_FRAME_RANGE); }
+  set use_frame_range(value) { x.anim_action_use_frame_range_set(this.pointer, !!value); }
+  get use_cyclic() { return !!(this.flag & ACT_CYCLIC); }
+  set use_cyclic(value) { this.flag = value ? this.flag | ACT_CYCLIC : this.flag & ~ACT_CYCLIC; }
+  get frame_start() { return this.#dv.getFloat32(this.pointer + ACT_FRAME_START, true); }
+  // As rna_action.cc's setters: the other end follows so the range stays ordered.
+  set frame_start(value) {
+    this.#dv.setFloat32(this.pointer + ACT_FRAME_START, value, true);
+    if (this.frame_end < value) this.#dv.setFloat32(this.pointer + ACT_FRAME_END, value, true);
+  }
+  get frame_end() { return this.#dv.getFloat32(this.pointer + ACT_FRAME_END, true); }
+  set frame_end(value) {
+    this.#dv.setFloat32(this.pointer + ACT_FRAME_END, value, true);
+    if (this.frame_start > value) this.#dv.setFloat32(this.pointer + ACT_FRAME_START, value, true);
+  }
+  // Its active slot: the display name and the target ID type's icon, or null.
+  get activeSlot() {
+    return withArrays([new Int32Array(1)], ([icon]) => {
+      const name = x.anim_action_slot(this.pointer, icon) >>> 0;
+      return name ? { name_display: cString(name), icon: new Int32Array(x.memory.buffer, icon, 1)[0] } : null;
+    });
   }
 }
 
@@ -136,6 +188,17 @@ export class BlenderAnimation {
   setTime({ frame, start, end, previewStart, previewEnd, preview, fps, keyframeType = 'KEYFRAME', autoKey = false }) {
     const cfra = Math.floor(frame);
     x.anim_scene_time_set(this.main.scene, cfra, frame - cfra, start, end, previewStart, previewEnd, preview, fps, KEYFRAME_TYPES.indexOf(keyframeType), autoKey);
+  }
+  // The scene's markers (Scene.timeline_markers): { name, frame, select } in list order; set replaces them.
+  get markers() {
+    return Array.from({ length: x.anim_markers(this.main.scene) }, (_, i) => withArrays([new Int32Array(2)], ([p]) => {
+      const name = cString(x.anim_marker(this.main.scene, i, p)), [frame, flag] = new Int32Array(x.memory.buffer, p, 2);
+      return { name, frame, select: !!(flag & SELECT) };
+    }));
+  }
+  set markers(markers) {
+    x.anim_markers_clear(this.main.scene);
+    for (const { name, frame, select } of markers) withString(name, (n) => x.anim_marker_add(this.main.scene, frame, select ? SELECT : 0, n));
   }
   get frame() { return x.anim_scene_frame(this.main.scene); }
   get range() {

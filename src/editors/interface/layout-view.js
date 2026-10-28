@@ -308,7 +308,7 @@ function propItem(node, env) {
       chars.map((char, i) => widget(prop, node, { ...options, index: i, text: useSplit ? elementText(i, chars) : (name && char ? char : '') })));
     // ui_item_array: without the split, the name (with a colon, ui_item_name_add_colon) above the elements.
     if (!useSplit && name && !iconOnly) value = h('div', { class: 'flex min-w-0 flex-1 flex-col' }, [label(name + ':'), value]);
-  } else value = widget(prop, node, { ...options, text: useSplit && splitLabel ? '' : meta.type === 'E' || meta.type === 'S' || meta.type === 'P' ? '' : name });
+  } else value = widget(prop, node, { ...options, index, text: useSplit && splitLabel ? '' : meta.type === 'E' || meta.type === 'S' || meta.type === 'P' ? '' : name });
 
   if (!useSplit || (name === '' && !splitEmptyName)) {
     if (!useSplit && meta.type === 'E' && !node.expand && name && !node.icon_only) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(name), value]);
