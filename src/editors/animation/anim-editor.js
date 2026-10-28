@@ -17,7 +17,7 @@ import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { headerLayout, drawPanels, panelTypes } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
-import { GRAPH_PANELS } from './anim-buttons.js';
+import { GRAPH_PANELS, drawFModifierPanels } from './anim-buttons.js';
 import { drawRecording, buttonAt } from '../interface/region-draw.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
@@ -180,6 +180,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     const categories = [...new Set(ordered.map((type) => type.bl_category))];
     const category = categories.includes(sidebarState.category) ? sidebarState.category : categories[0];
     const drawn = drawPanels({ roots: roots.filter(({ type }) => type.bl_category === category) }, ctx, { contexts: ['data'], open: sidebarPanels.isOpen });
+    if (graph && category === 'Modifiers') drawn.push(...drawFModifierPanels(area, { isOpen: sidebarPanels.isOpen, changed: () => layoutUI.undoPush() }));
     return [
       h(RegionView, { panels: drawn, ui: sidebarUI }),
       h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {

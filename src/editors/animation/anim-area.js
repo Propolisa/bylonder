@@ -133,6 +133,10 @@ export class AnimArea {
       return fcurve ? { fcurve: new FCurve(fcurve), name: cString(name), icon: cString(x.anim_icon_name(new Int32Array(x.memory.buffer, icon, 1)[0])) } : null;
     }));
   }
+  // The active F-Curve's F-Modifier panels, drawn by fmodifier_ui.cc and recorded by panel-layout.cc:
+  // [{ modifier (its address), panel (the recorded panel tree) }]. pressPanelButton presses one of their raw buttons.
+  fmodifierPanels() { return this.inContext(RGN_TYPE_UI, (C) => JSON.parse(cString(x.anim_fmodifier_panels(C)))); }
+  pressPanelButton(index) { this.inContext(RGN_TYPE_UI, (C) => x.panel_button_press(C, index, -1, 0)); }
   // The context's active Action (context.active_action), or null.
   activeAction() {
     const action = this.inContext(RGN_TYPE_UI, (C) => x.anim_active_action(C) >>> 0);

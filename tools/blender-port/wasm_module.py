@@ -226,6 +226,34 @@ def rna_prototypes(build, args):
     return path
 
 
+def rna_fcurve_funcs(build):
+    """generated/rna_fcurve_funcs.inc: RNA_FUNC(struct type, identifier, property type, member, function) for each RNA
+    function rna_fcurve.cc's runtime part gives a property (dna-fcurve.json, modifier_dna.py), for wasm/rna-fcurve.cc to
+    list for the module's properties: set and range functions by the property's type, a float array's get and length, and
+    updates;
+    and RNA_BASE(struct type, base type) for the structs that inherit their base's properties."""
+    types = {'BOOLEAN': 'PROP_BOOLEAN', 'INT': 'PROP_INT', 'FLOAT': 'PROP_FLOAT', 'ENUM': 'PROP_ENUM', 'STRING': 'PROP_STRING'}
+    lines = []
+    for struct, info in json.load(open(os.path.join(convert.REPO, 'src', 'makesrna', 'dna-fcurve.json'))).items():
+        if info.get('base'):
+            lines.append(f'RNA_BASE(RNA_{struct}, RNA_{info["base"]})')
+        for name, prop in info['properties'].items():
+            funcs, kind = prop.get('funcs', {}), prop.get('type')
+            if kind not in types:
+                continue
+            array = 'length' in funcs or prop.get('length')
+            members = {'set': 'float_set_array' if kind == 'FLOAT' and array else kind.lower() + '_set', 'length': 'length',
+                       'update': 'update', **({'get': 'float_get_array'} if kind == 'FLOAT' and array else {}),
+                       **({'range': kind.lower() + '_range'} if kind in ('INT', 'FLOAT') else {})}
+            lines += [f'RNA_FUNC(RNA_{struct}, "{name}", {types[kind]}, {members[role]}, {func})'
+                      for role, func in funcs.items() if role in members]
+    path = os.path.join(build, 'generated', 'rna_fcurve_funcs.inc')
+    text = '\n'.join(lines) + '\n'
+    if not os.path.exists(path) or open(path).read() != text:
+        open(path, 'w').write(text)
+    return text
+
+
 def rna_dna_fields(build):
     """generated/rna_dna_fields.inc: DNA_FIELD(struct type, identifier, type, array length, where it is stored) for each
     modifier property, from src/makesrna/rna-modifiers.json (Blender's RNA) and dna-modifiers.json (its DNA fields,
@@ -251,17 +279,20 @@ def rna_dna_fields(build):
             lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[prop["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
                          f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, {str("bitset" in field).lower()}, '
                          f'{str(field.get("negative", False)).lower()})')
-    # Structs whose properties dna-outliner.json describes whole (type, icon), with DNA_ICON(struct type, identifier,
-    # icon, consecutive) for those that have an icon.
-    for struct, info in json.load(open(os.path.join(makesrna, 'dna-outliner.json'))).items():
+    # Structs whose properties dna-outliner.json and dna-fcurve.json describe whole (type, icon), with DNA_ICON(struct
+    # type, identifier, icon, consecutive) for those that have an icon.
+    described = {**json.load(open(os.path.join(makesrna, 'dna-outliner.json'))), **json.load(open(os.path.join(makesrna, 'dna-fcurve.json')))}
+    for struct, info in described.items():
         for name, field in info['properties'].items():
-            if field.get('type') not in kinds or field['kind'] == 'struct' or (field.get('bitset') is not None):
+            # Dynamic arrays (pointers to values) are read through their RNA functions, which the module lacks.
+            dynamic = field['kind'] == 'pointer' and field.get('type') != 'POINTER'
+            if field.get('type') not in kinds or field['kind'] == 'struct' or field.get('bitset') is not None or dynamic:
                 continue
             length = 0 if field.get('type') == 'STRING' else field.get('length', 0)
             kind = 's' if field['type'] == 'STRING' else field['kind'][0]
             lines.append(f'DNA_FIELD(RNA_{struct}, "{name}", {kinds[field["type"]]}, {length}, {field["offset"]}, {field["size"]}, \'{kind}\', '
                          f'{str(field.get("signed", False)).lower()}, {field.get("bit", 0)}LL, false, '
-                         f'{str(field.get("negative", False)).lower()})')
+                         f'{str(field.get("negative", False)).lower()}, {info.get("from", -1)})')
             if field.get('icon'):
                 lines.append(f'DNA_ICON(RNA_{struct}, "{name}", {field["icon"]}, {field.get("consecutive", 0)})')
     path = os.path.join(build, 'generated', 'rna_dna_fields.inc')
@@ -370,7 +401,7 @@ def build(root, name, spec, tag):
     own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)]
                       + fetched_files(out_dir, spec.get('fetch', []), tag)
                       + ([datatoc(out_dir, spec['datatoc'], tag)] if spec.get('datatoc') else []),
-                      own_args, patches + operators + rna_dna_fields(out_dir) + own_headers())
+                      own_args, patches + operators + rna_dna_fields(out_dir) + rna_fcurve_funcs(out_dir) + own_headers())
     failed = [src for src, obj in own.items() if obj is None]
     if failed:
         result = subprocess.run(['clang++', *own_args, '-c', failed[0], '-o', os.devnull], capture_output=True, text=True)

@@ -45,6 +45,9 @@
 /* A layout in a row shares the row's width as its buttons do (ui_item_fit); a header's items keep their size. */
 .bl-row>:is(.bl-col,.bl-row,.bl-split,.bl-box,.bl-grid){flex:1 1 0}
 .bl-header :is(.bl-col,.bl-row,.bl-split,.bl-box,.bl-grid){flex:0 0 auto}
+.bl-header-expand>*{flex:1 1 0}
+/* A row aligned left, right or centre keeps its items' size and leaves the rest to its expanding siblings. */
+.bl-row>.bl-row:is(.justify-start,.justify-end,.justify-center){flex:0 0 auto}
 /* In a column every item keeps its height. */
 .bl-ui :is(.bl-col,.bl-align-col)>*{flex:none}
 .bl-row.bl-fit>*{flex:0 0 auto}

@@ -570,6 +570,58 @@ EXPORT(anim_active_fcurve) FCurve *anim_active_fcurve(bContext *C, char *r_name,
   return fcu;
 }
 
+namespace blender::ui {
+std::string panel_record(const bContext *C, PanelType *type, const PointerRNA &ptr, Block *block);
+Block *panel_block_new();
+}  // namespace blender::ui
+
+/* The struct type of an F-Modifier, as rna_FModifierType_refine gives it. */
+static StructRNA *fmodifier_srna(const FModifier &fcm)
+{
+  switch (fcm.type) {
+    case FMODIFIER_TYPE_GENERATOR: return RNA_FModifierGenerator;
+    case FMODIFIER_TYPE_FN_GENERATOR: return RNA_FModifierFunctionGenerator;
+    case FMODIFIER_TYPE_ENVELOPE: return RNA_FModifierEnvelope;
+    case FMODIFIER_TYPE_CYCLES: return RNA_FModifierCycles;
+    case FMODIFIER_TYPE_NOISE: return RNA_FModifierNoise;
+    case FMODIFIER_TYPE_LIMITS: return RNA_FModifierLimits;
+    case FMODIFIER_TYPE_STEPPED: return RNA_FModifierStepped;
+    case FMODIFIER_TYPE_SMOOTH: return RNA_FModifierSmooth;
+    default: return RNA_FModifier;
+  }
+}
+
+/* The context's active F-Curve's F-Modifier panels, as graph_panel_modifiers adds them (ANIM_fmodifier_panels, with
+ * graph_fmodifier_panel_id's names): a JSON array of each modifier's panel recorded by panel-layout.cc, with the
+ * modifier's address. Their buttons stay pressable (panel_button_press) until the next call. */
+EXPORT(anim_fmodifier_panels) const char *anim_fmodifier_panels(bContext *C)
+{
+  static std::string json;
+  json = "[";
+  bAnimContext ac;
+  bAnimListElem *ale = ANIM_animdata_get_context(C, &ac) ? get_active_fcurve_channel(&ac) : nullptr;
+  if (ale) {
+    FCurve *fcu = static_cast<FCurve *>(ale->data);
+    ARegionType *art = CTX_wm_region(C)->runtime->type;
+    ui::Block *block = ui::panel_block_new();
+    for (FModifier &fcm : fcu->modifiers) {
+      const FModifierTypeInfo *fmi = get_fmodifier_typeinfo(fcm.type);
+      char idname[BKE_ST_MAXNAME];
+      SNPRINTF(idname, "GRAPH_PT_%s", fmi ? fmi->name : "");
+      PanelType *type = static_cast<PanelType *>(BLI_findstring(&art->paneltypes, idname, offsetof(PanelType, idname)));
+      if (!type) {
+        continue;
+      }
+      const PointerRNA ptr = RNA_pointer_create_discrete(ale->fcurve_owner_id, fmodifier_srna(fcm), &fcm);
+      json += (json.size() > 1 ? ",{\"modifier\":" : "{\"modifier\":") + std::to_string(uintptr_t(&fcm)) +
+              ",\"panel\":" + ui::panel_record(C, type, ptr, block) + '}';
+    }
+    MEM_delete(ale);
+  }
+  json += ']';
+  return json.c_str();
+}
+
 /* The header text an operator shows while it runs (ED_area_status_text), or null. */
 EXPORT(anim_area_status) const char *anim_area_status(AnimArea *a) { return a->status.empty() ? nullptr : a->status.c_str(); }
 

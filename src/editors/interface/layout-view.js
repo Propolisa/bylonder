@@ -461,6 +461,9 @@ function item(node, env) {
     case 'label': return label(node.text ?? '', { iconName: node.icon, iconValue: node.icon_value, className: !env.active ? 'opacity-50' : '' });
     case 'separator': return h('div', { class: 'bl-separator shrink-0', style: { '--factor': node.factor ?? 1 }, 'data-type': node.type ?? 'AUTO' });
     case 'separator_spacer': return h('div', { class: 'flex-1' });
+    // A raw button a C panel made in its block (uiDefBut), pressed as Blender's handlers press it.
+    case 'button': return button({ text: node.text, iconName: node.icon, iconOnly: !node.text, title: node.tip, disabled: !env.enabled,
+      emboss: node.emboss !== false, onClick: () => node.press() });
     // A template gives its widgets, or a layout it recorded.
     case 'template': {
       const drawn = (TEMPLATES[node.name] ?? env.ui.templates?.[node.name])?.(node, env) ?? null;
@@ -553,9 +556,10 @@ function panel(drawn, ui, sub = false) {
   return h('section', { key: drawn.id, class: ['bl-panel', sub ? 'bl-subpanel' : 'bl-panel-root', drawn.open && 'is-open'], 'data-blender': drawn.id }, [
     h('header', { class: 'bl-panel-header flex items-center', onClick: toggle }, [
       icon(drawn.open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'),
-      drawn.header ? h('div', { class: 'bl-panel-header-layout flex items-center' }, layout(drawn.header, env)) : null,
+      // PANEL_TYPE_HEADER_EXPAND: the header's layout takes the header's width.
+      drawn.header ? h('div', { class: ['bl-panel-header-layout flex items-center', drawn.headerExpand && 'bl-header-expand min-w-0 flex-1'] }, layout(drawn.header, env)) : null,
       drawn.label ? h('span', { class: 'bl-panel-label truncate' }, drawn.label) : null,
-      h('div', { class: 'flex-1' }),
+      drawn.headerExpand ? null : h('div', { class: 'flex-1' }),
       drawn.preset ? h('div', { class: 'flex items-center' }, layout(drawn.preset, env)) : null,
       sub ? null : icon('GRIP', 'bl-grip'),
     ]),

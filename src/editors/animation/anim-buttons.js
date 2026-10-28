@@ -1,10 +1,14 @@
 // The Graph Editor's sidebar panels, which Blender draws in C (graph_buttons.cc): graph_buttons_register's panels,
 // ported as the layout calls they make so they draw through the same layout renderer as Blender's Python panels. The
 // panels read the area (its active F-Curve, graph_panel_context) from the context's space, and edit the module's data
-// through RNA (makesrna/rna-bylonder.js: FCurve, Keyframe). Drivers' panels and the F-Modifier panels are not ported.
+// through RNA (makesrna/rna-bylonder.js: FCurve, Keyframe). The F-Modifier panels are Blender's own (fmodifier_ui.cc in
+// the module), recorded and drawn by drawFModifierPanels. Drivers' panels are not ported.
 import { kw } from '../../windowmanager/wm-operators.js';
 import { INFO } from '../../makesrna/rna.js';
+import { moduleStruct } from '../../makesrna/rna-module.js';
+import { layoutTree } from '../space_buttons/modifier-panel.js';
 import { FCURVE } from '../../blenkernel/animation/anim-blender.js';
+import { iconName } from './anim-area.js';
 
 const FCURVE_DISCRETE_VALUES = 1 << 12;
 // The editor a context's space is (editors/animation/anim-editor.js): its AnimArea and RNA.
@@ -112,6 +116,35 @@ export const GRAPH_PT_view = graphPanel({
     sub.operator('graph.snap_cursor_value', kw({ text: 'Cursor Value to Selection' }));
   },
 });
+
+// A recorded node with its icons by name.
+const named = (node) => ({
+  ...node, ...(node.icon ? { icon: iconName(node.icon) } : {}),
+  ...(node.button ? { button: { ...node.button, icon: node.button.icon ? iconName(node.button.icon) : undefined } } : {}),
+  children: (node.children ?? []).map(named),
+});
+
+// The active F-Curve's F-Modifier panels after graph_panel_modifiers' row (ANIM_fmodifier_panels), as drawPanels gives
+// panels: each modifier's panel (its header the buttons fmodifier_panel_header makes) and sub-panels, their properties
+// read and written through the module's RNA, `changed()` after an edit.
+export function drawFModifierPanels(area, { isOpen, changed }) {
+  const structs = new Map();
+  const data = (struct, pointer) => {
+    if (!pointer) return null;
+    const key = struct + pointer.join(':');
+    if (!structs.has(key)) structs.set(key, moduleStruct(struct, pointer, { C: area.main.C, changed }));
+    return structs.get(key);
+  };
+  const press = (index) => { area.pressPanelButton(index); changed(); };
+  const drawn = (node, key, sub) => {
+    const part = (kind) => node.children.find((child) => child.kind === kind);
+    const tree = (kind) => part(kind) && layoutTree(part(kind), data, key, press);
+    const id = `${key}:${node.prop}`;
+    return { id, label: node.text, header: tree('header'), headerExpand: !sub, body: tree('body'), open: isOpen(id, sub), closedByDefault: sub,
+      children: node.children.filter((child) => child.kind === 'panel').map((child) => drawn(child, key, true)) };
+  };
+  return area.fmodifierPanels().map(({ modifier, panel }) => drawn(named(panel.children[0]), modifier, false));
+}
 
 // In graph_buttons_register's order.
 export const GRAPH_PANELS = [GRAPH_PT_properties, GRAPH_PT_key_properties, GRAPH_PT_modifiers, GRAPH_PT_view];

@@ -32,7 +32,9 @@ struct Node {
   /* \x01: none, so the widget shows its RNA name. */
   std::string text = "\x01";
   int index = -1, flag = 0, icon = 0;
-  bool split = false, decorate = true, align = false;
+  bool split = false, decorate = true, align = false, emboss_none = false;
+  /* A property's struct type, owner ID and data, for JS to read and write it in the module (rna_get, rna_set). */
+  std::optional<PointerRNA> pointer;
   const Layout *layout = nullptr;
   std::vector<std::unique_ptr<Node>> children;
 };
@@ -80,7 +82,22 @@ Layout::Layout(ItemType type, LayoutRoot *root) : Item(type)
 }
 void Layout::estimate_impl() {}
 void Layout::resolve_impl() {}
-Block *Layout::block() const { return nullptr; }
+/* The block raw buttons go into while a panel is recorded with one (panel_record): a button made in it is recorded
+ * in the layout whose block() gave it, as Blender adds it to the block's current layout. */
+static Block *recording_block = nullptr;
+static const Layout *button_layout = nullptr;
+Block *Layout::block() const
+{
+  button_layout = this;
+  return recording_block;
+}
+void layout_record_button(Block *block, int index)
+{
+  if (block == recording_block && button_layout) {
+    add(button_layout, "button").index = index;
+  }
+}
+std::string panel_button_json(int index);
 
 static Layout &aligned_layout(const Layout *parent, const char *kind, bool align, StringRef heading = "")
 {
@@ -98,7 +115,7 @@ Layout &Layout::split(float /*percentage*/, bool /*align*/) { return sub_layout(
 
 void Layout::use_property_split_set(bool value) { nodes.at(this)->split = value; }
 void Layout::use_property_decorate_set(bool value) { nodes.at(this)->decorate = value; }
-void Layout::emboss_set(EmbossType /*emboss*/) {}
+void Layout::emboss_set(EmbossType emboss) { nodes.at(this)->emboss_none = emboss == EmbossType::None; }
 void Layout::operator_context_set(wm::OpCallContext /*opcontext*/) {}
 void Layout::context_ptr_set(StringRef /*name*/, const PointerRNA * /*ptr*/) {}
 
@@ -108,6 +125,7 @@ void Layout::prop(PointerRNA *ptr, StringRefNull propname, eUI_Item_Flag flag, s
   node.icon = icon;
   node.prop = propname;
   node.owner = owner(ptr);
+  node.pointer = *ptr;
   node.flag = int(flag);
   node.text = name ? std::string(*name) : std::string("\x01");
 }
@@ -249,6 +267,19 @@ static void write(std::ostringstream &out, const Node &node)
   if (node.align) {
     out << ",\"align\":true";
   }
+  if (node.emboss_none) {
+    out << ",\"emboss\":\"NONE\"";
+  }
+  if (node.layout && node.layout->alignment() != LayoutAlign::Expand) {
+    out << ",\"alignment\":\"" << (const char *[]){"EXPAND", "LEFT", "CENTER", "RIGHT"}[int(node.layout->alignment())] << '"';
+  }
+  if (node.pointer) {
+    out << ",\"pointer\":[" << uintptr_t(node.pointer->type) << ',' << uintptr_t(node.pointer->owner_id) << ','
+        << uintptr_t(node.pointer->data) << ']';
+  }
+  if (node.kind == "button") {
+    out << ",\"button\":" << panel_button_json(node.index);
+  }
   out << ",\"index\":" << node.index << ",\"flag\":" << node.flag << ",\"split\":" << node.split << ",\"decorate\":" << node.decorate;
   if (node.layout) {
     out << ",\"active\":" << LayoutInternal::active(*node.layout) << ",\"enabled\":" << LayoutInternal::enabled(*node.layout)
@@ -286,6 +317,25 @@ static void draw_panel(const bContext *C, PanelType *type, Node &parent, bool ro
   for (LinkData &link : type->children) {
     draw_panel(C, static_cast<PanelType *>(link.data), node, false);
   }
+}
+
+/* A registered panel type with its header and sub-panels, as JSON, drawing `ptr` (its custom data, an instanced
+ * panel's) and recording the raw buttons it makes in `block`. */
+std::string panel_record(const bContext *C, PanelType *type, const PointerRNA &ptr, Block *block)
+{
+  Node root;
+  root.kind = "panels";
+  panel_ptr = ptr;
+  recording_block = block;
+  draw_panel(C, type, root, false);
+  recording_block = nullptr;
+  button_layout = nullptr;
+  std::ostringstream out;
+  out << std::boolalpha;
+  write(out, root);
+  nodes.clear();
+  layouts.clear();
+  return out.str();
 }
 
 /* A layout recorded on its own (a region's block layout, block_layout in region-draw.cc), as `kind`: its root, until

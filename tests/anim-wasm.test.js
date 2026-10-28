@@ -6,6 +6,8 @@ import fs from 'node:fs';
 import { BlenderMain, newOperator } from '../src/bmesh/bmesh-wasm.js';
 import { BlenderAnimation, animatedProperty } from '../src/blenkernel/animation/anim-blender.js';
 import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, ACTION_MODES, OPERATOR_FINISHED, OPERATOR_RUNNING_MODAL } from '../src/editors/animation/anim-area.js';
+import { FCURVE } from '../src/blenkernel/animation/anim-blender.js';
+import { moduleStruct } from '../src/makesrna/rna-module.js';
 
 const dir = new URL('./fixtures/anim/', import.meta.url);
 const close = (a, b, label) => assert.ok(Math.abs(a - b) < 2e-3, `${label}: ${a} != ${b}`);
@@ -61,7 +63,8 @@ function setup(fixture, name) {
 const read = (name) => JSON.parse(fs.readFileSync(new URL(name + '.json', dir)));
 
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
-const cases = files.filter((f) => !/^(panel|marker)-/.test(f)), panels = files.filter((f) => f.startsWith('panel-')), markers = files.filter((f) => f.startsWith('marker-'));
+const cases = files.filter((f) => !/^(panel|marker|fmod)-/.test(f)), panels = files.filter((f) => f.startsWith('panel-')), markers = files.filter((f) => f.startsWith('marker-'));
+const fmods = files.filter((f) => f.startsWith('fmod-'));
 for (const file of cases) {
   const name = file.replace('.json', ''), fixture = read(name), { anim, ob, area } = setup(fixture, name);
   if (fixture.operator) {
@@ -83,6 +86,31 @@ for (const file of panels) {
   if (prop === 'co_ui') fcurve.editKeyPanel(key, prop, value);
   else fcurve.editKey(key, (k) => { k[prop] = value; });
   compare(state(anim, ob), fixture.after, name);
+  area.dispose();
+}
+
+// F-Modifiers added by graph.fmodifier_add to the active F-Curve, then set as their panels (fmodifier_ui.cc, recorded) set
+// them through the module's RNA (rna_fcurve.cc's set functions and updates): their properties and the F-Curve's values.
+const near = (a, b) => (Array.isArray(a) ? a.length === b.length && a.every((v, i) => near(v, b[i])) : typeof a === 'number' ? Math.abs(a - b) < 2e-3 : a === b);
+const recordedPointer = (node) => node.pointer ? node : node.children?.map(recordedPointer).find(Boolean);
+for (const file of fmods) {
+  const name = file.replace('.json', ''), fixture = read(name);
+  const view = { width: 800, height: 400, min: [0, -5], max: [40, 5] };
+  const { anim, ob, area } = setup({ ...fixture, space: 'GRAPH_EDITOR', selection: [], frame: 12, view }, name);
+  const fcurve = anim.fcurves(ob)[0];
+  fcurve.flag |= FCURVE.ACTIVE | FCURVE.SELECTED;
+  for (const type of fixture.modifiers) {
+    assert.ok(area.run(newOperator('graph.fmodifier_add', { type, only_active: true }), RGN_TYPE_WINDOW) & OPERATOR_FINISHED, `${name}: add ${type}`);
+  }
+  const modifiers = area.fmodifierPanels().map(({ panel }) => {
+    const { owner, pointer } = recordedPointer(panel);
+    return moduleStruct(owner, pointer, { C: area.main.C });
+  });
+  for (const [index, prop, value] of fixture.edits) modifiers[index][prop] = value;
+  fixture.after.forEach((expected, i) => {
+    for (const [prop, value] of Object.entries(expected)) assert.ok(near(modifiers[i][prop], value), `${name}: modifier ${i} ${prop}: ${modifiers[i][prop]} != ${value}`);
+  });
+  fixture.frames.forEach((frame, i) => close(fcurve.evaluate(frame), fixture.values[i], `${name}: value at ${frame}`));
   area.dispose();
 }
 
@@ -114,4 +142,4 @@ for (const [name, idname, key, axes, typed] of MODAL) {
   compare(state(anim, ob), fixture.after, `${name} (modal)`);
   area.dispose();
 }
-console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits, ${markers.length} marker operators and ${MODAL.length} modal transforms match Blender 5.2`);
+console.log(`Animation editors: ${cases.length} Graph Editor and Dope Sheet operator results, ${panels.length} sidebar panel edits, ${fmods.length} F-Modifier stacks, ${markers.length} marker operators and ${MODAL.length} modal transforms match Blender 5.2`);

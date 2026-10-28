@@ -1,0 +1,811 @@
+{
+ "FModifier": {
+  "sdna": "FModifier",
+  "size": 112,
+  "properties": {
+   "name": {
+    "offset": 16,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "custom": true,
+    "type": "STRING",
+    "funcs": {
+     "set": "rna_fModifier_name_set"
+    }
+   },
+   "type": {
+    "offset": 80,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NULL"
+     ],
+     [
+      1,
+      "GENERATOR"
+     ],
+     [
+      2,
+      "FNGENERATOR"
+     ],
+     [
+      3,
+      "ENVELOPE"
+     ],
+     [
+      4,
+      "CYCLES"
+     ],
+     [
+      5,
+      "NOISE"
+     ],
+     [
+      8,
+      "LIMITS"
+     ],
+     [
+      9,
+      "STEPPED"
+     ],
+     [
+      10,
+      "SMOOTH"
+     ]
+    ]
+   },
+   "show_expanded": {
+    "offset": 84,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "custom": true,
+    "type": "BOOLEAN",
+    "icon": 33,
+    "consecutive": 1,
+    "funcs": {
+     "set": "rna_FModifier_show_expanded_set"
+    }
+   },
+   "mute": {
+    "offset": 82,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN",
+    "icon": 8,
+    "consecutive": -1,
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "is_valid": {
+    "offset": 82,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "active": {
+    "offset": 82,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "custom": true,
+    "type": "BOOLEAN",
+    "icon": 23,
+    "consecutive": 1,
+    "funcs": {
+     "set": "rna_FModifier_active_set",
+     "update": "rna_FModifier_active_update"
+    }
+   },
+   "use_restricted_range": {
+    "offset": 82,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "frame_start": {
+    "offset": 96,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifier_start_frame_set",
+     "range": "rna_FModifier_start_frame_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "frame_end": {
+    "offset": 100,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifier_end_frame_set",
+     "range": "rna_FModifier_end_frame_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "blend_in": {
+    "offset": 104,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "range": "rna_FModifier_blending_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "blend_out": {
+    "offset": 108,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "range": "rna_FModifier_blending_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_influence": {
+    "offset": 82,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "influence": {
+    "offset": 92,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierCycles": {
+  "sdna": "FMod_Cycles",
+  "size": 8,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "mode_before": {
+    "offset": 0,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "REPEAT"
+     ],
+     [
+      2,
+      "REPEAT_OFFSET"
+     ],
+     [
+      3,
+      "MIRROR"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "cycles_before": {
+    "offset": 4,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "mode_after": {
+    "offset": 2,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "REPEAT"
+     ],
+     [
+      2,
+      "REPEAT_OFFSET"
+     ],
+     [
+      3,
+      "MIRROR"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "cycles_after": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierEnvelope": {
+  "sdna": "FMod_Envelope",
+  "size": 20,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "reference_value": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "default_min": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "default_max": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierEnvelopeControlPoint": {
+  "sdna": "FCM_EnvelopeData",
+  "size": 16,
+  "properties": {
+   "min": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "max": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "frame": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierFunctionGenerator": {
+  "sdna": "FMod_FunctionGenerator",
+  "size": 24,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "amplitude": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "phase_multiplier": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "phase_offset": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "value_offset": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_additive": {
+    "offset": 20,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "function_type": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SIN"
+     ],
+     [
+      1,
+      "COS"
+     ],
+     [
+      2,
+      "TAN"
+     ],
+     [
+      3,
+      "SQRT"
+     ],
+     [
+      4,
+      "LN"
+     ],
+     [
+      5,
+      "SINC"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierGenerator": {
+  "sdna": "FMod_Generator",
+  "size": 20,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "use_additive": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "mode": {
+    "offset": 12,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "POLYNOMIAL"
+     ],
+     [
+      1,
+      "POLYNOMIAL_FACTORISED"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_FModifier_verify_data_update"
+    }
+   },
+   "poly_order": {
+    "offset": 8,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT",
+    "funcs": {
+     "update": "rna_FModifier_verify_data_update"
+    }
+   },
+   "coefficients": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "length": "rna_FModifierGenerator_coefficients_get_length",
+     "get": "rna_FModifierGenerator_coefficients_get",
+     "set": "rna_FModifierGenerator_coefficients_set",
+     "update": "rna_FModifier_verify_data_update"
+    }
+   }
+  }
+ },
+ "FModifierLimits": {
+  "sdna": "FMod_Limits",
+  "size": 24,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "use_min_x": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_min_y": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_max_x": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_max_y": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "min_x": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifierLimits_minx_set",
+     "range": "rna_FModifierLimits_minx_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "min_y": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifierLimits_miny_set",
+     "range": "rna_FModifierLimits_miny_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "max_x": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifierLimits_maxx_set",
+     "range": "rna_FModifierLimits_maxx_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "max_y": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifierLimits_maxy_set",
+     "range": "rna_FModifierLimits_maxy_range",
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierNoise": {
+  "sdna": "FMod_Noise",
+  "size": 32,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "blend_type": {
+    "offset": 26,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "REPLACE"
+     ],
+     [
+      1,
+      "ADD"
+     ],
+     [
+      2,
+      "SUBTRACT"
+     ],
+     [
+      3,
+      "MULTIPLY"
+     ]
+    ],
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "scale": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "strength": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "phase": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "offset": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "lacunarity": {
+    "offset": 20,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "roughness": {
+    "offset": 16,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "depth": {
+    "offset": 24,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_legacy_noise": {
+    "offset": 28,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierSmooth": {
+  "sdna": "FMod_Smooth",
+  "size": 8,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "sigma": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "filter_width": {
+    "offset": 4,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ },
+ "FModifierStepped": {
+  "sdna": "FMod_Stepped",
+  "size": 20,
+  "base": "FModifier",
+  "from": 12,
+  "properties": {
+   "frame_step": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "frame_offset": {
+    "offset": 4,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_frame_start": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "use_frame_end": {
+    "offset": 16,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update": "rna_FModifier_update"
+    }
+   },
+   "frame_start": {
+    "offset": 8,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifierStepped_frame_start_set",
+     "range": "rna_FModifierStepped_start_frame_range",
+     "update": "rna_FModifier_update"
+    }
+   },
+   "frame_end": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "custom": true,
+    "type": "FLOAT",
+    "funcs": {
+     "set": "rna_FModifierStepped_frame_end_set",
+     "range": "rna_FModifierStepped_end_frame_range",
+     "update": "rna_FModifier_update"
+    }
+   }
+  }
+ }
+}

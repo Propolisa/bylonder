@@ -7,6 +7,10 @@ names, as Clang parses the RNA definition files for the module's wasm32 target.
   takes too (rna_dna_fields in wasm_module.py).
 - src/makesrna/dna-curves.json: a Curve and its Nurb, BezTriple, BPoint, CharInfo and TextBox (rna_curve.cc); with
   rna-curves.json (tools/blender-reference/curves.py) it lets JS read and write curve and text data in the module.
+- src/makesrna/dna-fcurve.json: the F-Modifiers (rna_fcurve.cc), each type's own properties stored in the struct its
+  FModifier's `data` points to (RNA_def_struct_sdna_from: `from`, that pointer's offset in the base struct), and the
+  names of the RNA functions each property has (`funcs`: get, set, range, length, update), which the module compiles from
+  rna_fcurve.cc's runtime part (wasm/rna-fcurve.cc).
 
 Usage: tools/blender-port/modifier_dna.py SRC   (SRC: Blender sources of the manifest's tag)
 """
@@ -32,10 +36,18 @@ OUTPUTS = {
                           'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
                           'structs': ['Object', 'ObjectBase', 'Collection', 'LayerCollection', 'SpaceOutliner'], 'detail': True},
     'dna-curves.json': {'files': ['rna_curve.cc'], 'functions': lambda name: name == 'RNA_def_curve', 'structs': None, 'detail': True},
+    'dna-fcurve.json': {'files': ['rna_fcurve.cc'], 'functions': lambda name: name == 'RNA_def_fcurve',
+                        'structs': ['FModifier', 'FModifierGenerator', 'FModifierFunctionGenerator', 'FModifierEnvelope',
+                                    'FModifierEnvelopeControlPoint', 'FModifierCycles', 'FModifierLimits', 'FModifierNoise',
+                                    'FModifierStepped', 'FModifierSmooth'], 'detail': True, 'funcs': True},
 }
 SDNA_CALL = re.compile(r'RNA_def_property_(boolean|boolean_negative|boolean_bitset_array|int|float|enum|enum_bitflag|pointer|string)_sdna$')
 # RNA_def_property and the shorthands that call it (RNA_def_boolean, RNA_def_float_vector, ...).
 PROPERTY_CALL = re.compile(r'RNA_def_(property|boolean|int|float|enum|string|pointer)\w*$')
+# What each argument of an RNA_def_property_*_funcs call names (after the property).
+FUNC_ROLES = {'RNA_def_property_boolean_funcs': ('get', 'set'), 'RNA_def_property_int_funcs': ('get', 'set', 'range'),
+              'RNA_def_property_float_funcs': ('get', 'set', 'range'), 'RNA_def_property_enum_funcs': ('get', 'set', None),
+              'RNA_def_property_string_funcs': ('get', 'length', 'set'), 'RNA_def_property_dynamic_array_funcs': ('length',)}
 SHORTHAND_TYPES = {'boolean': 'BOOLEAN', 'int': 'INT', 'float': 'FLOAT', 'enum': 'ENUM', 'string': 'STRING', 'pointer': 'POINTER'}
 
 
@@ -128,10 +140,13 @@ def definitions(tu, evaluate, files, walked, detail):
                 continue
             name, args = call.spelling, list(call.get_arguments())
             if name == 'RNA_def_struct':
-                identifier = evaluate(args[1])
-                state['struct'] = structs.setdefault(identifier, {'properties': {}, **({'sdna': identifier} if detail else {})})
+                identifier, base = evaluate(args[1]), evaluate(args[2])
+                state['struct'] = structs.setdefault(identifier, {'properties': {}, **({'sdna': identifier} if detail else {}),
+                                                                  **({'base': base} if base else {})})
             elif name == 'RNA_def_struct_sdna' and state['struct'] is not None:
                 state['struct']['sdna'] = evaluate(args[1])
+            elif name == 'RNA_def_struct_sdna_from' and state['struct'] is not None:
+                state['struct']['sdna'], state['struct']['from'] = evaluate(args[1]), evaluate(args[2])
             elif PROPERTY_CALL.match(name) and not name.startswith('RNA_def_property_') and state['struct'] is not None:
                 identifier = evaluate(args[1])
                 state['prop'] = state['struct']['properties'].setdefault(identifier, {'field': identifier})
@@ -158,6 +173,12 @@ def definitions(tu, evaluate, files, walked, detail):
                 state['prop']['items'] = enum_items(args[1], evaluate)
             elif state['prop'] is not None and name.startswith('RNA_def_property_') and name.endswith('_funcs'):
                 state['prop']['custom'] = True
+                if detail:
+                    names = [evaluate(a) for a in args[1:]]
+                    roles = FUNC_ROLES.get(name, ())
+                    state['prop'].setdefault('funcs', {}).update({role: n for role, n in zip(roles, names) if role and n})
+            elif detail and state['prop'] is not None and name == 'RNA_def_property_update' and evaluate(args[2]):
+                state['prop'].setdefault('funcs', {})['update'] = evaluate(args[2])
             elif name in functions and name not in seen and name.startswith('rna_def_'):
                 outer = dict(state)
                 walk(functions[name], seen | {name})
@@ -196,9 +217,11 @@ def write(tree, args, output, spec):
                 located = field(struct, prop['field'])
             except (StopIteration, ValueError):
                 continue  # No DNA field of its own: a property whose functions compute it.
-            keys = ('bit', 'bitset', 'negative', 'bitflag', 'custom') + (('type', 'icon', 'consecutive', 'items') if spec['detail'] else ())
+            keys = ('bit', 'bitset', 'negative', 'bitflag', 'custom') + (('type', 'icon', 'consecutive', 'items') if spec['detail'] else ()) + (('funcs',) if spec.get('funcs') else ())
             props[identifier] = {**located, **{k: prop[k] for k in keys if k in prop}}
-        out[rna] = {'sdna': sdna, 'size': records[sdna].get_size(), 'properties': props}
+        base = found.get(definition.get('base'), {})
+        origin = {'base': definition['base'], 'from': field(records[base['sdna']], definition['from'])['offset']} if 'from' in definition else {}
+        out[rna] = {'sdna': sdna, 'size': records[sdna].get_size(), **origin, 'properties': props}
     path = os.path.join(convert.REPO, 'src', 'makesrna', output)
     json.dump(out, open(path, 'w'), indent=1)
     print(f'{os.path.relpath(path, convert.REPO)}: {len(out)} structs, {sum(len(s["properties"]) for s in out.values())} properties')

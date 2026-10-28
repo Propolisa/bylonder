@@ -11,6 +11,8 @@
 
 #include "DNA_ID.h"
 
+#include "BKE_context.hh"
+
 #include "BLI_utildefines.h"
 
 #include "RNA_access.hh"
@@ -19,6 +21,7 @@
 #include "RNA_types.hh"
 
 #include "operator-properties.hh"
+#include "rna-funcs.hh"
 #include "UI_resources.hh"
 
 namespace blender {
@@ -153,13 +156,62 @@ bool RNA_struct_is_ID(const StructRNA *type)
 /* As rna_access.cc defines it; the module's types have no subtypes to refine to. */
 PointerRNA RNA_id_pointer_create(ID *id) { return id ? PointerRNA{id, ID_code_to_RNA_type(GS(id->name)), id} : PointerRNA_NULL; }
 
-PropertyRNA *RNA_struct_type_find_property(StructRNA *srna, const char *identifier)
+static PropertyRNA *defined_property(StructRNA *srna, const char *identifier)
 {
-  static const bool dna_fields = (define_dna_fields(), true);
-  (void)dna_fields;
   for (const std::unique_ptr<PropertyRNA> &prop : srna->properties) {
     if (prop->identifier == identifier) {
       return prop.get();
+    }
+  }
+  return nullptr;
+}
+
+PropertyRNA *rna_property_runtime(StructRNA *srna, const char *identifier, PropertyType type)
+{
+  PropertyRNA *prop = defined_property(srna, identifier);
+  if (!prop) {
+    prop = define(srna, identifier, type, {});
+    prop->flag |= PROP_DYNAMIC;
+  }
+  return prop;
+}
+
+/* Gives the properties the RNA functions rna-fcurve.cc lists, and their structs their bases. */
+static void rna_fcurve_funcs_register()
+{
+  for (const RnaBase *b = rna_fcurve_bases; b->srna; b++) {
+    (*b->srna)->base = *b->base;
+  }
+  for (const RnaFunc *f = rna_fcurve_funcs; f->srna; f++) {
+    auto &funcs = rna_property_runtime(*f->srna, f->identifier, PropertyType(f->type))->funcs;
+    switch (f->member) {
+#define MEMBER(name) \
+  case RNA_FUNC_##name: \
+    funcs.name = reinterpret_cast<decltype(funcs.name)>(f->func); \
+    break;
+      MEMBER(boolean_set)
+      MEMBER(int_set)
+      MEMBER(float_set)
+      MEMBER(enum_set)
+      MEMBER(string_set)
+      MEMBER(float_get_array)
+      MEMBER(float_set_array)
+      MEMBER(float_range)
+      MEMBER(int_range)
+      MEMBER(length)
+      MEMBER(update)
+#undef MEMBER
+    }
+  }
+}
+
+PropertyRNA *RNA_struct_type_find_property(StructRNA *srna, const char *identifier)
+{
+  static const bool dna_fields = (define_dna_fields(), rna_fcurve_funcs_register(), true);
+  (void)dna_fields;
+  for (StructRNA *type = srna; type; type = type->base) {
+    if (PropertyRNA *prop = defined_property(type, identifier)) {
+      return prop;
     }
   }
   return nullptr;
@@ -290,6 +342,13 @@ static void write_int(char *at, const DnaField &f, long long value)
   }
 }
 
+/* The DNA struct a property is stored in: the pointer's data, or what its `from` pointer points to. */
+static char *dna_struct(PointerRNA *ptr, const PropertyRNA &prop)
+{
+  char *data = static_cast<char *>(ptr->data);
+  return prop.dna->from < 0 ? data : *reinterpret_cast<char **>(data + prop.dna->from);
+}
+
 /* A DNA property's element: where it is and, for a boolean stored as a bit, its mask. */
 static std::pair<long long, int> dna_element(const PropertyRNA &prop, int i)
 {
@@ -300,13 +359,25 @@ static std::pair<long long, int> dna_element(const PropertyRNA &prop, int i)
   return {0, f.offset + i * f.size};
 }
 
+/* A dynamic array's length (RNA_def_property_dynamic_array_funcs), or the property's own. */
+static int array_length(const PointerRNA *ptr, const PropertyRNA *prop)
+{
+  int length[RNA_MAX_ARRAY_DIMENSION];
+  return prop->funcs.length && ptr->data ? prop->funcs.length(ptr, length) : prop->length;
+}
+
 static std::vector<double> values(PointerRNA *ptr, const PropertyRNA *prop)
 {
   if (!prop || !ptr->data) {
     return std::vector<double>(prop ? std::max(prop->length, 1) : 1, 0.0);
   }
+  if (prop->funcs.float_get_array) {
+    std::vector<float> floats(std::max(array_length(ptr, prop), 1));
+    prop->funcs.float_get_array(ptr, floats.data());
+    return std::vector<double>(floats.begin(), floats.end());
+  }
   if (prop->dna) {
-    const char *data = static_cast<const char *>(ptr->data);
+    const char *data = dna_struct(ptr, *prop);
     std::vector<double> out(std::max(prop->length, 1));
     for (size_t i = 0; i < out.size(); i++) {
       const auto [mask, offset] = dna_element(*prop, int(i));
@@ -328,13 +399,39 @@ static std::vector<double> values(PointerRNA *ptr, const PropertyRNA *prop)
   return it != set.numbers.end() ? it->second : prop->defaults;
 }
 
+/* Sets through the property's RNA set function, when it has one. */
+static bool set_by_function(PointerRNA *ptr, const PropertyRNA *prop, const std::vector<double> &numbers)
+{
+  const auto &f = prop->funcs;
+  if (f.float_set_array) {
+    const std::vector<float> floats(numbers.begin(), numbers.end());
+    f.float_set_array(ptr, floats.data());
+  }
+  else if (f.boolean_set) {
+    f.boolean_set(ptr, numbers[0] != 0.0);
+  }
+  else if (f.int_set) {
+    f.int_set(ptr, int(numbers[0]));
+  }
+  else if (f.float_set) {
+    f.float_set(ptr, float(numbers[0]));
+  }
+  else if (f.enum_set) {
+    f.enum_set(ptr, int(numbers[0]));
+  }
+  else {
+    return false;
+  }
+  return true;
+}
+
 static void set_values(PointerRNA *ptr, const PropertyRNA *prop, std::vector<double> numbers)
 {
-  if (!prop || !ptr->data) {
+  if (!prop || !ptr->data || set_by_function(ptr, prop, numbers)) {
     return;
   }
   if (prop->dna) {
-    char *data = static_cast<char *>(ptr->data);
+    char *data = dna_struct(ptr, *prop);
     for (size_t i = 0; i < numbers.size(); i++) {
       const auto [mask, offset] = dna_element(*prop, int(i));
       if (prop->dna->kind == 'f') {
@@ -521,6 +618,9 @@ void RNA_property_update(bContext *C, PointerRNA *ptr, PropertyRNA *prop)
   if (prop->update) {
     prop->update(C, ptr);
   }
+  if (prop->funcs.update) {
+    prop->funcs.update(CTX_data_main(C), CTX_data_scene(C), ptr);
+  }
 }
 void rna_property_update_set(StructRNA *srna, const char *identifier, void (*update)(bContext *C, PointerRNA *ptr))
 {
@@ -575,14 +675,15 @@ const char *RNA_property_identifier(const PropertyRNA *prop) { return prop->iden
 PropertyType RNA_property_type(PropertyRNA *prop) { return prop->type; }
 PropertySubType RNA_property_subtype(PropertyRNA *prop) { return prop->subtype; }
 int RNA_property_flag(PropertyRNA *prop) { return prop->flag; }
-bool RNA_property_array_check(PropertyRNA *prop) { return prop->length > 0; }
-int RNA_property_array_length(PointerRNA * /*ptr*/, PropertyRNA *prop) { return prop->length; }
+static bool is_array(const PropertyRNA *prop) { return prop->length > 0 || prop->funcs.length; }
+bool RNA_property_array_check(PropertyRNA *prop) { return is_array(prop); }
+int RNA_property_array_length(PointerRNA *ptr, PropertyRNA *prop) { return array_length(ptr, prop); }
 /* An element of an array property, or the value of one that is not. */
-static double element(PointerRNA *ptr, PropertyRNA *prop, int index) { return values(ptr, prop)[prop->length ? index : 0]; }
+static double element(PointerRNA *ptr, PropertyRNA *prop, int index) { return values(ptr, prop)[is_array(prop) ? index : 0]; }
 static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double value)
 {
   std::vector<double> v = values(ptr, prop);
-  v[prop->length ? index : 0] = value;
+  v[is_array(prop) ? index : 0] = value;
   set_values(ptr, prop, std::move(v));
 }
 template<typename T> static void get_array(PointerRNA *ptr, PropertyRNA *prop, T *out)
@@ -653,7 +754,7 @@ static std::string string_value(PointerRNA *ptr, PropertyRNA *prop)
     return {};
   }
   if (prop->dna) {
-    return static_cast<const char *>(ptr->data) + prop->dna->offset;
+    return dna_struct(ptr, *prop) + prop->dna->offset;
   }
   const OperatorValues &set = *static_cast<OperatorValues *>(ptr->data);
   const auto it = set.strings.find(prop);
@@ -672,6 +773,14 @@ char *RNA_property_string_get_alloc(PointerRNA *ptr, PropertyRNA *prop, char *fi
 void RNA_property_string_set_bytes(PointerRNA *ptr, PropertyRNA *prop, const char *value, int len)
 {
   if (!prop || !ptr->data) {
+    return;
+  }
+  if (prop->funcs.string_set) {
+    prop->funcs.string_set(ptr, std::string(value, len).c_str());
+    return;
+  }
+  /* A DNA string without a set function is not written: its field's length is not kept. */
+  if (prop->dna) {
     return;
   }
   static_cast<OperatorValues *>(ptr->data)->strings[prop] = std::string(value, len);
@@ -774,6 +883,67 @@ bool operator_property_set(PointerRNA *ptr, const char *name, const double *numb
   }
   set_values(ptr, prop, {double(value)});
   return true;
+}
+
+/* A struct's properties in the module read and written from JS by identifier, as Blender's RNA reads and writes them
+ * (its set functions, then its update), for structs JS draws buttons for (an F-Modifier's). */
+static PointerRNA js_pointer(StructRNA *type, ID *id, void *data) { return PointerRNA{id, type, data}; }
+
+extern "C" __attribute__((export_name("rna_length"))) int rna_length(StructRNA *type, ID *id, void *data, const char *name)
+{
+  PointerRNA ptr = js_pointer(type, id, data);
+  PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
+  return prop ? array_length(&ptr, prop) : -1;
+}
+extern "C" __attribute__((export_name("rna_get"))) double rna_get(StructRNA *type, ID *id, void *data, const char *name, int index)
+{
+  PointerRNA ptr = js_pointer(type, id, data);
+  PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
+  return prop ? element(&ptr, prop, std::max(index, 0)) : 0.0;
+}
+/* A number clamped to the property's range, as a button clamps what it sets (ui_but_value_set). */
+static double clamped(PointerRNA *ptr, PropertyRNA *prop, double value)
+{
+  if (prop->funcs.float_range) {
+    float min, max, softmin, softmax;
+    prop->funcs.float_range(ptr, &min, &max, &softmin, &softmax);
+    return value < min ? min : value > max ? max : value;
+  }
+  if (prop->funcs.int_range) {
+    int min, max, softmin, softmax;
+    prop->funcs.int_range(ptr, &min, &max, &softmin, &softmax);
+    return value < min ? min : value > max ? max : value;
+  }
+  return prop->type == PROP_FLOAT ? std::clamp(value, double(prop->hardmin), double(prop->hardmax)) : value;
+}
+
+extern "C" __attribute__((export_name("rna_set"))) void rna_set(
+    bContext *C, StructRNA *type, ID *id, void *data, const char *name, int index, double value)
+{
+  PointerRNA ptr = js_pointer(type, id, data);
+  PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
+  if (prop) {
+    set_element(&ptr, prop, std::max(index, 0), clamped(&ptr, prop, value));
+    RNA_property_update(C, &ptr, prop);
+  }
+}
+extern "C" __attribute__((export_name("rna_string_get"))) const char *rna_string_get(StructRNA *type, ID *id, void *data,
+                                                                                      const char *name)
+{
+  static std::string value;
+  PointerRNA ptr = js_pointer(type, id, data);
+  value = string_value(&ptr, RNA_struct_find_property(&ptr, name));
+  return value.c_str();
+}
+extern "C" __attribute__((export_name("rna_string_set"))) void rna_string_set(
+    bContext *C, StructRNA *type, ID *id, void *data, const char *name, const char *value)
+{
+  PointerRNA ptr = js_pointer(type, id, data);
+  PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
+  if (prop) {
+    RNA_property_string_set_bytes(&ptr, prop, value, int(strlen(value)));
+    RNA_property_update(C, &ptr, prop);
+  }
 }
 
 }  // namespace blender

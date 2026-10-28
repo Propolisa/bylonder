@@ -664,7 +664,11 @@ struct Block {
   int flag = 0;
   rctf ortho;
   Vector<std::unique_ptr<Button>> buttons;
+  /* A panel's block whose buttons panel-layout.cc records into the panel's layouts (panel_block_new). */
+  bool recorded_layout = false;
 };
+
+void layout_record_button(Block *block, int index);
 
 }  // namespace blender::ui
 
@@ -716,6 +720,9 @@ static Button *button_add(Block *block, ButtonType type, int icon, StringRef str
   but->tip = tip.value_or("");
   but->rect = {float(x), float(x + width), float(y), float(y + height)};
   but->emboss = block->emboss;
+  if (block->recorded_layout) {
+    layout_record_button(block, int(block->buttons.size()) - 1);
+  }
   return but;
 }
 
@@ -1042,17 +1049,57 @@ void block_draw(const bContext * /*C*/, Block *block)
 
 }  // namespace blender::ui
 
+/* What a button owns: its function's argument and its operator's properties. */
+static void button_free(ui::Button *but)
+{
+  if (but->func_argN && but->func_argN_free_fn) {
+    but->func_argN_free_fn(but->func_argN);
+  }
+  if (but->opptr) {
+    WM_operator_properties_free(but->opptr);
+    MEM_delete(but->opptr);
+  }
+}
+
+/* The block of the panels last recorded (panel-layout.cc's panel_record), whose buttons stay until the next ones. */
+static std::unique_ptr<ui::Block> panel_block;
+namespace blender::ui {
+Block *panel_block_new()
+{
+  if (panel_block) {
+    for (std::unique_ptr<Button> &but : panel_block->buttons) {
+      button_free(but.get());
+    }
+  }
+  panel_block = std::make_unique<Block>();
+  panel_block->emboss = EmbossType::Emboss;
+  panel_block->recorded_layout = true;
+  return panel_block.get();
+}
+/* A recorded panel's button as JSON: its type, icon, text, tooltip and operator. */
+std::string panel_button_json(int index)
+{
+  const Button &but = *panel_block->buttons[index];
+  std::string s;
+  char head[64];
+  SNPRINTF(head, "{\"index\":%d,\"type\":%d,\"icon\":%d", index, int(but.type), but.icon);
+  s += head;
+  string_json(s += ",\"text\":", but.str);
+  if (!but.tip.empty()) {
+    string_json(s += ",\"tip\":", but.tip);
+  }
+  if (but.optype) {
+    string_json(s += ",\"operator\":", but.optype->idname);
+  }
+  return s + '}';
+}
+}  // namespace blender::ui
+
 /* Starts recording a region's draw, `winx` by `winy` pixels; the last draw's buttons go. */
 EXPORT(region_draw_begin) void region_draw_begin(int winx, int winy)
 {
   for (ui::Button *but : buttons()) {
-    if (but->func_argN && but->func_argN_free_fn) {
-      but->func_argN_free_fn(but->func_argN);
-    }
-    if (but->opptr) {
-      WM_operator_properties_free(but->opptr);
-      MEM_delete(but->opptr);
-    }
+    button_free(but);
   }
   ui::layout_record_clear();
   buttons().clear();
@@ -1075,9 +1122,8 @@ static void event_modifier_set(bContext *C, int modifier)
 
 /* As interface_handlers.cc applies a button: its new value, its function, then its RNA property's update. A toggle
  * takes `value` (0 or 1), or flips when it is -1. Returns the toggle's value after. */
-EXPORT(region_button_press) int region_button_press(bContext *C, int index, int value, int modifier)
+static int button_press(bContext *C, ui::Button *but, int value, int modifier)
 {
-  ui::Button *but = buttons()[index];
   event_modifier_set(C, modifier);
   if (ui::button_is_toggle(but)) {
     const bool negative = ELEM(but->type, ui::ButtonType::IconToggleN, ui::ButtonType::ToggleN, ui::ButtonType::CheckboxN);
@@ -1096,6 +1142,15 @@ EXPORT(region_button_press) int region_button_press(bContext *C, int index, int 
   ui::button_update(but);
   event_modifier_set(C, 0);
   return (but->flag & ui::UI_SELECT) ? 1 : 0;
+}
+EXPORT(region_button_press) int region_button_press(bContext *C, int index, int value, int modifier)
+{
+  return button_press(C, buttons()[index], value, modifier);
+}
+/* A button of the panels last recorded, pressed. */
+EXPORT(panel_button_press) int panel_button_press(bContext *C, int index, int value, int modifier)
+{
+  return button_press(C, panel_block->buttons[index].get(), value, modifier);
 }
 
 /* Applies a text button's edit (its new text), or cancels it (null), as its text editing ends. */
