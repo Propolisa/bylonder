@@ -51,5 +51,6 @@ export var NODE_MT_add =  __class__ ('NODE_MT_add', [node_add_menu.AddNodeMenu],
 		}
 	});}
 });
+export var _classes_in_order = ['NODE_MT_add'];
 
 //# sourceMappingURL=space_node.map

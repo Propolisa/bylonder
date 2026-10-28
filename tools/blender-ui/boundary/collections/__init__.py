@@ -14,6 +14,15 @@ def namedtuple(typename, field_names, defaults=None, rename=False, module=None):
             for index, name in enumerate(fields):
                 setattr(self, name, args[index] if index < len(args) else kwargs.get(name, trailing.get(name)))
 
+        def __getitem__(self, index):
+            return getattr(self, fields[index])
+
+        def __iter__(self):
+            return iter([getattr(self, name) for name in fields])
+
+        def __len__(self):
+            return len(fields)
+
         def _asdict(self):
             return {name: getattr(self, name) for name in fields}
 

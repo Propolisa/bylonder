@@ -21,19 +21,19 @@ export function registerOperators(table) {
 
 export const runOperator = (idname, props = {}) => operators.get(idname).run(props);
 
-// Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls; returns
-// whether it ran. run and poll get the event too. An operator with `confirm: { title, button }` asks first, as
-// WM_operator_confirm_ex does, unless its confirm property (default from Blender's RNA) is off.
+// Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls. Returns
+// false when it did not run, else what run returned, as Blender's operators do: 'FINISHED' (or nothing),
+// 'CANCELLED' or 'PASS_THROUGH', after which the event goes on to the next handler. run and poll get the event too.
+// An operator with `confirm: { title, button }` asks first, as WM_operator_confirm_ex does, unless its confirm property
+// (default from Blender's RNA) is off.
 export function invokeOperator(idname, props, event) {
   const operator = operators.get(idname);
   if (!operator || !(operator.supports?.(props) ?? true) || !(operator.poll?.(props, event) ?? true)) return false;
   const confirm = operator.confirm && (props.confirm ?? rnaOperators[idname]?.properties.confirm?.default ?? true);
-  if (confirm) {
-    import('../editors/interface/menu.js').then(({ openMenu }) =>
-      openMenu([{ label: operator.confirm.button, run: () => operator.run(props, event) }], event, operator.confirm.title));
-  }
-  else operator.run(props, event);
-  return true;
+  if (!confirm) return operator.run(props, event) ?? 'FINISHED';
+  import('../editors/interface/menu.js').then(({ openMenu }) =>
+    openMenu([{ label: operator.confirm.button, run: () => operator.run(props, event) }], event, operator.confirm.title));
+  return 'FINISHED';
 }
 
 // The area an event is handled in, Blender's context area: an editor sets it while its keymaps run, so operators act

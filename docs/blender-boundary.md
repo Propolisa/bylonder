@@ -80,6 +80,18 @@ The app opens in the Layout workspace: the window is Blender's (topbar, editors,
 
 Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order.
 
+## 3D View regions
+
+The toolbar, tool settings, header transform settings and sidebar are Blender's scripts, transpiled whole where they are systems.
+
+- Tool system: `space_toolsystem_common.py` and `space_toolsystem_toolbar.py` are transpiled as whole modules. `windowmanager/wm-toolsystem.js` keeps Blender's state (bToolRef per mode, `workspace_tool_type`, the group memory `_tool_group_active`) and runs Blender's Python for everything else: `draw_cls` draws the toolbar, `activate_by_id` sets the tool, `wm.tool_set_by_id` cycles. The active tool's keymaps run before the mode's, in the order of `wm_event_get_keymap_from_toolsystem_ex`, including the fallback tool's keymap off the gizmo, with the tool's stored operator properties. Blender's keyconfig loads with the preference defaults of `Blender.py` (left click select, fallback tool on).
+- Tool icons are Blender's `.dat` triangle files, converted to SVG by `tools/blender-ui/tool_icons.py`.
+- The toolbar (`editors/space_view3d/view3d-toolbar.js`) records `draw_cls`'s layout calls and draws Blender's one icon column: groups open their flyout on a 0.2 s hold or a drag, the region snaps to Blender's widths.
+- The Transform panel is C (`view3d_buttons.cc`). It is ported as the layout calls it makes (`view3d-buttons.js`), not built to WASM: it only reads and writes RNA, so the layout calls are the whole of it.
+- Panels and headers draw through `editors/space_view3d/region-layout.js` and `.css`, an interim renderer used only by `view3d-regions.js`. It is to be replaced by the shared layout renderer (Properties editor), with no other caller to change.
+- Transform orientation slots are stored per scene but no transform reads them yet.
+- Select Box, Circle and Lasso share `do_mesh_region_select` (`view3d-select.js`) in Edit Mode; in Object Mode box select tests vertices and circle and lasso the object origin, as Blender does. The gestures are `windowmanager/wm-gesture-*.js` with Blender's modal maps.
+
 ## Node editors
 
 The Shader Editor and Compositor build on the same foundations: Blender's node declarations and GLSL run as runtime-registered Babylon blocks, and the editor's Add menu and keys are Blender's menus and keymaps. See `docs/node-editors.md`.

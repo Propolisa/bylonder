@@ -25,6 +25,13 @@ TAG = json.load(open(os.path.join(REPO, 'tools', 'blender-port', 'manifest.json'
 # Where Transcrypt's Python differs from what Blender's scripts use: (generated file, text, replacement, reason).
 FORMAT = "str.format with a format spec ('{:s}', '{:.2f}'), which Transcrypt leaves unformatted"
 PATCHES = [
+    ('org.transcrypt.__runtime__.js', "export function getattr (obj, name) {\n    return name in obj ? obj [name] : obj ['py_' + name];",
+     "export function getattr (obj, name, py_default) {\n"
+     "    if (arguments.length > 2 && (obj === null || obj === undefined || !(name in Object (obj) || 'py_' + name in Object (obj)))) {\n"
+     "        return py_default;\n"
+     "    }\n"
+     "    return name in obj ? obj [name] : obj ['py_' + name];",
+     "getattr's default, which Transcrypt's getattr ignores"),
     ('org.transcrypt.__runtime__.js', "return self.replace (/\\{(\\w*)\\}/g, function (match, key) {",
      "return self.replace (/\\{(\\w*)(?::([^}]*))?\\}/g, function (match, key, spec) {", FORMAT),
     ('org.transcrypt.__runtime__.js', "return args [key] === undefined ? match : str (args [key]);",
@@ -37,6 +44,28 @@ PATCHES = [
      "};\n"
      "__setproperty__ (String.prototype, 'format', {", FORMAT),
     # JS's % on numbers is C's fmod: the remainder with the dividend's sign.
+    ('org.transcrypt.__runtime__.js', "        cls.__bases__ = bases;\n",
+     "        cls.__bases__ = bases;\n"
+     "        __classes__.push (cls);\n"
+     "        cls.__subclasses__ = function () {return __classes__.filter (function (c) {return c.__bases__.includes (cls);});};\n",
+     "type.__subclasses__, which Transcrypt's classes lack"),
+    ('org.transcrypt.__runtime__.js', "py_metatype.__metaclass__ = py_metatype;\n",
+     "py_metatype.__metaclass__ = py_metatype;\n"
+     "var __classes__ = [];\n"
+     "Object.getPrototypeOf (function* () {}).prototype.send = function (value) {\n"
+     "    var result = this.next (value);\n"
+     "    if (result.done) {\n"
+     "        throw StopIteration ();\n"
+     "    }\n"
+     "    return result.value;\n"
+     "};\n",
+     "generator.send, which JS generators call next"),
+    ('org.transcrypt.__runtime__.js', "var __classes__ = [];\n",
+     "var __classes__ = [];\n"
+     "String.prototype.title = function () {\n"
+     "    return this.replace (/[a-z]+/gi, function (word) {return word [0].toUpperCase () + word.slice (1).toLowerCase ();});\n"
+     "};\n",
+     "str.title, which Transcrypt's str lacks"),
     ('math.js', "export var expm1 = function (x) {", "export var fmod = function (x, y) {\n\treturn x % y;\n};\nexport var expm1 = function (x) {",
      "math.fmod, which Transcrypt's math lacks"),
 ]
@@ -72,12 +101,19 @@ def fetch(path):
     return open(cache).read()
 
 
-# The modules Blender's scripts import that Bylonder has: its bpy and mathutils (here), and Transcrypt's math; and,
-# imported in functions, all the packages here and Transcrypt's copy. The scripts the manifest names import each other
-# from Blender's bl_ui package, here flat modules.
-IMPORTABLE = {'bpy', 'mathutils', 'math'}
-LOCAL_IMPORTABLE = {d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))} | {'math', 'copy'}
-SCRIPTS = {os.path.basename(path)[:-3] for path in json.load(open(os.path.join(HERE, 'manifest.json')))['scripts']}
+# The modules Blender's scripts import that Bylonder has: its bpy and mathutils (here), and Transcrypt's math and copy; the
+# packages here (Bylonder's versions of Python's and Blender's modules) and the scripts the manifest names, imported by
+# their own names (bl_ui.space_toolsystem_common as space_toolsystem_common).
+IMPORTABLE = {'bpy', 'mathutils', 'math', 'copy'}
+SCRIPTS = set()
+
+
+def module_of(name):
+    """The module Bylonder compiles for an imported name, or None when it has none."""
+    package, _, rest = name.partition('.')
+    if package in ('bl_ui', 'bl_operators') and rest in SCRIPTS:
+        return rest
+    return name if package in IMPORTABLE or package in SCRIPTS else None
 
 
 def defined_names(node):
@@ -89,10 +125,24 @@ def defined_names(node):
     return []
 
 
+def is_main_guard(node):
+    return isinstance(node, ast.If) and isinstance(node.test, ast.Compare) and getattr(node.test.left, 'id', None) == '__name__'
+
+
+def importable(node):
+    """The import with only what Bylonder has, its modules renamed to Bylonder's, or None."""
+    if isinstance(node, ast.ImportFrom):
+        module = node.module and module_of(node.module)
+        return ast.ImportFrom(module=module, names=node.names, level=0) if module else None
+    names = [alias for alias in node.names if module_of(alias.name) == alias.name]
+    return ast.Import(names=names) if names else None
+
+
 def extract(source, patterns):
     """The module's imports Bylonder has, then the classes and functions matching patterns with what they use from the
-    module (constants too), in its order."""
+    module (constants too), in its order. The pattern '*' takes the whole module, its statements too."""
     tree = ast.parse(source)
+    whole = patterns == ['*']
     tree.body = [node for statement in tree.body for node in flat_imports(statement)]
     defined = {}
     for node in tree.body:
@@ -105,19 +155,68 @@ def extract(source, patterns):
             continue
         wanted.add(name)
         todo += [n.id for node in defined[name] for n in ast.walk(node) if isinstance(n, ast.Name) and n.id in defined]
-    imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
-               and all(alias.name.split('.')[0] in IMPORTABLE | SCRIPTS for alias in node.names if isinstance(node, ast.Import))
-               and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] in IMPORTABLE)]
-    nodes = [node for node in tree.body if wanted.intersection(defined_names(node))]
+    is_import = lambda node: isinstance(node, (ast.Import, ast.ImportFrom))
+    nodes = [node for node in tree.body if not is_import(node) and not is_main_guard(node) and (whole or wanted.intersection(defined_names(node)))]
+    imports = [i for i in (importable(node) for node in tree.body if is_import(node)) if i]
     # Only the imported names the taken code uses.
     used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
     for node in imports:
         node.names = [alias for alias in node.names if (alias.asname or alias.name).split('.')[0] in used]
-    body = [node for node in imports if node.names] + nodes
+    # The classes in their order in the script, which registration follows (an ES module's exports are sorted by name).
+    classes = [node.name for node in nodes if isinstance(node, ast.ClassDef)]
+    body = [node for node in imports if node.names] + nodes + ([ast.parse(f'_classes_in_order = {classes!r}').body[0]] if classes else [])
     source = ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
-    rewritten = ast.unparse(TranscryptFixes().visit(ast.parse(source)))
-    # Before the code: module-level code may use them, and JS functions defined by assignment exist only once it ran.
-    return (HELPERS if uses_helpers(rewritten) else '') + rewritten
+    module = TranscryptFixes().visit(ast.parse(source))
+    if uses_helpers(ast.unparse(module)):
+        # Before the module's own code, which may use them as it loads.
+        imports = sum(1 for node in module.body if isinstance(node, (ast.Import, ast.ImportFrom)))
+        module.body[imports:imports] = ast.parse(HELPERS).body
+    return ast.unparse(module)
+
+
+def class_scope_loads(statement):
+    """The names a class-body statement reads in the class's scope: all but those in function bodies and lambdas."""
+    nodes = [statement]
+    while nodes:
+        node = nodes.pop()
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+            yield node
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            nodes += node.decorator_list + node.args.defaults + [d for d in node.args.kw_defaults if d]
+        elif not isinstance(node, (ast.Lambda, ast.ClassDef)) or node is statement:
+            nodes += list(ast.iter_child_nodes(node))
+
+
+def class_scopes(module):
+    """Names a class body defines and later reads in its own scope (a tuple of tools built from others, a function a
+    decorator gets), which Transcrypt compiles as module names, defined at module level before the class as
+    _Class_name, and the class's own name for them assigned from those."""
+    body = []
+    for node in module.body:
+        if not isinstance(node, ast.ClassDef):
+            body.append(node)
+            continue
+        defined, hoisted = {}, {}
+        for statement in node.body:
+            for load in class_scope_loads(statement):
+                if load.id in defined:
+                    hoisted.setdefault(load.id, defined[load.id])
+                    load.id = f'_{node.name}_{load.id}'
+            for name in defined_names(statement):
+                defined[name] = statement
+        for name, statement in sorted(hoisted.items(), key=lambda item: node.body.index(item[1])):
+            alias = f'_{node.name}_{name}'
+            index = node.body.index(statement)
+            if isinstance(statement, ast.FunctionDef):
+                statement.decorator_list = [d for d in statement.decorator_list if getattr(d, 'id', None) != 'staticmethod']
+                statement.name = alias
+            else:
+                statement.targets = [ast.Name(alias, ast.Store())]
+            body.append(statement)
+            node.body[index] = ast.Assign(targets=[ast.Name(name, ast.Store())], value=ast.Name(alias, ast.Load()), lineno=0)
+        body.append(node)
+    module.body = body
+    return ast.parse(ast.unparse(module))
 
 
 def uses_helpers(source):
@@ -234,7 +333,8 @@ class Walrus:
 class TranscryptFixes(ast.NodeTransformer):
     """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
     def visit_Module(self, node):
-        self.generic_visit(Walrus().lower_module(node))
+        node = Walrus().lower_module(class_scopes(node))
+        self.generic_visit(node)
         return node
 
     def visit_Dict(self, node):
@@ -274,6 +374,11 @@ class TranscryptFixes(ast.NodeTransformer):
         if isinstance(node.func, ast.Name) and node.func.id == 'super':
             node.func._called = True
         self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == 'dict' and not node.args:
+            # dict(a=1) as {'a': 1}: Transcrypt's dict keeps the keyword arguments' object, marked as keyword arguments,
+            # so a function it is passed to takes it for its own.
+            return self.visit_Dict(ast.Dict(keys=[ast.Constant(k.arg) if k.arg else None for k in node.keywords],
+                                            values=[k.value for k in node.keywords]))
         if isinstance(node.func, ast.Name) and node.func.id == 'super':
             # super(Class, self) in Class's methods is super(), the only form Transcrypt compiles, and only to reach a
             # method: the super object itself has no JS equivalent.
@@ -290,6 +395,9 @@ class TranscryptFixes(ast.NodeTransformer):
         if isinstance(node.func, ast.Name) and node.func.id == 'object' and not node.args and not node.keywords:
             # object(), a sentinel, which Transcrypt's object cannot make: a new JS object, as unique.
             return ast.Call(ast.Name('_new_object', ast.Load()), [], [])
+        if isinstance(node.func, ast.Name) and node.func.id == 'next' and node.args and isinstance(node.args[0], ast.ListComp):
+            # next() of a generator expression, which is a list here (visit_GeneratorExp): of an iterator over it.
+            node.args[0] = ast.Call(func=ast.Name('iter', ast.Load()), args=[node.args[0]], keywords=[])
         if isinstance(node.func, ast.Name) and node.func.id == 'zip':
             # zip's strict only checks lengths, and Transcrypt's zip takes it for an iterable.
             node.keywords = [k for k in node.keywords if k.arg != 'strict']
@@ -319,8 +427,11 @@ class TranscryptFixes(ast.NodeTransformer):
         return ast.copy_location(ast.Constant(False), node) if reload else node
 
     def visit_Delete(self, node):
-        """del d[k], which Transcrypt compiles to a no-op with operator overloading, as d.pop(k)."""
+        """del d[k], which Transcrypt compiles to a no-op with operator overloading, as d.pop(k); del of names, which
+        only tidies a namespace and is a syntax error in an ES module, as nothing."""
         self.generic_visit(node)
+        if all(isinstance(target, ast.Name) for target in node.targets):
+            return ast.Pass()
         if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Subscript) or isinstance(node.targets[0].slice, ast.Slice):
             return node
         target = node.targets[0]
@@ -354,10 +465,9 @@ class TranscryptFixes(ast.NodeTransformer):
 
     @staticmethod
     def class_body(node):
-        """A class body as Transcrypt can compile it: annotations with a value as assignments; property declarations (how
-        Blender's classes declare their properties) as the __annotations__ dict Blender reads them from, other hints
-        dropped; and assignments using the body's earlier names after the class, as Python runs a class body in order
-        and Transcrypt makes it one object literal. Returns the class and what follows it."""
+        """A class body's annotations as Transcrypt can compile them: with a value, assignments; property declarations (how
+        Blender's classes declare their properties) as the __annotations__ dict Blender reads them from, after the
+        class; other hints dropped. Returns the class and what follows it."""
         node.body = [ast.copy_location(ast.Assign(targets=[s.target], value=s.value), s) if isinstance(s, ast.AnnAssign) and s.value is not None else s
                      for s in node.body]
         hints = [s for s in node.body if isinstance(s, ast.AnnAssign)]
@@ -368,18 +478,7 @@ class TranscryptFixes(ast.NodeTransformer):
         class Qualify(ast.NodeTransformer):
             def visit_Name(self, name):
                 return attribute(name.id, ast.Load()) if name.id in own and isinstance(name.ctx, ast.Load) else name
-        # Transcrypt compiles a property() of the body's methods itself.
-        uses = lambda statement, names: not (isinstance(statement.value, ast.Call) and getattr(statement.value.func, 'id', None) == 'property') \
-            and any(isinstance(n, ast.Name) and n.id in names for n in ast.walk(statement.value))
-        body, after, earlier = [], [], set()
-        for statement in node.body:
-            if isinstance(statement, ast.Assign) and len(statement.targets) == 1 and isinstance(statement.targets[0], ast.Name) \
-                    and uses(statement, earlier):
-                after.append(ast.copy_location(ast.Assign([attribute(statement.targets[0].id, ast.Store())], Qualify().visit(statement.value)), statement))
-            else:
-                body.append(statement)
-            earlier.update(defined_names(statement))
-        node.body = body or [ast.Pass()]
+        after = []
         # Blender registers the annotations that are property declarations (calls such as BoolProperty(...)); after the
         # class, as Python 3.14 evaluates annotations (PEP 649): they may name the class, and its own names.
         annotated = [s for s in hints if isinstance(s.target, ast.Name) and isinstance(s.annotation, ast.Call)]
@@ -464,6 +563,33 @@ class TranscryptFixes(ast.NodeTransformer):
         self.generic_visit(node)
         if node.arg in self.JS_RESERVED:
             node.arg += '_'
+        return node
+
+    def visit_If(self, node):
+        """`if (x := value)`, which Transcrypt compiles wrong, as `x = value` before the if; in a chain of `and` (without
+        an else), as nested ifs so the value is only taken when the operands before it hold."""
+        if not any(isinstance(n, ast.NamedExpr) for n in ast.walk(node.test)):
+            return self.generic_visit(node)
+        if isinstance(node.test, ast.BoolOp) and isinstance(node.test.op, ast.And) and not node.orelse:
+            first, *rest = node.test.values
+            inner = ast.If(test=rest[0] if len(rest) == 1 else ast.BoolOp(op=ast.And(), values=rest), body=node.body, orelse=[])
+            return self.visit_If(ast.If(test=first, body=[inner], orelse=[]))
+        assigns = []
+
+        class Hoist(ast.NodeTransformer):
+            def visit_NamedExpr(self, named):
+                assigns.append(ast.Assign(targets=[ast.Name(named.target.id, ast.Store())], value=named.value, lineno=0))
+                return ast.Name(named.target.id, ast.Load())
+        node.test = Hoist().visit(node.test)
+        self.generic_visit(node)
+        return [self.visit(a) for a in assigns] + [node]
+
+    def visit_Compare(self, node):
+        """`name in locals()`, which a module tests to tell a reload from its first load, as False: modules load once."""
+        self.generic_visit(node)
+        right = node.comparators[0]
+        if isinstance(node.ops[0], ast.In) and isinstance(right, ast.Call) and getattr(right.func, 'id', None) == 'locals':
+            return ast.Constant(False)
         return node
 
     def visit_Match(self, node):
@@ -575,6 +701,20 @@ def _joined(*lists):
 '''
 
 
+def take_imports(function):
+    """The imports anywhere in a function's statements, taken out of them."""
+    taken = []
+    for node in ast.walk(function):
+        for field in ('body', 'orelse', 'finalbody'):
+            statements = getattr(node, field, None)
+            if not isinstance(statements, list) or not statements or not isinstance(statements[0], ast.stmt):
+                continue
+            taken += [s for s in statements if isinstance(s, (ast.Import, ast.ImportFrom))]
+            setattr(node, field, [s for s in statements if not isinstance(s, (ast.Import, ast.ImportFrom))] or
+                    ([] if field != 'body' else [ast.Pass()]))
+    return taken
+
+
 def flat_imports(node):
     """from bl_ui import x as import x: the scripts the manifest names are flat modules."""
     if isinstance(node, ast.ImportFrom) and node.module == 'bl_ui':
@@ -584,14 +724,10 @@ def flat_imports(node):
 
 def hoist_imports(body):
     """Function-local imports (methods' too) moved to the module, merged: Transcrypt emits each as an ES import, and
-    two of one module are a syntax error. Those of modules Bylonder lacks are dropped: the code that needs them
-    raises when it runs."""
+    two of one module are a syntax error. Those of modules Bylonder lacks are left out."""
     names, modules = {}, {}
     for function in (node for node in ast.walk(ast.Module(body=body, type_ignores=[])) if isinstance(node, ast.FunctionDef)):
-        local = [s for s in function.body if isinstance(s, (ast.Import, ast.ImportFrom))]
-        function.body = [s for s in function.body if s not in local] or [ast.Pass()]
-        root = lambda statement: (statement.names[0].name if isinstance(statement, ast.Import) else statement.module).split('.')[0]
-        for statement in (s for s in local if root(s) in LOCAL_IMPORTABLE | SCRIPTS):
+        for statement in filter(None, map(importable, take_imports(function))):
             if isinstance(statement, ast.Import):
                 modules.update((alias.name, alias) for alias in statement.names)
             else:
@@ -608,6 +744,10 @@ def node_types():
     return {idname: node for tree in ('shader', 'compositor') for idname, node in types[tree].items()}
 
 
+# bpy.types structs whose RNA the scripts read (bpy.types.ToolSettings.bl_rna.properties[...]).
+RNA_TYPES = ['ToolSettings']
+
+
 def rna_module():
     """bpy/_rna.py: the RNA the scripts read when they load (Modifier's type enum, from src/makesrna/rna-modifiers.json)
     or draw (node types' names and enums, from node_types())."""
@@ -616,6 +756,12 @@ def rna_module():
     enum = lambda p: '_Property([' + ', '.join(f'_Item({i!r}, {n!r}, \'\', {d!r})' for i, n, d in p['items']) + '])'
     nodes = ',\n    '.join(f'{idname!r}: _Node({node["name"]!r}, {{' + ', '.join(f'{k!r}: {enum(p)}' for k, p in node['properties'].items() if p['type'] == 'ENUM') + '})'
                            for idname, node in node_types().items())
+    # The structs whose enums the scripts read through bpy.types (the 3D View header's snap elements), from Blender's
+    # RNA (src/makesrna/rna-ui.json).
+    ui = json.load(open(os.path.join(REPO, 'src', 'makesrna', 'rna-ui.json')))
+    structs = '\n'.join(f'{struct} = _Struct({{' + ', '.join(
+        f'{name!r}: _Property(_items([' + ', '.join(f'_Item({i!r}, {n!r}, {c!r}, {d!r})' for i, n, d, c in p['items'] if i) + ']))'
+        for name, p in ui[struct]['props'].items() if p.get('items')) + '})' for struct in RNA_TYPES)
     return f'''# Generated by transpile.py from src/makesrna/rna-modifiers.json and src/nodes/blender/node-types.json.
 class _Item:
     def __init__(self, identifier, name, icon, description):
@@ -645,19 +791,37 @@ class _Node(_Struct):
 
 nodes = {{
     {nodes}}}
+
+
+# An enum's items by index and by identifier, as bpy_prop_collection reads them (enum_items['VERTEX'].icon).
+def _items(items):
+    found = {{}}
+    for i, item in enumerate(items):
+        found[i] = found[item.identifier] = item
+    return found
+
+
+{structs}
 '''
 
 
 def main():
     manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
     with tempfile.TemporaryDirectory() as build:
-        # Bylonder's versions of the modules Blender's scripts import (bpy, mathutils, ...): the packages here.
-        for package in (d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))):
-            shutil.copytree(os.path.join(HERE, package), os.path.join(build, package))
+        # Bylonder's versions of the modules Blender's scripts import: Blender's (bpy, mathutils, ...), the packages
+        # here, and Python's that Transcrypt lacks (collections), in boundary/, apart so they do not shadow Python's own.
+        # boundary/'s Blender C modules (_bpy) are tree.py's.
+        for folder in (HERE, os.path.join(HERE, 'boundary')):
+            # A package here wins over boundary/'s (os here lists the application templates).
+            for package in (d for d in os.listdir(folder) if os.path.exists(os.path.join(folder, d, '__init__.py')) and not (folder != HERE and d.startswith('_'))
+                            and not os.path.exists(os.path.join(build, d))):
+                shutil.copytree(os.path.join(folder, package), os.path.join(build, package))
+                SCRIPTS.add(package)
         open(os.path.join(build, 'bpy', '_rna.py'), 'w').write(rna_module())
         # Node types as bpy.types has them, for the scripts that look one up by name (getattr(bpy.types, idname)).
         open(os.path.join(build, 'bpy', 'types.py'), 'a').write(''.join(f'\n{idname} = _rna.nodes[{idname!r}]' for idname in node_types()))
         modules = []
+        SCRIPTS.update(os.path.basename(path)[:-3] for path in manifest['scripts'])
         for path, spec in manifest['scripts'].items():
             # A script's names, or {names, flags}: Transcrypt options for its Python (-o for operator overloading).
             patterns, flags = (spec['names'], spec['flags']) if isinstance(spec, dict) else (spec, [])

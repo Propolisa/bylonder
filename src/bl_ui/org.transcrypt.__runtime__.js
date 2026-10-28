@@ -108,6 +108,8 @@ export var py_metatype = {
         cls.__metaclass__ = meta;
         cls.__name__ = name.startsWith ('py_') ? name.slice (3) : name;
         cls.__bases__ = bases;
+        __classes__.push (cls);
+        cls.__subclasses__ = function () {return __classes__.filter (function (c) {return c.__bases__.includes (cls);});};
         for (var attrib in attribs) {
             var descrip = Object.getOwnPropertyDescriptor (attribs, attrib);
             Object.defineProperty (cls, attrib, descrip);
@@ -120,6 +122,17 @@ export var py_metatype = {
     }
 };
 py_metatype.__metaclass__ = py_metatype;
+var __classes__ = [];
+String.prototype.title = function () {
+    return this.replace (/[a-z]+/gi, function (word) {return word [0].toUpperCase () + word.slice (1).toLowerCase ();});
+};
+Object.getPrototypeOf (function* () {}).prototype.send = function (value) {
+    var result = this.next (value);
+    if (result.done) {
+        throw StopIteration ();
+    }
+    return result.value;
+};
 export var object = {
     __init__: function (self) {},
     __metaclass__: py_metatype,
@@ -256,7 +269,10 @@ export function dir (obj) {
 export function setattr (obj, name, value) {
     obj [name] = value;
 };
-export function getattr (obj, name) {
+export function getattr (obj, name, py_default) {
+    if (arguments.length > 2 && (obj === null || obj === undefined || !(name in Object (obj) || 'py_' + name in Object (obj)))) {
+        return py_default;
+    }
     return name in obj ? obj [name] : obj ['py_' + name];
 };
 export function hasattr (obj, name) {

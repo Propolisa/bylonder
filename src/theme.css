@@ -19,6 +19,9 @@
   --bl-menu-item-text:#dddddd;--bl-menu-item-text-sel:#ffffff;--bl-menu-item-hover:#3f3f3f;--bl-menu-item-disabled-hover:#7a7a7a40;
   --bl-menu-sep:#dddddd1e;--bl-shadow-menu:0 3px 6px #0003;--bl-pulldown-text:#d9d9d9;--bl-pulldown-sel:#ffffff1a;
   --bl-widget-font:calc(var(--bl-row)*.55) var(--bl-font-family);
+  /* wcol_toolbar_item and wcol_tooltip. */
+  --bl-toolbar-item:#282828;--bl-toolbar-item-line:#3d3d3d;--bl-toolbar-item-sel:#4772b3;--bl-toolbar-item-mark:#ffffffb3;--bl-toolbar-item-text:#e6e6e6;
+  --bl-tooltip:#1d1d1d;--bl-tooltip-line:#242424;--bl-tooltip-text:#d9d9d9;--bl-tooltip-value:#a6a6a6;
   /* Blender 5.2's Node Editor theme (tools/blender-reference/nodes.py): node classes' header colors, the node body,
      outlines, wires and the background; socket colors are each socket type's draw_color_simple. */
   --bl-node-converter:#246283;--bl-node-color:#6e6e23;--bl-node-input:#82354c;--bl-node-output:#3e232a;--bl-node-shader:#2b652b;

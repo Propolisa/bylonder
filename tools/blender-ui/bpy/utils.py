@@ -3,5 +3,10 @@ def app_template_paths():
     return ['APP_TEMPLATES']
 
 
+# Blender's data files, by their path under datafiles/ (tool icons).
+def system_resource(kind, path=""):
+    return "datafiles/" + path
+
+
 def escape_identifier(text):
     return text.replace('\\', '\\\\').replace('"', '\\"')

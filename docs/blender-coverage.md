@@ -57,3 +57,10 @@ Typed values, the Global and Local cycling of repeated axis keys and the header 
 
 ## node.add_node
 Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with search as you type. It adds the Blender nodes Bylonder runs (Math, Mix, Color Balance so far); Babylon's blocks are in a Babylon sub-menu of each category. See `docs/node-editors.md`.
+
+## VIEW3D_PT_transform
+The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/space_view3d/view3d-buttons.js`. Edit Mode's Median panel is not ported yet.
+
+## VIEW3D_HT_header > *
+The transform settings (`draw_xform_template`) draw from Blender's Python. Transform orientation slots are stored but no transform uses them yet.
+
