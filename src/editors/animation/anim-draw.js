@@ -163,12 +163,12 @@ export function drawMarkers(view, v2d, markers, frame, redraw) {
 // A frame's label, with as many decimals as the step needs (frame_to_string).
 const frameLabel = (f, step) => (step >= 1 ? String(Math.trunc(f)) : f.toFixed(step >= 0.5 ? 1 : step >= 0.01 ? 2 : 3));
 
-// The time scrubbing area at the region's top: its band, frame numbers and the current frame's box; and the playhead
-// down the region (time_scrub_ui.cc).
-export function drawScrubbing(view, v2d, frame, scrubHeight, { seconds = false, fps = 24, fractions = false } = {}) {
-  const { ctx, width, height } = view, top = 0;
+// The time scrubbing area at the region's top: its band and frame numbers (ED_time_scrub_draw); the region's overlay
+// draws the current frame.
+export function drawScrubbing(view, v2d, scrubHeight, { seconds = false, fps = 24, fractions = false } = {}) {
+  const { ctx, width } = view;
   ctx.fillStyle = css(theme.regions.scrubbing.back);
-  ctx.fillRect(0, top, width, scrubHeight);
+  ctx.fillRect(0, 0, width, scrubHeight);
   const step = frameStep(view, v2d, { fps, fractions }), { cur } = v2d;
   ctx.fillStyle = css(theme.regions.scrubbing.text);
   ctx.textAlign = 'center';
@@ -176,17 +176,8 @@ export function drawScrubbing(view, v2d, frame, scrubHeight, { seconds = false, 
   const first = Math.ceil(cur.xmin / step);
   for (let i = first; i * step <= cur.xmax; i++) {
     const f = i * step;
-    ctx.fillText(seconds ? `${Math.floor(f / fps)}+${f % fps}` : frameLabel(f, step), v2d.toRegion(f, 0)[0], top + scrubHeight / 2);
+    ctx.fillText(seconds ? `${Math.floor(f / fps)}+${f % fps}` : frameLabel(f, step), v2d.toRegion(f, 0)[0], scrubHeight / 2);
   }
-  const x = v2d.toRegion(frame, 0)[0];
-  ctx.fillStyle = css(anim.playhead);
-  ctx.fillRect(Math.round(x) - 1, scrubHeight, 2, height - scrubHeight);
-  const label = String(Math.round(frame)), boxWidth = Math.max(ctx.measureText(label).width + 10, 24), boxHeight = scrubHeight - 4;
-  ctx.beginPath();
-  ctx.roundRect(x - boxWidth / 2, top + 2, boxWidth, boxHeight, 4);
-  ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.fillText(label, x, top + scrubHeight / 2);
 }
 
 // A channel row's backdrop, as each channel type's get_backdrop_color gives it.
@@ -198,66 +189,14 @@ function backdrop(channel) {
   if (channel.type === ANIMTYPE.FCURVE) return anim.channel;
   return anim.channels_sub;
 }
-const has = (channel, setting) => !!(channel.settings & (1 << ACHANNEL_SETTING[setting]));
 const on = (channel, setting) => !!(channel.values & (1 << ACHANNEL_SETTING[setting]));
 
-// Where a channel row is in a region's view, and its toggles (expand, visibility, mute, lock) by x in region pixels,
-// for drawing and for clicks.
+// Where a channel row is in a region's view.
 export function channelRows(channels, v2d, metrics) {
   return channels.map((channel, i) => {
     const ymax = metrics.firstChannelTop - i * metrics.channelStep, ymin = ymax - metrics.channelHeight;
     return { channel, ymin, ymax };
   });
-}
-export function channelToggles(channel, width, { graph }) {
-  const toggles = [];
-  let x = channel.offset;
-  if (has(channel, 'EXPAND')) { toggles.push({ setting: 'EXPAND', x }); x += 16; }
-  else if (channel.type !== ANIMTYPE.FCURVE) x += 4;
-  const icon = x;
-  x += 16;
-  if (graph && has(channel, 'VISIBLE')) { toggles.push({ setting: 'VISIBLE', x: x + (channel.type === ANIMTYPE.FCURVE ? 4 : 0) }); x += 16 + (channel.type === ANIMTYPE.FCURVE ? 4 : 0); }
-  let right = width - (graph && [ANIMTYPE.FCURVE, ANIMTYPE.GROUP].includes(channel.type) ? 11 : 0);
-  for (const setting of ['PROTECT', 'MUTE']) if (has(channel, setting)) { right -= 18; toggles.push({ setting, x: right }); }
-  return { toggles, icon, name: x + 3 };
-}
-
-const TOGGLE_ICONS = {
-  EXPAND: (v) => (v ? 'DOWNARROW_HLT' : 'RIGHTARROW'), VISIBLE: (v) => (v ? 'HIDE_OFF' : 'HIDE_ON'),
-  MUTE: (v) => (v ? 'CHECKBOX_DEHLT' : 'CHECKBOX_HLT'), PROTECT: (v) => (v ? 'LOCKED' : 'UNLOCKED'),
-};
-
-function drawIcon(ctx, name, x, y, redraw, alpha = 1) {
-  const image = iconImage(name, redraw);
-  if (!image) return;
-  ctx.globalAlpha = alpha;
-  ctx.drawImage(image, x, y, 16, 16);
-  ctx.globalAlpha = 1;
-}
-
-// The channel list (ANIM_channel_draw): backdrops, expanders, icons, the F-Curves' color bands, names and toggles.
-export function drawChannels(view, v2d, channels, metrics, { graph, redraw }) {
-  const { ctx, width } = view;
-  ctx.fillStyle = css(theme.regions.channels.back);
-  ctx.fillRect(0, 0, width, view.height);
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  for (const { channel, ymin, ymax } of channelRows(channels, v2d, metrics)) {
-    const top = view.y(v2d.toRegion(0, ymax)[1]), bottom = view.y(v2d.toRegion(0, ymin)[1]);
-    if (bottom < metrics.scrubHeight || top > view.height) continue;
-    const mid = (top + bottom) / 2, selected = on(channel, 'SELECT');
-    ctx.fillStyle = css(backdrop(channel));
-    ctx.fillRect(channel.offset, top, width - channel.offset, bottom - top);
-    const { toggles, icon, name } = channelToggles(channel, width, { graph });
-    if (channel.icon !== 'NONE') drawIcon(ctx, channel.icon, icon, mid - 8, redraw);
-    if (graph && channel.type === ANIMTYPE.FCURVE) {
-      ctx.fillStyle = css(channel.color, on(channel, 'VISIBLE') ? 1 : 0.3);
-      ctx.fillRect(icon + 16, top, 4, bottom - top);
-    }
-    for (const { setting, x } of toggles) drawIcon(ctx, TOGGLE_ICONS[setting](on(channel, setting)), x, mid - 8, redraw, 0.8);
-    ctx.fillStyle = css(selected ? theme.regions.channels.text_selected : theme.regions.channels.text);
-    ctx.fillText(channel.name, name, mid);
-  }
 }
 
 // Keyframe diamonds and holds of each channel row (draw_keylist_blocks, draw_keylist_keys).

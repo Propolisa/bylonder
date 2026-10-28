@@ -23,6 +23,8 @@ OBJECT_MENU = (318, 913)
 MOVE_TOOL = (30, 772)
 # Where the mouse rests, as a fraction of the 3D View from its top left; the same point as parity.mjs uses.
 REST = (0.25, 0.75)
+# The third channel row's centre below a channel region's top: the search row, two rows, half a row (as parity.mjs).
+CHANNEL_ROW_2 = 67
 
 
 def window():
@@ -93,14 +95,53 @@ def add_subdivision():
     area("PROPERTIES").spaces.active.context = "MODIFIER"
 
 
-# The cube's location keyed at frames 1 and 40, then the Timeline's area showing another of its editors.
-def animation_editor(ui_type):
+# The cube's location keyed at frames 1 and 40, then an area (the Timeline's) showing another editor.
+def animation_editor(ui_type, kind="DOPESHEET_EDITOR"):
     cube = bpy.data.objects["Cube"]
     cube.keyframe_insert("location", frame=1)
     cube.location = (2, 0, 1)
     cube.keyframe_insert("location", frame=40)
     bpy.context.scene.frame_set(1)
-    area("DOPESHEET_EDITOR").ui_type = ui_type
+    area(kind).ui_type = ui_type
+# The sidebar of an area's editor on a tab (Region.active_panel_category).
+def sidebar_tab(kind, category):
+    region = next(r for r in area(kind).regions if r.type == "UI")
+    region.active_panel_category = category
+
+
+# The Graph Editor in the 3D View's area with a Generator and an Envelope added to the active F-Curve (X Location) by
+# graph.fmodifier_add, as its Add Modifier menu adds them, its sidebar on the Modifiers tab.
+def graph_fmodifiers():
+    animation_editor("FCURVES", "VIEW_3D")
+    graph = area("GRAPH_EDITOR")
+    with bpy.context.temp_override(window=window(), area=graph, region=next(r for r in graph.regions if r.type == "WINDOW")):
+        for type in ("GENERATOR", "ENVELOPE"):
+            bpy.ops.graph.fmodifier_add(type=type, only_active=True)
+    later(0.3, lambda: sidebar_tab("GRAPH_EDITOR", "Modifiers"))
+
+
+# A driver on the cube's Y location (driver_add), the Drivers editor in the 3D View's area, the driver clicked in its
+# channel list (the third row) to make it active, its sidebar on the Drivers tab.
+def drivers_editor():
+    bpy.data.objects["Cube"].driver_add("location", 1)
+    view = area("VIEW_3D")
+    view.ui_type = "DRIVERS"
+    def click_driver():
+        region = next(r for r in area("GRAPH_EDITOR").regions if r.type == "CHANNELS")
+        click(region.x + 80, region.y + region.height - CHANNEL_ROW_2)
+    later(0.5, click_driver)
+    later(1.0, lambda: sidebar_tab("GRAPH_EDITOR", "Drivers"))
+
+
+# The cube's location keyed, the 3D View's area a Dope Sheet in a mode (SpaceDopeSheetEditor.ui_mode).
+def dope_sheet_mode(mode):
+    def setup():
+        view = area("VIEW_3D")
+        animation_editor("DOPESHEET", "VIEW_3D")
+        view.spaces.active.ui_mode = mode
+    return setup
+
+
 def properties_tab(name, tab):
     """The object made active and selected alone, and the Properties editor on a tab."""
     def setup():
@@ -186,6 +227,10 @@ SETUP = {
     "modifier-tab": add_subdivision,
     "graph-editor": lambda: animation_editor("FCURVES"),
     "dope-sheet": lambda: animation_editor("DOPESHEET"),
+    "graph-editor-large": lambda: animation_editor("FCURVES", "VIEW_3D"),
+    "graph-fmodifiers": graph_fmodifiers,
+    "drivers-editor": drivers_editor,
+    "action-editor": dope_sheet_mode("ACTION"),
     "object-tab": properties_tab("Cube", "OBJECT"),
     "light-data": properties_tab("Light", "DATA"),
     "camera-data": properties_tab("Camera", "DATA"),

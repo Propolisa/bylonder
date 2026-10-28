@@ -357,7 +357,10 @@ const STRUCTS = {
     show_region_ui: regionShown(4),
     show_region_channels: regionShown(2),
     mode: (editor) => ACTION_MODES[editor.area.settings.mode],
-    ui_mode: (editor) => ACTION_MODES[editor.area.settings.mode],
+    ui_mode: {
+      get: (editor) => ACTION_MODES[editor.area.settings.mode],
+      set: (editor, value) => { editor.area.setSpaceProperty('SpaceDopeSheetEditor', 'ui_mode', ACTION_MODES.indexOf(value)); editor.changed(); },
+    },
     show_sliders: spaceFlag(1 << 1),
     show_seconds: spaceFlag(1 << 2),
     use_auto_merge_keyframes: spaceFlag(1 << 4, true),
@@ -370,32 +373,16 @@ const STRUCTS = {
     dopesheet: (editor, r) => r.pointer('DopeSheet', editor),
   },
   DopeSheet: {
+    filter_text: { get: (editor) => editor.area.filterText, set: (editor, value) => { editor.area.filterText = value; editor.changed(); } },
+    // ADS_FLAG_INVERT_FILTER.
+    use_filter_invert: { get: (editor) => !!(editor.area.dopesheetFlag & (1 << 4)),
+      set: (editor, value) => { const flag = editor.area.dopesheetFlag; editor.area.dopesheetFlag = value ? flag | (1 << 4) : flag & ~(1 << 4); editor.changed(); } },
     show_only_selected: dopesheetFilter(1 << 0),
     show_hidden: dopesheetFilter(1 << 26),
     show_only_errors: dopesheetFilter(1 << 28),
   },
-  // The module's animation data (blenkernel/animation/anim-blender.js): an F-Curve, a key of one ({ fcurve, index }),
-  // an Action and its active slot, as the animation editors' sidebars edit them (rna_fcurve.cc, rna_action.cc).
-  FCurve: {
-    data_path: (fcurve) => fcurve.rna_path,
-    array_index: (fcurve) => fcurve.array_index,
-    color_mode: settable('color_mode'),
-    color: array((fcurve) => fcurve.color, (fcurve, value) => { fcurve.color = value; }, 'rgb'),
-    auto_smoothing: settable('auto_smoothing'),
-    extrapolation: settable('extrapolation'),
-  },
-  Keyframe: {
-    ...Object.fromEntries(['interpolation', 'easing', 'type', 'back', 'amplitude', 'period'].map((name) => [name, {
-      get: ({ fcurve, index }) => fcurve.keys[index][name],
-      set: ({ fcurve, index }, value) => fcurve.editKey(index, (key) => { key[name] = value; }),
-    }])),
-    ...Object.fromEntries([['co_ui', 'co'], ['handle_left', 'handle_left'], ['handle_right', 'handle_right']].map(([name, field]) => [name,
-      array(({ fcurve, index }) => fcurve.keys[index][field], ({ fcurve, index }, value) => fcurve.editKeyPanel(index, name, value))])),
-    ...Object.fromEntries(['handle_left_type', 'handle_right_type'].map((name) => [name, {
-      get: ({ fcurve, index }) => fcurve.keys[index][name],
-      set: ({ fcurve, index }, value) => fcurve.editKeyPanel(index, name, value),
-    }])),
-  },
+  // The module's animation data (blenkernel/animation/anim-blender.js): an Action and its active slot, as the Dope
+  // Sheet's sidebar edits them (rna_action.cc).
   Action: {
     name: (action) => action.name,
     ...Object.fromEntries(['use_frame_range', 'use_cyclic', 'frame_start', 'frame_end'].map((name) => [name, settable(name)])),

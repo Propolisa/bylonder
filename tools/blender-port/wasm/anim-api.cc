@@ -9,6 +9,7 @@
 #include "ANIM_keyframing.hh"
 #include "BKE_animsys.h"
 #include "BKE_node.hh"
+#include "BKE_pointcache.h"
 #include "BLF_api.hh"
 #include "BKE_context.hh"
 #include "BKE_curve.hh"
@@ -30,6 +31,7 @@
 #include "DNA_userdef_types.h"
 #include "ED_anim_api.hh"
 #include "ED_keyframes_keylist.hh"
+#include "ED_keyframing.hh"
 #include "ED_markers.hh"
 #include "ED_screen.hh"
 #include "ED_util.hh"
@@ -179,68 +181,6 @@ EXPORT(anim_fcurve_keys_set) void anim_fcurve_keys_set(FCurve *fcu, const BezTri
   BKE_fcurve_handles_recalc(*fcu);
 }
 
-/* The Graph Editor's Active Keyframe panel's edits (graph_buttons.cc), on the key at `index`: what (0) sets co_ui as
- * RNA's setter does (handles move with the key), (1, 2) a left or right handle's coordinates, (3, 4) a left or right
- * handle's type (values[0]); then its update callback runs. */
-static void activekey_update(FCurve *fcu)
-{
-  sort_time_fcurve(*fcu);
-  BKE_fcurve_handles_recalc(*fcu);
-}
-static void activekey_handles(FCurve *fcu, BezTriple *bezt)
-{
-  if (ELEM(bezt->h1, HD_AUTO, HD_AUTO_ANIM) && ELEM(bezt->h2, HD_AUTO, HD_AUTO_ANIM)) {
-    bezt->h1 = HD_ALIGN;
-    bezt->h2 = HD_ALIGN;
-  }
-  else {
-    BKE_nurb_bezt_handle_test(bezt, SELECT, NURB_HANDLE_TEST_EACH, false);
-  }
-  activekey_update(fcu);
-}
-/* graphedit_activekey_left_handle_coord_cb and its right twin: only the edited handle counts as selected meanwhile. */
-static void activekey_handle_coord(FCurve *fcu, BezTriple *bezt, bool left)
-{
-  const eBezTriple_Flag f1 = bezt->f1, f3 = bezt->f3;
-  SET_FLAG_FROM_TEST(bezt->f1, left, BEZT_FLAG_SELECT);
-  SET_FLAG_FROM_TEST(bezt->f3, !left, BEZT_FLAG_SELECT);
-  activekey_handles(fcu, bezt);
-  bezt->f1 = f1;
-  bezt->f3 = f3;
-}
-EXPORT(anim_keyframe_edit) void anim_keyframe_edit(FCurve *fcu, int index, int what, const float *values)
-{
-  BezTriple *bezt = &fcu->bezt[index];
-  switch (what) {
-    case 0: {
-      const float frame_delta = values[0] - bezt->vec[1][0], value_delta = values[1] - bezt->vec[1][1];
-      bezt->vec[0][0] += frame_delta;
-      bezt->vec[0][1] += value_delta;
-      bezt->vec[1][0] = values[0];
-      bezt->vec[1][1] = values[1];
-      bezt->vec[2][0] += frame_delta;
-      bezt->vec[2][1] += value_delta;
-      activekey_update(fcu);
-      break;
-    }
-    case 1:
-    case 2:
-      copy_v2_v2(bezt->vec[what == 1 ? 0 : 2], values);
-      activekey_handle_coord(fcu, bezt, what == 1);
-      break;
-    case 3:
-      bezt->h1 = eBezTriple_Handle(values[0]);
-      BKE_fcurve_update_handle_flag_from_opposite(*bezt, HandleSide::LEFT);
-      activekey_update(fcu);
-      break;
-    case 4:
-      bezt->h2 = eBezTriple_Handle(values[0]);
-      BKE_fcurve_update_handle_flag_from_opposite(*bezt, HandleSide::RIGHT);
-      activekey_update(fcu);
-      break;
-  }
-}
-
 EXPORT(anim_fcurve_evaluate) float anim_fcurve_evaluate(FCurve *fcu, float frame) { return evaluate_fcurve(fcu, frame); }
 
 /* Where an FCurve's and a BezTriple's fields are, for JS to read and write them in place (offsets in bytes). */
@@ -324,6 +264,34 @@ EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int su
   return a;
 }
 
+/* A region drawn by its own draw callback (the region type's draw: action_channel_region_draw,
+ * graph_channel_region_draw, ...), or its overlay's (graph_main_region_draw_overlay: the current frame, scrollers and
+ * value scale), recorded by region-draw.cc: returns the recording's JSON. */
+extern "C" void region_draw_begin(int winx, int winy);
+extern "C" const char *region_draw_end();
+EXPORT(anim_region_draw) const char *anim_region_draw(bContext *C, AnimArea *a, int regiontype, bool overlay)
+{
+  ARegion *region = BKE_area_find_region_type(&a->area, regiontype);
+  CTX_wm_area_set(C, &a->area);
+  CTX_wm_region_set(C, region);
+  region_draw_begin(region->winx, region->winy);
+  ui::theme::theme_set(a->area.spacetype, regiontype);
+  (overlay ? region->runtime->type->draw_overlay : region->runtime->type->draw)(C, region);
+  CTX_wm_area_set(C, nullptr);
+  CTX_wm_region_set(C, nullptr);
+  return region_draw_end();
+}
+
+/* The space's dope sheet filter text (bDopeSheet.searchstr, DopeSheet.filter_text) and flag (ADS_FLAG_*). */
+static bDopeSheet *space_dopesheet(SpaceLink *sl);
+extern "C" SpaceLink *anim_area_space(AnimArea *a);
+EXPORT(anim_dopesheet_search) char *anim_dopesheet_search(AnimArea *a) { return space_dopesheet(anim_area_space(a))->searchstr; }
+EXPORT(anim_dopesheet_flag) int anim_dopesheet_flag(AnimArea *a) { return space_dopesheet(anim_area_space(a))->flag; }
+EXPORT(anim_dopesheet_flag_set) void anim_dopesheet_flag_set(AnimArea *a, int flag)
+{
+  space_dopesheet(anim_area_space(a))->flag = eDopeSheet_Flag(flag);
+}
+
 /* A region's flags (RGN_FLAG_HIDDEN: shown or not), as the screen reads and sets them. */
 EXPORT(anim_region_flag) int anim_region_flag(ARegion *region) { return region ? region->flag : 0; }
 EXPORT(anim_region_flag_set) void anim_region_flag_set(ARegion *region, int flag) { region->flag = eRegion_Flag(flag); }
@@ -362,14 +330,24 @@ EXPORT(anim_area_subtype) int anim_area_subtype(AnimArea *a)
 }
 EXPORT(anim_area_region) ARegion *anim_area_region(AnimArea *a, int regiontype) { return area_region(a, regiontype); }
 
-/* A region's size and place in the area (bottom-left origin, Blender's y up), as the screen lays it out; its view keeps
- * its zoom as view2d_region_reinit keeps it for the region's view type. */
-EXPORT(anim_region_layout) void anim_region_layout(ARegion *region, int x, int y, int width, int height, int view_type)
+/* A region's size and place in the area (bottom-left origin, Blender's y up), then the region type's init as ED_area_init
+ * runs it on each layout (its view keeps its zoom, its scrollers as the type sets them). */
+EXPORT(anim_region_layout) void anim_region_layout(bContext *C, ARegion *region, int x, int y, int width, int height)
 {
   region->winrct = {x, x + width - 1, y, y + height - 1};
   region->winx = short(width);
   region->winy = short(height);
-  ui::view2d_region_reinit(&region->v2d, short(view_type), width, height);
+  /* port-override: the sidebar's panels are Bylonder's (anim-buttons.js), so its region skips ED_region_panels_init. */
+  if (region->runtime->type->init && region->regiontype != RGN_TYPE_UI) {
+    region->runtime->type->init(CTX_wm_manager(C), region);
+  }
+  /* As region_azones_scrollbars_init: scrollers are hidden until the mouse comes near (which Bylonder leaves out). */
+  if (region->v2d.scroll & V2D_SCROLL_VERTICAL) {
+    region->v2d.alpha_vert = 0;
+  }
+  if (region->v2d.scroll & V2D_SCROLL_HORIZONTAL) {
+    region->v2d.alpha_hor = 0;
+  }
 }
 
 EXPORT(anim_region_v2d) View2D *anim_region_v2d(ARegion *region) { return &region->v2d; }
@@ -437,6 +415,34 @@ EXPORT(anim_area_settings_set) void anim_area_settings_set(AnimArea *a, int flag
 
 /* An FCurve's active keyframe (BKE_fcurve_active_keyframe_index), or -1. */
 EXPORT(anim_fcurve_active_key) int anim_fcurve_active_key(FCurve *fcu) { return BKE_fcurve_active_keyframe_index(fcu); }
+
+/* A driver on an ID's property (ANIM_add_driver), as Python's driver_add (flag 0) or the Add Driver button
+ * (CREATEDRIVER_WITH_DEFAULT_DVAR) makes it: its F-Curve, or null where the path does not resolve. */
+EXPORT(anim_driver_add) FCurve *anim_driver_add(ID *id, const char *rna_path, int index, int flag)
+{
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  const bool added = ANIM_add_driver(&reports, id, rna_path, index, short(flag), DRIVER_TYPE_PYTHON);
+  BKE_reports_free(&reports);
+  return added ? verify_driver_fcurve(id, rna_path, index, DRIVER_FCURVE_LOOKUP_ONLY) : nullptr;
+}
+/* An ID's drivers (AnimData.drivers): their count, written to r_fcurves when given. */
+EXPORT(anim_drivers) int anim_drivers(ID *id, FCurve **r_fcurves)
+{
+  AnimData *adt = BKE_animdata_from_id(id);
+  int count = 0;
+  for (FCurve &fcu : adt ? adt->drivers : ListBaseT<FCurve>{}) {
+    if (r_fcurves) {
+      r_fcurves[count] = &fcu;
+    }
+    count++;
+  }
+  return count;
+}
+EXPORT(anim_fcurve_active_key_set) void anim_fcurve_active_key_set(FCurve *fcu, int index)
+{
+  BKE_fcurve_active_keyframe_set(fcu, index < 0 ? nullptr : &fcu->bezt[index]);
+}
 
 /* The scene's markers (Scene.timeline_markers), in list order: their count, then one by one its frame and flag
  * (SELECT) and its name. */
@@ -531,6 +537,79 @@ EXPORT(anim_active_fcurve) FCurve *anim_active_fcurve(bContext *C, char *r_name,
   *r_icon = icon ? *icon : (ale->id ? RNA_struct_ui_icon(ID_code_to_RNA_type(GS(ale->id->name))) : ICON_NONE);
   MEM_delete(ale);
   return fcu;
+}
+
+namespace blender::ui {
+std::string panel_record(const bContext *C, PanelType *type, const PointerRNA &ptr, Block *block);
+Block *panel_block_new();
+}  // namespace blender::ui
+
+/* The struct type of an F-Modifier, as rna_FModifierType_refine gives it. */
+static StructRNA *fmodifier_srna(const FModifier &fcm)
+{
+  switch (fcm.type) {
+    case FMODIFIER_TYPE_GENERATOR: return RNA_FModifierGenerator;
+    case FMODIFIER_TYPE_FN_GENERATOR: return RNA_FModifierFunctionGenerator;
+    case FMODIFIER_TYPE_ENVELOPE: return RNA_FModifierEnvelope;
+    case FMODIFIER_TYPE_CYCLES: return RNA_FModifierCycles;
+    case FMODIFIER_TYPE_NOISE: return RNA_FModifierNoise;
+    case FMODIFIER_TYPE_LIMITS: return RNA_FModifierLimits;
+    case FMODIFIER_TYPE_STEPPED: return RNA_FModifierStepped;
+    case FMODIFIER_TYPE_SMOOTH: return RNA_FModifierSmooth;
+    default: return RNA_FModifier;
+  }
+}
+
+/* A recorded panel as an element of a JSON array: its type's idname, label, category and flag, its F-Modifier's address
+ * for an instanced one, and what it draws. */
+static void panel_json(std::string &json, const bContext *C, PanelType *type, const PointerRNA &ptr, ui::Block *block)
+{
+  json += json.size() > 1 ? "," : "";
+  json += "{\"idname\":\"" + std::string(type->idname) + "\",\"label\":\"" + type->label + "\",\"category\":\"" +
+          type->category + "\",\"flag\":" + std::to_string(type->flag) + ",\"data\":" + std::to_string(uintptr_t(ptr.data)) +
+          ",\"panel\":" + ui::panel_record(C, type, ptr, block) + '}';
+}
+
+/* The context's active F-Curve's F-Modifier panels, as graph_panel_modifiers adds them (ANIM_fmodifier_panels, with
+ * graph_fmodifier_panel_id's names). */
+static void fmodifier_panels_json(std::string &json, const bContext *C, ARegionType *art, ui::Block *block)
+{
+  bAnimContext ac;
+  bAnimListElem *ale = ANIM_animdata_get_context(C, &ac) ? get_active_fcurve_channel(&ac) : nullptr;
+  if (!ale) {
+    return;
+  }
+  for (FModifier &fcm : static_cast<FCurve *>(ale->data)->modifiers) {
+    const FModifierTypeInfo *fmi = get_fmodifier_typeinfo(fcm.type);
+    char idname[BKE_ST_MAXNAME];
+    SNPRINTF(idname, "GRAPH_PT_%s", fmi ? fmi->name : "");
+    if (PanelType *type = static_cast<PanelType *>(BLI_findstring(&art->paneltypes, idname, offsetof(PanelType, idname)))) {
+      panel_json(json, C, type, RNA_pointer_create_discrete(ale->fcurve_owner_id, fmodifier_srna(fcm), &fcm), block);
+    }
+  }
+  MEM_delete(ale);
+}
+
+/* The context region's panels (the sidebar's: graph_buttons.cc's), each registered type whose poll passes in
+ * registration order with its sub-panels, the instanced F-Modifier panels after the Modifiers panel, as recorded by
+ * panel-layout.cc: a JSON array (panel_json). Their buttons stay pressable (panel_button_press) until the next call. */
+EXPORT(anim_sidebar_panels) const char *anim_sidebar_panels(bContext *C)
+{
+  static std::string json;
+  json = "[";
+  ARegionType *art = CTX_wm_region(C)->runtime->type;
+  ui::Block *block = ui::panel_block_new();
+  for (PanelType &type : art->paneltypes) {
+    if (type.parent || (type.flag & PANEL_TYPE_INSTANCED) || (type.poll && !type.poll(C, &type))) {
+      continue;
+    }
+    panel_json(json, C, &type, PointerRNA_NULL, block);
+    if (STREQ(type.idname, "GRAPH_PT_modifiers")) {
+      fmodifier_panels_json(json, C, art, block);
+    }
+  }
+  json += ']';
+  return json.c_str();
 }
 
 /* The header text an operator shows while it runs (ED_area_status_text), or null. */
@@ -962,6 +1041,31 @@ wmTimer *WM_event_timer_add(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmEven
 }
 void WM_event_timer_remove(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmTimer * /*timer*/) {}
 
+/* port-override: keys come from Bylonder's keymaps (keyconfig.js), so a region's init adds no keymap handlers. */
+wmKeyMap *WM_keymap_ensure(wmKeyConfig * /*keyconf*/, const char * /*idname*/, int /*spaceid*/, int /*regionid*/)
+{
+  static wmKeyMap keymap = {};
+  return &keymap;
+}
+wmEventHandler_Keymap *WM_event_add_keymap_handler(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
+{
+  return nullptr;
+}
+wmEventHandler_Keymap *WM_event_add_keymap_handler_poll(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/,
+                                                        EventHandlerPoll /*poll*/)
+{
+  return nullptr;
+}
+wmEventHandler_Keymap *WM_event_add_keymap_handler_v2d_mask(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
+{
+  return nullptr;
+}
+bool WM_event_handler_region_v2d_mask_no_marker_poll(const wmWindow * /*win*/, const ScrArea * /*area*/,
+                                                     const ARegion * /*region*/, const wmEvent * /*event*/)
+{
+  return true;
+}
+
 /* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks; of them it draws the dashed line
  * from a point to the mouse (ED_region_draw_mouse_line_cb, Inset's and Bevel's), whose point it reads with
  * region_mouse_line. */
@@ -982,6 +1086,20 @@ bool ED_region_draw_cb_exit(ARegionType * /*art*/, void *handle)
   }
   return true;
 }
+
+/* port-override: Bylonder's objects have no point caches, so the Timeline draws no cache ranges (timeline_draw_cache). */
+void BKE_ptcache_ids_from_object(ListBaseT<PTCacheID> *lb, Object * /*ob*/, Scene * /*scene*/, int /*duplis*/)
+{
+  BLI_listbase_clear(lb);
+}
+
+/* port-override: Bylonder lays an area's regions out on its next draw, from their flags. */
+void ED_region_visibility_change_update(bContext * /*C*/, ScrArea * /*area*/, ARegion * /*region*/) {}
+
+/* port-override: Bylonder's undo steps are made by the editor that ran a button or operator (its commit), not by
+ * Blender's undo stack. */
+void ED_undo_push(bContext * /*C*/, const char * /*str*/) {}
+
 
 /* As area.cc gives it for a region no other region overlaps. */
 const rcti *ED_region_visible_rect(ARegion *region)

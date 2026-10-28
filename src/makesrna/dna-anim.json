@@ -1,0 +1,406 @@
+{
+ "SpaceDopeSheetEditor": {
+  "sdna": "SpaceAction",
+  "size": 300,
+  "properties": {
+   "mode": {
+    "offset": 274,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      3,
+      "DOPESHEET"
+     ],
+     [
+      0,
+      "ACTION"
+     ],
+     [
+      1,
+      "SHAPEKEY"
+     ],
+     [
+      2,
+      "GPENCIL"
+     ],
+     [
+      4,
+      "MASK"
+     ],
+     [
+      5,
+      "CACHEFILE"
+     ],
+     [
+      6,
+      "TIMELINE"
+     ]
+    ],
+    "funcs": {
+     "update_context": "rna_SpaceDopeSheetEditor_mode_update"
+    }
+   },
+   "ui_mode": {
+    "offset": 274,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      3,
+      "DOPESHEET"
+     ],
+     [
+      0,
+      "ACTION"
+     ],
+     [
+      1,
+      "SHAPEKEY"
+     ],
+     [
+      2,
+      "GPENCIL"
+     ],
+     [
+      4,
+      "MASK"
+     ],
+     [
+      5,
+      "CACHEFILE"
+     ]
+    ],
+    "funcs": {
+     "update_context": "rna_SpaceDopeSheetEditor_mode_update"
+    }
+   },
+   "show_seconds": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "show_sliders": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "show_pose_markers": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "show_interpolation": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4096,
+    "type": "BOOLEAN"
+   },
+   "show_extremes": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8192,
+    "type": "BOOLEAN"
+   },
+   "show_markers": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384,
+    "type": "BOOLEAN"
+   },
+   "use_auto_merge_keyframes": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_realtime_update": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_marker_sync": {
+    "offset": 272,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   },
+   "dopesheet": {
+    "offset": 172,
+    "size": 96,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "show_cache": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "cache_softbody": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "cache_particles": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "cache_cloth": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "cache_smoke": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "cache_simulation_nodes": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": -128,
+    "type": "BOOLEAN"
+   },
+   "cache_dynamicpaint": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "cache_rigidbody": {
+    "offset": 277,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "overlays": {
+    "offset": 284,
+    "size": 8,
+    "kind": "struct",
+    "custom": true,
+    "type": "POINTER",
+    "funcs": {}
+   }
+  }
+ },
+ "SpaceGraphEditor": {
+  "sdna": "SpaceGraph",
+  "size": 228,
+  "properties": {
+   "mode": {
+    "offset": 172,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FCURVES"
+     ],
+     [
+      1,
+      "DRIVERS"
+     ]
+    ],
+    "funcs": {
+     "update_context": "rna_SpaceGraphEditor_display_mode_update"
+    }
+   },
+   "show_seconds": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "show_sliders": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "show_handles": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_auto_lock_translation_axis": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_only_selected_keyframe_handles": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "show_markers": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 65536,
+    "type": "BOOLEAN"
+   },
+   "show_extrapolation": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 131072,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_auto_merge_keyframes": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_realtime_update": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "show_cursor": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "cursor_position_x": {
+    "offset": 180,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "cursor_position_y": {
+    "offset": 184,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "pivot_point": {
+    "offset": 188,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BOUNDING_BOX_CENTER"
+     ],
+     [
+      1,
+      "CURSOR"
+     ],
+     [
+      2,
+      "INDIVIDUAL_ORIGINS"
+     ]
+    ]
+   },
+   "dopesheet": {
+    "offset": 168,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "use_normalization": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384,
+    "type": "BOOLEAN",
+    "funcs": {
+     "update_context": "rna_SpaceGraphEditor_normalize_update"
+    }
+   },
+   "use_auto_normalization": {
+    "offset": 176,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32768,
+    "negative": true,
+    "type": "BOOLEAN"
+   }
+  }
+ }
+}

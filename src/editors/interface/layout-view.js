@@ -205,7 +205,7 @@ function enumMenu(prop, title) {
 
 // Booleans whose RNA icons are consecutive (PROP_ICONS_CONSECUTIVE): the icon after the property's while true.
 const ICON_ON = { SNAP_OFF: 'SNAP_ON', PROP_OFF: 'PROP_ON', UNLOCKED: 'LOCKED', DECORATE_UNLOCKED: 'DECORATE_LOCKED', RESTRICT_VIEW_ON: 'RESTRICT_VIEW_OFF',
-  RESTRICT_SELECT_ON: 'RESTRICT_SELECT_OFF', HIDE_ON: 'HIDE_OFF', CHECKBOX_DEHLT: 'CHECKBOX_HLT', AUTOMERGE_OFF: 'AUTOMERGE_ON' };
+  RESTRICT_SELECT_ON: 'RESTRICT_SELECT_OFF', HIDE_ON: 'HIDE_OFF', CHECKBOX_DEHLT: 'CHECKBOX_HLT', AUTOMERGE_OFF: 'AUTOMERGE_ON', RADIOBUT_OFF: 'RADIOBUT_ON' };
 
 // bpy.data's collection of an ID type, for a full data path.
 const ID_COLLECTIONS = { Object: 'objects', Scene: 'scenes', World: 'worlds', Material: 'materials', Mesh: 'meshes', Light: 'lights', Camera: 'cameras',
@@ -255,7 +255,8 @@ const withMenu = (vnode, prop, index, ui) => vnode && cloneVNode(vnode, {
 // context menu.
 const widget = (prop, node, options) => withMenu(widgetOf(prop, node, options), prop, options.index ?? -1, options.ui);
 function widgetOf(prop, node, { text, index = -1, disabled, inactive, ui }) {
-  const { meta } = prop, value = prop.get();
+  // A button's own unit (button_unit_type_set) over its property's.
+  const meta = node.unit ? { ...prop.meta, unit: node.unit } : prop.meta, value = prop.get();
   const element = index >= 0 ? value[index] : value;
   const setElement = (v, finish) => {
     if (index < 0) return prop.set(v, finish);
@@ -263,7 +264,7 @@ function widgetOf(prop, node, { text, index = -1, disabled, inactive, ui }) {
     next[index] = v;
     prop.set(next, finish);
   };
-  const iconName = [node.icon, meta.type === 'B' ? meta.icon : null].find((name) => name && name !== 'NONE') ?? null;
+  const iconName = [node.icon, 'BS'.includes(meta.type) ? meta.icon : null].find((name) => name && name !== 'NONE') ?? null;
   switch (meta.type) {
     case 'B': {
       const checked = node.invert_checkbox ? !element : !!element;
@@ -358,8 +359,10 @@ function propItem(node, env) {
   } else value = widget(prop, node, { ...options, index, text: useSplit && splitLabel ? '' : meta.type === 'E' || meta.type === 'S' || meta.type === 'P' ? '' : name });
 
   if (!useSplit || (name === '' && !splitEmptyName)) {
-    if (!useSplit && meta.type === 'E' && !node.expand && name && !node.icon_only) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(name), value]);
-    if (!useSplit && (meta.type === 'S' || meta.type === 'P') && name) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(name), value]);
+    // item_name_add_colon: a label beside its value, outside a property split, ends with a colon.
+    const colon = (text) => (text.endsWith(':') ? text : text + ':');
+    if (!useSplit && meta.type === 'E' && !node.expand && name && !node.icon_only) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(colon(name)), value]);
+    if (!useSplit && (meta.type === 'S' || meta.type === 'P') && name) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(colon(name)), value]);
     return value;
   }
   let left;
@@ -508,6 +511,9 @@ function item(node, env) {
     case 'label': return label(node.text ?? '', { iconName: node.icon, iconValue: node.icon_value, className: !env.active ? 'opacity-50' : '' });
     case 'separator': return h('div', { class: 'bl-separator shrink-0', style: { '--factor': node.factor ?? 1 }, 'data-type': node.type ?? 'AUTO' });
     case 'separator_spacer': return h('div', { class: 'flex-1' });
+    // A raw button a C panel made in its block (uiDefBut), pressed as Blender's handlers press it.
+    case 'button': return button({ text: node.text, iconName: node.icon, iconOnly: !node.text, title: node.tip, disabled: !env.enabled,
+      emboss: node.emboss !== false, onClick: () => node.press() });
     // A template gives its widgets, or a layout it recorded.
     case 'template': {
       const drawn = (TEMPLATES[node.name] ?? env.ui.templates?.[node.name])?.(node, env) ?? null;
@@ -535,6 +541,8 @@ function layout(node, env) {
   const inner = { ...env, flow: node.kind === 'grid_flow' || node.kind === 'column_flow', header: env.header || node.root_type === 'HEADER', scaleX: (env.scaleX ?? 1) * (node.scale_x || 1), unitScale: node.scale_x || 1, active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
     heading: node.heading ? { text: node.heading } : env.heading };
   if (node.kind === 'panel') return layoutPanel(node, inner);
+  // uiItemL_respect_property_split: a label in the split's label column, the items after it in its value column.
+  if (node.kind === 'split_label') return splitRow(label(node.text ?? '', { align: 'right', className: 'bl-split-label' }), layout({ ...node, kind: 'column' }, inner), null);
   const children = [];
   let slot = null;
   for (const child of node.children) {
@@ -600,9 +608,10 @@ function panel(drawn, ui, sub = false) {
   return h('section', { key: drawn.id, class: ['bl-panel', sub ? 'bl-subpanel' : 'bl-panel-root', drawn.open && 'is-open'], 'data-blender': drawn.id }, [
     h('header', { class: 'bl-panel-header flex items-center', onClick: toggle }, [
       icon(drawn.open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'),
-      drawn.header ? h('div', { class: 'bl-panel-header-layout flex items-center' }, layout(drawn.header, env)) : null,
+      // PANEL_TYPE_HEADER_EXPAND: the header's layout takes the header's width.
+      drawn.header ? h('div', { class: ['bl-panel-header-layout flex items-center', drawn.headerExpand && 'bl-header-expand min-w-0 flex-1'] }, layout(drawn.header, env)) : null,
       drawn.label ? h('span', { class: 'bl-panel-label truncate' }, drawn.label) : null,
-      h('div', { class: 'flex-1' }),
+      drawn.headerExpand ? null : h('div', { class: 'flex-1' }),
       drawn.preset ? h('div', { class: 'flex items-center' }, layout(drawn.preset, env)) : null,
       sub ? null : icon('GRIP', 'bl-grip'),
     ]),

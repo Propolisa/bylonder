@@ -64,6 +64,37 @@ PANEL_CASES = {
     "panel-interpolation": (0, 1, "interpolation", "ELASTIC"),
     "panel-easing": (1, 1, "easing", "EASE_IN"),
 }
+# F-Modifiers on the first F-Curve, added as graph.fmodifier_add adds them (add_fmodifier), then their properties set in
+# order as the F-Modifier panels set them: (types, [(modifier index, property, value)]). Each modifier's properties and
+# the F-Curve's values at some frames are compared.
+FMOD_CASES = {
+    "fmod-generator": (["GENERATOR"], [(0, "poly_order", 3), (0, "coefficients", [0.5, 1.0, -0.25, 0.05]), (0, "use_additive", True)]),
+    "fmod-generator-factorised": (["GENERATOR"], [(0, "mode", "POLYNOMIAL_FACTORISED"), (0, "poly_order", 2)]),
+    "fmod-fn-generator": (["FNGENERATOR"], [(0, "function_type", "SIN"), (0, "amplitude", 2.0), (0, "phase_multiplier", 0.5)]),
+    "fmod-noise": (["NOISE"], [(0, "scale", 2.0), (0, "strength", 3.0), (0, "phase", 1.5), (0, "depth", 2), (0, "blend_type", "ADD")]),
+    "fmod-limits": (["LIMITS"], [(0, "use_max_y", True), (0, "max_y", 3.0), (0, "max_x", 10.0), (0, "min_x", 20.0)]),
+    "fmod-cycles": (["CYCLES"], [(0, "mode_before", "REPEAT_OFFSET"), (0, "cycles_after", 2)]),
+    "fmod-stepped": (["STEPPED"], [(0, "frame_step", 4.0), (0, "use_restricted_range", True), (0, "frame_end", 25.0),
+                                   (0, "frame_start", 30.0), (0, "blend_in", 2.0)]),
+    "fmod-two": (["NOISE", "NOISE"], [(1, "name", "Noise"), (0, "active", True), (1, "mute", True)]),
+    "fmod-smooth": (["SMOOTH"], [(0, "sigma", 2.0), (0, "filter_width", 3), (0, "use_influence", True), (0, "influence", 0.5)]),
+}
+FMOD_FRAMES = list(range(-5, 40, 3))
+# A driver added on the empty's Y location as Python's driver_add adds it (ANIM_add_driver), then edited as the Drivers
+# editor's Driver panel edits it: ("add_variable"), ("driver", property, value), ("var", index, property, value) or
+# ("target", variable index, target index, property, value). The driver's settings, its variables and their targets
+# are compared.
+DRIVER_CASES = {
+    "driver-add": [],
+    "driver-expression": [("driver", "expression", "var * 2"), ("add_variable",), ("var", 0, "name", "height")],
+    "driver-transforms": [("add_variable",), ("var", 0, "type", "TRANSFORMS"), ("target", 0, 0, "transform_type", "ROT_Y"),
+                          ("target", 0, 0, "transform_space", "LOCAL_SPACE")],
+    "driver-averaged": [("driver", "type", "AVERAGE"), ("add_variable",), ("add_variable",), ("var", 1, "type", "LOC_DIFF"),
+                        ("var", 0, "name", "1st")],
+}
+DRIVER_TARGET = ("id_type", "data_path", "bone_target", "transform_type", "rotation_mode", "transform_space", "use_fallback_value",
+                 "fallback_value")
+
 # Marker operators in the Dope Sheet, on markers at frames 10 (selected), 30 and 45: (operator, properties).
 MARKER_CASES = {
     "marker-move": ("marker.move", {"frames": 5}),
@@ -156,6 +187,60 @@ for name, (curve, key, prop, value) in PANEL_CASES.items():
     data = {"panel": [curve, key, prop, value], "keys": KEYS, "before": before, "after": keys()}
     with open(os.path.join(out_dir, name + ".json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))
+
+
+def modifier_state(fcm):
+    """Every property of an F-Modifier but its pointers and collections, as the panels show them."""
+    out = {}
+    for prop in fcm.bl_rna.properties:
+        if prop.identifier == "rna_type" or prop.type in {"POINTER", "COLLECTION"}:
+            continue
+        value = getattr(fcm, prop.identifier)
+        out[prop.identifier] = r(value) if prop.type == "FLOAT" and getattr(prop, "is_array", False) else (
+            round(value, 4) if isinstance(value, float) else value)
+    return out
+
+
+for name, (types, edits) in FMOD_CASES.items():
+    build([])
+    before = keys()
+    fc = fcurves(bpy.data.objects["Empty"])[0]
+    for t in types:
+        fc.modifiers.new(t)
+    for index, prop, value in edits:
+        setattr(fc.modifiers[index], prop, value)
+    data = {"modifiers": types, "edits": edits, "keys": KEYS, "before": before, "frames": FMOD_FRAMES,
+            "after": [modifier_state(m) for m in fc.modifiers], "values": [round(fc.evaluate(f), 4) for f in FMOD_FRAMES]}
+    with open(os.path.join(out_dir, name + ".json"), "w") as f:
+        json.dump(data, f, separators=(",", ":"))
+
+
+def driver_state(fc):
+    driver = fc.driver
+    return {"type": driver.type, "expression": driver.expression, "use_self": driver.use_self,
+            "variables": [{"name": v.name, "type": v.type, "is_name_valid": v.is_name_valid,
+                           "targets": [{p: getattr(t, p) for p in DRIVER_TARGET} for t in v.targets]} for v in driver.variables],
+            "keys": [r(k.co) for k in fc.keyframe_points], "modifiers": [m.type for m in fc.modifiers]}
+
+
+for name, edits in DRIVER_CASES.items():
+    build([])
+    ob = bpy.data.objects["Empty"]
+    fc = ob.driver_add("location", 1)
+    for edit in edits:
+        if edit[0] == "add_variable":
+            fc.driver.variables.new()
+        elif edit[0] == "driver":
+            setattr(fc.driver, edit[1], edit[2])
+        elif edit[0] == "var":
+            setattr(fc.driver.variables[edit[1]], edit[2], edit[3])
+        else:
+            setattr(fc.driver.variables[edit[1]].targets[edit[2]], edit[3], edit[4])
+    data = {"driver": ["location", 1], "edits": edits, "keys": KEYS, "before": keys(), "after": driver_state(fc)}
+    with open(os.path.join(out_dir, name + ".json"), "w") as f:
+        json.dump(data, f, separators=(",", ":"))
+
+
 def markers():
     return [{"name": m.name, "frame": m.frame, "select": m.select} for m in bpy.context.scene.timeline_markers]
 
@@ -172,4 +257,4 @@ for name, (idname, props) in MARKER_CASES.items():
     data = {"markers_operator": idname, "props": props, "result": result, "frame": FRAME, "before": before, "after": markers()}
     with open(os.path.join(out_dir, name + ".json"), "w") as f:
         json.dump(data, f, separators=(",", ":"))
-print("fixtures written", len(CASES) + len(PANEL_CASES) + len(MARKER_CASES))
+print("fixtures written", len(CASES) + len(PANEL_CASES) + len(MARKER_CASES) + len(FMOD_CASES) + len(DRIVER_CASES))

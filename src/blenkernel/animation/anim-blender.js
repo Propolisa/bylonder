@@ -39,11 +39,11 @@ export const HANDLE_TYPES = ['FREE', 'AUTO', 'VECTOR', 'ALIGNED', 'AUTO_CLAMPED'
 export const EASINGS = ['AUTO', 'EASE_IN', 'EASE_OUT', 'EASE_IN_OUT'];
 export const KEYFRAME_TYPES = ['KEYFRAME', 'EXTREME', 'BREAKDOWN', 'JITTER', 'MOVING_HOLD', 'GENERATED'];
 export const EXTRAPOLATIONS = ['CONSTANT', 'LINEAR'];
-const KEY_PANEL_EDITS = ['co_ui', 'handle_left', 'handle_right', 'handle_left_type', 'handle_right_type'];
 export const COLOR_MODES = ['AUTO_RAINBOW', 'AUTO_RGB', 'CUSTOM', 'AUTO_YRGB'];
 export const SMOOTHINGS = ['NONE', 'CONT_ACCEL'];
 const SELECT = 1;
 // eFCurve_Flags.
+export const CREATEDRIVER_WITH_DEFAULT_DVAR = 1 << 0;
 export const FCURVE = { VISIBLE: 1 << 0, SELECTED: 1 << 1, ACTIVE: 1 << 2, PROTECTED: 1 << 3, MUTED: 1 << 4, DISABLED: 1 << 10 };
 
 const view = () => new DataView(x.memory.buffer);
@@ -114,18 +114,7 @@ export class FCurve {
     keys.forEach((key, i) => writeKey(dv, i * BEZT_SIZE, key));
     withArrays([bytes], ([p]) => x.anim_fcurve_keys_set(this.pointer, p, keys.length));
   }
-  // One key changed by `edit(key)`, then sorted and its handles recalculated, as the Graph Editor's panel updates do.
-  editKey(index, edit) {
-    const keys = this.keys;
-    edit(keys[index]);
-    this.keys = keys;
-  }
-  // The Graph Editor's Active Keyframe edits (anim_keyframe_edit): 'co_ui', 'handle_left', 'handle_right' (a frame and
-  // value) or 'handle_left_type', 'handle_right_type' (an identifier), with the panel's own updates.
-  editKeyPanel(index, what, value) {
-    const values = typeof value === 'string' ? [HANDLE_TYPES.indexOf(value), 0] : value;
-    withArrays([Float32Array.from(values)], ([p]) => x.anim_keyframe_edit(this.pointer, index, KEY_PANEL_EDITS.indexOf(what), p));
-  }
+  set active_key(index) { x.anim_fcurve_active_key_set(this.pointer, index); }
   evaluate(frame) { return x.anim_fcurve_evaluate(this.pointer, frame); }
   // Values at count frames from start, step apart.
   sample(start, step, count) {
@@ -181,6 +170,13 @@ export class BlenderAnimation {
       x.anim_fcurve_ensure(this.main.bmain, id, p, index, g, PROPERTY_TYPES[type], PROPERTY_SUBTYPES.get(subtype) ?? 0))) >>> 0);
   }
   fcurves(id) { return pointerList(x.anim_fcurves(id, 0), (p) => x.anim_fcurves(id, p)).map((p) => new FCurve(p)); }
+  // An ID's drivers (AnimData.drivers), and a driver added on one of its properties (anim_driver_add; flag:
+  // CREATEDRIVER_WITH_DEFAULT_DVAR as the Add Driver button, 0 as Python's driver_add), or null.
+  drivers(id) { return pointerList(x.anim_drivers(id, 0), (p) => x.anim_drivers(id, p)).map((p) => new FCurve(p)); }
+  addDriver(id, rnaPath, index, flag = CREATEDRIVER_WITH_DEFAULT_DVAR) {
+    const pointer = withString(rnaPath, (p) => x.anim_driver_add(id, p, index, flag)) >>> 0;
+    return pointer ? new FCurve(pointer) : null;
+  }
   remove(id, fcurve) { x.anim_fcurve_remove(id, fcurve.pointer); }
   // Inserts a key as Blender's keying does.
   insert(fcurve, frame, value, flags = INSERTKEY_NOFLAGS) { return x.anim_keyframe_insert(this.main.scene, fcurve.pointer, frame, value, flags); }

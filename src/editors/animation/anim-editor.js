@@ -4,9 +4,9 @@
 // and Blender's operators run there in Blender's C, modal ones (transform, frame change, view panning) getting the
 // following events with modal keymaps applied. The window manager's part (gestures, event values, redraws) is here;
 // the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
-import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
+import { AnimArea, iconName, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
-import { regionCanvas, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, drawChannels, channelRows, channelToggles, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
+import { regionCanvas, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
 import { newOperator, operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { keymapHandler, modalItem } from '../../windowmanager/keyconfig.js';
@@ -17,14 +17,17 @@ import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { headerLayout, drawPanels, panelTypes, drawType } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
-import { GRAPH_PANELS } from './anim-buttons.js';
+import { drawSidebarPanels } from './anim-buttons.js';
+import { drawRecording, buttonAt } from '../interface/region-draw.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
 import { propBinding, operatorProperties } from '../../makesrna/rna-bylonder.js';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { UILayout } from '../interface/layout.js';
 import { createContext } from '../../blenkernel/context.js';
-import { createApp, h, reactive, markRaw } from 'vue';
+import { createApp, h, reactive, markRaw, shallowRef } from 'vue';
+import { layoutTree } from '../space_buttons/modifier-panel.js';
+import { operatorIdname } from '../../makesrna/rna.js';
 import '../interface/layout-view.css';
 import '../interface/components/tailwind.css';
 import './anim-editor.css';
@@ -99,12 +102,13 @@ const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' 
 export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, sync: scene, commit = () => {} }) {
   // A Dope Sheet's space is made as the startup file's Timeline area's, whose Dope Sheet it becomes, keeping its regions
   // (channels and sidebar hidden), as Blender switches an area's sub-type.
-  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : -1);
+  const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space], space === 'DOPESHEET_EDITOR' ? ACTION_MODES.TIMELINE : GRAPH_MODES[uiType]);
   if (uiType === 'DOPESHEET') {
     area.subtype = ACTION_MODES.DOPESHEET;
     area.show(RGN_TYPE_UI, false);
   }
-  const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR';
+  // The Drivers editor's X axis is a driver's input, not time: no scrubbing, frame range or markers.
+  const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR', drivers = uiType === 'DRIVERS';
   section.classList.add('anim-editor');
   section.tabIndex = 0;
   const channelsCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-channels' });
@@ -158,33 +162,53 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   });
   const drawHeaderType = (type) => (layout) => drawType(type, layout, context());
 
-  // The sidebar (RGN_TYPE_UI): its tabs (the panels' bl_category) and the active tab's panels whose poll() passes,
-  // the Graph Editor's from graph_buttons.cc (anim-buttons.js), the Dope Sheet's from Blender's scripts.
-  const sidebarTypes = panelTypes(graph ? [{ classes: GRAPH_PANELS }] : [{ classes: Object.values(PANEL_TYPES) }], { space, region: 'UI' });
+  // The sidebar (RGN_TYPE_UI): its tabs (the panels' categories) and the active tab's panels whose poll passes, the
+  // Graph Editor's drawn by Blender's C code in the module (anim-buttons.js), the Dope Sheet's from Blender's scripts.
+  const sidebarTypes = graph ? null : panelTypes([{ classes: Object.values(PANEL_TYPES) }], { space, region: 'UI' });
   const sidebarState = reactive({ category: null, open: {} });
   const sidebarPanels = panelState(sidebarState);
   const sidebarContext = () => createContext(rna, { area: space, uiType, space: editor, region: 'UI', members: () => ({
     get active_action() { const action = area.activeAction(); return action ? rna.pointer('Action', action) : null; },
   }) });
   const sidebarUI = markRaw({ ...layoutUI, isOpen: sidebarPanels.isOpen, toggle: (id, event, closed) => { sidebarPanels.toggle(id, event, closed); headerState.revision++; } });
+  const recordedSidebar = (ctx) => drawSidebarPanels(area, { isOpen: sidebarPanels.isOpen, changed: () => layoutUI.undoPush(),
+    bound: (struct) => ({ SpaceGraphEditor: ctx.space_data, Scene: ctx.scene })[struct] ?? null });
+  const scriptedSidebar = (ctx) => {
+    const polls = (type) => { try { return !type.poll || !!type.poll(ctx); } catch { return false; } };
+    const roots = sidebarTypes.roots.filter(({ type }) => polls(type));
+    return { categories: [...new Set(roots.map(({ type }) => type.bl_category))],
+      panels: (category) => drawPanels({ roots: roots.filter(({ type }) => type.bl_category === category) }, ctx, { contexts: ['data'], open: sidebarPanels.isOpen }) };
+  };
   const sidebarApp = createApp({ render: () => {
     void headerState.revision;
     if (!headerState.ready || sidebar.hidden) return null;
-    const ctx = sidebarContext(), polls = (type) => { try { return !type.poll || !!type.poll(ctx); } catch { return false; } };
-    const roots = sidebarTypes.roots.filter(({ type }) => polls(type));
-    // Tabs in registration order: C panels as graph_buttons_register adds them (no header-first sorting).
-    const ordered = graph ? GRAPH_PANELS.filter((type) => roots.some((root) => root.type === type)) : roots.map(({ type }) => type);
-    const categories = [...new Set(ordered.map((type) => type.bl_category))];
+    sync();
+    const ctx = sidebarContext(), { categories, panels } = (graph ? recordedSidebar : scriptedSidebar)(ctx);
     const category = categories.includes(sidebarState.category) ? sidebarState.category : categories[0];
-    const drawn = drawPanels({ roots: roots.filter(({ type }) => type.bl_category === category) }, ctx, { contexts: ['data'], open: sidebarPanels.isOpen });
     return [
-      h(RegionView, { panels: drawn, ui: sidebarUI }),
+      h(RegionView, { panels: category ? panels(category) : [], ui: sidebarUI }),
       h('nav', { class: 'bl-region-tabs', role: 'tablist' }, categories.map((name) => h('button', {
         type: 'button', class: 'bl-region-tab', role: 'tab', 'aria-selected': String(name === category), onClick: () => { sidebarState.category = name; },
       }, name))),
     ];
   } });
   sidebarApp.mount(sidebar);
+
+  // The channel region's block layouts (ED_time_scrub_channel_search_draw), over its canvas where the draw laid them.
+  const channelLayouts = shallowRef([]);
+  const channelOverlay = Object.assign(document.createElement('div'), { className: 'bl-ui anim-channel-layouts' });
+  const recordedOwner = (struct) => (struct === 'DopeSheet' ? rna.pointer('DopeSheet', editor) : null);
+  const withIconNames = (node) => ({ ...node, ...(node.icon ? { icon: iconName(node.icon) } : {}), children: (node.children ?? []).map(withIconNames) });
+  const channelLayoutsApp = createApp({ render: () => {
+    void headerState.revision;
+    if (!headerState.ready) return null;
+    return channelLayouts.value.map(({ at: [x, y, width], layout }) => h('div', {
+      class: 'anim-block-layout', style: { left: x + 'px', top: size.height - y + 'px', width: width + 'px' },
+    }, [h(LayoutView, { layout: layoutTree(withIconNames(layout), recordedOwner, space), ui: layoutUI })]));
+  } });
+  channelLayoutsApp.mount(channelOverlay);
+  for (const type of ['pointerdown', 'pointerup', 'keydown', 'keyup', 'wheel']) channelOverlay.addEventListener(type, (e) => e.stopPropagation());
+  section.append(channelOverlay);
   const headerApp = createApp({ render: () => {
     void headerState.revision;
     return headerState.ready ? h(LayoutView, { layout: headerLayout(context(), drawHeaderType(HEADER_TYPES[HEADERS[space]])), ui: layoutUI }) : null;
@@ -374,7 +398,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
 
   const onPointerDown = (e) => {
     section.focus({ preventScroll: true });
-    if (channelToggleClick(e)) return;
+    if (channelButtonClick(e)) return;
     const type = BUTTONS[e.button], event = regionEvent(e, type, 'PRESS', area.modal?.regionType ?? gesture?.region);
     section.setPointerCapture(e.pointerId);
     const handled = dispatch(event);
@@ -415,19 +439,18 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const onContextMenu = (e) => e.preventDefault();
 
   // A click on a channel's toggle (expand, visibility, mute, lock), which Blender's channel list draws as buttons.
-  function channelToggleClick(e) {
-    if (e.button !== 0 || area.modal || gesture) return false;
+  // A click on a button the channel region's draw defined (a channel's toggles: expand, visibility, mute, lock...),
+  // pressed as Blender's handlers press it; an operator's button runs its operator.
+  function channelButtonClick(e) {
+    if (e.button !== 0 || area.modal || gesture || !channelRecording) return false;
     const event = regionEvent(e, 'LEFTMOUSE', 'PRESS');
     if (event.region !== RGN_TYPE_CHANNELS) return false;
+    const button = buttonAt(channelRecording, event.x, event.y);
+    if (!button) return false;
     sync();
-    const channels = area.channels(), v2d = area.v2d(RGN_TYPE_CHANNELS), metrics = area.metrics(RGN_TYPE_CHANNELS);
-    const [, vy] = v2d.toView(event.x, event.y);
-    const row = channelRows(channels, v2d, metrics).find(({ ymin, ymax }) => vy >= ymin && vy <= ymax);
-    if (!row) return false;
-    const toggle = channelToggles(row.channel, size.channels, { graph }).toggles.find(({ x }) => event.x >= x && event.x < x + 16);
-    if (!toggle) return false;
-    area.channelSetting(row.channel.index, ACHANNEL_SETTING[toggle.setting]);
-    if (toggle.setting !== 'EXPAND') commit();
+    if (button.operator) editor.invoke(operatorIdname(button.operator), {}, event);
+    else area.press(RGN_TYPE_CHANNELS, button.index, event.modifier);
+    commit();
     animation.edited();
     redraw();
     return true;
@@ -456,7 +479,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   }
 
 
-  let scheduled = 0, lastStatus = null;
+  let scheduled = 0, lastStatus = null, channelRecording = null;
   function redraw() {
     if (!scheduled) scheduled = requestAnimationFrame(draw);
   }
@@ -475,7 +498,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     const back = spaceTheme.space.back;
     main.ctx.fillStyle = `rgb(${back.map((c) => Math.round(c * 255)).join(',')})`;
     main.ctx.fillRect(0, 0, main.width, main.height);
-    drawFrameRange(main, v2d, range);
+    if (!drivers) drawFrameRange(main, v2d, range);
     if (graph) {
       drawGrid(main, v2d, spaceTheme.grid, { values: true, fps: t.fps });
       drawCurves(main, v2d, area.curves(), { showHandles: !(settings.flag & (1 << 2)), onlySelectedHandles: !!(settings.flag & (1 << 9)) });
@@ -484,14 +507,16 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       const { cur } = v2d, rows = channelRows(channels, v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
       drawKeyRows(main, v2d, rows, metrics, { backdrops: !timeline });
     }
-    if (markersShown()) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
+    if (markersShown() && !drivers) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
-    drawScrubbing(main, v2d, frame, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
+    if (!drivers) drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
+    drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW, true), { height: size.height, scale: globalThis.devicePixelRatio || 1, redraw });
     if (size.channels) {
-      const view = regionCanvas(channelsCanvas, size.channels, size.height), chv = area.v2d(RGN_TYPE_CHANNELS);
-      drawChannels(view, chv, channels, area.metrics(RGN_TYPE_CHANNELS), { graph, redraw });
-      view.ctx.fillStyle = `rgb(${theme.regions.scrubbing.back.slice(0, 3).map((c) => Math.round(c * 255)).join(',')})`;
-      view.ctx.fillRect(0, 0, view.width, metrics.scrubHeight);
+      const view = regionCanvas(channelsCanvas, size.channels, size.height);
+      channelRecording = area.draw(RGN_TYPE_CHANNELS);
+      drawRecording(view.ctx, channelRecording, { height: size.height, scale: globalThis.devicePixelRatio || 1, redraw });
+      // The block layouts the draw made (the channel filter beside the scrubbing area), by the shared renderer.
+      channelLayouts.value = channelRecording.draw.filter((op) => op.op === 'layout');
     }
     const text = area.status;
     if (text !== lastStatus) {
@@ -526,6 +551,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       cancelAnimationFrame(scheduled);
       headerApp.unmount();
       sidebarApp.unmount();
+      channelLayoutsApp.unmount();
       area.dispose();
     },
   };

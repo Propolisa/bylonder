@@ -42,8 +42,8 @@ async function captureBlender(ids) {
 }
 
 // The cube's location keyed as ui-shots.py keys it (Blender's location (2, 0, 1) is Babylon's position (2, 1, 0)), then
-// the Timeline's area switched to another editor from its Editor Type menu.
-const animationEditor = (title) => async (app) => {
+// an area (the Timeline's) switched to another editor from its Editor Type menu.
+const animationEditor = (title, from = "Timeline") => async (app) => {
   await app.bylonder((b) => {
     const a = b.world.animation, cube = b.world.scene.getNodeByName("Cube");
     const refs = [...a.channels.keys()].filter((ref) => ref.includes("object:") && /position/.test(ref) && a.channels.get(ref).group === "Cube");
@@ -52,11 +52,21 @@ const animationEditor = (title) => async (app) => {
     a.insert(refs, 40);
     a.seek(1);
   });
-  await app.locator('.dock-editor-type[title="Editor Type · Timeline"]').click();
+  const rest = await app.point(...REST);
+  await app.locator(`.dock-editor-type[title="Editor Type · ${from}"]`).click();
   await app.frame().getByRole("menuitem", { name: title, exact: true }).click();
-  await app.hover(...REST);
+  await app.page.mouse.move(...rest);
 };
 
+// The visible animation editor's sidebar on a tab.
+const sidebarTab = (app, name) => app.frame().locator(".anim-sidebar:visible").getByRole("tab", { name }).click();
+// The third channel row's centre below the channel region's top, as ui-shots.py clicks it (CHANNEL_ROW_2).
+async function clickChannelRow2(app) {
+  const canvases = await app.frame().locator("canvas.anim-channels:visible").all();
+  const boxes = await Promise.all(canvases.map((c) => c.boundingBox()));
+  const box = boxes.sort((a, b) => b.height - a.height)[0];
+  await app.page.mouse.click(box.x + 80, box.y + 67);
+}
 // As ui-shots.py: keys typed in turn with the mouse resting.
 const keys = async (app, ...names) => { await app.hover(...REST); for (const name of names) await app.page.keyboard.press(name); };
 // As ui-shots.py: the cube duplicated and moved by typed values.
@@ -81,6 +91,36 @@ const SETUP = {
   },
   "graph-editor": animationEditor("Graph Editor"),
   "dope-sheet": animationEditor("Dope Sheet"),
+  "graph-editor-large": animationEditor("Graph Editor", "3D Viewport"),
+  "graph-fmodifiers": async (app) => {
+    const rest = await app.point(...REST);
+    await animationEditor("Graph Editor", "3D Viewport")(app);
+    await sidebarTab(app, "Modifiers");
+    for (const type of ["Generator", "Envelope"]) {
+      await app.frame().locator(".anim-sidebar:visible").getByRole("button", { name: "Add Modifier" }).click();
+      await app.frame().getByRole("menuitem", { name: type, exact: true }).click();
+    }
+    await app.page.mouse.move(...rest);
+  },
+  "action-editor": async (app) => {
+    const rest = await app.point(...REST);
+    await animationEditor("Dope Sheet", "3D Viewport")(app);
+    await app.frame().locator(".anim-header:visible").first().getByRole("button", { name: "Dope Sheet" }).click();
+    await app.frame().getByRole("menuitem", { name: "Action Editor", exact: true }).click();
+    await app.page.mouse.move(...rest);
+  },
+  "drivers-editor": async (app) => {
+    await app.bylonder((b) => {
+      const a = b.world.animation, entry = a.ids.entries().find((e) => e.key === "object:Cube");
+      a.anim.addDriver(entry.ob, "location", 1, 0);
+    });
+    const rest = await app.point(...REST);
+    await app.locator('.dock-editor-type[title="Editor Type · 3D Viewport"]').click();
+    await app.frame().getByRole("menuitem", { name: "Drivers", exact: true }).click();
+    await clickChannelRow2(app);
+    await sidebarTab(app, "Drivers");
+    await app.page.mouse.move(...rest);
+  },
   "object-tab": (app) => propertiesTab(app, "Cube", "Object"),
   "light-data": (app) => propertiesTab(app, "Light", "Data"),
   "camera-data": (app) => propertiesTab(app, "Camera", "Data"),

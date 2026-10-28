@@ -28,11 +28,14 @@ namespace blender::ui {
 
 /* What a layout or an item in it draws; a layout's own state (active, enabled) is read from it when written out. */
 struct Node {
-  std::string kind, prop, owner, heading;
+  /* An operator's enum property, for an operator's enum menu. */
+  std::string kind, prop, owner, heading, property;
   /* \x01: none, so the widget shows its RNA name. */
   std::string text = "\x01";
-  int index = -1, flag = 0;
-  bool split = false, decorate = true;
+  int index = -1, flag = 0, icon = 0;
+  bool split = false, decorate = true, align = false, emboss_none = false;
+  /* A property's struct type, owner ID and data, for JS to read and write it in the module (rna_get, rna_set). */
+  std::optional<PointerRNA> pointer;
   const Layout *layout = nullptr;
   std::vector<std::unique_ptr<Node>> children;
 };
@@ -61,12 +64,17 @@ static Node &add(const Layout *parent, const char *kind)
   return node;
 }
 
+/* The layout raw buttons go into, as the block's current layout is Blender's: the last one made (block_layout_set_current
+ * in its making), or the one uiItemL_respect_property_split gives. */
+static const Layout *button_layout = nullptr;
+
 static Layout &sub_layout(const Layout *parent, const char *kind)
 {
   Layout &layout = *layouts.emplace_back(std::make_unique<Layout>(ItemType(0), nullptr));
   Node &node = add(parent, kind);
   node.layout = &layout;
   nodes[&layout] = &node;
+  button_layout = &layout;
   return layout;
 }
 
@@ -80,36 +88,45 @@ Layout::Layout(ItemType type, LayoutRoot *root) : Item(type)
 }
 void Layout::estimate_impl() {}
 void Layout::resolve_impl() {}
-Block *Layout::block() const { return nullptr; }
+/* The block raw buttons go into while a panel is recorded with one (panel_record): a button made in it is recorded
+ * in the block's current layout, as Blender adds it there. */
+static Block *recording_block = nullptr;
+Block *Layout::block() const { return recording_block; }
+void layout_record_button(Block *block, int index)
+{
+  if (block == recording_block && button_layout) {
+    add(button_layout, "button").index = index;
+  }
+}
+std::string panel_button_json(int index);
 
-Layout &Layout::column(bool /*align*/) { return sub_layout(this, "column"); }
-Layout &Layout::column(bool /*align*/, StringRef heading)
+static Layout &aligned_layout(const Layout *parent, const char *kind, bool align, StringRef heading = "")
 {
-  Layout &layout = sub_layout(this, "column");
+  Layout &layout = sub_layout(parent, kind);
+  nodes[&layout]->align = align;
   nodes[&layout]->heading = heading;
   return layout;
 }
-Layout &Layout::row(bool /*align*/) { return sub_layout(this, "row"); }
-Layout &Layout::row(bool /*align*/, StringRef heading)
-{
-  Layout &layout = sub_layout(this, "row");
-  nodes[&layout]->heading = heading;
-  return layout;
-}
+Layout &Layout::column(bool align) { return aligned_layout(this, "column", align); }
+Layout &Layout::column(bool align, StringRef heading) { return aligned_layout(this, "column", align, heading); }
+Layout &Layout::row(bool align) { return aligned_layout(this, "row", align); }
+Layout &Layout::row(bool align, StringRef heading) { return aligned_layout(this, "row", align, heading); }
 Layout &Layout::box() { return sub_layout(this, "box"); }
 Layout &Layout::split(float /*percentage*/, bool /*align*/) { return sub_layout(this, "split"); }
 
 void Layout::use_property_split_set(bool value) { nodes.at(this)->split = value; }
 void Layout::use_property_decorate_set(bool value) { nodes.at(this)->decorate = value; }
-void Layout::emboss_set(EmbossType /*emboss*/) {}
+void Layout::emboss_set(EmbossType emboss) { nodes.at(this)->emboss_none = emboss == EmbossType::None; }
 void Layout::operator_context_set(wm::OpCallContext /*opcontext*/) {}
 void Layout::context_ptr_set(StringRef /*name*/, const PointerRNA * /*ptr*/) {}
 
-void Layout::prop(PointerRNA *ptr, StringRefNull propname, eUI_Item_Flag flag, std::optional<StringRef> name, int /*icon*/)
+void Layout::prop(PointerRNA *ptr, StringRefNull propname, eUI_Item_Flag flag, std::optional<StringRef> name, int icon)
 {
   Node &node = add(this, "prop");
+  node.icon = icon;
   node.prop = propname;
   node.owner = owner(ptr);
+  node.pointer = *ptr;
   node.flag = int(flag);
   node.text = name ? std::string(*name) : std::string("\x01");
 }
@@ -133,17 +150,38 @@ void Layout::prop_search(PointerRNA *ptr, PropertyRNA *prop, PointerRNA *searchp
 void Layout::decorator(PointerRNA * /*ptr*/, PropertyRNA * /*prop*/, int /*index*/) {}
 void Layout::decorator(PointerRNA * /*ptr*/, std::optional<StringRefNull> /*propname*/, int /*index*/) {}
 void Layout::separator(float /*factor*/, LayoutSeparatorType /*type*/) { add(this, "separator"); }
-void Layout::label(StringRef name, int /*icon*/) { add(this, "label").text = name; }
+void Layout::label(StringRef name, int icon)
+{
+  Node &node = add(this, "label");
+  node.text = name;
+  node.icon = icon;
+}
 void Layout::menu_fn(StringRefNull name, int /*icon*/, MenuCreateFunc /*func*/, void * /*arg*/) { add(this, "menu").text = name; }
 
 /* Operators are recorded by name; the properties a panel sets on them go nowhere. */
-PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int /*icon*/, wm::OpCallContext /*context*/,
+PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int icon, wm::OpCallContext /*context*/,
                       eUI_Item_Flag /*flag*/)
 {
   Node &node = add(this, "operator");
   node.prop = opname;
-  node.text = name ? std::string(*name) : std::string();
+  node.icon = icon;
+  node.text = name ? std::string(*name) : std::string("\x01");
   return PointerRNA_NULL;
+}
+/* An operator's enum menu: its operator and property by name. */
+PointerRNA Layout::op_menu_enum(const bContext * /*C*/, StringRefNull opname, StringRefNull propname, StringRefNull name,
+                                int /*icon*/)
+{
+  Node &node = add(this, "operator_menu_enum");
+  node.prop = opname;
+  node.property = propname;
+  node.text = name;
+  return PointerRNA_NULL;
+}
+PointerRNA Layout::op_menu_enum(const bContext *C, wmOperatorType *ot, StringRefNull propname,
+                                std::optional<StringRefNull> name, int icon)
+{
+  return this->op_menu_enum(C, ot->idname, propname, name.value_or(""), icon);
 }
 PointerRNA Layout::op(StringRefNull opname, std::optional<StringRef> name, int icon)
 {
@@ -180,6 +218,20 @@ PanelLayout Layout::panel_prop_with_bool_header(const bContext *C, PointerRNA *o
   return panel;
 }
 
+/* A label in a property split's label column, the items after it in its value column (where the block's buttons go
+ * next); without the split, a label. Decorators are not drawn. */
+Layout *uiItemL_respect_property_split(Layout *layout, StringRef text, int icon)
+{
+  if (!nodes.at(layout)->split) {
+    layout->label(text, icon);
+    return nullptr;
+  }
+  Layout &value = sub_layout(layout, "split_label");
+  nodes[&value]->text = text;
+  button_layout = &value;
+  return nullptr;
+}
+
 /* Blender's template widgets (a data-block selector, a curve editor), recorded by name and property for JS to draw. */
 static void template_node(Layout *layout, const char *name, PointerRNA *ptr, StringRefNull propname)
 {
@@ -187,6 +239,7 @@ static void template_node(Layout *layout, const char *name, PointerRNA *ptr, Str
   node.text = name;
   node.prop = propname;
   node.owner = owner(ptr);
+  node.pointer = *ptr;
 }
 void template_id(Layout *layout, const bContext * /*C*/, PointerRNA *ptr, StringRefNull propname, const char * /*newop*/,
                  const char * /*openop*/, const char * /*unlinkop*/, int /*filter*/, bool /*live_icon*/, std::optional<StringRef> /*text*/)
@@ -205,6 +258,16 @@ void template_curve_mapping(Layout *layout, PointerRNA *ptr, StringRefNull propn
 void template_color_ramp(Layout *layout, PointerRNA *ptr, StringRefNull propname, bool /*expand*/)
 {
   template_node(layout, "template_color_ramp", ptr, propname);
+}
+void template_any_id(Layout *layout, PointerRNA *ptr, StringRefNull propname, StringRefNull /*proptypename*/,
+                     std::optional<StringRef> /*text*/)
+{
+  template_node(layout, "template_any_ID", ptr, propname);
+}
+void template_path_builder(Layout *layout, PointerRNA *ptr, StringRefNull propname, PointerRNA * /*root_ptr*/,
+                           std::optional<StringRefNull> /*text*/)
+{
+  template_node(layout, "template_path_builder", ptr, propname);
 }
 
 /* The panel being drawn and the modifier it draws. */
@@ -235,7 +298,9 @@ static void write(std::ostringstream &out, const Node &node)
 {
   out << "{\"kind\":";
   quote(out, node.kind);
-  for (const auto &[key, value] : {std::pair{"prop", &node.prop}, {"owner", &node.owner}, {"heading", &node.heading}}) {
+  for (const auto &[key, value] :
+       {std::pair{"prop", &node.prop}, {"owner", &node.owner}, {"heading", &node.heading}, {"property", &node.property}})
+  {
     if (!value->empty()) {
       out << ",\"" << key << "\":";
       quote(out, *value);
@@ -244,6 +309,25 @@ static void write(std::ostringstream &out, const Node &node)
   if (node.text != "\x01") {
     out << ",\"text\":";
     quote(out, node.text);
+  }
+  if (node.icon) {
+    out << ",\"icon\":" << node.icon;
+  }
+  if (node.align) {
+    out << ",\"align\":true";
+  }
+  if (node.emboss_none) {
+    out << ",\"emboss\":\"NONE\"";
+  }
+  if (node.layout && node.layout->alignment() != LayoutAlign::Expand) {
+    out << ",\"alignment\":\"" << (const char *[]){"EXPAND", "LEFT", "CENTER", "RIGHT"}[int(node.layout->alignment())] << '"';
+  }
+  if (node.pointer) {
+    out << ",\"pointer\":[" << uintptr_t(node.pointer->type) << ',' << uintptr_t(node.pointer->owner_id) << ','
+        << uintptr_t(node.pointer->data) << ']';
+  }
+  if (node.kind == "button") {
+    out << ",\"button\":" << panel_button_json(node.index);
   }
   out << ",\"index\":" << node.index << ",\"flag\":" << node.flag << ",\"split\":" << node.split << ",\"decorate\":" << node.decorate;
   if (node.layout) {
@@ -277,11 +361,72 @@ static void draw_panel(const bContext *C, PanelType *type, Node &parent, bool ro
     part.layout = &layout;
     nodes[&layout] = &part;
     panel.layout = &layout;
+    button_layout = &layout;
     draw(C, &panel);
   }
   for (LinkData &link : type->children) {
     draw_panel(C, static_cast<PanelType *>(link.data), node, false);
   }
+}
+
+/* port-override: a region's instanced panels (the F-Modifiers' that ANIM_fmodifier_panels adds) are not kept: the
+ * sidebar records them after the panel that adds them (anim_sidebar_panels), so adding one only frees its data. */
+bool panel_list_matches_data(ARegion * /*region*/, ListBase * /*data*/, ListPanelIDFromDataFunc /*panel_idname_func*/)
+{
+  return false;
+}
+void panels_free_instanced(const bContext * /*C*/, ARegion * /*region*/) {}
+Panel *panel_add_instanced(const bContext * /*C*/, ARegion * /*region*/, ListBaseT<Panel> * /*panels*/,
+                           const char * /*panel_idname*/, PointerRNA *custom_data)
+{
+  MEM_delete(custom_data);
+  return nullptr;
+}
+
+/* A registered panel type with its header and sub-panels, as JSON, drawing `ptr` (its custom data, an instanced
+ * panel's) and recording the raw buttons it makes in `block`. */
+std::string panel_record(const bContext *C, PanelType *type, const PointerRNA &ptr, Block *block)
+{
+  Node root;
+  root.kind = "panels";
+  panel_ptr = ptr;
+  recording_block = block;
+  draw_panel(C, type, root, false);
+  recording_block = nullptr;
+  button_layout = nullptr;
+  std::ostringstream out;
+  out << std::boolalpha;
+  write(out, root);
+  nodes.clear();
+  layouts.clear();
+  return out.str();
+}
+
+/* A layout recorded on its own (a region's block layout, block_layout in region-draw.cc), as `kind`: its root, until
+ * layout_record_clear. */
+static std::vector<std::unique_ptr<Node>> roots;
+Layout &layout_record_begin(const char *kind)
+{
+  Layout &layout = *layouts.emplace_back(std::make_unique<Layout>(ItemType(0), nullptr));
+  Node &node = *roots.emplace_back(std::make_unique<Node>());
+  node.kind = kind;
+  node.layout = &layout;
+  nodes[&layout] = &node;
+  return layout;
+}
+void layout_record_align_set(const Layout &layout, bool align) { nodes.at(&layout)->align = align; }
+std::string layout_record_json(const Layout &layout)
+{
+  std::ostringstream out;
+  out << std::boolalpha;
+  write(out, *nodes.at(&layout));
+  return out.str();
+}
+void layout_record_clear()
+{
+  roots.clear();
+  nodes.clear();
+  layouts.clear();
 }
 
 }  // namespace blender::ui
