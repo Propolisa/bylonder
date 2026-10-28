@@ -40,6 +40,8 @@ import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
+import { registerAddOperators } from "./editors/object/add-operators.js";
+import { openMenu } from "./editors/interface/menu.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
@@ -294,6 +296,7 @@ world.objectActions = createObjectActions({
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 registerObjectOperators(world.objectActions);
+registerAddOperators(creator);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
@@ -491,6 +494,7 @@ registerOperators({
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(activeView().id) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(activeView().id, direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(activeView().id) },
+  "wm.call_menu": { supports: ({ name }) => !!activeView()?.menu(name), run: ({ name }) => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name)) },
   "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
   "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
 });

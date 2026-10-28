@@ -119,6 +119,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);
+  // A Blender menu for wm.call_menu in this view (its items, or null without one) and its title.
+  view.menu = (idname) => (blender.menus[idname] ? drawMenu(idname, blender) : null);
+  view.menuTitle = (idname) => blender.menus[idname]?.bl_label ?? '';
   const viewMenu = menuButton('View', blenderMenu('VIEW3D_MT_view'), { blender: 'VIEW3D_MT_view' });
   const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
@@ -128,12 +131,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     const babylon = mesh.filter(p => p.group === 'babylon');
     return [...mesh.filter(p => !p.group).map(meshItem), ...(babylon.length ? ['-', { label: 'Babylon', icon: 'mesh_data', items: babylon.map(meshItem) }] : [])];
   };
-  const add = menuButton('Add', () => [
-    { label: 'Mesh', blender: 'VIEW3D_MT_mesh_add', icon: 'outliner_ob_mesh', items: meshes },
-    { label: 'Text', blender: 'object.text_add', icon: 'outliner_ob_empty', run: () => creator.add(creator.catalog.find(p => p.id === 'text')) },
-    '-',
-    { label: 'Search…', keys: 'Shift A', run: () => creator.show() },
-  ], { blender: 'VIEW3D_MT_add' });
+  const add = menuButton('Add', () => (editMode() ? meshes() : blenderMenu('VIEW3D_MT_add')()), { blender: 'VIEW3D_MT_add' });
   const object = menuButton('Object', blenderMenu('VIEW3D_MT_object'), { blender: 'VIEW3D_MT_object' });
   const meshMenu = menuButton('Mesh', () => world.editMode.menus.mesh(), { blender: 'VIEW3D_MT_edit_mesh' });
   const vertexMenu = menuButton('Vertex', () => world.editMode.menus.vertex(), { blender: 'VIEW3D_MT_edit_mesh_vertices' });
