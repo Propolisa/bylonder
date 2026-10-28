@@ -22,7 +22,8 @@ export const createScene = function () {
   camera.fovMode = BABYLON.Camera.FOVMODE_HORIZONTAL_FIXED;
   camera.fov = 2 * Math.atan(18 / 50);
 
-  new BABYLON.PointLight('Light', new BABYLON.Vector3(4.0762, 5.9039, 1.0055), scene);
+  const light = new BABYLON.PointLight('Light', new BABYLON.Vector3(4.0762, 5.9039, 1.0055), scene);
+  light.radius = 0.1;
   return scene;
 };
 `,
