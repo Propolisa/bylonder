@@ -234,17 +234,18 @@ assert.deepEqual(lavaTree.nodes.map((node) => node.idname).sort(), ['ShaderNodeB
 assert.deepEqual(lavaTree.links.sort(), [['Noise Texture', 'Fac', 'Principled BSDF', 'Emission Strength'], ['Principled BSDF', 'BSDF', 'Material Output', 'Surface']]);
 assert(Math.abs(lavaTree.nodes.find((node) => node.idname === 'ShaderNodeTexNoise').inputs.W - 1.3) < 1e-6);
 assert.deepEqual(sync.check(), []);
-// The texture's record is the truth: Main's Tex is filled from it, undo restores it there, and what Blender's code
-// writes into the Tex comes back to the record.
+// Main's Tex and the texture's record stay equal: an edit and its undo reach the Tex, and what Blender's code writes
+// into the Tex comes back to the record, which project saves and undo carry.
 const tex = sync.textureOf(clouds.id);
 assert.equal(dnaGet('Texture', tex, 'type'), 'CLOUDS');
 world.textures.set(clouds, 'noise_depth', 5);
 const before = world.textures.capture();
+world.textures.subscribe(() => sync.changed());
 world.textures.set(clouds, 'noise_depth', 1);
-sync.flush();
-assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 1);
+await null;
+assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 1, 'an edit reaches Main by the end of the task');
 world.textures.apply(before);
-sync.flush();
+await null;
 assert.equal(dnaGet('CloudsTexture', tex, 'noise_depth'), 5);
 dnaSet('CloudsTexture', tex, 'noise_depth', 3);
 sync.writeBack();

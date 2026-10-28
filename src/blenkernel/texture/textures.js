@@ -1,6 +1,6 @@
 // Texture datablocks (bpy.data.textures), as Blender's Texture ID: a name, a fake user and the settings of Blender's Tex
-// by RNA identifier. The records are the truth, saved and undone with the project (document slice "textures"); the
-// scene sync fills Main's Tex from them (main-sync.js), and modifiers sample a Tex made from them (texture.js).
+// by RNA identifier, saved and undone with the project (document slice "textures"). The scene sync keeps each equal
+// to its Tex in Main both ways (main-sync.js); modifiers sample a Tex made from the record (texture.js).
 import { settingsAfter, textureDefaults } from './texture.js';
 
 const clone = (value) => structuredClone(value);

@@ -370,7 +370,7 @@ const tools = createView3DTools({
 // Blender's Main, kept equal to the scene both ways (blenkernel/main-sync.js), which Blender's code runs on. Slices hooks
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
-for (const slice of [world.collections, world.materials, world.worlds, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
+for (const slice of [world.collections, world.materials, world.worlds, world.textures, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
 world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
 registerObjectOperators(world.objectActions, { sync: world.mainSync, transaction: commands.transaction, notify, keying: (run) => animation.keying(run) });
 registerAddOperators(creator);
