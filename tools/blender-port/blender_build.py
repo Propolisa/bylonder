@@ -314,12 +314,15 @@ def link_module(host, out, entries, extra, archives, module_libraries):
     os.makedirs(linked)
     api = [shutil.copy(o, os.path.join(linked, f'api-{i}-{os.path.basename(o)}')) for i, (_, o, _) in enumerate(built)]
     copies = [shutil.copy(a, linked) for a in archives]
+    # Renamed copies replace Blender's definitions, so they are linked whole: an archive member is not pulled in for a
+    # symbol something already defines.
+    renamed = [c for c in copies if os.path.basename(c).startswith('renamed_')]
     strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
     replaced = {'blender': {}, 'api': {}}
     while True:
         link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
-                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
+                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, '-Wl,--whole-archive', *renamed, '-Wl,--no-whole-archive', *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
                 '-Wl,--allow-undefined', '-o', module]
         result = subprocess.run(link, capture_output=True, text=True)
         losers = duplicate_losers(result.stderr, {os.path.basename(a) for a in module_libraries})

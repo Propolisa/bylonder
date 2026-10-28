@@ -110,6 +110,7 @@ for (const file of fs.readdirSync(dir).sort()) {
       }) }), mesh);
     if (problem) (KNOWN[file] ? known : failed).push(`${file}: ${problem}`);
   } catch (error) {
+    if (process.env.STACK) console.error(error.stack);
     failed.push(`${file}: ${error.message}`);
   } finally {
     made.forEach((o) => o.free());

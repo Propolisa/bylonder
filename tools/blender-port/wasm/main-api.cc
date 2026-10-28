@@ -115,6 +115,8 @@ EXPORT(main_new) BlenderMain *main_new()
   ctx->scene->toolsettings->autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
+  /* As BKE_workspace_add makes it: transforms clear its status when they end. */
+  ctx->workspace.runtime = MEM_new<bke::WorkSpaceRuntime>(__func__);
   ctx->workspace_hook = {&ctx->workspace, &ctx->layout};
   ctx->window.scene = ctx->scene;
   ctx->window.workspace_hook = &ctx->workspace_hook;
@@ -431,7 +433,7 @@ static void where_is_calc(Depsgraph *depsgraph, Scene *scene, Object *ob, Set<Ob
  * world matrix, parents first, and the tags cleared. */
 EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx)
 {
-  Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(ctx->C);
+  Depsgraph *depsgraph = CTX_data_depsgraph_pointer(ctx->C);
   Set<Object *> done;
   for (Object &ob : ctx->bmain->objects) {
     where_is_calc(depsgraph, ctx->scene, &ob, done);
@@ -503,7 +505,7 @@ EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *c
   if (result) {
     BKE_id_free(nullptr, result);
   }
-  Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(ctx->C);
+  Depsgraph *depsgraph = CTX_data_depsgraph_pointer(ctx->C);
   CustomData_MeshMasks mask = CD_MASK_MESH;
   result = bke::mesh_create_eval_final(depsgraph, ctx->scene, ob, &mask);
   mesh_extraction(*result, ctx->extraction);

@@ -8,7 +8,9 @@
 
 #include "BKE_idprop.hh"
 #include "BKE_report.hh"
+#include "BLI_listbase.h"
 #include "BLI_string.h"
+#include "BLI_utildefines.h"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_path.hh"
@@ -30,11 +32,31 @@ wmOperator *operator_create(wmOperatorType *ot, const IDProperty *values)
   WM_operator_properties_alloc(&op->ptr, &op->properties, ot->idname);
   op->reports = MEM_new<ReportList>(__func__);
   BKE_reports_init(op->reports, RPT_STORE);
+  /* A macro's operators, in order, each with its properties from the macro's and the macro type's fixed values (as
+   * wm_operator_create fills op->macro). */
+  wmOperatorTypeMacro *otmacro = static_cast<wmOperatorTypeMacro *>(ot->macro.first);
+  RNA_STRUCT_BEGIN (op->ptr, prop) {
+    if (otmacro == nullptr) {
+      break;
+    }
+    if (STREQ(RNA_property_identifier(prop), otmacro->idname)) {
+      PointerRNA values_ptr = RNA_property_pointer_get(op->ptr, prop);
+      wmOperator *opm = operator_create(WM_operatortype_find(otmacro->idname, false), static_cast<IDProperty *>(values_ptr.data));
+      IDP_ReplaceGroupInGroup(opm->properties, otmacro->properties);
+      BLI_addtail(&op->macro, opm);
+      opm->opm = op;
+      otmacro = otmacro->next;
+    }
+  }
+  RNA_STRUCT_END;
   return op;
 }
 
 void operator_destroy(wmOperator *op)
 {
+  while (wmOperator *opm = static_cast<wmOperator *>(BLI_pophead(&op->macro))) {
+    operator_destroy(opm);
+  }
   WM_operator_properties_free(op->ptr);
   MEM_delete(op->ptr);
   BKE_reports_free(op->reports);
@@ -61,6 +83,7 @@ static double element(PointerRNA *ptr, PropertyRNA *prop, int index)
 }
 
 /* As a button sets a number (ui_but_value_set): clamped to the property's range. */
+/* Clamped as bpy clamps a value it sets (pyrna_py_to_prop): with CLAMP, also where a range function gives min > max. */
 static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double value)
 {
   const bool array = RNA_property_array_check(prop);
@@ -71,14 +94,16 @@ static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double va
     case PROP_INT: {
       int min, max;
       RNA_property_int_range(ptr, prop, &min, &max);
-      const int v = std::clamp(int(value), min, max);
+      int v = int(value);
+      CLAMP(v, min, max);
       array ? RNA_property_int_set_index(ptr, prop, index, v) : RNA_property_int_set(ptr, prop, v);
       break;
     }
     case PROP_FLOAT: {
       float min, max;
       RNA_property_float_range(ptr, prop, &min, &max);
-      const float v = std::clamp(float(value), min, max);
+      float v = float(value);
+      CLAMP(v, min, max);
       array ? RNA_property_float_set_index(ptr, prop, index, v) : RNA_property_float_set(ptr, prop, v);
       break;
     }
@@ -210,6 +235,17 @@ EXPORT(rna_set) void rna_set(bContext *C, StructRNA *type, ID *id, void *data, c
     set_element(&ptr, prop, std::max(index, 0), value);
     RNA_property_update(C, &ptr, prop);
   }
+}
+
+/* FCurve.update(), as Python calls it: the keys sorted, duplicates removed and handles recalculated. */
+EXPORT(rna_fcurve_update) void rna_fcurve_update(bContext *C, ID *id, FCurve *fcu)
+{
+  PointerRNA ptr = RNA_pointer_create_discrete(id, RNA_struct_find("FCurve"), fcu);
+  FunctionRNA *func = RNA_struct_find_function(ptr.type, "update");
+  ParameterList parameters;
+  RNA_parameter_list_create(&parameters, &ptr, func);
+  RNA_function_call(C, nullptr, &ptr, func, &parameters);
+  RNA_parameter_list_free(&parameters);
 }
 
 EXPORT(rna_string_get) const char *rna_string_get(StructRNA *type, ID *id, void *data, const char *name)

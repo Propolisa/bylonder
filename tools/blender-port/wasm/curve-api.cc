@@ -320,7 +320,7 @@ EXPORT(curve_object_pointer_set) void curve_object_pointer_set(Object *ob, int o
 EXPORT(curve_object_eval) const ExtractionHeader *curve_object_eval(bContext *C, Object *ob)
 {
   static ExtractionHeader header;
-  BKE_displist_make_curveTypes(CTX_data_ensure_evaluated_depsgraph(C), CTX_data_scene(C), ob, false);
+  BKE_displist_make_curveTypes(CTX_data_depsgraph_pointer(C), CTX_data_scene(C), ob, false);
   bke::GeometrySet &geometry = *ob->runtime->geometry_set_eval;
   if (!geometry.has_mesh() && geometry.has_curves()) {
     geometry.replace_mesh(bke::curve_to_wire_mesh(geometry.get_curves()->geometry.wrap()));
