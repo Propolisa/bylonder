@@ -8,7 +8,7 @@ import { BM_mesh_bm_to_me } from '../../bmesh/intern/bmesh-mesh-convert.js';
 import { bmo_create_grid_exec, bmo_create_cube_exec, bmo_create_circle_exec, bmo_create_cone_exec } from '../../bmesh/operators/bmo-primitive.js';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { EditMesh, meshFromFaces } from '../../bmesh/bmesh-wasm.js';
-import { add_torus, add_uvs } from '../../bl_ui/add_mesh_torus.js';
+import { module } from '../../python/bpy_interface.js';
 import { createMesh } from '../../blenkernel/mesh/mesh.js';
 import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
 
@@ -36,11 +36,12 @@ export const operatorProperties = (idname, props = {}) => ({
   ...props,
 });
 
-// mesh.primitive_torus_add: Blender's Python (add_mesh_torus.py, transpiled into src/bl_ui) makes the vertices, quads
+// mesh.primitive_torus_add: Blender's Python (add_mesh_torus.py, in Blender's Python tree) makes the vertices, quads
 // and UVs, as AddTorus.execute calls it; edges come as mesh.update() derives them, and the faces are shaded flat.
 function torus_add(p) {
   const extra = (p.abso_major_rad - p.abso_minor_rad) * 0.5;
   const [major_radius, minor_radius] = p.mode === 'EXT_INT' ? [p.abso_minor_rad + extra, extra] : [p.major_radius, p.minor_radius];
+  const { add_torus, add_uvs } = module('bl_operators.add_mesh_torus');
   const [verts, faces] = add_torus(major_radius, minor_radius, p.major_segments, p.minor_segments);
   const faces_num = faces.length / 4;
   const mesh = meshFromFaces(verts, Array.from({ length: faces_num + 1 }, (_, f) => f * 4), faces);

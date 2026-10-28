@@ -1,25 +1,17 @@
-"""Blender's UI scripts as JS modules: the scripts manifest.json names (paths may hold *), each with the classes and
-functions its patterns match (* for all, ! to leave out) and what they use, and the names they use from the Blender
-modules they import ("modules" in the manifest), taken from Blender's scripts at the port's tag and transpiled by
-Transcrypt against Bylonder's bpy (bpy/ here) into src/bl_ui/.
-
-usage: python3 tools/blender-ui/transpile.py   (needs `pip install transcrypt`)
+"""What tree.py compiles Blender's Python with: Blender's scripts at the port's tag (fetch, listing), rewritten where
+Transcrypt compiles them wrong (TranscryptFixes, Walrus, class_scopes, HELPERS), and Transcrypt's output patched
+where its runtime differs from Python's (PATCHES, runtime.js, finish).
 """
 import ast
-import fnmatch
 import functools
 import json
 import os
 import re
-import shutil
-import subprocess
-import sys
-import tempfile
 import urllib.parse
+import subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-OUT = os.path.join(REPO, 'src', 'bl_ui')
 BLENDER = 'https://projects.blender.org/api/v1/repos/blender/blender'
 TAG = json.load(open(os.path.join(REPO, 'tools', 'blender-port', 'manifest.json')))['blender']
 
@@ -137,66 +129,6 @@ def exists(path):
         return False
 
 
-# The modules Blender's scripts import that Bylonder has: its bpy and mathutils (here), and Transcrypt's math and copy; the
-# packages here (Bylonder's versions of Python's and Blender's modules) and the scripts the manifest names, imported by
-# their own names (bl_ui.space_toolsystem_common as space_toolsystem_common).
-IMPORTABLE = {'bpy', 'mathutils', 'math', 'copy'}
-SCRIPTS = set()
-# The Blender modules outside the manifest's scripts that the scripts may import (manifest.json's "modules"), built
-# with the names the scripts use from them, by the flat name the build gives them: their paths.
-IMPORTS = json.load(open(os.path.join(HERE, 'manifest.json'))).get('modules', [])
-SOURCES = {}
-
-
-def blender_module(name):
-    """A Blender module's path for its dotted name (bl_ui.utils, rna_prop_ui, bpy_extras.node_utils), or None for
-    Bylonder's own and the modules the build leaves out."""
-    parts = name.split('.')
-    if parts[0] in IMPORTABLE or parts[0] in SCRIPTS or not any(fnmatch.fnmatchcase(name, p) for p in IMPORTS):
-        return None
-    return ('scripts/startup/' if parts[0] == 'bl_ui' else 'scripts/modules/') + '/'.join(parts) + '.py'
-
-
-def flat(name):
-    """The flat module the build gives a Blender module (bl_ui.utils as utils), or the name."""
-    path = blender_module(name)
-    if not path:
-        return name
-    SOURCES[module_name(path)] = path
-    return module_name(path)
-
-
-def module_name(path):
-    return os.path.basename(path)[:-3]
-
-
-class FlatImports(ast.NodeTransformer):
-    """Imports of Blender's modules as imports of the flat modules the build holds; `from bl_ui import anim` (or
-    `from . import anim`) as `import anim`."""
-    def visit_ImportFrom(self, node):
-        module = ('bl_ui' + ('.' if node.module else '') if node.level else '') + (node.module or '')
-        if module == 'bl_ui':
-            return ast.Import(names=[ast.alias(flat('bl_ui.' + a.name), a.asname) for a in node.names])
-        return ast.ImportFrom(module=flat(module), names=node.names, level=0)
-
-    def visit_Import(self, node):
-        return ast.Import(names=[ast.alias(flat(a.name), a.asname or (a.name if '.' in a.name and blender_module(a.name) else None))
-                                 for a in node.names])
-
-
-def parse(path):
-    """A Blender script's syntax tree with its imports of Blender's modules made flat, or None if Blender lacks it."""
-    return FlatImports().visit(ast.parse(fetch(path))) if exists(path) else None
-
-
-def module_of(name):
-    """The module Bylonder compiles for an imported name, or None when it has none."""
-    package, _, rest = name.partition('.')
-    if package in ('bl_ui', 'bl_operators') and rest in SCRIPTS:
-        return rest
-    return name if package in IMPORTABLE or package in SCRIPTS else None
-
-
 def defined_names(node):
     """The names a module-level class, function or assignment to names (a = b = ...) defines."""
     if isinstance(node, (ast.ClassDef, ast.FunctionDef)):
@@ -206,104 +138,7 @@ def defined_names(node):
     return []
 
 
-def is_main_guard(node):
-    return isinstance(node, ast.If) and isinstance(node.test, ast.Compare) and getattr(node.test.left, 'id', None) == '__name__'
-
-
-def importable(node):
-    """The import with only what Bylonder has, its modules renamed to Bylonder's, or None."""
-    if isinstance(node, ast.ImportFrom):
-        module = node.module and module_of(node.module)
-        return ast.ImportFrom(module=module, names=node.names, level=0) if module else None
-    names = [alias for alias in node.names if module_of(alias.name) == alias.name]
-    return ast.Import(names=names) if names else None
-
-
 is_import = lambda node: isinstance(node, (ast.Import, ast.ImportFrom))
-
-
-def taken(tree, patterns):
-    """The module-level statements the patterns take ('*' the whole module, '!' leaves out), with what they use from
-    the module (constants too), in its order."""
-    match = lambda name, ps: any(fnmatch.fnmatchcase(name, p) for p in ps)
-    whole, exclude = '*' in patterns, [p[1:] for p in patterns if p.startswith('!')]
-    defined = {}
-    for node in tree.body:
-        for name in defined_names(node):
-            defined.setdefault(name, []).append(node)
-    wanted, todo = set(), [name for name in defined if match(name, patterns) and not match(name, exclude)]
-    while todo:
-        name = todo.pop()
-        if name in wanted:
-            continue
-        wanted.add(name)
-        todo += [n.id for node in defined[name] for n in ast.walk(node) if isinstance(n, ast.Name) and n.id in defined]
-    kept = lambda node: wanted.intersection(defined_names(node)) or whole and not defined_names(node)
-    return [node for node in tree.body if not is_import(node) and not is_main_guard(node) and kept(node)]
-
-
-def requirements(tree, patterns):
-    """What the taken code imports from the Blender modules the build may hold: {module: names}. A module imported
-    whole gives the attributes the code reads of it."""
-    nodes = taken(tree, patterns)
-    used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
-    attributes = {(n.value.id, n.attr) for node in nodes for n in ast.walk(node) if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)}
-    found = {}
-    for node in tree.body + [n for node in nodes for n in ast.walk(node)]:
-        if isinstance(node, ast.ImportFrom) and node.module in SOURCES:
-            found.setdefault(node.module, set()).update(a.name for a in node.names if (a.asname or a.name) in used)
-        elif isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name in SOURCES and (alias.asname or alias.name) in used:
-                    found.setdefault(alias.name, set()).update(attr for name, attr in attributes if name == (alias.asname or alias.name))
-    return found
-
-
-def closure(scripts):
-    """The scripts to build, {module: (path, patterns, flags)}: the manifest's, and the Blender modules they import with
-    the names they use, until nothing more is needed. Each built module is importable by its flat name."""
-    modules = {module_name(path): (path, list(patterns), flags) for path, (patterns, flags) in scripts.items()}
-    trees, changed = {}, True
-    while changed:
-        changed = False
-        for module, (path, patterns, flags) in list(modules.items()):
-            if path not in trees:
-                trees[path] = parse(path)
-            if trees[path] is None:
-                continue
-            for target, names in requirements(trees[path], patterns).items():
-                if target not in modules:
-                    if not exists(SOURCES[target]):
-                        continue
-                    modules[target] = (SOURCES[target], [], flags)
-                    changed = True
-                missing = sorted(names - set(modules[target][1]))
-                if missing:
-                    modules[target][1].extend(missing)
-                    changed = True
-    built = {module: entry for module, entry in modules.items() if trees.get(entry[0]) is not None}
-    SCRIPTS.update(built)
-    return built, trees
-
-
-def extract(tree, patterns):
-    """The module's imports Bylonder has, then the statements the patterns take (taken())."""
-    nodes = taken(tree, patterns)
-    imports = [i for i in (importable(node) for node in tree.body if is_import(node)) if i]
-    # Only the imported names the taken code uses.
-    used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
-    for node in imports:
-        node.names = [alias for alias in node.names if (alias.asname or alias.name).split('.')[0] in used]
-    # The classes in their order in the script, which registration follows (an ES module's exports are sorted by name).
-    classes = [node.name for node in nodes if isinstance(node, ast.ClassDef)]
-    body = [node for node in imports if node.names] + nodes + ([ast.parse(f'_classes_in_order = {classes!r}').body[0]] if classes else [])
-    source = ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
-    module = TranscryptFixes().visit(ast.parse(source))
-    if uses_helpers(ast.unparse(module)):
-        # Before the module's own code, which may use them as it loads.
-        imports = sum(1 for node in module.body if isinstance(node, (ast.Import, ast.ImportFrom)))
-        module.body[imports:imports] = ast.parse(HELPERS).body
-    return ast.unparse(module)
 
 
 def class_scope_loads(statement):
@@ -918,151 +753,3 @@ def _super_classmethod(owner, cls, method):
 '''
 
 
-def take_imports(function):
-    """The imports anywhere in a function's statements, taken out of them."""
-    taken = []
-    for node in ast.walk(function):
-        for field in ('body', 'orelse', 'finalbody'):
-            statements = getattr(node, field, None)
-            if not isinstance(statements, list) or not statements or not isinstance(statements[0], ast.stmt):
-                continue
-            taken += [s for s in statements if isinstance(s, (ast.Import, ast.ImportFrom))]
-            setattr(node, field, [s for s in statements if not isinstance(s, (ast.Import, ast.ImportFrom))] or
-                    ([] if field != 'body' else [ast.Pass()]))
-    return taken
-
-
-def hoist_imports(body):
-    """Function-local imports (methods' too) moved to the module, merged: Transcrypt emits each as an ES import, and
-    two of one module are a syntax error. Those of modules Bylonder lacks are left out."""
-    names, modules = {}, {}
-    for function in (node for node in ast.walk(ast.Module(body=body, type_ignores=[])) if isinstance(node, ast.FunctionDef)):
-        for statement in filter(None, map(importable, take_imports(function))):
-            if isinstance(statement, ast.Import):
-                modules.update((alias.name, alias) for alias in statement.names)
-            else:
-                names.setdefault(statement.module, {}).update((alias.name, alias) for alias in statement.names)
-    hoisted = ([ast.Import(names=list(modules.values()))] if modules else []) + \
-        [ast.ImportFrom(module=module, names=list(aliases.values()), level=0) for module, aliases in names.items()]
-    return [node for node in body if isinstance(node, (ast.Import, ast.ImportFrom))] + hoisted + \
-        [node for node in body if not isinstance(node, (ast.Import, ast.ImportFrom))]
-
-
-def node_types():
-    """Blender's shader and compositor node types (src/nodes/blender/node-types.json): idname to name and enums."""
-    types = json.load(open(os.path.join(REPO, 'src', 'nodes', 'blender', 'node-types.json')))
-    return {idname: node for tree in ('shader', 'compositor') for idname, node in types[tree].items()}
-
-
-# bpy.types structs whose RNA the scripts read (bpy.types.ToolSettings.bl_rna.properties[...]).
-RNA_TYPES = ['ToolSettings']
-
-
-def rna_module():
-    """bpy/_rna.py: the RNA the scripts read when they load (Modifier's type enum, from src/makesrna/rna-modifiers.json)
-    or draw (node types' names and enums, from node_types())."""
-    modifiers = json.load(open(os.path.join(REPO, 'src', 'makesrna', 'rna-modifiers.json')))
-    items = ',\n    '.join(f'_Item({t!r}, {d["name"]!r}, {d["icon"]!r}, {d["description"]!r})' for t, d in modifiers['types'].items())
-    enum = lambda p: '_Property([' + ', '.join(f'_Item({i!r}, {n!r}, \'\', {d!r})' for i, n, d in p['items']) + '])'
-    nodes = ',\n    '.join(f'{idname!r}: _Node({node["name"]!r}, {{' + ', '.join(f'{k!r}: {enum(p)}' for k, p in node['properties'].items() if p['type'] == 'ENUM') + '})'
-                           for idname, node in node_types().items())
-    # The structs whose enums the scripts read through bpy.types (the 3D View header's snap elements), from Blender's
-    # RNA (src/makesrna/rna-ui.json).
-    ui = json.load(open(os.path.join(REPO, 'src', 'makesrna', 'rna-ui.json')))
-    structs = '\n'.join(f'{struct} = _Struct({{' + ', '.join(
-        f'{name!r}: _Property(_items([' + ', '.join(f'_Item({i!r}, {n!r}, {c!r}, {d!r})' for i, n, d, c in p['items'] if i) + ']))'
-        for name, p in ui[struct]['props'].items() if p.get('items')) + '})' for struct in RNA_TYPES)
-    return f'''# Generated by transpile.py from src/makesrna/rna-modifiers.json and src/nodes/blender/node-types.json.
-class _Item:
-    def __init__(self, identifier, name, icon, description):
-        self.identifier, self.name, self.icon, self.description = identifier, name, icon, description
-
-
-class _Property:
-    def __init__(self, items):
-        self.enum_items = self.enum_items_static = items
-        self.translation_context = '*'
-
-
-class _Struct:
-    def __init__(self, properties):
-        self.properties = properties
-
-
-Modifier = _Struct({{'type': _Property([
-    {items}])}})
-
-
-class _Node(_Struct):
-    def __init__(self, name, properties):
-        _Struct.__init__(self, properties)
-        self.name, self.translation_context, self.bl_rna = name, '*', self
-
-
-nodes = {{
-    {nodes}}}
-
-
-# An enum's items by index and by identifier, as bpy_prop_collection reads them (enum_items['VERTEX'].icon).
-def _items(items):
-    found = {{}}
-    for i, item in enumerate(items):
-        found[i] = found[item.identifier] = item
-    return found
-
-
-{structs}
-'''
-
-
-def main():
-    manifest = json.load(open(os.path.join(HERE, 'manifest.json')))
-    with tempfile.TemporaryDirectory() as build:
-        # Bylonder's versions of the modules Blender's scripts import: Blender's (bpy, mathutils, ...), the packages
-        # here, and Python's that Transcrypt lacks (collections), in boundary/, apart so they do not shadow Python's own.
-        # boundary/'s Blender C modules (_bpy) are tree.py's.
-        for folder in (HERE, os.path.join(HERE, 'boundary')):
-            # A package here wins over boundary/'s (os here lists the application templates).
-            for package in (d for d in os.listdir(folder) if os.path.exists(os.path.join(folder, d, '__init__.py')) and not (folder != HERE and d.startswith('_'))
-                            and not os.path.exists(os.path.join(build, d))):
-                shutil.copytree(os.path.join(folder, package), os.path.join(build, package))
-                SCRIPTS.add(package)
-        open(os.path.join(build, 'bpy', '_rna.py'), 'w').write(rna_module())
-        # Node types as bpy.types has them, for the scripts that look one up by name (getattr(bpy.types, idname)).
-        open(os.path.join(build, 'bpy', 'types.py'), 'a').write(''.join(f'\n{idname} = _rna.nodes[{idname!r}]' for idname in node_types()))
-        # A script's names, or {names, flags}: Transcrypt options for its Python (-o for operator overloading, -t for
-        # Python's truth values). A path with * names every script it matches in Blender's folder.
-        scripts = {}
-        for pattern, spec in manifest['scripts'].items():
-            entry = (spec['names'], spec['flags']) if isinstance(spec, dict) else (spec, [])
-            for path in (fnmatch.filter(listing(os.path.dirname(pattern)), pattern) if '*' in pattern else [pattern]):
-                scripts[path] = entry
-        SCRIPTS.update(module_name(path) for path in scripts)
-        built, trees = closure(scripts)
-        modules = []
-        for module, (path, patterns, flags) in built.items():
-            open(os.path.join(build, module + '.py'), 'w').write(extract(trees[path], patterns))
-            modules.append((module + '.py', flags))
-        # Transcrypt rebuilds its target folder on each run (-b), so each module's output is collected as it is made.
-        # A module with options keeps only its own output and the modules no other one has: the runtime and library
-        # modules the others share keep the default compile.
-        outputs = {}
-        for module, flags in sorted(modules, key=lambda m: bool(m[1])):
-            # A fixed hash seed keeps Transcrypt's export order, and so its output, the same on every run.
-            result = subprocess.run([sys.executable, '-P', '-s', '-m', 'transcrypt', '-b', '-n', '-k', *flags, '-m', module], cwd=build,
-                                    capture_output=True, text=True, env={**os.environ, 'PYTHONHASHSEED': '0'})
-            if result.returncode:
-                sys.exit(result.stdout + result.stderr)
-            target = os.path.join(build, '__target__')
-            for name in os.listdir(target):
-                if name.endswith('.js') and (not flags or name == module.replace('.py', '.js') or name not in outputs):
-                    outputs[name] = open(os.path.join(target, name)).read()
-        os.makedirs(OUT, exist_ok=True)
-        for name, script in outputs.items():
-            script = finish(name, script)
-            header = f'// Generated by tools/blender-ui/transpile.py from Blender {TAG}; do not edit.\n'
-            open(os.path.join(OUT, name), 'w').write(header + script)
-            print('wrote', os.path.relpath(os.path.join(OUT, name), REPO))
-
-if __name__ == '__main__':
-    main()

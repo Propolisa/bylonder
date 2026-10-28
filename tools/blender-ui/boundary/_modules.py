@@ -2,7 +2,8 @@
 # loaded, and imports Transcrypt cannot compile statically (in functions, or closing a cycle) look modules up here.
 # The JS below names its variables module_id and member_id: Transcrypt renames `name` and others.
 def _module(module_id):
-    return __pragma__('js', '{}', 'globalThis.__py_modules[module_id]')
+    """A module, with its submodules as attributes (import a.b in a function binds a)."""
+    return __pragma__('js', '{}', 'globalThis.__py_modules[module_id] && new Proxy(globalThis.__py_modules[module_id], {get: (target, key) => key in target || typeof key !== "string" ? target[key] : globalThis.__py_modules[module_id + "." + key]})')
 
 
 def _member(module_id, member_id):

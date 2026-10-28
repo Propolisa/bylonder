@@ -3,21 +3,22 @@
 import { loadRNAUI } from '../makesrna/rna.js';
 import { invokeOperator, runOperator, pollOperator, hasOperator, registerOperator } from '../windowmanager/wm-operators.js';
 
+
+// Blender's scripts read RNA's enums as they load. Vite serves JSON as a module, without Node's import attribute.
+await loadRNAUI(import.meta.env ? () => import('../makesrna/rna-ui.json') : undefined);
+await import('../bl_py/__main__.js');
+const _bpy = globalThis.__py_modules._bpy;
+
 // bpy.ops (the boundary's _bpy.ops) runs Blender's operators by idname in Bylonder's registry: invoked or executed as
 // the execution context says, returning Blender's result set.
 globalThis.__bylonder_operators__ = {
-  poll: pollOperator,
+  poll: (...args) => pollOperator(...args),
   call(idname, props, context) {
     if (!pollOperator(idname, props)) throw Error(`${idname}.poll() failed, context is incorrect`);
     const result = context.startsWith('INVOKE') ? invokeOperator(idname, props, null) : runOperator(idname, props);
     return [typeof result === 'string' ? result : 'FINISHED'];
   },
 };
-
-// Blender's scripts read RNA's enums as they load. Vite serves JSON as a module, without Node's import attribute.
-await loadRNAUI(import.meta.env ? () => import('../makesrna/rna-ui.json') : undefined);
-await import('../bl_py/__main__.js');
-const _bpy = globalThis.__py_modules._bpy;
 
 // Registered classes by Blender's idname (VIEW3D_MT_object, PROPERTIES_PT_context_object, OBJECT_OT_...).
 export const registered = _bpy.registered;

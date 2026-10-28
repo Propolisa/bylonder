@@ -1,15 +1,14 @@
-// Blender's data as its UI scripts read it (src/bl_ui): a struct is the data Bylonder binds, under Blender's property
+// Blender's data as its UI scripts read it (src/bl_py): a struct is the data Bylonder binds, under Blender's property
 // names, and every property it does not bind reads as Blender's default (rna-structs.json, from Blender itself): a
 // pointer as None, or the struct's defaults when Blender's never is None, a collection as empty, the rest as their
 // default values. Bylonder's bindings are in rna-bylonder.js. What the interface shows of a property (name, ranges,
 // enum items, ...) is in rna-ui.json, loaded by loadRNAUI() before an editor first draws properties.
 import structs from './rna-structs.json' with { type: 'json' };
 import operators from './rna-operators.json' with { type: 'json' };
-import * as bpyTypes from '../bl_ui/bpy.types.js';
 
-// A struct's class in bpy.types (type(context.curve) is TextCurve): Blender's Python tree's once it has loaded
-// (python/bpy_interface.js, by its module registry: it imports this module), else the interim src/bl_ui's.
-const structClass = (struct) => globalThis.__py_modules?.['_bpy.types']?.[struct] ?? bpyTypes[struct];
+// A struct's class in bpy.types (type(context.curve) is TextCurve), from Blender's Python tree by its module registry
+// (python/bpy_interface.js imports this module).
+const structClass = (struct) => globalThis.__py_modules?.['_bpy.types']?.[struct];
 
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));

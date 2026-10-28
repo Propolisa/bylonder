@@ -15437,6 +15437,25 @@ export var WORLD_PT_viewport_display =  __class__ ('WORLD_PT_viewport_display', 
 export var WoodTexture =  __class__ ('WoodTexture', [Texture], {
 	__module__: __name__,
 });
+export var __getattr__ = function (py_name) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (function () {
+		var __accu0__ = __call__ (_member, null, '_bpy', 'registered');
+		return __call__ (__accu0__.py_get, __accu0__, py_name);
+	}) ();
+};
 export var GeometrySet = null;
 export var InlineShaderNodes = null;
 export var bpy_prop_array = null;
@@ -19480,6 +19499,7 @@ export function __py_setattr__ (key, value) {
 		case 'WORLD_PT_custom_props': WORLD_PT_custom_props = value; break;
 		case 'WORLD_PT_viewport_display': WORLD_PT_viewport_display = value; break;
 		case 'WoodTexture': WoodTexture = value; break;
+		case '__getattr__': __getattr__ = value; break;
 		case 'GeometrySet': GeometrySet = value; break;
 		case 'InlineShaderNodes': InlineShaderNodes = value; break;
 		case 'bpy_prop_array': bpy_prop_array = value; break;

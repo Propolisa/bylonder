@@ -1,5 +1,5 @@
 // Bylonder's implementations of Blender's operators, by idname, and the draw functions added to Blender's menus, for
-// the menus and headers drawn from Blender's own scripts (src/bl_ui, drawn by editors/interface/ui-layout.js).
+// the menus and headers drawn from Blender's own scripts (src/bl_py, drawn by editors/interface/ui-layout.js).
 // Operators Blender lacks (Bylonder's project and code features) are registered as `bylonder.*`, and added to Blender's
 // menus with appendMenu, as add-ons extend Blender.
 import { operatorKeys } from './input/keymap.js';

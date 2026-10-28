@@ -69,8 +69,10 @@ def unregister_cli_command(handle):
     return None
 
 
+# Blender's installation as the file system has it (os, _files): its scripts in /blender/scripts and its data files in
+# /blender/datafiles, as BKE_appdir lays out a release; the user's folders under /blender/user.
 def resource_path(resource_type, major=5, minor=2):
-    return '/blender/' + resource_type.lower()
+    return '/blender/user' if resource_type == 'USER' else '/blender'
 
 
 def user_resource(resource_type, path='', create=False):
@@ -78,7 +80,7 @@ def user_resource(resource_type, path='', create=False):
 
 
 def system_resource(resource_type, path=''):
-    return '/blender/system/' + resource_type.lower() + ('/' + path if path else '')
+    return '/blender/' + resource_type.lower() + ('/' + path if path else '')
 
 
 def script_paths():

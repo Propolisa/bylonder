@@ -1,6 +1,6 @@
 # Blender boundary
 
-How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own code: the UI scripts in `src/bl_ui` (Blender's Python, compiled by Transcrypt), which read `bpy.context` and RNA, and the C++ in `src/bmesh/bmesh.wasm`, which reads a `bContext` and DNA. Decided 2026-10-27.
+How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own code: Blender's Python in `src/bl_py` (all of its scripts, compiled by Transcrypt), which read `bpy.context` and RNA, and the C++ in `src/bmesh/bmesh.wasm`, which reads a `bContext` and DNA. Decided 2026-10-27.
 
 ## Decisions
 
@@ -67,7 +67,7 @@ The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` wi
 
 Every subsystem builds on these, one of each:
 
-- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry). `transpile.py`'s per-class manifest is the interim path until `src/bl_py` replaces `src/bl_ui`.
+- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry).
 - Blender's C: one WebAssembly module (`tools/blender-port`), with one Blender world in it (Main, Scene, ViewLayer, bContext stand-ins) that every subsystem's data (meshes, curves, text, animation) lives in.
 - Data: one RNA layer over Bylonder's data (`src/makesrna/rna-bylonder.js`) and one `bpy.context` (`src/blenkernel/context.js`).
 - Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps. An editor runs its keymaps inside its context area (`inArea(area, ...)`), so operators act on that editor (`contextArea()`) and `wm.call_menu` opens the area's own menu (`area.menu(idname)`); editors never keep operator tables of their own.
@@ -96,8 +96,8 @@ Blender's startup, which registers its classes (2094: every menu, panel, header 
 Consumers and running:
 
 - `src/python/bpy_interface.js` loads the tree and exports `registered`, `menus`, `panels`, `headers`, `module(name)` and
-  `setContext`. Menus, the Properties editor's panels, the 3D View's regions and the tool system draw from these;
-  `src/bl_ui` (transpile.py's per-class manifest) is being retired and takes no new entries.
+  `setContext`. Menus, the Properties editor's panels, the 3D View's regions, the animation editors' headers, the tool system and the
+  keymaps (`presets/keyconfig`) all come from these; the per-class transpile it replaced is gone (2026-10-28).
 - Blender's Python operators register in Bylonder's operator registry by idname unless Bylonder registers its own
   (which then wins); they run as Blender runs one: an instance with its property defaults and the given values,
   `poll`, then `execute` (or `invoke` from an event) in `bpy.context`.
