@@ -27,18 +27,19 @@ export function operatorSchema(idname) {
 const operatorPreset = (preset) => ({ ...preset, title: rna[preset.blender].name.replace(/^Add /, ""), operator: preset.blender, schema: operatorSchema(preset.blender) });
 
 // Add > Mesh in Blender's order. Entries with `operator` build Blender's exact primitive; the rest are Babylon
-// builders standing in until their Blender operator is ported.
+// builders standing in until their Blender operator is ported. `name` is the new object's where editmesh_add.cc names it
+// other than the operator does.
 export const presets = [
   operatorPreset({ id: "plane", blender: "mesh.primitive_plane_add", icon: "mesh_plane" }),
   operatorPreset({ id: "box", blender: "mesh.primitive_cube_add", icon: "mesh_cube" }),
   operatorPreset({ id: "disc", blender: "mesh.primitive_circle_add", icon: "mesh_circle" }),
-  operatorPreset({ id: "sphere", blender: "mesh.primitive_uv_sphere_add", icon: "mesh_uvsphere" }),
-  operatorPreset({ id: "ico", blender: "mesh.primitive_ico_sphere_add", icon: "mesh_icosphere" }),
+  operatorPreset({ id: "sphere", blender: "mesh.primitive_uv_sphere_add", name: "Sphere", icon: "mesh_uvsphere" }),
+  operatorPreset({ id: "ico", blender: "mesh.primitive_ico_sphere_add", name: "Icosphere", icon: "mesh_icosphere" }),
   operatorPreset({ id: "cylinder", blender: "mesh.primitive_cylinder_add", icon: "mesh_cylinder" }),
   operatorPreset({ id: "cone", blender: "mesh.primitive_cone_add", icon: "mesh_cone" }),
   operatorPreset({ id: "torus", blender: "mesh.primitive_torus_add", icon: "mesh_torus" }),
   operatorPreset({ id: "ground", blender: "mesh.primitive_grid_add", icon: "mesh_grid" }),
-  operatorPreset({ id: "monkey", blender: "mesh.primitive_monkey_add", icon: "mesh_monkey" }),
+  operatorPreset({ id: "monkey", blender: "mesh.primitive_monkey_add", name: "Suzanne", icon: "mesh_monkey" }),
   { id: "knot", group: "babylon", title: "Torus Knot", builder: "CreateTorusKnot", schema: { radius: n(1), tube: n(0.3), radialSegments: detail(64), tubularSegments: detail(32), p: n(2, 1, 12, 1), q: n(3, 1, 12, 1) } },
   { id: "capsule", group: "babylon", title: "Capsule", builder: "CreateCapsule", schema: { height: n(2), radius: n(0.5), tessellation: detail(24), subdivisions: n(2, 1, 32, 1) } },
   { id: "polyhedron", group: "babylon", title: "Polyhedron", builder: "CreatePolyhedron", schema: { type: { default: 0, options: { Tetrahedron: 0, Octahedron: 1, Dodecahedron: 2, Icosahedron: 3, Rhombicuboctahedron: 4 } }, size: n(1), flat: { default: true } } },

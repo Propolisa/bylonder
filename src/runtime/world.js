@@ -16,6 +16,7 @@ import { sdkModuleSource } from "./sdk-module.js";
 import { RUN_CACHE } from "../workspace/module-host.js";
 import { createMaterialLibrary } from "../blenkernel/material/library.js";
 import { createSceneSettings } from "../blenkernel/scene/settings.js";
+import { createTextures } from "../blenkernel/texture/textures.js";
 import { createWorlds } from "../blenkernel/scene/world.js";
 import { createRenderSettings } from "../blenkernel/scene/render.js";
 import { createCollections } from "../blenkernel/scene/collections.js";
@@ -108,6 +109,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   registerObjects(animation, objects);
   const documentState = createDocument();
   world.materials = documentState.register("materials", createMaterialLibrary(world, { commit, asset: (path) => sdk.asset(path), files: input.files || [] }));
+  world.textures = documentState.register("textures", createTextures(world, { commit }));
   world.sceneSettings = documentState.register("scene", createSceneSettings(world, { commit, name: input.scene?.name, rename: renameScene, cameras: {
     list: () => scene.cameras.filter((c) => !c.name.startsWith("__")),
     get: () => authoredCamera,

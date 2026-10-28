@@ -1,4 +1,5 @@
 import { Color3, Material, MultiMaterial, NodeMaterial, PBRMaterial, StandardMaterial, Texture } from '@babylonjs/core';
+import { blenderDefaultTree, buildMaterial } from '../../nodes/blender/shader-nodes.js';
 import { nodeId, deleted } from '../../editors/object/identity.js';
 import { fields, materialType, materialTypes, resolve, textureSlots } from './schema.js';
 import { bindGraph } from '../../nodes/bindings.js';
@@ -62,7 +63,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
   const create = (type = 'pbr', name) => {
     let material;
     const label = unique(name || 'Material');
-    if (type === 'node') { material = new NodeMaterial(label, scene); material.setToDefault(); material.build(); }
+    if (type === 'node') { material = new NodeMaterial(label, scene); blenderDefaultTree(material); buildMaterial(material); }
     else if (type === 'standard') material = new StandardMaterial(label, scene);
     else { material = new PBRMaterial(label, scene); material.metallic = 0; material.roughness = 0.5; material.albedoColor = new Color3(0.8, 0.8, 0.8); }
     return tag(material);
@@ -180,7 +181,7 @@ export function createMaterialLibrary(world, { commit = () => {}, asset = path =
       }
       for (const [id, json] of Object.entries(state.graphs || {})) {
         const material = byId(id);
-        if (material instanceof NodeMaterial) { material.parseSerializedObject(json); material.build(); material.metadata = { ...material.metadata, wbGraphEdited: true }; }
+        if (material instanceof NodeMaterial) { material.parseSerializedObject(json); buildMaterial(material); material.metadata = { ...material.metadata, wbGraphEdited: true }; }
       }
       for (const id of state.fake || []) { const m = byId(id); if (m) m.metadata = { ...m.metadata, wbFakeUser: true }; }
       for (const [id, map] of Object.entries(state.textures || {})) {

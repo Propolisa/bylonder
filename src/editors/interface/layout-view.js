@@ -117,7 +117,7 @@ function textField({ value, iconName, disabled, inactive, onChange, title, place
   ]);
 }
 
-const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly, arrowOnly, onClick = (e) => openMenu(items, e.currentTarget) }) => h('button', {
+export const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly, arrowOnly, onClick = (e) => openMenu(items, e.currentTarget) }) => h('button', {
   type: 'button', title, disabled, 'aria-label': text || title, 'aria-haspopup': 'menu',
   class: [W, 'bl-menu-button flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md pl-1.5 pr-5 text-xs', inactive && 'opacity-50', iconOnly && 'bl-menu-icon pr-4', arrowOnly && 'bl-arrow-only'],
   onClick,
@@ -365,6 +365,11 @@ function operatorButton(node, env) {
 
 // ---- Templates.
 const NO_FAKE_USER = new Set(['Object', 'Scene', 'Collection', 'WorkSpace', 'Screen']);
+// The data-block selector whose New button runs its operator (context_active_but_prop_get_templateID), which the
+// operator assigns what it makes to.
+let activeTemplate = null;
+export const templateIDButton = () => activeTemplate;
+const runFor = (prop, ui, idname) => { activeTemplate = prop; try { ui.run(idname, {}); } finally { activeTemplate = null; } };
 // template_ID: the data-block's browse menu, its name, and New or unlink.
 function templateID(node, env) {
   const { ui } = env, prop = resolve(node, ui);
@@ -376,7 +381,7 @@ function templateID(node, env) {
       title: `Browse ${prop.meta.name}`, 'aria-label': `Browse ${prop.meta.name}`, disabled: !env.enabled, onClick: (e) => openMenu(browse, e.currentTarget) }, icon(iconName, 'bl-icon-id')),
     id
       ? textField({ value: id.name, disabled: !env.enabled, title: `${prop.meta.name} name`, onChange: (name) => { id.name = name; ui.undoPush('Rename'); } })
-      : node.new ? button({ text: 'New', iconName: 'ADD', kind: 'tool', className: 'flex-1', disabled: !ui.supported(node.new, {}), onClick: () => ui.run(node.new, {}) }) : null,
+      : node.new ? button({ text: 'New', iconName: 'ADD', kind: 'tool', className: 'flex-1', disabled: !ui.supported(node.new, {}), onClick: () => runFor(prop, ui, node.new) }) : null,
     // Data-blocks other than objects, scenes, collections and workspaces can keep a fake user (template_id_cb).
     id && !NO_FAKE_USER.has(struct) ? propItem({ kind: 'prop', data: id, property: 'use_fake_user', text: '', icon: 'FAKE_USER_OFF', toggle: true }, env) : null,
     // The open operator: Open beside New, an icon beside a name.

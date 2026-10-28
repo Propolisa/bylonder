@@ -81,7 +81,7 @@ export function createAddMesh(
     const recipe = recipeOf(preset, { ...Object.fromEntries(Object.entries(preset.schema).map(([key, def]) => [key, def.default])), ...options });
     const node = buildMesh(
       world.scene,
-      commands.unique(preset.title.replace(/\s/g, "")),
+      commands.unique(preset.name ?? preset.title.replace(/\s/g, "")),
       recipe,
     );
     node.metadata = {

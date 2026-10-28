@@ -36,16 +36,30 @@ BALANCE = {
 source = bpy.data.images.new("Input", SIZE, SIZE, float_buffer=True)
 
 
+def color_ramp(node, ramp):
+    """A Color Ramp's settings by RNA name, its elements as {position, color} (the first two exist already)."""
+    for key in ("color_mode", "interpolation", "hue_interpolation"):
+        setattr(node.color_ramp, key, ramp[key])
+    elements = node.color_ramp.elements
+    while len(elements) < len(ramp["elements"]):
+        elements.new(0.5)
+    for element, settings in zip(elements, sorted(ramp["elements"], key=lambda e: e["position"])):
+        element.position, element.color = settings["position"], settings["color"]
+
+
 def evaluate(idname, properties, inputs, output):
     tree.nodes.clear()
     node = tree.nodes.new(idname)
     for key, value in properties.items():
-        setattr(node, key, value)
+        if key == "color_ramp":
+            color_ramp(node, value)
+        else:
+            setattr(node, key, value)
     for identifier, value in inputs.items():
         socket = next(s for s in node.inputs if s.identifier == identifier)
         socket.default_value = value
     first, value = next(iter(inputs.items()))
-    source.pixels[:] = (list(value) if isinstance(value, tuple) else [value, value, value, 1.0]) * SIZE * SIZE
+    source.pixels[:] = ((list(value) + [1.0])[:4] if isinstance(value, tuple) else [value, value, value, 1.0]) * SIZE * SIZE
     image = tree.nodes.new("CompositorNodeImage")
     image.image = source
     tree.links.new(image.outputs["Image"], next(s for s in node.inputs if s.identifier == first))
@@ -71,6 +85,37 @@ for operation in bpy.types.ShaderNodeMath.bl_rna.properties["operation"].enum_it
 for blend in bpy.types.ShaderNodeMix.bl_rna.properties["blend_type"].enum_items.keys():
     cases.append(case("shader", "ShaderNodeMix", {"data_type": "RGBA", "blend_type": blend}, COLORS, "Result_Color"))
 cases.append(case("shader", "ShaderNodeMath", {"operation": "ADD", "use_clamp": True}, {"Value": 0.7, "Value_001": 1.3}, "Value"))
+VECTOR = (0.31, 0.62, 0.93)
+NOISE = {"W": 1.7, "Scale": 3.0, "Detail": 4.5, "Roughness": 0.6, "Lacunarity": 2.2, "Offset": 0.3, "Gain": 1.4, "Distortion": 0.4}
+for noise_type in bpy.types.ShaderNodeTexNoise.bl_rna.properties["noise_type"].enum_items.keys():
+    for dimensions in ("1D", "2D", "3D", "4D"):
+        first = {"W": NOISE["W"]} if dimensions == "1D" else {"Vector": VECTOR}
+        for output in ("Fac", "Color"):
+            cases.append(case("shader", "ShaderNodeTexNoise", {"noise_type": noise_type, "noise_dimensions": dimensions},
+                              {**first, **NOISE}, output))
+for settings, inputs in [({"noise_dimensions": "3D", "normalize": False}, {"Detail": 0.0}), ({"noise_dimensions": "3D"}, {"Detail": 15.0, "Distortion": 0.0}),
+                         ({"noise_dimensions": "4D"}, {"W": 2.5, "Scale": 6.0, "Detail": 8.0, "Roughness": 0.55})]:
+    cases.append(case("shader", "ShaderNodeTexNoise", settings, {"Vector": VECTOR, **inputs}, "Fac"))
+RAMPS = [
+    {"interpolation": "LINEAR", "elements": [{"position": 0.2, "color": (0.1, 0.0, 0.0, 1.0)}, {"position": 0.7, "color": (1.0, 0.4, 0.05, 0.5)}]},
+    {"interpolation": "EASE", "elements": [{"position": 0.0, "color": (0.0, 0.0, 0.0, 1.0)}, {"position": 1.0, "color": (1.0, 0.8, 0.2, 1.0)}]},
+    {"interpolation": "CONSTANT", "elements": [{"position": 0.3, "color": (0.2, 0.1, 0.0, 1.0)}, {"position": 0.6, "color": (0.9, 0.3, 0.1, 1.0)}]},
+    {"interpolation": "LINEAR", "elements": [{"position": 0.0, "color": (0.0, 0.0, 0.0, 1.0)}, {"position": 0.45, "color": (0.8, 0.05, 0.0, 1.0)},
+                                             {"position": 0.75, "color": (1.0, 0.5, 0.0, 1.0)}, {"position": 1.0, "color": (1.0, 0.95, 0.4, 1.0)}]},
+    {"interpolation": "B_SPLINE", "elements": [{"position": 0.1, "color": (0.0, 0.1, 0.2, 1.0)}, {"position": 0.5, "color": (0.9, 0.2, 0.1, 1.0)},
+                                               {"position": 0.9, "color": (0.2, 0.9, 0.3, 1.0)}]},
+    {"interpolation": "CARDINAL", "elements": [{"position": 0.1, "color": (0.0, 0.1, 0.2, 1.0)}, {"position": 0.5, "color": (0.9, 0.2, 0.1, 1.0)},
+                                               {"position": 0.9, "color": (0.2, 0.9, 0.3, 1.0)}]},
+    {"interpolation": "CONSTANT", "elements": [{"position": 0.1, "color": (0.0, 0.1, 0.2, 1.0)}, {"position": 0.5, "color": (0.9, 0.2, 0.1, 1.0)},
+                                               {"position": 0.9, "color": (0.2, 0.9, 0.3, 1.0)}]},
+    {"color_mode": "HSV", "hue_interpolation": "FAR", "elements": [{"position": 0.0, "color": (1.0, 0.0, 0.0, 1.0)}, {"position": 1.0, "color": (0.0, 0.0, 1.0, 1.0)}]},
+    {"color_mode": "HSL", "hue_interpolation": "CW", "elements": [{"position": 0.2, "color": (0.9, 0.6, 0.1, 1.0)}, {"position": 0.8, "color": (0.1, 0.3, 0.9, 1.0)}]},
+]
+for ramp in RAMPS:
+    ramp = {"color_mode": "RGB", "interpolation": "LINEAR", "hue_interpolation": "NEAR", **ramp}
+    for fac in (0.37, 0.81):
+        for output in ("Color", "Alpha"):
+            cases.append(case("shader", "ShaderNodeValToRGB", {"color_ramp": ramp}, {"Fac": fac}, output))
 for mode, inputs in BALANCE.items():
     cases.append(case("compositor", "CompositorNodeColorBalance", {}, {"Image": IMAGE, "Type": mode, **inputs}, "Image"))
 json.dump({"blender": bpy.app.version_string, "cases": cases}, open(out_path, "w"), indent=1)

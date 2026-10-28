@@ -5,9 +5,15 @@
 // the f suffix GLSL ES lacks. Library symbols get a bl_ prefix so they cannot meet Babylon's (square, wrap).
 import { glsl as libraries } from './gpu-library.js';
 
-// Where GLSL ES differs from the desktop GLSL Blender targets: (function, text, replacement, reason).
+// Where GLSL ES differs from the desktop GLSL Blender targets: (function, text or pattern, replacement, reason), applied
+// to each of the function's overloads it is found in.
 const FIXES = [
   ['compatible_mod', 'a - N * b', 'a - float(N) * b', 'GLSL ES has no implicit int to float conversion'],
+  ['noise_grad', 'float g = 1u + (h & 7u);', 'float g = float(1u + (h & 7u));', 'GLSL ES has no implicit uint to float conversion'],
+  ['noise_perlin', /\b(f[xyzw]) - 1(?![.\d])/g, '$1 - 1.0', 'GLSL ES has no implicit int to float conversion'],
+  ['valtorgb_nearest', 'fac * (textureSize(colormap, 0).x - 1)', 'fac * float(textureSize(colormap, 0).x - 1)', 'GLSL ES has no implicit int to float conversion'],
+  ['valtorgb', 'sampler1DArray', 'sampler2D', 'WebGL 2 has no 1D textures: a color map is a 2D texture one texel high'],
+  ['valtorgb_nearest', 'sampler1DArray', 'sampler2D', 'WebGL 2 has no 1D textures: a color map is a 2D texture one texel high'],
 ];
 
 const PREFIX = 'bl_';
@@ -22,7 +28,9 @@ const condition = (expression, macros) => {
   try { return !!Function(`return (${js});`)(); } catch { return false; }
 };
 
-// The macros a file defines and its code outside preprocessor lines, with conditional blocks resolved.
+// A file's code outside preprocessor lines, with conditional blocks resolved and its macros expanded as they stand
+// where the code is (a library can #undef what it defined for itself, as the hash library's mix); `macros` takes
+// what it defines.
 function preprocess(text, macros) {
   const lines = stripComments(text).replace(/\\\r?\n/g, ' ').split('\n');
   // Per open conditional: whether its current branch is on, and whether one of its branches was.
@@ -30,9 +38,12 @@ function preprocess(text, macros) {
   const on = () => active.every((c) => c.on);
   const open = (value) => active.push({ on: value, taken: value });
   const branch = (value) => { const c = active.at(-1); c.on = !c.taken && value; c.taken ||= c.on; };
+  let pending = [];
+  const flush = () => { code.push(expand(pending.join('\n'), macros)); pending = []; };
   for (const line of lines) {
     const directive = /^\s*#\s*(\w+)\s*(.*)$/.exec(line);
-    if (!directive) { if (on()) code.push(line); continue; }
+    if (!directive) { if (on()) pending.push(line); continue; }
+    flush();
     const [, name, rest] = directive;
     if (name === 'if') open(condition(rest, macros));
     else if (name === 'ifdef') open(macros.has(rest.trim()));
@@ -43,8 +54,9 @@ function preprocess(text, macros) {
     else if (name === 'define' && on()) {
       const [, id, params, body] = /^(\w+)(?:\(([^)]*)\))?\s*(.*)$/.exec(rest);
       macros.set(id, { params: params === undefined ? null : params.split(',').map((p) => p.trim()).filter(Boolean), body: body.trim() });
-    }
+    } else if (name === 'undef' && on()) macros.delete(rest.trim());
   }
+  flush();
   return code.join('\n');
 }
 
@@ -113,18 +125,32 @@ const dialect = (text) => text
   .replace(/\.([xyzwrgba]{1,4})\(\)/g, '.$1')
   .replace(/\b(\d+\.\d*|\.\d+|\d+)([eE][+-]?\d+)?[fF]\b/g, '$1$2');
 
+// The libraries each after what it includes, the compatibility macros (gpu_shader_compat.hh's) first.
+function includeOrder() {
+  const order = [], seen = new Set();
+  const visit = (file) => {
+    if (seen.has(file) || !libraries[file]) return;
+    seen.add(file);
+    for (const [, name] of libraries[file].matchAll(/^\s*#include "([^"]+)"/gm)) visit(name);
+    order.push(file);
+  };
+  ['gpu_shader_compat_glsl.glsl', ...Object.keys(libraries)].forEach(visit);
+  return order;
+}
+
 function parse() {
-  const macros = new Map();
-  const codes = Object.entries(libraries).map(([file, text]) => [file, preprocess(text, macros)]);
+  // Every function Bylonder links runs in a fragment shader (a material's, or a compositor node's pass).
+  const macros = new Map([['GPU_FRAGMENT_SHADER', { params: null, body: '1' }]]);
+  const codes = includeOrder().map((file) => [file, preprocess(libraries[file], macros)]);
   const symbols = new Map();
-  for (const [, code] of codes) for (const [name, text] of declarations(expand(code, macros))) {
+  for (const [, code] of codes) for (const [name, text] of declarations(code)) {
     if (!symbols.has(name)) symbols.set(name, []);
     symbols.get(name).push(dialect(text));
   }
   for (const [name, text, replacement, reason] of FIXES) {
-    const list = symbols.get(name), at = list?.findIndex((t) => t.includes(text));
-    if (!(at >= 0)) throw Error(`glsl.js: the fix for ${name} (${reason}) no longer applies`);
-    list[at] = list[at].replace(text, replacement);
+    const list = symbols.get(name) ?? [], matches = (t) => (typeof text === 'string' ? t.includes(text) : t.match(text));
+    if (!list.some(matches)) throw Error(`glsl.js: the fix for ${name} (${reason}) no longer applies`);
+    for (let i = 0; i < list.length; i++) if (matches(list[i])) list[i] = list[i].replace(text, replacement);
   }
   return symbols;
 }

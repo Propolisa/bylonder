@@ -2149,6 +2149,2883 @@
    ]
   },
   {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.741935,
+    0.741935,
+    0.741935,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.741935,
+    0.865721,
+    0.507691,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.554607,
+    0.554607,
+    0.554607,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.554607,
+    1.251764,
+    1.016698,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.960096,
+    0.960096,
+    0.960096,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.960096,
+    1.65698,
+    1.146152,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    1.239921,
+    1.239921,
+    1.239921,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "MULTIFRACTAL",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    1.239921,
+    1.146894,
+    1.413121,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.003919,
+    0.003919,
+    0.003919,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.003919,
+    0.016982,
+    0.004509,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.00063,
+    0.00063,
+    0.00063,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.00063,
+    0.03714,
+    0.030116,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.023856,
+    0.023856,
+    0.023856,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.023856,
+    0.036766,
+    0.022365,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.016199,
+    0.016199,
+    0.016199,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "RIDGED_MULTIFRACTAL",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.016199,
+    0.002012,
+    0.042332,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    -0.062461,
+    -0.062461,
+    -0.062461,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    -0.062461,
+    0.478947,
+    -0.066158,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.033638,
+    0.033638,
+    0.033638,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.033638,
+    1.193817,
+    0.84908,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.52558,
+    0.52558,
+    0.52558,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.52558,
+    1.32475,
+    0.891712,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.839965,
+    0.839965,
+    0.839965,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HYBRID_MULTIFRACTAL",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.839965,
+    0.800032,
+    0.591497,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.457763,
+    0.457763,
+    0.457763,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.457763,
+    0.476153,
+    0.375851,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.390161,
+    0.390161,
+    0.390161,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.390161,
+    0.583378,
+    0.527417,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.494646,
+    0.494646,
+    0.494646,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.494646,
+    0.640058,
+    0.555504,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.569348,
+    0.569348,
+    0.569348,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "FBM",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.569348,
+    0.540972,
+    0.577685,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    -0.104112,
+    -0.104112,
+    -0.104112,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "1D"
+   },
+   "inputs": {
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    -0.104112,
+    0.529401,
+    -0.079145,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.028295,
+    0.028295,
+    0.028295,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "2D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.028295,
+    0.973018,
+    0.810782,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.558928,
+    0.558928,
+    0.558928,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.558928,
+    1.250116,
+    0.890998,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Fac",
+   "result": [
+    0.946972,
+    0.946972,
+    0.946972,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_type": "HETERO_TERRAIN",
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 1.7,
+    "Scale": 3.0,
+    "Detail": 4.5,
+    "Roughness": 0.6,
+    "Lacunarity": 2.2,
+    "Offset": 0.3,
+    "Gain": 1.4,
+    "Distortion": 0.4
+   },
+   "output": "Color",
+   "result": [
+    0.946972,
+    0.815507,
+    0.73012,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_dimensions": "3D",
+    "normalize": false
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "Detail": 0.0
+   },
+   "output": "Fac",
+   "result": [
+    0.255865,
+    0.255865,
+    0.255865,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_dimensions": "3D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "Detail": 15.0,
+    "Distortion": 0.0
+   },
+   "output": "Fac",
+   "result": [
+    0.536097,
+    0.536097,
+    0.536097,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeTexNoise",
+   "properties": {
+    "noise_dimensions": "4D"
+   },
+   "inputs": {
+    "Vector": [
+     0.31,
+     0.62,
+     0.93
+    ],
+    "W": 2.5,
+    "Scale": 6.0,
+    "Detail": 8.0,
+    "Roughness": 0.55
+   },
+   "output": "Fac",
+   "result": [
+    0.524919,
+    0.524919,
+    0.524919,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.1,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.7,
+       "color": [
+        1.0,
+        0.4,
+        0.05,
+        0.5
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.406,
+    0.136,
+    0.017,
+    0.83
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.1,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.7,
+       "color": [
+        1.0,
+        0.4,
+        0.05,
+        0.5
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    0.83,
+    0.83,
+    0.83,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.1,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.7,
+       "color": [
+        1.0,
+        0.4,
+        0.05,
+        0.5
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    1.0,
+    0.4,
+    0.05,
+    0.5
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.1,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.7,
+       "color": [
+        1.0,
+        0.4,
+        0.05,
+        0.5
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "EASE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.8,
+        0.2,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.309394,
+    0.247515,
+    0.061879,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "EASE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.8,
+        0.2,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "EASE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.8,
+        0.2,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    0.905418,
+    0.724334,
+    0.181084,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "EASE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.8,
+        0.2,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.3,
+       "color": [
+        0.2,
+        0.1,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.6,
+       "color": [
+        0.9,
+        0.3,
+        0.1,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.2,
+    0.1,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.3,
+       "color": [
+        0.2,
+        0.1,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.6,
+       "color": [
+        0.9,
+        0.3,
+        0.1,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.3,
+       "color": [
+        0.2,
+        0.1,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.6,
+       "color": [
+        0.9,
+        0.3,
+        0.1,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    0.9,
+    0.3,
+    0.1,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.3,
+       "color": [
+        0.2,
+        0.1,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.6,
+       "color": [
+        0.9,
+        0.3,
+        0.1,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.45,
+       "color": [
+        0.8,
+        0.05,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.75,
+       "color": [
+        1.0,
+        0.5,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.95,
+        0.4,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.657754,
+    0.04111,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.45,
+       "color": [
+        0.8,
+        0.05,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.75,
+       "color": [
+        1.0,
+        0.5,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.95,
+        0.4,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.45,
+       "color": [
+        0.8,
+        0.05,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.75,
+       "color": [
+        1.0,
+        0.5,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.95,
+        0.4,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    1.0,
+    0.60793,
+    0.095991,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.45,
+       "color": [
+        0.8,
+        0.05,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 0.75,
+       "color": [
+        1.0,
+        0.5,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        1.0,
+        0.95,
+        0.4,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "B_SPLINE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.530508,
+    0.198848,
+    0.147285,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "B_SPLINE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "B_SPLINE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    0.408818,
+    0.689258,
+    0.240063,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "B_SPLINE",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CARDINAL",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.701016,
+    0.096128,
+    0.109238,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CARDINAL",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CARDINAL",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    0.363047,
+    0.764668,
+    0.257871,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CARDINAL",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.0,
+    0.099976,
+    0.199951,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    0.899902,
+    0.199951,
+    0.099976,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "RGB",
+     "interpolation": "CONSTANT",
+     "hue_interpolation": "NEAR",
+     "elements": [
+      {
+       "position": 0.1,
+       "color": [
+        0.0,
+        0.1,
+        0.2,
+        1.0
+       ]
+      },
+      {
+       "position": 0.5,
+       "color": [
+        0.9,
+        0.2,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.9,
+       "color": [
+        0.2,
+        0.9,
+        0.3,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSV",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "FAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.52,
+    1.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSV",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "FAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSV",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "FAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    0.0,
+    0.76,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSV",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "FAR",
+     "elements": [
+      {
+       "position": 0.0,
+       "color": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "position": 1.0,
+       "color": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSL",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "CW",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.9,
+        0.6,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.8,
+       "color": [
+        0.1,
+        0.3,
+        0.9,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Color",
+   "result": [
+    0.491641,
+    0.899902,
+    0.099976,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSL",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "CW",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.9,
+        0.6,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.8,
+       "color": [
+        0.1,
+        0.3,
+        0.9,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.37
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSL",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "CW",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.9,
+        0.6,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.8,
+       "color": [
+        0.1,
+        0.3,
+        0.9,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Color",
+   "result": [
+    0.099976,
+    0.300049,
+    0.899902,
+    1.0
+   ]
+  },
+  {
+   "tree": "shader",
+   "node": "ShaderNodeValToRGB",
+   "properties": {
+    "color_ramp": {
+     "color_mode": "HSL",
+     "interpolation": "LINEAR",
+     "hue_interpolation": "CW",
+     "elements": [
+      {
+       "position": 0.2,
+       "color": [
+        0.9,
+        0.6,
+        0.1,
+        1.0
+       ]
+      },
+      {
+       "position": 0.8,
+       "color": [
+        0.1,
+        0.3,
+        0.9,
+        1.0
+       ]
+      }
+     ]
+    }
+   },
+   "inputs": {
+    "Fac": 0.81
+   },
+   "output": "Alpha",
+   "result": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
    "tree": "compositor",
    "node": "CompositorNodeColorBalance",
    "properties": {},

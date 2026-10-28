@@ -11,6 +11,8 @@ export const modifierDefinitions=new Map([...blenderModifierDefinitions,arrayDef
 export function registerModifier(definition){if(!definition.id||!definition.schema||!definition.evaluate)throw Error('Invalid modifier definition');modifierDefinitions.set(definition.id,definition);}
 export const modifierStack=node=>node.metadata?.wbModifiers||[];
 const valid=(value,def)=>{
+  // A data-block pointer (a Displace modifier's texture) is its id, or null.
+  if(def.id){if(value!==null&&typeof value!=='string')throw Error('Invalid modifier value');return value;}
   if(typeof value!==typeof def.default)throw Error('Invalid modifier value');
   if(typeof value==='number'){if(!Number.isFinite(value))throw Error('Modifier values must be finite');value=Math.max(def.min??-1e9,Math.min(def.max??1e9,value));if(def.integer)value=Math.round(value);}
   if(def.options&&!Object.values(def.options).includes(value))throw Error('Invalid modifier option');return value;
@@ -63,11 +65,14 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     if(curvePaths){const transform=curve.computeWorldMatrix(true).multiply(inverse);curvePaths=curvePaths.map(path=>({...path,points:path.points.map(point=>{const v=Vector3.TransformCoordinates(Vector3.FromArray(point),transform);return v.asArray();})}));}
     return {objectMatrix,curvePaths};
   }
+  // A stack entry with its texture's settings (textures.js), which the module's Tex for it takes.
+  const textureOf=m=>(m.values.texture&&world.textures?.byId(m.values.texture)?.values)||null;
+  const withTexture=m=>(m.values.texture?{...m,texture:textureOf(m)}:m);
   const jobName=(node,modifiers)=>node.name+' | '+modifiers.map(m=>m.name).join(', ');
   const blenderModifiers=stack=>stack.filter(m=>m.showViewport&&modifierDefinitions.get(m.type)?.mesh);
   // Work running Blender's modifiers on a Mesh, copied now. It asks first when they would make very many faces.
   function blenderWork(mesh,modifiers,selectmode){
-    const input=evaluation(mesh,modifiers,selectmode),faces=estimatedFaces(mesh,modifiers);
+    const input=evaluation(mesh,modifiers.map(withTexture),selectmode),faces=estimatedFaces(mesh,modifiers);
     const question=`About ${Math.round(faces).toLocaleString('en-US')} faces, which can take very long or run out of memory`;
     return (signal,job)=>then(faces>ASK_FACES?job?.ask(question):null,()=>evaluator(input,signal));
   }
@@ -111,7 +116,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     }finally{applying=false;}
   }
   function signature(node){
-    return JSON.stringify([modifierStack(node),modifierStack(node).map(m=>{const c=context(node,m);return [c.objectMatrix?.asArray(),c.curvePaths];})]);
+    return JSON.stringify([modifierStack(node),modifierStack(node).map(m=>{const c=context(node,m);return [c.objectMatrix?.asArray(),c.curvePaths,textureOf(m)];})]);
   }
   function report(node,error){const text=error.message;if(errors.get(nodeId(node))!==text){errors.set(nodeId(node),text);notify(text);emit();}}
   // Goes back to the stack that evaluated last, as an undo step. When that is the stack as it is (the geometry made

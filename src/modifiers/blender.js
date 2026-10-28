@@ -3,7 +3,8 @@
 // ModifierData at the DNA fields RNA names (dna-modifiers.json).
 import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
-import { evaluateModifiers, drawModifierPanel, meshData, EditMesh } from '../bmesh/bmesh-wasm.js';
+import { evaluateModifiers, drawModifierPanel, meshData, EditMesh, blenderModule } from '../bmesh/bmesh-wasm.js';
+import { moduleTexture, freeUnusedTextures } from '../blenkernel/texture/texture.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
 import { fieldLayout, writeValues } from './dna-write.js';
 
@@ -41,16 +42,18 @@ function schema(properties, located, hidden = {}) {
 function definition(id) {
   const { value: type, name, description, icon, struct, properties } = rna.types[id];
   const located = dna[struct].properties;
-  const fields = schema(properties, located, NOT_OFFERED[id]);
+  // A Texture pointer (MappingInfoModifierData's), stored as the texture's id (textures.js).
+  const textured = properties.texture?.fixed_type === 'Texture';
+  const fields = { ...schema(properties, located, NOT_OFFERED[id]), ...(textured && { texture: { label: 'Texture', default: null, id: 'Texture', animatable: false } }) };
   // The DNA layouts of the properties a stack entry's settings name, which is all writing them needs.
   const layouts = (values) => Object.fromEntries(Object.keys(values).map((path) => path.match(/^\w+/)[0])
-    .filter((prop) => located[prop] && properties[prop]).map((prop) => [prop, fieldLayout(located[prop], properties[prop])]));
+    .filter((prop) => located[prop] && properties[prop] && located[prop].kind !== 'pointer').map((prop) => [prop, fieldLayout(located[prop], properties[prop])]));
   const write = (values) => (view, address) => writeValues(view, address, layouts(values), values);
   return {
     id, name, description, icon, category: 'Generate', blender: `object.modifier_add:${id}`,
     schema: fields,
     defaults: () => Object.fromEntries(Object.entries(fields).map(([path, entry]) => [path, entry.default])),
-    mesh: { type, write, layouts },
+    mesh: { type, write, layouts, textured },
   };
 }
 
@@ -61,11 +64,16 @@ export const blenderModifierDefinition = definition;
 export const modifierPointers = (id) => Object.fromEntries(Object.entries(dna[rna.types[id].struct].properties)
   .filter(([, field]) => field.kind === 'pointer').map(([name, { offset }]) => [name, offset]));
 
-// Stack entries ({type, values}) as the module takes them.
-export const moduleModifiers = (modifiers) => modifiers.map(({ type, values }) => {
-  const { mesh: { type: value, write } } = blenderModifierDefinitions.find((d) => d.id === type);
-  return { type: value, write: write(values) };
+// Stack entries ({type, values, texture}: a textured modifier's texture settings) as the module takes them; `texture`
+// gives the Tex a modifier points at, by default one outside Main with the entry's settings.
+const entryTexture = (entry) => (entry.texture ? moduleTexture(entry.texture) : 0);
+export const moduleModifiers = (modifiers, texture = entryTexture) => modifiers.map((entry) => {
+  const { mesh: { type: value, write, textured } } = blenderModifierDefinitions.find((d) => d.id === entry.type);
+  const tex = textured ? texture(entry) : 0;
+  return { type: value, write: (view, md) => { write(entry.values)(view, md); if (textured) blenderModule.exports.modifier_texture_set(md, tex); } };
 });
+// Runs fn on the module's evaluation of a stack, then frees the textures no modifier uses any more.
+const withTextures = (fn) => { try { return fn(); } finally { freeUnusedTextures(); } };
 
 // An error a modifier reported, as against the module failing (a trap, or running out of memory).
 export class ModifierError extends Error {
@@ -81,15 +89,15 @@ export function evaluated({ mesh, errors }) {
 }
 
 // Evaluates Blender modifiers on a Mesh.
-export const evaluateBlenderModifiers = (mesh, modifiers) => evaluated(evaluateModifiers(mesh, moduleModifiers(modifiers)));
+export const evaluateBlenderModifiers = (mesh, modifiers) => withTextures(() => evaluated(evaluateModifiers(mesh, moduleModifiers(modifiers))));
 
 // An evaluation that can be posted to another realm: a Mesh's data, stack entries, and for Edit Mode the select mode
 // of the edit mesh the Mesh was extracted from.
 export const evaluation = (mesh, modifiers, selectmode) =>
-  ({ mesh: meshData(mesh), modifiers: modifiers.map(({ type, values }) => ({ type, values })), selectmode });
+  ({ mesh: meshData(mesh), modifiers: modifiers.map(({ type, values, texture }) => ({ type, values, texture })), selectmode });
 
 // Runs an evaluation in this realm's module: the evaluated Mesh detached from it.
-export function evaluate({ mesh, modifiers, selectmode }) {
+export const evaluate = ({ mesh, modifiers, selectmode }) => withTextures(() => {
   const input = createMesh(mesh), stack = moduleModifiers(modifiers);
   if (selectmode === undefined) return evaluated(evaluateModifiers(input, stack)).detach();
   const edit = EditMesh.fromMesh(input, selectmode);
@@ -98,7 +106,7 @@ export function evaluate({ mesh, modifiers, selectmode }) {
   } finally {
     edit.free();
   }
-}
+});
 
 // How many times the faces it takes a modifier makes, where its settings say so up front.
 const GROWTH = {
@@ -111,5 +119,5 @@ const GROWTH = {
 export const estimatedFaces = (mesh, modifiers) =>
   modifiers.reduce((faces, { type, values }) => faces * (GROWTH[type]?.(values) ?? 1), mesh.faces_num || mesh.edges_num);
 
-// What Blender's panel for a stack entry draws with its values (drawModifierPanel).
-export const modifierPanel = (modifier) => drawModifierPanel(moduleModifiers([modifier])[0]);
+// What Blender's panel for a stack entry draws with its values (drawModifierPanel), its texture Main's (`texture(id)`).
+export const modifierPanel = (modifier, texture = () => 0) => drawModifierPanel(moduleModifiers([modifier], (entry) => texture(entry.values.texture))[0]);
