@@ -4,6 +4,9 @@ import { DefaultRenderingPipeline, ImageProcessingConfiguration, MotionBlurPostP
 // tone mapping/exposure/contrast or creates render-engine effects. Effects are attached per camera, only to the
 // cameras of views in Rendered shading or camera view (like EEVEE in Blender's viewport), so views with
 // different shading render side by side without rebuilding anything.
+// Effects that need scene geometry (Raytracing, Motion Blur) read Babylon's geometry buffer renderer, which renders
+// for whichever camera the scene renders through, never its prepass renderer: the prepass is one scene-wide switch
+// that routes every camera's draw into its targets, so views without these effects would never reach their canvas.
 export const viewTransforms = {
   STANDARD: { label: 'Standard', apply: ip => { ip.toneMappingEnabled = false; } },
   KHR_PBR_NEUTRAL: { label: 'Khronos PBR Neutral', apply: ip => { ip.toneMappingEnabled = true; ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_KHR_PBR_NEUTRAL; } },
@@ -22,17 +25,30 @@ export function readAuthoredRender(scene) {
 
 export function createRenderEngine(scene) {
   const attached = new Map(); // camera -> { key, effects }
+  const usesGeometry = effects => !!(effects.ssao || effects.ssr || effects.motion);
+  const ownGeometryBuffer = !scene.geometryBufferRenderer;
+  // The geometry buffer renders once per scene render; only cameras with effects that read it need it filled.
+  const gateGeometryBuffer = scene.onBeforeRenderObservable.add(() => {
+    const buffer = scene.geometryBufferRenderer, effects = attached.get(scene.activeCamera)?.effects;
+    if (buffer && ownGeometryBuffer) buffer.renderList = effects && usesGeometry(effects) ? null : [];
+  });
   const drop = camera => {
     const entry = attached.get(camera); if (!entry) return;
     const e = entry.effects; e.pipeline?.dispose(); e.ssr?.dispose(); e.ssao?.dispose(); e.motion?.dispose();
     attached.delete(camera);
+    if (ownGeometryBuffer && ![...attached.values()].some(a => usesGeometry(a.effects))) scene.disableGeometryBufferRenderer();
   };
   const build = (camera, settings, samples) => {
     const e = settings.eevee, r = settings.render, effects = {};
-    if (samples > 1) { effects.pipeline = new DefaultRenderingPipeline('__renderSamples', false, scene, [camera]); effects.pipeline.imageProcessingEnabled = false; }
-    if (e.useRaytracing) effects.ssao = new SSAO2RenderingPipeline('__fastGI', scene, 0.5, [camera]);
-    if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline('__screenTrace', scene, [camera]);
-    if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess('__motionBlur', scene, 1, camera);
+    // Babylon's pipeline manager keys pipelines by name, so each camera's pipelines need their own.
+    const name = id => `__${id}:${camera.uniqueId}`;
+    if (samples > 1) { effects.pipeline = new DefaultRenderingPipeline(name('renderSamples'), false, scene, [camera]); effects.pipeline.imageProcessingEnabled = false; }
+    // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
+    // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
+    if (e.useRaytracing) effects.ssao = Object.assign(new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true), { useViewportInCombineStage: false });
+    if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
+    if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess(name('motionBlur'), scene, 1, camera, undefined, undefined, undefined, undefined, undefined, true);
+    if (usesGeometry(effects)) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
     return effects;
   };
   return {
@@ -56,6 +72,6 @@ export function createRenderEngine(scene) {
         if (effects.motion) effects.motion.motionStrength = r.motionBlurShutter * 2;
       }
     },
-    dispose() { for (const camera of [...attached.keys()]) drop(camera); },
+    dispose() { scene.onBeforeRenderObservable.remove(gateGeometryBuffer); for (const camera of [...attached.keys()]) drop(camera); },
   };
 }

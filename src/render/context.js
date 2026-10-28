@@ -24,7 +24,6 @@ function useCamera(name) {
   const { world, scene } = built;
   const camera = name ? scene.cameras.find((c) => c.name === name) : built.authoredCamera;
   if (!camera) throw Error(name ? `No camera named ${name}` : 'No camera found in scene. Add a camera in code or pick one in Properties > Scene.');
-  if (scene.activeCamera === camera) return camera;
   scene.activeCamera = camera;
   world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
   return camera;
