@@ -41,5 +41,73 @@ class SurfaceCurve:
     pass
 
 
+class Collection:
+    pass
+
+
+class Curve:
+    pass
+
+
+class TextCurve:
+    pass
+
+
+class GreasePencil:
+    pass
+
+
+class GreasePencilLayer:
+    pass
+
+
+class GreasePencilLayerGroup:
+    pass
+
+
+class GreasePencilTreeNode:
+    pass
+
+
+class Brush:
+    pass
+
+
+class ViewLayer:
+    pass
+
+
+class FreestyleLineStyle:
+    pass
+
+
+class ParticleSettings:
+    pass
+
+
+class Texture:
+    pass
+
+
+class Context:
+    pass
+
+
+class WindowManager:
+    pass
+
+
+class Theme:
+    pass
+
+
+class AssetShelf:
+    pass
+
+
+class UILayout:
+    pass
+
+
 class Operator:
     pass

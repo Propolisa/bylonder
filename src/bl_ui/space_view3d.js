@@ -4,7 +4,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {operator_context} from './_bl_ui_utils.layout.js';
 import {pi} from './math.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt_} from './bpy.app.translations.js';
-import {Menu} from './bpy.types.js';
+import {Menu, Panel} from './bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = '__main__';
@@ -6542,6 +6542,440 @@ export var VIEW3D_MT_wpaint_vgroup_lock_pie =  __class__ ('VIEW3D_MT_wpaint_vgro
 		var __left0__ = tuple (['INVERT', 'ALL']);
 		props.action = __left0__ [0];
 		props.mask = __left0__ [1];
+	});}
+});
+export var VIEW3D_PT_shading =  __class__ ('VIEW3D_PT_shading', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Shading',
+	bl_ui_units_x: 12,
+	get get_shading () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var view = context.space_data;
+		if (view.py_metatype == 'VIEW_3D') {
+			return view.shading;
+		}
+		else {
+			return context.scene.display.shading;
+		}
+	});},
+	get draw () {return __get__ (this, function (self, _context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case '_context': var _context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		layout.label (__kwargtrans__ ({text: 'Viewport Shading'}));
+	});}
+});
+export var VIEW3D_PT_shading_lighting =  __class__ ('VIEW3D_PT_shading_lighting', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Lighting',
+	bl_parent_id: 'VIEW3D_PT_shading',
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		if (__in__ (shading.py_metatype, new set (['SOLID', 'MATERIAL']))) {
+			return true;
+		}
+		if (shading.py_metatype == 'RENDERED') {
+			var engine = context.scene.render.engine;
+			if (engine == 'BLENDER_EEVEE') {
+				return true;
+			}
+		}
+		return false;
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		var col = layout.column ();
+		var py_split = col.py_split (__kwargtrans__ ({factor: 0.95}));
+		if (shading.py_metatype == 'SOLID') {
+			col.row ().prop (shading, 'light', __kwargtrans__ ({expand: true}));
+			var col = py_split.column ();
+			var py_split = layout.py_split (__kwargtrans__ ({factor: 0.95}));
+			var col = py_split.column ();
+			var sub = col.row ();
+			if (shading.light == 'STUDIO') {
+				var prefs = context.preferences;
+				var system = prefs.system;
+				if (!(system.use_studio_light_edit)) {
+					sub.scale_y = 0.6;
+					sub.template_icon_view (shading, 'studio_light', __kwargtrans__ ({scale_popup: 3.0}));
+				}
+				else {
+					sub.prop (system, 'use_studio_light_edit', __kwargtrans__ ({text: 'Disable Studio Light Edit', icon: 'NONE', toggle: true}));
+				}
+				var col = py_split.column ();
+				col.operator ('screen.userpref_show', __kwargtrans__ ({emboss: false, text: '', icon: 'PREFERENCES'})).section = 'LIGHTS';
+				var py_split = layout.py_split (__kwargtrans__ ({factor: 0.95}));
+				var col = py_split.column ();
+				var row = col.row (__kwargtrans__ ({align: true}));
+				row.prop (shading, 'use_world_space_lighting', __kwargtrans__ ({text: '', icon: 'WORLD', toggle: true}));
+				var row = row.row (__kwargtrans__ ({align: true}));
+				row.active = shading.use_world_space_lighting;
+				row.prop (shading, 'studiolight_rotate_z', __kwargtrans__ ({text: 'Rotation'}));
+				var col = py_split.column ();
+			}
+			else if (shading.light == 'MATCAP') {
+				sub.scale_y = 0.6;
+				sub.template_icon_view (shading, 'studio_light', __kwargtrans__ ({scale_popup: 3.0}));
+				var col = py_split.column ();
+				col.operator ('screen.userpref_show', __kwargtrans__ ({emboss: false, text: '', icon: 'PREFERENCES'})).section = 'LIGHTS';
+				col.operator ('view3d.toggle_matcap_flip', __kwargtrans__ ({emboss: false, text: '', icon: 'ARROW_LEFTRIGHT'}));
+			}
+		}
+		else if (shading.py_metatype == 'MATERIAL') {
+			col.prop (shading, 'use_scene_lights');
+			col.prop (shading, 'use_scene_world');
+			var col = layout.column ();
+			var py_split = col.py_split (__kwargtrans__ ({factor: 0.95}));
+			if (!(shading.use_scene_world)) {
+				var col = py_split.column ();
+				var sub = col.row ();
+				sub.scale_y = 0.6;
+				sub.template_icon_view (shading, 'studio_light', __kwargtrans__ ({scale_popup: 3}));
+				var col = py_split.column ();
+				col.operator ('screen.userpref_show', __kwargtrans__ ({emboss: false, text: '', icon: 'PREFERENCES'})).section = 'LIGHTS';
+				var py_split = layout.py_split (__kwargtrans__ ({factor: 0.95}));
+				var col = py_split.column ();
+				var row = col.row (__kwargtrans__ ({align: true}));
+				row.prop (shading, 'use_studiolight_view_rotation', __kwargtrans__ ({text: '', icon: 'WORLD', toggle: true}));
+				var row = row.row (__kwargtrans__ ({align: true}));
+				row.prop (shading, 'studiolight_rotate_z', __kwargtrans__ ({text: 'Rotation'}));
+				col.prop (shading, 'studiolight_intensity');
+				col.prop (shading, 'studiolight_background_alpha');
+				col.prop (shading, 'studiolight_background_blur');
+				var col = py_split.column ();
+			}
+		}
+		else if (shading.py_metatype == 'RENDERED') {
+			col.prop (shading, 'use_scene_lights_render');
+			col.prop (shading, 'use_scene_world_render');
+			if (!(shading.use_scene_world_render)) {
+				var col = layout.column ();
+				var py_split = col.py_split (__kwargtrans__ ({factor: 0.95}));
+				var col = py_split.column ();
+				var sub = col.row ();
+				sub.scale_y = 0.6;
+				sub.template_icon_view (shading, 'studio_light', __kwargtrans__ ({scale_popup: 3}));
+				var col = py_split.column ();
+				col.operator ('screen.userpref_show', __kwargtrans__ ({emboss: false, text: '', icon: 'PREFERENCES'})).section = 'LIGHTS';
+				var py_split = layout.py_split (__kwargtrans__ ({factor: 0.95}));
+				var col = py_split.column ();
+				col.prop (shading, 'studiolight_rotate_z', __kwargtrans__ ({text: 'Rotation'}));
+				col.prop (shading, 'studiolight_intensity');
+				col.prop (shading, 'studiolight_background_alpha');
+				col.prop (shading, 'studiolight_background_blur');
+				var col = py_split.column ();
+			}
+		}
+	});}
+});
+export var VIEW3D_PT_shading_color =  __class__ ('VIEW3D_PT_shading_color', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Color',
+	bl_parent_id: 'VIEW3D_PT_shading',
+	get _draw_color_type () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 3, align: true})).prop (shading, 'color_type', __kwargtrans__ ({expand: true}));
+		if (shading.color_type == 'SINGLE') {
+			layout.row ().prop (shading, 'single_color', __kwargtrans__ ({text: ''}));
+		}
+	});},
+	get _draw_background_color () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		layout.row ().label (__kwargtrans__ ({text: 'Background'}));
+		layout.row ().prop (shading, 'background_type', __kwargtrans__ ({expand: true}));
+		if (shading.background_type == 'VIEWPORT') {
+			layout.row ().prop (shading, 'background_color', __kwargtrans__ ({text: ''}));
+		}
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		layout.label (__kwargtrans__ ({text: 'Wireframe'}));
+		layout.row ().prop (shading, 'wireframe_color_type', __kwargtrans__ ({expand: true}));
+		layout.separator ();
+		if (shading.py_metatype == 'SOLID') {
+			layout.label (__kwargtrans__ ({text: 'Object'}));
+			self._draw_color_type (context);
+			layout.separator ();
+			self._draw_background_color (context);
+		}
+		else if (shading.py_metatype == 'WIREFRAME') {
+			self._draw_background_color (context);
+		}
+	});}
+});
+export var VIEW3D_PT_shading_options =  __class__ ('VIEW3D_PT_shading_options', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Options',
+	bl_parent_id: 'VIEW3D_PT_shading',
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		return __in__ (shading.py_metatype, new set (['WIREFRAME', 'SOLID']));
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		var col = layout.column ();
+		if (shading.py_metatype == 'SOLID') {
+			col.prop (shading, 'show_backface_culling');
+		}
+		if (__in__ (shading.py_metatype, new set (['WIREFRAME', 'SOLID']))) {
+			var row = col.py_split ();
+			row.prop (shading, 'show_object_outline');
+			var sub = row.row ();
+			sub.active = shading.show_object_outline;
+			sub.prop (shading, 'object_outline_color', __kwargtrans__ ({text: ''}));
+		}
+		if (shading.py_metatype == 'SOLID' && __in__ (shading.light, new set (['STUDIO', 'MATCAP']))) {
+			var sub = col.row ();
+			var studio_light = shading.selected_studio_light;
+			sub.active = studio_light !== null && studio_light.has_specular_highlight_pass;
+			sub.prop (shading, 'show_specular_highlight', __kwargtrans__ ({text: 'Specular Lighting'}));
+		}
+		var row = col.row (__kwargtrans__ ({align: true}));
+		if (shading.py_metatype == 'WIREFRAME') {
+			row.prop (shading, 'show_xray_wireframe', __kwargtrans__ ({text: ''}));
+			var sub = row.row ();
+			sub.active = shading.show_xray_wireframe;
+			sub.prop (shading, 'xray_alpha_wireframe', __kwargtrans__ ({text: 'X-Ray'}));
+		}
+		else if (shading.py_metatype == 'SOLID') {
+			row.prop (shading, 'show_xray', __kwargtrans__ ({text: ''}));
+			var sub = row.row ();
+			sub.active = shading.show_xray;
+			sub.prop (shading, 'xray_alpha', __kwargtrans__ ({text: 'X-Ray'}));
+			var xray_active = shading.show_xray && shading.xray_alpha != 1;
+			var row = col.row (__kwargtrans__ ({align: true}));
+			row.prop (shading, 'show_shadows', __kwargtrans__ ({text: ''}));
+			row.active = !(xray_active);
+			var sub = row.row (__kwargtrans__ ({align: true}));
+			sub.active = shading.show_shadows;
+			sub.prop (shading, 'shadow_intensity', __kwargtrans__ ({text: 'Shadow'}));
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_shading_options_shadow', icon: 'PREFERENCES', text: ''}));
+			var row = col.row ();
+			row.active = !(xray_active);
+			row.prop (shading, 'use_dof', __kwargtrans__ ({text: 'Depth of Field'}));
+		}
+	});}
+});
+export var VIEW3D_PT_shading_cavity =  __class__ ('VIEW3D_PT_shading_cavity', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Cavity',
+	bl_parent_id: 'VIEW3D_PT_shading',
+	bl_options: new set (['DEFAULT_CLOSED']),
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		return __in__ (shading.py_metatype, new set (['SOLID']));
+	});},
+	get draw_header () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		var xray_active = shading.show_xray && shading.xray_alpha != 1;
+		var row = layout.row ();
+		row.active = !(xray_active);
+		row.prop (shading, 'show_cavity');
+		var row = row.row ();
+		row.active = shading.show_cavity;
+		row.prop (shading, 'cavity_type', __kwargtrans__ ({text: 'Type'}));
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		var xray_active = shading.show_xray && shading.xray_alpha != 1;
+		var col = layout.column ();
+		col.active = !(xray_active) && shading.show_cavity;
+		if (__in__ (shading.cavity_type, new set (['WORLD', 'BOTH']))) {
+			var row = col.row ();
+			row.label (__kwargtrans__ ({text: 'World Space'}));
+			row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_shading_options_ssao', icon: 'PREFERENCES', text: ''}));
+			var row = col.row ();
+			row.prop (shading, 'cavity_ridge_factor', __kwargtrans__ ({text: 'Ridge'}));
+			row.prop (shading, 'cavity_valley_factor', __kwargtrans__ ({text: 'Valley'}));
+		}
+		if (__in__ (shading.cavity_type, new set (['SCREEN', 'BOTH']))) {
+			col.label (__kwargtrans__ ({text: 'Screen Space'}));
+			var row = col.row ();
+			row.prop (shading, 'curvature_ridge_factor', __kwargtrans__ ({text: 'Ridge'}));
+			row.prop (shading, 'curvature_valley_factor', __kwargtrans__ ({text: 'Valley'}));
+		}
 	});}
 });
 export var VIEW3D_MT_greasepencil_material_active =  __class__ ('VIEW3D_MT_greasepencil_material_active', [Menu], {

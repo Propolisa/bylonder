@@ -1,11 +1,14 @@
-# Writes every RNA struct's properties to src/makesrna/rna-structs.json: for each struct its base and, per property,
-# [type initial, default] or, for pointers and collections, [type initial, struct] and 1 for a pointer that is never
-# None, so Blender's UI scripts read
-# what Bylonder does not bind as Blender's defaults.
-# usage: blender -b --factory-startup --python tools/blender-reference/rna-structs.py -- OUT.json
+# Writes every RNA struct's properties from Blender itself:
+# - rna-structs.json: per struct its base and, per property, [type initial, default] or, for pointers and collections,
+#   [type initial, struct] and 1 for a pointer that is never None, so Blender's UI scripts read what Bylonder does not
+#   bind as Blender's defaults.
+# - rna-ui.json: per struct its name and, per property it adds to its base, what the interface shows: name,
+#   description, icon, subtype, unit, read-only, ranges, step and precision, and enum items as
+#   [identifier, name, description, icon]. Loaded when an editor first draws properties (makesrna/rna.js).
+# usage: blender -b --factory-startup --python tools/blender-reference/rna-structs.py -- STRUCTS.json UI.json
 import bpy, json, sys
 
-out_path = sys.argv[sys.argv.index("--") + 1]
+structs_path, ui_path = sys.argv[sys.argv.index("--") + 1:][:2]
 
 
 def default(p):
@@ -18,12 +21,32 @@ def default(p):
     return None
 
 
-structs = {}
+def ui(p):
+    d = {"name": p.name}
+    for key, value, none in (("description", p.description, ""), ("icon", p.icon, "NONE"), ("subtype", p.subtype, "NONE"),
+                             ("unit", p.unit, "NONE")):
+        if value != none:
+            d[key] = value
+    if p.is_readonly:
+        d["readonly"] = 1
+    if p.type in {"INT", "FLOAT"}:
+        d.update(min=p.hard_min, max=p.hard_max, soft_min=p.soft_min, soft_max=p.soft_max, step=p.step)
+        if p.type == "FLOAT":
+            d["precision"] = p.precision
+    if p.type == "ENUM":
+        d["items"] = [[i.identifier, i.name, i.description, i.icon] for i in p.enum_items]
+        if p.is_enum_flag:
+            d["flag"] = 1
+    return d
+
+
+structs, uis = {}, {}
 for name in dir(bpy.types):
     rna = getattr(getattr(bpy.types, name), "bl_rna", None)
     if rna is None or rna.identifier != name:
         continue
-    props = {}
+    inherited = {p.identifier for p in rna.base.properties} if rna.base else set()
+    props, own = {}, {}
     for p in rna.properties:
         if p.identifier == "rna_type":
             continue
@@ -35,7 +58,11 @@ for name in dir(bpy.types):
         else:
             entry.append(default(p))
         props[p.identifier] = entry
+        if p.identifier not in inherited:
+            own[p.identifier] = ui(p)
     structs[name] = {"base": rna.base.identifier if rna.base else None, "props": props}
-with open(out_path, "w") as f:
-    json.dump(structs, f, separators=(",", ":"))
+    uis[name] = {"name": rna.name, "props": own}
+for path, data in ((structs_path, structs), (ui_path, uis)):
+    with open(path, "w") as f:
+        json.dump(data, f, separators=(",", ":"))
 print("structs written", len(structs))

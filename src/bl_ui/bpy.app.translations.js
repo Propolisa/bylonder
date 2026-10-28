@@ -81,13 +81,64 @@ export var pgettext_n = function (text, context) {
 	}
 	return text;
 };
+export var pgettext_data = function (text, context) {
+	if (typeof context == 'undefined' || (context != null && context.hasOwnProperty ("__kwargtrans__"))) {;
+		var context = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'text': var text = __allkwargs0__ [__attrib0__]; break;
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return text;
+};
 export var contexts =  __class__ ('contexts', [object], {
 	__module__: __name__,
 	py_default: '*',
 	operator_default: 'Operator',
+	amount: 'Amount',
+	color: 'Color',
+	constraint: 'Constraint',
+	countable: 'Countable',
+	navigation: 'Navigation',
+	render_layer: 'Render Layer',
+	time: 'Time',
+	unit: 'Unit',
+	editor_view3d: 'View3D',
+	id_action: 'Action',
+	id_armature: 'Armature',
+	id_brush: 'Brush',
+	id_camera: 'Camera',
+	id_collection: 'Collection',
+	id_curve: 'Curve',
+	id_gpencil: 'GPencil',
+	id_id: 'ID',
+	id_image: 'Image',
+	id_light: 'Light',
+	id_material: 'Material',
 	id_mesh: 'Mesh',
+	id_movieclip: 'MovieClip',
+	id_nodetree: 'NodeTree',
+	id_object: 'Object',
+	id_particlesettings: 'ParticleSettings',
+	id_scene: 'Scene',
+	id_sequence: 'Sequence',
+	id_simulation: 'Simulation',
+	id_sound: 'Sound',
+	id_speaker: 'Speaker',
+	id_texture: 'Texture',
+	id_volume: 'Volume',
 	id_windowmanager: 'WindowManager',
-	editor_view3d: 'View3D'
+	id_world: 'World'
 });
 
 //# sourceMappingURL=bpy.app.translations.map
