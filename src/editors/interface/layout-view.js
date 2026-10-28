@@ -300,8 +300,8 @@ function propItem(node, env) {
   const elementText = (i, chars) => (isCheck ? chars[i] : '');
 
   let value;
-  // An expanded enum without a name shows its items' icons alone (item_enum_expand_exec).
-  if (meta.type === 'E' && node.expand) value = expanded(prop, node.text === '' ? { ...node, icon_only: true } : node, { ...options, vertical: !useSplit && !env.horizontal });
+  // An expanded enum is a row of its items, a column in a flow (item_enum_expand_exec); without a name it shows their icons alone.
+  if (meta.type === 'E' && node.expand) value = expanded(prop, node.text === '' ? { ...node, icon_only: true } : node, { ...options, vertical: !!env.flow });
   else if (isArray) {
     const chars = Array.from({ length: meta.array }, (_, i) => itemChar(meta, i)), iconOnly = meta.type === 'B' && !isCheck;
     value = h('div', { class: [node.expand ? 'bl-align-row flex' : 'bl-align-col flex flex-col', iconOnly ? 'bl-icon-only' : 'min-w-0 flex-1'] },
@@ -481,7 +481,7 @@ function layoutClass(node) {
 
 // A layout's children: with its heading for the first property, its active and enabled state for all it holds.
 function layout(node, env) {
-  const inner = { ...env, header: env.header || node.root_type === 'HEADER', scaleX: (env.scaleX ?? 1) * (node.scale_x || 1), unitScale: node.scale_x || 1, horizontal: node.kind === 'row' || node.kind === 'split', active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
+  const inner = { ...env, flow: node.kind === 'grid_flow' || node.kind === 'column_flow', header: env.header || node.root_type === 'HEADER', scaleX: (env.scaleX ?? 1) * (node.scale_x || 1), unitScale: node.scale_x || 1, active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
     heading: node.heading ? { text: node.heading } : env.heading };
   if (node.kind === 'panel') return layoutPanel(node, inner);
   const children = [];
