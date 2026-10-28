@@ -2,14 +2,155 @@
 import * as __self__ from './bl_operators.wm.js';
 (globalThis.__py_modules ??= {})['bl_operators.wm'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_n as n_, pgettext_rpt as rpt_, pgettext_tip as tip_} from './_bpy.app.translations.js';
 import {BoolProperty, BoolVectorProperty, CollectionProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, StringProperty} from './_bpy.props.js';
 import {Menu, Operator} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = 'bl_operators.wm';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var _rna_path_prop_search_for_context_impl = function* (context, edit_text, unique_attrs) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -167,10 +308,10 @@ export var context_path_validate = function (context, data_path) {
 	else {
 	}
 	try {
-		var value = (data_path ? __call__ (eval, null, (function () {
+		var value = (data_path ? __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ()) : Ellipsis);
+		}) (), dict ({'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm')) : _ellipsis);
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, AttributeError)) {
@@ -179,14 +320,14 @@ export var context_path_validate = function (context, data_path) {
 				var __accu0__ = __call__ (str, null, ex);
 				return __call__ (__accu0__.startswith, __accu0__, "'NoneType'");
 			}) ()) {
-				var value = Ellipsis;
+				var value = _ellipsis;
 			}
 			else {
 				__call__ (print, null, (function () {
 					var __accu0__ = 'context_path_validate error: context.{:s} not found (invalid keymap entry?)';
 					return __call__ (__accu0__.format, __accu0__, data_path);
 				}) ());
-				var value = Ellipsis;
+				var value = _ellipsis;
 			}
 		}
 		else {
@@ -282,7 +423,7 @@ export var context_path_decompose = function (data_path) {
 	return tuple ([base_path, prop_attr, prop_item]);
 };
 export var description_from_data_path = function (base, data_path) {
-	var value = Ellipsis;
+	var value = _ellipsis;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
 		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
@@ -299,7 +440,7 @@ export var description_from_data_path = function (base, data_path) {
 	}
 	else {
 	}
-	if (__call__ (context_path_validate, null, base, data_path) === Ellipsis) {
+	if (__call__ (context_path_validate, null, base, data_path) === _ellipsis) {
 		return null;
 	}
 	var rna_prop = __call__ (context_path_to_rna_property, null, base, data_path);
@@ -313,7 +454,7 @@ export var description_from_data_path = function (base, data_path) {
 			var __accu0__ = __call__ (tip_, null, '{:s}: {:s}');
 			return __call__ (__accu0__.format, __accu0__, prefix, description);
 		}) ();
-		if (__ne__ (value, Ellipsis)) {
+		if (__ne__ (value, _ellipsis)) {
 			var description = (function () {
 				var __accu0__ = '{:s}\n{:s}: {:s}';
 				return __call__ (__accu0__.format, __accu0__, description, __call__ (tip_, null, 'Value'), __call__ (str, null, value));
@@ -337,14 +478,14 @@ export var operator_value_is_undo = function (value) {
 	}
 	else {
 	}
-	if (__in__ (value, new set ([null, Ellipsis]))) {
+	if (__in__ (value, new set ([null, _ellipsis]))) {
 		return false;
 	}
-	var id_data = __call__ (getattr, null, value, 'id_data', Ellipsis);
+	var id_data = __call__ (getattr, null, value, 'id_data', _ellipsis);
 	if (id_data === null) {
 		return false;
 	}
-	else if (id_data === Ellipsis) {
+	else if (id_data === _ellipsis) {
 		var id_data = __call__ (getattr, null, __call__ (getattr, null, value, 'owner', null), 'id_data', null);
 		if (id_data === null) {
 			return false;
@@ -426,20 +567,20 @@ export var execute_context_assign = function (self, context) {
 	else {
 	}
 	var data_path = self.data_path;
-	if (__call__ (context_path_validate, null, context, data_path) === Ellipsis) {
+	if (__call__ (context_path_validate, null, context, data_path) === _ellipsis) {
 		return new set (['PASS_THROUGH']);
 	}
 	if (__call__ (getattr, null, self, 'relative', false)) {
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} += self.value';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path}), __call__ (_module, null, 'bl_operators.wm'));
 	}
 	else {
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} = self.value';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path}), __call__ (_module, null, 'bl_operators.wm'));
 	}
 	return __call__ (operator_path_undo_return, null, context, data_path);
 };
@@ -466,9 +607,29 @@ export var WM_OT_context_set_boolean =  __class__ ('WM_OT_context_set_boolean', 
 		}
 		return __call__ (description_from_data_path, null, context, props.data_path, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Assign'), value: props.value}));
 	});},
-	execute: execute_context_assign
+	get execute () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return __call__ (execute_context_assign, null, self, ...args, __kwargtrans__ (kwargs));
+	});}
 });
-WM_OT_context_set_boolean.__annotations__ = dict ({'value': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: true}))});
+WM_OT_context_set_boolean.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: true}))});
 export var WM_OT_context_set_int =  __class__ ('WM_OT_context_set_int', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_set_int',
@@ -492,9 +653,29 @@ export var WM_OT_context_set_int =  __class__ ('WM_OT_context_set_int', [Operato
 		}
 		return __call__ (description_from_data_path, null, context, props.data_path, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Assign'), value: props.value}));
 	});},
-	execute: execute_context_assign
+	get execute () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return __call__ (execute_context_assign, null, self, ...args, __kwargtrans__ (kwargs));
+	});}
 });
-WM_OT_context_set_int.__annotations__ = dict ({'value': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 0}))});
+WM_OT_context_set_int.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 0})), 'relative': rna_relative_prop});
 export var WM_OT_context_scale_float =  __class__ ('WM_OT_context_scale_float', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_scale_float',
@@ -534,21 +715,21 @@ export var WM_OT_context_scale_float =  __class__ ('WM_OT_context_scale_float', 
 		else {
 		}
 		var data_path = self.data_path;
-		if (__call__ (context_path_validate, null, context, data_path) === Ellipsis) {
+		if (__call__ (context_path_validate, null, context, data_path) === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		var value = self.value;
 		if (__eq__ (value, 1.0)) {
 			return new set (['CANCELLED']);
 		}
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} *= value';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
-WM_OT_context_scale_float.__annotations__ = dict ({'value': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0}))});
+WM_OT_context_scale_float.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0}))});
 export var WM_OT_context_scale_int =  __class__ ('WM_OT_context_scale_int', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_scale_int',
@@ -588,7 +769,7 @@ export var WM_OT_context_scale_int =  __class__ ('WM_OT_context_scale_int', [Ope
 		else {
 		}
 		var data_path = self.data_path;
-		if (__call__ (context_path_validate, null, context, data_path) === Ellipsis) {
+		if (__call__ (context_path_validate, null, context, data_path) === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		var value = self.value;
@@ -604,21 +785,21 @@ export var WM_OT_context_scale_int =  __class__ ('WM_OT_context_scale_int', [Ope
 				var add = '-1';
 				var func = 'min';
 			}
-			__call__ (exec, null, (function () {
+			__call__ (_py_exec, null, (function () {
 				var __accu0__ = 'context.{:s} = {:s}(round(context.{:s} * value), context.{:s} + {:s})';
 				return __call__ (__accu0__.format, __accu0__, data_path, func, data_path, data_path, add);
-			}) ());
+			}) (), dict ({'self': self, 'context': context, 'add': add, 'data_path': data_path, 'func': func, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
 		}
 		else {
-			__call__ (exec, null, (function () {
+			__call__ (_py_exec, null, (function () {
 				var __accu0__ = 'context.{:s} *= value';
 				return __call__ (__accu0__.format, __accu0__, data_path);
-			}) ());
+			}) (), dict ({'self': self, 'context': context, 'add': add, 'data_path': data_path, 'func': func, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
 		}
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
-WM_OT_context_scale_int.__annotations__ = dict ({'value': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0})), 'always_step': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Always Step', description: "Always adjust the value by a minimum of 1 when 'value' is not 1.0", py_default: true, options: new set (['SKIP_SAVE'])}))});
+WM_OT_context_scale_int.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', py_default: 1.0})), 'always_step': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Always Step', description: "Always adjust the value by a minimum of 1 when 'value' is not 1.0", py_default: true, options: new set (['SKIP_SAVE'])}))});
 export var WM_OT_context_set_float =  __class__ ('WM_OT_context_set_float', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_set_float',
@@ -642,9 +823,29 @@ export var WM_OT_context_set_float =  __class__ ('WM_OT_context_set_float', [Ope
 		}
 		return __call__ (description_from_data_path, null, context, props.data_path, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Assign'), value: props.value}));
 	});},
-	execute: execute_context_assign
+	get execute () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return __call__ (execute_context_assign, null, self, ...args, __kwargtrans__ (kwargs));
+	});}
 });
-WM_OT_context_set_float.__annotations__ = dict ({'value': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: 0.0}))});
+WM_OT_context_set_float.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value', py_default: 0.0})), 'relative': rna_relative_prop});
 export var WM_OT_context_set_string =  __class__ ('WM_OT_context_set_string', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_set_string',
@@ -668,9 +869,29 @@ export var WM_OT_context_set_string =  __class__ ('WM_OT_context_set_string', [O
 		}
 		return __call__ (description_from_data_path, null, context, props.data_path, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Assign'), value: props.value}));
 	});},
-	execute: execute_context_assign
+	get execute () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return __call__ (execute_context_assign, null, self, ...args, __kwargtrans__ (kwargs));
+	});}
 });
-WM_OT_context_set_string.__annotations__ = dict ({'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))});
+WM_OT_context_set_string.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))});
 export var WM_OT_context_set_enum =  __class__ ('WM_OT_context_set_enum', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_set_enum',
@@ -694,9 +915,29 @@ export var WM_OT_context_set_enum =  __class__ ('WM_OT_context_set_enum', [Opera
 		}
 		return __call__ (description_from_data_path, null, context, props.data_path, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Assign'), value: props.value}));
 	});},
-	execute: execute_context_assign
+	get execute () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return __call__ (execute_context_assign, null, self, ...args, __kwargtrans__ (kwargs));
+	});}
 });
-WM_OT_context_set_enum.__annotations__ = dict ({'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))});
+WM_OT_context_set_enum.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))});
 export var WM_OT_context_set_value =  __class__ ('WM_OT_context_set_value', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_set_value',
@@ -736,17 +977,17 @@ export var WM_OT_context_set_value =  __class__ ('WM_OT_context_set_value', [Ope
 		else {
 		}
 		var data_path = self.data_path;
-		if (__call__ (context_path_validate, null, context, data_path) === Ellipsis) {
+		if (__call__ (context_path_validate, null, context, data_path) === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} = {:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path, self.value);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path}), __call__ (_module, null, 'bl_operators.wm'));
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
-WM_OT_context_set_value.__annotations__ = dict ({'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))});
+WM_OT_context_set_value.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assignment value (as a string)', maxlen: 1024}))});
 export var WM_OT_context_toggle =  __class__ ('WM_OT_context_toggle', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_toggle',
@@ -797,16 +1038,17 @@ export var WM_OT_context_toggle =  __class__ ('WM_OT_context_toggle', [Operator]
 			var import_module = __call__ (_member, null, 'importlib', 'import_module');
 			var base = __call__ (import_module, null, self.module);
 		}
-		if (__call__ (context_path_validate, null, base, data_path) === Ellipsis) {
+		if (__call__ (context_path_validate, null, base, data_path) === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'base.{:s} = not (base.{:s})';
 			return __call__ (__accu0__.format, __accu0__, data_path, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'base': base, 'data_path': data_path, 'module': module}), __call__ (_module, null, 'bl_operators.wm'));
 		return __call__ (operator_path_undo_return, null, base, data_path);
 	});}
 });
+WM_OT_context_toggle.__annotations__ = dict ({'data_path': rna_path_prop, 'module': rna_module_prop});
 export var WM_OT_context_toggle_enum =  __class__ ('WM_OT_context_toggle_enum', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_toggle_enum',
@@ -850,14 +1092,14 @@ export var WM_OT_context_toggle_enum =  __class__ ('WM_OT_context_toggle_enum', 
 		else {
 		}
 		var data_path = self.data_path;
-		if (__call__ (context_path_validate, null, context, data_path) === Ellipsis) {
+		if (__call__ (context_path_validate, null, context, data_path) === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		try {
-			__call__ (exec, null, (function () {
+			__call__ (_py_exec, null, (function () {
 				var __accu0__ = 'context.{:s} = {!r} if (context.{:s} != {!r}) else {!r}';
 				return __call__ (__accu0__.format, __accu0__, data_path, self.value_2, data_path, self.value_2, self.value_1);
-			}) ());
+			}) (), dict ({'self': self, 'context': context, 'data_path': data_path}), __call__ (_module, null, 'bl_operators.wm'));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
@@ -870,7 +1112,7 @@ export var WM_OT_context_toggle_enum =  __class__ ('WM_OT_context_toggle_enum', 
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
-WM_OT_context_toggle_enum.__annotations__ = dict ({'value_1': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024})), 'value_2': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024}))});
+WM_OT_context_toggle_enum.__annotations__ = dict ({'data_path': rna_path_prop, 'value_1': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024})), 'value_2': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Toggle enum', maxlen: 1024}))});
 export var WM_OT_context_cycle_int =  __class__ ('WM_OT_context_cycle_int', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_cycle_int',
@@ -911,7 +1153,7 @@ export var WM_OT_context_cycle_int =  __class__ ('WM_OT_context_cycle_int', [Ope
 		}
 		var data_path = self.data_path;
 		var value = __call__ (context_path_validate, null, context, data_path);
-		if (value === Ellipsis) {
+		if (value === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		if (self.reverse) {
@@ -920,30 +1162,31 @@ export var WM_OT_context_cycle_int =  __class__ ('WM_OT_context_cycle_int', [Ope
 		else {
 			var value = __call__ (__iadd__, null, value, 1);
 		}
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} = value';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
 		if (self.wrap) {
-			if (__ne__ (value, __call__ (eval, null, (function () {
+			if (__ne__ (value, __call__ (_py_eval, null, (function () {
 				var __accu0__ = 'context.{:s}';
 				return __call__ (__accu0__.format, __accu0__, data_path);
-			}) ()))) {
+			}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm')))) {
 				if (self.reverse) {
 					var value = __sub__ (__lshift__ (1, 31), 1);
 				}
 				else {
 					var value = __lshift__ (__neg__ (1), 31);
 				}
-				__call__ (exec, null, (function () {
+				__call__ (_py_exec, null, (function () {
 					var __accu0__ = 'context.{:s} = value';
 					return __call__ (__accu0__.format, __accu0__, data_path);
-				}) ());
+				}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 		}
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
+WM_OT_context_cycle_int.__annotations__ = dict ({'data_path': rna_path_prop, 'reverse': rna_reverse_prop, 'wrap': rna_wrap_prop});
 export var WM_OT_context_cycle_enum =  __class__ ('WM_OT_context_cycle_enum', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_cycle_enum',
@@ -984,7 +1227,7 @@ export var WM_OT_context_cycle_enum =  __class__ ('WM_OT_context_cycle_enum', [O
 		}
 		var data_path = self.data_path;
 		var value = __call__ (context_path_validate, null, context, data_path);
-		if (value === Ellipsis) {
+		if (value === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		var orig_value = value;
@@ -1016,13 +1259,14 @@ export var WM_OT_context_cycle_enum =  __class__ ('WM_OT_context_cycle_enum', [O
 		else {
 			var advance_enum = __getitem__ (enums, __add__ (orig_index, 1));
 		}
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} = advance_enum';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'advance_enum': advance_enum, 'data_path': data_path, 'enums': enums, 'orig_index': orig_index, 'orig_value': orig_value, 'rna_prop': rna_prop, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
+WM_OT_context_cycle_enum.__annotations__ = dict ({'data_path': rna_path_prop, 'reverse': rna_reverse_prop, 'wrap': rna_wrap_prop});
 export var WM_OT_context_cycle_array =  __class__ ('WM_OT_context_cycle_array', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_cycle_array',
@@ -1063,7 +1307,7 @@ export var WM_OT_context_cycle_array =  __class__ ('WM_OT_context_cycle_array', 
 		}
 		var data_path = self.data_path;
 		var value = __call__ (context_path_validate, null, context, data_path);
-		if (value === Ellipsis) {
+		if (value === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		var cycle = function (array) {
@@ -1100,13 +1344,14 @@ export var WM_OT_context_cycle_array =  __class__ ('WM_OT_context_cycle_array', 
 			}
 			return array;
 		};
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = 'context.{:s} = cycle(context.{:s}[:])';
 			return __call__ (__accu0__.format, __accu0__, data_path, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'value': value}), __call__ (_module, null, 'bl_operators.wm'));
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
+WM_OT_context_cycle_array.__annotations__ = dict ({'data_path': rna_path_prop, 'reverse': rna_reverse_prop});
 export var WM_OT_context_menu_enum =  __class__ ('WM_OT_context_menu_enum', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_menu_enum',
@@ -1147,7 +1392,7 @@ export var WM_OT_context_menu_enum =  __class__ ('WM_OT_context_menu_enum', [Ope
 		}
 		var data_path = self.data_path;
 		var value = __call__ (context_path_validate, null, context, data_path);
-		if (value === Ellipsis) {
+		if (value === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		var __left0__ = __call__ (context_path_decompose, null, data_path);
@@ -1184,6 +1429,7 @@ export var WM_OT_context_menu_enum =  __class__ ('WM_OT_context_menu_enum', [Ope
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_context_menu_enum.__annotations__ = dict ({'data_path': rna_path_prop});
 export var WM_OT_context_pie_enum =  __class__ ('WM_OT_context_pie_enum', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_pie_enum',
@@ -1226,7 +1472,7 @@ export var WM_OT_context_pie_enum =  __class__ ('WM_OT_context_pie_enum', [Opera
 		var wm = context.window_manager;
 		var data_path = self.data_path;
 		var value = __call__ (context_path_validate, null, context, data_path);
-		if (value === Ellipsis) {
+		if (value === _ellipsis) {
 			return new set (['PASS_THROUGH']);
 		}
 		var __left0__ = __call__ (context_path_decompose, null, data_path);
@@ -1263,6 +1509,7 @@ export var WM_OT_context_pie_enum =  __class__ ('WM_OT_context_pie_enum', [Opera
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_context_pie_enum.__annotations__ = dict ({'data_path': rna_path_prop});
 export var WM_OT_operator_pie_enum =  __class__ ('WM_OT_operator_pie_enum', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.operator_pie_enum',
@@ -1408,15 +1655,15 @@ export var WM_OT_context_set_id =  __class__ ('WM_OT_context_set_id', [Operator]
 				var __accu0__ = __call__ (getattr, null, bpy.data, id_iter);
 				return __call__ (__accu0__.py_get, __accu0__, value);
 			}) ();
-			__call__ (exec, null, (function () {
+			__call__ (_py_exec, null, (function () {
 				var __accu0__ = 'context.{:s} = value_id';
 				return __call__ (__accu0__.format, __accu0__, data_path);
-			}) ());
+			}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'id_iter': id_iter, 'prop': prop, 'rna_prop': rna_prop, 'rna_prop_fixed_type': rna_prop_fixed_type, 'value': value, 'value_id': value_id}), __call__ (_module, null, 'bl_operators.wm'));
 		}
 		return __call__ (operator_path_undo_return, null, context, data_path);
 	});}
 });
-WM_OT_context_set_id.__annotations__ = dict ({'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))});
+WM_OT_context_set_id.__annotations__ = dict ({'data_path': rna_path_prop, 'value': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Assign value', maxlen: 1024}))});
 export var doc_id = __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Doc ID', maxlen: 1024, options: new set (['HIDDEN'])}));
 export var data_path_iter = __call__ (StringProperty, null, __kwargtrans__ ({description: 'The data path relative to the context, must point to an iterable'}));
 export var data_path_item = __call__ (StringProperty, null, __kwargtrans__ ({description: 'The data path from each iterable to the value (int or float)'}));
@@ -1450,7 +1697,7 @@ export var WM_OT_context_collection_boolean_set =  __class__ ('WM_OT_context_col
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var item = __getitem__ (__iterable0__, __index0__);
 			try {
-				var value_orig = __call__ (eval, null, __add__ ('item.', data_path_item));
+				var value_orig = __call__ (_py_eval, null, __add__ ('item.', data_path_item), dict ({'self': self, 'context': context, 'data_path_item': data_path_item, 'data_path_iter': data_path_iter, 'exec_str': exec_str, 'is_set': is_set, 'item': item, 'items': py_items, 'items_ok': items_ok, 'value_orig': value_orig}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -1501,12 +1748,12 @@ export var WM_OT_context_collection_boolean_set =  __class__ ('WM_OT_context_col
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var item = __getitem__ (__iterable0__, __index0__);
-			__call__ (exec, null, exec_str);
+			__call__ (_py_exec, null, exec_str, dict ({'self': self, 'context': context, 'data_path_item': data_path_item, 'data_path_iter': data_path_iter, 'exec_str': exec_str, 'is_set': is_set, 'item': item, 'items': py_items, 'items_ok': items_ok, 'value_orig': value_orig}), __call__ (_module, null, 'bl_operators.wm'));
 		}
 		return __call__ (operator_value_undo_return, null, item);
 	});}
 });
-WM_OT_context_collection_boolean_set.__annotations__ = dict ({'type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TOGGLE', 'Toggle', '']), tuple (['ENABLE', 'Enable', '']), tuple (['DISABLE', 'Disable', ''])])}))});
+WM_OT_context_collection_boolean_set.__annotations__ = dict ({'data_path_iter': data_path_iter, 'data_path_item': data_path_item, 'type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TOGGLE', 'Toggle', '']), tuple (['ENABLE', 'Enable', '']), tuple (['DISABLE', 'Disable', ''])])}))});
 export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.context_modal_mouse',
@@ -1537,7 +1784,7 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var item = __getitem__ (__iterable0__, __index0__);
 			try {
-				var value_orig = __call__ (eval, null, __add__ ('item.', data_path_item));
+				var value_orig = __call__ (_py_eval, null, __add__ ('item.', data_path_item), dict ({'self': self, 'context': context, 'data_path_item': data_path_item, 'data_path_iter': data_path_iter, 'item': item, 'value_orig': value_orig, 'values': py_values}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -1548,10 +1795,10 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 				}
 			}
 			try {
-				__call__ (exec, null, (function () {
+				__call__ (_py_exec, null, (function () {
 					var __accu0__ = 'item.{:s} = {:s}';
 					return __call__ (__accu0__.format, __accu0__, data_path_item, __call__ (str, null, value_orig));
-				}) ());
+				}) (), dict ({'self': self, 'context': context, 'data_path_item': data_path_item, 'data_path_iter': data_path_iter, 'item': item, 'value_orig': value_orig, 'values': py_values}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -1594,16 +1841,16 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 			var item = __left0__ [0];
 			var value_orig = __left0__ [1];
 			if (__eq__ (py_typeof (value_orig), int)) {
-				__call__ (exec, null, (function () {
+				__call__ (_py_exec, null, (function () {
 					var __accu0__ = 'item.{:s} = int({:d})';
 					return __call__ (__accu0__.format, __accu0__, data_path_item, __call__ (round, null, __add__ (value_orig, delta)));
-				}) ());
+				}) (), dict ({'self': self, 'delta': delta, 'data_path_item': data_path_item, 'delta': delta, 'item': item, 'value_orig': value_orig}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 			else {
-				__call__ (exec, null, (function () {
+				__call__ (_py_exec, null, (function () {
 					var __accu0__ = 'item.{:s} = {:f}';
 					return __call__ (__accu0__.format, __accu0__, data_path_item, __add__ (value_orig, delta));
-				}) ());
+				}) (), dict ({'self': self, 'delta': delta, 'data_path_item': data_path_item, 'delta': delta, 'item': item, 'value_orig': value_orig}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 		}
 	});},
@@ -1631,10 +1878,10 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 			var __left0__ = __getitem__ (__iterable0__, __index0__);
 			var item = __left0__ [0];
 			var value_orig = __left0__ [1];
-			__call__ (exec, null, (function () {
+			__call__ (_py_exec, null, (function () {
 				var __accu0__ = 'item.{:s} = {:s}';
 				return __call__ (__accu0__.format, __accu0__, data_path_item, __call__ (str, null, value_orig));
-			}) ());
+			}) (), dict ({'self': self, 'data_path_item': data_path_item, 'item': item, 'value_orig': value_orig}), __call__ (_module, null, 'bl_operators.wm'));
 		}
 		(function () {
 			var __accu0__ = self._values;
@@ -1699,10 +1946,10 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 						return __call__ (__accu0__.py_keys, __accu0__);
 					}) ();
 					var item = __left0__ [0];
-					var header_text = __mod__ (header_text, __call__ (eval, null, (function () {
+					var header_text = __mod__ (header_text, __call__ (_py_eval, null, (function () {
 						var __accu0__ = 'item.{:s}';
 						return __call__ (__accu0__.format, __accu0__, self.data_path_item);
-					}) ()));
+					}) (), dict ({'self': self, 'context': context, 'event': event, 'context_modal_mouse_precision_fac': context_modal_mouse_precision_fac, 'delta': delta, 'effective_offset': effective_offset, 'event_type': event_type, 'header_text': header_text, 'item': item, 'step_delta': step_delta, 'total_offset': total_offset}), __call__ (_module, null, 'bl_operators.wm')));
 				}
 				else {
 					var header_text = __add__ (__mod__ (self.header_text, delta), __call__ (rpt_, null, ' (delta)'));
@@ -1783,7 +2030,7 @@ export var WM_OT_context_modal_mouse =  __class__ ('WM_OT_context_modal_mouse', 
 		}
 	});}
 });
-WM_OT_context_modal_mouse.__annotations__ = dict ({'header_text': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Header Text', description: 'Text to display in header during scale'})), 'input_scale': __call__ (FloatProperty, null, __kwargtrans__ ({description: 'Scale the mouse movement by this value before applying the delta', py_default: 0.01, options: new set (['SKIP_SAVE'])})), 'invert': __call__ (BoolProperty, null, __kwargtrans__ ({description: 'Invert the mouse input', py_default: false, options: new set (['SKIP_SAVE'])})), 'initial_x': __call__ (IntProperty, null, __kwargtrans__ ({options: new set (['HIDDEN'])}))});
+WM_OT_context_modal_mouse.__annotations__ = dict ({'data_path_iter': data_path_iter, 'data_path_item': data_path_item, 'header_text': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Header Text', description: 'Text to display in header during scale'})), 'input_scale': __call__ (FloatProperty, null, __kwargtrans__ ({description: 'Scale the mouse movement by this value before applying the delta', py_default: 0.01, options: new set (['SKIP_SAVE'])})), 'invert': __call__ (BoolProperty, null, __kwargtrans__ ({description: 'Invert the mouse input', py_default: false, options: new set (['SKIP_SAVE'])})), 'initial_x': __call__ (IntProperty, null, __kwargtrans__ ({options: new set (['HIDDEN'])}))});
 export var WM_OT_url_open =  __class__ ('WM_OT_url_open', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.url_open',
@@ -2399,7 +2646,7 @@ export var WM_OT_doc_view_manual =  __class__ ('WM_OT_doc_view_manual', [Operato
 		return null;
 	};},
 	get _lookup_rna_url () {return function (rna_id, verbose) {
-		if (typeof verbose == 'undefined' || (verbose != null && verbose.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof verbose == 'undefined' || (verbose != null && globalThis.Object.hasOwn (verbose, "__kwargtrans__"))) {;
 			var verbose = true;
 		};
 		if (arguments.length) {
@@ -2476,6 +2723,7 @@ export var WM_OT_doc_view_manual =  __class__ ('WM_OT_doc_view_manual', [Operato
 		}
 	});}
 });
+WM_OT_doc_view_manual.__annotations__ = dict ({'doc_id': doc_id});
 export var WM_OT_doc_view =  __class__ ('WM_OT_doc_view', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.doc_view',
@@ -2509,6 +2757,7 @@ export var WM_OT_doc_view =  __class__ ('WM_OT_doc_view', [Operator], {
 		}) ();
 	});}
 });
+WM_OT_doc_view.__annotations__ = dict ({'doc_id': doc_id});
 export var rna_path = __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Property Edit', description: 'Property data_path edit', maxlen: 1024, options: new set (['HIDDEN'])}));
 export var rna_custom_property_name = __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Property Name', description: 'Property name edit', maxlen: 63}));
 export var rna_custom_property_type_items = tuple ([tuple (['FLOAT', 'Float', 'A single floating-point value']), tuple (['FLOAT_ARRAY', 'Float Array', 'An array of floating-point values']), tuple (['INT', 'Integer', 'A single integer']), tuple (['INT_ARRAY', 'Integer Array', 'An array of integers']), tuple (['BOOL', 'Boolean', 'A true or false value']), tuple (['BOOL_ARRAY', 'Boolean Array', 'An array of true or false values']), tuple (['STRING', 'String', 'A string value']), tuple (['DATA_BLOCK', 'Data-Block', 'A data-block value']), tuple (['PYTHON', 'Python', 'Edit a Python value directly, for unsupported property types'])]);
@@ -3242,10 +3491,10 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		}
 		var data_path = self.data_path;
 		var py_name = self.property_name;
-		var item = __call__ (eval, null, (function () {
+		var item = __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'adt': adt, 'data_path': data_path, 'id_type_new': id_type_new, 'id_type_old': id_type_old, 'item': item, 'name': py_name, 'name_old': name_old, 'new_value': new_value, 'prop_type_new': prop_type_new, 'prop_type_old': prop_type_old}), __call__ (_module, null, 'bl_operators.wm'));
 		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
 			(function () {
 				var __accu0__ = self;
@@ -3266,7 +3515,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		var id_type_new = self.id_type;
 		if (__eq__ (prop_type_new, 'PYTHON')) {
 			try {
-				var new_value = __call__ (eval, null, self.eval_string);
+				var new_value = __call__ (_py_eval, null, self.eval_string, dict ({'self': self, 'context': context, 'adt': adt, 'data_path': data_path, 'id_type_new': id_type_new, 'id_type_old': id_type_old, 'item': item, 'name': py_name, 'name_old': name_old, 'new_value': new_value, 'prop_type_new': prop_type_new, 'prop_type_old': prop_type_old}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -3366,10 +3615,10 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		}
 		var py_name = self.property_name;
 		self._old_prop_name = [py_name];
-		var item = __call__ (eval, null, (function () {
+		var item = __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, '_event': _event, 'data_path': data_path, 'item': item, 'name': py_name, 'old_type': old_type, 'wm': wm}), __call__ (_module, null, 'bl_operators.wm'));
 		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
 			(function () {
 				var __accu0__ = self;
@@ -3695,7 +3944,7 @@ export var WM_OT_properties_edit =  __class__ ('WM_OT_properties_edit', [Operato
 		}) ();
 	});}
 });
-WM_OT_properties_edit.__annotations__ = dict ({'property_type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Type', py_items: rna_custom_property_type_items, py_update: _WM_OT_properties_edit_property_type_update_cb})), 'is_overridable_library': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Library Overridable', description: 'Allow the property to be overridden when the data-block is linked', py_default: false})), 'description': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Description'})), 'use_soft_limits': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Soft Limits', description: 'Limits the Property Value slider to a range, values outside the range must be inputted numerically'})), 'array_length': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Array Length', py_default: 3, min: 1, max: 32})), 'default_int': __call__ (IntVectorProperty, null, __kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Min', py_default: __neg__ (10000)})), 'max_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Max', py_default: 10000})), 'soft_min_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Soft Min', py_default: __neg__ (10000)})), 'soft_max_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Soft Max', py_default: 10000})), 'step_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Step', min: 1, py_default: 1})), 'default_bool': __call__ (BoolVectorProperty, null, __kwargtrans__ ({py_name: 'Default Value', size: 32})), 'default_float': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Min', py_default: __neg__ (10000.0)})), 'max_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Max', py_default: __neg__ (10000.0)})), 'soft_min_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Soft Min', py_default: __neg__ (10000.0)})), 'soft_max_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Soft Max', py_default: __neg__ (10000.0)})), 'precision': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Precision', py_default: 3, min: 0, max: 8})), 'step_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Step', py_default: 0.1, min: 0.001})), 'subtype': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Subtype', py_items: _WM_OT_properties_edit_subtype_items_cb, translation_context: i18n_contexts.unit})), 'default_string': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Default Value', maxlen: 1024})), 'id_type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'ID Type', py_items: rna_id_type_items, translation_context: i18n_contexts.id_id, py_default: 'OBJECT'})), 'eval_string': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Python value for unsupported custom property types'}))});
+WM_OT_properties_edit.__annotations__ = dict ({'data_path': rna_path, 'property_name': rna_custom_property_name, 'property_type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Type', py_items: rna_custom_property_type_items, py_update: _WM_OT_properties_edit_property_type_update_cb})), 'is_overridable_library': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Library Overridable', description: 'Allow the property to be overridden when the data-block is linked', py_default: false})), 'description': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Description'})), 'use_soft_limits': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Soft Limits', description: 'Limits the Property Value slider to a range, values outside the range must be inputted numerically'})), 'array_length': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Array Length', py_default: 3, min: 1, max: 32})), 'default_int': __call__ (IntVectorProperty, null, __kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Min', py_default: __neg__ (10000)})), 'max_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Max', py_default: 10000})), 'soft_min_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Soft Min', py_default: __neg__ (10000)})), 'soft_max_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Soft Max', py_default: 10000})), 'step_int': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Step', min: 1, py_default: 1})), 'default_bool': __call__ (BoolVectorProperty, null, __kwargtrans__ ({py_name: 'Default Value', size: 32})), 'default_float': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Default Value', size: 32})), 'min_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Min', py_default: __neg__ (10000.0)})), 'max_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Max', py_default: __neg__ (10000.0)})), 'soft_min_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Soft Min', py_default: __neg__ (10000.0)})), 'soft_max_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Soft Max', py_default: __neg__ (10000.0)})), 'precision': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Precision', py_default: 3, min: 0, max: 8})), 'step_float': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Step', py_default: 0.1, min: 0.001})), 'subtype': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Subtype', py_items: _WM_OT_properties_edit_subtype_items_cb, translation_context: i18n_contexts.unit})), 'default_string': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Default Value', maxlen: 1024})), 'id_type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'ID Type', py_items: rna_id_type_items, translation_context: i18n_contexts.id_id, py_default: 'OBJECT'})), 'eval_string': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Python value for unsupported custom property types'}))});
 export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_value', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.properties_edit_value',
@@ -3717,12 +3966,12 @@ export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_valu
 		else {
 		}
 		if (self.eval_string) {
-			var rna_item = __call__ (eval, null, (function () {
+			var rna_item = __call__ (_py_eval, null, (function () {
 				var __accu0__ = 'context.{:s}';
 				return __call__ (__accu0__.format, __accu0__, self.data_path);
-			}) ());
+			}) (), dict ({'self': self, 'context': context, 'new_value': new_value, 'rna_item': rna_item}), __call__ (_module, null, 'bl_operators.wm'));
 			try {
-				var new_value = __call__ (eval, null, self.eval_string);
+				var new_value = __call__ (_py_eval, null, self.eval_string, dict ({'self': self, 'context': context, 'new_value': new_value, 'rna_item': rna_item}), __call__ (_module, null, 'bl_operators.wm'));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -3757,10 +4006,10 @@ export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_valu
 		}
 		else {
 		}
-		var rna_item = __call__ (eval, null, (function () {
+		var rna_item = __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, self.data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, '_event': _event, 'rna_item': rna_item, 'wm': wm}), __call__ (_module, null, 'bl_operators.wm'));
 		if (__eq__ ((function () {
 			var __accu0__ = WM_OT_properties_edit;
 			return __call__ (__accu0__.get_property_type, __accu0__, rna_item, self.property_name);
@@ -3795,10 +4044,10 @@ export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_valu
 		else {
 		}
 		var escape_identifier = __call__ (_member, null, 'bpy.utils', 'escape_identifier');
-		var rna_item = __call__ (eval, null, (function () {
+		var rna_item = __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, self.data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'col': col, 'layout': layout, 'rna_item': rna_item}), __call__ (_module, null, 'bl_operators.wm'));
 		var layout = self.layout;
 		if (__eq__ ((function () {
 			var __accu0__ = WM_OT_properties_edit;
@@ -3824,7 +4073,7 @@ export var WM_OT_properties_edit_value =  __class__ ('WM_OT_properties_edit_valu
 		}
 	});}
 });
-WM_OT_properties_edit_value.__annotations__ = dict ({'eval_string': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Value for custom property types that can only be edited as a Python expression'}))});
+WM_OT_properties_edit_value.__annotations__ = dict ({'data_path': rna_path, 'property_name': rna_custom_property_name, 'eval_string': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Value', description: 'Value for custom property types that can only be edited as a Python expression'}))});
 export var WM_OT_properties_add =  __class__ ('WM_OT_properties_add', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.properties_add',
@@ -3847,10 +4096,10 @@ export var WM_OT_properties_add =  __class__ ('WM_OT_properties_add', [Operator]
 		}
 		var rna_idprop_ui_create = __call__ (_member, null, 'rna_prop_ui', 'rna_idprop_ui_create');
 		var data_path = self.data_path;
-		var item = __call__ (eval, null, (function () {
+		var item = __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'i': i, 'item': item, 'prop': prop, 'prop_new': prop_new}), __call__ (_module, null, 'bl_operators.wm'));
 		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
 			(function () {
 				var __accu0__ = self;
@@ -3892,6 +4141,7 @@ export var WM_OT_properties_add =  __class__ ('WM_OT_properties_add', [Operator]
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_properties_add.__annotations__ = dict ({'data_path': rna_path});
 export var WM_OT_properties_context_change =  __class__ ('WM_OT_properties_context_change', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.properties_context_change',
@@ -3939,10 +4189,10 @@ export var WM_OT_properties_remove =  __class__ ('WM_OT_properties_remove', [Ope
 		}
 		var rna_idprop_ui_prop_update = __call__ (_member, null, 'rna_prop_ui', 'rna_idprop_ui_prop_update');
 		var data_path = self.data_path;
-		var item = __call__ (eval, null, (function () {
+		var item = __call__ (_py_eval, null, (function () {
 			var __accu0__ = 'context.{:s}';
 			return __call__ (__accu0__.format, __accu0__, data_path);
-		}) ());
+		}) (), dict ({'self': self, 'context': context, 'data_path': data_path, 'item': item, 'name': py_name}), __call__ (_module, null, 'bl_operators.wm'));
 		if (item.id_data && item.id_data.override_library && item.id_data.override_library.reference) {
 			(function () {
 				var __accu0__ = self;
@@ -3959,6 +4209,7 @@ export var WM_OT_properties_remove =  __class__ ('WM_OT_properties_remove', [Ope
 		return new set (['FINISHED']);
 	});}
 });
+WM_OT_properties_remove.__annotations__ = dict ({'data_path': rna_path, 'property_name': rna_custom_property_name});
 export var WM_OT_sysinfo =  __class__ ('WM_OT_sysinfo', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.sysinfo',
@@ -4264,7 +4515,7 @@ export var WM_OT_tool_set_by_id =  __class__ ('WM_OT_tool_set_by_id', [Operator]
 		}
 	});}
 });
-WM_OT_tool_set_by_id.__annotations__ = dict ({'name': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Identifier', description: 'Identifier of the tool'})), 'cycle': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'as_fallback': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary tool', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])}))});
+WM_OT_tool_set_by_id.__annotations__ = dict ({'name': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Identifier', description: 'Identifier of the tool'})), 'cycle': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'as_fallback': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary tool', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])})), 'space_type': rna_space_type_prop});
 export var WM_OT_tool_set_by_index =  __class__ ('WM_OT_tool_set_by_index', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.tool_set_by_index',
@@ -4315,7 +4566,7 @@ export var WM_OT_tool_set_by_index =  __class__ ('WM_OT_tool_set_by_index', [Ope
 		}
 	});}
 });
-WM_OT_tool_set_by_index.__annotations__ = dict ({'index': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Index in Toolbar', py_default: 0})), 'cycle': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'expand': __call__ (BoolProperty, null, __kwargtrans__ ({description: 'Include tool subgroups', py_default: true, options: new set (['SKIP_SAVE'])})), 'as_fallback': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])}))});
+WM_OT_tool_set_by_index.__annotations__ = dict ({'index': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Index in Toolbar', py_default: 0})), 'cycle': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Cycle', description: 'Cycle through tools in this group', py_default: false, options: new set (['SKIP_SAVE'])})), 'expand': __call__ (BoolProperty, null, __kwargtrans__ ({description: 'Include tool subgroups', py_default: true, options: new set (['SKIP_SAVE'])})), 'as_fallback': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Set Fallback', description: 'Set the fallback tool instead of the primary', py_default: false, options: new set (['SKIP_SAVE', 'HIDDEN'])})), 'space_type': rna_space_type_prop});
 export var WM_OT_tool_set_by_brush_type =  __class__ ('WM_OT_tool_set_by_brush_type', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.tool_set_by_brush_type',
@@ -4387,7 +4638,7 @@ export var WM_OT_tool_set_by_brush_type =  __class__ ('WM_OT_tool_set_by_brush_t
 		}
 	});}
 });
-WM_OT_tool_set_by_brush_type.__annotations__ = dict ({'brush_type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Brush Type', description: 'Brush type identifier for which the most appropriate tool will be looked up'}))});
+WM_OT_tool_set_by_brush_type.__annotations__ = dict ({'brush_type': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Brush Type', description: 'Brush type identifier for which the most appropriate tool will be looked up'})), 'space_type': rna_space_type_prop});
 export var WM_OT_toolbar =  __class__ ('WM_OT_toolbar', [Operator], {
 	__module__: __name__,
 	bl_idname: 'wm.toolbar',
@@ -6835,10 +7086,17 @@ WM_OT_drop_blend_file.__annotations__ = dict ({'filepath': __call__ (StringPrope
 export var classes = tuple ([WM_OT_context_collection_boolean_set, WM_OT_context_cycle_array, WM_OT_context_cycle_enum, WM_OT_context_cycle_int, WM_OT_context_menu_enum, WM_OT_context_modal_mouse, WM_OT_context_pie_enum, WM_OT_context_scale_float, WM_OT_context_scale_int, WM_OT_context_set_boolean, WM_OT_context_set_enum, WM_OT_context_set_float, WM_OT_context_set_id, WM_OT_context_set_int, WM_OT_context_set_string, WM_OT_context_set_value, WM_OT_context_toggle, WM_OT_context_toggle_enum, WM_OT_doc_view, WM_OT_doc_view_manual, WM_OT_drop_blend_file, WM_OT_operator_cheat_sheet, WM_OT_operator_pie_enum, WM_OT_path_open, WM_OT_properties_add, WM_OT_properties_context_change, WM_OT_properties_edit, WM_OT_properties_edit_value, WM_OT_properties_remove, WM_OT_sysinfo, WM_OT_owner_disable, WM_OT_owner_enable, WM_OT_url_open, WM_OT_url_open_preset, WM_OT_tool_set_by_id, WM_OT_tool_set_by_index, WM_OT_tool_set_by_brush_type, WM_OT_toolbar, WM_OT_toolbar_fallback_pie, WM_OT_toolbar_prompt, BatchRenameAction, WM_OT_batch_rename, WM_MT_splash_quick_setup, WM_MT_splash, WM_MT_splash_about, WM_MT_region_toggle_pie]);
 
 //# sourceMappingURL=bl_operators.wm.map
-export {BoolProperty, BoolVectorProperty, CollectionProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, Menu, Operator, StringProperty, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, n_, rpt_, tip_};
+export {BoolProperty, BoolVectorProperty, CollectionProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, IntVectorProperty, Menu, Operator, StringProperty, _globals, _import, _lazy, _member, _module, _py_eval, _py_exec, i18n_contexts, iface_, n_, rpt_, tip_};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '_rna_path_prop_search_for_context_impl': _rna_path_prop_search_for_context_impl = value; break;
 		case 'rna_path_prop_search_for_context': rna_path_prop_search_for_context = value; break;
 		case 'rna_path_prop': rna_path_prop = value; break;

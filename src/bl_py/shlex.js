@@ -23,10 +23,10 @@ export var quote = function (text) {
 	}) ()), "'");
 };
 export var py_split = function (text, comments, posix) {
-	if (typeof comments == 'undefined' || (comments != null && comments.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof comments == 'undefined' || (comments != null && globalThis.Object.hasOwn (comments, "__kwargtrans__"))) {;
 		var comments = false;
 	};
-	if (typeof posix == 'undefined' || (posix != null && posix.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof posix == 'undefined' || (posix != null && globalThis.Object.hasOwn (posix, "__kwargtrans__"))) {;
 		var posix = true;
 	};
 	if (arguments.length) {

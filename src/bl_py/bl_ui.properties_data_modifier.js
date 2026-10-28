@@ -46,10 +46,10 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 	}) (),
 	MODIFIER_TYPES_I18N_CONTEXT: __getitem__ (bpy.types.Modifier.bl_rna.properties, 'type').translation_context,
 	get operator_modifier_add () {return __getcm__ (this, function (cls, layout, mod_type, text, no_icon) {
-		if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof text == 'undefined' || (text != null && globalThis.Object.hasOwn (text, "__kwargtrans__"))) {;
 			var text = null;
 		};
-		if (typeof no_icon == 'undefined' || (no_icon != null && no_icon.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof no_icon == 'undefined' || (no_icon != null && globalThis.Object.hasOwn (no_icon, "__kwargtrans__"))) {;
 			var no_icon = false;
 		};
 		if (arguments.length) {
@@ -76,7 +76,7 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 		}) ().py_metatype = mod_type;
 	});},
 	get operator_modifier_add_asset () {return __getcm__ (this, function (cls, layout, py_name, icon) {
-		if (typeof icon == 'undefined' || (icon != null && icon.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof icon == 'undefined' || (icon != null && globalThis.Object.hasOwn (icon, "__kwargtrans__"))) {;
 			var icon = 'NONE';
 		};
 		if (arguments.length) {

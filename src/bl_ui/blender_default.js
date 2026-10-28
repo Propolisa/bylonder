@@ -26,7 +26,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -41,16 +41,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -353,7 +353,7 @@ export var op_menu_pie = function (menu, kmi_args) {
 	return tuple (['wm.call_menu_pie', kmi_args, dict ({'properties': [tuple (['name', menu])]})]);
 };
 export var op_panel = function (menu, kmi_args, kmi_data) {
-	if (typeof kmi_data == 'undefined' || (kmi_data != null && kmi_data.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof kmi_data == 'undefined' || (kmi_data != null && globalThis.Object.hasOwn (kmi_data, "__kwargtrans__"))) {;
 		var kmi_data = tuple ([]);
 	};
 	if (arguments.length) {
@@ -3234,16 +3234,16 @@ export var radial_control_properties = function (paint, prop) {
 	}) () : '')]), tuple (['zoom_path', (zoom ? 'space_data.zoom' : '')]), tuple (['image_id', brush_path]), tuple (['secondary_tex', secondary_rotation])]});
 };
 export var _template_paint_radial_control = function (paint, rotation, secondary_rotation, color, zoom) {
-	if (typeof rotation == 'undefined' || (rotation != null && rotation.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof rotation == 'undefined' || (rotation != null && globalThis.Object.hasOwn (rotation, "__kwargtrans__"))) {;
 		var rotation = false;
 	};
-	if (typeof secondary_rotation == 'undefined' || (secondary_rotation != null && secondary_rotation.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof secondary_rotation == 'undefined' || (secondary_rotation != null && globalThis.Object.hasOwn (secondary_rotation, "__kwargtrans__"))) {;
 		var secondary_rotation = false;
 	};
-	if (typeof color == 'undefined' || (color != null && color.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof color == 'undefined' || (color != null && globalThis.Object.hasOwn (color, "__kwargtrans__"))) {;
 		var color = false;
 	};
-	if (typeof zoom == 'undefined' || (zoom != null && zoom.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof zoom == 'undefined' || (zoom != null && globalThis.Object.hasOwn (zoom, "__kwargtrans__"))) {;
 		var zoom = false;
 	};
 	if (arguments.length) {
@@ -7145,7 +7145,7 @@ export var km_3d_view_tool_paint_grease_pencil_interpolate = function (params) {
 	return tuple (['3D View Tool: Paint Grease Pencil, Interpolate', dict ({'space_type': 'VIEW_3D', 'region_type': 'WINDOW'}), dict ({'items': [tuple (['grease_pencil.interpolate', params.tool_maybe_tweak_event, dict ({'properties': [tuple (['use_selection', false])]})])]})]);
 };
 export var generate_keymaps = function (params) {
-	if (typeof params == 'undefined' || (params != null && params.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof params == 'undefined' || (params != null && globalThis.Object.hasOwn (params, "__kwargtrans__"))) {;
 		var params = null;
 	};
 	if (arguments.length) {

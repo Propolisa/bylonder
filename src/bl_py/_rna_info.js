@@ -388,7 +388,7 @@ export var InfoStructRNA =  __class__ ('InfoStructRNA', [object], {
 		return bases;
 	});},
 	get get_nested_properties () {return __get__ (this, function (self, ls) {
-		if (typeof ls == 'undefined' || (ls != null && ls.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof ls == 'undefined' || (ls != null && globalThis.Object.hasOwn (ls, "__kwargtrans__"))) {;
 			var ls = null;
 		};
 		if (arguments.length) {
@@ -907,7 +907,7 @@ export var InfoPropertyRNA =  __class__ ('InfoPropertyRNA', [object], {
 		self.srna = __call__ (GetInfoStructRNA, null, rna_prop.srna);
 	});},
 	get get_arg_default () {return __get__ (this, function (self, force) {
-		if (typeof force == 'undefined' || (force != null && force.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof force == 'undefined' || (force != null && globalThis.Object.hasOwn (force, "__kwargtrans__"))) {;
 			var force = true;
 		};
 		if (arguments.length) {
@@ -1544,7 +1544,7 @@ export var InfoOperatorRNA =  __class__ ('InfoOperatorRNA', [object], {
 	});}
 });
 export var _GetInfoRNA = function (bl_rna, cls, parent_id) {
-	if (typeof parent_id == 'undefined' || (parent_id != null && parent_id.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof parent_id == 'undefined' || (parent_id != null && globalThis.Object.hasOwn (parent_id, "__kwargtrans__"))) {;
 		var parent_id = '';
 	};
 	if (arguments.length) {

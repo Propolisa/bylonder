@@ -487,7 +487,7 @@ export var unregister_node_cat_types = function (cats) {
 	}
 };
 export var unregister_node_categories = function (identifier) {
-	if (typeof identifier == 'undefined' || (identifier != null && identifier.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof identifier == 'undefined' || (identifier != null && globalThis.Object.hasOwn (identifier, "__kwargtrans__"))) {;
 		var identifier = null;
 	};
 	if (arguments.length) {

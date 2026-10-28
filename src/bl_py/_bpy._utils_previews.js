@@ -20,7 +20,7 @@ export var py_new = function (py_name) {
 	return null;
 };
 export var load = function (py_name, filepath, filetype, force_reload) {
-	if (typeof force_reload == 'undefined' || (force_reload != null && force_reload.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof force_reload == 'undefined' || (force_reload != null && globalThis.Object.hasOwn (force_reload, "__kwargtrans__"))) {;
 		var force_reload = false;
 	};
 	if (arguments.length) {

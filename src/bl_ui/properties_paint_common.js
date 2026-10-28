@@ -26,7 +26,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -41,16 +41,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -319,7 +319,7 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		return mode_map [mode];
 	};},
 	get draw_popup_selector () {return function (layout, context, brush, show_name) {
-		if (typeof show_name == 'undefined' || (show_name != null && show_name.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof show_name == 'undefined' || (show_name != null && globalThis.Object.hasOwn (show_name, "__kwargtrans__"))) {;
 			var show_name = true;
 		};
 		if (arguments.length) {
@@ -472,22 +472,22 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		return null;
 	};},
 	get prop_unified () {return function (layout, context, brush, prop_name, unified_paint_settings_override, unified_name, pressure_name, text, slider, header) {
-		if (typeof unified_paint_settings_override == 'undefined' || (unified_paint_settings_override != null && unified_paint_settings_override.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof unified_paint_settings_override == 'undefined' || (unified_paint_settings_override != null && globalThis.Object.hasOwn (unified_paint_settings_override, "__kwargtrans__"))) {;
 			var unified_paint_settings_override = null;
 		};
-		if (typeof unified_name == 'undefined' || (unified_name != null && unified_name.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof unified_name == 'undefined' || (unified_name != null && globalThis.Object.hasOwn (unified_name, "__kwargtrans__"))) {;
 			var unified_name = null;
 		};
-		if (typeof pressure_name == 'undefined' || (pressure_name != null && pressure_name.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pressure_name == 'undefined' || (pressure_name != null && globalThis.Object.hasOwn (pressure_name, "__kwargtrans__"))) {;
 			var pressure_name = null;
 		};
-		if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof text == 'undefined' || (text != null && globalThis.Object.hasOwn (text, "__kwargtrans__"))) {;
 			var text = null;
 		};
-		if (typeof slider == 'undefined' || (slider != null && slider.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof slider == 'undefined' || (slider != null && globalThis.Object.hasOwn (slider, "__kwargtrans__"))) {;
 			var slider = false;
 		};
-		if (typeof header == 'undefined' || (header != null && header.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof header == 'undefined' || (header != null && globalThis.Object.hasOwn (header, "__kwargtrans__"))) {;
 			var header = false;
 		};
 		if (arguments.length) {
@@ -585,7 +585,7 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		parent.prop (prop_owner, prop_name, __kwargtrans__ ({text: text}));
 	};},
 	get prop_unified_color_picker () {return function (parent, context, brush, prop_name, value_slider) {
-		if (typeof value_slider == 'undefined' || (value_slider != null && value_slider.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof value_slider == 'undefined' || (value_slider != null && globalThis.Object.hasOwn (value_slider, "__kwargtrans__"))) {;
 			var value_slider = true;
 		};
 		if (arguments.length) {
@@ -1262,7 +1262,7 @@ export var VIEW3D_MT_tools_projectpaint_clone =  __class__ ('VIEW3D_MT_tools_pro
 	});}
 });
 export var brush_settings = function (layout, context, brush, popover) {
-	if (typeof popover == 'undefined' || (popover != null && popover.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof popover == 'undefined' || (popover != null && globalThis.Object.hasOwn (popover, "__kwargtrans__"))) {;
 		var popover = false;
 	};
 	if (arguments.length) {
@@ -1557,7 +1557,7 @@ export var brush_settings = function (layout, context, brush, popover) {
 	}
 };
 export var brush_shared_settings = function (layout, context, brush, popover) {
-	if (typeof popover == 'undefined' || (popover != null && popover.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof popover == 'undefined' || (popover != null && globalThis.Object.hasOwn (popover, "__kwargtrans__"))) {;
 		var popover = false;
 	};
 	if (arguments.length) {
@@ -1730,7 +1730,7 @@ export var draw_color_jitter_panel = function (layout, context, brush) {
 	}
 };
 export var brush_settings_advanced = function (layout, context, settings, brush, popover) {
-	if (typeof popover == 'undefined' || (popover != null && popover.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof popover == 'undefined' || (popover != null && globalThis.Object.hasOwn (popover, "__kwargtrans__"))) {;
 		var popover = false;
 	};
 	if (arguments.length) {
@@ -1937,7 +1937,7 @@ export var draw_auto_masking_panel = function (layout, brush) {
 	}
 };
 export var draw_color_settings = function (context, layout, brush, color_type) {
-	if (typeof color_type == 'undefined' || (color_type != null && color_type.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof color_type == 'undefined' || (color_type != null && globalThis.Object.hasOwn (color_type, "__kwargtrans__"))) {;
 		var color_type = false;
 	};
 	if (arguments.length) {

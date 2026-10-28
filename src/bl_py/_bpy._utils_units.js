@@ -6,7 +6,7 @@ var __name__ = '_bpy._utils_units';
 export var systems = dict ({'NONE': 'NONE', 'METRIC': 'METRIC', 'IMPERIAL': 'IMPERIAL'});
 export var categories = dict ({'NONE': 'NONE', 'LENGTH': 'LENGTH', 'AREA': 'AREA', 'VOLUME': 'VOLUME', 'MASS': 'MASS', 'ROTATION': 'ROTATION', 'TIME': 'TIME', 'TIME_ABSOLUTE': 'TIME_ABSOLUTE', 'VELOCITY': 'VELOCITY', 'ACCELERATION': 'ACCELERATION', 'CAMERA': 'CAMERA', 'POWER': 'POWER', 'TEMPERATURE': 'TEMPERATURE'});
 export var to_value = function (unit_system, unit_category, str_input, str_ref_unit) {
-	if (typeof str_ref_unit == 'undefined' || (str_ref_unit != null && str_ref_unit.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof str_ref_unit == 'undefined' || (str_ref_unit != null && globalThis.Object.hasOwn (str_ref_unit, "__kwargtrans__"))) {;
 		var str_ref_unit = null;
 	};
 	if (arguments.length) {
@@ -28,13 +28,13 @@ export var to_value = function (unit_system, unit_category, str_input, str_ref_u
 	return __call__ (float, null, str_input);
 };
 export var to_string = function (unit_system, unit_category, value, precision, split_unit, compatible_unit) {
-	if (typeof precision == 'undefined' || (precision != null && precision.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof precision == 'undefined' || (precision != null && globalThis.Object.hasOwn (precision, "__kwargtrans__"))) {;
 		var precision = 3;
 	};
-	if (typeof split_unit == 'undefined' || (split_unit != null && split_unit.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof split_unit == 'undefined' || (split_unit != null && globalThis.Object.hasOwn (split_unit, "__kwargtrans__"))) {;
 		var split_unit = false;
 	};
-	if (typeof compatible_unit == 'undefined' || (compatible_unit != null && compatible_unit.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof compatible_unit == 'undefined' || (compatible_unit != null && globalThis.Object.hasOwn (compatible_unit, "__kwargtrans__"))) {;
 		var compatible_unit = false;
 	};
 	if (arguments.length) {

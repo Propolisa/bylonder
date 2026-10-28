@@ -25,6 +25,9 @@ export function registerOperators(table, space = null) {
 const operatorFor = (idname) => (area?.space && spaceOperators.get(area.space)?.get(idname)) ?? operators.get(idname);
 
 export const runOperator = (idname, props = {}) => operatorFor(idname).run(props);
+export const hasOperator = (idname) => operators.has(idname);
+// Whether an operator is registered and can run now with those properties (WM_operator_poll).
+export const pollOperator = (idname, props = {}) => { const operator = operatorFor(idname); return !!operator && (operator.supports?.(props) ?? true) && (operator.poll?.(props) ?? true); };
 
 // Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls. Returns
 // false when it did not run, else what run returned, as Blender's operators do: 'FINISHED' (or nothing),

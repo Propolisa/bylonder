@@ -157,10 +157,10 @@ export var copysign = function (x, y) {
 	return (Math.sign (x) == Math.sign (y) ? x : -(x));
 };
 export var isclose = function (a, b, rel_tol, abs_tol) {
-	if (typeof rel_tol == 'undefined' || (rel_tol != null && rel_tol.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof rel_tol == 'undefined' || (rel_tol != null && globalThis.Object.hasOwn (rel_tol, "__kwargtrans__"))) {;
 		var rel_tol = 1e-09;
 	};
-	if (typeof abs_tol == 'undefined' || (abs_tol != null && abs_tol.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof abs_tol == 'undefined' || (abs_tol != null && globalThis.Object.hasOwn (abs_tol, "__kwargtrans__"))) {;
 		var abs_tol = 0.0;
 	};
 	if (arguments.length) {

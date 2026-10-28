@@ -16,10 +16,10 @@ export var app_template_paths = function () {
 	return ['APP_TEMPLATES'];
 };
 export var smpte_from_frame = function (frame, fps, fps_base) {
-	if (typeof fps == 'undefined' || (fps != null && fps.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fps == 'undefined' || (fps != null && globalThis.Object.hasOwn (fps, "__kwargtrans__"))) {;
 		var fps = null;
 	};
-	if (typeof fps_base == 'undefined' || (fps_base != null && fps_base.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fps_base == 'undefined' || (fps_base != null && globalThis.Object.hasOwn (fps_base, "__kwargtrans__"))) {;
 		var fps_base = null;
 	};
 	if (arguments.length) {
@@ -43,7 +43,7 @@ export var smpte_from_frame = function (frame, fps, fps_base) {
 	return '{}{:02d}:{:02d}:{:02d}:{:02d}'.format (sign, Math.floor (total / (3600 * fps)), __mod__ (Math.floor (total / (60 * fps)), 60), __mod__ (Math.floor (total / fps), 60), __mod__ (total, fps));
 };
 export var system_resource = function (kind, path) {
-	if (typeof path == 'undefined' || (path != null && path.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof path == 'undefined' || (path != null && globalThis.Object.hasOwn (path, "__kwargtrans__"))) {;
 		var path = '';
 	};
 	if (arguments.length) {
