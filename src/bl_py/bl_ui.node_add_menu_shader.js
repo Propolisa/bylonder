@@ -128,6 +128,24 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var line_style_shader_nodes_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -509,7 +527,7 @@ export var NODE_MT_shader_node_shader_base =  __class__ ('NODE_MT_shader_node_sh
 		}
 		else {
 		}
-		return __call__ (__call__ (__super__, null, NODE_MT_shader_node_shader_base, 'poll'), null, self, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
+		return __call__ (__call__ (_super_classmethod, null, NODE_MT_shader_node_shader_base, cls, 'poll'), null, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
@@ -957,7 +975,7 @@ export var NODE_MT_shader_node_displacement_base =  __class__ ('NODE_MT_shader_n
 		}
 		else {
 		}
-		return __call__ (__call__ (__super__, null, NODE_MT_shader_node_displacement_base, 'poll'), null, self, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
+		return __call__ (__call__ (_super_classmethod, null, NODE_MT_shader_node_displacement_base, cls, 'poll'), null, context) && !(__call__ (line_style_shader_nodes_poll, null, context));
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
@@ -1195,6 +1213,7 @@ export function __py_setattr__ (key, value) {
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
 		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'line_style_shader_nodes_poll': line_style_shader_nodes_poll = value; break;
 		case 'world_shader_nodes_poll': world_shader_nodes_poll = value; break;
 		case 'object_shader_nodes_poll': object_shader_nodes_poll = value; break;

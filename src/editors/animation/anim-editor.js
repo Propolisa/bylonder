@@ -14,16 +14,18 @@ import { keyType } from '../../windowmanager/input/keymap.js';
 import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI } from '../../windowmanager/wm-operators.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
-import { drawHeader } from '../interface/header.js';
 import { drawMenu } from '../interface/ui-layout.js';
+import { headerLayout, drawPanels } from '../interface/panels.js';
+import { LayoutView } from '../interface/layout-view.js';
+import { loadRNAUI } from '../../makesrna/rna.js';
+import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import { createContext } from '../../blenkernel/context.js';
-import * as spaceGraph from '../../bl_ui/space_graph.js';
-import * as spaceDopesheet from '../../bl_ui/space_dopesheet.js';
-import * as spaceTime from '../../bl_ui/space_time.js';
+import { createApp, h, reactive, markRaw } from 'vue';
+import '../interface/layout-view.css';
+import '../interface/components/tailwind.css';
 import './anim-editor.css';
 
-const MENUS = Object.fromEntries([spaceGraph, spaceDopesheet, spaceTime].flatMap((m) => Object.entries(m)).filter(([name]) => /_(MT|HT)_/.test(name)));
 
 // The keymaps a region's handlers run, in order (ed_default_handlers' then the region type's init), then the window's.
 const KEYMAPS = {
@@ -99,7 +101,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const mainCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-main' });
   section.replaceChildren(...(timeline ? [] : [channelsCanvas]), mainCanvas);
   const status = Object.assign(document.createElement('div'), { className: 'anim-status' });
-  const menus = Object.assign(document.createElement('div'), { className: 'anim-header' });
+  const menus = Object.assign(document.createElement('div'), { className: 'bl-ui anim-header' });
   header?.replaceChildren(menus, status);
 
   let size = { width: 0, height: 0, channels: 0 }, frame = 0, gesture = null, press = null, hover = RGN_TYPE_WINDOW, pointer = { x: 0, y: 0, region: RGN_TYPE_WINDOW };
@@ -116,6 +118,36 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const inThisArea = (fn) => (...args) => inArea(contextAreaOf, () => fn(...args));
   Object.assign(ui, { run: inThisArea((idname, props) => (MODULE_OPERATOR.test(idname) || MACROS[idname] ? runFromMenu(idname, props) : runOperator(idname, props))), supported: inThisArea(ui.supported), poll: inThisArea(ui.poll), keys: inThisArea(ui.keys) });
   const menuItems = (name) => inArea(contextAreaOf, () => drawMenu(name, ui));
+
+  // The header (DOPESHEET_HT_header, GRAPH_HT_header) drawn by the shared layout renderer; its popovers draw their panels.
+  const headerState = reactive({ revision: 0, ready: false });
+  const layoutUI = markRaw({
+    get revision() { return headerState.revision; },
+    undoPush: () => { commit(); redraw(); },
+    report: (error) => rna.host.notify?.(error.message),
+    run: (idname, props) => ui.run(idname, props),
+    supported: (idname, props) => ui.supported(idname, props),
+    poll: (idname, props) => ui.poll(idname, props),
+    isOpen: () => true,
+    toggle: () => {},
+    ids: () => [],
+    drawMenu: (idname) => menuItems(idname),
+    menuLabel: (idname) => MENUS[idname]?.bl_label,
+    menuContents: (idname) => MENUS[idname] && markRaw(headerLayout(context(), drawHeaderType(MENUS[idname]))),
+    popover: (id) => {
+      const type = PANEL_TYPES[id];
+      if (!type) return null;
+      const [drawn] = drawPanels({ roots: [{ type, children: [] }] }, context(), { contexts: [type.bl_context].filter(Boolean) });
+      return drawn?.body && { label: drawn.label, layout: drawn.body, units: type.bl_ui_units_x };
+    },
+  });
+  const drawHeaderType = (type) => (layout) => Object.assign(type(), { layout }).draw(context());
+  const headerApp = createApp({ render: () => {
+    void headerState.revision;
+    return headerState.ready ? h(LayoutView, { layout: headerLayout(context(), drawHeaderType(HEADER_TYPES[HEADERS[space]])), ui: layoutUI }) : null;
+  } });
+  headerApp.mount(menus);
+  loadRNAUI(() => import('../../makesrna/rna-ui.json')).then(() => { headerState.ready = true; });
 
   // Before Blender's code reads them: the scene's time, and the objects' bases (selection, visibility).
   function sync() {
@@ -338,7 +370,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   }
 
 
-  let scheduled = 0, headerRefresh = null, lastStatus = null;
+  let scheduled = 0, lastStatus = null;
   function redraw() {
     if (!scheduled) scheduled = requestAnimationFrame(draw);
   }
@@ -380,8 +412,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       status.textContent = text;
       menus.hidden = !!text;
     }
-    if (!headerRefresh) headerRefresh = drawHeader(menus, HEADERS[space], ui, { changed: redraw });
-    else headerRefresh();
+    headerState.revision++;
   }
 
   section.addEventListener('pointerdown', onPointerDown);
@@ -406,6 +437,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       unsubscribe();
       resized.disconnect();
       cancelAnimationFrame(scheduled);
+      headerApp.unmount();
       area.dispose();
     },
   };

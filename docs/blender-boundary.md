@@ -61,7 +61,7 @@ Text and curve objects go in without their data, so operators that change it (Ap
 
 Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel is a custom property of the Scene (`["<id, path>"]`). Keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings, values come out with `evaluate_fcurve`, and Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`).
 
-The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus), and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are Blender's scripts (`space_time.py`, `space_dopesheet.py`, `space_graph.py`) through `drawMenu`.
+The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus), and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
 
 ## Shared foundations
 
@@ -114,9 +114,29 @@ The toolbar, tool settings, header transform settings and sidebar are Blender's 
 - Tool icons are Blender's `.dat` triangle files, converted to SVG by `tools/blender-ui/tool_icons.py`.
 - The toolbar (`editors/space_view3d/view3d-toolbar.js`) records `draw_cls`'s layout calls and draws Blender's one icon column: groups open their flyout on a 0.2 s hold or a drag, the region snaps to Blender's widths.
 - The Transform panel is C (`view3d_buttons.cc`). It is ported as the layout calls it makes (`view3d-buttons.js`), not built to WASM: it only reads and writes RNA, so the layout calls are the whole of it.
-- Panels and headers draw through `editors/space_view3d/region-layout.js` and `.css`, an interim renderer used only by `view3d-regions.js`. It is to be replaced by the shared layout renderer (Properties editor), with no other caller to change.
+- The tool settings, the header's transform settings and the sidebar draw through the shared layout renderer (see Layouts and panels), with their popovers.
 - Transform orientation slots are stored per scene but no transform reads them yet.
 - Select Box, Circle and Lasso share `do_mesh_region_select` (`view3d-select.js`) in Edit Mode; in Object Mode box select tests vertices and circle and lasso the object origin, as Blender does. The gestures are `windowmanager/wm-gesture-*.js` with Blender's modal maps.
+
+## Layouts and panels
+
+One recorder and one renderer draw every layout from Blender's scripts: panels, headers, popovers and the C panels whose layout calls are recorded (modifier panels from `panel-layout.cc`, the 3D View's Transform panel).
+
+- `editors/interface/layout.js`: `UILayout`, Blender's layout API as a recorder. Each call adds a node `{ kind, ...arguments, ...layout settings }`; sub-layouts hold `children`. Unknown `template_*` calls record their name and arguments.
+- `editors/interface/panels.js`: `panelTypes(modules, { space, region })` gives a region's panel types in Blender's registration order (bl_parent_id, bl_order, HIDE_HEADER first); `drawPanels(types, context, { contexts, open })` runs poll, draw_header, draw_header_preset and draw into layouts; `headerLayout(context, draw)` lays out a header row.
+- `editors/interface/layout-view.js`: the Vue renderer. `h(LayoutView, { layout, ui })`, `h(PanelView, { panel, ui })`, `h(RegionView, { panels, ui })`. `ui` is what the widgets need from the editor (undo push, operators, menus, popovers, panel open state, ID lists, animation); the file's header lists it.
+- Widgets follow `interface_layout.cc` and `interface_widgets.cc`: property split at 0.4 with the row hack that puts later items in the value column, the checkbox exception, decorators, array names above their fields, expanded enums in the layout's direction, and Blender's spacing. Numbers are one component, `components/ui/number-field/NumberField.vue`, with Blender's drag behavior.
+- Property metadata (names, ranges, units, enum items) is Blender's RNA: `rna-ui.json` (from `tools/blender-reference/rna-structs.py`) through `rnaProperty(struct, name)`, and `rna-operators.json` for operator properties. `bl_rna` and `rna_type` give `blRna(struct)` on the same data.
+
+## Properties editor
+
+The Properties editor (`editors/space_buttons/editor.js`) is Blender's `space_properties.py` and every `properties_*.py`, transpiled whole (manifest globs), drawn through the shared renderer.
+
+- Tabs and the shown tab are `buttons_context.cc`'s (`buttons-context.js`): the tabs come from the context per object type, the user's choice is kept as `mainbuser` and the first available tab shows while the data lacks it.
+- Bindings are in `rna-bylonder.js` only: Object (with Light, Camera, Empty, Text and Curve data), World and Material node inputs, Scene, render and view layer settings. Unbound properties read greyed at Blender's defaults.
+- Lights and cameras are objects as Blender's are: `runtime/object-transform.js` gives them a rotation and scaling, so selection, transform and undo use one path.
+- Modifier panels are the module's C layouts (`modifier-panel.js`) in the same node shape. Bylonder's own panels go after Blender's, as add-on panels (`addon-panels.js`).
+- Keys run Blender's Property Editor keymap inside the editor's area (`inArea`).
 
 ## Node editors
 
@@ -133,6 +153,6 @@ The Shader Editor and Compositor build on the same foundations: Blender's node d
 ## Next
 
 - The 3D View's Object Mode Select and Object menus are Blender's, over `createContext`, running Bylonder's actions by the operators they name (`editors/object/object-operators.js`). Next: View and Add, and the Edit Mode menus (`view3d-menus-edit-mesh.js`, which builds its own context).
-- Properties editor contexts: `SpaceProperties`, `context.modifier`, `context.material`.
+- Properties editor: popovers in panels other than the 3D View's, template_list filtering and sorting, multi-drag of number fields, light type changes (Bylonder replaces the Babylon light), the Collection tab for the master collection.
 - The topbar's scene properties across windows (decision 7).
-- Camera and Light data, Mesh element collections, collections and view layers from the collections slice, Preferences.
+- Mesh element collections, Preferences.

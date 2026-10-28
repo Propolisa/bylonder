@@ -131,6 +131,24 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var bl_file_extensions_image_and_movie = (function () {
 	var __accu0__ = ';';
 	return __call__ (__accu0__.join, __accu0__, __call__ (_joined, null, bpy.path.extensions_image, bpy.path.extensions_movie));
@@ -681,6 +699,7 @@ export function __py_setattr__ (key, value) {
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
 		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'bl_file_extensions_image_and_movie': bl_file_extensions_image_and_movie = value; break;
 		case 'VIEW3D_OT_edit_mesh_extrude_individual_move': VIEW3D_OT_edit_mesh_extrude_individual_move = value; break;
 		case 'VIEW3D_OT_edit_mesh_extrude_move': VIEW3D_OT_edit_mesh_extrude_move = value; break;

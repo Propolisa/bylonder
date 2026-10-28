@@ -7,6 +7,9 @@
   { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" },
   { "id": "graph-editor", "title": "Graph Editor in the Timeline's area, the cube's location keyed at frames 1 and 40" },
   { "id": "dope-sheet", "title": "Dope Sheet in the Timeline's area, the cube's location keyed at frames 1 and 40" },
+  { "id": "object-tab", "title": "Properties: Object tab of the cube" },
+  { "id": "light-data", "title": "Properties: Light data tab of the point light" },
+  { "id": "camera-data", "title": "Properties: Camera data tab of the camera" },
   { "id": "toolbar", "title": "3D View toolbar: the Move tool chosen, with its tool settings and gizmo" },
   { "id": "sidebar-item", "title": "3D View sidebar (N): the Item tab", "settle": 4 }
 ]

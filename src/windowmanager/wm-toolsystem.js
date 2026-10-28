@@ -4,7 +4,7 @@
 // the operator properties the tool stores (its settings in the tool header), and its gizmo group shows.
 import { activate_by_id, activate_by_id_or_cycle, item_from_flat_index, item_from_index_active, ToolSelectPanelHelper } from '../bl_ui/space_toolsystem_common.js';
 import { VIEW3D_PT_tools_active } from '../bl_ui/space_toolsystem_toolbar.js';
-import { useContext } from '../editors/interface/ui-layout.js';
+import { useContext } from '../editors/interface/layout.js';
 import { registerOperators, kw } from './wm-operators.js';
 import { dict } from '../bl_ui/org.transcrypt.__runtime__.js';
 

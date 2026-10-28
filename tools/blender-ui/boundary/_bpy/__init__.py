@@ -32,6 +32,13 @@ data = None
 __pragma__('js', '{}', 'context = top(_contexts); data = top(_datas);')
 
 
+def _context_set(context, data=None):
+    """The context Bylonder draws or runs with, in place of the one it set before (Blender's defaults stay below)."""
+    if len(_contexts) > 1:
+        _context_pop()
+    _context_push(context, data)
+
+
 def _context_push(context, data=None):
     _contexts.append(context)
     _datas.append(data or _datas[-1])

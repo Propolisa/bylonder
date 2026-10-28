@@ -32,7 +32,23 @@
   --bl-socket-value:#a1a1a1;--bl-socket-int:#598c5c;--bl-socket-boolean:#cca6d6;--bl-socket-vector:#6363c7;--bl-socket-rgba:#c7c729;
   --bl-socket-shader:#63c763;--bl-socket-menu:#666666;--bl-socket-rotation:#a663c7;--bl-socket-matrix:#b83385;--bl-socket-string:#70b2ff;
   --bl-socket-object:#ed9e5c;--bl-socket-collection:#f5f5f5;--bl-socket-geometry:#00d6a3;--bl-socket-custom:#333333;
-  --bl-header-h:26px;--bl-topbar-h:24px;--bl-statusbar-h:21px;--bl-row:20px;--bl-radius:4px
+  --bl-header-h:26px;--bl-topbar-h:24px;--bl-statusbar-h:21px;--bl-row:20px;--bl-radius:4px;
+  /* Blender's widget colors (userdef_default_theme.c, read from Blender 5.2): inner, inner when pressed or selected,
+     item (a slider's fill, a check mark, a menu's arrow), outline. Hover lightens inner (widget_state). Panels: header,
+     back, a sub-panel's back, outline. Property split: the label column is 0.4 of a row, the decorator a unit wide. */
+  --bl-wcol-outline:#3d3d3d;--bl-wcol-emboss:#00000026;--bl-wcol-hover:#ffffff17;
+  --bl-wcol-num:#545454;--bl-wcol-num-sel:#222222;--bl-wcol-num-item:#4772b3;
+  --bl-wcol-option:#545454;--bl-wcol-option-sel:#4772b3;--bl-wcol-option-item:#ffffff;
+  --bl-wcol-toggle:#545454;--bl-wcol-toggle-sel:#4772b3;
+  --bl-wcol-tool:#545454;--bl-wcol-tool-sel:#4772b3;
+  --bl-wcol-menu:#282828;--bl-wcol-menu-item:#d9d9d9;
+  --bl-wcol-text:#1d1d1d;--bl-wcol-text-sel:#181818;--bl-wcol-text-item:#ffffff33;--bl-wcol-text-cursor:#71a8ff;
+  --bl-wcol-box:#1d1d1d80;--bl-wcol-list-sel:#4772b3;--bl-wcol-list-item:#ffffff33;
+  --bl-wcol-tab:#1d1d1d;--bl-wcol-tab-sel:#303030;--bl-wcol-tab-text:#989898;
+  --bl-panel-back:#3d3d3d;--bl-panel-sub-back:#0000001f;--bl-panel-outline:#ffffff11;--bl-panel-title:#e6e6e6;
+  --bl-text-sel:#ffffff;--bl-icon-object:#e19658;--bl-icon-object-data:#00d4a3;--bl-icon-modifier:#74a2ff;--bl-icon-shading:#cc6670;
+  --bl-icon-scene:#cccccc;--bl-icon-collection:#ffffff;--bl-icon-folder:#ccad63;
+  --bl-split-label:40%;--bl-button-gap:2px;--bl-row-gap:4px
 }
 @media(pointer:coarse){:root{--bl-header-h:36px;--bl-row:30px}}
 html,body{background:var(--bl-gap);color:var(--bl-text);font:var(--bl-font)}

@@ -133,6 +133,24 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var math_nodes = new set (['ShaderNodeMath', 'ShaderNodeVectorMath', 'FunctionNodeIntegerMath', 'FunctionNodeBooleanMath', 'FunctionNodeBitMath']);
 export var switch_nodes = new set (['GeometryNodeSwitch', 'GeometryNodeMenuSwitch', 'GeometryNodeIndexSwitch']);
 export var has_child_sockets = new set (['NodeCombineBundle', 'NodeSeparateBundle']);
@@ -2738,7 +2756,7 @@ export var NODE_OT_interface_item_duplicate =  __class__ ('NODE_OT_interface_ite
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (__super__, null, NODE_OT_interface_item_duplicate, 'poll'), null, self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_duplicate, cls, 'poll'), null, context))) {
 			return false;
 		}
 		var snode = context.space_data;
@@ -2866,7 +2884,7 @@ export var NODE_OT_interface_item_make_panel_toggle =  __class__ ('NODE_OT_inter
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (__super__, null, NODE_OT_interface_item_make_panel_toggle, 'poll'), null, self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_make_panel_toggle, cls, 'poll'), null, context))) {
 			return false;
 		}
 		var snode = context.space_data;
@@ -2955,7 +2973,7 @@ export var NODE_OT_interface_item_unlink_panel_toggle =  __class__ ('NODE_OT_int
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (__super__, null, NODE_OT_interface_item_unlink_panel_toggle, 'poll'), null, self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, NODE_OT_interface_item_unlink_panel_toggle, cls, 'poll'), null, context))) {
 			return false;
 		}
 		var snode = context.space_data;
@@ -3260,6 +3278,7 @@ export function __py_setattr__ (key, value) {
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
 		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case 'math_nodes': math_nodes = value; break;
 		case 'switch_nodes': switch_nodes = value; break;
 		case 'has_child_sockets': has_child_sockets = value; break;

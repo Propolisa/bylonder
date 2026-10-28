@@ -3,7 +3,6 @@
 .anim-header{display:flex;align-items:center;gap:2px;min-width:0;flex:1}
 .anim-status{display:flex;align-items:center;padding:0 8px;color:var(--bl-text);white-space:pre;font:var(--bl-font)}
 .anim-status:empty{display:none}
-.bl-header-spacer{flex:1}
-.bl-header-field{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;border-radius:var(--bl-radius);background:var(--bl-field);color:var(--bl-text-dim);font:var(--bl-font)}
-.bl-header-field input{width:48px;border:0;background:transparent;color:var(--bl-text);font:var(--bl-font);text-align:center}
-.bl-header-value{padding:0 6px;color:var(--bl-text-dim);font:var(--bl-font);white-space:nowrap}
+/* Header items keep their own widths (ED_region_header_layout), as the 3D View's header's do. */
+.anim-header>.bl-row{flex:1}
+.anim-header .bl-widget{flex:none}

@@ -1,15 +1,9 @@
-// Blender's Add menu (NODE_MT_add and the node_add_menu_*.py menus, compiled into src/bl_ui), its entries adding
+// Blender's Add menu (NODE_MT_add and the node_add_menu_*.py menus, in Blender's Python tree), its entries adding
 // the nodes Bylonder runs: Blender's own (src/nodes/blender) and, appended to Blender's categories as an add-on
 // extends them, Babylon's blocks from its editors' catalogs (babylon/*-blocks.js).
-import * as space from '../../bl_ui/space_node.js';
-import * as base from '../../bl_ui/node_add_menu.js';
-import * as shaderMenus from '../../bl_ui/node_add_menu_shader.js';
-import * as compositorMenus from '../../bl_ui/node_add_menu_compositor.js';
+import { menus } from '../../python/bpy_interface.js';
 import { drawMenu, subitems } from '../interface/ui-layout.js';
-import { menuClasses, kw } from '../../windowmanager/wm-operators.js';
-
-const classes = (list) => Object.fromEntries([...list].map((cls) => [cls.bl_idname, cls]));
-const menus = { ...menuClasses(space), ...classes(base.classes), ...classes(shaderMenus.add_menus), ...classes(compositorMenus.add_menus) };
+import { kw } from '../../windowmanager/wm-operators.js';
 
 // Babylon's editor categories in Blender's Add menu categories.
 const BABYLON_CATEGORIES = {

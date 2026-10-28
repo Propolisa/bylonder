@@ -135,6 +135,24 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var _toggle_xray_operator = function (layout, context, text) {
 	if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
 		var text = null;
@@ -20741,7 +20759,7 @@ export var VIEW3D_AST_brush_texture_paint =  __class__ ('VIEW3D_AST_brush_textur
 		}
 		else {
 		}
-		if (!(__call__ (__call__ (__super__, null, VIEW3D_AST_brush_texture_paint, 'poll'), null, self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, VIEW3D_AST_brush_texture_paint, cls, 'poll'), null, context))) {
 			return false;
 		}
 		return __ne__ (context.space_data.py_metatype, 'IMAGE_EDITOR');
@@ -20792,6 +20810,7 @@ export function __py_setattr__ (key, value) {
 		case '_property': _property = value; break;
 		case '_formatted': _formatted = value; break;
 		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '_toggle_xray_operator': _toggle_xray_operator = value; break;
 		case 'VIEW3D_HT_tool_header': VIEW3D_HT_tool_header = value; break;
 		case '_draw_tool_settings_context_mode': _draw_tool_settings_context_mode = value; break;

@@ -1,9 +1,9 @@
-// The 3D View's Edit Mode menus: Blender's own (space_view3d.py, compiled into src/bl_ui by tools/blender-ui) drawn
+// The 3D View's Edit Mode menus: Blender's own (space_view3d.py, in Blender's Python tree) drawn
 // with Bylonder's UILayout, holding the operators Bylonder runs. `api` is Edit Mode's:
 //   context(): bpy.context (blenkernel/context.js), edit(): the EditMesh, exec(idname, props): runs an operator as an undo step, keys(idname, props): its shortcut,
 //   move(idname, props, { normal }) and slide(idname, props): an operator and then a move or Edge Slide, as Blender's
 //   macros run them, start(type): a transform, and the modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
-import * as spaceView3d from '../../bl_ui/space_view3d.js';
+import { menus as MENUS } from '../../python/bpy_interface.js';
 import { drawMenu, runs } from '../interface/ui-layout.js';
 import { rna } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
@@ -14,7 +14,6 @@ import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../../bmesh
 
 // The keymaps an Edit Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Mesh', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
-const MENUS = Object.fromEntries(Object.entries(spaceView3d).filter(([name]) => name.includes('_MT_')));
 
 // What Edit Mode runs itself rather than as an operator's exec, by Blender idname: transforms, Blender's macros and modal
 // tools, run with the operator's properties.

@@ -35,7 +35,7 @@ const checks = {
   },
 
   async "Render Animation renders the frame range"() {
-    await app.locator('label[data-property="frame_end"] input').click();
+    await app.locator('[role="spinbutton"][aria-label="End"]').click();
     await app.page.keyboard.press("Control+A");
     await app.page.keyboard.type("2");
     await app.page.keyboard.press("Enter");
