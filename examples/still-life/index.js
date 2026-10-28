@@ -44,7 +44,7 @@ export const createScene = function () {
   const { window } = windowLight(scene, m, props);
   candleFlame(scene, new BABYLON.Vector3(-0.34, 0.296, 0.36));
   bakeEnvironment(scene, [table, wall, cloth, window], new BABYLON.Vector3(0, 0.12, 0.05));
-  seenThroughGlass(scene, [m.glass, m.crystal], [table, wall, cloth, wine, bowl, candlestick, candle, grapes, pear, ...lemons]);
+  seenThroughGlass(scene, [m.glass], [table, wall, cloth, wine, bowl, candlestick, candle, grapes, pear, ...lemons]);
 
   // A 60 mm lens, low over the table.
   const camera = new BABYLON.TargetCamera('Camera', new BABYLON.Vector3(-0.3, 0.24, -1.1), scene);

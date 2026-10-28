@@ -68,9 +68,13 @@ const glass = (scene, name, tint) => pbr(scene, name, {
   environmentIntensity: 1.2, alpha: 1,
 });
 
-// Polished and hammered metals.
+// Thin crystal: clear, so its highlights and the rim light define it more than what it refracts.
+const crystal = (scene) => pbr(scene, 'Crystal', {
+  albedoColor: color(0.92, 0.94, 0.97), metallic: 0, roughness: 0.03, alpha: 0.12,
+  useSpecularOverAlpha: true, useRadianceOverAlpha: true, environmentIntensity: 1.5,
+});
+
 const brass = (scene) => pbr(scene, 'Brass', { albedoColor: color(0.95, 0.72, 0.38), metallic: 1, roughness: 0.22, bumpTexture: normalMap(scene, 'Hammered Normal', 256, (u, v) => noise(u * 40, v * 40, 40, 31), 0.6) });
-const silver = (scene) => pbr(scene, 'Silver', { albedoColor: color(0.96, 0.95, 0.93), metallic: 1, roughness: 0.08 });
 
 // Lemon peel: waxy, pitted with pores, light scattering under the skin.
 function lemon(scene) {
@@ -117,7 +121,7 @@ const window_ = (scene) => pbr(scene, 'Window', { emissiveColor: color(1, 0.9, 0
 export function createMaterials(scene) {
   return {
     walnut: walnut(scene), plaster: plaster(scene), linen: linen(scene), celadon: celadon(scene),
-    glass: glass(scene, 'Glass', color(0.86, 0.95, 0.9)), crystal: glass(scene, 'Crystal', color(0.97, 0.98, 1)), wine: wine(scene), beeswax: beeswax(scene),
-    brass: brass(scene), silver: silver(scene), lemon: lemon(scene), pear: pear(scene), grape: grape(scene), stem: stem(scene), window: window_(scene),
+    glass: glass(scene, 'Glass', color(0.86, 0.95, 0.9)), crystal: crystal(scene), wine: wine(scene), beeswax: beeswax(scene),
+    brass: brass(scene), lemon: lemon(scene), pear: pear(scene), grape: grape(scene), stem: stem(scene), window: window_(scene),
   };
 }

@@ -77,4 +77,3 @@ export function cloth(scene) {
 
 export const table = (scene) => slab('Table', [1.6, 0.04, 0.8], scene, { bevel: 0.006 });
 export const wall = (scene) => slab('Wall', [3, 1.6, 0.05], scene, { bevel: 0.002, segments: 1 });
-export const book = (scene) => slab('Book', [0.24, 0.035, 0.17], scene, { bevel: 0.004 });
