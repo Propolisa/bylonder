@@ -1,6 +1,6 @@
 import { Matrix, Vector3, VertexData } from '@babylonjs/core';
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
-import { nodeId, deleted } from '../editors/object/identity.js';
+import { nodeId, deleted, hasMesh } from '../editors/object/identity.js';
 import { arrayDefinition, realize } from './array.js';
 import { blenderModifierDefinitions, evaluation, estimatedFaces } from './blender.js';
 import { evaluateHere } from './evaluator.js';
@@ -17,7 +17,7 @@ const valid=(value,def)=>{
 };
 export function addModifier(node,type='GN_ARRAY',values={}){
   const definition=modifierDefinitions.get(type);if(!definition)throw Error('Unknown modifier: '+type);
-  if(!node?.getTotalVertices?.()||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
+  if(!node||!hasMesh(node)||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
   node.metadata||={};node.metadata.wbModifierBase||=VertexData.ExtractFromMesh(node).serialize();
   const modifier={id:crypto.randomUUID(),type,name:definition.name,showViewport:true,showRender:true,values:definition.defaults()};
   for(const [path,value] of Object.entries(values)){if(!definition.schema[path])throw Error('Unknown modifier property: '+path);modifier.values[path]=valid(value,definition.schema[path]);}
@@ -88,13 +88,24 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     };
     return count?then(objectWork(node,visible.slice(0,count))(signal,job),finish):finish(null);
   }
+  // The Mesh's loose edges draw as a line child (mesh_batch_cache_apply); modifiers draw their result instead.
+  const showLooseEdges=(node,show)=>node.getChildMeshes(true).filter(c=>c.metadata?.drawOwner===node).forEach(c=>c.setEnabled(show));
+  // Thin instances the object had before its modifiers drew (from project code), which modifier results are drawn in.
+  const authored=new WeakMap();
+  const authoredInstances=node=>{if(!authored.has(node))authored.set(node,node.thinInstanceCount?node.thinInstanceGetWorldMatrices().map(m=>m.clone()):null);return authored.get(node);};
+  const setInstances=(node,matrices)=>{
+    node.thinInstanceSetBuffer('matrix',null);
+    if(!matrices||(matrices.length===1&&matrices[0].isIdentity()))return;
+    const buffer=new Float32Array(matrices.length*16);matrices.forEach((m,i)=>m.copyToArray(buffer,i*16));node.thinInstanceSetBuffer('matrix',buffer,16,true);node.thinInstanceEnablePicking=true;node.thinInstanceRefreshBoundingInfo(true);
+  };
+  const restoreInstances=node=>{showLooseEdges(node,true);setInstances(node,authored.get(node));};
   function draw(node,result,request){
     applying=true;
     try{
-      node.thinInstanceSetBuffer('matrix',null);node.makeGeometryUnique();VertexData.Parse(result.data).applyToMesh(node);
-      if(result.matrices.length!==1||!result.matrices[0].isIdentity()){
-        const buffer=new Float32Array(result.matrices.length*16);result.matrices.forEach((m,i)=>m.copyToArray(buffer,i*16));node.thinInstanceSetBuffer('matrix',buffer,16,true);node.thinInstanceEnablePicking=true;node.thinInstanceRefreshBoundingInfo(true);
-      }
+      showLooseEdges(node,!request.stack.some(m=>m.showViewport));
+      const instances=authoredInstances(node);
+      node.thinInstanceSetBuffer('matrix',null);node.makeGeometryUnique();VertexData.Parse(result.data).applyToMesh(node);node.refreshBoundingInfo();
+      setInstances(node,instances?result.matrices.flatMap(m=>instances.map(instance=>m.multiply(instance))):result.matrices);
       cache.set(node,{signature:request.signature,geometry:node.geometry,result,base:request.base,creation:request.creation});
       good.set(node,request.stack);
     }finally{applying=false;}
@@ -129,7 +140,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     definitions:modifierDefinitions,stack:modifierStack,errors,
     subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     add(node,type='GN_ARRAY',values={}){
-      if(!node?.getTotalVertices?.()||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
+      if(!node||!hasMesh(node)||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
       const definition=modifierDefinitions.get(type);if(!definition)throw Error('Unknown modifier');
       node.metadata||={};base(node);
       const id=crypto.randomUUID(),used=modifierStack(node).map(m=>m.name);let name=definition.name,n=1;while(used.includes(name))name=definition.name+'.'+String(n++).padStart(3,'0');
@@ -164,17 +175,17 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
         return null;
       });
     },
-    copyToSelected(node,id,nodes){const m=modifierStack(node).find(m=>m.id===id);if(m)for(const other of nodes)if(other!==node&&other.getTotalVertices?.())api.add(other,m.type,structuredClone(m.values));},
+    copyToSelected(node,id,nodes){const m=modifierStack(node).find(m=>m.id===id);if(m)for(const other of nodes)if(other!==node&&hasMesh(other))api.add(other,m.type,structuredClone(m.values));},
     refresh(){
       if(applying)return;
       for(const node of world.objects){
         // Files saved before Blender's Array came keep Bylonder's as ARRAY.
         for(const m of node.metadata?.wbModifiers||[])if(m.type==='ARRAY'&&'shape' in m.values)m.type='GN_ARRAY';
         // Edit Mode draws the object itself, with Blender's modifiers evaluated on the edit mesh.
-        if(node.isDisposed()||deleted(node)||!node.getTotalVertices?.()||node.metadata?.editing)continue;
+        if(node.isDisposed()||deleted(node)||!hasMesh(node)||node.metadata?.editing)continue;
         const stack=modifierStack(node),prior=cache.get(node);
         if(!stack.length&&!prior)continue;
-        if(!stack.length&&prior&&!node.metadata.wbModifierBase){node.thinInstanceSetBuffer('matrix',null);VertexData.Parse(prior.base).applyToMesh(node);cache.delete(node);continue;}
+        if(!stack.length&&prior&&!node.metadata.wbModifierBase){restoreInstances(node);VertexData.Parse(prior.base).applyToMesh(node);cache.delete(node);continue;}
         try{
           for(const modifier of stack)registerChannels(node,modifier);
           if(prior&&(node.geometry!==prior.geometry||node.metadata.wbCreation!==prior.creation)&&node.metadata.wbModifierBase===prior.base){node.metadata.wbModifierBase=meshBase(node);cache.delete(node);}
@@ -187,7 +198,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     // Resolves once every object's stack is drawn as it now is, as a render needs it.
     async settled(){for(;;){api.refresh();const pending=[...requested.values()].filter(r=>!r.done).map(r=>r.promise);if(!pending.length)return;await Promise.all(pending);}},
     source:node=>structuredClone(node.metadata?.wbModifierBase||VertexData.ExtractFromMesh(node).serialize()),
-    dispose(){for(const node of requested.keys())jobs?.cancel(node);for(const [node] of cache)if(!node.isDisposed()){node.thinInstanceSetBuffer('matrix',null);if(node.metadata?.wbModifierBase)VertexData.Parse(node.metadata.wbModifierBase).applyToMesh(node);}cache.clear();listeners.clear();}
+    dispose(){for(const node of requested.keys())jobs?.cancel(node);for(const [node] of cache)if(!node.isDisposed()){restoreInstances(node);if(node.metadata?.wbModifierBase)VertexData.Parse(node.metadata.wbModifierBase).applyToMesh(node);}cache.clear();listeners.clear();}
   };
   return api;
 }

@@ -19,7 +19,7 @@ import { propertiesContext, propertiesTabs, propertiesPath, TAB_CONTEXTS, struct
 import { propertyPanels } from './registry.js';
 import { addonPanels } from './addon-panels.js';
 import { modifierTemplates } from './modifier-panel.js';
-import { deleted } from '../object/identity.js';
+import { deleted, hasMesh } from '../object/identity.js';
 import { modifierAddMenu } from './modifier-add-menu.js';
 import '../interface/layout-view.css';
 import '../interface/components/tailwind.css';
@@ -71,7 +71,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       cycle(step) { const tabs = space.tabs().filter(Boolean).map(([id]) => id); space.context = tabs[(tabs.indexOf(space.context) + step + tabs.length) % tabs.length]; },
       startFilter: () => host.querySelector('.bl-properties-header input, input[aria-label="Live search filtering string"]')?.focus(),
       clearFilter: () => { space.search = ''; },
-      canAddModifier: () => space.context === 'MODIFIER' && !!ob()?.getTotalVertices?.(),
+      canAddModifier: () => space.context === 'MODIFIER' && !!ob() && hasMesh(ob()),
       // The active object's material slots in the material library.
       materials: () => {
         const node = ob(), library = world.materials;

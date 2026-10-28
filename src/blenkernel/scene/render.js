@@ -25,13 +25,15 @@ export const getRenderPath = (state, path) => { const { owner, key } = resolve(s
 // Output size in pixels: resolution times percentage, like Blender's render size.
 export const outputSize = render => ({ width: Math.max(4, Math.round(render.resolutionX * render.resolutionPercentage / 100)), height: Math.max(4, Math.round(render.resolutionY * render.resolutionPercentage / 100)) });
 
-export function createRenderSettings(world, { commit = () => {} } = {}) {
+export function createRenderSettings(world, { commit = () => {}, authored = {} } = {}) {
   const { scene, animation } = world;
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
   const engine = createRenderEngine(scene);
   let cameras = new Set();
-  const baseline = { ...clone(renderDefaults), viewSettings: { ...renderDefaults.viewSettings, ...readAuthoredRender(scene) } };
+  // Code sets render settings through the SDK's renderSettings, and view settings also through Babylon's image processing.
+  const fromCode = { ...authored, viewSettings: { ...readAuthoredRender(scene), ...authored.viewSettings } };
+  const baseline = clone(Object.fromEntries(Object.entries(renderDefaults).map(([group, values]) => [group, { ...values, ...fromCode[group] }])));
   let state = clone(baseline);
   const render = () => engine.render(state, { cameras });
   for (const [path, label] of renderChannels) animation.register({ id: 'scene', path, label, group: 'Scene', get: () => getRenderPath(state, path), set: v => { const { owner, key } = resolve(state, path); owner[key] = v; render(); } });
