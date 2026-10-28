@@ -19,6 +19,16 @@
   --bl-menu-item-text:#dddddd;--bl-menu-item-text-sel:#ffffff;--bl-menu-item-hover:#3f3f3f;--bl-menu-item-disabled-hover:#7a7a7a40;
   --bl-menu-sep:#dddddd1e;--bl-shadow-menu:0 3px 6px #0003;--bl-pulldown-text:#d9d9d9;--bl-pulldown-sel:#ffffff1a;
   --bl-widget-font:calc(var(--bl-row)*.55) var(--bl-font-family);
+  /* Blender 5.2's Node Editor theme (tools/blender-reference/nodes.py): node classes' header colors, the node body,
+     outlines, wires and the background; socket colors are each socket type's draw_color_simple. */
+  --bl-node-converter:#246283;--bl-node-color:#6e6e23;--bl-node-input:#82354c;--bl-node-output:#3e232a;--bl-node-shader:#2b652b;
+  --bl-node-texture:#79461d;--bl-node-vector:#3c3c83;--bl-node-filter:#412b51;--bl-node-distort:#3e5a5b;--bl-node-matte:#5a3838;
+  --bl-node-group:#374725;--bl-node-interface:#1d1d1d;--bl-node-geometry:#1d725e;--bl-node-attribute:#1d2546;--bl-node-script:#203c3c;
+  --bl-node-frame:#0f0f0fcc;--bl-node-back:#303030;--bl-node-selected:#ed5700;--bl-node-active:#ffffff;--bl-node-outline:#ffffff26;
+  --bl-node-editor-back:#1d1d1d;--bl-node-grid:#303030;--bl-wire:#1a1a1a;--bl-wire-inner:#8d8d8d;--bl-wire-select:#ffffffb3;--bl-node-muted-link:#ff4040;
+  --bl-socket-value:#a1a1a1;--bl-socket-int:#598c5c;--bl-socket-boolean:#cca6d6;--bl-socket-vector:#6363c7;--bl-socket-rgba:#c7c729;
+  --bl-socket-shader:#63c763;--bl-socket-menu:#666666;--bl-socket-rotation:#a663c7;--bl-socket-matrix:#b83385;--bl-socket-string:#70b2ff;
+  --bl-socket-object:#ed9e5c;--bl-socket-collection:#f5f5f5;--bl-socket-geometry:#00d6a3;--bl-socket-custom:#333333;
   --bl-header-h:26px;--bl-row:20px;--bl-radius:4px
 }
 @media(pointer:coarse){:root{--bl-header-h:36px;--bl-row:30px}}
@@ -51,6 +61,9 @@ html,body{background:var(--bl-gap);color:var(--bl-text);font:var(--bl-font)}
 .bl-menu-sep{height:1px;margin:round(down,calc((var(--u)*.35 - 1px)/2),1px) calc(var(--u)*.35);border:0;background:var(--bl-menu-sep)}
 .bl-menu-heading,.bl-menu-title{height:var(--u);line-height:var(--u);color:var(--bl-menu-back-text);white-space:nowrap}
 .bl-menu-heading{padding:0 calc(var(--u)*.25) 0 calc(var(--u)*1.5)}.bl-menu-title{padding:0 calc(var(--u)*.25) 0 calc(var(--u)*.4)}
+.bl-menu.searching{min-width:calc(var(--u)*24)}.bl-menu-path{color:var(--bl-menu-back-text)}
+.bl-menu-search{display:flex;align-items:center;gap:calc(var(--u)*.2);height:calc(var(--u)*1.1);margin:calc(var(--u)*.15) var(--inset-r) calc(var(--u)*.3) var(--inset-l);padding:0 calc(var(--u)*.3);border-radius:var(--pad);background:var(--bl-field);box-shadow:inset 0 0 0 1px var(--bl-widget-line);color:var(--bl-text)}
+.bl-menu-search>.bl-icon{width:calc(var(--u)*.8);height:calc(var(--u)*.8)}.bl-menu-caret{width:1px;height:calc(var(--u)*.7);background:var(--bl-select)}
 .bl-menu-scroll{position:absolute;left:0;right:0;display:none;box-sizing:border-box;height:calc(var(--u)*.7 + 1px);border:1px solid var(--bl-menu-back-line);background:var(--bl-menu-back)}
 .bl-menu-scroll.up{top:0;border-bottom:0;border-radius:inherit;border-bottom-left-radius:0;border-bottom-right-radius:0}.bl-menu-scroll.down{bottom:0;border-top:0;border-radius:inherit;border-top-left-radius:0;border-top-right-radius:0}.bl-menu.clip-top>.up,.bl-menu.clip-bottom>.down{display:block}
 .bl-menu-scroll::after{content:'';position:absolute;left:calc(50% - var(--u)*.15);width:calc(var(--u)*.3);height:calc(var(--u)*.3);background:var(--bl-menu-back-text)}

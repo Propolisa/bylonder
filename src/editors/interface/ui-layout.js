@@ -49,7 +49,8 @@ export class UILayout {
     this.parent = parent;
     this.enabled = true;
     this.active = true;
-    this.operator_context = 'INVOKE_REGION_WIN';
+    // A popup's layout runs operators with EXEC_REGION_WIN (ui.operatorContext), a header's with INVOKE_REGION_WIN.
+    this.operator_context = parent?.operator_context ?? ui.operatorContext ?? 'INVOKE_REGION_WIN';
   }
 
   #enabled() { return this.enabled !== false && (this.parent?.#enabled() ?? true); }

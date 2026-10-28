@@ -7,6 +7,7 @@ import { BlenderShaderBlock, shaderNodeClasses } from '../../nodes/blender/shade
 import { BlenderCompositorBlock, compositorNodeClasses } from '../../nodes/blender/compositor-nodes.js';
 import { availability } from '../../nodes/blender/declarations.js';
 import { categoryOf } from './block-categories.js';
+import { nodeLayout, U } from './node-layout.js';
 import * as materialCatalog from './babylon/material-blocks.js';
 import * as renderGraphCatalog from './babylon/render-graph-blocks.js';
 
@@ -22,7 +23,7 @@ const renderGraphSocket = (type) => (type & (R.TextureAll | R.AutoDetect | R.Bas
 const BABYLON_TAGS = { input: 'INPUT', output: 'OUTPUT', shader: 'SHADER', texture: 'TEXTURE', filter: 'FILTER', geometry: 'GEOMETRY', particle: 'CONVERTER', color: 'COLOR', vector: 'VECTOR', converter: 'CONVERTER', layout: 'LAYOUT' };
 // Babylon's PropertyTypeForEdition as Blender's property types.
 const PROPERTY_TYPES = { 0: 'BOOLEAN', 1: 'FLOAT', 2: 'INT', 5: 'ENUM' };
-const ELBOWS = new Set(['ElbowBlock', 'NodeRenderGraphElbowBlock']);
+const ELBOWS = new Set(['ElbowBlock', 'NodeRenderGraphElbowBlock']), REROUTE = 'ElbowBlock';
 // Babylon's port names (worldPosition, rgba) as Blender labels (World Position, RGBA).
 const ACRONYMS = /^(rgba?|xyz|xy|uv|ior)$/i;
 const titleCase = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ').map((w) => (ACRONYMS.test(w) ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1))).join(' ');
@@ -71,16 +72,29 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     return data;
   };
   const location = (block) => {
-    const data = editor();
-    let entry = data.locations.find((l) => l.blockId === block.uniqueId);
-    if (!entry) data.locations.push((entry = { blockId: block.uniqueId, ...autoPlace(block), isCollapsed: false }));
-    return entry;
+    const data = editor(), placed = (b) => data.locations.some((l) => l.blockId === b.uniqueId);
+    if (!placed(block)) arrange(blocks().filter((b) => !placed(b)));
+    return data.locations.find((l) => l.blockId === block.uniqueId);
   };
-  // A block placed left of what it feeds, as a layered layout does.
-  const autoPlace = (block) => {
-    const depth = (b, seen = new Set()) => (seen.has(b) ? 0 : (seen.add(b), Math.max(0, ...b.outputs.flatMap((o) => o.endpoints.map((e) => 1 + depth(e.ownerBlock, seen))))));
-    const d = depth(block), siblings = editor().locations.filter((l) => Math.round(-l.x / 240) === d).length;
-    return { x: -d * 240, y: siblings * 160 };
+  // Blocks without a location (a graph Babylon made, or saved without its editor) in columns by their distance from
+  // the outputs, each column stacked in the order of the graph.
+  const arrange = (list) => {
+    const depth = new Map();
+    const visit = (block, d) => {
+      if ((depth.get(block) ?? -1) >= d) return;
+      depth.set(block, d);
+      for (const input of block.inputs) if (input.connectedPoint) visit(input.connectedPoint.ownerBlock, d + 1);
+    };
+    blocks().filter((b) => b.outputs.every((o) => !o.hasEndpoints)).forEach((b) => visit(b, 0));
+    const entries = list.map((block) => ({ blockId: block.uniqueId, x: -(depth.get(block) ?? 0) * 260, y: 0, isCollapsed: false }));
+    editor().locations.push(...entries);
+    for (const column of Map.groupBy(list.map((block, i) => [block, entries[i]]), ([, entry]) => entry.x).values()) {
+      let y = 0;
+      for (const [block, entry] of column) {
+        entry.y = y;
+        y += nodeLayout(node(block)).height + U * 2;
+      }
+    }
   };
 
   // A connection point as a socket: its Blender type, label and whether it shows.
@@ -118,11 +132,12 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       tag = BABYLON_TAGS[categoryOf(block.getClassName())];
       label = block.name;
     }
+    const shown = (list) => (at.hideSockets ? list.filter((s) => s.linked) : list);
     return {
       id: block.uniqueId, block, blender: blender ? block.idname : null, label, tag, x: at.x, y: at.y,
       width: blender?.width ?? Math.max(140, ...[...inputs, ...outs].map((s) => s.label.length * 7 + 50)),
-      hidden: !!at.isCollapsed, muted: !!(block.mute ?? block.disabled), canMute: 'mute' in block || 'disabled' in block,
-      outputs: outs, inputs, buttons,
+      hidden: !!at.isCollapsed, socketsHidden: !!at.hideSockets, muted: !!(block.mute ?? block.disabled),
+      outputs: shown(outs), inputs: shown(inputs), buttons,
     };
   }
   // A Babylon input block's value, as Blender's Value and RGB nodes show theirs.
@@ -136,6 +151,14 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     };
   };
 
+  const make = (name) => {
+    const Blender = blenderClasses[name];
+    if (Blender) return kind === 'shader' ? new Blender() : new Blender(undefined, graph.frameGraph, graph.getScene());
+    const block = kind === 'shader' ? catalog.BlockTools.GetBlockFromString(name, graph.getScene(), graph) : catalog.BlockTools.GetBlockFromString(name, graph.frameGraph, graph.getScene());
+    const type = !block && kind === 'shader' && catalog.BlockTools.GetConnectionNodeTypeFromString(name);
+    return block ?? (type && type !== M.AutoDetect ? new InputBlock(name, undefined, type) : null);
+  };
+
   const links = () => blocks().flatMap((block) => block.inputs.filter((i) => i.connectedPoint).map((input) => ({ from: input.connectedPoint, to: input })));
 
   const tree = {
@@ -143,8 +166,9 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     blocks, byId, node, links,
     nodes: () => blocks().map(node),
     frames: () => editor().frames,
-    move(block, dx, dy) { const at = location(block); at.x += dx; at.y += dy; },
+    location,
     setLocation(block, x, y) { Object.assign(location(block), { x, y }); },
+    moved: () => changed(false),
     canLink: (from, to) => from !== to && from.ownerBlock !== to.ownerBlock && from.checkCompatibilityState(to) === 0,
     // node.link: a link to an input replaces the one it has, as Blender's single inputs take one link.
     link(from, to) {
@@ -156,20 +180,46 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       return true;
     },
     unlink(to) { to.connectedPoint?.disconnectFrom(to); changed(true); },
-    // A block from Blender's idname or Babylon's menu name, as Babylon's editor makes it.
-    add(name, x, y) {
-      const Blender = blenderClasses[name];
-      let block = Blender ? (kind === 'shader' ? new Blender() : new Blender(undefined, graph.frameGraph, graph.getScene())) : null;
-      block ??= kind === 'shader' ? catalog.BlockTools.GetBlockFromString(name, graph.getScene(), graph) : catalog.BlockTools.GetBlockFromString(name, graph.frameGraph, graph.getScene());
-      if (!block && kind === 'shader') {
-        const type = catalog.BlockTools.GetConnectionNodeTypeFromString(name);
-        if (type !== M.AutoDetect) block = new InputBlock(name, undefined, type);
-      }
+    // A block from Blender's idname or Babylon's menu name, as Babylon's editor makes it; a Blender node with the
+    // settings its Add menu entry gives (node.add_node's settings: properties, and inputs' default values).
+    add(name, x, y, settings = {}) {
+      if (name === 'NodeFrame') return tree.join([]) && null;
+      const block = make(name === 'NodeReroute' ? REROUTE : name);
       if (!block) return null;
+      for (const [key, value] of Object.entries(settings)) {
+        const input = /^inputs\["(.+)"\]\.default_value$/.exec(key);
+        if (input) block.values[input[1]] = value; else if (block.properties) block.properties[key] = value;
+      }
       graph.attachedBlocks.push(block);
       editor().locations.push({ blockId: block.uniqueId, x, y, isCollapsed: false });
       changed(true);
       return block;
+    },
+    // node.duplicate: copies offset by (dx, dy), with the links between the originals.
+    duplicate(list, dx, dy) {
+      const copies = new Map(list.map((block) => [block, block.clone(graph.getScene())]));
+      for (const [block, copy] of copies) {
+        graph.attachedBlocks.push(copy);
+        const at = location(block);
+        editor().locations.push({ blockId: copy.uniqueId, x: at.x + dx, y: at.y + dy, isCollapsed: at.isCollapsed });
+        block.inputs.forEach((input, i) => {
+          const from = input.connectedPoint, source = from && copies.get(from.ownerBlock);
+          if (source) source.outputs[from.ownerBlock.outputs.indexOf(from)].connectTo(copy.inputs[i]);
+        });
+      }
+      changed(true);
+      return [...copies.values()];
+    },
+    // node.add_reroute: a reroute on the link, at (x, y).
+    insertReroute(from, to, x, y) {
+      const reroute = make(REROUTE);
+      graph.attachedBlocks.push(reroute);
+      editor().locations.push({ blockId: reroute.uniqueId, x, y, isCollapsed: false });
+      from.disconnectFrom(to);
+      from.connectTo(reroute.inputs[0]);
+      reroute.outputs[0].connectTo(to);
+      changed(true);
+      return reroute;
     },
     remove(list) {
       for (const block of list) {
@@ -189,6 +239,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       changed(true);
     },
     setHidden(block, value) { location(block).isCollapsed = value; changed(false); },
+    setSocketsHidden(block, value) { location(block).hideSockets = value; changed(false); },
     // node.join: a frame around the blocks, in Babylon's frame format.
     join(list, name = 'Frame') {
       const data = editor();
