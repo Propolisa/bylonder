@@ -145,7 +145,7 @@ export var WORKSPACE_UL_addons_items =  __class__ ('WORKSPACE_UL_addons_items', 
 		return '{:s}: {:s}'.format (iface_ (bl_info ['category']), iface_ (bl_info ['name']));
 	};},
 	get _filter_addons_by_category_name () {return function (pattern, bitflag, addons, reverse) {
-		if (typeof reverse == 'undefined' || (reverse != null && reverse.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof reverse == 'undefined' || (reverse != null && globalThis.Object.hasOwn (reverse, "__kwargtrans__"))) {;
 			var reverse = false;
 		};
 		if (arguments.length) {

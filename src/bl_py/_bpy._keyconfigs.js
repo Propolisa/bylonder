@@ -28,7 +28,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -43,16 +43,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -149,37 +149,37 @@ export var OperatorProperties =  __class__ ('OperatorProperties', [object], {
 export var KeyMapItem =  __class__ ('KeyMapItem', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, idname, py_metatype, value, any, shift, ctrl, alt, oskey, hyper, key_modifier, direction, repeat, map_type, propvalue) {
-		if (typeof any == 'undefined' || (any != null && any.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof any == 'undefined' || (any != null && globalThis.Object.hasOwn (any, "__kwargtrans__"))) {;
 			var any = false;
 		};
-		if (typeof shift == 'undefined' || (shift != null && shift.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof shift == 'undefined' || (shift != null && globalThis.Object.hasOwn (shift, "__kwargtrans__"))) {;
 			var shift = 0;
 		};
-		if (typeof ctrl == 'undefined' || (ctrl != null && ctrl.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof ctrl == 'undefined' || (ctrl != null && globalThis.Object.hasOwn (ctrl, "__kwargtrans__"))) {;
 			var ctrl = 0;
 		};
-		if (typeof alt == 'undefined' || (alt != null && alt.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof alt == 'undefined' || (alt != null && globalThis.Object.hasOwn (alt, "__kwargtrans__"))) {;
 			var alt = 0;
 		};
-		if (typeof oskey == 'undefined' || (oskey != null && oskey.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof oskey == 'undefined' || (oskey != null && globalThis.Object.hasOwn (oskey, "__kwargtrans__"))) {;
 			var oskey = 0;
 		};
-		if (typeof hyper == 'undefined' || (hyper != null && hyper.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof hyper == 'undefined' || (hyper != null && globalThis.Object.hasOwn (hyper, "__kwargtrans__"))) {;
 			var hyper = 0;
 		};
-		if (typeof key_modifier == 'undefined' || (key_modifier != null && key_modifier.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof key_modifier == 'undefined' || (key_modifier != null && globalThis.Object.hasOwn (key_modifier, "__kwargtrans__"))) {;
 			var key_modifier = 'NONE';
 		};
-		if (typeof direction == 'undefined' || (direction != null && direction.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof direction == 'undefined' || (direction != null && globalThis.Object.hasOwn (direction, "__kwargtrans__"))) {;
 			var direction = 'ANY';
 		};
-		if (typeof repeat == 'undefined' || (repeat != null && repeat.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof repeat == 'undefined' || (repeat != null && globalThis.Object.hasOwn (repeat, "__kwargtrans__"))) {;
 			var repeat = false;
 		};
-		if (typeof map_type == 'undefined' || (map_type != null && map_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof map_type == 'undefined' || (map_type != null && globalThis.Object.hasOwn (map_type, "__kwargtrans__"))) {;
 			var map_type = 'KEYBOARD';
 		};
-		if (typeof propvalue == 'undefined' || (propvalue != null && propvalue.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof propvalue == 'undefined' || (propvalue != null && globalThis.Object.hasOwn (propvalue, "__kwargtrans__"))) {;
 			var propvalue = 'NONE';
 		};
 		if (arguments.length) {
@@ -336,7 +336,7 @@ export var KeyMapItems =  __class__ ('KeyMapItems', [object], {
 		return item;
 	});},
 	get py_new () {return __get__ (this, function (self, idname, py_metatype, value, head) {
-		if (typeof head == 'undefined' || (head != null && head.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof head == 'undefined' || (head != null && globalThis.Object.hasOwn (head, "__kwargtrans__"))) {;
 			var head = false;
 		};
 		var keywords = dict ();
@@ -390,7 +390,7 @@ export var KeyMapItems =  __class__ ('KeyMapItems', [object], {
 		}) ();
 	});},
 	get new_from_item () {return __get__ (this, function (self, item, head) {
-		if (typeof head == 'undefined' || (head != null && head.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof head == 'undefined' || (head != null && globalThis.Object.hasOwn (head, "__kwargtrans__"))) {;
 			var head = false;
 		};
 		if (arguments.length) {
@@ -470,13 +470,13 @@ export var KeyMapItems =  __class__ ('KeyMapItems', [object], {
 		}) ()), null);
 	});},
 	get find_from_operator () {return __get__ (this, function (self, idname, properties, include, exclude) {
-		if (typeof properties == 'undefined' || (properties != null && properties.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof properties == 'undefined' || (properties != null && globalThis.Object.hasOwn (properties, "__kwargtrans__"))) {;
 			var properties = null;
 		};
-		if (typeof include == 'undefined' || (include != null && include.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof include == 'undefined' || (include != null && globalThis.Object.hasOwn (include, "__kwargtrans__"))) {;
 			var include = new set (['ACTIONZONE', 'KEYBOARD', 'MOUSE', 'NDOF', 'TEXTINPUT', 'TIMER', 'TWEAK']);
 		};
-		if (typeof exclude == 'undefined' || (exclude != null && exclude.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof exclude == 'undefined' || (exclude != null && globalThis.Object.hasOwn (exclude, "__kwargtrans__"))) {;
 			var exclude = __call__ (set, null);
 		};
 		if (arguments.length) {
@@ -516,16 +516,16 @@ export var KeyMapItems =  __class__ ('KeyMapItems', [object], {
 export var KeyMap =  __class__ ('KeyMap', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, py_name, space_type, region_type, modal, tool) {
-		if (typeof space_type == 'undefined' || (space_type != null && space_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof space_type == 'undefined' || (space_type != null && globalThis.Object.hasOwn (space_type, "__kwargtrans__"))) {;
 			var space_type = 'EMPTY';
 		};
-		if (typeof region_type == 'undefined' || (region_type != null && region_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof region_type == 'undefined' || (region_type != null && globalThis.Object.hasOwn (region_type, "__kwargtrans__"))) {;
 			var region_type = 'WINDOW';
 		};
-		if (typeof modal == 'undefined' || (modal != null && modal.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof modal == 'undefined' || (modal != null && globalThis.Object.hasOwn (modal, "__kwargtrans__"))) {;
 			var modal = false;
 		};
-		if (typeof tool == 'undefined' || (tool != null && tool.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tool == 'undefined' || (tool != null && globalThis.Object.hasOwn (tool, "__kwargtrans__"))) {;
 			var tool = false;
 		};
 		if (arguments.length) {
@@ -666,7 +666,7 @@ export var KeyMaps =  __class__ ('KeyMaps', [object], {
 		}) ());
 	});},
 	get py_get () {return __get__ (this, function (self, py_name, py_default) {
-		if (typeof py_default == 'undefined' || (py_default != null && py_default.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_default == 'undefined' || (py_default != null && globalThis.Object.hasOwn (py_default, "__kwargtrans__"))) {;
 			var py_default = null;
 		};
 		if (arguments.length) {
@@ -701,10 +701,10 @@ export var KeyMaps =  __class__ ('KeyMaps', [object], {
 		}) ()), py_default);
 	});},
 	get find () {return __get__ (this, function (self, py_name, space_type, region_type) {
-		if (typeof space_type == 'undefined' || (space_type != null && space_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof space_type == 'undefined' || (space_type != null && globalThis.Object.hasOwn (space_type, "__kwargtrans__"))) {;
 			var space_type = 'EMPTY';
 		};
-		if (typeof region_type == 'undefined' || (region_type != null && region_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof region_type == 'undefined' || (region_type != null && globalThis.Object.hasOwn (region_type, "__kwargtrans__"))) {;
 			var region_type = 'WINDOW';
 		};
 		if (arguments.length) {
@@ -791,16 +791,16 @@ export var KeyMaps =  __class__ ('KeyMaps', [object], {
 		}) ()), null);
 	});},
 	get py_new () {return __get__ (this, function (self, py_name, space_type, region_type, modal, tool) {
-		if (typeof space_type == 'undefined' || (space_type != null && space_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof space_type == 'undefined' || (space_type != null && globalThis.Object.hasOwn (space_type, "__kwargtrans__"))) {;
 			var space_type = 'EMPTY';
 		};
-		if (typeof region_type == 'undefined' || (region_type != null && region_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof region_type == 'undefined' || (region_type != null && globalThis.Object.hasOwn (region_type, "__kwargtrans__"))) {;
 			var region_type = 'WINDOW';
 		};
-		if (typeof modal == 'undefined' || (modal != null && modal.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof modal == 'undefined' || (modal != null && globalThis.Object.hasOwn (modal, "__kwargtrans__"))) {;
 			var modal = false;
 		};
-		if (typeof tool == 'undefined' || (tool != null && tool.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tool == 'undefined' || (tool != null && globalThis.Object.hasOwn (tool, "__kwargtrans__"))) {;
 			var tool = false;
 		};
 		if (arguments.length) {
@@ -983,7 +983,7 @@ export var KeyConfigs =  __class__ ('KeyConfigs', [object], {
 		}) ()), null));
 	});},
 	get py_get () {return __get__ (this, function (self, py_name, py_default) {
-		if (typeof py_default == 'undefined' || (py_default != null && py_default.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_default == 'undefined' || (py_default != null && globalThis.Object.hasOwn (py_default, "__kwargtrans__"))) {;
 			var py_default = null;
 		};
 		if (arguments.length) {
@@ -1065,7 +1065,7 @@ export var KeyConfigs =  __class__ ('KeyConfigs', [object], {
 		}) ();
 	});},
 	get py_update () {return __get__ (this, function (self, keep_properties) {
-		if (typeof keep_properties == 'undefined' || (keep_properties != null && keep_properties.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof keep_properties == 'undefined' || (keep_properties != null && globalThis.Object.hasOwn (keep_properties, "__kwargtrans__"))) {;
 			var keep_properties = false;
 		};
 		if (arguments.length) {
@@ -1085,16 +1085,16 @@ export var KeyConfigs =  __class__ ('KeyConfigs', [object], {
 		// pass;
 	});},
 	get find_item_from_operator () {return __get__ (this, function (self, idname, context, properties, include, exclude) {
-		if (typeof context == 'undefined' || (context != null && context.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof context == 'undefined' || (context != null && globalThis.Object.hasOwn (context, "__kwargtrans__"))) {;
 			var context = 'INVOKE_DEFAULT';
 		};
-		if (typeof properties == 'undefined' || (properties != null && properties.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof properties == 'undefined' || (properties != null && globalThis.Object.hasOwn (properties, "__kwargtrans__"))) {;
 			var properties = null;
 		};
-		if (typeof include == 'undefined' || (include != null && include.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof include == 'undefined' || (include != null && globalThis.Object.hasOwn (include, "__kwargtrans__"))) {;
 			var include = new set (['ACTIONZONE', 'KEYBOARD', 'MOUSE', 'NDOF', 'TEXTINPUT', 'TIMER', 'TWEAK']);
 		};
-		if (typeof exclude == 'undefined' || (exclude != null && exclude.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof exclude == 'undefined' || (exclude != null && globalThis.Object.hasOwn (exclude, "__kwargtrans__"))) {;
 			var exclude = __call__ (set, null);
 		};
 		if (arguments.length) {

@@ -36,7 +36,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -51,16 +51,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -5165,7 +5165,7 @@ export var USERPREF_PT_ndof_settings =  __class__ ('USERPREF_PT_ndof_settings', 
 	bl_region_type: 'HEADER',
 	bl_ui_units_x: 12,
 	get draw_settings () {return function (layout, props, show_3dview_settings) {
-		if (typeof show_3dview_settings == 'undefined' || (show_3dview_settings != null && show_3dview_settings.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof show_3dview_settings == 'undefined' || (show_3dview_settings != null && globalThis.Object.hasOwn (show_3dview_settings, "__kwargtrans__"))) {;
 			var show_3dview_settings = true;
 		};
 		if (arguments.length) {
@@ -7059,7 +7059,7 @@ export var USERPREF_PT_studiolight_light_editor =  __class__ ('USERPREF_PT_studi
 	});}
 });
 export var _draw_experimental_items = function (layout, preferences, py_items, url_prefix) {
-	if (typeof url_prefix == 'undefined' || (url_prefix != null && url_prefix.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof url_prefix == 'undefined' || (url_prefix != null && globalThis.Object.hasOwn (url_prefix, "__kwargtrans__"))) {;
 		var url_prefix = 'https://projects.blender.org/';
 	};
 	if (arguments.length) {

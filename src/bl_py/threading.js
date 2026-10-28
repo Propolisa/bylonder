@@ -28,7 +28,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -43,16 +43,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -146,10 +146,10 @@ export var _super_classmethod = function (owner, cls, method) {
 export var Lock =  __class__ ('Lock', [object], {
 	__module__: __name__,
 	get acquire () {return __get__ (this, function (self, blocking, timeout) {
-		if (typeof blocking == 'undefined' || (blocking != null && blocking.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof blocking == 'undefined' || (blocking != null && globalThis.Object.hasOwn (blocking, "__kwargtrans__"))) {;
 			var blocking = true;
 		};
-		if (typeof timeout == 'undefined' || (timeout != null && timeout.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof timeout == 'undefined' || (timeout != null && globalThis.Object.hasOwn (timeout, "__kwargtrans__"))) {;
 			var timeout = __neg__ (1);
 		};
 		if (arguments.length) {
@@ -290,7 +290,7 @@ export var Event =  __class__ ('Event', [object], {
 		return self.flag;
 	});},
 	get wait () {return __get__ (this, function (self, timeout) {
-		if (typeof timeout == 'undefined' || (timeout != null && timeout.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof timeout == 'undefined' || (timeout != null && globalThis.Object.hasOwn (timeout, "__kwargtrans__"))) {;
 			var timeout = null;
 		};
 		if (arguments.length) {
@@ -313,22 +313,22 @@ export var Event =  __class__ ('Event', [object], {
 export var Thread =  __class__ ('Thread', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, group, target, py_name, args, kwargs, daemon) {
-		if (typeof group == 'undefined' || (group != null && group.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof group == 'undefined' || (group != null && globalThis.Object.hasOwn (group, "__kwargtrans__"))) {;
 			var group = null;
 		};
-		if (typeof target == 'undefined' || (target != null && target.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof target == 'undefined' || (target != null && globalThis.Object.hasOwn (target, "__kwargtrans__"))) {;
 			var target = null;
 		};
-		if (typeof py_name == 'undefined' || (py_name != null && py_name.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_name == 'undefined' || (py_name != null && globalThis.Object.hasOwn (py_name, "__kwargtrans__"))) {;
 			var py_name = null;
 		};
-		if (typeof args == 'undefined' || (args != null && args.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof args == 'undefined' || (args != null && globalThis.Object.hasOwn (args, "__kwargtrans__"))) {;
 			var args = tuple ([]);
 		};
-		if (typeof kwargs == 'undefined' || (kwargs != null && kwargs.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof kwargs == 'undefined' || (kwargs != null && globalThis.Object.hasOwn (kwargs, "__kwargtrans__"))) {;
 			var kwargs = null;
 		};
-		if (typeof daemon == 'undefined' || (daemon != null && daemon.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof daemon == 'undefined' || (daemon != null && globalThis.Object.hasOwn (daemon, "__kwargtrans__"))) {;
 			var daemon = null;
 		};
 		if (arguments.length) {
@@ -378,7 +378,7 @@ export var Thread =  __class__ ('Thread', [object], {
 		}
 	});},
 	get join () {return __get__ (this, function (self, timeout) {
-		if (typeof timeout == 'undefined' || (timeout != null && timeout.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof timeout == 'undefined' || (timeout != null && globalThis.Object.hasOwn (timeout, "__kwargtrans__"))) {;
 			var timeout = null;
 		};
 		if (arguments.length) {

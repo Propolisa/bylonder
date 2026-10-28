@@ -44,7 +44,7 @@ export var _ImagePreviewCollection_new = function (self, py_name) {
 	return p;
 };
 export var _ImagePreviewCollection_load = function (self, py_name, filepath, file_type, force_reload) {
-	if (typeof force_reload == 'undefined' || (force_reload != null && force_reload.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof force_reload == 'undefined' || (force_reload != null && globalThis.Object.hasOwn (force_reload, "__kwargtrans__"))) {;
 		var force_reload = false;
 	};
 	if (arguments.length) {

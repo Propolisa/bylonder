@@ -161,7 +161,7 @@ export var is_job_running = function (job_type) {
 	return false;
 };
 export var help_text = function (all) {
-	if (typeof all == 'undefined' || (all != null && all.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof all == 'undefined' || (all != null && globalThis.Object.hasOwn (all, "__kwargtrans__"))) {;
 		var all = false;
 	};
 	if (arguments.length) {

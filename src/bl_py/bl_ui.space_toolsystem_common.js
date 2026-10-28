@@ -36,7 +36,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -51,16 +51,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -371,7 +371,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 		throw __except0__;
 	});},
 	get tools_from_context () {return __getcm__ (this, function (cls, context, mode) {
-		if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 			var mode = null;
 		};
 		if (arguments.length) {
@@ -610,7 +610,7 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 		}
 		};},
 	get _tool_get_active () {return __getcm__ (this, function (cls, context, space_type, mode, with_icon) {
-		if (typeof with_icon == 'undefined' || (with_icon != null && with_icon.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof with_icon == 'undefined' || (with_icon != null && globalThis.Object.hasOwn (with_icon, "__kwargtrans__"))) {;
 			var with_icon = false;
 		};
 		if (arguments.length) {
@@ -968,10 +968,10 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 		return false;
 	});},
 	get _tool_active_from_context () {return function (context, space_type, mode, create) {
-		if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 			var mode = null;
 		};
-		if (typeof create == 'undefined' || (create != null && create.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof create == 'undefined' || (create != null && globalThis.Object.hasOwn (create, "__kwargtrans__"))) {;
 			var create = false;
 		};
 		if (arguments.length) {
@@ -1427,10 +1427,10 @@ export var ToolSelectPanelHelper =  __class__ ('ToolSelectPanelHelper', [object]
 		return tuple ([ui_gen, show_text]);
 	};},
 	get draw_cls () {return __getcm__ (this, function (cls, layout, context, detect_layout, scale_y) {
-		if (typeof detect_layout == 'undefined' || (detect_layout != null && detect_layout.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof detect_layout == 'undefined' || (detect_layout != null && globalThis.Object.hasOwn (detect_layout, "__kwargtrans__"))) {;
 			var detect_layout = true;
 		};
-		if (typeof scale_y == 'undefined' || (scale_y != null && scale_y.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof scale_y == 'undefined' || (scale_y != null && globalThis.Object.hasOwn (scale_y, "__kwargtrans__"))) {;
 			var scale_y = 1.75;
 		};
 		if (arguments.length) {

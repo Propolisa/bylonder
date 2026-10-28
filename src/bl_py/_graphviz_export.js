@@ -12,7 +12,7 @@ var __name__ = '_graphviz_export';
 export var header = '\ndigraph ancestors           {\ngraph [fontsize=30 labelloc="t" label="" splines=false overlap=true, rankdir=BT];\nratio = "auto" ;\n';
 export var footer = '\n}\n';
 export var compat_str = function (text, line_length) {
-	if (typeof line_length == 'undefined' || (line_length != null && line_length.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof line_length == 'undefined' || (line_length != null && globalThis.Object.hasOwn (line_length, "__kwargtrans__"))) {;
 		var line_length = 0;
 	};
 	if (arguments.length) {
@@ -60,16 +60,16 @@ export var compat_str = function (text, line_length) {
 	return text;
 };
 export var graph_armature = function (obj, filepath, FAKE_PARENT, CONSTRAINTS, DRIVERS, XTRA_INFO) {
-	if (typeof FAKE_PARENT == 'undefined' || (FAKE_PARENT != null && FAKE_PARENT.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof FAKE_PARENT == 'undefined' || (FAKE_PARENT != null && globalThis.Object.hasOwn (FAKE_PARENT, "__kwargtrans__"))) {;
 		var FAKE_PARENT = true;
 	};
-	if (typeof CONSTRAINTS == 'undefined' || (CONSTRAINTS != null && CONSTRAINTS.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof CONSTRAINTS == 'undefined' || (CONSTRAINTS != null && globalThis.Object.hasOwn (CONSTRAINTS, "__kwargtrans__"))) {;
 		var CONSTRAINTS = true;
 	};
-	if (typeof DRIVERS == 'undefined' || (DRIVERS != null && DRIVERS.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof DRIVERS == 'undefined' || (DRIVERS != null && globalThis.Object.hasOwn (DRIVERS, "__kwargtrans__"))) {;
 		var DRIVERS = true;
 	};
-	if (typeof XTRA_INFO == 'undefined' || (XTRA_INFO != null && XTRA_INFO.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof XTRA_INFO == 'undefined' || (XTRA_INFO != null && globalThis.Object.hasOwn (XTRA_INFO, "__kwargtrans__"))) {;
 		var XTRA_INFO = true;
 	};
 	if (arguments.length) {

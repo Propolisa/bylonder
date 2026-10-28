@@ -49,6 +49,9 @@ PATCHES = [
      "    if (py_typeof (any) == dict) return any.py_keys ();\n"
      "    return any == null || typeof any == 'string' || Array.isArray (any) || '__getitem__' in Object (any) ? any : Array.from (any);",
      "iterators (enumerate, zip, generators) in loops, which Transcrypt indexes with operator overloading"),
+    ('org.transcrypt.__runtime__.js', "                        return target.__getattr__ (name);",
+     "                        return target.__getattr__ ? target.__getattr__ (name) : result;",
+     "the attribute proxy of a class with __setattr__ but no __getattr__ (Blender's Operator)"),
     # JS's % on numbers is C's fmod: the remainder with the dividend's sign.
     ('org.transcrypt.__runtime__.js', "        cls.__bases__ = bases;\n",
      "        cls.__bases__ = bases;\n"
@@ -91,7 +94,7 @@ def finish(name, script):
     # its Python name too, as they do when they come from a dict (**kwargs).
     script = re.sub(r"case 'py_(metatype|\w+)': var py_\1", lambda m: f"case '{'type' if m[1] == 'metatype' else m[1]}': case 'py_{m[1]}': var py_{m[1]}", script)
     # The keyword arguments check, for a last argument without Object's prototype too (a module's namespace).
-    script = re.sub(r'(arguments \[__ilastarg\d+__\]) && \1\.hasOwnProperty \("__kwargtrans__"\)', r'\1 && globalThis.Object.hasOwn (\1, "__kwargtrans__")', script)
+    script = re.sub(r'((?:arguments \[__ilastarg\d+__\])|\b\w+)\.hasOwnProperty \("__kwargtrans__"\)', r'globalThis.Object.hasOwn (\1, "__kwargtrans__")', script)
     # **kwargs collects keyword arguments under their Python names.
     script = re.sub(r"default: (\w+) \[(__attrib\d+__)\] = (__allkwargs\d+__) \[\2\]", r"default: \1 [__pyname__ (\2)] = \3 [\2]", script)
     if '__pyname__ (' in script and name != 'org.transcrypt.__runtime__.js':
@@ -464,6 +467,10 @@ class Walrus:
 class TranscryptFixes(ast.NodeTransformer):
     """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
     def visit_Module(self, node):
+        # The module's functions and its property declarations by name (rna_path_prop = StringProperty(...)), which
+        # class bodies use by name.
+        self.functions = {n.name for n in node.body if isinstance(n, ast.FunctionDef)}
+        self.properties = {t.id for n in node.body if isinstance(n, ast.Assign) and isinstance(n.value, ast.Call) for t in n.targets if isinstance(t, ast.Name)}
         node = Walrus().lower_module(class_scopes(node))
         self.generic_visit(node)
         return node
@@ -594,6 +601,19 @@ class TranscryptFixes(ast.NodeTransformer):
             ast.fix_missing_locations(node)
         return node
 
+    def visit_Lambda(self, node):
+        """Defaults evaluated where the lambda is made, as Python does (lambda x=x: ..., capturing a loop's value);
+        Transcrypt evaluates them at each call: bound by an enclosing lambda called with them at once."""
+        self.generic_visit(node)
+        defaults = node.args.defaults
+        if all(isinstance(d, ast.Constant) for d in defaults):
+            return node
+        TranscryptFixes.starred_temporaries += 1
+        names = [f'_default{TranscryptFixes.starred_temporaries}_{i}' for i in range(len(defaults))]
+        node.args.defaults = [ast.Name(n, ast.Load()) for n in names]
+        outer = ast.Lambda(ast.arguments(posonlyargs=[], args=[ast.arg(n) for n in names], kwonlyargs=[], kw_defaults=[], defaults=[]), node)
+        return ast.fix_missing_locations(ast.copy_location(ast.Call(outer, defaults, []), node))
+
     def visit_Compare(self, node):
         """Blender's reload idiom, `"name" in locals()`, is False: modules load once."""
         self.generic_visit(node)
@@ -648,13 +668,17 @@ class TranscryptFixes(ast.NodeTransformer):
         self.scopes.pop()
         return self.class_body(node)
 
-    @staticmethod
-    def class_body(node):
+    def class_body(self, node):
         """A class body's annotations as Transcrypt can compile them: with a value, assignments; property declarations (how
         Blender's classes declare their properties) as the __annotations__ dict Blender reads them from, after the
         class; other hints dropped. Returns the class and what follows it."""
         node.body = [ast.copy_location(ast.Assign(targets=[s.target], value=s.value), s) if isinstance(s, ast.AnnAssign) and s.value is not None else s
                      for s in node.body]
+        # A module function assigned in the body (execute = execute_context_assign) is a method in Python; Transcrypt
+        # binds self only to methods defined in the body, so it is one that calls the function.
+        node.body = [ast.copy_location(ast.parse(f'def {s.targets[0].id}(self, *args, **kwargs):\n    return {s.value.id}(self, *args, **kwargs)').body[0], s)
+                     if isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Name) and isinstance(s.value, ast.Name)
+                     and s.value.id in getattr(self, 'functions', ()) else s for s in node.body]
         hints = [s for s in node.body if isinstance(s, ast.AnnAssign)]
         node.body = [s for s in node.body if s not in hints]
         own = {d for s in node.body for d in defined_names(s)}
@@ -666,7 +690,8 @@ class TranscryptFixes(ast.NodeTransformer):
         after = []
         # Blender registers the annotations that are property declarations (calls such as BoolProperty(...)); after the
         # class, as Python 3.14 evaluates annotations (PEP 649): they may name the class, and its own names.
-        annotated = [s for s in hints if isinstance(s.target, ast.Name) and isinstance(s.annotation, ast.Call)]
+        declared = lambda a: isinstance(a, ast.Call) or (isinstance(a, ast.Name) and a.id in getattr(self, 'properties', ()))
+        annotated = [s for s in hints if isinstance(s.target, ast.Name) and declared(s.annotation)]
         if annotated:
             after.append(ast.copy_location(ast.Assign([attribute('__annotations__', ast.Store())], ast.Dict(
                 keys=[ast.Constant(s.target.id) for s in annotated], values=[Qualify().visit(s.annotation) for s in annotated])), node))
@@ -735,6 +760,9 @@ class TranscryptFixes(ast.NodeTransformer):
                    'debugger', 'do', 'extends', 'export'}
 
     def visit_Name(self, node):
+        """JS's reserved words as names with a trailing _; Ellipsis by its name, as ... is."""
+        if node.id == 'Ellipsis' and isinstance(node.ctx, ast.Load):
+            return ast.copy_location(ast.Name('_ellipsis', ast.Load()), node)
         if node.id in self.JS_RESERVED and not (node.id == 'super' and isinstance(node.ctx, ast.Load) and getattr(node, '_called', False)):
             node.id += '_'
         return node
@@ -823,7 +851,7 @@ class TranscryptFixes(ast.NodeTransformer):
         raise NotImplementedError(f'match pattern {ast.dump(pattern)[:80]}')
 
     def visit_Constant(self, node):
-        """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel object (identity holds within a module), and
+        """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel (one registered symbol for every module), and
         bytes literals, which it escapes wrong, as bytes of their values."""
         if node.value is Ellipsis:
             return ast.Name('_ellipsis', ast.Load())
@@ -859,7 +887,7 @@ def _merged(*dicts):
     return result
 
 
-_ellipsis = __pragma__('js', '{}', 'Symbol ("Ellipsis")')
+_ellipsis = __pragma__('js', '{}', 'Symbol.for ("Ellipsis")')
 
 
 def _new_object():

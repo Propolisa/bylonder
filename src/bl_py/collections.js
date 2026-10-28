@@ -30,7 +30,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -45,16 +45,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -146,13 +146,13 @@ export var _super_classmethod = function (owner, cls, method) {
 	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var namedtuple = function (typename, field_names, defaults, rename, module) {
-	if (typeof defaults == 'undefined' || (defaults != null && defaults.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof defaults == 'undefined' || (defaults != null && globalThis.Object.hasOwn (defaults, "__kwargtrans__"))) {;
 		var defaults = null;
 	};
-	if (typeof rename == 'undefined' || (rename != null && rename.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof rename == 'undefined' || (rename != null && globalThis.Object.hasOwn (rename, "__kwargtrans__"))) {;
 		var rename = false;
 	};
-	if (typeof module == 'undefined' || (module != null && module.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof module == 'undefined' || (module != null && globalThis.Object.hasOwn (module, "__kwargtrans__"))) {;
 		var module = null;
 	};
 	if (arguments.length) {
@@ -341,7 +341,7 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 };
 export var OrderedDict = dict;
 export var defaultdict = function (default_factory) {
-	if (typeof default_factory == 'undefined' || (default_factory != null && default_factory.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof default_factory == 'undefined' || (default_factory != null && globalThis.Object.hasOwn (default_factory, "__kwargtrans__"))) {;
 		var default_factory = null;
 	};
 	if (arguments.length) {
@@ -363,7 +363,7 @@ export var defaultdict = function (default_factory) {
 	return new Proxy(values, {get: (target, key) => key in target || typeof key !== 'string' || !default_factory ? target[key] : (target[key] = default_factory())});
 };
 export var Counter = function (iterable) {
-	if (typeof iterable == 'undefined' || (iterable != null && iterable.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof iterable == 'undefined' || (iterable != null && globalThis.Object.hasOwn (iterable, "__kwargtrans__"))) {;
 		var iterable = tuple ([]);
 	};
 	if (arguments.length) {
@@ -392,10 +392,10 @@ export var Counter = function (iterable) {
 	return counts;
 };
 export var deque = function (iterable, maxlen) {
-	if (typeof iterable == 'undefined' || (iterable != null && iterable.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof iterable == 'undefined' || (iterable != null && globalThis.Object.hasOwn (iterable, "__kwargtrans__"))) {;
 		var iterable = tuple ([]);
 	};
-	if (typeof maxlen == 'undefined' || (maxlen != null && maxlen.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof maxlen == 'undefined' || (maxlen != null && globalThis.Object.hasOwn (maxlen, "__kwargtrans__"))) {;
 		var maxlen = null;
 	};
 	if (arguments.length) {

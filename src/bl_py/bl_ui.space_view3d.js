@@ -2,7 +2,7 @@
 import * as __self__ from './bl_ui.space_view3d.js';
 (globalThis.__py_modules ??= {})['bl_ui.space_view3d'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {register_class} from './bpy.utils.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt_} from './_bpy.app.translations.js';
 import {ToolActivePanelHelper} from './bl_ui.space_toolsystem_common.js';
@@ -38,7 +38,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -53,16 +53,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -154,7 +154,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var _toggle_xray_operator = function (layout, context, text) {
-	if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof text == 'undefined' || (text != null && globalThis.Object.hasOwn (text, "__kwargtrans__"))) {;
 		var text = null;
 	};
 	if (arguments.length) {
@@ -7863,7 +7863,7 @@ export var VIEW3D_MT_paint_weight =  __class__ ('VIEW3D_MT_paint_weight', [Menu]
 	__module__: __name__,
 	bl_label: 'Weights',
 	get draw_generic () {return function (layout, is_editmode) {
-		if (typeof is_editmode == 'undefined' || (is_editmode != null && is_editmode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof is_editmode == 'undefined' || (is_editmode != null && globalThis.Object.hasOwn (is_editmode, "__kwargtrans__"))) {;
 			var is_editmode = false;
 		};
 		if (arguments.length) {
@@ -11572,7 +11572,27 @@ export var draw_curve = function (self, _context) {
 export var VIEW3D_MT_edit_curve =  __class__ ('VIEW3D_MT_edit_curve', [Menu], {
 	__module__: __name__,
 	bl_label: 'Curve',
-	draw: draw_curve
+	get draw () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return __call__ (draw_curve, null, self, ...args, __kwargtrans__ (kwargs));
+	});}
 });
 export var VIEW3D_MT_edit_curve_ctrlpoints =  __class__ ('VIEW3D_MT_edit_curve_ctrlpoints', [Menu], {
 	__module__: __name__,
@@ -11914,7 +11934,27 @@ export var VIEW3D_MT_edit_curve_showhide =  __class__ ('VIEW3D_MT_edit_curve_sho
 export var VIEW3D_MT_edit_surface =  __class__ ('VIEW3D_MT_edit_surface', [Menu], {
 	__module__: __name__,
 	bl_label: 'Surface',
-	draw: draw_curve
+	get draw () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return __call__ (draw_curve, null, self, ...args, __kwargtrans__ (kwargs));
+	});}
 });
 export var VIEW3D_MT_edit_font_chars =  __class__ ('VIEW3D_MT_edit_font_chars', [Menu], {
 	__module__: __name__,

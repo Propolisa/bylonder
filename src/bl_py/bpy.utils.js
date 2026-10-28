@@ -2257,7 +2257,7 @@ export var manual_map = function* () {
 	};
 export var _manual_language_codes = dict ({'ar_EG': 'ar', 'ca_AD': 'ca', 'de_DE': 'de', 'el_GR': 'el', 'es': 'es', 'fi_FI': 'fi', 'fr_FR': 'fr', 'id_ID': 'id', 'it_IT': 'it', 'ja_JP': 'ja', 'ko_KR': 'ko', 'nl_NL': 'nl', 'pt_PT': 'pt', 'pt_BR': 'pt', 'ru_RU': 'ru', 'sk_SK': 'sk', 'sr_RS': 'sr', 'th_TH': 'th', 'uk_UA': 'uk', 'vi_VN': 'vi', 'zh_HANS': 'zh-hans', 'zh_HANT': 'zh-hant'});
 export var manual_language_code = function (py_default) {
-	if (typeof py_default == 'undefined' || (py_default != null && py_default.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof py_default == 'undefined' || (py_default != null && globalThis.Object.hasOwn (py_default, "__kwargtrans__"))) {;
 		var py_default = 'en';
 	};
 	if (arguments.length) {

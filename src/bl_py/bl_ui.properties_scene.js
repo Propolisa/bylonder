@@ -216,7 +216,7 @@ export var SceneKeyingSetsPanel =  __class__ ('SceneKeyingSetsPanel', [object], 
 		}) ();
 	};},
 	get _draw_keyframing_setting () {return function (context, layout, ks, ksp, label, toggle_prop, prop, userpref_fallback) {
-		if (typeof userpref_fallback == 'undefined' || (userpref_fallback != null && userpref_fallback.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof userpref_fallback == 'undefined' || (userpref_fallback != null && globalThis.Object.hasOwn (userpref_fallback, "__kwargtrans__"))) {;
 			var userpref_fallback = null;
 		};
 		if (arguments.length) {

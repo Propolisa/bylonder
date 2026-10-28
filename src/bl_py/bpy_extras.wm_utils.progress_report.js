@@ -8,7 +8,7 @@ __nest__ (time, '', __module_time__);
 var __name__ = 'bpy_extras.wm_utils.progress_report';
 export var __all__ = tuple (['ProgressReport', 'ProgressReportSubstep']);
 export var _ProgressReport___init__ = function (self, wm) {
-	if (typeof wm == 'undefined' || (wm != null && wm.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof wm == 'undefined' || (wm != null && globalThis.Object.hasOwn (wm, "__kwargtrans__"))) {;
 		var wm = null;
 	};
 	if (arguments.length) {
@@ -74,13 +74,13 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		return self;
 	});},
 	get __exit__ () {return __get__ (this, function (self, _exc_type, _exc_value, _traceback) {
-		if (typeof _exc_type == 'undefined' || (_exc_type != null && _exc_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof _exc_type == 'undefined' || (_exc_type != null && globalThis.Object.hasOwn (_exc_type, "__kwargtrans__"))) {;
 			var _exc_type = null;
 		};
-		if (typeof _exc_value == 'undefined' || (_exc_value != null && _exc_value.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof _exc_value == 'undefined' || (_exc_value != null && globalThis.Object.hasOwn (_exc_value, "__kwargtrans__"))) {;
 			var _exc_value = null;
 		};
-		if (typeof _traceback == 'undefined' || (_traceback != null && _traceback.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof _traceback == 'undefined' || (_traceback != null && globalThis.Object.hasOwn (_traceback, "__kwargtrans__"))) {;
 			var _traceback = null;
 		};
 		if (arguments.length) {
@@ -154,7 +154,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}) ();
 	});},
 	get py_update () {return __get__ (this, function (self, msg) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
 		if (arguments.length) {
@@ -214,7 +214,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}
 	});},
 	get enter_substeps () {return __get__ (this, function (self, nbr, msg) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
 		if (arguments.length) {
@@ -255,10 +255,10 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}) ();
 	});},
 	get step () {return __get__ (this, function (self, msg, nbr) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
-		if (typeof nbr == 'undefined' || (nbr != null && nbr.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof nbr == 'undefined' || (nbr != null && globalThis.Object.hasOwn (nbr, "__kwargtrans__"))) {;
 			var nbr = 1;
 		};
 		if (arguments.length) {
@@ -283,7 +283,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}) ();
 	});},
 	get leave_substeps () {return __get__ (this, function (self, msg) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
 		if (arguments.length) {
@@ -328,10 +328,10 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 	__module__: __name__,
 	__slots__: tuple (['progress', 'nbr', 'msg', 'final_msg', 'level']),
 	get __init__ () {return __get__ (this, function (self, progress, nbr, msg, final_msg) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
-		if (typeof final_msg == 'undefined' || (final_msg != null && final_msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof final_msg == 'undefined' || (final_msg != null && globalThis.Object.hasOwn (final_msg, "__kwargtrans__"))) {;
 			var final_msg = '';
 		};
 		if (arguments.length) {
@@ -407,7 +407,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}) ();
 	});},
 	get enter_substeps () {return __get__ (this, function (self, nbr, msg) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
 		if (arguments.length) {
@@ -431,10 +431,10 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}) ();
 	});},
 	get step () {return __get__ (this, function (self, msg, nbr) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
-		if (typeof nbr == 'undefined' || (nbr != null && nbr.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof nbr == 'undefined' || (nbr != null && globalThis.Object.hasOwn (nbr, "__kwargtrans__"))) {;
 			var nbr = 1;
 		};
 		if (arguments.length) {
@@ -458,7 +458,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}) ();
 	});},
 	get leave_substeps () {return __get__ (this, function (self, msg) {
-		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof msg == 'undefined' || (msg != null && globalThis.Object.hasOwn (msg, "__kwargtrans__"))) {;
 			var msg = '';
 		};
 		if (arguments.length) {

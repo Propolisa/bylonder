@@ -145,7 +145,7 @@ export var object = {
                 get: function (target, name) {
                     let result = target [name];
                     if (result == undefined) {
-                        return target.__getattr__ (name);
+                        return target.__getattr__ ? target.__getattr__ (name) : result;
                     }
                     else {
                         return result;
@@ -2096,10 +2096,10 @@ export var RuntimeWarning =  __class__ ('RuntimeWarning', [Warning], {
 	__module__: __name__,
 });
 export var _sort = function (iterable, key, reverse) {
-	if (typeof key == 'undefined' || (key != null && key.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof key == 'undefined' || (key != null && globalThis.Object.hasOwn (key, "__kwargtrans__"))) {;
 		var key = null;
 	};
-	if (typeof reverse == 'undefined' || (reverse != null && reverse.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof reverse == 'undefined' || (reverse != null && globalThis.Object.hasOwn (reverse, "__kwargtrans__"))) {;
 		var reverse = false;
 	};
 	if (arguments.length) {
@@ -2362,3 +2362,5 @@ Object.defineProperty (Function.prototype, '__dict__', { configurable: true, get
     }
     return own;
 } });
+// A module with a module-level __getattr__ (PEP 562, bpy.ops) as its importers see it: its names, then __getattr__.
+globalThis.__py_module_getattr__ = (module) => new Proxy (module, { get: (target, key) => (key in target || typeof key != 'string' ? target [key] : target.__getattr__ (key)) });

@@ -118,10 +118,10 @@ export var Matrix =  __class__ ('Matrix', [object], {
 export var Euler =  __class__ ('Euler', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, angles, order) {
-		if (typeof angles == 'undefined' || (angles != null && angles.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof angles == 'undefined' || (angles != null && globalThis.Object.hasOwn (angles, "__kwargtrans__"))) {;
 			var angles = tuple ([0.0, 0.0, 0.0]);
 		};
-		if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof order == 'undefined' || (order != null && globalThis.Object.hasOwn (order, "__kwargtrans__"))) {;
 			var order = 'XYZ';
 		};
 		if (arguments.length) {
@@ -146,7 +146,7 @@ export var Euler =  __class__ ('Euler', [object], {
 export var Color =  __class__ ('Color', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, rgb) {
-		if (typeof rgb == 'undefined' || (rgb != null && rgb.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof rgb == 'undefined' || (rgb != null && globalThis.Object.hasOwn (rgb, "__kwargtrans__"))) {;
 			var rgb = tuple ([0.0, 0.0, 0.0]);
 		};
 		if (arguments.length) {

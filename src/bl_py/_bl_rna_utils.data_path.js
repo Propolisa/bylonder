@@ -2,6 +2,8 @@
 import * as __self__ from './_bl_rna_utils.data_path.js';
 (globalThis.__py_modules ??= {})['_bl_rna_utils.data_path'] = __self__;
 import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = '_bl_rna_utils.data_path';
 export var __all__ = tuple (['property_definition_from_data_path', 'decompose_data_path']);
 export var _TokenizeDataPath =  __class__ ('_TokenizeDataPath', [object], {
@@ -177,7 +179,7 @@ export var decompose_data_path = function (data_path) {
 	else {
 	}
 	var ns = dict ({'base': __call__ (_TokenizeDataPath, null, tuple ([]))});
-	return __call__ (list, null, __call__ (eval, null, __add__ ('base', data_path), ns, ns));
+	return __call__ (list, null, __call__ (_py_eval, null, __add__ ('base', data_path), ns, __call__ (_module, null, '_bl_rna_utils.data_path')));
 };
 export var property_definition_from_data_path = function (base, data_path) {
 	if (arguments.length) {
@@ -215,7 +217,7 @@ export var property_definition_from_data_path = function (base, data_path) {
 		return __call__ (__accu0__.join, __accu0__, __getslice__ (data, null, __neg__ (1), 1));
 	}) ();
 	var data_path_tail = __getitem__ (data, __neg__ (1));
-	var value_head = __call__ (eval, null, __add__ ('base', data_path_head));
+	var value_head = __call__ (_py_eval, null, __add__ ('base', data_path_head), dict ({'base': base, 'data_path': data_path, 'data': data, 'data_path_head': data_path_head, 'data_path_tail': data_path_tail, 'value_head': value_head, 'value_head_rna': value_head_rna, 'value_tail': value_tail}), __call__ (_module, null, '_bl_rna_utils.data_path'));
 	var value_head_rna = __call__ (getattr, null, value_head, 'bl_rna', null);
 	if (value_head_rna === null) {
 		return null;
@@ -231,6 +233,8 @@ export var property_definition_from_data_path = function (base, data_path) {
 };
 
 //# sourceMappingURL=_bl_rna_utils.data_path.map
+export {_globals, _import, _lazy, _member, _module, _py_eval, _py_exec};
+
 export function __py_setattr__ (key, value) {
 	switch (key) {
 		case '__all__': __all__ = value; break;

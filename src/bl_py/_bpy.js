@@ -30,7 +30,7 @@ export var context = null;
 export var data = null;
 context = top(_contexts); data = top(_datas);
 export var _context_set = function (context, data) {
-	if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof data == 'undefined' || (data != null && globalThis.Object.hasOwn (data, "__kwargtrans__"))) {;
 		var data = null;
 	};
 	if (arguments.length) {
@@ -53,7 +53,7 @@ export var _context_set = function (context, data) {
 	__call__ (_context_push, null, context, data);
 };
 export var _context_push = function (context, data) {
-	if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof data == 'undefined' || (data != null && globalThis.Object.hasOwn (data, "__kwargtrans__"))) {;
 		var data = null;
 	};
 	if (arguments.length) {
@@ -180,10 +180,10 @@ export var unregister_cli_command = function (handle) {
 	return null;
 };
 export var resource_path = function (resource_type, major, minor) {
-	if (typeof major == 'undefined' || (major != null && major.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof major == 'undefined' || (major != null && globalThis.Object.hasOwn (major, "__kwargtrans__"))) {;
 		var major = 5;
 	};
-	if (typeof minor == 'undefined' || (minor != null && minor.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof minor == 'undefined' || (minor != null && globalThis.Object.hasOwn (minor, "__kwargtrans__"))) {;
 		var minor = 2;
 	};
 	if (arguments.length) {
@@ -207,10 +207,10 @@ export var resource_path = function (resource_type, major, minor) {
 	}) ());
 };
 export var user_resource = function (resource_type, path, create) {
-	if (typeof path == 'undefined' || (path != null && path.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof path == 'undefined' || (path != null && globalThis.Object.hasOwn (path, "__kwargtrans__"))) {;
 		var path = '';
 	};
-	if (typeof create == 'undefined' || (create != null && create.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof create == 'undefined' || (create != null && globalThis.Object.hasOwn (create, "__kwargtrans__"))) {;
 		var create = false;
 	};
 	if (arguments.length) {
@@ -234,7 +234,7 @@ export var user_resource = function (resource_type, path, create) {
 	}) ()), (path ? __add__ ('/', path) : ''));
 };
 export var system_resource = function (resource_type, path) {
-	if (typeof path == 'undefined' || (path != null && path.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof path == 'undefined' || (path != null && globalThis.Object.hasOwn (path, "__kwargtrans__"))) {;
 		var path = '';
 	};
 	if (arguments.length) {
@@ -270,13 +270,13 @@ export var script_paths = function () {
 	return tuple (['/blender/scripts', '']);
 };
 export var blend_paths = function (absolute, packed, local) {
-	if (typeof absolute == 'undefined' || (absolute != null && absolute.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof absolute == 'undefined' || (absolute != null && globalThis.Object.hasOwn (absolute, "__kwargtrans__"))) {;
 		var absolute = false;
 	};
-	if (typeof packed == 'undefined' || (packed != null && packed.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof packed == 'undefined' || (packed != null && globalThis.Object.hasOwn (packed, "__kwargtrans__"))) {;
 		var packed = false;
 	};
-	if (typeof local == 'undefined' || (local != null && local.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof local == 'undefined' || (local != null && globalThis.Object.hasOwn (local, "__kwargtrans__"))) {;
 		var local = false;
 	};
 	if (arguments.length) {
@@ -341,7 +341,7 @@ export var unescape_identifier = function (text) {
 	}) ();
 };
 export var flip_name = function (py_name, strip_digits) {
-	if (typeof strip_digits == 'undefined' || (strip_digits != null && strip_digits.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof strip_digits == 'undefined' || (strip_digits != null && globalThis.Object.hasOwn (strip_digits, "__kwargtrans__"))) {;
 		var strip_digits = false;
 	};
 	if (arguments.length) {

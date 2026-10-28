@@ -28,7 +28,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -43,16 +43,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -174,10 +174,10 @@ export var reduce = function (function_, iterable) {
 	return value;
 };
 export var wraps = function (wrapped, assigned, updated) {
-	if (typeof assigned == 'undefined' || (assigned != null && assigned.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof assigned == 'undefined' || (assigned != null && globalThis.Object.hasOwn (assigned, "__kwargtrans__"))) {;
 		var assigned = null;
 	};
-	if (typeof updated == 'undefined' || (updated != null && updated.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof updated == 'undefined' || (updated != null && globalThis.Object.hasOwn (updated, "__kwargtrans__"))) {;
 		var updated = null;
 	};
 	if (arguments.length) {
@@ -311,10 +311,10 @@ export var _cached = function (function_) {
 	return cached;
 };
 export var lru_cache = function (maxsize, typed) {
-	if (typeof maxsize == 'undefined' || (maxsize != null && maxsize.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof maxsize == 'undefined' || (maxsize != null && globalThis.Object.hasOwn (maxsize, "__kwargtrans__"))) {;
 		var maxsize = 128;
 	};
-	if (typeof typed == 'undefined' || (typed != null && typed.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof typed == 'undefined' || (typed != null && globalThis.Object.hasOwn (typed, "__kwargtrans__"))) {;
 		var typed = false;
 	};
 	if (arguments.length) {

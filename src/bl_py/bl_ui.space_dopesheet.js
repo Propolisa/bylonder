@@ -110,7 +110,7 @@ export var DopesheetFilterPopoverBase =  __class__ ('DopesheetFilterPopoverBase'
 		}
 	});},
 	get draw_search_filters () {return __getcm__ (this, function (cls, context, layout, generic_filters_only) {
-		if (typeof generic_filters_only == 'undefined' || (generic_filters_only != null && generic_filters_only.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof generic_filters_only == 'undefined' || (generic_filters_only != null && globalThis.Object.hasOwn (generic_filters_only, "__kwargtrans__"))) {;
 			var generic_filters_only = false;
 		};
 		if (arguments.length) {

@@ -553,7 +553,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		return __call__ (max, null, 1, duration);
 	});},
 	get is_long_enough () {return __get__ (this, function (self, strip, duration) {
-		if (typeof duration == 'undefined' || (duration != null && duration.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof duration == 'undefined' || (duration != null && globalThis.Object.hasOwn (duration, "__kwargtrans__"))) {;
 			var duration = 0.0;
 		};
 		if (arguments.length) {

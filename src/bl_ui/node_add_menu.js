@@ -193,10 +193,10 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		return null;
 	});},
 	get node_operator_with_searchable_enum () {return __getcm__ (this, function (cls, context, layout, node_idname, property_name, search_weight, defaults_callback) {
-		if (typeof search_weight == 'undefined' || (search_weight != null && search_weight.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof search_weight == 'undefined' || (search_weight != null && globalThis.Object.hasOwn (search_weight, "__kwargtrans__"))) {;
 			var search_weight = 0.0;
 		};
-		if (typeof defaults_callback == 'undefined' || (defaults_callback != null && defaults_callback.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof defaults_callback == 'undefined' || (defaults_callback != null && globalThis.Object.hasOwn (defaults_callback, "__kwargtrans__"))) {;
 			var defaults_callback = null;
 		};
 		if (arguments.length) {
@@ -242,7 +242,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		return operators;
 	});},
 	get node_operator_with_searchable_enum_socket () {return __getcm__ (this, function (cls, context, layout, node_idname, socket_identifier, enum_names, search_weight) {
-		if (typeof search_weight == 'undefined' || (search_weight != null && search_weight.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof search_weight == 'undefined' || (search_weight != null && globalThis.Object.hasOwn (search_weight, "__kwargtrans__"))) {;
 			var search_weight = 0.0;
 		};
 		if (arguments.length) {
@@ -331,7 +331,7 @@ export var NodeMenu =  __class__ ('NodeMenu', [Menu], {
 		return operators;
 	});},
 	get color_mix_node () {return __getcm__ (this, function (cls, context, layout, search_weight) {
-		if (typeof search_weight == 'undefined' || (search_weight != null && search_weight.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof search_weight == 'undefined' || (search_weight != null && globalThis.Object.hasOwn (search_weight, "__kwargtrans__"))) {;
 			var search_weight = 0.0;
 		};
 		if (arguments.length) {
@@ -825,7 +825,7 @@ export var NODE_MT_layout_base =  __class__ ('NODE_MT_layout_base', [NodeMenu], 
 export var add_base_pathing_dict = dict ({'Group': 'NODE_MT_group_add', 'Group/Linked': 'NODE_MT_linked_group_add', 'Layout': 'NODE_MT_category_layout'});
 export var swap_base_pathing_dict = dict ({'Group': 'NODE_MT_group_swap', 'Group/Linked': 'NODE_MT_linked_group_swap', 'Layout': 'NODE_MT_layout_swap'});
 export var generate_menu = function (bl_idname, template, layout_base, pathing_dict) {
-	if (typeof pathing_dict == 'undefined' || (pathing_dict != null && pathing_dict.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof pathing_dict == 'undefined' || (pathing_dict != null && globalThis.Object.hasOwn (pathing_dict, "__kwargtrans__"))) {;
 		var pathing_dict = null;
 	};
 	if (arguments.length) {
