@@ -66,7 +66,7 @@ function onPointerDown(event) {
   if (event.button === 2 && mode.value === "drag") return cancel();
   if (event.button !== 0) return;
   event.preventDefault();
-  press = { x: event.clientX, value: props.modelValue, dx: 0, offset: event.offsetX };
+  press = { x: event.clientX, value: props.modelValue, dx: 0, offset: event.clientX - root.value.getBoundingClientRect().left };
   mode.value = "press";
   addEventListener("pointermove", onPointerMove);
   addEventListener("pointerup", onPointerUp);

@@ -5,7 +5,8 @@
 import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { loadRNAUI, rnaProperty, INFO } from '../../makesrna/rna.js';
 import { createPreview } from '../../blenkernel/material/preview.js';
-import { MODULES, panelTypes, drawPanels, headerLayout } from '../interface/panels.js';
+import { panelTypes, drawPanels, headerLayout } from '../interface/panels.js';
+import { panels as blenderPanels, menus as blenderMenus, headers } from '../../python/bpy_interface.js';
 import { UILayout } from '../interface/layout.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
 import { drawMenu } from '../interface/ui-layout.js';
@@ -18,12 +19,13 @@ import { propertiesContext, propertiesTabs, propertiesPath, TAB_CONTEXTS, struct
 import { propertyPanels } from './registry.js';
 import { addonPanels } from './addon-panels.js';
 import { modifierTemplates } from './modifier-panel.js';
-import { deleted } from '../object/identity.js';
+import { deleted, hasMesh } from '../object/identity.js';
 import { modifierAddMenu } from './modifier-add-menu.js';
 import '../interface/layout-view.css';
 import '../interface/components/tailwind.css';
 
-const modules = Promise.all(MODULES.map((name) => import(`../../bl_ui/${name}.js`).catch(() => null)));
+// Blender's classes in the order its scripts register them.
+const modules = [{ classes: [...Object.values(blenderPanels), ...Object.values(blenderMenus), ...Object.values(headers)] }];
 
 // The path bar (buttons_panel_context_draw, C in Blender): the path of the data the tab shows, and the pin.
 function contextBar(context, space) {
@@ -69,7 +71,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       cycle(step) { const tabs = space.tabs().filter(Boolean).map(([id]) => id); space.context = tabs[(tabs.indexOf(space.context) + step + tabs.length) % tabs.length]; },
       startFilter: () => host.querySelector('.bl-properties-header input, input[aria-label="Live search filtering string"]')?.focus(),
       clearFilter: () => { space.search = ''; },
-      canAddModifier: () => space.context === 'MODIFIER' && !!ob()?.getTotalVertices?.(),
+      canAddModifier: () => space.context === 'MODIFIER' && !!ob() && hasMesh(ob()),
       // The active object's material slots in the material library.
       materials: () => {
         const node = ob(), library = world.materials;
@@ -155,10 +157,10 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
   });
   app.mount(host);
 
-  Promise.all([modules, loadRNAUI(() => import('../../makesrna/rna-ui.json'))]).then(([loaded]) => {
+  Promise.resolve(modules).then((loaded) => {
     types = panelTypes(loaded, { space: 'PROPERTIES' });
     navigation = panelTypes(loaded, { space: 'PROPERTIES', region: 'NAVIGATION_BAR' });
-    menus = { ...menuClasses(...loaded.filter(Boolean)), PROPERTIES_HT_header: loaded.find((m) => m?.PROPERTIES_HT_header)?.PROPERTIES_HT_header };
+    menus = { ...blenderMenus, PROPERTIES_HT_header: headers.PROPERTIES_HT_header };
     state.ready = true;
   });
 

@@ -138,6 +138,28 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     if (hit) sync();
   }
 
+  // font.selection_set: a click puts the text cursor where Blender's layout has the character under the mouse, and a
+  // drag selects up to where it is released.
+  function textClick(event) {
+    const rect = placeRegion(event.view);
+    if (!rect) return;
+    const at = (e) => ({ x: e.x - rect.left, y: rect.bottom - e.y });
+    if (!(ed.object.invoke(region, 'font.selection_set', { type: 'LEFTMOUSE', value: 'PRESS', ...at(event) }) & 1)) return;
+    sync({ commit: false });
+    const end = wm().addModal({
+      mousemove: (e) => { placeRegion(event.view); ed?.object.modal(region, { type: 'MOUSEMOVE', value: 'NOTHING', ...at(e) }); if (ed) sync({ commit: false }); },
+      keymap: (e) => {
+        if (e.type !== 'leftmouse' || e.value !== 'RELEASE') return true;
+        placeRegion(event.view);
+        ed?.object.modal(region, { type: 'LEFTMOUSE', value: 'RELEASE', ...at(e) });
+        end();
+        if (ed) sync();
+        return true;
+      },
+    });
+  }
+  const wm = () => world.wm;
+
   // The selected points' median in world space (Blender's axes), from their transform data's centers.
   function median() {
     const world_m = ed.node.computeWorldMatrix(true), centers = [];
@@ -228,6 +250,7 @@ export function createEditCurve({ world, editor, views, history, notify, changed
 
   const inView = (event) => !!event.view && ed?.kind === 'CURVE';
   const viewKeymap = createKeymap([
+    { blender: 'font.selection_set', keys: 'LEFTMOUSE PRESS', poll: (event) => !!event.view && ed?.kind === 'FONT', run: textClick },
     { blender: 'view3d.select', keys: 'LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, false) },
     { blender: 'view3d.select', keys: 'Shift LEFTMOUSE CLICK', poll: inView, run: (event) => selectPick(event, true) },
   ], ['3D View']);

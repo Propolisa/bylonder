@@ -10,7 +10,8 @@
 // Settings are written at their DNA offsets (dna-curves.json, from rna_curve.cc) as RNA's setters would.
 import rna from '../../makesrna/rna-curves.json' with { type: 'json' };
 import dna from '../../makesrna/dna-curves.json' with { type: 'json' };
-import { blenderMain, moduleAccess } from '../../bmesh/bmesh-wasm.js';
+import { blenderMain, moduleAccess, newOperator } from '../../bmesh/bmesh-wasm.js';
+import { EVENT_TYPES, EVENT_VALUES } from '../animation/anim-blender.js';
 import { blenderModifierDefinition, modifierPointers } from '../../modifiers/blender.js';
 
 const { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems } = moduleAccess;
@@ -145,9 +146,10 @@ const CHARINFO_SIZE = 8;
 
 // A curve or text object in the module's Main, holding its Curve data while Bylonder edits or evaluates it.
 export class CurveObject {
-  // A new object in the Main, or `ob`, one of the Main's objects of that type (Object Mode's mirror of a node).
-  constructor(type, name = type === 'FONT' ? 'Text' : 'Curve', ob = null) {
-    this.main = blenderMain();
+  // A new object in a Main (BlenderMain, by default the realm's), or `ob`, one of its objects of that type (Object
+  // Mode's mirror of a node).
+  constructor(type, name = type === 'FONT' ? 'Text' : 'Curve', ob = null, main = blenderMain()) {
+    this.main = main;
     this.type = type;
     this.ob = ob ?? this.main.add(type, name);
     // The names of the objects its pointers name (follow_curve, bevel_object, taper_object); target() points them.
@@ -290,6 +292,40 @@ export class CurveObject {
     } finally {
       x.view3d_region_attach(this.main.C, 0);
     }
+  }
+
+  // An operator invoked by an event in a 3D View region (font.selection_set's click), as Blender's handlers invoke
+  // it: { type, value, x, y } with Blender's event type and value and region pixels (y up). One that goes modal gets
+  // the next events from modal() until it ends. Returns its status.
+  invoke(region, idname, event, props = {}) {
+    this.cancelModal();
+    const op = newOperator(idname, props);
+    const status = this.#inRegion(region, (C) => x.operator_invoke(C, op, this.#event(C, event)));
+    if (status & 1 && x.operator_modal_added()) this.running = op;
+    else x.operator_free(op);
+    return status;
+  }
+  modal(region, event) {
+    if (!this.running) return 0;
+    const status = this.#inRegion(region, (C) => x.operator_modal(C, this.running, this.#event(C, event)));
+    if (!(status & 1)) this.cancelModal();
+    return status;
+  }
+  cancelModal() {
+    if (this.running) x.operator_free(this.running);
+    this.running = null;
+  }
+  #inRegion(region, fn) {
+    x.view3d_region_attach(this.main.C, region.address);
+    try {
+      return fn(this.main.C);
+    } finally {
+      x.view3d_region_attach(this.main.C, 0);
+    }
+  }
+  #event(C, { type, value = 'PRESS', x: mx = 0, y: my = 0 }) {
+    return withString('', (t) => x.wm_event_set(C, EVENT_TYPES.get(type), EVENT_VALUES.get(value), Math.round(mx), Math.round(my), 0, t,
+      EVENT_TYPES.get(type), EVENT_VALUES.get(value))) >>> 0;
   }
 
   // A transform's steps start again from the edit data as it was when it began.

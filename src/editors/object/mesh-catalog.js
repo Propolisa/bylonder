@@ -4,7 +4,9 @@ import reflected from "./builder-schema.json" with { type: "json" };
 import rna from "../../makesrna/rna-operators.json" with { type: "json" };
 import { primitiveOperators, primitive_add } from "../mesh/editmesh-add.js";
 import { mesh_batch_cache_apply } from "../../draw/mesh-batch-cache.js";
-import { mesh_deserialize, createMesh } from "../../blenkernel/mesh/mesh.js";
+import { createMesh as meshData, mesh_deserialize, mesh_serialize } from "../../blenkernel/mesh/mesh.js";
+import { mesh_from_pydata, mesh_shade } from "../../blenkernel/mesh/mesh-from-pydata.js";
+import { objectMesh } from "./object-mesh.js";
 import { evaluateCurve } from "../../blenkernel/curve/curve.js";
 
 const n = (value, min = 0.01, max = 100, step = 0.1) => ({ default: value, min, max, step });
@@ -81,7 +83,7 @@ const recipeMesh = (recipe) => {
 
 // A curve or text object's mesh from its Curve data alone; the objects it follows join when the scene evaluates it
 // (editors/curve/curve-objects.js).
-const curveMesh = (recipe) => evaluateCurve(recipe.curve) ?? createMesh({ vert_positions: new Float32Array(0), edges: new Int32Array(0),
+const curveMesh = (recipe) => evaluateCurve(recipe.curve) ?? meshData({ vert_positions: new Float32Array(0), edges: new Int32Array(0),
   face_offsets: new Int32Array([0]), corner_verts: new Int32Array(0), corner_edges: new Int32Array(0) });
 
 export function buildMesh(scene, name, recipe) {
@@ -104,6 +106,23 @@ export function buildMesh(scene, name, recipe) {
 export function createPrimitive(name, operator, options = {}, scene) {
   const node = buildMesh(scene, name, { operator, options });
   node.metadata = { ...node.metadata, wbCreation: { operator, options } };
+  return node;
+}
+
+// A mesh object from Mesh data (Blender's Mesh.from_pydata): vertices in Blender's axes (Z up), edges as vertex pairs,
+// faces as vertex loops; `smooth` shades its faces smooth.
+export function createMesh(name, { vertices, edges = [], faces = [], smooth = false }, scene) {
+  const mesh = mesh_serialize(mesh_from_pydata(vertices, edges, faces, { smooth }));
+  const node = buildMesh(scene, name, { mesh });
+  node.metadata = { ...node.metadata, wbCreation: { mesh } };
+  return node;
+}
+
+// Blender's object.shade_smooth and object.shade_flat: the object's Mesh with every face smooth, or flat.
+export function shadeSmooth(node, smooth = true) {
+  const mesh = mesh_serialize(mesh_shade(objectMesh(node), smooth));
+  node.metadata = { ...node.metadata, wbCreation: { mesh } };
+  rebuildMesh(node, { mesh });
   return node;
 }
 

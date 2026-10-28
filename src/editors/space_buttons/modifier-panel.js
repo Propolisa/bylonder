@@ -8,6 +8,7 @@ import { LayoutView, icon } from '../interface/layout-view.js';
 import { UILayout } from '../interface/layout.js';
 import { modifierPanel } from '../../modifiers/blender.js';
 import { modifierStack } from '../../modifiers/stack.js';
+import { hasMesh } from '../object/identity.js';
 import { openMenu } from '../interface/menu.js';
 import { kw } from '../../windowmanager/wm-operators.js';
 import { nodeModifierRows } from './addon-panels.js';
@@ -55,7 +56,7 @@ function headerLayout(modifier) {
 export function modifierTemplates({ world, editor, rna, history }) {
   return (node, env) => {
     const ob = editor.selection.nodes.at(-1);
-    if (!ob?.getTotalVertices?.()) return null;
+    if (!ob || !hasMesh(ob)) return null;
     const stack = modifierStack(ob), structs = rna.pointer('Object', ob).modifiers;
     return h('div', { class: 'flex flex-col gap-[calc(var(--bl-row)*.2)]' }, stack.map((modifier, index) => {
       const struct = structs[index], id = 'modifier:' + modifier.id, open = env.ui.isOpen(id, false), active = structs.active === struct;

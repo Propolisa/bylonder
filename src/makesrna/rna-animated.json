@@ -1,0 +1,1488 @@
+{
+ "Camera": {
+  "code": "CA",
+  "properties": {
+   "central_cylindrical_radius": {
+    "length": 0,
+    "name": "Cylinder Radius",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "central_cylindrical_range_u_max": {
+    "length": 0,
+    "name": "Max Longitude",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "central_cylindrical_range_u_min": {
+    "length": 0,
+    "name": "Min Longitude",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "central_cylindrical_range_v_max": {
+    "length": 0,
+    "name": "Max Height",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "central_cylindrical_range_v_min": {
+    "length": 0,
+    "name": "Min Height",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "clip_end": {
+    "length": 0,
+    "name": "Clip End",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "clip_start": {
+    "length": 0,
+    "name": "Clip Start",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "composition_guide_color": {
+    "length": 4,
+    "name": "Composition Guide Color",
+    "subtype": "COLOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "custom_mode": {
+    "length": 0,
+    "name": "Custom shader source",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "display_size": {
+    "length": 0,
+    "name": "Display Size",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "fisheye_fov": {
+    "length": 0,
+    "name": "Field of View",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "fisheye_lens": {
+    "length": 0,
+    "name": "Fisheye Lens",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "fisheye_polynomial_k0": {
+    "length": 0,
+    "name": "Fisheye Polynomial K0",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "fisheye_polynomial_k1": {
+    "length": 0,
+    "name": "Fisheye Polynomial K1",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "fisheye_polynomial_k2": {
+    "length": 0,
+    "name": "Fisheye Polynomial K2",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "fisheye_polynomial_k3": {
+    "length": 0,
+    "name": "Fisheye Polynomial K3",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "fisheye_polynomial_k4": {
+    "length": 0,
+    "name": "Fisheye Polynomial K4",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "is_runtime_data": {
+    "length": 0,
+    "name": "Runtime Data",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "latitude_max": {
+    "length": 0,
+    "name": "Max Latitude",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "latitude_min": {
+    "length": 0,
+    "name": "Min Latitude",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "lens": {
+    "length": 0,
+    "name": "Focal Length",
+    "subtype": "DISTANCE_CAMERA",
+    "type": "FLOAT",
+    "unit": "CAMERA"
+   },
+   "lens_unit": {
+    "length": 0,
+    "name": "Lens Unit",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "longitude_max": {
+    "length": 0,
+    "name": "Max Longitude",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "longitude_min": {
+    "length": 0,
+    "name": "Min Longitude",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "ortho_scale": {
+    "length": 0,
+    "name": "Orthographic Scale",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "panorama_type": {
+    "length": 0,
+    "name": "Panorama Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "passepartout_alpha": {
+    "length": 0,
+    "name": "Passepartout Alpha",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "sensor_fit": {
+    "length": 0,
+    "name": "Sensor Fit",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "sensor_height": {
+    "length": 0,
+    "name": "Sensor Height",
+    "subtype": "DISTANCE_CAMERA",
+    "type": "FLOAT",
+    "unit": "CAMERA"
+   },
+   "sensor_width": {
+    "length": 0,
+    "name": "Sensor Width",
+    "subtype": "DISTANCE_CAMERA",
+    "type": "FLOAT",
+    "unit": "CAMERA"
+   },
+   "shift_x": {
+    "length": 0,
+    "name": "Shift X",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "shift_y": {
+    "length": 0,
+    "name": "Shift Y",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "show_background_images": {
+    "length": 0,
+    "name": "Display Background Images",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_center": {
+    "length": 0,
+    "name": "Center",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_center_diagonal": {
+    "length": 0,
+    "name": "Center Diagonal",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_golden": {
+    "length": 0,
+    "name": "Golden Ratio",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_golden_tria_a": {
+    "length": 0,
+    "name": "Golden Triangle A",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_golden_tria_b": {
+    "length": 0,
+    "name": "Golden Triangle B",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_harmony_tri_a": {
+    "length": 0,
+    "name": "Harmonious Triangle A",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_harmony_tri_b": {
+    "length": 0,
+    "name": "Harmonious Triangle B",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_composition_thirds": {
+    "length": 0,
+    "name": "Thirds",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_limits": {
+    "length": 0,
+    "name": "Show Limits",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_mist": {
+    "length": 0,
+    "name": "Show Mist",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_name": {
+    "length": 0,
+    "name": "Show Name",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_passepartout": {
+    "length": 0,
+    "name": "Show Passepartout",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_safe_areas": {
+    "length": 0,
+    "name": "Show Safe Areas",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_safe_center": {
+    "length": 0,
+    "name": "Show Center-Cut Safe Areas",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_sensor": {
+    "length": 0,
+    "name": "Show Sensor Size",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "tag": {
+    "length": 0,
+    "name": "Tag",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "type": {
+    "length": 0,
+    "name": "Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "use_extra_user": {
+    "length": 0,
+    "name": "Extra User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_fake_user": {
+    "length": 0,
+    "name": "Fake User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   }
+  }
+ },
+ "Light": {
+  "code": "LA",
+  "properties": {
+   "color": {
+    "length": 3,
+    "name": "Color",
+    "subtype": "COLOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "cutoff_distance": {
+    "length": 0,
+    "name": "Cutoff Distance",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "diffuse_factor": {
+    "length": 0,
+    "name": "Diffuse Factor",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "exposure": {
+    "length": 0,
+    "name": "Exposure",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "is_runtime_data": {
+    "length": 0,
+    "name": "Runtime Data",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "specular_factor": {
+    "length": 0,
+    "name": "Specular Factor",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "tag": {
+    "length": 0,
+    "name": "Tag",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "temperature": {
+    "length": 0,
+    "name": "Temperature",
+    "subtype": "COLOR_TEMPERATURE",
+    "type": "FLOAT",
+    "unit": "COLOR_TEMPERATURE"
+   },
+   "transmission_factor": {
+    "length": 0,
+    "name": "Transmission Factor",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "type": {
+    "length": 0,
+    "name": "Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "use_custom_distance": {
+    "length": 0,
+    "name": "Custom Attenuation",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_extra_user": {
+    "length": 0,
+    "name": "Extra User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_fake_user": {
+    "length": 0,
+    "name": "Fake User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_shadow": {
+    "length": 0,
+    "name": "use_shadow",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_temperature": {
+    "length": 0,
+    "name": "Use Temperature",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "volume_factor": {
+    "length": 0,
+    "name": "Volume Factor",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   }
+  }
+ },
+ "Material": {
+  "code": "MA",
+  "properties": {
+   "alpha_threshold": {
+    "length": 0,
+    "name": "Clip Threshold",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "blend_method": {
+    "length": 0,
+    "name": "Blend Mode",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "diffuse_color": {
+    "length": 4,
+    "name": "Diffuse Color",
+    "subtype": "COLOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "displacement_method": {
+    "length": 0,
+    "name": "Displacement Method",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "is_runtime_data": {
+    "length": 0,
+    "name": "Runtime Data",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "line_color": {
+    "length": 4,
+    "name": "Line Color",
+    "subtype": "COLOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "line_priority": {
+    "length": 0,
+    "name": "Line Priority",
+    "subtype": "NONE",
+    "type": "INT",
+    "unit": "NONE"
+   },
+   "max_vertex_displacement": {
+    "length": 0,
+    "name": "Max Vertex Displacement",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "metallic": {
+    "length": 0,
+    "name": "Metallic",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "paint_active_slot": {
+    "length": 0,
+    "name": "Active Paint Texture Index",
+    "subtype": "UNSIGNED",
+    "type": "INT",
+    "unit": "NONE"
+   },
+   "paint_clone_slot": {
+    "length": 0,
+    "name": "Clone Paint Texture Index",
+    "subtype": "UNSIGNED",
+    "type": "INT",
+    "unit": "NONE"
+   },
+   "pass_index": {
+    "length": 0,
+    "name": "Pass Index",
+    "subtype": "UNSIGNED",
+    "type": "INT",
+    "unit": "NONE"
+   },
+   "preview_render_type": {
+    "length": 0,
+    "name": "Preview Render Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "refraction_depth": {
+    "length": 0,
+    "name": "Refraction Depth",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "roughness": {
+    "length": 0,
+    "name": "Roughness",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "show_transparent_back": {
+    "length": 0,
+    "name": "Show Backface",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "specular_color": {
+    "length": 3,
+    "name": "Specular Color",
+    "subtype": "COLOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "specular_intensity": {
+    "length": 0,
+    "name": "Specular",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "surface_render_method": {
+    "length": 0,
+    "name": "Surface Render Method",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "tag": {
+    "length": 0,
+    "name": "Tag",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "thickness_mode": {
+    "length": 0,
+    "name": "Thickness Mode",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "use_backface_culling": {
+    "length": 0,
+    "name": "Backface Culling",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_backface_culling_lightprobe_volume": {
+    "length": 0,
+    "name": "Light Probe Volume Backface Culling",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_backface_culling_shadow": {
+    "length": 0,
+    "name": "Shadow Backface Culling",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_extra_user": {
+    "length": 0,
+    "name": "Extra User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_fake_user": {
+    "length": 0,
+    "name": "Fake User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_preview_world": {
+    "length": 0,
+    "name": "Preview World",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_raytrace_refraction": {
+    "length": 0,
+    "name": "Raytrace Transmission",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_screen_refraction": {
+    "length": 0,
+    "name": "Raytrace Transmission",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_sss_translucency": {
+    "length": 0,
+    "name": "Subsurface Translucency",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_thickness_from_shadow": {
+    "length": 0,
+    "name": "Thickness From Shadow",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_transparency_overlap": {
+    "length": 0,
+    "name": "Use Transparency Overlap",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_transparent_shadow": {
+    "length": 0,
+    "name": "Transparent Shadows",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "volume_intersection_method": {
+    "length": 0,
+    "name": "Volume Intersection Method",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   }
+  }
+ },
+ "Object": {
+  "code": "OB",
+  "properties": {
+   "active_selection_set": {
+    "length": 0,
+    "name": "Active Selection Set",
+    "subtype": "NONE",
+    "type": "INT",
+    "unit": "NONE"
+   },
+   "add_rest_position_attribute": {
+    "length": 0,
+    "name": "Add Rest Position",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "color": {
+    "length": 4,
+    "name": "Color",
+    "subtype": "COLOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "delta_location": {
+    "length": 3,
+    "name": "Delta Location",
+    "subtype": "TRANSLATION",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "delta_rotation_euler": {
+    "length": 3,
+    "name": "Delta Rotation (Euler)",
+    "subtype": "EULER",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "delta_rotation_quaternion": {
+    "length": 4,
+    "name": "Delta Rotation (Quaternion)",
+    "subtype": "QUATERNION",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "delta_scale": {
+    "length": 3,
+    "name": "Delta Scale",
+    "subtype": "XYZ",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "display_bounds_type": {
+    "length": 0,
+    "name": "Display Bounds Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "display_type": {
+    "length": 0,
+    "name": "Display As",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "empty_display_size": {
+    "length": 0,
+    "name": "Empty Display Size",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "empty_display_type": {
+    "length": 0,
+    "name": "Empty Display Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "empty_image_depth": {
+    "length": 0,
+    "name": "Empty Image Depth",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "empty_image_offset": {
+    "length": 2,
+    "name": "Origin Offset",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "empty_image_side": {
+    "length": 0,
+    "name": "Empty Image Side",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "hide_probe_plane": {
+    "length": 0,
+    "name": "Disable in Planar Light Probes",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "hide_probe_sphere": {
+    "length": 0,
+    "name": "Disable in Spherical Light Probes",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "hide_probe_volume": {
+    "length": 0,
+    "name": "Disable in Volume Probes",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "hide_render": {
+    "length": 0,
+    "name": "Disable in Renders",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "hide_surface_pick": {
+    "length": 0,
+    "name": "Disable in Surface Picking",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "hide_viewport": {
+    "length": 0,
+    "name": "Disable in Viewports",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "instance_faces_scale": {
+    "length": 0,
+    "name": "Instance Faces Scale",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "instance_type": {
+    "length": 0,
+    "name": "Instance Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "is_holdout": {
+    "length": 0,
+    "name": "Holdout",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "is_runtime_data": {
+    "length": 0,
+    "name": "Runtime Data",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "is_shadow_catcher": {
+    "length": 0,
+    "name": "Shadow Catcher",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "location": {
+    "length": 3,
+    "name": "Location",
+    "subtype": "TRANSLATION",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "lock_location": {
+    "length": 3,
+    "name": "Lock Location",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "lock_rotation": {
+    "length": 3,
+    "name": "Lock Rotation",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "lock_rotation_w": {
+    "length": 0,
+    "name": "Lock Rotation (4D Angle)",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "lock_rotations_4d": {
+    "length": 0,
+    "name": "Lock Rotations (4D)",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "lock_scale": {
+    "length": 3,
+    "name": "Lock Scale",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "matrix_parent_inverse": {
+    "length": 16,
+    "name": "Parent Inverse Matrix",
+    "subtype": "MATRIX",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "parent_bone_head_tail_factor": {
+    "length": 0,
+    "name": "Parent Bone Head/Tail",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "parent_type": {
+    "length": 0,
+    "name": "Parent Type",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "parent_vertices": {
+    "length": 3,
+    "name": "Parent Vertices",
+    "subtype": "UNSIGNED",
+    "type": "INT",
+    "unit": "NONE"
+   },
+   "pass_index": {
+    "length": 0,
+    "name": "Pass Index",
+    "subtype": "UNSIGNED",
+    "type": "INT",
+    "unit": "NONE"
+   },
+   "rotation_axis_angle": {
+    "length": 4,
+    "name": "Axis-Angle Rotation",
+    "subtype": "AXISANGLE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "rotation_euler": {
+    "length": 3,
+    "name": "Euler Rotation",
+    "subtype": "EULER",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "rotation_mode": {
+    "length": 0,
+    "name": "Rotation Mode",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "rotation_quaternion": {
+    "length": 4,
+    "name": "Quaternion Rotation",
+    "subtype": "QUATERNION",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "scale": {
+    "length": 3,
+    "name": "Scale",
+    "subtype": "XYZ",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "shadow_terminator_geometry_offset": {
+    "length": 0,
+    "name": "Shadow Terminator Geometry Offset",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "shadow_terminator_normal_offset": {
+    "length": 0,
+    "name": "Shadow Terminator Normal Offset",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "shadow_terminator_shading_offset": {
+    "length": 0,
+    "name": "Shadow Terminator Shading Offset",
+    "subtype": "FACTOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "show_all_edges": {
+    "length": 0,
+    "name": "Display All Edges",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_axis": {
+    "length": 0,
+    "name": "Display Axes",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_bounds": {
+    "length": 0,
+    "name": "Display Bounds",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_empty_image_only_axis_aligned": {
+    "length": 0,
+    "name": "Display Only Axis Aligned",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_empty_image_orthographic": {
+    "length": 0,
+    "name": "Display in Orthographic Mode",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_empty_image_perspective": {
+    "length": 0,
+    "name": "Display in Perspective Mode",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_in_front": {
+    "length": 0,
+    "name": "In Front",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_instancer_for_render": {
+    "length": 0,
+    "name": "Render Instancer",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_instancer_for_viewport": {
+    "length": 0,
+    "name": "Display Instancer",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_name": {
+    "length": 0,
+    "name": "Display Name",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_only_shape_key": {
+    "length": 0,
+    "name": "Solo Active Shape Key",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_texture_space": {
+    "length": 0,
+    "name": "Display Texture Space",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_transparent": {
+    "length": 0,
+    "name": "Display Transparent",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "show_wire": {
+    "length": 0,
+    "name": "Display Wire",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "tag": {
+    "length": 0,
+    "name": "Tag",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "track_axis": {
+    "length": 0,
+    "name": "Track Axis",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "up_axis": {
+    "length": 0,
+    "name": "Up Axis",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "use_camera_lock_parent": {
+    "length": 0,
+    "name": "Camera Parent Lock",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_empty_image_alpha": {
+    "length": 0,
+    "name": "Use Alpha",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_extra_user": {
+    "length": 0,
+    "name": "Extra User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_fake_user": {
+    "length": 0,
+    "name": "Fake User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_grease_pencil_lights": {
+    "length": 0,
+    "name": "Use Lights",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_instance_faces_scale": {
+    "length": 0,
+    "name": "Scale to Face Sizes",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_instance_vertices_rotation": {
+    "length": 0,
+    "name": "Orient with Normals",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_mesh_mirror_x": {
+    "length": 0,
+    "name": "X",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_mesh_mirror_y": {
+    "length": 0,
+    "name": "Y",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_mesh_mirror_z": {
+    "length": 0,
+    "name": "Z",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_parent_final_indices": {
+    "length": 0,
+    "name": "Use Final Indices",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_shape_key_edit_mode": {
+    "length": 0,
+    "name": "Shape Key Edit Mode",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "visible_camera": {
+    "length": 0,
+    "name": "Camera Visibility",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "visible_diffuse": {
+    "length": 0,
+    "name": "Diffuse Visibility",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "visible_glossy": {
+    "length": 0,
+    "name": "Glossy Visibility",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "visible_raycast": {
+    "length": 0,
+    "name": "Raycast Visibility",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "visible_shadow": {
+    "length": 0,
+    "name": "Shadow Visibility",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "visible_transmission": {
+    "length": 0,
+    "name": "Transmission Visibility",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "visible_volume_scatter": {
+    "length": 0,
+    "name": "Volume Scatter Visibility",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   }
+  }
+ },
+ "Scene": {
+  "code": "SC",
+  "properties": {
+   "audio_volume": {
+    "length": 0,
+    "name": "Volume",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "gravity": {
+    "length": 3,
+    "name": "Gravity",
+    "subtype": "ACCELERATION",
+    "type": "FLOAT",
+    "unit": "ACCELERATION"
+   },
+   "is_runtime_data": {
+    "length": 0,
+    "name": "Runtime Data",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "playback_loop_mode": {
+    "length": 0,
+    "name": "Loop Mode",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "show_keys_from_selected_only": {
+    "length": 0,
+    "name": "Only Show Selected",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "sync_mode": {
+    "length": 0,
+    "name": "Sync Mode",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "tag": {
+    "length": 0,
+    "name": "Tag",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_audio": {
+    "length": 0,
+    "name": "Play Audio",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_audio_scrub": {
+    "length": 0,
+    "name": "Audio Scrubbing",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_extra_user": {
+    "length": 0,
+    "name": "Extra User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_fake_user": {
+    "length": 0,
+    "name": "Fake User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_gravity": {
+    "length": 0,
+    "name": "Global Gravity",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_nodes": {
+    "length": 0,
+    "name": "Use Nodes",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   }
+  }
+ },
+ "World": {
+  "code": "WO",
+  "properties": {
+   "color": {
+    "length": 3,
+    "name": "Color",
+    "subtype": "COLOR",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "is_runtime_data": {
+    "length": 0,
+    "name": "Runtime Data",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "probe_resolution": {
+    "length": 0,
+    "name": "Resolution",
+    "subtype": "NONE",
+    "type": "ENUM",
+    "unit": "NONE"
+   },
+   "sun_angle": {
+    "length": 0,
+    "name": "Sun Angle",
+    "subtype": "ANGLE",
+    "type": "FLOAT",
+    "unit": "ROTATION"
+   },
+   "sun_shadow_filter_radius": {
+    "length": 0,
+    "name": "Shadow Filter Radius",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "sun_shadow_jitter_overblur": {
+    "length": 0,
+    "name": "Shadow Jitter Overblur",
+    "subtype": "PERCENTAGE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "sun_shadow_maximum_resolution": {
+    "length": 0,
+    "name": "Shadows Resolution Limit",
+    "subtype": "DISTANCE",
+    "type": "FLOAT",
+    "unit": "LENGTH"
+   },
+   "sun_threshold": {
+    "length": 0,
+    "name": "Sun Threshold",
+    "subtype": "NONE",
+    "type": "FLOAT",
+    "unit": "NONE"
+   },
+   "tag": {
+    "length": 0,
+    "name": "Tag",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_extra_user": {
+    "length": 0,
+    "name": "Extra User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_fake_user": {
+    "length": 0,
+    "name": "Fake User",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_sun_shadow": {
+    "length": 0,
+    "name": "Use Shadow",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   },
+   "use_sun_shadow_jitter": {
+    "length": 0,
+    "name": "Shadow Jitter",
+    "subtype": "NONE",
+    "type": "BOOLEAN",
+    "unit": "NONE"
+   }
+  }
+ }
+}

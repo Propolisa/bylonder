@@ -52,12 +52,23 @@ Blender's modifiers run Blender's own code in the module (`tools/blender-port/wa
 
 Unlike Blender, evaluation never blocks the interface: it runs as a job (`src/windowmanager/wm-jobs.js`, after `wm_jobs.cc`) in a worker with its own instance of the module (`src/modifiers/evaluator.js`), and the last result stays drawn meanwhile. A job that takes longer than a moment shows in the running-jobs template with Cancel, which terminates the worker, the only way to stop WebAssembly, and goes back to the stack that evaluated last as an undo step. A stack estimated at more than 4 million faces asks before it starts. Edit Mode, Apply and renders use the same jobs; Bylonder's own modifiers (Array (Nodes), Geometry Nodes) still run on the main thread.
 
+## object.shade_smooth
+Status: partial
+Project code calls `shadeSmooth(mesh)` (and `shadeSmooth(mesh, false)` for Shade Flat), which clears or sets `sharp_face` on the object's Mesh. The Object menu entry comes later. Mesh data from code is `createMesh`, Blender's `Mesh.from_pydata`.
+
 ## Transform Modal Map > *
 Typed values, the Global and Local cycling of repeated axis keys and the header text follow transform.cc. The scene orientation is always Global, so the second axis press is Local. Ctrl snaps to 1 unit in every view; Blender's orthographic axis views step the grid with zoom.
 
 ## node.add_node
 Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with search as you type. It adds the Blender nodes Bylonder runs (Math, Mix, Color Balance so far); Babylon's blocks are in a Babylon sub-menu of each category. See `docs/node-editors.md`.
 
+## DOPESHEET_EDITOR > *
+Status: partial
+The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). The sidebar, markers and the Action, Shape Key, Grease Pencil, Mask and Cache File modes are not shown yet.
+
+## GRAPH_EDITOR > *
+Status: partial
+Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Drivers mode, F-Curve modifiers and the sidebar are not shown yet.
 ## VIEW3D_PT_transform
 The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/space_view3d/view3d-buttons.js`. Edit Mode's Median panel is not ported yet.
 

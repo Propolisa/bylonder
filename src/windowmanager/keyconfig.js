@@ -13,8 +13,9 @@ const PREFERENCES = {
   use_fallback_tool_select_handled: false, use_alt_tool_or_cursor: false, use_alt_click_leader: false, use_pie_click_drag: false,
   use_file_single_click: false, use_alt_navigation: true,
 };
+export const defaultKeymaps = () => generate_keymaps(Params(kw(PREFERENCES)));
 let keymaps;
-const keyconfig = () => (keymaps ??= new Map(generate_keymaps(Params(kw(PREFERENCES))).map(([name, , { items }]) => [name, items])));
+const keyconfig = () => (keymaps ??= new Map(defaultKeymaps().map(([name, , { items }]) => [name, items])));
 
 const MODIFIERS = [['shift', 'Shift'], ['ctrl', 'Ctrl'], ['alt', 'Alt'], ['oskey', 'Cmd']];
 const eventText = (event) => [...MODIFIERS.filter(([key]) => event[key] === true).map(([, text]) => text), keysLabel(event.type)].join(' ');
@@ -56,6 +57,13 @@ function matches(kmi, event) {
   if ((KEYMAP_TYPES[kmi.type] ?? kmi.type) !== (EVENT_TYPES[type] ?? type)) return false;
   if (kmi.value !== 'ANY' && kmi.value !== event.value) return false;
   return kmi.any === true || ['shift', 'ctrl', 'alt'].every((key) => kmi[key] === KM_ANY || !!kmi[key] === !!event[key]);
+}
+
+// The item of a modal keymap ("Transform Modal Map") an event maps to, as wm_event_modalkeymap maps it: the first whose
+// event matches and that `allowed(item)` lets through now (the operator's poll_modal_item), or null.
+export function modalItem(name, event, allowed = () => true) {
+  for (const [item, kmi] of keyconfig().get(name) ?? []) if (matches(kmi, event) && allowed(item)) return item;
+  return null;
 }
 
 // A handler running the named keymaps in order (or those `names(event)` gives), as the editor's handlers run

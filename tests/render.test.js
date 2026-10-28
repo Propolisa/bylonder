@@ -22,6 +22,15 @@ assert.equal(settings.state.render.imageSettings.fileFormat, 'PNG', 'apply(undef
 settings.apply(saved);
 assert.equal(settings.state.render.resolutionPercentage, 50);
 
+// Render settings code sets are the baseline: they are not saved as edits, and edits are saved against them.
+const authored = createRenderSettings({ scene, animation: createAnimationModel() }, { authored: { render: { useMotionBlur: true }, eevee: { taaRenderSamples: 64 } } });
+assert.equal(authored.state.render.useMotionBlur, true);
+assert.equal(authored.state.render.resolutionX, 1920, 'other settings keep their defaults');
+assert.equal(authored.capture(), undefined);
+authored.set('eevee.taaRenderSamples', 8);
+assert.deepEqual(authored.capture(), { eevee: { taaRenderSamples: 8 } });
+authored.dispose();
+
 // Formats: Blender names map to browser outputs; impossible pairs are rejected.
 assert.deepEqual(outputSpec(settings.state.render), { kind: 'video', container: 'MPEG4', mime: 'video/mp4', ext: 'mp4', codec: 'avc', quality: 'QUALITY_HIGH', gopsize: 18 });
 assert.throws(() => outputSpec({ ...settings.state.render, ffmpeg: { ...settings.state.render.ffmpeg, format: 'WEBM', codec: 'H264' } }), /WebM cannot hold H.264/);

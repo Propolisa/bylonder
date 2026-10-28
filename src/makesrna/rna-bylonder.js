@@ -10,7 +10,7 @@ import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct } fr
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import rnaOperators from './rna-operators.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
-import { deleted, nodeId } from '../editors/object/identity.js';
+import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
 import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
 import { fileFormats, containers, videoCodecs, qualities } from '../render/formats.js';
@@ -83,7 +83,7 @@ const lightType = (light) => (light instanceof SpotLight ? 'SPOT' : light instan
 const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
 const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve' };
 const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
-  ?? (ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices?.() > 0 ? 'MESH' : 'EMPTY'));
+  ?? (ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices && hasMesh(ob) ? 'MESH' : 'EMPTY'));
 const editing = (ob, r) => !!ob && r.world.editMode?.object === ob;
 const editTotals = (ob, r) => (editing(ob, r) && r.world.editMode.stats) || { verts: [0], edges: [0], faces: [0] };
 
@@ -288,6 +288,46 @@ const STRUCTS = {
     ['length_unit', 'length']].map(([name, key]) => [name, {
     get: (world) => world.sceneSettings?.state.unitSettings[key], set: (world, value) => world.sceneSettings.set('unitSettings.' + key, value, false) }])),
   ...curveStructs,
+  // A Graph Editor and a Dope Sheet (editors/animation/anim-editor.js): their space's flags, in the module (rna_space.cc).
+  SpaceGraphEditor: {
+    type: () => 'GRAPH_EDITOR',
+    mode: (editor) => ['FCURVES', 'DRIVERS'][editor.area.settings.mode],
+    ui_mode: (editor) => ['FCURVES', 'DRIVERS'][editor.area.settings.mode],
+    show_handles: spaceFlag(1 << 2, true),
+    use_only_selected_keyframe_handles: spaceFlag(1 << 9),
+    show_seconds: spaceFlag(1 << 4),
+    show_sliders: spaceFlag(1 << 7),
+    show_cursor: spaceFlag(1 << 8, true),
+    use_realtime_update: spaceFlag(1 << 11, true),
+    use_normalization: spaceFlag(1 << 14),
+    use_auto_normalization: spaceFlag(1 << 15, true),
+    show_markers: spaceFlag(1 << 16),
+    show_extrapolation: spaceFlag(1 << 17, true),
+    use_auto_merge_keyframes: spaceFlag(1 << 1, true),
+    has_ghost_curves: () => false,
+    pivot_point: { get: (editor) => PIVOTS[editor.area.settings.around], set: (editor, value) => { editor.area.settings = { around: PIVOTS.indexOf(value) }; editor.changed(); } },
+    dopesheet: (editor, r) => r.pointer('DopeSheet', editor),
+  },
+  SpaceDopeSheetEditor: {
+    type: () => 'DOPESHEET_EDITOR',
+    mode: (editor) => ACTION_MODES[editor.area.settings.mode],
+    ui_mode: (editor) => ACTION_MODES[editor.area.settings.mode],
+    show_sliders: spaceFlag(1 << 1),
+    show_seconds: spaceFlag(1 << 2),
+    use_auto_merge_keyframes: spaceFlag(1 << 4, true),
+    show_pose_markers: spaceFlag(1 << 6),
+    use_realtime_update: spaceFlag(1 << 10, true),
+    use_marker_sync: spaceFlag(1 << 11),
+    show_interpolation: spaceFlag(1 << 12),
+    show_extremes: spaceFlag(1 << 13),
+    show_markers: spaceFlag(1 << 14),
+    dopesheet: (editor, r) => r.pointer('DopeSheet', editor),
+  },
+  DopeSheet: {
+    show_only_selected: dopesheetFilter(1 << 0),
+    show_hidden: dopesheetFilter(1 << 26),
+    show_only_errors: dopesheetFilter(1 << 28),
+  },
   Light: {
     name: settable('name'),
     type: lightType,
@@ -425,6 +465,22 @@ const STRUCTS = {
   },
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
+// A flag of an animation editor's space (eGraphEdit_Flag, eSAction_Flag), and of its dope sheet's filters; `inverted`
+// for a property that is on when the flag is off (show_handles is !SIPO_NOHANDLES).
+function spaceFlag(bit, inverted = false) {
+  return {
+    get: (editor) => !!(editor.area.settings.flag & bit) !== inverted,
+    set: (editor, value) => { const { flag } = editor.area.settings; editor.area.settings = { flag: !!value !== inverted ? flag | bit : flag & ~bit }; editor.changed(); },
+  };
+}
+function dopesheetFilter(bit) {
+  return {
+    get: (editor) => !!(editor.area.settings.filterflag & bit),
+    set: (editor, value) => { const { filterflag } = editor.area.settings; editor.area.settings = { filterflag: value ? filterflag | bit : filterflag & ~bit }; editor.changed(); },
+  };
+}
+const PIVOTS = ['BOUNDING_BOX_CENTER', 'CURSOR', 'INDIVIDUAL_ORIGINS'];
+const ACTION_MODES = ['ACTION', 'SHAPEKEY', 'GPENCIL', 'DOPESHEET', 'MASK', 'CACHEFILE', 'TIMELINE'];
 // Scenes' transform orientation slots (Scene.transform_orientation_slots).
 const orientationSlots = new WeakMap();
 const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];

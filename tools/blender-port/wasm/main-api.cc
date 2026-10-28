@@ -19,6 +19,7 @@
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_set.hh"
+#include "BLI_string.h"
 #include "DEG_depsgraph_query.hh"
 #include "DNA_layer_types.h"
 #include "DNA_mesh_types.h"
@@ -65,8 +66,10 @@ EXPORT(main_new) BlenderMain *main_new()
   G_MAIN = ctx->bmain;
   ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);
   BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
+  STRNCPY(ctx->scene.id.name, "SCScene");
+  STRNCPY(ctx->view_layer.name, "ViewLayer");
   ctx->scene.toolsettings = &ctx->tool_settings;
-  /* port-override: the module has no animation data yet, so Blender's auto keying stays off. */
+  /* Auto keying is off until Bylonder sets its own (anim_scene_time_set). */
   ctx->tool_settings.autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
@@ -80,6 +83,7 @@ EXPORT(main_new) BlenderMain *main_new()
 }
 
 EXPORT(main_C) bContext *main_C(BlenderMain *ctx) { return ctx->C; }
+EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return &ctx->scene; }
 /* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }
 

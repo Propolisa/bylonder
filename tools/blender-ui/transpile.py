@@ -84,6 +84,8 @@ def finish(name, script):
             assert text in script, f'{name}: the patch for {reason} no longer applies'
             script = script.replace(text, replacement)
     if name == 'org.transcrypt.__runtime__.js':
+        # Operator overloading's dunder lookups, for None too (typeof null is 'object').
+        script = re.sub(r"typeof (\w+) == 'object' && '(__\w+__)' in \1\b", r"typeof \1 == 'object' && \1 !== null && '\2' in \1", script)
         script += open(os.path.join(HERE, 'runtime.js')).read()
     # Keyword arguments reach a parameter Transcrypt renames (type as py_metatype, others with a py_ prefix) under
     # its Python name too, as they do when they come from a dict (**kwargs).

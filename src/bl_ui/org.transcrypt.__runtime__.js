@@ -452,7 +452,7 @@ export function isinstance (anObject, classinfo) {
     }
 };
 export function callable (anObject) {
-    return anObject && typeof anObject == 'object' && '__call__' in anObject ? true : typeof anObject === 'function';
+    return anObject && typeof anObject == 'object' && anObject !== null && '__call__' in anObject ? true : typeof anObject === 'function';
 };
 export function repr (anObject) {
     try {
@@ -1522,10 +1522,10 @@ function __setdoc__ (docString) {
 }
 __setproperty__ (Function.prototype, '__setdoc__', {value: __setdoc__, enumerable: false});
 export function __jsmod__ (a, b) {
-    if (typeof a == 'object' && '__mod__' in a) {
+    if (typeof a == 'object' && a !== null && '__mod__' in a) {
         return a.__mod__ (b);
     }
-    else if (typeof b == 'object' && '__rmod__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rmod__' in b) {
         return b.__rmod__ (a);
     }
     else {
@@ -1533,10 +1533,10 @@ export function __jsmod__ (a, b) {
     }
 };
 export function __mod__ (a, b) {
-    if (typeof a == 'object' && '__mod__' in a) {
+    if (typeof a == 'object' && a !== null && '__mod__' in a) {
         return a.__mod__ (b);
     }
-    else if (typeof b == 'object' && '__rmod__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rmod__' in b) {
         return b.__rmod__ (a);
     }
     else {
@@ -1544,10 +1544,10 @@ export function __mod__ (a, b) {
     }
 };
 export function __pow__ (a, b) {
-    if (typeof a == 'object' && '__pow__' in a) {
+    if (typeof a == 'object' && a !== null && '__pow__' in a) {
         return a.__pow__ (b);
     }
-    else if (typeof b == 'object' && '__rpow__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rpow__' in b) {
         return b.__rpow__ (a);
     }
     else {
@@ -1556,7 +1556,7 @@ export function __pow__ (a, b) {
 };
 export var pow = __pow__;
 export function __neg__ (a) {
-    if (typeof a == 'object' && '__neg__' in a) {
+    if (typeof a == 'object' && a !== null && '__neg__' in a) {
         return a.__neg__ ();
     }
     else {
@@ -1567,10 +1567,10 @@ export function __matmul__ (a, b) {
     return a.__matmul__ (b);
 };
 export function __mul__ (a, b) {
-    if (typeof a == 'object' && '__mul__' in a) {
+    if (typeof a == 'object' && a !== null && '__mul__' in a) {
         return a.__mul__ (b);
     }
-    else if (typeof b == 'object' && '__rmul__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rmul__' in b) {
         return b.__rmul__ (a);
     }
     else if (typeof a == 'string') {
@@ -1584,16 +1584,16 @@ export function __mul__ (a, b) {
     }
 };
 export function __truediv__ (a, b) {
-    if (typeof a == 'object' && '__truediv__' in a) {
+    if (typeof a == 'object' && a !== null && '__truediv__' in a) {
         return a.__truediv__ (b);
     }
-    else if (typeof b == 'object' && '__rtruediv__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rtruediv__' in b) {
         return b.__rtruediv__ (a);
     }
-    else if (typeof a == 'object' && '__div__' in a) {
+    else if (typeof a == 'object' && a !== null && '__div__' in a) {
         return a.__div__ (b);
     }
-    else if (typeof b == 'object' && '__rdiv__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rdiv__' in b) {
         return b.__rdiv__ (a);
     }
     else {
@@ -1601,16 +1601,16 @@ export function __truediv__ (a, b) {
     }
 };
 export function __floordiv__ (a, b) {
-    if (typeof a == 'object' && '__floordiv__' in a) {
+    if (typeof a == 'object' && a !== null && '__floordiv__' in a) {
         return a.__floordiv__ (b);
     }
-    else if (typeof b == 'object' && '__rfloordiv__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rfloordiv__' in b) {
         return b.__rfloordiv__ (a);
     }
-    else if (typeof a == 'object' && '__div__' in a) {
+    else if (typeof a == 'object' && a !== null && '__div__' in a) {
         return a.__div__ (b);
     }
-    else if (typeof b == 'object' && '__rdiv__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rdiv__' in b) {
         return b.__rdiv__ (a);
     }
     else {
@@ -1618,10 +1618,10 @@ export function __floordiv__ (a, b) {
     }
 };
 export function __add__ (a, b) {
-    if (typeof a == 'object' && '__add__' in a) {
+    if (typeof a == 'object' && a !== null && '__add__' in a) {
         return a.__add__ (b);
     }
-    else if (typeof b == 'object' && '__radd__' in b) {
+    else if (typeof b == 'object' && b !== null && '__radd__' in b) {
         return b.__radd__ (a);
     }
     else {
@@ -1629,10 +1629,10 @@ export function __add__ (a, b) {
     }
 };
 export function __sub__ (a, b) {
-    if (typeof a == 'object' && '__sub__' in a) {
+    if (typeof a == 'object' && a !== null && '__sub__' in a) {
         return a.__sub__ (b);
     }
-    else if (typeof b == 'object' && '__rsub__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rsub__' in b) {
         return b.__rsub__ (a);
     }
     else {
@@ -1640,10 +1640,10 @@ export function __sub__ (a, b) {
     }
 };
 export function __lshift__ (a, b) {
-    if (typeof a == 'object' && '__lshift__' in a) {
+    if (typeof a == 'object' && a !== null && '__lshift__' in a) {
         return a.__lshift__ (b);
     }
-    else if (typeof b == 'object' && '__rlshift__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rlshift__' in b) {
         return b.__rlshift__ (a);
     }
     else {
@@ -1651,10 +1651,10 @@ export function __lshift__ (a, b) {
     }
 };
 export function __rshift__ (a, b) {
-    if (typeof a == 'object' && '__rshift__' in a) {
+    if (typeof a == 'object' && a !== null && '__rshift__' in a) {
         return a.__rshift__ (b);
     }
-    else if (typeof b == 'object' && '__rrshift__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rrshift__' in b) {
         return b.__rrshift__ (a);
     }
     else {
@@ -1662,10 +1662,10 @@ export function __rshift__ (a, b) {
     }
 };
 export function __or__ (a, b) {
-    if (typeof a == 'object' && '__or__' in a) {
+    if (typeof a == 'object' && a !== null && '__or__' in a) {
         return a.__or__ (b);
     }
-    else if (typeof b == 'object' && '__ror__' in b) {
+    else if (typeof b == 'object' && b !== null && '__ror__' in b) {
         return b.__ror__ (a);
     }
     else {
@@ -1673,10 +1673,10 @@ export function __or__ (a, b) {
     }
 };
 export function __xor__ (a, b) {
-    if (typeof a == 'object' && '__xor__' in a) {
+    if (typeof a == 'object' && a !== null && '__xor__' in a) {
         return a.__xor__ (b);
     }
-    else if (typeof b == 'object' && '__rxor__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rxor__' in b) {
         return b.__rxor__ (a);
     }
     else {
@@ -1684,10 +1684,10 @@ export function __xor__ (a, b) {
     }
 };
 export function __and__ (a, b) {
-    if (typeof a == 'object' && '__and__' in a) {
+    if (typeof a == 'object' && a !== null && '__and__' in a) {
         return a.__and__ (b);
     }
-    else if (typeof b == 'object' && '__rand__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rand__' in b) {
         return b.__rand__ (a);
     }
     else {
@@ -1695,7 +1695,7 @@ export function __and__ (a, b) {
     }
 };
 export function __eq__ (a, b) {
-    if (typeof a == 'object' && '__eq__' in a) {
+    if (typeof a == 'object' && a !== null && '__eq__' in a) {
         return a.__eq__ (b);
     }
     else {
@@ -1703,7 +1703,7 @@ export function __eq__ (a, b) {
     }
 };
 export function __ne__ (a, b) {
-    if (typeof a == 'object' && '__ne__' in a) {
+    if (typeof a == 'object' && a !== null && '__ne__' in a) {
         return a.__ne__ (b);
     }
     else {
@@ -1711,7 +1711,7 @@ export function __ne__ (a, b) {
     }
 };
 export function __lt__ (a, b) {
-    if (typeof a == 'object' && '__lt__' in a) {
+    if (typeof a == 'object' && a !== null && '__lt__' in a) {
         return a.__lt__ (b);
     }
     else {
@@ -1719,7 +1719,7 @@ export function __lt__ (a, b) {
     }
 };
 export function __le__ (a, b) {
-    if (typeof a == 'object' && '__le__' in a) {
+    if (typeof a == 'object' && a !== null && '__le__' in a) {
         return a.__le__ (b);
     }
     else {
@@ -1727,7 +1727,7 @@ export function __le__ (a, b) {
     }
 };
 export function __gt__ (a, b) {
-    if (typeof a == 'object' && '__gt__' in a) {
+    if (typeof a == 'object' && a !== null && '__gt__' in a) {
         return a.__gt__ (b);
     }
     else {
@@ -1735,7 +1735,7 @@ export function __gt__ (a, b) {
     }
 };
 export function __ge__ (a, b) {
-    if (typeof a == 'object' && '__ge__' in a) {
+    if (typeof a == 'object' && a !== null && '__ge__' in a) {
         return a.__ge__ (b);
     }
     else {
@@ -1751,13 +1751,13 @@ export function __imatmul__ (a, b) {
     }
 };
 export function __ipow__ (a, b) {
-    if (typeof a == 'object' && '__pow__' in a) {
+    if (typeof a == 'object' && a !== null && '__pow__' in a) {
         return a.__ipow__ (b);
     }
-    else if (typeof a == 'object' && '__ipow__' in a) {
+    else if (typeof a == 'object' && a !== null && '__ipow__' in a) {
         return a.__pow__ (b);
     }
-    else if (typeof b == 'object' && '__rpow__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rpow__' in b) {
         return b.__rpow__ (a);
     }
     else {
@@ -1765,13 +1765,13 @@ export function __ipow__ (a, b) {
     }
 };
 export function __ijsmod__ (a, b) {
-    if (typeof a == 'object' && '__imod__' in a) {
+    if (typeof a == 'object' && a !== null && '__imod__' in a) {
         return a.__ismod__ (b);
     }
-    else if (typeof a == 'object' && '__mod__' in a) {
+    else if (typeof a == 'object' && a !== null && '__mod__' in a) {
         return a.__mod__ (b);
     }
-    else if (typeof b == 'object' && '__rpow__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rpow__' in b) {
         return b.__rmod__ (a);
     }
     else {
@@ -1779,13 +1779,13 @@ export function __ijsmod__ (a, b) {
     }
 };
 export function __imod__ (a, b) {
-    if (typeof a == 'object' && '__imod__' in a) {
+    if (typeof a == 'object' && a !== null && '__imod__' in a) {
         return a.__imod__ (b);
     }
-    else if (typeof a == 'object' && '__mod__' in a) {
+    else if (typeof a == 'object' && a !== null && '__mod__' in a) {
         return a.__mod__ (b);
     }
-    else if (typeof b == 'object' && '__rmod__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rmod__' in b) {
         return b.__rmod__ (a);
     }
     else {
@@ -1793,13 +1793,13 @@ export function __imod__ (a, b) {
     }
 };
 export function __imul__ (a, b) {
-    if (typeof a == 'object' && '__imul__' in a) {
+    if (typeof a == 'object' && a !== null && '__imul__' in a) {
         return a.__imul__ (b);
     }
-    else if (typeof a == 'object' && '__mul__' in a) {
+    else if (typeof a == 'object' && a !== null && '__mul__' in a) {
         return a = a.__mul__ (b);
     }
-    else if (typeof b == 'object' && '__rmul__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rmul__' in b) {
         return a = b.__rmul__ (a);
     }
     else if (typeof a == 'string') {
@@ -1813,13 +1813,13 @@ export function __imul__ (a, b) {
     }
 };
 export function __idiv__ (a, b) {
-    if (typeof a == 'object' && '__idiv__' in a) {
+    if (typeof a == 'object' && a !== null && '__idiv__' in a) {
         return a.__idiv__ (b);
     }
-    else if (typeof a == 'object' && '__div__' in a) {
+    else if (typeof a == 'object' && a !== null && '__div__' in a) {
         return a = a.__div__ (b);
     }
-    else if (typeof b == 'object' && '__rdiv__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rdiv__' in b) {
         return a = b.__rdiv__ (a);
     }
     else {
@@ -1827,13 +1827,13 @@ export function __idiv__ (a, b) {
     }
 };
 export function __iadd__ (a, b) {
-    if (typeof a == 'object' && '__iadd__' in a) {
+    if (typeof a == 'object' && a !== null && '__iadd__' in a) {
         return a.__iadd__ (b);
     }
-    else if (typeof a == 'object' && '__add__' in a) {
+    else if (typeof a == 'object' && a !== null && '__add__' in a) {
         return a = a.__add__ (b);
     }
-    else if (typeof b == 'object' && '__radd__' in b) {
+    else if (typeof b == 'object' && b !== null && '__radd__' in b) {
         return a = b.__radd__ (a);
     }
     else {
@@ -1841,13 +1841,13 @@ export function __iadd__ (a, b) {
     }
 };
 export function __isub__ (a, b) {
-    if (typeof a == 'object' && '__isub__' in a) {
+    if (typeof a == 'object' && a !== null && '__isub__' in a) {
         return a.__isub__ (b);
     }
-    else if (typeof a == 'object' && '__sub__' in a) {
+    else if (typeof a == 'object' && a !== null && '__sub__' in a) {
         return a = a.__sub__ (b);
     }
-    else if (typeof b == 'object' && '__rsub__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rsub__' in b) {
         return a = b.__rsub__ (a);
     }
     else {
@@ -1855,13 +1855,13 @@ export function __isub__ (a, b) {
     }
 };
 export function __ilshift__ (a, b) {
-    if (typeof a == 'object' && '__ilshift__' in a) {
+    if (typeof a == 'object' && a !== null && '__ilshift__' in a) {
         return a.__ilshift__ (b);
     }
-    else if (typeof a == 'object' && '__lshift__' in a) {
+    else if (typeof a == 'object' && a !== null && '__lshift__' in a) {
         return a = a.__lshift__ (b);
     }
-    else if (typeof b == 'object' && '__rlshift__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rlshift__' in b) {
         return a = b.__rlshift__ (a);
     }
     else {
@@ -1869,13 +1869,13 @@ export function __ilshift__ (a, b) {
     }
 };
 export function __irshift__ (a, b) {
-    if (typeof a == 'object' && '__irshift__' in a) {
+    if (typeof a == 'object' && a !== null && '__irshift__' in a) {
         return a.__irshift__ (b);
     }
-    else if (typeof a == 'object' && '__rshift__' in a) {
+    else if (typeof a == 'object' && a !== null && '__rshift__' in a) {
         return a = a.__rshift__ (b);
     }
-    else if (typeof b == 'object' && '__rrshift__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rrshift__' in b) {
         return a = b.__rrshift__ (a);
     }
     else {
@@ -1883,13 +1883,13 @@ export function __irshift__ (a, b) {
     }
 };
 export function __ior__ (a, b) {
-    if (typeof a == 'object' && '__ior__' in a) {
+    if (typeof a == 'object' && a !== null && '__ior__' in a) {
         return a.__ior__ (b);
     }
-    else if (typeof a == 'object' && '__or__' in a) {
+    else if (typeof a == 'object' && a !== null && '__or__' in a) {
         return a = a.__or__ (b);
     }
-    else if (typeof b == 'object' && '__ror__' in b) {
+    else if (typeof b == 'object' && b !== null && '__ror__' in b) {
         return a = b.__ror__ (a);
     }
     else {
@@ -1897,13 +1897,13 @@ export function __ior__ (a, b) {
     }
 };
 export function __ixor__ (a, b) {
-    if (typeof a == 'object' && '__ixor__' in a) {
+    if (typeof a == 'object' && a !== null && '__ixor__' in a) {
         return a.__ixor__ (b);
     }
-    else if (typeof a == 'object' && '__xor__' in a) {
+    else if (typeof a == 'object' && a !== null && '__xor__' in a) {
         return a = a.__xor__ (b);
     }
-    else if (typeof b == 'object' && '__rxor__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rxor__' in b) {
         return a = b.__rxor__ (a);
     }
     else {
@@ -1911,13 +1911,13 @@ export function __ixor__ (a, b) {
     }
 };
 export function __iand__ (a, b) {
-    if (typeof a == 'object' && '__iand__' in a) {
+    if (typeof a == 'object' && a !== null && '__iand__' in a) {
         return a.__iand__ (b);
     }
-    else if (typeof a == 'object' && '__and__' in a) {
+    else if (typeof a == 'object' && a !== null && '__and__' in a) {
         return a = a.__and__ (b);
     }
-    else if (typeof b == 'object' && '__rand__' in b) {
+    else if (typeof b == 'object' && b !== null && '__rand__' in b) {
         return a = b.__rand__ (a);
     }
     else {
@@ -1925,7 +1925,7 @@ export function __iand__ (a, b) {
     }
 };
 export function __getitem__ (container, key) {
-    if (typeof container == 'object' && '__getitem__' in container) {
+    if (typeof container == 'object' && container !== null && '__getitem__' in container) {
         return container.__getitem__ (key);
     }
     else if ( ['[object Array]', '[object String]'].includes(Object.prototype.toString.call(container)) ) {
@@ -1940,7 +1940,7 @@ export function __getitem__ (container, key) {
     }
 };
 export function __setitem__ (container, key, value) {
-    if (typeof container == 'object' && '__setitem__' in container) {
+    if (typeof container == 'object' && container !== null && '__setitem__' in container) {
         container.__setitem__ (key, value);
     }
     else if ((typeof container == 'string' || container instanceof Array) && key < 0) {
@@ -1951,7 +1951,7 @@ export function __setitem__ (container, key, value) {
     }
 };
 export function __getslice__ (container, lower, upper, step) {
-    if (typeof container == 'object' && '__getitem__' in container) {
+    if (typeof container == 'object' && container !== null && '__getitem__' in container) {
         return container.__getitem__ ([lower, upper, step]);
     }
     else {
@@ -1959,7 +1959,7 @@ export function __getslice__ (container, lower, upper, step) {
     }
 };
 export function __setslice__ (container, lower, upper, step, value) {
-    if (typeof container == 'object' && '__setitem__' in container) {
+    if (typeof container == 'object' && container !== null && '__setitem__' in container) {
         container.__setitem__ ([lower, upper, step], value);
     }
     else {

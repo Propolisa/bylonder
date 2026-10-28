@@ -16,8 +16,7 @@ import { menuUI, menuClasses } from '../src/windowmanager/wm-operators.js';
 import * as spaceView3d from '../src/bl_ui/space_view3d.js';
 import { registerObjectOperators } from '../src/editors/object/object-operators.js';
 import { registerOperator } from '../src/windowmanager/wm-operators.js';
-import { keymapHandler } from '../src/windowmanager/keyconfig.js';
-import { generate_keymaps } from '../src/bl_ui/blender_default.js';
+import { keymapHandler, defaultKeymaps } from '../src/windowmanager/keyconfig.js';
 import * as dataModifier from '../src/bl_ui/properties_data_modifier.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
@@ -164,7 +163,7 @@ assert.deepEqual(ran, ['parent', 'hide-others', 'group']);
 
 // Blender's keymaps, transpiled, equal Blender's own, and events run the operator the first matching item names, with
 // its properties.
-assert.deepEqual(JSON.parse(JSON.stringify(generate_keymaps())), JSON.parse(await readFile('tests/fixtures/keymaps.json', 'utf8')));
+assert.deepEqual(JSON.parse(JSON.stringify(defaultKeymaps())), JSON.parse(await readFile('tests/fixtures/keymaps.json', 'utf8')));
 const viewed = [];
 registerOperator('view3d.view_axis', { supports: ({ align_active }) => !align_active, run: ({ type }) => viewed.push(type) });
 const keys = keymapHandler(['3D View']);

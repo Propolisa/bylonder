@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { NullEngine, Scene, MeshBuilder } from '@babylonjs/core';
+import { NullEngine, Scene, MeshBuilder, Matrix } from '@babylonjs/core';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { evaluateBlenderModifiers, evaluated, moduleModifiers, modifierPanel, evaluation, estimatedFaces } from '../src/modifiers/blender.js';
 import { evaluateHere } from '../src/modifiers/evaluator.js';
@@ -8,6 +8,9 @@ import { createJobs } from '../src/windowmanager/wm-jobs.js';
 import { EditMesh } from '../src/bmesh/bmesh-wasm.js';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
+import { createMesh, createPrimitive, shadeSmooth } from '../src/editors/object/mesh-catalog.js';
+import { hasMesh } from '../src/editors/object/identity.js';
+import { mesh_deserialize } from '../src/blenkernel/mesh/mesh.js';
 
 // Blender's modifiers evaluated by Blender's code in the module, against Blender 5.2's result on a default cube
 // (tools/blender-reference/modifier-fixtures.py).
@@ -125,6 +128,37 @@ assert.deepEqual(notes, ['Cube | Subdivision Surface: cancelled', 'Cube | Subdiv
 guarded.dispose();
 jobs.dispose();
 console.log('Modifiers: jobs keep the last result drawn, Cancel goes back to it as an undo step, and an enormous stack asks first');
+// Mesh data from code (Mesh.from_pydata): a profile of loose edges is a mesh object Screw turns into faces, and Shade
+// Smooth draws a primitive's subdivided faces with vertex normals.
+const profile = [[0.3, 0, 0], [0.5, 0, 0.4], [0.2, 0, 1]];
+const vase = createMesh('Vase', { vertices: profile, edges: [[0, 1], [1, 2]] }, scene);
+vase.metadata.wbId = 'vase';
+assert.ok(hasMesh(vase) && vase.getTotalVertices() === 0, 'loose edges only');
+const cube = shadeSmooth(createPrimitive('Smooth', 'mesh.primitive_cube_add', { size: 2 }, scene));
+assert.equal(mesh_deserialize(cube.metadata.wbCreation.mesh).attribute('sharp_face'), undefined);
+const lathe = createModifierSystem({ scene, objects: [vase], animation: createAnimationModel() });
+lathe.add(vase, 'SCREW', { steps: 8 });
+await lathe.settled();
+assert.equal(vase.getTotalIndices(), 8 * 2 * 6, 'Screw makes two quads per step');
+assert.ok(vase.getChildMeshes(true).every((wire) => !wire.isEnabled(false)), 'the profile\'s loose edges do not draw over the result');
+lathe.dispose();
+console.log('Modifiers: Screw turns a profile of edges from code, Shade Smooth clears sharp faces');
+
+// Thin instances placed by code stay: the evaluated mesh draws in each of them.
+engine.getCaps().instancedArrays = true;
+const studs = createPrimitive('Studs', 'mesh.primitive_cube_add', { size: 0.2 }, scene);
+studs.metadata.wbId = 'studs';
+studs.thinInstanceAdd([0, 1, 2].map((x) => Matrix.Translation(x, 0, 0)));
+const placed = createModifierSystem({ scene, objects: [studs], animation: createAnimationModel() });
+const bevel = placed.add(studs, 'BEVEL', { width: 0.02 });
+await placed.settled();
+assert.equal(studs.thinInstanceCount, 3, 'instances survive the evaluation');
+assert.deepEqual(studs.thinInstanceGetWorldMatrices().map((m) => m.m[12]), [0, 1, 2]);
+placed.remove(studs, bevel.id);
+await placed.settled();
+assert.equal(studs.thinInstanceCount, 3, 'and removing the modifier keeps them');
+placed.dispose();
+console.log('Modifiers: thin instances from code keep drawing the evaluated mesh');
 scene.dispose();
 engine.dispose();
 console.log(`Modifiers: ${known.length} results differ where known (${Object.values(KNOWN).join('; ')})`);
