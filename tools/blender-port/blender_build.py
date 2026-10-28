@@ -24,7 +24,7 @@ from wasm_module import WASM, demangle
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
 SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace|bf_imbuf_movie'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
-                   r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu)')
+                   r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Host flags that have no meaning for wasm32 or name host paths.
 DROP = re.compile(r'^(-DFMT_SHARED|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
@@ -237,6 +237,8 @@ def main():
             '-o', os.path.join(out, 'blender-all.wasm')]
     result = subprocess.run(link, capture_output=True, text=True)
     unresolved = sorted({line.split('undefined symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'undefined symbol: ' in line})
+    # Symbols two libraries define (each line: the symbol, then where each definition is).
+    duplicates = sorted({line.split('duplicate symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'duplicate symbol: ' in line})
     names = demangle(unresolved)
     by_prefix = {}
     for name in names:
@@ -248,6 +250,8 @@ def main():
                           'failed': {os.path.relpath(s, host + '/..'): first_error(e) for s, o, e in d if not o}} for t, d in results.items()},
         'link': result.returncode, 'size': os.path.getsize(wasm) if os.path.exists(wasm) else None,
         'unresolved': len(names), 'unresolved_by_prefix': dict(sorted(by_prefix.items(), key=lambda kv: -len(kv[1]))),
+        'duplicates': demangle(duplicates) if duplicates else [],
+        'link_errors': [line for line in result.stderr.splitlines() if 'error' in line and 'undefined symbol' not in line][:200],
     }, open(report, 'w'), indent=1)
     total = sum(len(d) for d in results.values())
     compiled = sum(1 for d in results.values() for _, o, _ in d if o)
@@ -261,8 +265,8 @@ WRAPPED = ['_ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS
 
 def link_module(host, out, entries, extra, archives):
     """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) first, then Blender's libraries,
-    as the module build links them. Where the API still defines what Blender's libraries also define, the API's
-    definition is kept (--allow-multiple-definition), until it is removed for Blender's own."""
+    as the module build links them. What the API defines that a library linked in also defines is a duplicate: the API's
+    stand-in, which goes for Blender's own; the link names them."""
     built = glue(host, out, entries, extra)
     failed = [(s, e) for s, o, e in built if not o]
     if failed:
@@ -270,11 +274,15 @@ def link_module(host, out, entries, extra, archives):
     module = os.path.join(out, 'bylonder.wasm')
     strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
     link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
-            '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free', '-Wl,--allow-multiple-definition',
+            '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
             *(f'-Wl,--wrap={w}' for w in WRAPPED), *(o for _, o, _ in built), *archives, *archives, '-lwasi-emulated-process-clocks',
             '-Wl,--allow-undefined', '-o', module]
     result = subprocess.run(link, capture_output=True, text=True)
     if result.returncode:
+        stand_ins = sorted({line.split('duplicate symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'duplicate symbol: ' in line})
+        if stand_ins:
+            json.dump(demangle(stand_ins), open(os.path.join(out, 'stand-ins.json'), 'w'), indent=1)
+            sys.exit(f'module link: {len(stand_ins)} API definitions Blender\'s libraries also define (wasm-build/stand-ins.json)')
         sys.exit(f'module link failed:\n{result.stderr[-3000:]}')
     missing = wasm_module.live_imports(module)
     print(f'{module}: {os.path.getsize(module)} bytes; {len(missing)} imports, which throw when called', file=sys.stderr)
