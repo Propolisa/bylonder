@@ -112,8 +112,12 @@ def wasm_tool(host, out, name, libraries, by_any, extra, link=True):
             os.remove(archive)
         subprocess.run([shutil.which('llvm-ar') or shutil.which('llvm-ar-18'), 'rcs', archive, *built], check=True)
         return [archive]
+    # With the module's platform functions (thread-local destructors, allocation), as wasm_module.sdna builds makesdna.
+    platform = os.path.join(objects, 'platform.o')
+    tree, spec, includes = module_inputs(host, out)
+    subprocess.run(['clang++', *includes, *wasm_module.flags(tree, spec), '-c', os.path.join(WASM, 'platform.cc'), '-o', platform], check=True)
     tool = os.path.join(out, name + '.wasm')
-    subprocess.run(['clang++', '--target=wasm32-wasi', *built, '-lwasi-emulated-process-clocks', '-Wl,--allow-undefined', '-o', tool], check=True)
+    subprocess.run(['clang++', '--target=wasm32-wasi', *built, platform, '-lwasi-emulated-process-clocks', '-Wl,--allow-undefined', '-o', tool], check=True)
     return tool
 
 
