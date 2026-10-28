@@ -1,4 +1,5 @@
 import { mountNodeEditor } from './editors/space_node/node-editor.js';
+import { syncLightDirections } from "./runtime/object-transform.js";
 import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
 import { createNodeContexts } from './editors/space_node/contexts.js';
 import { registerObjects, objectRefs } from './blenkernel/animation/bindings.js';
@@ -181,6 +182,7 @@ const live = () =>
   scene.animatables.length > 0 || scene.particleSystems.some((p) => p.isStarted?.() && p.isAlive?.()) ||
   scene.textures.some((t) => t.video && !t.video.paused);
 views = createViews({ engine, scene, live });
+syncLightDirections(scene);
 world.views = views;
 world.focusViewport = () => views.input?.canvas.focus();
 let creator;
@@ -351,7 +353,7 @@ world.collections.subscribe(() => {
 });
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
-ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || []);
+ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || [], blenderRNA);
 const nodeSection = document.querySelector("#nodes-section");
 let shadingReady = false;
 const backdrop = createCompositorBackdrop({

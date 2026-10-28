@@ -1,11 +1,13 @@
-"""Blender's UI scripts as JS modules: the classes manifest.json names (a trailing * matches a prefix), with the base
-classes and module-level functions they use, taken from Blender's scripts at the port's tag and transpiled by
+"""Blender's UI scripts as JS modules: the scripts manifest.json names (paths may hold *), each with the classes and
+functions its patterns match (* for all, ! to leave out) and what they use, and the names they use from the Blender
+modules they import ("modules" in the manifest), taken from Blender's scripts at the port's tag and transpiled by
 Transcrypt against Bylonder's bpy (bpy/ here) into src/bl_ui/.
 
 usage: python3 tools/blender-ui/transpile.py   (needs `pip install transcrypt`)
 """
 import ast
 import fnmatch
+import functools
 import json
 import os
 import re
@@ -107,11 +109,79 @@ def fetch(path):
     return open(cache).read()
 
 
+def listing(path):
+    """The Python files under a directory of Blender's repository at the tag, cached."""
+    cache = os.path.join(os.path.expanduser('~/.cache/bylonder/blender'), TAG, path, '.listing.json')
+    if os.path.exists(cache):
+        return json.load(open(cache))
+    url = f'{BLENDER}/contents/{path.replace("/", "%2F")}?ref={TAG}'
+    entries = json.loads(subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout)
+    files = [e['path'] for e in entries if e['type'] == 'file' and e['name'].endswith('.py')]
+    for d in (e['path'] for e in entries if e['type'] == 'dir'):
+        files += listing(d)
+    os.makedirs(os.path.dirname(cache), exist_ok=True)
+    json.dump(files, open(cache, 'w'))
+    return files
+
+
+@functools.cache
+def exists(path):
+    try:
+        return bool(fetch(path))
+    except subprocess.CalledProcessError:
+        return False
+
+
 # The modules Blender's scripts import that Bylonder has: its bpy and mathutils (here), and Transcrypt's math and copy; the
 # packages here (Bylonder's versions of Python's and Blender's modules) and the scripts the manifest names, imported by
 # their own names (bl_ui.space_toolsystem_common as space_toolsystem_common).
 IMPORTABLE = {'bpy', 'mathutils', 'math', 'copy'}
 SCRIPTS = set()
+# The Blender modules outside the manifest's scripts that the scripts may import (manifest.json's "modules"), built
+# with the names the scripts use from them, by the flat name the build gives them: their paths.
+IMPORTS = json.load(open(os.path.join(HERE, 'manifest.json'))).get('modules', [])
+SOURCES = {}
+
+
+def blender_module(name):
+    """A Blender module's path for its dotted name (bl_ui.utils, rna_prop_ui, bpy_extras.node_utils), or None for
+    Bylonder's own and the modules the build leaves out."""
+    parts = name.split('.')
+    if parts[0] in IMPORTABLE or parts[0] in SCRIPTS or not any(fnmatch.fnmatchcase(name, p) for p in IMPORTS):
+        return None
+    return ('scripts/startup/' if parts[0] == 'bl_ui' else 'scripts/modules/') + '/'.join(parts) + '.py'
+
+
+def flat(name):
+    """The flat module the build gives a Blender module (bl_ui.utils as utils), or the name."""
+    path = blender_module(name)
+    if not path:
+        return name
+    SOURCES[module_name(path)] = path
+    return module_name(path)
+
+
+def module_name(path):
+    return os.path.basename(path)[:-3]
+
+
+class FlatImports(ast.NodeTransformer):
+    """Imports of Blender's modules as imports of the flat modules the build holds; `from bl_ui import anim` (or
+    `from . import anim`) as `import anim`."""
+    def visit_ImportFrom(self, node):
+        module = ('bl_ui' + ('.' if node.module else '') if node.level else '') + (node.module or '')
+        if module == 'bl_ui':
+            return ast.Import(names=[ast.alias(flat('bl_ui.' + a.name), a.asname) for a in node.names])
+        return ast.ImportFrom(module=flat(module), names=node.names, level=0)
+
+    def visit_Import(self, node):
+        return ast.Import(names=[ast.alias(flat(a.name), a.asname or (a.name if '.' in a.name and blender_module(a.name) else None))
+                                 for a in node.names])
+
+
+def parse(path):
+    """A Blender script's syntax tree with its imports of Blender's modules made flat, or None if Blender lacks it."""
+    return FlatImports().visit(ast.parse(fetch(path))) if exists(path) else None
 
 
 def module_of(name):
@@ -144,25 +214,76 @@ def importable(node):
     return ast.Import(names=names) if names else None
 
 
-def extract(source, patterns):
-    """The module's imports Bylonder has, then the classes and functions matching patterns with what they use from the
-    module (constants too), in its order. The pattern '*' takes the whole module, its statements too."""
-    tree = ast.parse(source)
-    whole = patterns == ['*']
-    tree.body = [node for statement in tree.body for node in flat_imports(statement)]
+is_import = lambda node: isinstance(node, (ast.Import, ast.ImportFrom))
+
+
+def taken(tree, patterns):
+    """The module-level statements the patterns take ('*' the whole module, '!' leaves out), with what they use from
+    the module (constants too), in its order."""
+    match = lambda name, ps: any(fnmatch.fnmatchcase(name, p) for p in ps)
+    whole, exclude = '*' in patterns, [p[1:] for p in patterns if p.startswith('!')]
     defined = {}
     for node in tree.body:
         for name in defined_names(node):
             defined.setdefault(name, []).append(node)
-    wanted, todo = set(), [name for name in defined if any(fnmatch.fnmatchcase(name, p) for p in patterns)]
+    wanted, todo = set(), [name for name in defined if match(name, patterns) and not match(name, exclude)]
     while todo:
         name = todo.pop()
         if name in wanted:
             continue
         wanted.add(name)
         todo += [n.id for node in defined[name] for n in ast.walk(node) if isinstance(n, ast.Name) and n.id in defined]
-    is_import = lambda node: isinstance(node, (ast.Import, ast.ImportFrom))
-    nodes = [node for node in tree.body if not is_import(node) and not is_main_guard(node) and (whole or wanted.intersection(defined_names(node)))]
+    kept = lambda node: wanted.intersection(defined_names(node)) or whole and not defined_names(node)
+    return [node for node in tree.body if not is_import(node) and not is_main_guard(node) and kept(node)]
+
+
+def requirements(tree, patterns):
+    """What the taken code imports from the Blender modules the build may hold: {module: names}. A module imported
+    whole gives the attributes the code reads of it."""
+    nodes = taken(tree, patterns)
+    used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
+    attributes = {(n.value.id, n.attr) for node in nodes for n in ast.walk(node) if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)}
+    found = {}
+    for node in tree.body + [n for node in nodes for n in ast.walk(node)]:
+        if isinstance(node, ast.ImportFrom) and node.module in SOURCES:
+            found.setdefault(node.module, set()).update(a.name for a in node.names if (a.asname or a.name) in used)
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name in SOURCES and (alias.asname or alias.name) in used:
+                    found.setdefault(alias.name, set()).update(attr for name, attr in attributes if name == (alias.asname or alias.name))
+    return found
+
+
+def closure(scripts):
+    """The scripts to build, {module: (path, patterns, flags)}: the manifest's, and the Blender modules they import with
+    the names they use, until nothing more is needed. Each built module is importable by its flat name."""
+    modules = {module_name(path): (path, list(patterns), flags) for path, (patterns, flags) in scripts.items()}
+    trees, changed = {}, True
+    while changed:
+        changed = False
+        for module, (path, patterns, flags) in list(modules.items()):
+            if path not in trees:
+                trees[path] = parse(path)
+            if trees[path] is None:
+                continue
+            for target, names in requirements(trees[path], patterns).items():
+                if target not in modules:
+                    if not exists(SOURCES[target]):
+                        continue
+                    modules[target] = (SOURCES[target], [], flags)
+                    changed = True
+                missing = sorted(names - set(modules[target][1]))
+                if missing:
+                    modules[target][1].extend(missing)
+                    changed = True
+    built = {module: entry for module, entry in modules.items() if trees.get(entry[0]) is not None}
+    SCRIPTS.update(built)
+    return built, trees
+
+
+def extract(tree, patterns):
+    """The module's imports Bylonder has, then the statements the patterns take (taken())."""
+    nodes = taken(tree, patterns)
     imports = [i for i in (importable(node) for node in tree.body if is_import(node)) if i]
     # Only the imported names the taken code uses.
     used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
@@ -228,7 +349,7 @@ def class_scopes(module):
 
 
 def uses_helpers(source):
-    return re.search(r'\b_(merged|joined|formatted|ellipsis|property|new_object)\b', source) is not None
+    return re.search(r'\b_(merged|joined|formatted|ellipsis|property|new_object|super_classmethod)\b', source) is not None
 
 
 class Walrus:
@@ -499,19 +620,29 @@ class TranscryptFixes(ast.NodeTransformer):
         return ast.Call(func=ast.Attribute(ast.Constant(''), 'join', ast.Load()), args=[ast.List(elts=parts, ctx=ast.Load())], keywords=[])
 
     def __init__(self):
-        self.scopes = []
+        self.scopes, self.classes = [], []
 
     def visit_FunctionDef(self, node):
+        """super().f(...) in a classmethod, which Transcrypt calls with an undefined self, as the base's f bound to cls."""
         self.scopes.append('function')
         self.generic_visit(node)
         self.scopes.pop()
+        if self.classes and any(getattr(d, 'id', None) == 'classmethod' for d in node.decorator_list) and node.args.args:
+            cls = node.args.args[0].arg
+            for call in ast.walk(node):
+                if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Call) \
+                        and getattr(call.func.value.func, 'id', None) == 'super':
+                    call.func = ast.Call(ast.Name('_super_classmethod', ast.Load()),
+                                         [ast.Name(self.classes[-1], ast.Load()), ast.Name(cls, ast.Load()), ast.Constant(call.func.attr)], [])
         return node
 
     visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_ClassDef(self, node):
         self.scopes.append('class')
+        self.classes.append(node.name)
         node = self.builtin_bases(self.dataclass(node))
+        self.classes.pop()
         self.scopes.pop()
         return self.class_body(node)
 
@@ -750,6 +881,10 @@ def _joined(*lists):
     for items in lists:
         result.extend(list(items))
     return result
+
+
+def _super_classmethod(owner, cls, method):
+    return __pragma__('js', '{}', 'owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]')
 '''
 
 
@@ -765,13 +900,6 @@ def take_imports(function):
             setattr(node, field, [s for s in statements if not isinstance(s, (ast.Import, ast.ImportFrom))] or
                     ([] if field != 'body' else [ast.Pass()]))
     return taken
-
-
-def flat_imports(node):
-    """from bl_ui import x as import x: the scripts the manifest names are flat modules."""
-    if isinstance(node, ast.ImportFrom) and node.module == 'bl_ui':
-        return [ast.Import(names=[alias]) for alias in node.names]
-    return [node]
 
 
 def hoist_imports(body):
@@ -872,14 +1000,19 @@ def main():
         open(os.path.join(build, 'bpy', '_rna.py'), 'w').write(rna_module())
         # Node types as bpy.types has them, for the scripts that look one up by name (getattr(bpy.types, idname)).
         open(os.path.join(build, 'bpy', 'types.py'), 'a').write(''.join(f'\n{idname} = _rna.nodes[{idname!r}]' for idname in node_types()))
+        # A script's names, or {names, flags}: Transcrypt options for its Python (-o for operator overloading, -t for
+        # Python's truth values). A path with * names every script it matches in Blender's folder.
+        scripts = {}
+        for pattern, spec in manifest['scripts'].items():
+            entry = (spec['names'], spec['flags']) if isinstance(spec, dict) else (spec, [])
+            for path in (fnmatch.filter(listing(os.path.dirname(pattern)), pattern) if '*' in pattern else [pattern]):
+                scripts[path] = entry
+        SCRIPTS.update(module_name(path) for path in scripts)
+        built, trees = closure(scripts)
         modules = []
-        SCRIPTS.update(os.path.basename(path)[:-3] for path in manifest['scripts'])
-        for path, spec in manifest['scripts'].items():
-            # A script's names, or {names, flags}: Transcrypt options for its Python (-o for operator overloading).
-            patterns, flags = (spec['names'], spec['flags']) if isinstance(spec, dict) else (spec, [])
-            module = os.path.basename(path)
-            open(os.path.join(build, module), 'w').write(extract(fetch(path), patterns))
-            modules.append((module, flags))
+        for module, (path, patterns, flags) in built.items():
+            open(os.path.join(build, module + '.py'), 'w').write(extract(trees[path], patterns))
+            modules.append((module + '.py', flags))
         # Transcrypt rebuilds its target folder on each run (-b), so each module's output is collected as it is made.
         # A module with options keeps only its own output and the modules no other one has: the runtime and library
         # modules the others share keep the default compile.

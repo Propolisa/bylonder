@@ -44,21 +44,6 @@ BOUNDARY = ['boundary', 'mathutils', 'idprop']
 FILES = {}
 
 
-def listing(path):
-    """The Python files under a directory of Blender's repository at the tag, cached."""
-    cache = os.path.join(os.path.expanduser('~/.cache/bylonder/blender'), transpile.TAG, path, '.listing.json')
-    if os.path.exists(cache):
-        return json.load(open(cache))
-    url = f'{transpile.BLENDER}/contents/{path.replace("/", "%2F")}?ref={transpile.TAG}'
-    entries = json.loads(subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout)
-    files = [e['path'] for e in entries if e['type'] == 'file' and e['name'].endswith('.py')]
-    for d in (e['path'] for e in entries if e['type'] == 'dir'):
-        files += listing(d)
-    os.makedirs(os.path.dirname(cache), exist_ok=True)
-    json.dump(files, open(cache, 'w'))
-    return files
-
-
 def module_name(build, path):
     name = os.path.relpath(path, build)[:-3].replace(os.sep, '.')
     return name[:-len('.__init__')] if name.endswith('.__init__') else name
@@ -75,7 +60,7 @@ def is_module(build, name):
 
 def assemble(build):
     """Blender's scripts, without the excluded modules and those whose names are not identifiers, then the boundary."""
-    files = [f for root in ROOTS for f in listing(root)]
+    files = [f for root in ROOTS for f in transpile.listing(root)]
     with concurrent.futures.ThreadPoolExecutor(16) as pool:
         sources = dict(zip(files, pool.map(transpile.fetch, files)))
     for path, source in sources.items():

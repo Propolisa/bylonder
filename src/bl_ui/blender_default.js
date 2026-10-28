@@ -122,6 +122,24 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var Params =  __class__ ('Params', [object], {
 	__module__: __name__,
 	__slots__: tuple (['legacy', 'select_mouse', 'select_mouse_value', 'action_mouse', 'tool_mouse', 'tool_maybe_tweak_value', 'context_menu_event', 'cursor_set_event', 'cursor_tweak_event', 'use_tweak_select_passthrough', 'use_mouse_emulate_3_button', 'spacebar_action', 'use_select_all_toggle', 'use_gizmo_drag', 'use_fallback_tool', 'use_fallback_tool_select_handled', 'use_v3d_tab_menu', 'use_v3d_shade_ex_pie', 'use_v3d_mmb_pan', 'use_alt_click_leader', 'use_key_activate_tools', 'use_region_toggle_pie', 'tool_modifier', 'use_pie_click_drag', 'v3d_tilde_action', 'v3d_alt_mmb_drag_action', 'use_alt_navigation', 'use_file_single_click', 'use_fallback_tool_select_mouse', 'select_mouse_value_fallback', 'select_tweak_event', 'pie_value', 'tool_tweak_event', 'tool_maybe_tweak_event']),

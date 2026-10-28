@@ -78,6 +78,48 @@ export var UIList =  __class__ ('UIList', [object], {
 export var SurfaceCurve =  __class__ ('SurfaceCurve', [object], {
 	__module__: __name__,
 });
+export var Collection =  __class__ ('Collection', [object], {
+	__module__: __name__,
+});
+export var Curve =  __class__ ('Curve', [object], {
+	__module__: __name__,
+});
+export var TextCurve =  __class__ ('TextCurve', [object], {
+	__module__: __name__,
+});
+export var GreasePencil =  __class__ ('GreasePencil', [object], {
+	__module__: __name__,
+});
+export var GreasePencilLayer =  __class__ ('GreasePencilLayer', [object], {
+	__module__: __name__,
+});
+export var GreasePencilLayerGroup =  __class__ ('GreasePencilLayerGroup', [object], {
+	__module__: __name__,
+});
+export var GreasePencilTreeNode =  __class__ ('GreasePencilTreeNode', [object], {
+	__module__: __name__,
+});
+export var Brush =  __class__ ('Brush', [object], {
+	__module__: __name__,
+});
+export var ViewLayer =  __class__ ('ViewLayer', [object], {
+	__module__: __name__,
+});
+export var FreestyleLineStyle =  __class__ ('FreestyleLineStyle', [object], {
+	__module__: __name__,
+});
+export var ParticleSettings =  __class__ ('ParticleSettings', [object], {
+	__module__: __name__,
+});
+export var Texture =  __class__ ('Texture', [object], {
+	__module__: __name__,
+});
+export var Theme =  __class__ ('Theme', [object], {
+	__module__: __name__,
+});
+export var AssetShelf =  __class__ ('AssetShelf', [object], {
+	__module__: __name__,
+});
 export var Operator =  __class__ ('Operator', [object], {
 	__module__: __name__,
 });

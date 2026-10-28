@@ -50,5 +50,9 @@ export var _Context =  __class__ ('_Context', [object], {
 	__module__: __name__,
 });
 export var context = _Context ();
+export var _Types =  __class__ ('_Types', [object], {
+	__module__: __name__,
+});
+export var types = _Types ();
 
 //# sourceMappingURL=bpy._app.map

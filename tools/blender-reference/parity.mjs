@@ -55,9 +55,19 @@ const SETUP = {
     await app.frame().getByRole("menuitem", { name: "Subdivision Surface" }).click();
     await app.hover(...REST);
   },
+  "object-tab": (app) => propertiesTab(app, "Cube", "Object"),
+  "light-data": (app) => propertiesTab(app, "Light", "Data"),
+  "camera-data": (app) => propertiesTab(app, "Camera", "Data"),
   toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
 };
+
+// The object selected alone, and the Properties editor on a tab.
+async function propertiesTab(app, name, tab) {
+  await app.bylonder((b, name) => b.editor.selection.replace([b.world.objects.find((ob) => ob.name === name)]), name);
+  await app.locator(`[role="tab"][aria-label="${tab}"]`).click();
+  await app.hover(...REST);
+}
 
 async function captureBylonder(browser, url, state) {
   const app = await openApp(browser, url, { size });

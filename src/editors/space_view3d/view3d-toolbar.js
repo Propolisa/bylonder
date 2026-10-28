@@ -4,7 +4,8 @@
 // tools (WM_MT_toolsystem_submenu) on press and hold or drag, the active tool depressed, and tooltips with the tool's
 // description and shortcuts. Buttons run wm.tool_set_by_id.
 import { pyArgs } from '../../makesrna/rna.js';
-import { useContext, drawMenu } from '../interface/ui-layout.js';
+import { drawMenu } from '../interface/ui-layout.js';
+import { useContext } from '../interface/layout.js';
 import { openMenu, closeMenus } from '../interface/menu.js';
 import { WM_MT_toolsystem_submenu } from '../../bl_ui/space_toolsystem_common.js';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };

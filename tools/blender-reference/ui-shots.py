@@ -65,6 +65,17 @@ def add_subdivision():
     area("PROPERTIES").spaces.active.context = "MODIFIER"
 
 
+def properties_tab(name, tab):
+    """The object made active and selected alone, and the Properties editor on a tab."""
+    def setup():
+        layer = window().view_layer
+        for ob in layer.objects:
+            ob.select_set(ob.name == name, view_layer=layer)
+        layer.objects.active = bpy.data.objects[name]
+        area("PROPERTIES").spaces.active.context = tab
+    return setup
+
+
 def click_tool():
     # A toolbar button takes events once a redraw after the hover has made it active.
     for i, (kind, value) in enumerate([("MOUSEMOVE", "NOTHING"), ("LEFTMOUSE", "PRESS"), ("LEFTMOUSE", "RELEASE")]):
@@ -79,6 +90,9 @@ SETUP = {
     "add-menu": lambda: key("A", *view3d_point(0.5, 0.5), shift=True),
     "edit-mode": lambda: key("TAB", *view3d_point(*REST)),
     "modifier-tab": add_subdivision,
+    "object-tab": properties_tab("Cube", "OBJECT"),
+    "light-data": properties_tab("Light", "DATA"),
+    "camera-data": properties_tab("Camera", "DATA"),
     "toolbar": click_tool,
     "sidebar-item": lambda: key("N", *view3d_point(*REST)),
 }
