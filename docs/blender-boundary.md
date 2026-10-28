@@ -144,15 +144,23 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   stand-in both modules share) and `modifiers-only.cc`. Its libraries are `bmesh.wasm`'s minus the editors,
   `animrig`, `windowmanager`, the interface and the Outliner, blenfont and FreeType, and OpenVDB (built without
   `WITH_OPENVDB`, so Remesh's Voxel mode reports that it is unavailable). Modifier types outside `MESH_ONLY`
-  (`src/modifiers/blender.js`) are left out of its `modifiers/intern` and declared empty in `modifiers-only.cc`, as
-  `modifier-api.cc` makes Geometry Nodes unknown, except the ones Blender's own code makes: `BKE_modifier_init` makes
-  an Armature, Curve and Lattice modifier, and an empty type's ModifierData has no size, so its name was written past
-  the end of a block (2026-10-28: the module passed or trapped depending on where its data landed). Archives are per
+  (`src/modifiers/blender.js`) are left out of its `modifiers/intern` as stand-ins (`wasm/modifier-standins.hh`, used
+  by both modules for the types they leave out, Geometry Nodes and Line Art in the scene module): Blender's None type
+  under the type's name, a bare ModifierData that is always disabled, which `modifier_add` refuses. Blender's own code
+  that makes a left-out type gets a block of the right size. They were empty `ModifierTypeInfo`s, which
+  `BKE_modifier_get_info` does not know: `BKE_modifier_init` makes an Armature, Curve and Lattice modifier, read a null
+  type, and wrote the name past the end of an empty block (2026-10-28: the module passed or trapped depending on where
+  its data landed). Armature, Curve and Lattice stay real, as `BKE_modifier_init` copies them whole. Archives are per
   module in the shared build directory.
-- **Layout check.** A module's manifest `check` (here `tools/blender-port/check-modifiers.mjs`, every offered modifier
-  on Blender's cube) runs after each link, on the module and on copies linked with 100, 4000 and 70000 bytes of data
-  ahead of its own, and the build fails unless all print the same: a module whose results depend on where its data
-  lands reads or writes memory it does not own. `tests/export-live.test.js` runs the check on the committed module.
+- **Layout check.** A module's manifest `check` runs after each link, on the module and on copies linked with 100,
+  4000 and 70000 bytes of data ahead of its own, and the build fails (and removes the module) unless all print the
+  same: a module whose results depend on where its data lands reads or writes memory it does not own. The modifiers
+  module's is `tools/blender-port/check-modifiers.mjs` (every offered modifier on Blender's cube); the scene module's
+  is `tools/blender-port/check-bmesh.mjs`, the unit tests that drive it (`editmesh-wasm`, `editmesh-menus`,
+  `tools-wasm`, `objects-wasm`, `modifiers-wasm`, `outliner`, `anim-wasm`, `curves-wasm`: startup, primitives, Edit
+  Mode and its tools, modifier stacks, Object Mode operators, the Outliner, the animation editors, curves and text),
+  run on the given build through `BYLONDER_BMESH_WASM`, about 8 s a run. `tests/export-live.test.js` runs the
+  modifiers check on the committed module.
 - **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`: 15.4 MB, 4.4 MB gzipped), with
   `modifiers.js` (4 KB) and the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
   3.1 MB gzipped: OpenVDB's templates alone were a third of its code. What remains is mostly what `BKE_idtype_init`
