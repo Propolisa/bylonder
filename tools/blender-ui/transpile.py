@@ -53,8 +53,12 @@ def fetch(path):
     return open(cache).read()
 
 
-# The modules Blender's scripts import that Bylonder has: its bpy and mathutils (here), and Transcrypt's math.
+# The modules Blender's scripts import that Bylonder has: its bpy and mathutils (here), and Transcrypt's math; and,
+# imported in functions, all the packages here and Transcrypt's copy. The scripts the manifest names import each other
+# from Blender's bl_ui package, here flat modules.
 IMPORTABLE = {'bpy', 'mathutils', 'math'}
+LOCAL_IMPORTABLE = {d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))} | {'math', 'copy'}
+SCRIPTS = {os.path.basename(path)[:-3] for path in json.load(open(os.path.join(HERE, 'manifest.json')))['scripts']}
 
 
 def defined_name(node):
@@ -70,16 +74,20 @@ def extract(source, patterns):
     """The module's imports Bylonder has, then the classes and functions matching patterns with what they use from the
     module (constants too), in its order."""
     tree = ast.parse(source)
-    defined = {defined_name(node): node for node in tree.body if defined_name(node)}
+    tree.body = [node for statement in tree.body for node in flat_imports(statement)]
+    defined = {}
+    for node in tree.body:
+        if defined_name(node):
+            defined.setdefault(defined_name(node), []).append(node)
     wanted, todo = set(), [name for name in defined if any(fnmatch.fnmatchcase(name, p) for p in patterns)]
     while todo:
         name = todo.pop()
         if name in wanted:
             continue
         wanted.add(name)
-        todo += [n.id for n in ast.walk(defined[name]) if isinstance(n, ast.Name) and n.id in defined]
+        todo += [n.id for node in defined[name] for n in ast.walk(node) if isinstance(n, ast.Name) and n.id in defined]
     imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
-               and all(alias.name.split('.')[0] in IMPORTABLE for alias in node.names if isinstance(node, ast.Import))
+               and all(alias.name.split('.')[0] in IMPORTABLE | SCRIPTS for alias in node.names if isinstance(node, ast.Import))
                and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] in IMPORTABLE)]
     nodes = [node for node in tree.body if defined_name(node) in wanted]
     # Only the imported names the taken code uses.
@@ -89,7 +97,7 @@ def extract(source, patterns):
     body = [node for node in imports if node.names] + nodes
     source = ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
     rewritten = ast.unparse(Unpacking().visit(ast.parse(source)))
-    return rewritten + (UNPACKING_HELPERS if rewritten != source else '')
+    return rewritten + (UNPACKING_HELPERS if re.search(r'\b_(merged|joined)\(', rewritten) else '')
 
 
 class Unpacking(ast.NodeTransformer):
@@ -130,6 +138,9 @@ class Unpacking(ast.NodeTransformer):
         """f(a=1, **b) as f(**_merged({'a': 1}, b)): Transcrypt compiles the mix wrong, and marks the dict it unpacks,
         which may be shared, as keyword arguments."""
         self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == 'type' and len(node.args) == 3:
+            # type(name, bases, attributes), a new class, as Transcrypt's metaclass makes one.
+            return ast.Call(func=ast.Attribute(ast.Name('type', ast.Load()), '__new__', ast.Load()), args=[ast.Name('type', ast.Load()), *node.args], keywords=[])
         if isinstance(node.func, ast.Name) and node.func.id == 'zip':
             # zip's strict only checks lengths, and Transcrypt's zip takes it for an iterable.
             node.keywords = [k for k in node.keywords if k.arg != 'strict']
@@ -147,6 +158,17 @@ class Unpacking(ast.NodeTransformer):
             return node
         target = node.targets[0]
         return ast.Expr(ast.Call(func=ast.Attribute(target.value, 'pop', ast.Load()), args=[target.slice], keywords=[]))
+
+    def visit_GeneratorExp(self, node):
+        """A generator expression, which Transcrypt makes an iterator that tuple() and list() read as empty, as a list."""
+        self.generic_visit(node)
+        return ast.ListComp(elt=node.elt, generators=node.generators)
+
+    def visit_AnnAssign(self, node):
+        """An annotated name (draw_assets: bool), which Transcrypt compiles to a property without a value: an
+        assignment, or nothing without a value."""
+        self.generic_visit(node)
+        return ast.Assign(targets=[node.target], value=node.value) if node.value else ast.Pass()
 
     def visit_comprehension(self, node):
         """Comprehensions loop by index up to len(), which is 0 for iterators (enumerate, zip, generators): the
@@ -173,14 +195,23 @@ def _joined(*lists):
 '''
 
 
+def flat_imports(node):
+    """from bl_ui import x as import x: the scripts the manifest names are flat modules."""
+    if isinstance(node, ast.ImportFrom) and node.module == 'bl_ui':
+        return [ast.Import(names=[alias]) for alias in node.names]
+    return [node]
+
+
 def hoist_imports(body):
     """Function-local imports (methods' too) moved to the module, merged: Transcrypt emits each as an ES import, and
-    two of one module are a syntax error."""
+    two of one module are a syntax error. Those of modules Bylonder lacks are dropped: the code that needs them
+    raises when it runs."""
     names, modules = {}, {}
     for function in (node for node in ast.walk(ast.Module(body=body, type_ignores=[])) if isinstance(node, ast.FunctionDef)):
         local = [s for s in function.body if isinstance(s, (ast.Import, ast.ImportFrom))]
         function.body = [s for s in function.body if s not in local] or [ast.Pass()]
-        for statement in local:
+        root = lambda statement: (statement.names[0].name if isinstance(statement, ast.Import) else statement.module).split('.')[0]
+        for statement in (s for s in local if root(s) in LOCAL_IMPORTABLE | SCRIPTS):
             if isinstance(statement, ast.Import):
                 modules.update((alias.name, alias) for alias in statement.names)
             else:
@@ -191,11 +222,21 @@ def hoist_imports(body):
         [node for node in body if not isinstance(node, (ast.Import, ast.ImportFrom))]
 
 
+def node_types():
+    """Blender's shader and compositor node types (src/nodes/blender/node-types.json): idname to name and enums."""
+    types = json.load(open(os.path.join(REPO, 'src', 'nodes', 'blender', 'node-types.json')))
+    return {idname: node for tree in ('shader', 'compositor') for idname, node in types[tree].items()}
+
+
 def rna_module():
-    """bpy/_rna.py: the RNA the scripts read when they load (Modifier's type enum), from src/makesrna/rna-modifiers.json."""
+    """bpy/_rna.py: the RNA the scripts read when they load (Modifier's type enum, from src/makesrna/rna-modifiers.json)
+    or draw (node types' names and enums, from node_types())."""
     modifiers = json.load(open(os.path.join(REPO, 'src', 'makesrna', 'rna-modifiers.json')))
     items = ',\n    '.join(f'_Item({t!r}, {d["name"]!r}, {d["icon"]!r}, {d["description"]!r})' for t, d in modifiers['types'].items())
-    return f'''# Generated by transpile.py from src/makesrna/rna-modifiers.json.
+    enum = lambda p: '_Property([' + ', '.join(f'_Item({i!r}, {n!r}, \'\', {d!r})' for i, n, d in p['items']) + '])'
+    nodes = ',\n    '.join(f'{idname!r}: _Node({node["name"]!r}, {{' + ', '.join(f'{k!r}: {enum(p)}' for k, p in node['properties'].items() if p['type'] == 'ENUM') + '})'
+                           for idname, node in node_types().items())
+    return f'''# Generated by transpile.py from src/makesrna/rna-modifiers.json and src/nodes/blender/node-types.json.
 class _Item:
     def __init__(self, identifier, name, icon, description):
         self.identifier, self.name, self.icon, self.description = identifier, name, icon, description
@@ -214,6 +255,16 @@ class _Struct:
 
 Modifier = _Struct({{'type': _Property([
     {items}])}})
+
+
+class _Node(_Struct):
+    def __init__(self, name, properties):
+        _Struct.__init__(self, properties)
+        self.name, self.translation_context, self.bl_rna = name, '*', self
+
+
+nodes = {{
+    {nodes}}}
 '''
 
 
@@ -224,6 +275,8 @@ def main():
         for package in (d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))):
             shutil.copytree(os.path.join(HERE, package), os.path.join(build, package))
         open(os.path.join(build, 'bpy', '_rna.py'), 'w').write(rna_module())
+        # Node types as bpy.types has them, for the scripts that look one up by name (getattr(bpy.types, idname)).
+        open(os.path.join(build, 'bpy', 'types.py'), 'a').write(''.join(f'\n{idname} = _rna.nodes[{idname!r}]' for idname in node_types()))
         modules = []
         for path, spec in manifest['scripts'].items():
             # A script's names, or {names, flags}: Transcrypt options for its Python (-o for operator overloading).

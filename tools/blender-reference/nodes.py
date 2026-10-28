@@ -1,8 +1,9 @@
 # Writes Blender's shader and compositor node types as Blender declares them: per node its label, description, color
 # tag, width, sockets (identifier, name, type, default, range, subtype, shape, color) and properties (enums with their
-# items, and the sockets each item shows); and the Node Editor theme.
+# items, and the sockets each item shows); and the Node Editor theme. The nodes are the types bpy.types has and the
+# idnames Blender's Add menus name (some are aliases, as ShaderNodeBsdfGlossy is of ShaderNodeBsdfAnisotropic).
 # usage: blender -b --factory-startup --python tools/blender-reference/nodes.py -- OUT.json
-import bpy, json, sys
+import bpy, glob, json, os, re, sys
 
 out_path = sys.argv[sys.argv.index("--") + 1]
 BASE = {p.identifier for p in bpy.types.Node.bl_rna.properties}
@@ -66,9 +67,13 @@ def prop(node, p):
     return d
 
 
+MENUS = os.path.join(bpy.utils.resource_path("LOCAL"), "scripts", "startup", "bl_ui", "node_add_menu*.py")
+MENU_IDNAMES = {name for path in glob.glob(MENUS) for name in re.findall(r'"((?:Shader|Compositor|Function|Geometry)?Node[A-Z]\w+)"', open(path).read())}
+
+
 def tree_nodes(tree, prefixes):
     nodes = {}
-    for idname in sorted(dir(bpy.types)):
+    for idname in sorted(set(dir(bpy.types)) | MENU_IDNAMES):
         if not idname.startswith(prefixes):
             continue
         try:
@@ -90,8 +95,8 @@ theme = bpy.context.preferences.themes[0].node_editor
 data = {
     "blender": bpy.app.version_string,
     "theme": {p.identifier: value(getattr(theme, p.identifier)) for p in theme.bl_rna.properties if p.type in {"FLOAT", "INT"}},
-    "shader": tree_nodes(material.node_tree, ("ShaderNode", "FunctionNode", "NodeReroute", "NodeFrame")),
-    "compositor": tree_nodes(compositor, ("CompositorNode", "ShaderNode", "FunctionNode", "NodeReroute", "NodeFrame")),
+    "shader": tree_nodes(material.node_tree, ("ShaderNode", "FunctionNode", "GeometryNode", "Node")),
+    "compositor": tree_nodes(compositor, ("CompositorNode", "ShaderNode", "FunctionNode", "GeometryNode", "Node")),
 }
-json.dump(data, open(out_path, "w"), indent=1, sort_keys=True)
+json.dump(data, open(out_path, "w"), indent=1)
 print("wrote", out_path, len(data["shader"]), "shader and", len(data["compositor"]), "compositor nodes")

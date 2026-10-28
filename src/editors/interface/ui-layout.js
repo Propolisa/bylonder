@@ -17,9 +17,13 @@ function args(list, names) {
 
 // OperatorProperties: what a menu sets on an entry; a macro's operators (props.MESH_OT_rip) have their own.
 const MACRO_PART = /_OT_/;
+// A collection property the scripts add items to (node.add_node's settings: props.settings.add()).
+const COLLECTIONS = new Set(['settings']);
+const collection = () => Object.assign([], { add() { const item = {}; this.push(item); return item; } });
 // A property read before it is set is an array the script sets elements of (props.constraint_axis[0] = True).
 const properties = () => new Proxy({}, {
-  get: (target, key) => (MACRO_PART.test(key) ? (target[key] ??= properties()) : typeof key === 'string' ? (target[key] ??= []) : target[key]),
+  get: (target, key) => (MACRO_PART.test(key) ? (target[key] ??= properties())
+    : COLLECTIONS.has(key) ? (target[key] ??= collection()) : typeof key === 'string' ? (target[key] ??= []) : target[key]),
 });
 // The values a menu set, without a macro's parts. Transcrypt renames Python names its runtime uses (type becomes
 // py_metatype, clear py_clear: the aliases in Transcrypt's compiler.py); no operator property starts with py_.
@@ -105,6 +109,7 @@ export class UILayout {
   label() {}
   // Asset menus list node group assets, which Bylonder does not have.
   template_node_operator_asset_menu_items() {}
+  template_node_asset_menu_items() {}
   template_node_operator_asset_root_items() {}
   template_modifier_asset_menu_items() {}
   row() { return new UILayout(this.ui, this.items, this); }
