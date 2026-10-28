@@ -48,7 +48,8 @@ def fetch(path):
     if not os.path.exists(cache):
         os.makedirs(os.path.dirname(cache), exist_ok=True)
         url = f'{BLENDER}/raw/{urllib.parse.quote(path, safe="")}?ref={TAG}'
-        open(cache, 'wb').write(subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout)
+        body = subprocess.run(['curl', '-sfL', url], capture_output=True, check=True).stdout
+        open(cache, 'wb').write(body)
     return open(cache).read()
 
 
