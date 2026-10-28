@@ -5,8 +5,16 @@ import curveRNA from './rna-curves.json' with { type: 'json' };
 import { settingNames, splineFlags } from '../blenkernel/curve/curve.js';
 import { collection } from './rna.js';
 
-const data = (node, r) => r.world.curves.data(node);
-const update = (node, r, fn) => r.world.curves.update(node, fn);
+// The object's Curve data, the edit data in Edit Mode; an object without any (a scene without the curve system) reads
+// as Blender's defaults.
+const data = (node, r) => r.world.curves?.data(node) ?? node.metadata?.wbCreation?.curve ?? { settings: {}, splines: [], text: { body: '', boxes: [] } };
+const update = (node, r, fn) => r.world.curves?.update(node, fn);
+// One owner per element of a node's data, so RNA keeps one struct per element (createRNA's pointer cache is weak).
+const owners = new WeakMap();
+const owner = (node, key, make) => {
+  const table = owners.get(node) ?? owners.set(node, new Map()).get(node);
+  return table.get(key) ?? table.set(key, make()).get(key);
+};
 const FORMAT_BITS = { use_bold: 1, use_italic: 2, use_underline: 4, use_small_caps: 16 };
 const BOX_FIELDS = ['x', 'y', 'width', 'height'];
 const POINT_ARRAYS = ['co', 'handle_left', 'handle_right'];
@@ -20,11 +28,11 @@ const settings = (type, struct) => Object.fromEntries(settingNames(type).filter(
 
 // A pointer to another object, held by name.
 const target = (name) => ({
-  get: (node, r) => r.pointer('Object', r.world.curves.byName(data(node, r).targets?.[name])),
+  get: (node, r) => r.pointer('Object', r.objects().find((n) => n.name === data(node, r).targets?.[name])),
   set: (node, ob, r) => update(node, r, (d) => { d.targets = { ...d.targets, [name]: ob ? r.objects().find((n) => r.pointer('Object', n) === ob)?.name : undefined }; }),
 });
 
-const splines = (node, r) => collection((data(node, r).splines ?? []).map((_, index) => r.pointer('Spline', { node, index }, `${node.uniqueId}:${index}`)));
+const splines = (node, r) => collection((data(node, r).splines ?? []).map((_, index) => r.pointer('Spline', owner(node, `s${index}`, () => ({ node, index })))));
 
 const curve = (type) => ({
   ...settings(type, 'Curve'),
@@ -43,10 +51,10 @@ export const curveStructs = {
       get: (node, r) => data(node, r).text?.body ?? '',
       set: (node, body, r) => update(node, r, (d) => { d.text = { ...d.text, body, format: null, pos: [...body].length, selstart: 0, selend: 0 }; }),
     },
-    body_format: (node, r) => collection([...(data(node, r).text?.body ?? '')].map((_, index) => r.pointer('TextCharacterFormat', { node, index }, `${node.uniqueId}:c${index}`))),
-    text_boxes: (node, r) => collection((data(node, r).text?.boxes ?? []).map((_, index) => r.pointer('TextBox', { node, index }, `${node.uniqueId}:b${index}`))),
+    body_format: (node, r) => collection([...(data(node, r).text?.body ?? '')].map((_, index) => r.pointer('TextCharacterFormat', owner(node, `c${index}`, () => ({ node, index }))))),
+    text_boxes: (node, r) => collection((data(node, r).text?.boxes ?? []).map((_, index) => r.pointer('TextBox', owner(node, `b${index}`, () => ({ node, index }))))),
     follow_curve: target('follow_curve'),
-    font: (node, r) => r.pointer('VectorFont', { name: data(node, r).text?.fonts?.[0] ?? null }, data(node, r).text?.fonts?.[0] ?? 'builtin'),
+    font: (node, r) => r.pointer('VectorFont', owner(node, `f${data(node, r).text?.fonts?.[0] ?? ''}`, () => ({ name: data(node, r).text?.fonts?.[0] ?? null }))),
   },
   VectorFont: { name: ({ name }) => name ?? 'Bfont Regular', filepath: ({ name }) => name ?? '<builtin>', is_builtin: ({ name }) => !name },
   Spline: ({ node, index }) => {
@@ -64,8 +72,8 @@ export const curveStructs = {
         get: (owner, r) => !!(spline(r)[key] & bit),
         set: (owner, value, r) => write(r, (s) => { s[key] = value ? s[key] | bit : s[key] & ~bit; }),
       }])),
-      bezier_points: (owner, r) => collection((spline(r).bezier_points ?? []).map((_, point) => r.pointer('BezierSplinePoint', { node, index, point }, `${node.uniqueId}:${index}:${point}`))),
-      points: (owner, r) => collection((spline(r).points ?? []).map((_, point) => r.pointer('SplinePoint', { node, index, point }, `${node.uniqueId}:${index}:p${point}`))),
+      bezier_points: (owner, r) => collection((spline(r).bezier_points ?? []).map((_, point) => r.pointer('BezierSplinePoint', owner(node, `s${index}b${point}`, () => ({ node, index, point }))))),
+      points: (owner, r) => collection((spline(r).points ?? []).map((_, point) => r.pointer('SplinePoint', owner(node, `s${index}p${point}`, () => ({ node, index, point }))))),
     };
   },
   BezierSplinePoint: (owner) => point(owner, 'bezier_points'),

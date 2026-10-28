@@ -1,7 +1,7 @@
 import { menuButton, openMenu } from '../editors/interface/menu.js';
 import { drawMenu, menuCoverage } from '../editors/interface/ui-layout.js';
-import { registerOperators, appendMenu, prependMenu, kw, menuUI, menuClasses } from '../windowmanager/wm-operators.js';
-import * as spaceTopbar from '../bl_ui/space_topbar.js';
+import { registerOperators, appendMenu, prependMenu, kw, menuUI } from '../windowmanager/wm-operators.js';
+import { menus as blenderMenus } from '../python/bpy_interface.js';
 import { templates } from '../bl_ui/bpy._app.js';
 import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
@@ -92,7 +92,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     area: { show_menus: true }, blend_data: { is_saved: true }, view_layer: { has_export_collections: false }, preferences: { view: { show_developer_ui: false } },
     scene: { render: { use_multiview: false } }, sequencer_scene: null, tool_settings: {}, screen: { show_statusbar: true, show_fullscreen: false }, window: {},
   });
-  const ui = topbarUI = menuUI({ menus: { ...menuClasses(spaceTopbar), TOPBAR_MT_file_open_recent }, context, prop: (data, name) => data?.__bindings?.[name] });
+  const ui = topbarUI = menuUI({ menus: { ...blenderMenus, TOPBAR_MT_file_open_recent }, context, prop: (data, name) => data?.__bindings?.[name] });
   // The menus of Blender's topbar (TOPBAR_MT_editor_menus), the Blender menu shown as the logo.
   for (const item of drawMenu('TOPBAR_MT_editor_menus', ui)) {
     const logo = item.blender === 'TOPBAR_MT_blender';

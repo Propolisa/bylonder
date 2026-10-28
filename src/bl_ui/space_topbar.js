@@ -4,15 +4,46 @@ var os = {};
 var sys = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {operator_context} from './_bl_ui_utils.layout.js';
+import {ToolSelectPanelHelper} from './space_toolsystem_common.js';
 import * as __module_os__ from './os.js';
 __nest__ (os, '', __module_os__);
 import * as __module_sys__ from './sys.js';
 __nest__ (sys, '', __module_sys__);
 import {contexts as i18n_contexts, pgettext_iface as iface_} from './bpy.app.translations.js';
-import {Menu} from './bpy.types.js';
+import {Menu, Panel} from './bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = '__main__';
+export var TOPBAR_PT_tool_fallback =  __class__ ('TOPBAR_PT_tool_fallback', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Layers',
+	bl_ui_units_x: 8,
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var tool_settings = context.tool_settings;
+		ToolSelectPanelHelper.draw_fallback_tool_items (layout, context);
+		if (tool_settings.workspace_tool_type == 'FALLBACK') {
+			var tool = context.tool;
+			ToolSelectPanelHelper.draw_active_tool_fallback (context, layout, tool);
+		}
+	});}
+});
 export var TOPBAR_MT_editor_menus =  __class__ ('TOPBAR_MT_editor_menus', [Menu], {
 	__module__: __name__,
 	bl_idname: 'TOPBAR_MT_editor_menus',
@@ -20,7 +51,7 @@ export var TOPBAR_MT_editor_menus =  __class__ ('TOPBAR_MT_editor_menus', [Menu]
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -52,7 +83,7 @@ export var TOPBAR_MT_blender =  __class__ ('TOPBAR_MT_blender', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -79,7 +110,7 @@ export var TOPBAR_MT_file_cleanup =  __class__ ('TOPBAR_MT_file_cleanup', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -103,7 +134,7 @@ export var TOPBAR_MT_file =  __class__ ('TOPBAR_MT_file', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -163,7 +194,7 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 	get app_template_paths () {return function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -191,7 +222,7 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 		var use_more = false;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -253,7 +284,7 @@ export var TOPBAR_MT_file_new =  __class__ ('TOPBAR_MT_file_new', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -274,7 +305,7 @@ export var TOPBAR_MT_file_recover =  __class__ ('TOPBAR_MT_file_recover', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -297,7 +328,7 @@ export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Men
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -329,6 +360,7 @@ export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Men
 			var props = layout.operator ('wm.read_factory_settings', __kwargtrans__ ({text: iface_ ('Load Factory {:s} Settings', i18n_contexts.operator_default).format (display_name), translate: false}));
 			props.app_template = app_template;
 			props.use_factory_startup_app_template_only = true;
+			// pass;
 		}
 		else {
 			layout.operator ('wm.read_factory_settings');
@@ -341,7 +373,7 @@ export var TOPBAR_MT_blender_system =  __class__ ('TOPBAR_MT_blender_system', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -370,7 +402,7 @@ export var TOPBAR_MT_templates_more =  __class__ ('TOPBAR_MT_templates_more', [M
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -393,7 +425,7 @@ export var TOPBAR_MT_file_import =  __class__ ('TOPBAR_MT_file_import', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -436,7 +468,7 @@ export var TOPBAR_MT_file_export =  __class__ ('TOPBAR_MT_file_export', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -479,7 +511,7 @@ export var TOPBAR_MT_file_external_data =  __class__ ('TOPBAR_MT_file_external_d
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -517,7 +549,7 @@ export var TOPBAR_MT_file_previews =  __class__ ('TOPBAR_MT_file_previews', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -543,7 +575,7 @@ export var TOPBAR_MT_render =  __class__ ('TOPBAR_MT_render', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -590,7 +622,7 @@ export var TOPBAR_MT_edit =  __class__ ('TOPBAR_MT_edit', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -634,7 +666,7 @@ export var TOPBAR_MT_window =  __class__ ('TOPBAR_MT_window', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -685,7 +717,7 @@ export var TOPBAR_MT_help =  __class__ ('TOPBAR_MT_help', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -722,7 +754,7 @@ export var TOPBAR_MT_file_context_menu =  __class__ ('TOPBAR_MT_file_context_men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -755,7 +787,7 @@ export var TOPBAR_MT_workspace_menu =  __class__ ('TOPBAR_MT_workspace_menu', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -785,5 +817,6 @@ export var TOPBAR_MT_workspace_menu =  __class__ ('TOPBAR_MT_workspace_menu', [M
 		layout.operator ('workspace.delete_all_others');
 	});}
 });
+export var _classes_in_order = ['TOPBAR_PT_tool_fallback', 'TOPBAR_MT_editor_menus', 'TOPBAR_MT_blender', 'TOPBAR_MT_file_cleanup', 'TOPBAR_MT_file', 'TOPBAR_MT_file_new', 'TOPBAR_MT_file_recover', 'TOPBAR_MT_file_defaults', 'TOPBAR_MT_blender_system', 'TOPBAR_MT_templates_more', 'TOPBAR_MT_file_import', 'TOPBAR_MT_file_export', 'TOPBAR_MT_file_external_data', 'TOPBAR_MT_file_previews', 'TOPBAR_MT_render', 'TOPBAR_MT_edit', 'TOPBAR_MT_window', 'TOPBAR_MT_help', 'TOPBAR_MT_file_context_menu', 'TOPBAR_MT_workspace_menu'];
 
 //# sourceMappingURL=space_topbar.map

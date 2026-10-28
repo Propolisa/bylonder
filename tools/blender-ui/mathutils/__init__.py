@@ -30,3 +30,14 @@ class Matrix:
                 total += row[i] * vector.values[i]
             out.append(total)
         return Vector(out)
+
+
+class Euler:
+    def __init__(self, angles=(0.0, 0.0, 0.0), order='XYZ'):
+        self.values = list(angles)
+        self.order = order
+
+
+class Color:
+    def __init__(self, rgb=(0.0, 0.0, 0.0)):
+        self.values = list(rgb)

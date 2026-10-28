@@ -12,7 +12,7 @@ export var Menu =  __class__ ('Menu', [object], {
 	get is_extended () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -28,7 +28,7 @@ export var Menu =  __class__ ('Menu', [object], {
 	get draw_collapsible () {return __getcm__ (this, function (cls, context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -51,7 +51,7 @@ export var Menu =  __class__ ('Menu', [object], {
 	get draw_preset () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -78,15 +78,95 @@ export var UIList =  __class__ ('UIList', [object], {
 export var SurfaceCurve =  __class__ ('SurfaceCurve', [object], {
 	__module__: __name__,
 });
+export var Collection =  __class__ ('Collection', [object], {
+	__module__: __name__,
+});
+export var Curve =  __class__ ('Curve', [object], {
+	__module__: __name__,
+});
+export var TextCurve =  __class__ ('TextCurve', [object], {
+	__module__: __name__,
+});
+export var GreasePencil =  __class__ ('GreasePencil', [object], {
+	__module__: __name__,
+});
+export var GreasePencilLayer =  __class__ ('GreasePencilLayer', [object], {
+	__module__: __name__,
+});
+export var GreasePencilLayerGroup =  __class__ ('GreasePencilLayerGroup', [object], {
+	__module__: __name__,
+});
+export var GreasePencilTreeNode =  __class__ ('GreasePencilTreeNode', [object], {
+	__module__: __name__,
+});
+export var Brush =  __class__ ('Brush', [object], {
+	__module__: __name__,
+});
+export var ViewLayer =  __class__ ('ViewLayer', [object], {
+	__module__: __name__,
+});
+export var FreestyleLineStyle =  __class__ ('FreestyleLineStyle', [object], {
+	__module__: __name__,
+});
+export var ParticleSettings =  __class__ ('ParticleSettings', [object], {
+	__module__: __name__,
+});
+export var Texture =  __class__ ('Texture', [object], {
+	__module__: __name__,
+});
+export var Theme =  __class__ ('Theme', [object], {
+	__module__: __name__,
+});
+export var AssetShelf =  __class__ ('AssetShelf', [object], {
+	__module__: __name__,
+});
 export var Operator =  __class__ ('Operator', [object], {
 	__module__: __name__,
+});
+export var WindowManager =  __class__ ('WindowManager', [object], {
+	__module__: __name__,
+	get draw_cursor_add () {return function (callback, args, space_type, region_type) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'callback': var callback = __allkwargs0__ [__attrib0__]; break;
+						case 'args': var args = __allkwargs0__ [__attrib0__]; break;
+						case 'space_type': var space_type = __allkwargs0__ [__attrib0__]; break;
+						case 'region_type': var region_type = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return null;
+	};},
+	get draw_cursor_remove () {return function (handle) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'handle': var handle = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		// pass;
+	};}
 });
 export var Node =  __class__ ('Node', [object], {
 	__module__: __name__,
 	get bl_rna_get_subclass () {return __getcm__ (this, function (cls, idname) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -100,6 +180,16 @@ export var Node =  __class__ ('Node', [object], {
 		}
 		return _rna.nodes.py_get (idname);
 	});}
+});
+export var Context =  __class__ ('Context', [object], {
+	__module__: __name__,
+});
+export var UILayout =  __class__ ('UILayout', [object], {
+	__module__: __name__,
+});
+export var ToolSettings =  __class__ ('ToolSettings', [object], {
+	__module__: __name__,
+	bl_rna: _rna.ToolSettings
 });
 export var FunctionNodeInputBool = _rna.nodes ['FunctionNodeInputBool'];
 export var FunctionNodeInputInt = _rna.nodes ['FunctionNodeInputInt'];
