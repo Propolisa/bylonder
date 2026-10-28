@@ -26,6 +26,10 @@ ROOTS = [
     'gpu_shader_material_clamp.glsl',
     'gpu_shader_material_mix_color.glsl',
     'gpu_shader_compositor_color_balance.glsl',
+    'gpu_shader_material_tex_noise.glsl',
+    'gpu_shader_common_color_ramp.glsl',
+    'gpu_shader_material_bump.glsl',
+    'gpu_shader_material_set.glsl',
 ]
 # name: (C++ file, signature of the function whose switch names the GLSL functions, RNA file, RNA enum items).
 TABLES = {
@@ -33,6 +37,9 @@ TABLES = {
              'source/blender/makesrna/intern/rna_nodetree.cc', 'rna_enum_node_math_items'),
     'mix_color': ('source/blender/nodes/shader/nodes/node_shader_mix.cc', 'static const char *gpu_shader_get_name(',
                   'source/blender/makesrna/intern/rna_material.cc', 'rna_enum_ramp_blend_items'),
+    # Per type, its functions by dimension (1D to 4D).
+    'noise': ('source/blender/nodes/shader/nodes/node_shader_tex_noise.cc', 'static const char *gpu_shader_get_name(',
+              'source/blender/makesrna/intern/rna_nodetree.cc', 'prop_noise_type'),
 }
 # The nodes Bylonder runs, by their C++ file.
 DECLARATIONS = {
@@ -74,7 +81,10 @@ def body(source, signature):
 
 
 def table(cc, function, rna, items):
-    names = dict(re.findall(r'case (\w+):\s*(?:RETURN_OPERATION_INFO\(\s*"[^"]*",\s*|return\s+)"(\w+)"', body(fetch(cc), function)))
+    """An enum identifier to its function name, or to their list where the switch picks one from an array."""
+    switch = body(fetch(cc), function)
+    names = dict(re.findall(r'case (\w+):\s*(?:RETURN_OPERATION_INFO\(\s*"[^"]*",\s*|return\s+)"(\w+)"', switch))
+    names.update({macro: re.findall(r'"(\w+)"', array) for macro, array in re.findall(r'case (\w+):\s*return std::array\{([^}]*)\}', switch)})
     identifiers = dict(re.findall(r'\{(\w+),\s*"(\w+)"', body(fetch(rna), f'EnumPropertyItem {items}[]')))
     return {identifiers[macro]: name for macro, name in names.items() if macro in identifiers}
 

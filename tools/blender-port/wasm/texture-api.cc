@@ -1,11 +1,15 @@
-/* Blender's textures (Tex, the ID Properties > Texture edits and modifiers sample): one in Main per Bylonder texture,
+/* Blender's textures (Tex, the ID Properties > Texture edits and modifiers sample) and color ramps: a texture in Main per Bylonder texture,
  * and ones outside Main for an evaluation in a module of its own (a worker, the modifier kernels polyfill). JS writes
  * their settings at their DNA fields (dna-textures.json). Sampling is Blender's (BKE_texture_get_value: multitex, with
  * BLI noise for the procedural types), as the Displace, Wave and Warp modifiers sample. */
+#include <algorithm>
+
+#include "BKE_colorband.hh"
 #include "BKE_image.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_texture.h"
 #include "BLI_math_vector.h"
+#include "MEM_guardedalloc.h"
 #include "DNA_modifier_types.h"
 #include "DNA_texture_types.h"
 #include "RE_texture.h"
@@ -43,6 +47,28 @@ EXPORT(texture_value) void texture_value(Tex *tex, const float co[3], float r_va
   BKE_texture_get_value(tex, co, &result, false);
   r_value[0] = result.tin;
   copy_v4_v4(&r_value[1], result.trgba);
+}
+
+/* A color ramp's table as GPU_color_band samples it (BKE_colorband_evaluate_table_rgba): its stops as r, g, b, a and
+ * position each, in order, and its interpolation, hue interpolation and color mode (DNA_colorband_types.h). Writes 257
+ * RGBA colors. */
+EXPORT(colorband_table)
+void colorband_table(int tot, const float *stops, int ipotype, int ipotype_hue, int color_mode, float *r_table)
+{
+  ColorBand coba;
+  coba.tot = short(tot);
+  coba.ipotype = eColorBand_Interp(ipotype);
+  coba.ipotype_hue = eColorBand_HueInterp(ipotype_hue);
+  coba.color_mode = eColorBand_ColorMode(color_mode);
+  for (int i = 0; i < tot; i++) {
+    const float *stop = &stops[i * 5];
+    coba.data[i] = {stop[0], stop[1], stop[2], stop[3], stop[4], i};
+  }
+  float *table;
+  int size;
+  BKE_colorband_evaluate_table_rgba(&coba, &table, &size);
+  std::copy_n(table, size * 4, r_table);
+  MEM_delete(table);
 }
 
 namespace blender {
