@@ -18,6 +18,8 @@ STATES = json.load(open(os.path.join(os.path.dirname(__file__), "ui-states.json"
 # Header buttons, in window pixels from the bottom left.
 FILE_MENU = (42, 938)
 OBJECT_MENU = (318, 913)
+# The Move tool, the third button of the 3D View's toolbar.
+MOVE_TOOL = (30, 772)
 # Where the mouse rests, as a fraction of the 3D View from its top left; the same point as parity.mjs uses.
 REST = (0.25, 0.75)
 
@@ -63,6 +65,13 @@ def add_subdivision():
     area("PROPERTIES").spaces.active.context = "MODIFIER"
 
 
+def click_tool():
+    # A toolbar button takes events once a redraw after the hover has made it active.
+    for i, (kind, value) in enumerate([("MOUSEMOVE", "NOTHING"), ("LEFTMOUSE", "PRESS"), ("LEFTMOUSE", "RELEASE")]):
+        bpy.app.timers.register(lambda kind=kind, value=value: window().event_simulate(type=kind, value=value, x=MOVE_TOOL[0], y=MOVE_TOOL[1]) and None,
+                                first_interval=0.1 + 0.3 * i)
+
+
 SETUP = {
     "startup": lambda: None,
     "object-menu": lambda: click(*OBJECT_MENU),
@@ -70,6 +79,8 @@ SETUP = {
     "add-menu": lambda: key("A", *view3d_point(0.5, 0.5), shift=True),
     "edit-mode": lambda: key("TAB", *view3d_point(*REST)),
     "modifier-tab": add_subdivision,
+    "toolbar": click_tool,
+    "sidebar-item": lambda: key("N", *view3d_point(*REST)),
 }
 
 
@@ -83,7 +94,8 @@ def steps():
         rest()
         yield 0.3
         SETUP[state["id"]]()
-        yield 1.5
+        # Seconds to settle: the sidebar fades in slowly under Xvfb.
+        yield state.get("settle", 1.5)
         subprocess.run(["import", "-window", "root", os.path.join(out, state["id"] + ".png")], check=True)
         areas[state["id"]] = [
             {"type": a.type, "x": a.x, "y": window().height - a.y - a.height, "width": a.width, "height": a.height}

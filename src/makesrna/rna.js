@@ -7,6 +7,14 @@ import structs from './rna-structs.json' with { type: 'json' };
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));
 
+// A function's arguments as Python passes them, positional and then keywords: Transcrypt passes keywords as a last
+// object marked __kwargtrans__.
+export function pyArgs(list, names) {
+  const last = list.at(-1), keywords = last && Object.hasOwn(last, '__kwargtrans__') ? last : {};
+  const positional = keywords === last ? list.slice(0, -1) : list;
+  return Object.fromEntries(names.map((name, i) => [name, keywords[name] ?? positional[i]]));
+}
+
 function property(struct, name) {
   for (let s = structs[struct]; s; s = structs[s.base]) if (s.props[name]) return s.props[name];
   return null;

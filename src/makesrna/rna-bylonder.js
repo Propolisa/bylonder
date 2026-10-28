@@ -6,8 +6,9 @@
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
 import { Camera, Light, Quaternion } from '@babylonjs/core';
-import { rna, collection } from './rna.js';
+import { rna, collection, pyArgs } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
+import rnaOperators from './rna-operators.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
 import { deleted } from '../editors/object/identity.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
@@ -122,6 +123,7 @@ const STRUCTS = {
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
   },
   ToolSettings: {
+    workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },
     mesh_select_mode: array((world) => SELECT_BITS.map((bit) => !!((world.editMode?.selectmode ?? SCE_SELECT_VERTEX) & bit)), (world, value) => {
       const mode = SELECT_BITS.reduce((mask, bit, i) => (value[i] ? mask | bit : mask), 0);
       if (mode && world.editMode) world.editMode.selectmode = mode;
@@ -137,9 +139,30 @@ const STRUCTS = {
   UnitSettings: Object.fromEntries([['system', 'system'], ['scale_length', 'scale'], ['use_separate', 'separate'], ['system_rotation', 'rotation'],
     ['length_unit', 'length']].map(([name, key]) => [name, {
     get: (world) => world.sceneSettings?.state.unitSettings[key], set: (world, value) => world.sceneSettings.set('unitSettings.' + key, value, false) }])),
-  // A 3D Viewport (space_view3d/view3d.js): its shading, overlays and view.
+  // The workspace's active tools (bToolRef, windowmanager/wm-toolsystem.js), as rna_workspace_api.cc gives them.
+  WorkSpace: {
+    tools: (world, r) => Object.assign(collection(), {
+      from_space_view3d_mode: (...list) => {
+        const { mode, create } = pyArgs(list, ['mode', 'create']);
+        return r.pointer('WorkSpaceTool', world.toolsystem?.ref('VIEW_3D', mode, !!create));
+      },
+    }),
+  },
+  WorkSpaceTool: {
+    ...Object.fromEntries(['idname', 'idname_fallback', 'index', 'space_type', 'mode'].map((name) => [name, (ref) => ref[name]])),
+    widget: (ref) => ref.gizmo_group,
+    use_brushes: (ref) => ref.options.has('USE_BRUSHES'),
+    use_paint_canvas: (ref) => ref.options.has('USE_PAINT_CANVAS'),
+    setup: (ref, r) => (...list) => r.world.toolsystem.setup(ref, pyArgs(list, TOOL_SETUP)),
+    refresh_from_context: () => () => {},
+    operator_properties: (ref, r) => (idname) => operatorProperties(idname, r.world.toolsystem.properties(ref, idname), r.host),
+    gizmo_group_properties: () => () => rna('GizmoGroupProperties'),
+  },
+  // A 3D Viewport (space_view3d/view3d.js): its regions, shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',
+    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header'].map((name) => [name,
+      { get: (view) => view.state[name], set: (view, value) => setViewState(view, name, !!value) }])),
     shading: (view, r) => r.pointer('View3DShading', view),
     overlay: (view, r) => r.pointer('View3DOverlay', view),
     region_3d: (view, r) => r.pointer('RegionView3D', view),
@@ -155,6 +178,25 @@ const STRUCTS = {
   },
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
+const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
+
+// An operator's struct name (WM_operator_py_idname's inverse): view3d.select_box is VIEW3D_OT_select_box.
+export const operatorStruct = (idname) => idname.replace(/^(\w+)\./, (match, group) => group.toUpperCase() + '_OT_');
+export const operatorIdname = (struct) => struct.replace(/^(\w+?)_OT_/, (match, group) => group.toLowerCase() + '.');
+
+// An operator's properties (OperatorProperties) over the values stored for it: Blender's defaults (rna-operators.json)
+// until set. Writing one is an update (host.update), as a tool setting is.
+export function operatorProperties(idname, values, host) {
+  const data = {};
+  for (const [name, def] of Object.entries(rnaOperators[idname]?.properties ?? {})) {
+    Object.defineProperty(data, name, {
+      enumerable: true,
+      get: () => values[name] ?? def.default,
+      set: (value) => { values[name] = value; host?.update?.('OperatorProperties', name, values); },
+    });
+  }
+  return rna(operatorStruct(idname), data);
+}
 function setViewState(view, key, value) {
   if (value === undefined) throw TypeError(`bpy_struct: invalid ${key}`);
   if (key === 'shading' && view.setShading) return view.setShading(value);

@@ -19,6 +19,9 @@
   --bl-menu-item-text:#dddddd;--bl-menu-item-text-sel:#ffffff;--bl-menu-item-hover:#3f3f3f;--bl-menu-item-disabled-hover:#7a7a7a40;
   --bl-menu-sep:#dddddd1e;--bl-shadow-menu:0 3px 6px #0003;--bl-pulldown-text:#d9d9d9;--bl-pulldown-sel:#ffffff1a;
   --bl-widget-font:calc(var(--bl-row)*.55) var(--bl-font-family);
+  /* wcol_toolbar_item and wcol_tooltip. */
+  --bl-toolbar-item:#282828;--bl-toolbar-item-line:#3d3d3d;--bl-toolbar-item-sel:#4772b3;--bl-toolbar-item-mark:#ffffffb3;--bl-toolbar-item-text:#e6e6e6;
+  --bl-tooltip:#1d1d1d;--bl-tooltip-line:#242424;--bl-tooltip-text:#d9d9d9;--bl-tooltip-value:#a6a6a6;
   --bl-header-h:26px;--bl-row:20px;--bl-radius:4px
 }
 @media(pointer:coarse){:root{--bl-header-h:36px;--bl-row:30px}}

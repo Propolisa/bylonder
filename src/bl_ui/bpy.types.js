@@ -81,5 +81,43 @@ export var SurfaceCurve =  __class__ ('SurfaceCurve', [object], {
 export var Operator =  __class__ ('Operator', [object], {
 	__module__: __name__,
 });
+export var WindowManager =  __class__ ('WindowManager', [object], {
+	__module__: __name__,
+	get draw_cursor_add () {return function (callback, args, space_type, region_type) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'callback': var callback = __allkwargs0__ [__attrib0__]; break;
+						case 'args': var args = __allkwargs0__ [__attrib0__]; break;
+						case 'space_type': var space_type = __allkwargs0__ [__attrib0__]; break;
+						case 'region_type': var region_type = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return null;
+	};},
+	get draw_cursor_remove () {return function (handle) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'handle': var handle = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		// pass;
+	};}
+});
 
 //# sourceMappingURL=bpy.types.map

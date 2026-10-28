@@ -329,6 +329,7 @@ export var TOPBAR_MT_file_defaults =  __class__ ('TOPBAR_MT_file_defaults', [Men
 			var props = layout.operator ('wm.read_factory_settings', __kwargtrans__ ({text: iface_ ('Load Factory {:s} Settings', i18n_contexts.operator_default).format (display_name), translate: false}));
 			props.app_template = app_template;
 			props.use_factory_startup_app_template_only = true;
+			// pass;
 		}
 		else {
 			layout.operator ('wm.read_factory_settings');

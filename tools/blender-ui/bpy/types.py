@@ -43,3 +43,14 @@ class SurfaceCurve:
 
 class Operator:
     pass
+
+
+# The draw callbacks a tool adds for its cursor (Select Circle's circle); Bylonder's views draw tool cursors themselves.
+class WindowManager:
+    @staticmethod
+    def draw_cursor_add(callback, args, space_type, region_type):
+        return None
+
+    @staticmethod
+    def draw_cursor_remove(handle):
+        pass

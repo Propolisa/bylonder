@@ -44,6 +44,7 @@ import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
+import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
@@ -284,6 +285,7 @@ world.editMode = createEditMode({ world, editor, views, history, notify, changed
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
+  applyTool();
   viewports().forEach((view) => view.sync());
 };
 world.beforeSelection = () => creator.finish();
@@ -299,8 +301,19 @@ world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 registerObjectOperators(world.objectActions);
 registerAddOperators(creator);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
-// bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
-world.blenderContext = (view) => createContext(blenderRNA, { space: view });
+// bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
+world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
+// The mode the tool system and Blender's keymaps go by (context.mode).
+const contextMode = () => (world.editMode.active ? "EDIT_MESH" : "OBJECT");
+// Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
+const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
+const applyTool = () => {
+  if (!editor.modal && !world.editMode.active) editor.setMode(TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ?? "select");
+};
+world.toolsystem = createToolSystem({
+  context: () => world.blenderContext(activeView()),
+  changed: () => { applyTool(); viewports().forEach((view) => view.sync()); },
+});
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
@@ -497,6 +510,27 @@ registerOperators({
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(activeView().id) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(activeView().id, direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(activeView().id) },
+  // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
+  "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : editor).selectOperator(event, props) },
+  "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
+  // A transform from a key starts at the mouse, from a tool's drag at its press; release_confirm ends it on release.
+  ...Object.fromEntries([["transform.translate", "move"], ["transform.rotate", "rotate"], ["transform.resize", "scale"]].map(([idname, type]) => [idname, {
+    poll: () => editor.selection.size > 0,
+    run: (props, event) => {
+      creator.finish();
+      editor.start(type, { point: event?.press, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm });
+    },
+  }])),
+  // Blender's is Python setting the data path with exec; a path to a property Bylonder does not bind passes through.
+  "wm.context_toggle": {
+    run: ({ data_path }) => {
+      const path = data_path.split("."), key = path.pop();
+      const owner = path.reduce((data, name) => data?.[name], world.blenderContext(activeView()));
+      if (typeof owner?.[key] !== "boolean" || !Object.getOwnPropertyDescriptor(Object(owner), key)?.set) return "PASS_THROUGH";
+      owner[key] = !owner[key];
+    },
+  },
+  "wm.toolbar": { poll: () => !!activeView(), run: () => activeView().toolbar.popup(editor.pointer) },
   "wm.call_menu": { supports: ({ name }) => !!activeView()?.menu(name), run: ({ name }) => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name)) },
   "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
   "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
@@ -508,19 +542,24 @@ appendMenu("VIEW3D_MT_view", ({ layout }) => {
 });
 // Bylonder's own keys, below Blender's keymaps.
 const bylonderKeys = createKeymap([
-  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() || (!world.editMode.active && editor.setMode("select")) },
+  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs: the mode's (Object Mode or Mesh), then the 3D View's and the window's.
-const blenderKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true);
+// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode or Mesh), then the
+// 3D View's and the window's. Tool keymaps run with the tool's settings.
+const blenderKeys = keymapHandler(
+  (event) => [...world.toolsystem.keymaps(contextMode(), editor.gizmoState(event)), "Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true,
+  (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
+// The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's gizmos drag themselves).
+const gizmoKeys = (event) => event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight;
 const keyLayers = () => {
   const view = activeView();
   if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
-  return [creatorKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap]), blenderKeys, ...(world.editMode.active ? [] : [world.objectActions.key]), bylonderKeys];
+  return [creatorKeys, gizmoKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap]), blenderKeys, ...(world.editMode.active ? [] : [world.objectActions.key]), bylonderKeys];
 };
 
 let last = 0;

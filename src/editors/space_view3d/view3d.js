@@ -6,14 +6,9 @@ import { drawMenu } from '../interface/ui-layout.js';
 import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
+import { createToolbar } from './view3d-toolbar.js';
+import { blenderKeys } from '../../windowmanager/keyconfig.js';
 
-const toolIcons = {
-  select: 'M5 2v14l3.6-3.4 2.6 5.6 2.2-1-2.6-5.5H16Z',
-  move: 'M10 1 7 4h2v5H4V7L1 10l3 3v-2h5v5H7l3 3 3-3h-2v-5h5v2l3-3-3-3v2h-5V4h2Z',
-  rotate: 'M10 3a7 7 0 1 0 7 7h-2a5 5 0 1 1-1.5-3.5L11 9h7V2l-2.6 2.6A7 7 0 0 0 10 3Z',
-  scale: 'M2 2h7L6.5 4.5 10 8 8 10 4.5 6.5 2 9Zm16 16h-7l2.5-2.5L10 12l2-2 3.5 3.5L18 11ZM2 12h2v4h4v2H2Zm16-4h-2V4h-4V2h6Z',
-};
-const toolTitles = { select: 'Select (Esc)', move: 'Move (G)', rotate: 'Rotate (R)', scale: 'Scale (S)' };
 const axes = [
   { id: 'x', dir: new Vector3(1, 0, 0), color: '#ff3352', dark: '#9a2335', view: ['right', false] },
   { id: 'y', dir: new Vector3(0, 1, 0), color: '#8bdc00', dark: '#557d10', view: ['top', false] },
@@ -53,32 +48,25 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const editorCamera = new ArcRotateCamera(cameraName, -Math.PI / 2, Math.PI / 3, 12, new Vector3(0, 1, 0), scene);
   Object.assign(editorCamera, { minZ: 0.01, lowerRadiusLimit: 0.1, upperRadiusLimit: 10000, inertia: 0 });
   if (from) { editorCamera.alpha = from.alpha; editorCamera.beta = from.beta; editorCamera.radius = from.radius; editorCamera.target.copyFrom(from.target); editorCamera.mode = from.mode; }
-  const state = { shading: 'solid', overlays: true, cameraView: false };
+  // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar).
+  const state = { shading: 'solid', overlays: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
+    show_region_ui: false };
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
     get camera() { return state.cameraView && ctx.sceneCamera() ? ctx.sceneCamera() : editorCamera; },
     get rendered() { return state.shading === 'rendered' || state.cameraView; },
   };
 
-  // Overlays: view name, tool column, navigation gizmo and buttons.
+  // Overlays: view name, navigation gizmo and buttons.
   const label = Object.assign(document.createElement('div'), { className: 'view-label' });
   const name = Object.assign(document.createElement('span'), { className: 'view-name' });
   const detail = Object.assign(document.createElement('span'), { className: 'view-detail' });
   label.append(name, detail);
-  const tools = Object.assign(document.createElement('nav'), { className: 'tools' });
-  tools.setAttribute('aria-label', 'Transform tools');
-  for (const tool of Object.keys(toolIcons)) {
-    const b = Object.assign(document.createElement('button'), { title: toolTitles[tool] });
-    b.dataset.tool = tool;
-    b.innerHTML = `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="${toolIcons[tool]}"/></svg>`;
-    b.onclick = () => { creator.finish(); editor.finish(false); editor.setMode(tool); };
-    tools.append(b);
-  }
   const gizmo = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   gizmo.setAttribute('viewBox', '-50 -50 100 100');
   gizmo.classList.add('nav-gizmo');
   const navButtons = Object.assign(document.createElement('div'), { className: 'nav-buttons' });
-  section.append(label, tools, gizmo, navButtons);
+  section.append(label, gizmo, navButtons);
 
   const nav = createNavigation({ camera: editorCamera, engine: world.engine, canvas, capture: ctx.capture, enabled: () => !state.cameraView, onSync: () => sync() });
   view.nav = nav;
@@ -121,6 +109,14 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // A Blender menu for wm.call_menu in this view (its items, or null without one) and its title.
   view.menu = (idname) => (blender.menus[idname] ? drawMenu(idname, blender) : null);
   view.menuTitle = (idname) => blender.menus[idname]?.bl_label ?? '';
+  // The toolbar region, Blender's tool system's.
+  const toolbar = createToolbar({
+    panel: world.toolsystem.panel, ui: blender, run: blender.run,
+    context: (width) => world.blenderContext(view, { type: 'TOOLS', width }),
+    keys: (idname, props, strict) => blenderKeys(['Object Mode', 'Mesh', ...KEYMAPS], idname, props, strict),
+  });
+  section.append(toolbar.el);
+  view.toolbar = toolbar;
   const viewMenu = menuButton('View', blenderMenu('VIEW3D_MT_view'), { blender: 'VIEW3D_MT_view' });
   const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
@@ -204,6 +200,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     section.classList.toggle('camera-view', state.cameraView);
     shadingButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shading === state.shading)));
     overlayButton.setAttribute('aria-pressed', String(state.overlays));
+    toolbar.el.hidden = !state.show_region_toolbar;
+    if (state.show_region_toolbar) toolbar.draw();
+    section.classList.toggle('toolbar-shown', state.show_region_toolbar);
     views.wake();
   };
 
@@ -226,7 +225,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     if (state.cameraView) ctx.sceneCamera()?.detachControl();
     nav.dispose();
     editorCamera.dispose();
-    for (const el of [label, tools, gizmo, navButtons]) el.remove();
+    toolbar.dispose();
+    for (const el of [label, gizmo, navButtons]) el.remove();
     ctx.shadingChanged();
   };
   sync();

@@ -4318,6 +4318,7 @@ export var VIEW3D_MT_edit_mesh_context_menu =  __class__ ('VIEW3D_MT_edit_mesh_c
 		var selected_verts_len = __left0__ [0];
 		var selected_edges_len = __left0__ [1];
 		var selected_faces_len = __left0__ [2];
+		// pass;
 		var layout = self.layout;
 		var with_freestyle = bpy.app.build_options.freestyle;
 		layout.operator_context = 'INVOKE_REGION_WIN';
