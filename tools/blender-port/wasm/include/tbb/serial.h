@@ -1,6 +1,8 @@
 // Serial stand-in for the oneTBB API OpenVDB uses (oneTBB needs threads, which the module does not have): each
 // parallel algorithm runs its body once over the whole range, as TBB does when it chooses not to split.
 #pragma once
+
+#include <vector>
 #include <cstddef>
 #include <algorithm>
 #include <functional>
@@ -185,5 +187,20 @@ template<typename Key, typename T, typename HashCompare = void, typename A = voi
   const_iterator end() const { return items.end(); }
  private:
   map items;
+};
+/* One thread grows the vector: grow_by appends and returns the first new element, as tbb's does. */
+template<class T> struct concurrent_vector : std::vector<T> {
+  using std::vector<T>::vector;
+  typename std::vector<T>::iterator grow_by(size_t n)
+  {
+    const size_t old_size = this->size();
+    this->resize(old_size + n);
+    return this->begin() + old_size;
+  }
+  typename std::vector<T>::iterator push_back(const T &value)
+  {
+    std::vector<T>::push_back(value);
+    return this->end() - 1;
+  }
 };
 }  // namespace tbb

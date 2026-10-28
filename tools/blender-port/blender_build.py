@@ -205,7 +205,7 @@ def glue(host, out, entries, extra):
     args = [*extra, '-std=c++20', f'-I{generated}', f'-I{WASM}', *directories,
             *(f'-I{os.path.join(tree, "source/blender", d)}' for d in wasm_module.EDITOR_INCLUDES), *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
     wasm_module.operator_table(tree, out, args + FLAGS, spec)
-    sources = [os.path.join(WASM, f) for f in [*spec['api'], 'rna-runtime.cc', 'platform.cc'] if f not in STAND_INS]
+    sources = [os.path.join(WASM, f) for f in [*spec['api'], 'rna-runtime.cc', 'platform.cc', 'ghost-paths.cc', 'draw-seam.cc'] if f not in STAND_INS]
     entry = lambda src: {'directory': host, 'file': src, 'command': ' '.join(['clang++', *args, '-c', src])}
     objects = os.path.join(out, 'objects')
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get('JOBS', os.cpu_count()))) as pool:

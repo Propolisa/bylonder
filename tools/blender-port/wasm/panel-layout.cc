@@ -446,14 +446,6 @@ static ARegionType &modifier_region(ModifierType type)
   return region;
 }
 
-/* port-override: Bylonder renders with its own engine, which has none of Blender's engine flags, so panels that ask
- * (Subdivision Surface's adaptive subdivision for Cycles) show what they show for any other engine. */
-RenderEngineType *blender::RE_engines_find(const char * /*idname*/)
-{
-  static RenderEngineType engine = {};
-  return &engine;
-}
-
 /* port-override: UI lists and gizmos are drawn by Bylonder, so their types are not kept. */
 bool blender::WM_uilisttype_add(uiListType * /*ult*/) { return true; }
 
