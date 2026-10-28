@@ -3,134 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Babylon Workbench</title>
-    <meta
-      name="description"
-      content="A modular 3D workspace powered by Babylon.js and Tweakpane."
-    />
+    <title>Bylonder Scene</title>
   </head>
   <body>
-    <header>
-      <button
-        id="scene-mode"
-        title="Switch between editor camera and the camera authored in your code"
-      >
-        Edit mode
-      </button>
-      <div class="header-actions">
-        <button id="add-mesh">Add <kbd>Shift A</kbd></button>
-        <button id="help">Shortcuts <kbd>?</kbd></button
-        ><button id="inspector">Inspector <kbd>Ctrl ⇧ I</kbd></button
-        ><button id="panel-toggle">Parameters ☷</button>
-      </div>
-    </header>
     <main>
-      <canvas
-        id="viewport"
-        tabindex="0"
-        aria-label="Interactive 3D viewport"
-      ></canvas>
-      
-      
-      <div class="views">
-        <button data-view="front">Front</button
-        ><button data-view="right">Right</button
-        ><button data-view="top">Top</button
-        ><button id="opposite-view" title="Opposite view">Opposite</button><button id="projection">Perspective <kbd>5</kbd></button><button id="frame" title="Frame selected (Numpad . / F)">Frame Selected</button>
-      </div>
-      <aside id="panel">
-        <div class="panel-heading">
-          <span>Properties</span>
-        </div>
-        <div class="section-label">
-          Scene
-          <div>
-            <button id="group" title="Group (Ctrl G)">Group</button
-            ><button id="ungroup" title="Ungroup (Ctrl Alt G)">Ungroup</button>
-          </div>
-        </div>
-        <div class="tree-tools">
-          <button id="duplicate-objects" title="Duplicate">⧉</button
-          ><button id="delete-objects" title="Delete">×</button>
-        </div>
-        <div id="outliner" class="bl-outliner"></div>
-        <div id="pane"></div>
-      </aside>
+      <canvas id="viewport" tabindex="0" aria-label="Interactive 3D viewport"></canvas>
+      <div id="panel"><div id="outliner" class="bl-outliner"></div></div>
+      <div id="pane"></div>
       <div id="gesture-cursor" hidden aria-hidden="true">+</div>
       <div id="gesture-guide" hidden aria-hidden="true"></div>
       <div id="toast" role="status"></div>
       <div id="creation-panel" hidden></div>
       <div id="redo-panel" hidden></div>
-      <div id="object-context" role="menu" hidden></div>
     </main>
-    <footer>
-      <span><i></i> <span id="status">Ready</span></span
-      ><span class="hints"
-        >MMB orbit <b>·</b> Shift MMB pan <b>·</b> Scroll zoom <b>·</b> G R S
-        transform</span
-      ><span id="fps">— FPS</span>
-    </footer>
-    <dialog id="add-menu">
-      <button id="add-close" aria-label="Close">×</button>
-      <h3>Add Object</h3>
-      <input
-        id="add-search"
-        placeholder="Search objects…"
-        aria-label="Search mesh types"
-      />
-      <div id="add-list"></div>
-    </dialog>
-    <dialog id="shortcuts">
-      <button id="close-help" aria-label="Close shortcuts">✕</button>
-      <h2>Shortcuts</h2>
-      <dl>
-        <dt>Add mesh / creation settings</dt>
-        <dd>Shift A / F9</dd>
-        <dt>Duplicate / delete / rename</dt>
-        <dd>Shift D / X or Delete / F2</dd>
-        <dt>Select all / deselect / invert</dt>
-        <dd>A / Alt A / Ctrl I</dd>
-        <dt>Hide / hide others / show all</dt>
-        <dd>H / Shift H / Alt H</dd>
-        <dt>Local view</dt>
-        <dd>/</dd>
-        <dt>Clear location / rotation / scale</dt>
-        <dd>Alt G / Alt R / Alt S</dd>
-        <dt>Parent to active / unparent</dt>
-        <dd>Ctrl P / Alt P</dd>
-        <dt>Select / toggle / multi-select</dt>
-        <dd>Click / click again / Shift-click</dd>
-        <dt>Group / Ungroup</dt>
-        <dd>Ctrl G / Ctrl Alt G</dd>
-        <dt>Reposition for another sweep</dt>
-        <dd>Hold Alt during a transform</dd>
-        <dt>Orbit / Pan / Zoom</dt>
-        <dd>MMB / Shift MMB / Scroll</dd>
-        <dt>Perspective ↔ Orthographic</dt>
-        <dd>Numpad 5 or 5</dd>
-        <dt>Front / Right / Top</dt>
-        <dd>Numpad 1 / 3 / 7 · Ctrl for opposite</dd>
-        <dt>Frame selection</dt>
-        <dd>Numpad . or F</dd>
-        <dt>Move / Rotate / Scale</dt>
-        <dd>G / R / S, then move pointer</dd>
-        <dt>Constrain world axis</dt>
-        <dd>X / Y / Z during transform</dd>
-        <dt>Precise / Snap</dt>
-        <dd>Shift / Ctrl while transforming</dd>
-        <dt>Confirm / Cancel</dt>
-        <dd>Enter or left click / Escape or right click</dd>
-        <dt>Undo / Redo</dt>
-        <dd>Ctrl Z / Ctrl Shift Z</dd>
-        <dt>Inspector</dt>
-        <dd>Ctrl Shift I</dd>
-      </dl>
-      <p>
-        Touch: tap to select; tap again to deselect. Double-tap to frame. Long-press for object actions. One finger orbits in Select mode or transforms in Move/Rotate/Scale mode. Two fingers pan and pinch to zoom. Multi enables additive selection. X/Y/Z constrain transforms; Snap and Fine work without a keyboard. Lift to commit, or use × to cancel an active operation.<br />G/R/S
-        use screen-space movement and rotation; scale is radial from the
-        selection pivot. X/Y/Z constrain world axes.<br />Remember scene edits stores object edits and control values on this browser. Share can include them even when persistence is off.
-      </p>
-    </dialog>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

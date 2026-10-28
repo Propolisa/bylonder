@@ -5,7 +5,6 @@
   color: #ccc;
   background: #202020;
   font-synthesis: none;
-  --line: #383838;
   --accent: #e8a24d;
   --tp-base-background-color: #292929;
   --tp-base-shadow-color: transparent;
@@ -25,23 +24,9 @@
 body {
   margin: 0;
   overflow: hidden;
-}
-body > header {
-  height: 34px;
+  height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px;
-  background: #292929;
-  border-bottom: 1px solid var(--line);
-}
-.workspace-title {
-  font-size: 11px;
-  color: #aaa;
-}
-.header-actions {
-  display: flex;
-  gap: 4px;
+  flex-direction: column;
 }
 /* Bylonder's own buttons; Blender's interface (.bl-ui) styles its widgets itself. */
 button:not(.bl-ui *) {
@@ -69,51 +54,15 @@ button.active:not(.bl-ui *) {
   background: #61462c;
   border-color: #986b38;
 }
-kbd {
-  font:
-    10px ui-monospace,
-    monospace;
-  color: #999;
-  margin-left: 7px;
-}
-main {
+main.runtime-dock {
   position: relative;
-  height: calc(100dvh - 56px);
+  flex: 1;
+  min-height: 0;
 }
 canvas {
-  width: calc(100% - 268px);
-  height: 100%;
   display: block;
   outline: none;
   touch-action: none;
-}
-aside {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 268px;
-  background: #292929;
-  overflow: auto;
-  border-left: 1px solid #111;
-}
-.panel-heading {
-  padding: 7px 10px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--line);
-}
-.section-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 8px;
-  color: #aaa;
-  border-bottom: 1px solid var(--line);
-}
-.section-label button {
-  font-size: 10px;
-  padding: 3px 5px;
-  margin-left: 3px;
 }
 .tp-dfwv {
   width: 100% !important;
@@ -132,93 +81,24 @@ aside {
 }
 .view-label {
   position: absolute;
-  top: 9px;
-  left: 9px;
   pointer-events: none;
-  font-size: 10px;
-  color: #aaa;
-}
-.views {
-  position: absolute;
-  right: 275px;
-  top: 6px;
-  display: flex;
-  gap: 3px;
-}
-.views button {
-  font-size: 10px;
-  padding: 4px 6px;
-}
-footer {
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px;
-  border-top: 1px solid var(--line);
-  background: #292929;
-  font-size: 10px;
-  color: #aaa;
-}
-.hints b {
-  padding: 0 7px;
-  color: #666;
 }
 #toast {
   position: absolute;
-  bottom: 8px;
-  left: 45px;
-  background: #303030;
-  border: 1px solid #555;
   padding: 6px 9px;
   display: none;
   font-size: 11px;
-  max-width: calc(100% - 330px);
+  max-width: calc(100% - 65px);
+  z-index: 20;
   pointer-events: none;
 }
 dialog {
   width: 540px;
   max-width: 94vw;
-  background: #292929;
-  color: #ddd;
-  border: 1px solid #666;
-  border-radius: 3px;
   padding: 18px;
 }
 dialog::backdrop {
   background: #0008;
-}
-dialog h2 {
-  font-size: 15px;
-  margin: 0 0 18px;
-}
-dialog dl {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 10px;
-  font-size: 11px;
-}
-dialog dd {
-  margin: 0;
-  color: #aaa;
-}
-dialog p {
-  margin: 18px 0 0;
-  color: #aaa;
-  font-size: 10px;
-  line-height: 1.7;
-}
-#close-help {
-  float: right;
-}
-body.panel-hidden aside {
-  display: none;
-}
-body.panel-hidden canvas {
-  width: 100%;
-}
-body.panel-hidden .views {
-  right: 7px;
 }
 #gesture-cursor {
   position: fixed;
@@ -242,40 +122,9 @@ body.panel-hidden .views {
 [hidden] {
   display: none !important;
 }
-@media (max-width: 750px) {
-  .hints,
-  .header-actions kbd {
-    display: none;
-  }
-  .views {
-    top: 6px;
-  }
-  #toast {
-    max-width: 65%;
-  }
-}
-@media (max-width: 550px) {
-  canvas {
-    width: 100%;
-  }
-  aside {
-    width: 250px;
-    z-index: 5;
-  }
-  .views {
-    right: 7px;
-  }
-  .view-label {
-    top: 40px;
-  }
-}
-
-.scene-mode .views{display:none}
-.tree-tools{display:flex;align-items:center;gap:3px;padding:0 5px 5px;font-size:10px}.tree-tools button{padding:2px 5px}#creation-panel,#redo-panel{position:absolute;left:42px;bottom:12px;width:265px;max-height:70%;overflow:auto;background:#292929;border:1px solid #666;padding:6px;z-index:12}#add-menu{width:300px;padding:12px}#add-menu h3{font-size:13px;margin:0 0 10px}#add-close{float:right}#add-search{width:100%;padding:7px;background:#1b1b1b;border:1px solid #666;color:#ddd;font:12px system-ui}#add-list{max-height:55vh;overflow:auto;margin-top:6px}#add-list button{display:block;width:100%;text-align:left;border:0;padding:7px}#object-context{position:fixed;z-index:50;width:232px;max-height:calc(100vh - 16px);overflow:auto;background:#292929;border:1px solid #666;padding:5px;box-shadow:0 4px 15px #0008}#object-context button{display:flex;width:100%;align-items:center;justify-content:space-between;border:0;padding:5px;font-size:11px;text-align:left}#object-context kbd{font-size:9px;white-space:nowrap}.context-title{font-weight:600;padding:5px}.context-section{font-size:9px;color:#999;padding:5px 5px 2px;border-top:1px solid #444;margin-top:3px}
-.text-editor{position:fixed;margin:0;left:16px;top:65px;width:310px;max-height:calc(100vh - 85px);overflow:auto;background:#24272d;color:#dce0e6;border:1px solid #505761;border-radius:5px;padding:12px;font:12px system-ui}.text-editor::backdrop{background:rgba(0,0,0,.12)}.text-editor header,.text-editor footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.text-editor label{display:block;margin-top:10px}.text-editor textarea,.text-editor input{display:block;box-sizing:border-box;width:100%;margin-top:4px;background:#181b20;color:inherit;border:1px solid #414752;border-radius:3px;padding:6px}.text-editor [data-preview]{min-height:42px;font-size:28px;padding:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}.text-editor [data-status]{color:#e5b779;min-height:16px}.text-editor footer{justify-content:flex-end}
-body{height:100dvh;display:flex;flex-direction:column}body>header{flex-shrink:0}main.runtime-dock{height:auto;flex:1;min-height:0}body>footer{flex-shrink:0}#viewport-section{position:relative;overflow:hidden}#viewport-section .views{right:7px}#viewport-section #toast{max-width:calc(100% - 65px);z-index:20}#panel{display:flex;flex-direction:column;overflow:auto}#properties-section{overflow:auto;background:#292929}#touch-controls{display:none}.runtime-dock .dock-content{background:#292929}.runtime-dock .dock-heading select{color:#ccc}.runtime-dock .dock-options select{background:#202020;color:#ddd;border:1px solid #555;padding:5px}.runtime-dock .dock-tabs{justify-content:flex-start}.runtime-dock .dock-tabs button{font-size:11px}.scene-mode #touch-controls{display:none}
-@media(pointer:coarse){body>header{height:40px;min-height:40px;padding:2px 4px;gap:3px;overflow:auto;justify-content:flex-start}body>header button{min-height:36px;white-space:nowrap;font-size:12px}body>header .header-actions{gap:3px}body>header kbd{display:none}body>footer{display:none}.view-label{display:none}.views{top:5px;right:6px}.views button{min-height:34px;font-size:12px}.views kbd{display:none}#touch-controls{display:grid;position:absolute;bottom:6px;left:6px;right:6px;gap:4px;pointer-events:none}.touch-row{display:flex;justify-content:center;gap:4px;pointer-events:auto}.touch-row button{min-height:42px;min-width:38px;padding:5px 9px;background:#292c32ed;font-size:13px}.touch-row button.active{background:#654827}.runtime-dock #toast{bottom:100px}.tree-tools button,.section-label button{min-height:38px;min-width:38px;font-size:13px}#pane{--tp-container-unit-size:34px;--tp-base-font-size:13px}#pane input{font-size:16px}#object-context{width:min(300px,calc(100vw - 16px));max-height:calc(100dvh - 24px)}#object-context button{min-height:44px;font-size:14px}#object-context kbd{display:none}#add-list button{min-height:44px;font-size:15px}#add-search{font-size:16px}#creation-panel{left:6px;bottom:100px;max-width:calc(100% - 12px);max-height:65%;--tp-container-unit-size:34px}.text-editor{top:8px;left:8px;width:min(330px,calc(100vw - 16px));max-height:calc(100dvh - 16px);font-size:14px;--tp-container-unit-size:34px}.text-editor textarea,.text-editor input{font-size:16px}.text-editor button{min-height:40px}}
-@media(pointer:coarse) and (orientation:landscape){#touch-controls{display:flex;justify-content:center}.touch-row{justify-content:flex-start}.runtime-dock #toast{bottom:56px}#creation-panel{bottom:54px}}
-.graph-touch-controls{display:none}.views{max-width:calc(100% - 12px);overflow-x:auto}.views>button{flex-shrink:0}@media(pointer:coarse){.graph-touch-controls{display:inline-flex}.tree-tools{flex-wrap:wrap}.tree-tools .graph-touch-controls{flex:0}}
-.scene-menu{position:static;align-self:stretch}.scene-menu>summary{display:flex;align-items:center;justify-content:center;list-style:none;width:36px;height:100%;cursor:pointer;font-size:20px}.scene-menu>summary::-webkit-details-marker{display:none}.scene-menu-content{position:absolute;z-index:35;right:6px;top:42px;width:240px;max-height:calc(100% - 50px);overflow:auto;background:#292b30;border:1px solid #50535a;border-radius:6px;padding:10px;box-shadow:0 6px 24px #0008;display:grid;gap:5px}.scene-menu-content button{min-height:32px;text-align:left}.scene-menu-content .views{position:static;display:grid;grid-template-columns:1fr 1fr;max-width:none;overflow:visible;gap:5px}.scene-menu-content .views button{font-size:12px}.menu-label{text-transform:uppercase;letter-spacing:.07em;font-size:10px;color:#92969e;padding:6px 1px}.scene-menu-content #frame{width:auto;height:auto;font-size:13px}.scene-menu-content #frame:after{content:' Frame selected'}.runtime-dock .dock-toolbar>button{margin:0}#touch-controls{padding-bottom:env(safe-area-inset-bottom)}.touch-primary select{min-width:0;max-width:125px;background:#292c32;color:#eee;border:1px solid #50535a;border-radius:4px;font-size:13px;padding:4px 6px}.touch-primary{background:#24262be8;border:1px solid #45484f;border-radius:7px;padding:3px;box-shadow:0 3px 12px #0004}.touch-primary button{border:0;background:transparent}.touch-primary select{border:0}.touch-transform-options{background:#24262be8;border:1px solid #45484f;border-radius:6px;padding:3px}.touch-transform-options button{border:0}.touch-row select{min-height:40px}.touch-row button{border-radius:4px}
-@media(pointer:coarse){#touch-controls{bottom:8px;left:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:5px}.touch-row{gap:2px}.touch-row button{min-height:40px;min-width:38px;padding:4px 7px;font-size:12px}.touch-primary select{width:112px}.scene-menu-content{top:42px;width:min(260px,calc(100% - 12px))}.scene-menu-content button{min-height:40px;font-size:13px}.scene-menu-content .views button{min-height:40px}.runtime-dock #toast{bottom:64px}#creation-panel{bottom:64px}.scene-mode #touch-controls{display:none}}
+#creation-panel,#redo-panel{position:absolute;width:265px;max-height:70%;overflow:auto;padding:6px;z-index:12}
+#viewport-section{position:relative;overflow:hidden}#panel{display:flex;flex-direction:column;overflow:auto}#properties-section{overflow:auto;background:#292929}.runtime-dock .dock-content{background:#292929}.runtime-dock .dock-tabs{justify-content:flex-start}.runtime-dock .dock-tabs button{font-size:11px}
+#touch-controls{display:none;padding-bottom:env(safe-area-inset-bottom)}.scene-mode #touch-controls{display:none}
+.touch-primary select{min-width:0;max-width:125px;background:#292c32;color:#eee;border:0;border-radius:4px;font-size:13px;padding:4px 6px}.touch-primary{background:#24262be8;border:1px solid #45484f;border-radius:7px;padding:3px;box-shadow:0 3px 12px #0004}.touch-primary button{border:0;background:transparent}.touch-transform-options{background:#24262be8;border:1px solid #45484f;border-radius:6px;padding:3px}.touch-transform-options button{border:0}.touch-row select{min-height:40px}.touch-row button{border-radius:4px}
+@media(pointer:coarse){.view-label{display:none}#touch-controls{position:absolute;bottom:8px;left:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}.touch-row{display:flex;justify-content:center;gap:2px;pointer-events:auto}.touch-row button{min-height:40px;min-width:38px;padding:4px 7px;background:#292c32ed;font-size:12px}.touch-row button.active{background:#654827}.touch-primary select{width:112px}.runtime-dock #toast{bottom:64px}#pane{--tp-container-unit-size:34px;--tp-base-font-size:13px}#pane input{font-size:16px}#creation-panel{left:6px;bottom:64px;max-width:calc(100% - 12px);max-height:65%;--tp-container-unit-size:34px}.scene-mode #touch-controls{display:none}}
+@media(pointer:coarse) and (orientation:landscape){.touch-row{justify-content:flex-start}.runtime-dock #toast{bottom:56px}#creation-panel{bottom:54px}}

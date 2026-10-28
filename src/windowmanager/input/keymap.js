@@ -51,9 +51,9 @@ const CODES = {
   ControlLeft: 'left_ctrl', ControlRight: 'right_ctrl', ShiftLeft: 'left_shift', ShiftRight: 'right_shift', AltLeft: 'left_alt', AltRight: 'right_alt', MetaLeft: 'oskey', MetaRight: 'oskey',
 };
 
-// The Blender event type of a keyboard event's physical key.
+// The Blender event type of a keyboard event's physical key; empty for a pointer event.
 export function keyType(e) {
-  const code = e.code;
+  const code = e.code ?? '';
   return CODES[code] ?? code.match(/^Key([A-Z])$/)?.[1].toLowerCase() ?? (code.match(/^Digit(\d)$/) ? DIGITS[code.at(-1)] : null)
     ?? code.match(/^Numpad(\d)$/)?.[1].replace(/^/, 'numpad_') ?? code.toLowerCase();
 }

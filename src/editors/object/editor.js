@@ -235,13 +235,7 @@ export function createEditor(world, views, history, changed, notify, capture) {
     const candidates = objects.filter((n) => selectable(n) && n.isEnabled());
     selectList(candidates.filter((n) => OPS[op](selection.has(n), drawnInside(n))));
   };
-  const contextMenu = (event) => {
-    world.contextMenu?.open(event.native, pickIn(event.view, event.x, event.y));
-  };
   const inView = (event) => !!event.view && !event.view.state.cameraView && !world.editMode?.active;
-  const contextKeymap = createKeymap([
-    { blender: "VIEW3D_MT_object_context_menu", keys: "RIGHTMOUSE", poll: inView, run: contextMenu },
-  ], ["Object Mode"]);
   // The Transform Modal Map. Edit Mode's G during Move starts Edge Slide.
   const transformModalKeymap = createKeymap([
     // release_confirm: a transform a drag started (a tool's) ends where the button is let go.
@@ -289,8 +283,6 @@ export function createEditor(world, views, history, changed, notify, capture) {
     get pointer() { return last; },
     updateGesture: update,
     pick: (x, y, view = views.input) => pickIn(view, x, y),
-    // Object Mode's context menu (Object Mode keymap).
-    keymap: (event) => contextKeymap(event),
     // view3d.select and view3d.select_box in Object Mode, run with the event: a box begins at a drag's press, or
     // from a key at the next press.
     selectOperator: (event, props) => (inView(event) ? selectOperator(event, props) : "PASS_THROUGH"),

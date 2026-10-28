@@ -1,7 +1,6 @@
 import { Mesh, TransformNode, VertexData } from "@babylonjs/core";
 import { nodeId, identify } from "../object/identity.js";
 import { buildMesh, rebuildMesh } from "../object/mesh-catalog.js";
-const KEY = "babylon-workbench:transforms:v1";
 export const snapshot = (objects) =>
   objects.map((m) => ({
     id: nodeId(m),
@@ -118,53 +117,6 @@ export function apply(objects, data, { partial = false } = {}) {
     if ("isPickable" in node)
       node.isPickable = row.pickable !== false && !row.locked;
   }
-}
-export function createStorage(objects, notify) {
-  let enabled = false;
-  try {
-    const value = JSON.parse(localStorage.getItem(KEY));
-    if ([1, 2, 3].includes(value?.version)) {
-      apply(objects, value.objects);
-      enabled = true;
-    }
-  } catch {
-    notify("Saved transforms unavailable; using defaults.");
-  }
-  return {
-    get enabled() {
-      return enabled;
-    },
-    save() {
-      if (!enabled) return;
-      try {
-        localStorage.setItem(
-          KEY,
-          JSON.stringify({ version: 3, objects: snapshot(objects) }),
-        );
-      } catch {
-        enabled = false;
-        notify("Browser storage unavailable. Changes remain in this session.");
-      }
-    },
-    set(value) {
-      enabled = value;
-      if (value) this.save();
-      else
-        try {
-          localStorage.removeItem(KEY);
-        } catch {
-          notify("Could not remove saved transforms.");
-        }
-    },
-    clear() {
-      try {
-        localStorage.removeItem(KEY);
-        enabled = false;
-      } catch {
-        notify("Could not clear browser storage.");
-      }
-    },
-  };
 }
 export function createHistory(objects, onChange, extras = {}) {
   const capture = () => ({objects:snapshot(objects), extra:extras.capture?.()});
