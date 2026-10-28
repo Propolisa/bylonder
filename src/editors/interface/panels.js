@@ -25,8 +25,10 @@ export const hasOption = (type, option) => !!type.bl_options && __in__(option, t
 // bpy.types as the scripts read it: the classes registered (Blender's and add-ons'), and any other name as the RNA
 // struct of that name (bpy.types.Object.bl_rna.properties['type'].enum_items).
 Object.setPrototypeOf(bpyTypes, new Proxy({}, { get: (target, name) => (typeof name === 'string' && !name.startsWith('__') ? { bl_rna: blRna(name) } : undefined) }));
+// A module's classes in the order it registers them: its `classes`, or (a module taken in part) its classes in order.
+const moduleClasses = (module) => module?.classes ?? module?._classes_in_order?.map((name) => module[name]) ?? [];
 export function registerClasses(modules) {
-  for (const module of modules) for (const cls of module?.classes ?? []) bpyTypes[cls.bl_idname || cls.__name__] = cls;
+  for (const module of modules) for (const cls of moduleClasses(module)) bpyTypes[cls.bl_idname || cls.__name__] = cls;
 }
 
 // The panel types of a space's region, as Blender registers them: per module its `classes` in order, a panel without a
@@ -34,7 +36,7 @@ export function registerClasses(modules) {
 // as plain objects with the same fields) go after, as Blender registers add-ons after its own scripts.
 export function panelTypes(modules, { space, region = 'WINDOW' }) {
   registerClasses(modules);
-  const classes = modules.flatMap((module) => module?.classes ?? []);
+  const classes = modules.flatMap(moduleClasses);
   // Instanced panels (a modifier's, a constraint's) are drawn by the templates that list their data.
   const panels = classes.filter((cls) => isPanel(cls) && cls.bl_space_type === space && (cls.bl_region_type ?? 'WINDOW') === region && !hasOption(cls, 'INSTANCED'));
   const byId = new Map(), roots = [];
@@ -61,6 +63,14 @@ export function panelTypes(modules, { space, region = 'WINDOW' }) {
 const isPanel = (cls) => (cls.__bases__ ? cls === Panel || cls.__bases__.some(isPanel) : !!cls.draw);
 
 export const idname = (type) => type.bl_idname || type.__name__;
+
+// A header's layout (or a draw function's, as draw_xform_template), laid out as a header region lays it: in a row.
+export function headerLayout(context, draw) {
+  useContext(context);
+  const layout = new UILayout('row');
+  draw(layout);
+  return layout;
+}
 
 // What a region shows: per panel whose context matches and whose poll() passes, its layouts. `open(panel)` tells
 // whether a panel is open (the editor's state, starting from DEFAULT_CLOSED); a closed panel draws its header only.

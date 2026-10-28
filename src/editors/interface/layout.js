@@ -46,6 +46,7 @@ const ITEM_ARGS = {
   menu: ['menu', 'text', 'text_ctxt', 'translate', 'icon', 'icon_value'],
   menu_contents: ['menu'],
   popover: ['panel', 'text', 'text_ctxt', 'translate', 'icon', 'icon_value'],
+  popover_group: ['space_type', 'region_type', 'context', 'category'],
   label: ['text', 'text_ctxt', 'translate', 'icon', 'icon_value'],
   separator: ['factor', 'type'],
   separator_spacer: [],
@@ -63,6 +64,7 @@ const TEMPLATE_ARGS = {
   template_color_ramp: ['data', 'property', 'expand'],
   template_light_linking_collection: ['context_layout', 'data', 'property'],
   template_constraints: ['use_bone_constraints'],
+  template_icon: ['icon_value', 'scale'],
 };
 
 let nextId = 0;
@@ -94,8 +96,9 @@ export class UILayout {
   }
 
   #item(kind, list, names = ITEM_ARGS[kind]) {
-    const item = { kind, ...args(list, names), split: this.use_property_split, decorate: this.use_property_decorate,
-      emboss_layout: this.emboss, context: this.context, operator_context: this.operator_context };
+    // The call's arguments last: popover_group's context is the panels' context string, not the layout's.
+    const item = { kind, split: this.use_property_split, decorate: this.use_property_decorate,
+      emboss_layout: this.emboss, context: this.context, operator_context: this.operator_context, ...args(list, names) };
     this.children.push(item);
     return item;
   }
@@ -147,6 +150,7 @@ export class UILayout {
   menu(...list) { this.#item('menu', list); }
   menu_contents(...list) { this.#item('menu_contents', list); }
   popover(...list) { this.#item('popover', list); }
+  popover_group(...list) { this.#item('popover_group', list); }
   label(...list) { this.#item('label', list); }
   separator(...list) { this.#item('separator', list); }
   separator_spacer() { this.#item('separator_spacer', []); }

@@ -9,7 +9,7 @@ import * as spaceView3d from '../../bl_ui/space_view3d.js';
 import { view_3d, user_interface, cssColor } from '../interface/userdef-default-theme.js';
 import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
-import { propertyName } from './region-layout.js';
+import { rnaProperty } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 // Blender's axes as Babylon directions (Babylon's (x, y, z) is Blender's (x, z, y)) and the view each axis's ball
 // aligns to (the opposite view for its negative ball).
@@ -46,7 +46,7 @@ const LENS_HALF_TAN = (36 / 2 / 50) * 2;
 // A bound property's check item, named as Blender's RNA names it (Toolbar for show_region_toolbar) once loaded.
 const namedBinding = (binding) => (data, name) => {
   const bound = binding(data, name);
-  return bound && { ...bound, label: propertyName(data, name) ?? bound.label, keys: blenderKeys(KEYMAPS, 'wm.context_toggle', { data_path: dataPath(data, name) }) };
+  return bound && { ...bound, label: rnaProperty(data.bl_rna?.identifier, name)?.name ?? bound.label, keys: blenderKeys(KEYMAPS, 'wm.context_toggle', { data_path: dataPath(data, name) }) };
 };
 // A property's path from the context, for the keymap items toggling it (wm.context_toggle's data_path).
 const dataPath = (data, name) => ({ SpaceView3D: 'space_data.', ToolSettings: 'tool_settings.', View3DOverlay: 'space_data.overlay.' })[data.bl_rna?.identifier] + name;
@@ -139,7 +139,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // The tool settings, the header's transform settings and the sidebar, Blender's.
   const regions = createRegions({
     view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
-    ui: { run: blender.run, supported: blender.supported, menuItems: (idname) => drawMenu(idname, blender) },
+    ui: blender,
   });
   section.append(regions.toolHeader, regions.sidebar);
   view.regions = regions;

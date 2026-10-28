@@ -10,11 +10,13 @@
 // `ui` is what the widgets need from the editor:
 //   { undoPush(name), report(error), run(idname, props), supported(idname, props), poll(idname, props),
 //     ids(struct): the data-blocks a pointer of that struct can point to, isOpen(id, closedByDefault), toggle(id, event),
-//     animation: { state(refs), insert(refs), remove(refs) }, drawMenu(idname), drawPopover(idname), revision }
-import { defineComponent, h } from 'vue';
+//     animation: { state(refs), insert(refs), remove(refs) }, drawMenu(idname), revision,
+//     popover(idname): a panel drawn for a popover, { label, layout, units } (null without one),
+//     panelsOf({ space_type, region_type, context, category }): the panels' idnames, for popover_group }
+import { defineComponent, h, ref, Teleport, onBeforeUnmount } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
-import { iconUrl } from './icon.js';
+import { iconUrl, toolIconUrl } from './icon.js';
 import { rnaProperty, INFO } from '../../makesrna/rna.js';
 import { operatorValues, isLayout } from './layout.js';
 import { formatLength, formatAngle, parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
@@ -51,9 +53,11 @@ function itemChar(meta, i) {
 
 // ---- Widgets. A widget's class carries its Blender widget type; aligned layouts square the corners where widgets meet.
 const W = 'bl-widget';
-const label = (text, { iconName, className = '', align = 'left' } = {}) => h('div', {
+// A tool's icon, which bpy.app.icons names (icon_value), as an image.
+const toolIcon = (name) => (typeof name === 'string' ? h('img', { class: 'bl-tool-icon', src: toolIconUrl(name), alt: '' }) : null);
+const label = (text, { iconName, iconValue, className = '', align = 'left' } = {}) => h('div', {
   class: ['bl-label flex h-unit min-w-0 items-center gap-1 text-xs', align === 'right' ? 'justify-end text-right' : '', !text && iconName && 'bl-icon-only', className],
-}, [icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
+}, [toolIcon(iconValue), icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
 
 function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true }) {
   return h('button', {
@@ -79,11 +83,44 @@ function textField({ value, iconName, disabled, inactive, onChange, title, place
   ]);
 }
 
-const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly }) => h('button', {
+const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly, onClick = (e) => openMenu(items, e.currentTarget) }) => h('button', {
   type: 'button', title, disabled, 'aria-label': text || title, 'aria-haspopup': 'menu',
   class: [W, 'bl-menu-button flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md pl-1.5 pr-5 text-xs', inactive && 'opacity-50', iconOnly && 'pr-4'],
-  onClick: (e) => openMenu(items, e.currentTarget),
+  onClick,
 }, [icon(iconName), text && !iconOnly ? h('span', { class: 'min-w-0 flex-1 truncate text-left' }, text) : null]);
+
+// A popover (UI_popover_panel): a menu button that opens its panels below it, each drawn as in a region, under its
+// label when there are several; a press outside closes it.
+const Popover = defineComponent({
+  name: 'Popover',
+  props: { panels: Array, text: String, iconName: String, iconOnly: Boolean, disabled: Boolean, env: Object },
+  setup(props) {
+    const at = ref(null);
+    let owner = null;
+    const outside = (e) => { if (!e.target.closest?.('.bl-popover-block,.bl-menu') && !owner?.contains(e.target)) hide(); };
+    const hide = () => { at.value = null; removeEventListener('pointerdown', outside, true); };
+    const toggle = (e) => {
+      if (at.value) return hide();
+      owner = e.currentTarget;
+      const r = owner.getBoundingClientRect();
+      at.value = { left: `${r.left}px`, top: `${r.bottom + 2}px` };
+      addEventListener('pointerdown', outside, true);
+    };
+    onBeforeUnmount(hide);
+    return () => {
+      const { ui } = props.env, drawn = props.panels.map((id) => ui.popover?.(id)).filter(Boolean);
+      return [
+        menuButton({ text: props.text ?? drawn[0]?.label, iconName: props.iconName, iconOnly: props.iconOnly, disabled: props.disabled, onClick: toggle }),
+        at.value && drawn.length ? h(Teleport, { to: 'body' }, h('div', {
+          class: 'bl-ui bl-popover-block flex flex-col', style: { ...at.value, width: `calc(var(--bl-row) * ${Math.max(...drawn.map((p) => p.units || 10))})` },
+        }, drawn.flatMap((p) => [drawn.length > 1 ? label(p.label, { className: 'bl-popover-title' }) : null, layout(p.layout, rootEnv(ui))]))) : null,
+      ];
+    };
+  },
+});
+const popover = (panels, node, env, iconOnly = !node.text && !!node.icon) => h(Popover, {
+  panels, text: node.text, iconName: node.icon, iconOnly, disabled: !env.enabled, env,
+});
 
 function colorSwatch({ value, disabled, inactive, onChange, title }) {
   const hex = '#' + [...value].slice(0, 3).map((c) => Math.round(Math.min(1, Math.max(0, c)) ** (1 / 2.2) * 255).toString(16).padStart(2, '0')).join('');
@@ -118,6 +155,10 @@ function enumMenu(prop, title) {
     : { label: item[1], icon: item[3] !== 'NONE' ? item[3] : undefined, title: item[2], checked: () => prop.get() === item[0], run: () => prop.set(item[0]) }))];
 }
 
+// Booleans whose RNA icons are consecutive (PROP_ICONS_CONSECUTIVE): the icon after the property's while true.
+const ICON_ON = { SNAP_OFF: 'SNAP_ON', PROP_OFF: 'PROP_ON', UNLOCKED: 'LOCKED', DECORATE_UNLOCKED: 'DECORATE_LOCKED', RESTRICT_VIEW_ON: 'RESTRICT_VIEW_OFF',
+  RESTRICT_SELECT_ON: 'RESTRICT_SELECT_OFF', HIDE_ON: 'HIDE_OFF', CHECKBOX_DEHLT: 'CHECKBOX_HLT', AUTOMERGE_OFF: 'AUTOMERGE_ON' };
+
 // The widget for one value (an array's element when index >= 0), without its label column.
 function widget(prop, node, { text, index = -1, disabled, inactive, ui }) {
   const { meta } = prop, value = prop.get();
@@ -133,8 +174,8 @@ function widget(prop, node, { text, index = -1, disabled, inactive, ui }) {
     case 'B': {
       const checked = node.invert_checkbox ? !element : !!element;
       if (node.toggle || node.icon_only || node.emboss === false || (iconName && !text)) {
-        const shown = node.emboss === false && iconName?.startsWith('DECORATE_') ? (checked ? iconName.replace('UNLOCKED', 'LOCKED') : iconName) : iconName;
-        return button({ text, iconName: shown, kind: 'toggle', pressed: checked, disabled, inactive, iconOnly: !text, emboss: node.emboss !== false,
+        const shown = checked ? ICON_ON[iconName] ?? iconName : iconName;
+        return button({ text: node.icon_only ? '' : text, iconName: shown, kind: 'toggle', pressed: checked, disabled, inactive, iconOnly: !text, emboss: node.emboss !== false,
           title: meta.description || meta.name, onClick: () => setElement(node.invert_checkbox ? checked : !checked) });
       }
       return checkbox({ checked, text, disabled, inactive, title: meta.description, onChange: (v) => setElement(node.invert_checkbox ? !v : v) });
@@ -166,13 +207,14 @@ function widget(prop, node, { text, index = -1, disabled, inactive, ui }) {
   }
 }
 
-// An expanded enum: a row of toggles (radio buttons), or of icons; a flag enum toggles each.
-function expanded(prop, node, { disabled, inactive }) {
+// An expanded enum: aligned toggles (radio buttons), or icons, in the direction of the layout they are in
+// (ui_item_local_sublayout); a flag enum toggles each.
+function expanded(prop, node, { disabled, inactive, vertical }) {
   const value = prop.get(), flag = prop.meta.flag;
-  return h('div', { class: 'bl-align-row flex min-w-0 flex-1' }, prop.items().filter(Boolean).map(([id, name, description, iconName]) => {
+  return h('div', { class: vertical ? 'bl-align-col flex min-w-0 flex-1 flex-col' : 'bl-align-row flex min-w-0 flex-1' }, prop.items().filter(Boolean).map(([id, name, description, iconName]) => {
     const on = flag ? [...(value ?? [])].includes(id) : value === id;
     return button({ text: node.icon_only ? '' : name, iconName: iconName !== 'NONE' ? iconName : null, kind: 'radio', pressed: on, disabled, inactive,
-      title: description || name, iconOnly: node.icon_only, className: 'flex-1 gap-0.5 px-0.5',
+      title: description || name, iconOnly: node.icon_only, className: ['flex-1 gap-0.5 px-0.5', vertical && 'justify-start!'],
       onClick: () => prop.set(flag ? (on ? [...value].filter((v) => v !== id) : [...(value ?? []), id]) : id) });
   }));
 }
@@ -210,11 +252,13 @@ function propItem(node, env) {
   const elementText = (i, chars) => (isCheck ? chars[i] : '');
 
   let value;
-  if (meta.type === 'E' && node.expand) value = expanded(prop, node, options);
+  if (meta.type === 'E' && node.expand) value = expanded(prop, node, { ...options, vertical: !useSplit && !env.horizontal });
   else if (isArray) {
     const chars = Array.from({ length: meta.array }, (_, i) => itemChar(meta, i)), iconOnly = meta.type === 'B' && !isCheck;
     value = h('div', { class: [node.expand ? 'bl-align-row flex' : 'bl-align-col flex flex-col', iconOnly ? 'bl-icon-only' : 'min-w-0 flex-1'] },
       chars.map((char, i) => widget(prop, node, { ...options, index: i, text: useSplit ? elementText(i, chars) : (name && char ? char : '') })));
+    // ui_item_array: without the split, the name (with a colon, ui_item_name_add_colon) above the elements.
+    if (!useSplit && name && !iconOnly) value = h('div', { class: 'flex min-w-0 flex-1 flex-col' }, [label(name + ':'), value]);
   } else value = widget(prop, node, { ...options, text: useSplit && splitLabel ? '' : meta.type === 'E' || meta.type === 'S' || meta.type === 'P' ? '' : name });
 
   if (!useSplit || (name === '' && !splitEmptyName)) {
@@ -326,7 +370,7 @@ function templateImageSettings(node, env) {
   return settings ? layout({ kind: 'column', children: [prop('file_format'), prop('color_mode', { expand: true }), ...quality] }, env) : null;
 }
 
-const TEMPLATES = { template_image_settings: templateImageSettings, template_ID: templateID, template_list: templateList, template_node_view: templateNodeView,
+const TEMPLATES = { template_icon: (node) => toolIcon(node.icon_value), template_image_settings: templateImageSettings, template_ID: templateID, template_list: templateList, template_node_view: templateNodeView,
   template_ID_preview: templateID, template_search: templateID };
 
 // ---- Layouts.
@@ -347,9 +391,15 @@ function item(node, env) {
       const items = node.kind === 'menu' ? () => env.ui.drawMenu?.(node.menu) ?? [] : () => [];
       return menuButton({ text: node.text ?? '', iconName: node.icon, items, disabled: !env.enabled });
     }
-    case 'popover': case 'prop_with_popover':
-      return button({ text: node.text ?? '', iconName: node.icon ?? 'DOWNARROW_HLT', kind: 'popover', iconOnly: !node.text, onClick: (e) => env.ui.drawPopover?.(node.panel, e.currentTarget) });
-    case 'label': return label(node.text ?? '', { iconName: node.icon, className: !env.active ? 'opacity-50' : '' });
+    case 'popover': return popover([node.panel], node, env);
+    // An enum's menu button that opens the panel (uiItemPopoverPanel over the property's current item).
+    case 'prop_with_popover': {
+      const prop = resolve(node, env.ui), current = prop && enumItem(prop.items(), prop.get());
+      return prop && popover([node.panel], { text: node.icon_only ? '' : current?.[1], icon: node.icon ?? current?.[3] }, env, !!node.icon_only);
+    }
+    // uiItemPopoverPanelFromGroup: a popover for each panel of the region, context and category.
+    case 'popover_group': return h('div', { class: 'bl-row flex items-center gap-[var(--bl-row-gap)]' }, (env.ui.panelsOf?.(node) ?? []).map((id) => popover([id], {}, env)));
+    case 'label': return label(node.text ?? '', { iconName: node.icon, iconValue: node.icon_value, className: !env.active ? 'opacity-50' : '' });
     case 'separator': return h('div', { class: 'bl-separator shrink-0', style: { '--factor': node.factor ?? 1 }, 'data-type': node.type ?? 'AUTO' });
     case 'separator_spacer': return h('div', { class: 'flex-1' });
     case 'template': return (TEMPLATES[node.name] ?? env.ui.templates?.[node.name])?.(node, env) ?? null;
@@ -372,7 +422,7 @@ function layoutClass(node) {
 
 // A layout's children: with its heading for the first property, its active and enabled state for all it holds.
 function layout(node, env) {
-  const inner = { ...env, active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
+  const inner = { ...env, horizontal: node.kind === 'row' || node.kind === 'split', active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
     heading: node.heading ? { text: node.heading } : env.heading };
   if (node.kind === 'panel') return layoutPanel(node, inner);
   const children = [];

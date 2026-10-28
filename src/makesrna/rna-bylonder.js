@@ -6,7 +6,7 @@
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
 import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
-import { rna, collection, baseOf, INFO, pyArgs } from './rna.js';
+import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import rnaOperators from './rna-operators.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
@@ -263,9 +263,8 @@ const STRUCTS = {
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
     // The scene's orientation, then the Move, Rotate and Scale tools' (Default: the scene's), as the scene keeps them.
     transform_orientation_slots: (world) => (orientationSlots.get(world) ?? orientationSlots.set(world, collection([0, 1, 2, 3].map((slot) =>
-      rna('TransformOrientationSlot', Object.defineProperty({ type: slot ? 'DEFAULT' : 'GLOBAL' }, 'enum_items_of', {
-        value: (prop) => (prop === 'type' && slot ? [['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN']] : []),
-      }))))).get(world)),
+      rna('TransformOrientationSlot', { type: slot ? 'DEFAULT' : 'GLOBAL' }, { items: { type: () => [...(slot ? [ORIENTATION_DEFAULT] : []),
+        ...rnaProperty('TransformOrientationSlot', 'type').items] } })))).get(world)),
   },
   ToolSettings: {
     workspace_tool_type: { get: (world) => world.toolsystem?.workspace_tool_type ?? 'FALLBACK', set: (world, value) => { world.toolsystem.workspace_tool_type = value; } },
@@ -452,9 +451,8 @@ const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
 const orientationSlots = new WeakMap();
 const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
 
-// An operator's struct name (WM_operator_py_idname's inverse): view3d.select_box is VIEW3D_OT_select_box.
-export const operatorStruct = (idname) => idname.replace(/^(\w+)\./, (match, group) => group.toUpperCase() + '_OT_');
-export const operatorIdname = (struct) => struct.replace(/^(\w+?)_OT_/, (match, group) => group.toLowerCase() + '.');
+// A tool's orientation slot's own choice (rna_scene.cc: rna_TransformOrientation_with_scene_itemf).
+const ORIENTATION_DEFAULT = ['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN'];
 
 // An operator's properties (OperatorProperties) over the values stored for it: Blender's defaults (rna-operators.json)
 // until set. Writing one is an update (host.update), as a tool setting is.

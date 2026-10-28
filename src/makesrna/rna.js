@@ -4,6 +4,7 @@
 // default values. Bylonder's bindings are in rna-bylonder.js. What the interface shows of a property (name, ranges,
 // enum items, ...) is in rna-ui.json, loaded by loadRNAUI() before an editor first draws properties.
 import structs from './rna-structs.json' with { type: 'json' };
+import operators from './rna-operators.json' with { type: 'json' };
 import * as bpyTypes from '../bl_ui/bpy.types.js';
 
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
@@ -33,13 +34,26 @@ export async function loadRNAUI(load = () => import('./rna-ui.json', { with: { t
 // precision, items ([identifier, name, description, icon], null for a separator), flag }, or null if the struct lacks it.
 export function rnaProperty(struct, name) {
   const [type, value] = property(struct, name) ?? [];
-  if (!type) return null;
+  if (!type) return operatorProperty(struct, name);
   let meta = {};
   for (let s = struct; s; s = structs[s]?.base) if (ui?.[s]?.props[name]) { meta = ui[s].props[name]; break; }
   return {
     identifier: name, type, ...meta, name: meta.name ?? name,
     ...(type === 'P' || type === 'C' ? { struct: value } : { default: value, array: Array.isArray(value) && type !== 'E' ? value.length : 0 }),
   };
+}
+
+// An operator's struct name (WM_operator_py_idname's inverse): view3d.select_box is VIEW3D_OT_select_box.
+export const operatorStruct = (idname) => idname.replace(/^(\w+)\./, (match, group) => group.toUpperCase() + '_OT_');
+export const operatorIdname = (struct) => struct.replace(/^(\w+?)_OT_/, (match, group) => group.toLowerCase() + '.');
+
+// A property of an operator's struct (OperatorProperties: VIEW3D_OT_select_box), from rna-operators.json.
+const OPERATOR_TYPES = { BOOLEAN: 'B', INT: 'I', FLOAT: 'F', STRING: 'S', ENUM: 'E', POINTER: 'P', COLLECTION: 'C' };
+function operatorProperty(struct, name) {
+  const p = /_OT_/.test(struct) && operators[operatorIdname(struct)]?.properties[name];
+  if (!p) return null;
+  const type = OPERATOR_TYPES[p.type], flag = type === 'E' && Array.isArray(p.default);
+  return { ...p, identifier: name, type, flag, array: !flag && Array.isArray(p.default) ? p.default.length : 0, ...(p.fixed_type && { struct: p.fixed_type }) };
 }
 
 // A path from a struct (data_path), as RNA resolves it: names, ["name"] and [index].

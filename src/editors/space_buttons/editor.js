@@ -5,7 +5,7 @@
 import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { loadRNAUI, rnaProperty, INFO } from '../../makesrna/rna.js';
 import { createPreview } from '../../blenkernel/material/preview.js';
-import { MODULES, panelTypes, drawPanels } from '../interface/panels.js';
+import { MODULES, panelTypes, drawPanels, headerLayout } from '../interface/panels.js';
 import { UILayout } from '../interface/layout.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
 import { drawMenu } from '../interface/ui-layout.js';
@@ -38,12 +38,6 @@ function contextBar(context, space) {
 }
 
 // A header (bpy.types.Header) drawn into a layout.
-function drawHeader(type, context) {
-  const header = type(), layout = new UILayout('row');
-  header.layout = layout;
-  header.draw(context);
-  return layout;
-}
 
 export function mountProperties(host, { world, editor, history, rna, systems, properties, storage, files = [] }, areaId = 'properties', headerHost) {
   const key = 'workbench:properties:' + areaId;
@@ -148,8 +142,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       if (!state.ready) return h('section', { class: 'bl-ui bl-properties' });
       context = propertiesContext(rna, space);
       const nav = drawPanels(navigation, context, { contexts: [] });
-      const headerLayout = drawHeader(menus.PROPERTIES_HT_header ?? (() => ({ draw() {} })), context);
-      const header = h(LayoutView, { layout: headerLayout, ui });
+      const header = h(LayoutView, { layout: headerLayout(context, (layout) => menus.PROPERTIES_HT_header && Object.assign(menus.PROPERTIES_HT_header(), { layout }).draw(context)), ui });
       return h('section', { class: 'bl-ui bl-properties flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PROPERTIES', tabindex: -1, onKeydown,
         onPointerenter: (e) => e.currentTarget.focus({ preventScroll: true }) }, [
         headerHost ? h(Teleport, { to: headerHost }, [h('div', { class: 'bl-ui bl-properties-header flex min-w-0 flex-1 items-center' }, [header])]) : header,
