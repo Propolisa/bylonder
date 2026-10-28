@@ -2,7 +2,8 @@
 # JSON: the scene's frame range and render settings, its world, each object's type, transform, parent, data, material
 # slots, modifiers and animation, and each material's Principled BSDF inputs. With a PNG path, renders the scene's
 # current frame there.
-# usage: blender -b FILE.blend --python tools/blender-reference/blend-check.py -- [OUT.png [ENGINE [SAMPLES]]]
+# usage: blender -b FILE.blend --python tools/blender-reference/blend-check.py -- [OUT.png [ENGINE [SAMPLES [PERCENT]]]]
+# A render also prints the mean color of its middle and of its corners (BLEND-RENDER), for a test to see the scene.
 import bpy, json, sys
 
 args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
@@ -86,6 +87,18 @@ if args:
     if scene.render.engine == "CYCLES":
         scene.cycles.samples = int(args[2]) if len(args) > 2 else 32
         scene.cycles.device = "CPU"
+    if len(args) > 3:
+        scene.render.resolution_percentage = int(args[3])
     scene.render.filepath = args[0]
     scene.render.image_settings.file_format = "PNG"
     bpy.ops.render.render(write_still=True)
+    image = bpy.data.images.load(args[0])
+    w, h = image.size
+    pixels = image.pixels[:]
+
+    def mean(points):
+        return [round(sum(pixels[(y * w + x) * 4 + c] for x, y in points) / len(points), 4) for c in range(3)]
+
+    middle = [(x, y) for x in range(w * 2 // 5, w * 3 // 5) for y in range(h * 2 // 5, h * 3 // 5)]
+    corners = [(x, y) for x in (0, w - 1) for y in (0, h - 1)]
+    print("BLEND-RENDER " + json.dumps({"middle": mean(middle), "corners": mean(corners)}))

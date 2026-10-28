@@ -55,8 +55,11 @@ function matrixXYZ([x, y, z]) {
   return [[cy * cz, sx * sy * cz - cx * sz, cx * sy * cz + sx * sz], [cy * sz, sx * sy * sz + cx * cz, cx * sy * sz - sx * cz], [-sy, sx * cy, cx * cy]];
 }
 const looksAlongZ = (ob) => ob instanceof Camera || ob instanceof Light;
+// A camera that looks at a target (an Arc Rotate camera, or one locked on a target) is turned by its view, not its rotation.
+const aimed = (ob) => ob instanceof Camera && (ob.getClassName() === 'ArcRotateCamera' || !!ob.lockedTarget);
+const viewQuaternion = (ob) => Quaternion.FromRotationMatrix(ob.getWorldMatrix().getRotationMatrix());
 const lookingRotation = {
-  get: (ob) => eulerXYZ(lookingFrame(quaternionMatrix(babylonQuaternion(ob)))),
+  get: (ob) => eulerXYZ(lookingFrame(quaternionMatrix(aimed(ob) ? viewQuaternion(ob) : babylonQuaternion(ob)))),
   set: (ob, value) => setRotation(ob, matrixQuaternion(lookingFrame(matrixXYZ(value)))),
 };
 
@@ -153,6 +156,10 @@ const materialValue = (material, path) => {
   const keys = path.split('.'), key = keys.pop(), owner = () => keys.reduce((o, k) => o?.[k], material);
   return owner()?.[key] === undefined ? null : { get: () => owner()[key], set: (value) => { owner()[key] = value; } };
 };
+// A PBR layer's weight (clear coat, sheen): its intensity while enabled, as Blender's weight 0 turns the layer off.
+const layerWeight = (layer) => layer && { get: () => (layer.isEnabled ? layer.intensity : 0), set: (weight) => { layer.isEnabled = weight > 0; if (weight > 0) layer.intensity = weight; } };
+// Babylon's F0 factor is 1 where Blender's Specular IOR Level is 0.5 (the IOR's own reflectance).
+const specularLevel = (material) => ({ get: () => material.metallicF0Factor / 2, set: (level) => { material.metallicF0Factor = level * 2; } });
 function principledInputs(material) {
   const pbr = material.getClassName() === 'PBRMaterial', value = (path) => materialValue(material, path);
   return [
@@ -162,9 +169,9 @@ function principledInputs(material) {
     ['IOR', 'NodeSocketFloat', pbr && value('indexOfRefraction')],
     ['Alpha', 'NodeSocketFloatFactor', value('alpha')],
     ['Normal', 'NodeSocketVector', null],
-    ['Specular IOR Level', 'NodeSocketFloatFactor', pbr && value('metallicF0Factor')],
-    ['Coat Weight', 'NodeSocketFloatFactor', pbr && value('clearCoat.intensity')],
-    ['Sheen Weight', 'NodeSocketFloatFactor', pbr && value('sheen.intensity')],
+    ['Specular IOR Level', 'NodeSocketFloatFactor', pbr && specularLevel(material)],
+    ['Coat Weight', 'NodeSocketFloatFactor', pbr && layerWeight(material.clearCoat)],
+    ['Sheen Weight', 'NodeSocketFloatFactor', pbr && layerWeight(material.sheen)],
     ['Emission Color', 'NodeSocketColor', material.emissiveColor && color3(material, 'emissiveColor')],
     ['Emission Strength', 'NodeSocketFloat', pbr && value('emissiveIntensity')],
   ].map(([name, socket, binding]) => [name, socket, binding || null]);

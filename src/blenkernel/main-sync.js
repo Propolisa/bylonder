@@ -3,7 +3,7 @@
 // the .blend writer) works on real data whenever it runs.
 // - One mapping: the RNA bindings marked `sync` (makesrna/rna-bylonder.js), read and written in Main at the DNA field
 //   Blender's RNA names (makesrna/dna-struct.js). What is not a value (names, parents, object data, materials,
-//   collections, modifiers, bases) is written here, under the same RNA names (RELATIONS).
+//   collections, modifiers, bases) is written here, under the same RNA names (an object's in RELATIONS).
 // - Babylon to Main: hooks on Babylon's setters and observables mark an object changed (hooks.js); flush() writes
 //   what differs from what was last synced, at the end of the task and before any of Blender's code runs.
 // - Main to Babylon: after Blender's code ran (run()), what it changed is written back through the same mapping:
@@ -63,7 +63,9 @@ export function shaderTree(tree) {
     nodes.push(entry);
     for (const input of node.inputs) {
       const from = input.is_linked ? input.links[0].from_node : null;
-      entry.inputs.push({ identifier: input.identifier, name: input.name, socket: input[INFO].struct, value: from ? null : plain(input.default_value) ?? null });
+      // An input Bylonder does not bind has no value: Blender's default is the node type's.
+      const bound = !from && input[INFO].bound.has('default_value');
+      entry.inputs.push({ identifier: input.identifier, name: input.name, socket: input[INFO].struct, value: bound ? plain(input.default_value) ?? null : null });
       if (from) {
         add(from, depth + 1);
         links.push([from.name, SHADER_OUTPUTS[from[INFO].struct], node.name, input.identifier]);
@@ -105,6 +107,39 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const live = () => rna.objects();
   const entryOf = (node) => objects.get(node);
   const nodeOf = (ob) => [...objects.values()].find((entry) => entry.ob === ob)?.node ?? null;
+
+  // An object's relations: its RNA pointer and collection properties, as IDs in Main. Each is written, read back and
+  // checked by the same routines (pushRelations, pullRelations, check): `babylon` is the value Main should hold,
+  // `main` what it holds, `set` writes it with Blender's function for that RNA setter, `apply` (when Blender's code
+  // may change it) gives Main's to Babylon. A new kind is one more entry.
+  const RELATIONS = {
+    parent: {
+      babylon: (node) => objects.get(node.parent)?.ob ?? 0,
+      main: (ob) => blender.parent(ob),
+      set: (ob, parent) => blender.setParent(ob, parent),
+      apply: (node, parent) => node.setParent(nodeOf(parent)),
+    },
+    material_slots: {
+      applies: (entry) => entry.type === 'MESH' && !!world.materials,
+      babylon: (node) => world.materials.slots(node).map((material) => (material ? materials.get(material)?.ma ?? 0 : 0)),
+      main: (ob) => blender.materials(ob),
+      set: (ob, slots) => blender.setMaterials(ob, slots),
+    },
+  };
+  const exact = (a, b) => JSON.stringify(plain(a)) === JSON.stringify(plain(b));
+  const relations = (entry) => Object.entries(RELATIONS).filter(([, relation]) => relation.applies?.(entry) ?? true);
+  function pushRelations(entry) {
+    for (const [, relation] of relations(entry)) {
+      const value = relation.babylon(entry.node);
+      if (!exact(value, relation.main(entry.ob))) relation.set(entry.ob, value);
+    }
+  }
+  function pullRelations(entry) {
+    for (const [, relation] of relations(entry)) {
+      const value = relation.main(entry.ob);
+      if (relation.apply && !exact(value, relation.babylon(entry.node))) relation.apply(entry.node, value);
+    }
+  }
 
   // A record's values from Babylon into Main, where they differ from what was last synced; what Main holds is kept.
   function push(record, owner) {
@@ -179,16 +214,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       blender.rename(ob, node.name);
       [entry.babylonName, entry.name] = [node.name, blender.name(ob)];
     }
-    blender.setParent(ob, objects.get(node.parent)?.ob);
+    pushRelations(entry);
     blender.setMode(ob, data.mode);
     if (entry.id !== nodeId(node)) blender.setProperty(ob, PROPERTIES.id, (entry.id = nodeId(node)));
     push(entry, node);
     if (entry.data.ptr && entry.data.struct) push(entry.data, node);
-    const slots = world.materials?.slots(node);
-    if (slots && entry.type === 'MESH') {
-      const wanted = slots.map((material) => (material ? materials.get(material)?.ma ?? 0 : 0));
-      if (!same(wanted, blender.materials(ob))) blender.setMaterials(ob, wanted);
-    }
     pushModifiers(entry);
   }
   // A mesh object's modifier stack as Blender holds it: the stack's Blender modifiers with their settings.
@@ -404,8 +434,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
         const name = blender.name(ob);
         if (name !== entry.name) [node.name, entry.name, entry.babylonName] = [name, name, name];
-        const parent = nodeOf(blender.parent(ob));
-        if (parent !== (objects.has(node.parent) ? node.parent : null)) node.setParent(parent);
+        pullRelations(entry);
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
@@ -463,14 +492,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (!sameName(node.name, blender.name(entry.ob))) diffs.push(`${label}.name: Main "${blender.name(entry.ob)}"`);
       compare(label, entry, node);
       if (entry.data.ptr && entry.data.struct) compare(`${label}.data`, entry.data, node);
-      if (blender.parent(entry.ob) !== (objects.get(node.parent)?.ob ?? 0)) diffs.push(`${label}.parent differs`);
+      for (const [name, relation] of relations(entry)) if (!exact(relation.babylon(node), relation.main(entry.ob))) diffs.push(`${label}.${name} differs`);
       const base = blender.base(entry.ob);
       if (base && base.selected !== selection.has(node)) diffs.push(`${label}: selected ${selection.has(node)}, Main ${base.selected}`);
       if (base && base.active !== (node === active) && base.selected) diffs.push(`${label}: active differs`);
-      if (entry.type === 'MESH' && world.materials) {
-        const wanted = world.materials.slots(node).map((m) => (m ? materials.get(m)?.ma ?? 0 : 0));
-        if (!same(wanted, blender.materials(entry.ob))) diffs.push(`${label}.material_slots differ`);
-      }
       if (filled.has(entry)) {
         const mesh = blender.mesh(entry.ob), own = objectMesh(node);
         if (!same(Array.from(mesh.vert_positions), Array.from(own.vert_positions)) || !same(Array.from(mesh.corner_verts), Array.from(own.corner_verts)))
