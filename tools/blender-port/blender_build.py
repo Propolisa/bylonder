@@ -68,12 +68,21 @@ def wasm_command(entry, extra):
     return [compiler, *extra, *keep, *FLAGS]
 
 
+REPO = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
+# The work directory (configure_host.sh's DIR), set by main.
+WORK = {}
+
+
 def compile_one(objects, entry, extra):
     command = wasm_command(entry, extra)
     source = entry['file'] if os.path.isabs(entry['file']) else os.path.join(entry['directory'], entry['file'])
     if not os.path.exists(source):
         return source, None, 'generated source missing'
-    digest = hashlib.sha1((' '.join(command) + open(source, 'rb').read().hex()).encode()).hexdigest()[:16]
+    # Keyed without where the checkout and the work directory are, so objects compiled elsewhere (CI) are found here.
+    stable = ' '.join(command).replace(REPO, '$REPO')
+    for work, token in WORK.items():
+        stable = stable.replace(work, token)
+    digest = hashlib.sha1((stable + open(source, 'rb').read().hex()).encode()).hexdigest()[:16]
     obj = os.path.join(objects, f'{os.path.basename(source)}.{digest}.o')
     if os.path.exists(obj):
         return source, obj, None
@@ -178,6 +187,8 @@ def first_error(stderr):
 
 def main():
     host = os.path.abspath(sys.argv[1])
+    WORK[os.path.realpath(os.path.join(host, '..'))] = '$WORK'
+    WORK[os.path.dirname(host)] = '$WORK'
     report = sys.argv[sys.argv.index('--report') + 1] if '--report' in sys.argv else os.path.join(host, '..', 'seam-report.json')
     out = os.path.join(host, '..', 'wasm-build')
     objects = os.path.join(out, 'objects')
