@@ -214,7 +214,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     const rendered = view.rendered;
     authored = null;
     if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
-    ctx.overlays.setEnabled(state.overlays && !rendered);
+    ctx.overlays.setEnabled(state.overlays && !rendered, state);
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
   };
   view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; };

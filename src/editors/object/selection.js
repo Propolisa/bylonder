@@ -1,37 +1,32 @@
 import { nodeId, deleted } from "./identity.js";
-import {
-  Color3,
-  Matrix,
-  Quaternion,
-  TransformNode,
-  Vector3,
-} from "@babylonjs/core";
+import { Quaternion, TransformNode } from "@babylonjs/core";
 export function createSelection(scene, objects) {
   const ids = new Set();
   const pivot = new TransformNode("__selectionPivot", scene);
   let baseline = null;
-  const nodes = () =>
-    objects.filter(
-      (n) =>
-        ids.has(nodeId(n)) &&
-        !n.isDisposed() &&
-        !deleted(n) &&
-        !n.metadata?.wbLocked,
-    );
+  // In selection order: the last is the active object.
+  const nodes = () => {
+    const order = new Map([...ids].map((id, i) => [id, i]));
+    return objects
+      .filter((n) => order.has(nodeId(n)) && !n.isDisposed() && !deleted(n) && !n.metadata?.wbLocked)
+      .sort((a, b) => order.get(nodeId(a)) - order.get(nodeId(b)));
+  };
   const roots = () =>
     nodes().filter(
       (n) => !nodes().some((other) => other !== n && n.isDescendantOf(other)),
     );
-  const meshes = () => objects.filter((n) => n.getTotalVertices?.() > 0);
-  function highlight() {
-    for (const mesh of meshes()) {
-      // Edit Mode draws its own overlay instead of the object outline, as Blender does.
-      mesh.renderOutline = !mesh.metadata?.editing && nodes().some(
-        (n) => mesh === n || mesh.isDescendantOf(n),
-      );
-      mesh.outlineColor = new Color3(1, 0.58, 0.17);
-      mesh.outlineWidth = 0.035;
+  // The meshes the selection outline draws (Instance::object_sync), each with the selected node it outlines for (its
+  // nearest selected ancestor or itself): selected meshes and the meshes under a selected node, outside Edit Mode.
+  function outlined() {
+    const selected = new Set(nodes()), owners = new Map();
+    if (!selected.size) return owners;
+    for (const mesh of objects) {
+      if (!(mesh.getTotalVertices?.() > 0) || mesh.metadata?.editing || deleted(mesh) || mesh.isDisposed()) continue;
+      let owner = mesh;
+      while (owner && !selected.has(owner)) owner = owner.parent;
+      if (owner) owners.set(mesh, owner);
     }
+    return owners;
   }
   function sync() {
     for (const id of ids)
@@ -56,7 +51,6 @@ export function createSelection(scene, objects) {
       pivot.position.scaleInPlace(1 / selected.length);
     }
     baseline = null;
-    highlight();
   }
   function begin() {
     pivot.computeWorldMatrix(true);
@@ -84,7 +78,6 @@ export function createSelection(scene, objects) {
       for(const [property,original] of Object.entries({position,rotation,scaling}))for(const axis of ["x","y","z"])if(node.metadata?.wbTransformLocks?.[property+"."+axis])node[property][axis]=original[axis];
       node.computeWorldMatrix(true);
     }
-    highlight();
   }
   return {
     pivot,
@@ -115,6 +108,7 @@ export function createSelection(scene, objects) {
       list.forEach((n) => ids.add(nodeId(n)));
       sync();
     },
+    outlined,
     sync,
     begin,
     update,
@@ -148,7 +142,6 @@ export function createSelection(scene, objects) {
       return list.length;
     },
     dispose() {
-      for (const mesh of meshes()) mesh.renderOutline = false;
       pivot.dispose();
     },
   };
