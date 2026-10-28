@@ -13,6 +13,7 @@ import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { openMenu } from '../interface/menu.js';
 import { buttonAt, drawRecording } from '../interface/region-draw.js';
+import { SvgContext } from '../interface/svg-context.js';
 import { headerLayout, drawPanels, drawType } from '../interface/panels.js';
 import { LayoutView } from '../interface/layout-view.js';
 import { menus, headers, panels } from '../../python/bpy_interface.js';
@@ -308,7 +309,9 @@ export function createOutliner({ world, editor, commands, sync: scene, rna, regi
     if (area.size[0] !== width || area.size[1] !== height) area.resize(width, height);
     sync();
     recording = area.draw();
-    drawRecording(view, recording, { width, height });
+    const ctx = new SvgContext(width, height);
+    drawRecording(ctx, recording, { height });
+    ctx.flush(view);
     const editing = recording.buttons.find((b) => b.type === BUT_TEXT && b.active);
     if (editing && !textField) startTextEdit(editing);
     drawHeader();

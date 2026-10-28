@@ -1,8 +1,8 @@
-// Drawing the animation editors' regions on a canvas as Blender draws them (view2d_draw.cc, time_scrub_ui.cc,
+// Drawing the animation editors' regions as Blender draws them (view2d_draw.cc, time_scrub_ui.cc,
 // anim_channels_defines.cc, graph_draw.cc, keyframes_draw.cc), from what the module lists (anim-area.js) and Blender's
-// default theme (theme-default.json). Coordinates: `r` maps a region's Blender pixels (y up) to the canvas.
+// default theme (theme-default.json). Coordinates: `r` maps a region's Blender pixels (y up) to the drawing.
 import theme from '../interface/theme-default.json' with { type: 'json' };
-import { iconUrl } from '../interface/icon.js';
+import { SvgContext } from '../interface/svg-context.js';
 import { ACHANNEL_SETTING } from './anim-area.js';
 
 const { anim, curves } = theme.common;
@@ -10,44 +10,10 @@ const css = (c, alpha = c[3] ?? 1) => `rgba(${Math.round(c[0] * 255)},${Math.rou
 const shade = (c, amount) => c.map((v, i) => (i < 3 ? Math.max(0, Math.min(1, v + amount / 255)) : v));
 export const FONT = '11px "Inter","DejaVu Sans",system-ui,sans-serif';
 
-// Icons as images, loaded once.
-const images = new Map();
-function iconImage(name, onload) {
-  if (!images.has(name)) {
-    const image = new Image();
-    image.onload = onload;
-    image.src = iconUrl(name);
-    images.set(name, image);
-  }
-  const image = images.get(name);
-  return image.complete && image.naturalWidth ? image : null;
-}
-
-// An icon in a color, as Blender draws a monochrome icon with a color (icon_draw_ex): the icon's shape filled.
-const tinted = new Map();
-function tintedIcon(name, color, onload) {
-  const key = name + color, image = iconImage(name, onload);
-  if (!image) return null;
-  if (!tinted.has(key)) {
-    const canvas = Object.assign(document.createElement('canvas'), { width: 32, height: 32 }), ctx = canvas.getContext('2d');
-    ctx.drawImage(image, 0, 0, 32, 32);
-    ctx.globalCompositeOperation = 'source-in';
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, 32, 32);
-    tinted.set(key, canvas);
-  }
-  return tinted.get(key);
-}
-
-// A region's canvas and its mapping from Blender's region pixels (origin bottom left) to the canvas.
-export function regionCanvas(canvas, width, height) {
-  const ratio = globalThis.devicePixelRatio || 1;
-  if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-  }
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+// A region's drawing (svg-context.js, flushed into its SVG by the caller) and its mapping from Blender's region pixels
+// (origin bottom left) to it.
+export function regionDrawing(width, height) {
+  const ctx = new SvgContext(width, height);
   ctx.font = FONT;
   return { ctx, width, height, y: (y) => height - y };
 }
@@ -130,7 +96,7 @@ export function drawFrameRange(view, v2d, { start, end, previewStart, previewEnd
 // The scene's markers along the region's bottom (ED_markers_draw): the strip they sit on, then per marker a dashed
 // line up the region, its icon and its name, those not elevated (selected, or the one the current frame is at) first.
 export const UI_MARKER_MARGIN_Y = 34;
-export function drawMarkers(view, v2d, markers, frame, redraw) {
+export function drawMarkers(view, v2d, markers, frame) {
   if (!markers.length) return;
   const { ctx, width, height } = view, scrubbing = theme.regions.scrubbing;
   ctx.fillStyle = css(scrubbing.back);
@@ -145,8 +111,7 @@ export function drawMarkers(view, v2d, markers, frame, redraw) {
     ctx.setLineDash([3, 3]);
     ctx.beginPath(); ctx.moveTo(x, view.y(22)); ctx.lineTo(x, 0); ctx.stroke();
     ctx.setLineDash([]);
-    const icon = tintedIcon(m.select ? 'MARKER_HLT' : 'MARKER', color, redraw);
-    if (icon) ctx.drawImage(icon, x - 8, view.y(10) - 16, 16, 16);
+    ctx.icon(m.select ? 'MARKER_HLT' : 'MARKER', x - 8, view.y(10) - 16, 16, 16, color);
     const xmax = i + 1 < sorted.length ? v2d.toRegion(sorted[i + 1].frame, 0)[0] : width;
     ctx.save();
     ctx.beginPath(); ctx.rect(x + 12, 0, Math.max(0, xmax - 12 - (x + 12)), height); ctx.clip();

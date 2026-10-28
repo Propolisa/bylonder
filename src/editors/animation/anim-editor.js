@@ -6,7 +6,7 @@
 // the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
 import { AnimArea, iconName, GRAPH_MODES, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
-import { regionCanvas, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
+import { regionDrawing, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
 import { newOperator, operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { keymapHandler, modalItem } from '../../windowmanager/keyconfig.js';
@@ -116,15 +116,14 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     view.setAttribute('class', className);
     return view;
   };
-  // The channel region is the module's drawing; the main region is Bylonder's (anim-draw.js), the module's over it.
+  // The channel region is the module's drawing; the main region is Bylonder's (anim-draw.js) with the module's over it.
   const channelsView = svg('anim-channels');
-  const mainCanvas = Object.assign(document.createElement('canvas'), { className: 'anim-main' });
-  const mainOverlay = svg('anim-overlay');
+  const mainView = svg('anim-main');
   const sidebar = Object.assign(document.createElement('div'), { className: 'bl-ui anim-sidebar' });
   sidebar.setAttribute('aria-label', 'Sidebar');
   // The sidebar's own events stay there, as a region's handlers take them.
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'wheel', 'keydown', 'keyup', 'contextmenu']) sidebar.addEventListener(type, (e) => e.stopPropagation());
-  section.replaceChildren(channelsView, mainCanvas, mainOverlay, sidebar);
+  section.replaceChildren(channelsView, mainView, sidebar);
   const status = Object.assign(document.createElement('div'), { className: 'anim-status' });
   const menus = Object.assign(document.createElement('div'), { className: 'bl-ui anim-header' });
   header?.replaceChildren(menus, status);
@@ -479,7 +478,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       channelsView.style.display = channels ? '' : 'none';
       sidebar.hidden = !ui;
       Object.assign(channelsView.style, { width: channels + 'px', height: height + 'px' });
-      for (const view of [mainCanvas, mainOverlay]) Object.assign(view.style, { left: channels + 'px', width: width - channels - ui + 'px', height: height + 'px' });
+      Object.assign(mainView.style, { left: channels + 'px', width: width - channels - ui + 'px', height: height + 'px' });
       sidebar.style.width = ui + 'px';
     }
     return true;
@@ -500,7 +499,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     const range = { start: t.frameStart, end: t.frameEnd, previewStart: t.framePreviewStart, previewEnd: t.framePreviewEnd, preview: t.usePreviewRange };
     const settings = area.settings, metrics = area.metrics(), v2d = area.v2d();
     const channels = area.channels();
-    const main = regionCanvas(mainCanvas, size.width - size.channels - size.ui, size.height);
+    const main = regionDrawing(size.width - size.channels - size.ui, size.height);
     const spaceTheme = graph ? theme.graph_editor : theme.dopesheet_editor;
     const back = spaceTheme.space.back;
     main.ctx.fillStyle = `rgb(${back.map((c) => Math.round(c * 255)).join(',')})`;
@@ -514,13 +513,16 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       const { cur } = v2d, rows = channelRows(channels, v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
       drawKeyRows(main, v2d, rows, metrics, { backdrops: !timeline });
     }
-    if (markersShown() && !drivers) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
+    if (markersShown() && !drivers) drawMarkers(main, v2d, animation.anim.markers, frame);
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
     if (!drivers) drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
-    drawRecording(mainOverlay, area.draw(RGN_TYPE_WINDOW, true), { width: main.width, height: size.height });
+    drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW, true), { height: size.height });
+    main.ctx.flush(mainView);
     if (size.channels) {
+      const view = regionDrawing(size.channels, size.height);
       channelRecording = area.draw(RGN_TYPE_CHANNELS);
-      drawRecording(channelsView, channelRecording, { width: size.channels, height: size.height });
+      drawRecording(view.ctx, channelRecording, { height: size.height });
+      view.ctx.flush(channelsView);
       // The block layouts the draw made (the channel filter beside the scrubbing area), by the shared renderer.
       channelLayouts.value = channelRecording.draw.filter((op) => op.op === 'layout');
     }
