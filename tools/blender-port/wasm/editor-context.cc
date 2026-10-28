@@ -622,7 +622,7 @@ EXPORT(operator_enum_items) const char *operator_enum_items(bContext *C, int typ
     }
   }
   if (free) {
-    MEM_delete_void(const_cast<EnumPropertyItem *>(items));
+    MEM_delete(const_cast<EnumPropertyItem *>(items));
   }
   operator_destroy(op);
   return text.c_str();
