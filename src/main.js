@@ -40,6 +40,7 @@ import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
+import { createBlenderObjects } from "./editors/object/object-blender.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
@@ -287,8 +288,8 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-registerObjectOperators(world.objectActions);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
+registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify }));
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
@@ -499,6 +500,9 @@ const bylonderKeys = createKeymap([
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
+// Blender's menus its keymaps call that Bylonder draws as popups, those whose entries Blender's code runs.
+const CALLED_MENUS = ["VIEW3D_MT_object_apply"];
+registerOperators({ "wm.call_menu": { supports: ({ name }) => CALLED_MENUS.includes(name), run: ({ name }) => activeView()?.callMenu(name) } });
 // Blender's keymaps a 3D View runs, Object Mode's only outside Edit Mode, whose own keymap runs before them.
 const blenderKeys = keymapHandler(["Object Mode", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
   (name) => name !== "Object Mode" || !world.editMode.active);

@@ -1,8 +1,9 @@
-/* Blender's Object Mode without a window manager: a Main holding Bylonder's objects and their data, one Scene with one
- * ViewLayer whose Bases hold the selection and the active object, and a window whose screen answers context members
- * as Blender's screen context does (screen_context.cc). Bylonder owns the objects: before an operator the editor
- * writes their transforms, parents, selection and meshes here, and afterwards reads back what the operator tagged
- * (DEG_id_tag_update keeps its tags on the ID). Operators run by their own exec (operator_exec). */
+/* Blender's data outside Edit Mode, without a window manager: a Main holding Bylonder's objects and their data, one
+ * Scene with one ViewLayer whose Bases hold the selection and the active object, and a window whose screen answers
+ * context members as Blender's screen context does (screen_context.cc). Bylonder owns the data: before an operator the
+ * editor writes the objects' transforms, parents, bases and data here, and afterwards reads back what the operator
+ * tagged (DEG_id_tag_update keeps its tags on the ID). Operators run by their own exec (operator_exec, on main_C).
+ * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
 #include "BKE_attribute.hh"
 #include "BKE_context.hh"
 #include "BKE_layer.hh"
@@ -39,7 +40,7 @@ namespace blender {
 int ed_screen_context(const bContext *C, const char *member, bContextDataResult *result);
 }
 
-struct ObjectContext {
+struct BlenderMain {
   bContext *C;
   Main *bmain;
   Scene scene = {};
@@ -53,16 +54,16 @@ struct ObjectContext {
   ExtractionHeader extraction = {};
 };
 
-EXPORT(object_context_new) ObjectContext *object_context_new()
+EXPORT(main_new) BlenderMain *main_new()
 {
   types_ensure();
-  ObjectContext *ctx = MEM_new<ObjectContext>(__func__);
+  BlenderMain *ctx = MEM_new<BlenderMain>(__func__);
   /* As BKE_main_new makes it, without the working color space: the module has no color management. */
   ctx->bmain = MEM_new<Main>(__func__);
   ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);
   BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
   ctx->scene.toolsettings = &ctx->tool_settings;
-  /* port-override: Bylonder's animation keys what operators change, so Blender's auto keying stays off. */
+  /* port-override: the module has no animation data yet, so Blender's auto keying stays off. */
   ctx->tool_settings.autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
@@ -75,15 +76,17 @@ EXPORT(object_context_new) ObjectContext *object_context_new()
   return ctx;
 }
 
-EXPORT(object_context_C) bContext *object_context_C(ObjectContext *ctx) { return ctx->C; }
+EXPORT(main_C) bContext *main_C(BlenderMain *ctx) { return ctx->C; }
+/* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
+EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }
 
-static Base *base_of(ObjectContext *ctx, Object *ob) { return BKE_view_layer_base_find(&ctx->view_layer, ob); }
+static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(&ctx->view_layer, ob); }
 
 /* The bases changed, so the view layer's map from objects to them is made again when next asked. */
-static void bases_changed(ObjectContext *ctx) { MEM_SAFE_DELETE(ctx->view_layer.runtime->object_bases_hash); }
+static void bases_changed(BlenderMain *ctx) { MEM_SAFE_DELETE(ctx->view_layer.runtime->object_bases_hash); }
 
 /* An object of a type (ObjectType) with new data of its type, as BKE_object_add makes it, in the view layer. */
-EXPORT(object_context_add) Object *object_context_add(ObjectContext *ctx, int type, const char *name)
+EXPORT(main_object_add) Object *main_object_add(BlenderMain *ctx, int type, const char *name)
 {
   Object *ob = BKE_object_add_only_object(ctx->bmain, ObjectType(type), name);
   ob->data = static_cast<ID *>(BKE_object_obdata_add_from_type(ctx->bmain, ObjectType(type), name));
@@ -95,8 +98,11 @@ EXPORT(object_context_add) Object *object_context_add(ObjectContext *ctx, int ty
   return ob;
 }
 
+/* An object's data (Mesh, Curve, Light, Camera...), or null for an empty. */
+EXPORT(object_data) ID *object_data(Object *ob) { return ob->data; }
+
 /* Removes an object and its data; no other object may have it as parent. */
-EXPORT(object_context_remove) void object_context_remove(ObjectContext *ctx, Object *ob)
+EXPORT(main_object_remove) void main_object_remove(BlenderMain *ctx, Object *ob)
 {
   Base *base = base_of(ctx, ob);
   if (ctx->view_layer.basact == base) {
@@ -112,8 +118,8 @@ EXPORT(object_context_remove) void object_context_remove(ObjectContext *ctx, Obj
 
 /* An object's base: its collection's visibility, whether it is hidden, unselectable or selected, and whether it is
  * the active object, with its flags evaluated as the view layer's sync evaluates them. */
-EXPORT(object_context_base_set)
-void object_context_base_set(ObjectContext *ctx, Object *ob, bool visible, bool hidden, bool hide_select, bool select, bool active)
+EXPORT(main_base_set)
+void main_base_set(BlenderMain *ctx, Object *ob, bool visible, bool hidden, bool hide_select, bool select, bool active)
 {
   Base *base = base_of(ctx, ob);
   base->flag_from_collection = visible ? BASE_ENABLED_VIEWPORT | BASE_ENABLED_AND_MAYBE_VISIBLE_IN_VIEWPORT |
@@ -167,8 +173,8 @@ EXPORT(object_fields) const ObjectFields *object_fields(Object *ob)
 }
 
 /* The scene's 3D cursor location and its pivot point (V3D_AROUND_*), which operators read. */
-EXPORT(object_context_cursor) float *object_context_cursor(ObjectContext *ctx) { return ctx->scene.cursor.location; }
-EXPORT(object_context_pivot_point_set) void object_context_pivot_point_set(ObjectContext *ctx, int pivot_point)
+EXPORT(main_cursor) float *main_cursor(BlenderMain *ctx) { return ctx->scene.cursor.location; }
+EXPORT(main_pivot_point_set) void main_pivot_point_set(BlenderMain *ctx, int pivot_point)
 {
   ctx->tool_settings.transform_pivot_point = char(pivot_point);
 }
@@ -186,7 +192,7 @@ static void where_is_calc(Depsgraph *depsgraph, Scene *scene, Object *ob, Set<Ob
 
 /* What the depsgraph does once the editor has written the objects or an operator has changed them: each object's
  * world matrix, parents first, and the tags cleared. */
-EXPORT(object_context_evaluate) void object_context_evaluate(ObjectContext *ctx)
+EXPORT(main_evaluate) void main_evaluate(BlenderMain *ctx)
 {
   Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(ctx->C);
   Set<Object *> done;
@@ -224,7 +230,7 @@ EXPORT(object_mesh_attribute_add) bool object_mesh_attribute_add(Object *ob, con
 }
 
 /* A mesh object's Mesh, read through the header until the next call. */
-EXPORT(object_mesh_extract) const ExtractionHeader *object_mesh_extract(ObjectContext *ctx, Object *ob)
+EXPORT(object_mesh_extract) const ExtractionHeader *object_mesh_extract(BlenderMain *ctx, Object *ob)
 {
   mesh_extraction(*id_cast<Mesh *>(ob->data), ctx->extraction);
   return &ctx->extraction;

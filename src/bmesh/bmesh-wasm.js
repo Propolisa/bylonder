@@ -298,36 +298,37 @@ export class EditMesh {
   }
 }
 
-const OBJECT_TYPES = { EMPTY: 0, MESH: 1, LIGHT: 10, CAMERA: 11 };
+const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11 };
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 // A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
 const DOMAINS = { POINT: 0, EDGE: 1, FACE: 2, CORNER: 3 };
 const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num', CORNER: 'corners_num' };
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
 
-// Blender's Object Mode world (object-context.cc): a Main of objects and their data, a scene whose view layer holds the
-// selection and the active object, and the context Object Mode operators run in. An object is named by the address
+// Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
+// selection and the active object, and the context operators run in. Other subsystems add their IDs to `bmain` and
+// reach an object's data by `data(ob)`. An object is named by the address
 // add() gives; transforms are in Blender's axes, matrices column-major, as an object's RNA names them.
-export class BlenderObjects {
-  #context = x.object_context_new();
-  #C = x.object_context_C(this.#context);
+export class BlenderMain {
+  #context = x.main_new();
+  #C = x.main_C(this.#context);
   #attributes = new Map();
 
-  // An object of a type (EMPTY, MESH, LIGHT, CAMERA) with new data of its type.
-  add(type, name) { return withString(name, (p) => x.object_context_add(this.#context, OBJECT_TYPES[type], p)) >>> 0; }
+  // An object of a type (EMPTY, MESH, CURVE, FONT, LIGHT, CAMERA) with new data of its type.
+  add(type, name) { return withString(name, (p) => x.main_object_add(this.#context, OBJECT_TYPES[type], p)) >>> 0; }
   remove(ob) {
     this.#attributes.delete(ob);
-    x.object_context_remove(this.#context, ob);
+    x.main_object_remove(this.#context, ob);
   }
 
   // Its base in the view layer: whether its collection shows it, whether it is hidden, unselectable, selected or active.
   setBase(ob, { visible = true, hidden = false, hide_select = false, select = false, active = false }) {
-    x.object_context_base_set(this.#context, ob, visible, hidden, hide_select, select, active);
+    x.main_base_set(this.#context, ob, visible, hidden, hide_select, select, active);
   }
   setParent(ob, parent) { x.object_parent_set(ob, parent ?? 0); }
   setMode(ob, mode) { x.object_mode_set(ob, mode === 'EDIT' ? 1 : 0); }
 
-  // The object's DNA (ObjectFields in object-context.cc), read and written in place.
+  // The object's DNA (ObjectFields in main-api.cc), read and written in place.
   #fields(ob) {
     const [location, euler, quaternion, scale, mode, parentinv, world, recalc, dataRecalc] = new Uint32Array(x.memory.buffer, x.object_fields(ob) >>> 0, 9);
     const floats = (p, n) => new Float32Array(x.memory.buffer, p, n);
@@ -356,11 +357,11 @@ export class BlenderObjects {
   }
 
   // The scene's 3D cursor location and its pivot point (V3D_AROUND_*), which operators read.
-  set cursor(location) { new Float32Array(x.memory.buffer, x.object_context_cursor(this.#context) >>> 0, 3).set(location); }
-  set pivotPoint(pivot) { x.object_context_pivot_point_set(this.#context, pivot); }
+  set cursor(location) { new Float32Array(x.memory.buffer, x.main_cursor(this.#context) >>> 0, 3).set(location); }
+  set pivotPoint(pivot) { x.main_pivot_point_set(this.#context, pivot); }
 
   // World matrices, parents first, as the depsgraph evaluates them; clears the tags.
-  evaluate() { x.object_context_evaluate(this.#context); }
+  evaluate() { x.main_evaluate(this.#context); }
 
   // A mesh object's Mesh, with the attributes Blender's Mesh has types for.
   setMesh(ob, mesh) {
@@ -382,6 +383,10 @@ export class BlenderObjects {
     }));
     return ownedMesh(mesh);
   }
+
+  // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
+  get bmain() { return x.main_bmain(this.#context) >>> 0; }
+  data(ob) { return x.object_data(ob) >>> 0; }
 
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
   poll(idname) { return pollOperator(this.#C, idname); }

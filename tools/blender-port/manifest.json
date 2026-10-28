@@ -25,7 +25,7 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "object-context.cc", "modifier-api.cc", "panel-layout.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "modifier-api.cc", "panel-layout.cc"],
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH", "WITH_OPENVDB"],
       "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "intern/openvdb", "extern/bullet2/src"],
       "operators": ["source/blender/editors/mesh/mesh_intern.hh", "source/blender/editors/object/object_transform.cc"],

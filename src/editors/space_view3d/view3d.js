@@ -1,5 +1,5 @@
 import { ArcRotateCamera, Color4, Vector3 } from '@babylonjs/core';
-import { menuButton } from '../interface/menu.js';
+import { menuButton, openMenu } from '../interface/menu.js';
 import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
@@ -119,6 +119,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);
+  // wm.call_menu: one of Blender's menus as a popup at the pointer.
+  view.callMenu = (idname) => openMenu(drawMenu(idname, blender), editor.pointer, blender.menus[idname].bl_label);
   const viewMenu = menuButton('View', blenderMenu('VIEW3D_MT_view'), { blender: 'VIEW3D_MT_view' });
   const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
   const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
