@@ -3,7 +3,8 @@
 // ModifierData at the DNA fields RNA names (dna-modifiers.json).
 import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
-import { evaluateModifiers, drawModifierPanel } from '../bmesh/bmesh-wasm.js';
+import { evaluateModifiers, drawModifierPanel, meshData, EditMesh } from '../bmesh/bmesh-wasm.js';
+import { createMesh } from '../blenkernel/mesh/mesh.js';
 
 // The types that evaluate on a mesh alone; the rest need other objects, vertex groups, bind data or simulation.
 const MESH_ONLY = ['ARRAY', 'BEVEL', 'BUILD', 'DECIMATE', 'EDGE_SPLIT', 'MIRROR', 'REMESH', 'SCREW', 'SKIN', 'SOLIDIFY', 'SUBSURF', 'TRIANGULATE',
@@ -72,26 +73,55 @@ function definition(id) {
 
 export const blenderModifierDefinitions = MESH_ONLY.map(definition);
 
-// The Blender modifiers of a stack shown in the viewport, as the module takes them.
-export const viewportModifiers = (stack) =>
-  moduleModifiers(stack.filter((m) => m.showViewport && blenderModifierDefinitions.some((d) => d.id === m.type)));
-
 // Stack entries ({type, values}) as the module takes them.
 export const moduleModifiers = (modifiers) => modifiers.map(({ type, values }) => {
   const { mesh: { type: value, write } } = blenderModifierDefinitions.find((d) => d.id === type);
   return { type: value, write: write(values) };
 });
 
+// An error a modifier reported, as against the module failing (a trap, or running out of memory).
+export class ModifierError extends Error {
+  name = 'ModifierError';
+}
+
 // The evaluated Mesh of an evaluation ({mesh, errors}); throws the first modifier's error, as Blender shows it in its
 // panel.
 export function evaluated({ mesh, errors }) {
   const error = errors.find(Boolean);
-  if (error) throw new Error(error);
+  if (error) throw new ModifierError(error);
   return mesh;
 }
 
 // Evaluates Blender modifiers on a Mesh.
 export const evaluateBlenderModifiers = (mesh, modifiers) => evaluated(evaluateModifiers(mesh, moduleModifiers(modifiers)));
+
+// An evaluation that can be posted to another realm: a Mesh's data, stack entries, and for Edit Mode the select mode
+// of the edit mesh the Mesh was extracted from.
+export const evaluation = (mesh, modifiers, selectmode) =>
+  ({ mesh: meshData(mesh), modifiers: modifiers.map(({ type, values }) => ({ type, values })), selectmode });
+
+// Runs an evaluation in this realm's module: the evaluated Mesh detached from it.
+export function evaluate({ mesh, modifiers, selectmode }) {
+  const input = createMesh(mesh), stack = moduleModifiers(modifiers);
+  if (selectmode === undefined) return evaluated(evaluateModifiers(input, stack)).detach();
+  const edit = EditMesh.fromMesh(input, selectmode);
+  try {
+    return evaluated(edit.evaluate(stack)).detach();
+  } finally {
+    edit.free();
+  }
+}
+
+// How many times the faces it takes a modifier makes, where its settings say so up front.
+const GROWTH = {
+  SUBSURF: (v) => 4 ** v.levels,
+  ARRAY: (v) => (v.fit_type === 'FIXED_COUNT' ? v.count : 1),
+  SCREW: (v) => v.steps * v.iterations,
+  BEVEL: (v) => v.segments,
+};
+// About how many faces a stack makes of a Mesh, for asking before an evaluation that would take very long.
+export const estimatedFaces = (mesh, modifiers) =>
+  modifiers.reduce((faces, { type, values }) => faces * (GROWTH[type]?.(values) ?? 1), mesh.faces_num || mesh.edges_num);
 
 // What Blender's panel for a stack entry draws with its values (drawModifierPanel).
 export const modifierPanel = (modifier) => drawModifierPanel(moduleModifiers([modifier])[0]);

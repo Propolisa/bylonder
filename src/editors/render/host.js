@@ -4,6 +4,14 @@ import { outputSpec, encodeSize, fileFormats } from '../../render/formats.js';
 import { outputSize } from '../../blenkernel/scene/render.js';
 import './result.css';
 
+const cancelled = () => new DOMException('Render cancelled', 'AbortError');
+// A frame's promise, rejected on Cancel: a frame can wait on modifiers that take very long, and disposing the render
+// context stops them.
+const untilCancelled = (promise, signal) => new Promise((resolve, reject) => {
+  signal.addEventListener('abort', () => reject(cancelled()), { once: true });
+  promise.then(resolve, reject);
+});
+
 // Render Image (F12), Render Animation (Ctrl F12) and View Render (F11). Each job runs in a fresh hidden
 // render context (render.html) built from a snapshot of the current document, and shows progress and the
 // result in a Render Result window, like Blender's render window.
@@ -54,8 +62,8 @@ export function createRenderHost({ world, snapshot, sequencer, name = () => 'ren
       writer = await createWriter(spec, { ...size, fps: time.fps, name: name(), frames: frames.length, audio });
       const out = new OffscreenCanvas(size.width, size.height), ctx = out.getContext('2d');
       for (let index = 0; index < frames.length; index++) {
-        if (signal.aborted) throw new DOMException('Render cancelled', 'AbortError');
-        const image = await source.renderFrame(frames[index]);
+        if (signal.aborted) throw cancelled();
+        const image = await untilCancelled(source.renderFrame(frames[index]), signal);
         ctx.drawImage(image, 0, 0, size.width, size.height);
         image.close?.();
         draw(await createImageBitmap(out));

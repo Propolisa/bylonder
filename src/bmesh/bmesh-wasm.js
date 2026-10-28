@@ -4,8 +4,9 @@
 // BMesh.
 import { instantiate } from '../port/wasm.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
+import { BMESH_WASM } from './bmesh-module.js';
 
-const { exports: x } = await instantiate(new URL('./bmesh.wasm', import.meta.url));
+const { exports: x } = await instantiate(BMESH_WASM);
 
 // Copies arrays into module memory (null stays a null pointer), runs fn with their pointers, and frees them.
 function withArrays(arrays, fn) {
@@ -60,10 +61,10 @@ export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISH
 export const EXTRACT_TOPOLOGY = 1, EXTRACT_POSITIONS = 2, EXTRACT_FLAGS = 4, EXTRACT_UV = 8, EXTRACT_ALL = 15;
 
 // The Mesh of an extraction (ExtractionHeader): counts, then buffer pointers. Its arrays are views made again when the
-// module's memory grows, which detaches the old ones.
+// module's memory grows, which detaches the old ones. detach() copies them out, for attachedMesh in another realm.
 function extractedMesh(header) {
   const words = Array.from(new Uint32Array(x.memory.buffer, header, 5 + 10 + FLAGS.length + 3));
-  const [verts, edges, faces, corners, tris] = words, at = (i) => words[5 + i];
+  const counts = words.slice(0, 5), [verts, edges, faces, corners, tris] = counts, at = (i) => words[5 + i];
   const sizes = { POINT: verts, EDGE: edges, FACE: faces };
   const layout = {
     vert_positions: [Float32Array, at(0), verts * 3], vert_normals: [Float32Array, at(1), verts * 3], face_normals: [Float32Array, at(2), faces * 3],
@@ -79,19 +80,31 @@ function extractedMesh(header) {
     const [Type, pointer, length] = layout[name];
     return (views[name] ??= new Type(buffer, pointer, length));
   };
+  const present = Object.keys(layout).filter((name) => layout[name][1]);
+  const mesh = meshOfBuffers(counts, present, view);
+  mesh.detach = () => ({ counts, buffers: Object.fromEntries(present.map((name) => [name, view(name).slice()])) });
+  return mesh;
+}
+
+// A detached extraction ({counts, buffers}) as the Mesh it was.
+export const attachedMesh = ({ counts, buffers }) => meshOfBuffers(counts, Object.keys(buffers), (name) => buffers[name]);
+
+// The Mesh of an extraction's counts and the buffers present in it, read through buffer(name).
+function meshOfBuffers([verts, edges, faces, corners], present, buffer) {
+  const has = (name) => present.includes(name);
   const mesh = createMesh({});
-  for (const name of ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges']) Object.defineProperty(mesh, name, { get: () => view(name) });
+  for (const name of ['vert_positions', 'edges', 'face_offsets', 'corner_verts', 'corner_edges']) Object.defineProperty(mesh, name, { get: () => buffer(name) });
   Object.defineProperties(mesh, { verts_num: { value: verts }, edges_num: { value: edges }, faces_num: { value: faces }, corners_num: { value: corners } });
-  const attribute = (name, domain, type) => [name, { domain, type, get data() { return view(name); } }];
-  mesh.attributes = new Map([...FLAGS.filter((_, i) => at(10 + i)).map(([name, domain]) => attribute(name, domain, 'BOOLEAN')),
-    ...(at(9) ? [attribute('UVMap', 'CORNER', 'FLOAT2')] : [])]);
+  const attribute = (name, domain, type) => [name, { domain, type, get data() { return buffer(name); } }];
+  mesh.attributes = new Map([...FLAGS.filter(([name]) => has(name)).map(([name, domain]) => attribute(name, domain, 'BOOLEAN')),
+    ...(has('UVMap') ? [attribute('UVMap', 'CORNER', 'FLOAT2')] : [])]);
   Object.assign(mesh, {
-    corner_tris: () => view('corner_tris'),
-    corner_tri_faces: () => view('tri_faces'),
-    face_normals: () => view('face_normals'),
-    vert_normals: () => view('vert_normals'),
+    corner_tris: () => buffer('corner_tris'),
+    corner_tri_faces: () => buffer('tri_faces'),
+    face_normals: () => buffer('face_normals'),
+    vert_normals: () => buffer('vert_normals'),
     // An evaluated mesh's original element of each of its own in a domain (CD_ORIGINDEX, -1 for none), or null.
-    orig_index: (domain) => (layout[`orig_index_${domain}`][1] ? view(`orig_index_${domain}`) : null),
+    orig_index: (domain) => (has(`orig_index_${domain}`) ? buffer(`orig_index_${domain}`) : null),
   });
   return mesh;
 }
@@ -130,12 +143,14 @@ export function drawModifierPanel(modifier) {
   return JSON.parse(cString(x.modifier_panel_draw(object, md)));
 }
 
-// A copy of an extracted Mesh that is its own: arrays and attributes.
-function ownedMesh(mesh) {
+// A copy of a Mesh's arrays and attributes, as createMesh takes them, that can be posted to another realm.
+export function meshData(mesh) {
   const attributes = Object.fromEntries([...mesh.attributes].map(([name, { domain, type, data }]) => [name, { domain, type, data: data.slice() }]));
   const { vert_positions, edges, face_offsets, corner_verts, corner_edges } = mesh;
-  return createMesh({ vert_positions: vert_positions.slice(), edges: edges.slice(), face_offsets: face_offsets.slice(), corner_verts: corner_verts.slice(), corner_edges: corner_edges.slice(), attributes });
+  return { vert_positions: vert_positions.slice(), edges: edges.slice(), face_offsets: face_offsets.slice(), corner_verts: corner_verts.slice(), corner_edges: corner_edges.slice(), attributes };
 }
+// A copy of an extracted Mesh that is its own.
+const ownedMesh = (mesh) => createMesh(meshData(mesh));
 
 // A Mesh of positions and faces (offsets into corner vertices) whose edges Blender derives, as a script's
 // mesh.update() does.

@@ -68,17 +68,16 @@ function surfaceFor(width, height, samples) {
 // Frame the scene state was last advanced to, so sequential final frames pre-roll only once.
 let simulated = null;
 
-function drawFinalFrame(frame, width, height, aborted = () => {}) {
+async function drawFinalFrame(frame, width, height) {
   const q = quality(), job = { ...q, width, height };
   const { out, ctx, accumulator } = surfaceFor(width, height, q.samples);
   // Pre-roll from the start frame so code that integrates time (physics, deltaTime) reaches the same state a
   // full animation render would.
-  for (let f = simulated !== null && simulated < frame ? simulated + 1 : q.start; f < frame; f++) { aborted(); renderSample(f, [0, 0], job); }
+  for (let f = simulated !== null && simulated < frame ? simulated + 1 : q.start; f < frame; f++) await renderSample(f, [0, 0], job);
   const times = sampleTimes(frame, q.samples, q);
   accumulator?.reset();
   for (let s = 0; s < q.samples; s++) {
-    aborted();
-    renderSample(times[s], jitter(s, q.samples), job);
+    await renderSample(times[s], jitter(s, q.samples), job);
     ctx.drawImage(canvas, 0, 0);
     accumulator?.add(ctx.getImageData(0, 0, width, height).data);
   }
@@ -91,20 +90,21 @@ function drawFinalFrame(frame, width, height, aborted = () => {}) {
 async function renderFrame({ frame, width, height, camera, quality: kind = 'preview' }) {
   resize(width, height);
   await useCamera(camera);
-  if (kind === 'final') return createImageBitmap(drawFinalFrame(frame, width, height));
+  if (kind === 'final') return createImageBitmap(await drawFinalFrame(frame, width, height));
   simulated = null;
   const { start, fps } = quality();
-  renderSample(frame, [0, 0], { start, fps, width, height });
+  await renderSample(frame, [0, 0], { start, fps, width, height });
   return createImageBitmap(canvas);
 }
 
-// Renders one sample at scene frame t (may be fractional) with a sub-pixel jitter.
-function renderSample(t, offset, { start, fps, width, height }) {
+// Renders one sample at scene frame t (may be fractional) with a sub-pixel jitter, once modifiers have evaluated for
+// it off the main thread.
+async function renderSample(t, offset, { start, fps, width, height }) {
   const { world, scene, animation } = built;
   const camera = scene.activeCamera;
   clock.set(frameMs(t, start, fps));
   animation.time.configure({ frameCurrent: t }, { record: false });
-  world.modifiers.refresh();
+  await world.modifiers.settled();
   camera.unfreezeProjectionMatrix();
   if (offset[0] || offset[1]) {
     const m = Array.from(camera.getProjectionMatrix(true).m);
