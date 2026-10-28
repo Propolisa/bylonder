@@ -118,8 +118,8 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       buttons = Object.entries(blender.properties).filter(([key, p]) => (p.type === 'ENUM' || p.type === 'BOOLEAN') && drawn(block.idname, key, block.properties)).map(([key, p]) => ({
         key, label: p.name, type: p.type, items: p.items, get: () => block.properties[key], set: (v) => { block.properties[key] = v; changed(true); },
       }));
-      tag = blender.color_tag;
-      label = blender.name;
+      tag = shown.tag;
+      label = LABELS[block.idname]?.(block.properties, blender) ?? blender.name;
     } else {
       outs = block.outputs.filter((p) => !p.isHidden).map((p) => socket(p));
       inputs = block.inputs.filter((p) => !p.isHidden && p.name !== 'dependencies').map((p) => socket(p));
@@ -254,6 +254,13 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
   };
   return tree;
 }
+
+// A node's header label where its type draws one from its properties (node_math_label, node_mix_label).
+const itemName = (decl, key, value) => decl.properties[key].items.find(([id]) => id === value)?.[1];
+const LABELS = {
+  ShaderNodeMath: (p, decl) => itemName(decl, 'operation', p.operation),
+  ShaderNodeMix: (p, decl) => (p.data_type === 'RGBA' ? itemName(decl, 'blend_type', p.blend_type) : undefined),
+};
 
 // The enum and boolean properties a node draws in its body, as its draw_buttons does; the rest are in the sidebar.
 const BUTTONS = {

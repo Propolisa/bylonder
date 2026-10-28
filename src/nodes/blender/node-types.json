@@ -633,7 +633,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -651,7 +652,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BOOLEAN": {
        "inputs": [
@@ -669,7 +671,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -687,7 +690,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RGBA": {
        "inputs": [
@@ -705,7 +709,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MENU": {
        "inputs": [
@@ -723,7 +728,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SHADER": {
        "inputs": [
@@ -741,7 +747,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BUNDLE": {
        "inputs": [
@@ -759,7 +766,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CLOSURE": {
        "inputs": [
@@ -777,7 +785,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -1372,7 +1381,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -1383,7 +1393,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BOOLEAN": {
        "inputs": [
@@ -1394,7 +1405,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -1405,7 +1417,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RGBA": {
        "inputs": [
@@ -1416,7 +1429,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MENU": {
        "inputs": [
@@ -1427,7 +1441,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SHADER": {
        "inputs": [
@@ -1438,7 +1453,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BUNDLE": {
        "inputs": [
@@ -1449,7 +1465,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CLOSURE": {
        "inputs": [
@@ -1460,7 +1477,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -1922,7 +1940,8 @@
         "Fac",
         "Alpha"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       },
       "OBJECT": {
        "inputs": [],
@@ -1932,7 +1951,8 @@
         "Fac",
         "Alpha"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       },
       "INSTANCER": {
        "inputs": [],
@@ -1942,7 +1962,8 @@
         "Fac",
         "Alpha"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       },
       "VIEW_LAYER": {
        "inputs": [],
@@ -1952,7 +1973,8 @@
         "Fac",
         "Alpha"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       }
      }
     },
@@ -2474,7 +2496,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "GGX": {
        "inputs": [
@@ -2495,7 +2518,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "ASHIKHMIN_SHIRLEY": {
        "inputs": [
@@ -2516,7 +2540,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MULTI_GGX": {
        "inputs": [
@@ -2537,7 +2562,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -2847,7 +2873,8 @@
         "Normal": "Normal",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "GGX": {
        "inputs": [
@@ -2868,7 +2895,8 @@
         "Normal": "Normal",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MULTI_GGX": {
        "inputs": [
@@ -2889,7 +2917,8 @@
         "Normal": "Normal",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -3103,7 +3132,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "GGX": {
        "inputs": [
@@ -3124,7 +3154,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "ASHIKHMIN_SHIRLEY": {
        "inputs": [
@@ -3145,7 +3176,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MULTI_GGX": {
        "inputs": [
@@ -3166,7 +3198,8 @@
         "Rotation": "Rotation",
         "Normal": "Normal",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -3347,7 +3380,8 @@
         "RoughnessU": "RoughnessU",
         "RoughnessV": "RoughnessV",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "Transmission": {
        "inputs": [
@@ -3366,7 +3400,8 @@
         "RoughnessU": "RoughnessU",
         "RoughnessV": "RoughnessV",
         "Tangent": "Tangent"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -3781,7 +3816,8 @@
         "Offset": "Offset",
         "Random Roughness": "Random Roughness",
         "Random": "Random"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "HUANG": {
        "inputs": [
@@ -3810,7 +3846,8 @@
         "R lobe": "Reflection",
         "TT lobe": "Transmission",
         "TRT lobe": "Secondary Reflection"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     },
@@ -3859,7 +3896,8 @@
         "Offset": "Offset",
         "Random Roughness": "Random Roughness",
         "Random": "Random"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MELANIN": {
        "inputs": [
@@ -3890,7 +3928,8 @@
         "Random Color": "Random Color",
         "Random Roughness": "Random Roughness",
         "Random": "Random"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "COLOR": {
        "inputs": [
@@ -3915,7 +3954,8 @@
         "Offset": "Offset",
         "Random Roughness": "Random Roughness",
         "Random": "Random"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -4233,7 +4273,8 @@
         "Tangent": "Tangent",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "GGX": {
        "inputs": [
@@ -4260,7 +4301,8 @@
         "Tangent": "Tangent",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MULTI_GGX": {
        "inputs": [
@@ -4287,7 +4329,8 @@
         "Tangent": "Tangent",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     },
@@ -4333,7 +4376,8 @@
         "Tangent": "Tangent",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "F82": {
        "inputs": [
@@ -4360,7 +4404,8 @@
         "Tangent": "Tangent",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -5084,7 +5129,8 @@
         "Emission Strength": "Emission Strength",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MULTI_GGX": {
        "inputs": [
@@ -5153,7 +5199,8 @@
         "Emission Strength": "Emission Strength",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     },
@@ -5251,7 +5298,8 @@
         "Emission Strength": "Emission Strength",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RANDOM_WALK": {
        "inputs": [
@@ -5320,7 +5368,8 @@
         "Emission Strength": "Emission Strength",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RANDOM_WALK_SKIN": {
        "inputs": [
@@ -5391,7 +5440,8 @@
         "Emission Strength": "Emission Strength",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RANDOM_WALK_LEGACY": {
        "inputs": [
@@ -5460,7 +5510,8 @@
         "Emission Strength": "Emission Strength",
         "Thin Film Thickness": "Thin Film Thickness",
         "Thin Film IOR": "Thin Film IOR"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -5730,7 +5781,8 @@
         "Roughness": "Roughness",
         "IOR": "IOR",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "GGX": {
        "inputs": [
@@ -5747,7 +5799,8 @@
         "Roughness": "Roughness",
         "IOR": "IOR",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -5888,7 +5941,8 @@
         "Color": "Color",
         "Roughness": "Roughness",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MICROFIBER": {
        "inputs": [
@@ -5903,7 +5957,8 @@
         "Color": "Color",
         "Roughness": "Roughness",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -6064,7 +6119,8 @@
         "Size": "Size",
         "Smooth": "Smooth",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "GLOSSY": {
        "inputs": [
@@ -6081,7 +6137,8 @@
         "Size": "Size",
         "Smooth": "Smooth",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -6545,7 +6602,8 @@
         "Value": "Value",
         "Min": "Min",
         "Max": "Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RANGE": {
        "inputs": [
@@ -6560,7 +6618,8 @@
         "Value": "Value",
         "Min": "Min",
         "Max": "Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -6688,7 +6747,8 @@
         "Red": "Red",
         "Green": "Green",
         "Blue": "Blue"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSV": {
        "inputs": [
@@ -6703,7 +6763,8 @@
         "Red": "Hue",
         "Green": "Saturation",
         "Blue": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSL": {
        "inputs": [
@@ -6718,7 +6779,8 @@
         "Red": "Hue",
         "Green": "Saturation",
         "Blue": "Lightness"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -6943,7 +7005,8 @@
         "Midlevel": "Midlevel",
         "Scale": "Scale",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "WORLD": {
        "inputs": [
@@ -6960,7 +7023,8 @@
         "Midlevel": "Midlevel",
         "Scale": "Scale",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -8635,7 +8699,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "STEPPED": {
        "inputs": [
@@ -8656,7 +8721,8 @@
         "To Min": "To Min",
         "To Max": "To Max",
         "Steps": "Steps"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTHSTEP": {
        "inputs": [
@@ -8675,7 +8741,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTHERSTEP": {
        "inputs": [
@@ -8694,7 +8761,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -8732,7 +8800,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FLOAT_VECTOR": {
        "inputs": [
@@ -8751,7 +8820,8 @@
         "From_Max_FLOAT3": "From Max",
         "To_Min_FLOAT3": "To Min",
         "To_Max_FLOAT3": "To Max"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -8917,7 +8987,8 @@
         "Location": "Location",
         "Rotation": "Rotation",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "TEXTURE": {
        "inputs": [
@@ -8934,7 +9005,8 @@
         "Location": "Location",
         "Rotation": "Rotation",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "VECTOR": {
        "inputs": [
@@ -8949,7 +9021,8 @@
         "Vector": "Vector",
         "Rotation": "Rotation",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "NORMAL": {
        "inputs": [
@@ -8964,7 +9037,8 @@
         "Vector": "Vector",
         "Rotation": "Rotation",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -9272,7 +9346,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SUBTRACT": {
        "inputs": [
@@ -9285,7 +9360,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MULTIPLY": {
        "inputs": [
@@ -9298,7 +9374,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DIVIDE": {
        "inputs": [
@@ -9311,7 +9388,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MULTIPLY_ADD": {
        "inputs": [
@@ -9326,7 +9404,8 @@
         "Value": "Value",
         "Value_001": "Multiplier",
         "Value_002": "Addend"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "POWER": {
        "inputs": [
@@ -9339,7 +9418,8 @@
        "labels": {
         "Value": "Base",
         "Value_001": "Exponent"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LOGARITHM": {
        "inputs": [
@@ -9352,7 +9432,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Base"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SQRT": {
        "inputs": [
@@ -9363,7 +9444,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INVERSE_SQRT": {
        "inputs": [
@@ -9374,7 +9456,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ABSOLUTE": {
        "inputs": [
@@ -9385,7 +9468,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "EXPONENT": {
        "inputs": [
@@ -9396,7 +9480,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MINIMUM": {
        "inputs": [
@@ -9409,7 +9494,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MAXIMUM": {
        "inputs": [
@@ -9422,7 +9508,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LESS_THAN": {
        "inputs": [
@@ -9435,7 +9522,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Threshold"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "GREATER_THAN": {
        "inputs": [
@@ -9448,7 +9536,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Threshold"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SIGN": {
        "inputs": [
@@ -9459,7 +9548,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COMPARE": {
        "inputs": [
@@ -9474,7 +9564,8 @@
         "Value": "Value",
         "Value_001": "Value",
         "Value_002": "Epsilon"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTH_MIN": {
        "inputs": [
@@ -9489,7 +9580,8 @@
         "Value": "Value",
         "Value_001": "Value",
         "Value_002": "Distance"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTH_MAX": {
        "inputs": [
@@ -9504,7 +9596,8 @@
         "Value": "Value",
         "Value_001": "Value",
         "Value_002": "Distance"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ROUND": {
        "inputs": [
@@ -9515,7 +9608,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FLOOR": {
        "inputs": [
@@ -9526,7 +9620,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CEIL": {
        "inputs": [
@@ -9537,7 +9632,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "TRUNC": {
        "inputs": [
@@ -9548,7 +9644,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FRACT": {
        "inputs": [
@@ -9559,7 +9656,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MODULO": {
        "inputs": [
@@ -9572,7 +9670,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FLOORED_MODULO": {
        "inputs": [
@@ -9585,7 +9684,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "WRAP": {
        "inputs": [
@@ -9600,7 +9700,8 @@
         "Value": "Value",
         "Value_001": "Max",
         "Value_002": "Min"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SNAP": {
        "inputs": [
@@ -9613,7 +9714,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Increment"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "PINGPONG": {
        "inputs": [
@@ -9626,7 +9728,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Scale"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SINE": {
        "inputs": [
@@ -9637,7 +9740,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COSINE": {
        "inputs": [
@@ -9648,7 +9752,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "TANGENT": {
        "inputs": [
@@ -9659,7 +9764,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCSINE": {
        "inputs": [
@@ -9670,7 +9776,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCCOSINE": {
        "inputs": [
@@ -9681,7 +9788,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCTANGENT": {
        "inputs": [
@@ -9692,7 +9800,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCTAN2": {
        "inputs": [
@@ -9705,7 +9814,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SINH": {
        "inputs": [
@@ -9716,7 +9826,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COSH": {
        "inputs": [
@@ -9727,7 +9838,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "TANH": {
        "inputs": [
@@ -9738,7 +9850,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RADIANS": {
        "inputs": [
@@ -9749,7 +9862,8 @@
        ],
        "labels": {
         "Value": "Degrees"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DEGREES": {
        "inputs": [
@@ -9760,7 +9874,8 @@
        ],
        "labels": {
         "Value": "Radians"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -10120,7 +10235,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -10135,7 +10251,8 @@
         "Factor_Float": "Factor",
         "A_Vector": "A",
         "B_Vector": "B"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "RGBA": {
        "inputs": [
@@ -10150,7 +10267,8 @@
         "Factor_Float": "Factor",
         "A_Color": "A",
         "B_Color": "B"
-       }
+       },
+       "color_tag": "COLOR"
       }
      }
     },
@@ -10184,7 +10302,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "NON_UNIFORM": {
        "inputs": [
@@ -10199,7 +10318,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -10318,7 +10438,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DARKEN": {
        "inputs": [
@@ -10333,7 +10454,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MULTIPLY": {
        "inputs": [
@@ -10348,7 +10470,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BURN": {
        "inputs": [
@@ -10363,7 +10486,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LIGHTEN": {
        "inputs": [
@@ -10378,7 +10502,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SCREEN": {
        "inputs": [
@@ -10393,7 +10518,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DODGE": {
        "inputs": [
@@ -10408,7 +10534,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ADD": {
        "inputs": [
@@ -10423,7 +10550,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "OVERLAY": {
        "inputs": [
@@ -10438,7 +10566,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SOFT_LIGHT": {
        "inputs": [
@@ -10453,7 +10582,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LINEAR_LIGHT": {
        "inputs": [
@@ -10468,7 +10598,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DIFFERENCE": {
        "inputs": [
@@ -10483,7 +10614,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "EXCLUSION": {
        "inputs": [
@@ -10498,7 +10630,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SUBTRACT": {
        "inputs": [
@@ -10513,7 +10646,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DIVIDE": {
        "inputs": [
@@ -10528,7 +10662,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HUE": {
        "inputs": [
@@ -10543,7 +10678,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SATURATION": {
        "inputs": [
@@ -10558,7 +10694,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COLOR": {
        "inputs": [
@@ -10573,7 +10710,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VALUE": {
        "inputs": [
@@ -10588,7 +10726,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -10816,7 +10955,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DARKEN": {
        "inputs": [
@@ -10831,7 +10971,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "MULTIPLY": {
        "inputs": [
@@ -10846,7 +10987,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "BURN": {
        "inputs": [
@@ -10861,7 +11003,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "LIGHTEN": {
        "inputs": [
@@ -10876,7 +11019,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SCREEN": {
        "inputs": [
@@ -10891,7 +11035,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DODGE": {
        "inputs": [
@@ -10906,7 +11051,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "ADD": {
        "inputs": [
@@ -10921,7 +11067,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "OVERLAY": {
        "inputs": [
@@ -10936,7 +11083,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SOFT_LIGHT": {
        "inputs": [
@@ -10951,7 +11099,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "LINEAR_LIGHT": {
        "inputs": [
@@ -10966,7 +11115,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DIFFERENCE": {
        "inputs": [
@@ -10981,7 +11131,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "EXCLUSION": {
        "inputs": [
@@ -10996,7 +11147,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SUBTRACT": {
        "inputs": [
@@ -11011,7 +11163,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DIVIDE": {
        "inputs": [
@@ -11026,7 +11179,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "HUE": {
        "inputs": [
@@ -11041,7 +11195,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SATURATION": {
        "inputs": [
@@ -11056,7 +11211,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "COLOR": {
        "inputs": [
@@ -11071,7 +11227,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "VALUE": {
        "inputs": [
@@ -11086,7 +11243,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       }
      }
     },
@@ -11546,7 +11704,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "OBJECT": {
        "inputs": [
@@ -11559,7 +11718,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "WORLD": {
        "inputs": [
@@ -11572,7 +11732,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "BLENDER_OBJECT": {
        "inputs": [
@@ -11585,7 +11746,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "BLENDER_WORLD": {
        "inputs": [
@@ -11598,7 +11760,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     },
@@ -11635,7 +11798,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DIRECTX": {
        "inputs": [
@@ -11648,7 +11812,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     },
@@ -11680,7 +11845,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DISPLACED": {
        "inputs": [
@@ -11693,7 +11859,8 @@
        "labels": {
         "Strength": "Strength",
         "Color": "Color"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -11934,7 +12101,8 @@
        "outputs": [],
        "labels": {
         "Surface": "Surface"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "EEVEE": {
        "inputs": [
@@ -11943,7 +12111,8 @@
        "outputs": [],
        "labels": {
         "Surface": "Surface"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "CYCLES": {
        "inputs": [
@@ -11952,7 +12121,8 @@
        "outputs": [],
        "labels": {
         "Surface": "Surface"
-       }
+       },
+       "color_tag": "OUTPUT"
       }
      }
     }
@@ -12084,7 +12254,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "EEVEE": {
        "inputs": [
@@ -12099,7 +12270,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "CYCLES": {
        "inputs": [
@@ -12114,7 +12286,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       }
      }
     },
@@ -12233,7 +12406,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "DARKEN": {
        "inputs": [
@@ -12248,7 +12422,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "MULTIPLY": {
        "inputs": [
@@ -12263,7 +12438,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "BURN": {
        "inputs": [
@@ -12278,7 +12454,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "LIGHTEN": {
        "inputs": [
@@ -12293,7 +12470,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "SCREEN": {
        "inputs": [
@@ -12308,7 +12486,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "DODGE": {
        "inputs": [
@@ -12323,7 +12502,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "ADD": {
        "inputs": [
@@ -12338,7 +12518,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "OVERLAY": {
        "inputs": [
@@ -12353,7 +12534,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "SOFT_LIGHT": {
        "inputs": [
@@ -12368,7 +12550,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "LINEAR_LIGHT": {
        "inputs": [
@@ -12383,7 +12566,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "DIFFERENCE": {
        "inputs": [
@@ -12398,7 +12582,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "EXCLUSION": {
        "inputs": [
@@ -12413,7 +12598,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "SUBTRACT": {
        "inputs": [
@@ -12428,7 +12614,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "DIVIDE": {
        "inputs": [
@@ -12443,7 +12630,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "HUE": {
        "inputs": [
@@ -12458,7 +12646,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "SATURATION": {
        "inputs": [
@@ -12473,7 +12662,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "COLOR": {
        "inputs": [
@@ -12488,7 +12678,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "VALUE": {
        "inputs": [
@@ -12503,7 +12694,8 @@
         "Color Fac": "Color Fac",
         "Alpha": "Alpha",
         "Alpha Fac": "Alpha Fac"
-       }
+       },
+       "color_tag": "OUTPUT"
       }
      }
     },
@@ -12636,7 +12828,8 @@
         "Volume": "Volume",
         "Displacement": "Displacement",
         "Thickness": "Thickness"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "EEVEE": {
        "inputs": [
@@ -12651,7 +12844,8 @@
         "Volume": "Volume",
         "Displacement": "Displacement",
         "Thickness": "Thickness"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "CYCLES": {
        "inputs": [
@@ -12666,7 +12860,8 @@
         "Volume": "Volume",
         "Displacement": "Displacement",
         "Thickness": "Thickness"
-       }
+       },
+       "color_tag": "OUTPUT"
       }
      }
     }
@@ -12745,7 +12940,8 @@
        "labels": {
         "Surface": "Surface",
         "Volume": "Volume"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "EEVEE": {
        "inputs": [
@@ -12756,7 +12952,8 @@
        "labels": {
         "Surface": "Surface",
         "Volume": "Volume"
-       }
+       },
+       "color_tag": "OUTPUT"
       },
       "CYCLES": {
        "inputs": [
@@ -12767,7 +12964,8 @@
        "labels": {
         "Surface": "Surface",
         "Volume": "Volume"
-       }
+       },
+       "color_tag": "OUTPUT"
       }
      }
     }
@@ -13542,12 +13740,14 @@
       "INTERNAL": {
        "inputs": [],
        "outputs": [],
-       "labels": {}
+       "labels": {},
+       "color_tag": "SCRIPT"
       },
       "EXTERNAL": {
        "inputs": [],
        "outputs": [],
-       "labels": {}
+       "labels": {},
+       "color_tag": "SCRIPT"
       }
      }
     },
@@ -13685,7 +13885,8 @@
        ],
        "labels": {
         "Color": "Color"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSV": {
        "inputs": [
@@ -13698,7 +13899,8 @@
        ],
        "labels": {
         "Color": "Color"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSL": {
        "inputs": [
@@ -13711,7 +13913,8 @@
        ],
        "labels": {
         "Color": "Color"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -14165,7 +14368,8 @@
         "Scale": "Scale",
         "Radius": "Radius",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RANDOM_WALK": {
        "inputs": [
@@ -14188,7 +14392,8 @@
         "Roughness": "Roughness",
         "Anisotropy": "Anisotropy",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RANDOM_WALK_SKIN": {
        "inputs": [
@@ -14209,7 +14414,8 @@
         "IOR": "IOR",
         "Anisotropy": "Anisotropy",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RANDOM_WALK_LEGACY": {
        "inputs": [
@@ -14232,7 +14438,8 @@
         "Roughness": "Roughness",
         "Anisotropy": "Anisotropy",
         "Normal": "Normal"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -14290,14 +14497,16 @@
        "outputs": [
         "Tangent"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       },
       "UV_MAP": {
        "inputs": [],
        "outputs": [
         "Tangent"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       }
      }
     },
@@ -14328,21 +14537,24 @@
        "outputs": [
         "Tangent"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       },
       "Y": {
        "inputs": [],
        "outputs": [
         "Tangent"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       },
       "Z": {
        "inputs": [],
        "outputs": [
         "Tangent"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "INPUT"
       }
      }
     },
@@ -15006,7 +15218,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "MIRROR_BALL": {
        "inputs": [
@@ -15017,7 +15230,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -15057,7 +15271,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Closest": {
        "inputs": [
@@ -15068,7 +15283,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Cubic": {
        "inputs": [
@@ -15079,7 +15295,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Smart": {
        "inputs": [
@@ -15090,7 +15307,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -15308,7 +15526,8 @@
         "Frequency": "Frequency",
         "Anisotropy": "Anisotropy",
         "Orientation 2D": "Orientation"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -15329,7 +15548,8 @@
         "Frequency": "Frequency",
         "Anisotropy": "Anisotropy",
         "Orientation 3D": "Orientation"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -15459,7 +15679,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "QUADRATIC": {
        "inputs": [
@@ -15471,7 +15692,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "EASING": {
        "inputs": [
@@ -15483,7 +15705,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "DIAGONAL": {
        "inputs": [
@@ -15495,7 +15718,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SPHERICAL": {
        "inputs": [
@@ -15507,7 +15731,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "QUADRATIC_SPHERE": {
        "inputs": [
@@ -15519,7 +15744,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "RADIAL": {
        "inputs": [
@@ -15531,7 +15757,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -15640,7 +15867,8 @@
        "labels": {
         "Vector": "Vector",
         "Strength": "Strength"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "EXTERNAL": {
        "inputs": [
@@ -15653,7 +15881,8 @@
        "labels": {
         "Vector": "Vector",
         "Strength": "Strength"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -15772,7 +16001,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "BOX": {
        "inputs": [
@@ -15784,7 +16014,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SPHERE": {
        "inputs": [
@@ -15796,7 +16027,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "TUBE": {
        "inputs": [
@@ -15808,7 +16040,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -15849,7 +16082,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Closest": {
        "inputs": [
@@ -15861,7 +16095,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Cubic": {
        "inputs": [
@@ -15873,7 +16108,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Smart": {
        "inputs": [
@@ -15885,7 +16121,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -15931,7 +16168,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "EXTEND": {
        "inputs": [
@@ -15943,7 +16181,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "CLIP": {
        "inputs": [
@@ -15955,7 +16194,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "MIRROR": {
        "inputs": [
@@ -15967,7 +16207,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -16345,7 +16586,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "2D": {
        "inputs": [
@@ -16367,7 +16609,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -16389,7 +16632,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "4D": {
        "inputs": [
@@ -16413,7 +16657,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -16469,7 +16714,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "RIDGED_MULTIFRACTAL": {
        "inputs": [
@@ -16495,7 +16741,8 @@
         "Offset": "Offset",
         "Gain": "Gain",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "HYBRID_MULTIFRACTAL": {
        "inputs": [
@@ -16521,7 +16768,8 @@
         "Offset": "Offset",
         "Gain": "Gain",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "FBM": {
        "inputs": [
@@ -16543,7 +16791,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "HETERO_TERRAIN": {
        "inputs": [
@@ -16567,7 +16816,8 @@
         "Lacunarity": "Lacunarity",
         "Offset": "Offset",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -16666,14 +16916,16 @@
        "outputs": [
         "Color"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "TEXTURE"
       },
       "MULTIPLE_SCATTERING": {
        "inputs": [],
        "outputs": [
         "Color"
        ],
-       "labels": {}
+       "labels": {},
+       "color_tag": "TEXTURE"
       },
       "PREETHAM": {
        "inputs": [
@@ -16684,7 +16936,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "HOSEK_WILKIE": {
        "inputs": [
@@ -16695,7 +16948,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -17084,7 +17338,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "2D": {
        "inputs": [
@@ -17107,7 +17362,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -17130,7 +17386,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "4D": {
        "inputs": [
@@ -17156,7 +17413,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -17208,7 +17466,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "MANHATTAN": {
        "inputs": [
@@ -17231,7 +17490,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "CHEBYCHEV": {
        "inputs": [
@@ -17254,7 +17514,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "MINKOWSKI": {
        "inputs": [
@@ -17279,7 +17540,8 @@
         "Lacunarity": "Lacunarity",
         "Exponent": "Exponent",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -17336,7 +17598,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "F2": {
        "inputs": [
@@ -17359,7 +17622,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SMOOTH_F1": {
        "inputs": [
@@ -17384,7 +17648,8 @@
         "Lacunarity": "Lacunarity",
         "Smoothness": "Smoothness",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "DISTANCE_TO_EDGE": {
        "inputs": [
@@ -17405,7 +17670,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "N_SPHERE_RADIUS": {
        "inputs": [
@@ -17420,7 +17686,8 @@
         "Vector": "Vector",
         "Scale": "Scale",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -17645,7 +17912,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "RINGS": {
        "inputs": [
@@ -17669,7 +17937,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -17722,7 +17991,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Y": {
        "inputs": [
@@ -17746,7 +18016,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Z": {
        "inputs": [
@@ -17770,7 +18041,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "DIAGONAL": {
        "inputs": [
@@ -17794,7 +18066,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -17847,7 +18120,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Y": {
        "inputs": [
@@ -17871,7 +18145,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Z": {
        "inputs": [
@@ -17895,7 +18170,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SPHERICAL": {
        "inputs": [
@@ -17919,7 +18195,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -17967,7 +18244,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SAW": {
        "inputs": [
@@ -17991,7 +18269,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "TRI": {
        "inputs": [
@@ -18015,7 +18294,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -18148,7 +18428,8 @@
        ],
        "labels": {
         "W": "W"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "2D": {
        "inputs": [
@@ -18160,7 +18441,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -18172,7 +18454,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "4D": {
        "inputs": [
@@ -18186,7 +18469,8 @@
        "labels": {
         "Vector": "Vector",
         "W": "W"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -18562,7 +18846,8 @@
         "Vector": "Vector",
         "Midlevel": "Midlevel",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "OBJECT": {
        "inputs": [
@@ -18577,7 +18862,8 @@
         "Vector": "Vector",
         "Midlevel": "Midlevel",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "WORLD": {
        "inputs": [
@@ -18592,7 +18878,8 @@
         "Vector": "Vector",
         "Midlevel": "Midlevel",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -18897,7 +19184,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SUBTRACT": {
        "inputs": [
@@ -18910,7 +19198,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MULTIPLY": {
        "inputs": [
@@ -18923,7 +19212,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DIVIDE": {
        "inputs": [
@@ -18936,7 +19226,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MULTIPLY_ADD": {
        "inputs": [
@@ -18951,7 +19242,8 @@
         "Vector": "Vector",
         "Vector_001": "Multiplier",
         "Vector_002": "Addend"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "CROSS_PRODUCT": {
        "inputs": [
@@ -18964,7 +19256,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "PROJECT": {
        "inputs": [
@@ -18977,7 +19270,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "REFLECT": {
        "inputs": [
@@ -18990,7 +19284,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "REFRACT": {
        "inputs": [
@@ -19005,7 +19300,8 @@
         "Vector": "Vector",
         "Vector_001": "Vector",
         "Scale": "IOR"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "FACEFORWARD": {
        "inputs": [
@@ -19020,7 +19316,8 @@
         "Vector": "Vector",
         "Vector_001": "Incident",
         "Vector_002": "Reference"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DOT_PRODUCT": {
        "inputs": [
@@ -19033,7 +19330,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DISTANCE": {
        "inputs": [
@@ -19046,7 +19344,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "LENGTH": {
        "inputs": [
@@ -19057,7 +19356,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SCALE": {
        "inputs": [
@@ -19070,7 +19370,8 @@
        "labels": {
         "Vector": "Vector",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "NORMALIZE": {
        "inputs": [
@@ -19081,7 +19382,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "ABSOLUTE": {
        "inputs": [
@@ -19092,7 +19394,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "POWER": {
        "inputs": [
@@ -19105,7 +19408,8 @@
        "labels": {
         "Vector": "Base",
         "Vector_001": "Exponent"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SIGN": {
        "inputs": [
@@ -19116,7 +19420,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MINIMUM": {
        "inputs": [
@@ -19129,7 +19434,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MAXIMUM": {
        "inputs": [
@@ -19142,7 +19448,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "ROUND": {
        "inputs": [
@@ -19153,7 +19460,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "FLOOR": {
        "inputs": [
@@ -19164,7 +19472,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "CEIL": {
        "inputs": [
@@ -19175,7 +19484,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "FRACTION": {
        "inputs": [
@@ -19186,7 +19496,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MODULO": {
        "inputs": [
@@ -19199,7 +19510,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "WRAP": {
        "inputs": [
@@ -19214,7 +19526,8 @@
         "Vector": "Vector",
         "Vector_001": "Max",
         "Vector_002": "Min"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SNAP": {
        "inputs": [
@@ -19227,7 +19540,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Increment"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SINE": {
        "inputs": [
@@ -19238,7 +19552,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "COSINE": {
        "inputs": [
@@ -19249,7 +19564,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "TANGENT": {
        "inputs": [
@@ -19260,7 +19576,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -19449,7 +19766,8 @@
         "Center": "Center",
         "Axis": "Axis",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "X_AXIS": {
        "inputs": [
@@ -19464,7 +19782,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "Y_AXIS": {
        "inputs": [
@@ -19479,7 +19798,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "Z_AXIS": {
        "inputs": [
@@ -19494,7 +19814,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "EULER_XYZ": {
        "inputs": [
@@ -19509,7 +19830,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Rotation": "Rotation"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     },
@@ -19603,7 +19925,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "VECTOR": {
        "inputs": [
@@ -19614,7 +19937,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "NORMAL": {
        "inputs": [
@@ -19625,7 +19949,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     },
@@ -19660,7 +19985,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "OBJECT": {
        "inputs": [
@@ -19671,7 +19997,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "CAMERA": {
        "inputs": [
@@ -19682,7 +20009,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     },
@@ -19717,7 +20045,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "OBJECT": {
        "inputs": [
@@ -19728,7 +20057,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "CAMERA": {
        "inputs": [
@@ -19739,7 +20069,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -20128,7 +20459,8 @@
         "Scatter Coefficients": "Scatter Coefficients",
         "Anisotropy": "Anisotropy",
         "Emission Coefficients": "Emission Coefficients"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "FOURNIER_FORAND": {
        "inputs": [
@@ -20147,7 +20479,8 @@
         "IOR": "IOR",
         "Backscatter": "Backscatter",
         "Emission Coefficients": "Emission Coefficients"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "DRAINE": {
        "inputs": [
@@ -20166,7 +20499,8 @@
         "Anisotropy": "Anisotropy",
         "Alpha": "Alpha",
         "Emission Coefficients": "Emission Coefficients"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RAYLEIGH": {
        "inputs": [
@@ -20181,7 +20515,8 @@
         "Absorption Coefficients": "Absorption Coefficients",
         "Scatter Coefficients": "Scatter Coefficients",
         "Emission Coefficients": "Emission Coefficients"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MIE": {
        "inputs": [
@@ -20198,7 +20533,8 @@
         "Scatter Coefficients": "Scatter Coefficients",
         "Diameter": "Diameter",
         "Emission Coefficients": "Emission Coefficients"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -20775,7 +21111,8 @@
         "Color": "Color",
         "Density": "Density",
         "Anisotropy": "Anisotropy"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "FOURNIER_FORAND": {
        "inputs": [
@@ -20792,7 +21129,8 @@
         "Density": "Density",
         "IOR": "IOR",
         "Backscatter": "Backscatter"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "DRAINE": {
        "inputs": [
@@ -20809,7 +21147,8 @@
         "Density": "Density",
         "Anisotropy": "Anisotropy",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "RAYLEIGH": {
        "inputs": [
@@ -20822,7 +21161,8 @@
        "labels": {
         "Color": "Color",
         "Density": "Density"
-       }
+       },
+       "color_tag": "SHADER"
       },
       "MIE": {
        "inputs": [
@@ -20837,7 +21177,8 @@
         "Color": "Color",
         "Density": "Density",
         "Diameter": "Diameter"
-       }
+       },
+       "color_tag": "SHADER"
       }
      }
     }
@@ -23844,7 +24185,8 @@
         "Green": "Green",
         "Blue": "Blue",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSV": {
        "inputs": [
@@ -23861,7 +24203,8 @@
         "Green": "Saturation",
         "Blue": "Value",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSL": {
        "inputs": [
@@ -23878,7 +24221,8 @@
         "Green": "Saturation",
         "Blue": "Lightness",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "YCC": {
        "inputs": [
@@ -23895,7 +24239,8 @@
         "Green": "Cb",
         "Blue": "Cr",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "YUV": {
        "inputs": [
@@ -23912,7 +24257,8 @@
         "Green": "U",
         "Blue": "V",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -23953,7 +24299,8 @@
         "Green": "Green",
         "Blue": "Blue",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ITUBT709": {
        "inputs": [
@@ -23970,7 +24317,8 @@
         "Green": "Green",
         "Blue": "Blue",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "JFIF": {
        "inputs": [
@@ -23987,7 +24335,8 @@
         "Green": "Green",
         "Blue": "Blue",
         "Alpha": "Alpha"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -24380,7 +24729,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACES 2.0 sRGB": {
        "inputs": [
@@ -24391,7 +24741,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACES2065-1": {
        "inputs": [
@@ -24402,7 +24753,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACEScc": {
        "inputs": [
@@ -24413,7 +24765,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACEScct": {
        "inputs": [
@@ -24424,7 +24777,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACEScg": {
        "inputs": [
@@ -24435,7 +24789,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ADX10": {
        "inputs": [
@@ -24446,7 +24801,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ADX16": {
        "inputs": [
@@ -24457,7 +24813,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARRI LogC3 (EI800)": {
        "inputs": [
@@ -24468,7 +24825,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARRI LogC4": {
        "inputs": [
@@ -24479,7 +24837,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "AgX Base sRGB": {
        "inputs": [
@@ -24490,7 +24849,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "AgX Log": {
        "inputs": [
@@ -24501,7 +24861,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Apple Log": {
        "inputs": [
@@ -24512,7 +24873,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Apple Log 2": {
        "inputs": [
@@ -24523,7 +24885,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BMDFilm WideGamut Gen5": {
        "inputs": [
@@ -24534,7 +24897,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CanonLog2 CinemaGamut D55": {
        "inputs": [
@@ -24545,7 +24909,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CanonLog3 CinemaGamut D55": {
        "inputs": [
@@ -24556,7 +24921,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "D-Log D-Gamut": {
        "inputs": [
@@ -24567,7 +24933,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DaVinci Intermediate WideGamut": {
        "inputs": [
@@ -24578,7 +24945,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Display P3": {
        "inputs": [
@@ -24589,7 +24957,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Filmic Log": {
        "inputs": [
@@ -24600,7 +24969,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Filmic sRGB": {
        "inputs": [
@@ -24611,7 +24981,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 1.8 Encoded Rec.709": {
        "inputs": [
@@ -24622,7 +24993,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.2 Encoded AP1": {
        "inputs": [
@@ -24633,7 +25005,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.2 Encoded AdobeRGB": {
        "inputs": [
@@ -24644,7 +25017,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.2 Encoded Rec.709": {
        "inputs": [
@@ -24655,7 +25029,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.4 Encoded Rec.709": {
        "inputs": [
@@ -24666,7 +25041,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Khronos PBR Neutral sRGB": {
        "inputs": [
@@ -24677,7 +25053,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear ARRI Wide Gamut 3": {
        "inputs": [
@@ -24688,7 +25065,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear ARRI Wide Gamut 4": {
        "inputs": [
@@ -24699,7 +25077,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Adobe RGB": {
        "inputs": [
@@ -24710,7 +25089,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Apple Wide Gamut": {
        "inputs": [
@@ -24721,7 +25101,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear BMD WideGamut Gen5": {
        "inputs": [
@@ -24732,7 +25113,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear CIE-XYZ D65": {
        "inputs": [
@@ -24743,7 +25125,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear CIE-XYZ E": {
        "inputs": [
@@ -24754,7 +25137,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear CinemaGamut D55": {
        "inputs": [
@@ -24765,7 +25149,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear D-Gamut": {
        "inputs": [
@@ -24776,7 +25161,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear DCI-P3 D65": {
        "inputs": [
@@ -24787,7 +25173,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear DaVinci WideGamut": {
        "inputs": [
@@ -24798,7 +25185,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear FilmLight E-Gamut": {
        "inputs": [
@@ -24809,7 +25197,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear REDWideGamutRGB": {
        "inputs": [
@@ -24820,7 +25209,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Rec.2020": {
        "inputs": [
@@ -24831,7 +25221,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Rec.709": {
        "inputs": [
@@ -24842,7 +25233,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear S-Gamut3": {
        "inputs": [
@@ -24853,7 +25245,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear S-Gamut3.Cine": {
        "inputs": [
@@ -24864,7 +25257,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear V-Gamut": {
        "inputs": [
@@ -24875,7 +25269,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Venice S-Gamut3": {
        "inputs": [
@@ -24886,7 +25281,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Venice S-Gamut3.Cine": {
        "inputs": [
@@ -24897,7 +25293,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Log3G10 REDWideGamutRGB": {
        "inputs": [
@@ -24908,7 +25305,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Non-Color": {
        "inputs": [
@@ -24919,7 +25317,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.1886": {
        "inputs": [
@@ -24930,7 +25329,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.2020": {
        "inputs": [
@@ -24941,7 +25341,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.2100-HLG": {
        "inputs": [
@@ -24952,7 +25353,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.2100-PQ": {
        "inputs": [
@@ -24963,7 +25365,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 S-Gamut3": {
        "inputs": [
@@ -24974,7 +25377,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 S-Gamut3.Cine": {
        "inputs": [
@@ -24985,7 +25389,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 Venice S-Gamut3": {
        "inputs": [
@@ -24996,7 +25401,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 Venice S-Gamut3.Cine": {
        "inputs": [
@@ -25007,7 +25413,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "V-Log V-Gamut": {
        "inputs": [
@@ -25018,7 +25425,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "sRGB": {
        "inputs": [
@@ -25029,7 +25437,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "sRGB Encoded AP1": {
        "inputs": [
@@ -25040,7 +25449,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "sRGB Encoded P3-D65": {
        "inputs": [
@@ -25051,7 +25461,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "scene_linear": {
        "inputs": [
@@ -25062,7 +25473,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -25397,7 +25809,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACES 2.0 sRGB": {
        "inputs": [
@@ -25408,7 +25821,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACES2065-1": {
        "inputs": [
@@ -25419,7 +25833,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACEScc": {
        "inputs": [
@@ -25430,7 +25845,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACEScct": {
        "inputs": [
@@ -25441,7 +25857,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ACEScg": {
        "inputs": [
@@ -25452,7 +25869,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ADX10": {
        "inputs": [
@@ -25463,7 +25881,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ADX16": {
        "inputs": [
@@ -25474,7 +25893,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARRI LogC3 (EI800)": {
        "inputs": [
@@ -25485,7 +25905,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARRI LogC4": {
        "inputs": [
@@ -25496,7 +25917,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "AgX Base sRGB": {
        "inputs": [
@@ -25507,7 +25929,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "AgX Log": {
        "inputs": [
@@ -25518,7 +25941,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Apple Log": {
        "inputs": [
@@ -25529,7 +25953,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Apple Log 2": {
        "inputs": [
@@ -25540,7 +25965,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BMDFilm WideGamut Gen5": {
        "inputs": [
@@ -25551,7 +25977,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CanonLog2 CinemaGamut D55": {
        "inputs": [
@@ -25562,7 +25989,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CanonLog3 CinemaGamut D55": {
        "inputs": [
@@ -25573,7 +26001,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "D-Log D-Gamut": {
        "inputs": [
@@ -25584,7 +26013,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DaVinci Intermediate WideGamut": {
        "inputs": [
@@ -25595,7 +26025,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Display P3": {
        "inputs": [
@@ -25606,7 +26037,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Filmic Log": {
        "inputs": [
@@ -25617,7 +26049,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Filmic sRGB": {
        "inputs": [
@@ -25628,7 +26061,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 1.8 Encoded Rec.709": {
        "inputs": [
@@ -25639,7 +26073,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.2 Encoded AP1": {
        "inputs": [
@@ -25650,7 +26085,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.2 Encoded AdobeRGB": {
        "inputs": [
@@ -25661,7 +26097,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.2 Encoded Rec.709": {
        "inputs": [
@@ -25672,7 +26109,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Gamma 2.4 Encoded Rec.709": {
        "inputs": [
@@ -25683,7 +26121,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Khronos PBR Neutral sRGB": {
        "inputs": [
@@ -25694,7 +26133,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear ARRI Wide Gamut 3": {
        "inputs": [
@@ -25705,7 +26145,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear ARRI Wide Gamut 4": {
        "inputs": [
@@ -25716,7 +26157,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Adobe RGB": {
        "inputs": [
@@ -25727,7 +26169,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Apple Wide Gamut": {
        "inputs": [
@@ -25738,7 +26181,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear BMD WideGamut Gen5": {
        "inputs": [
@@ -25749,7 +26193,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear CIE-XYZ D65": {
        "inputs": [
@@ -25760,7 +26205,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear CIE-XYZ E": {
        "inputs": [
@@ -25771,7 +26217,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear CinemaGamut D55": {
        "inputs": [
@@ -25782,7 +26229,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear D-Gamut": {
        "inputs": [
@@ -25793,7 +26241,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear DCI-P3 D65": {
        "inputs": [
@@ -25804,7 +26253,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear DaVinci WideGamut": {
        "inputs": [
@@ -25815,7 +26265,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear FilmLight E-Gamut": {
        "inputs": [
@@ -25826,7 +26277,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear REDWideGamutRGB": {
        "inputs": [
@@ -25837,7 +26289,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Rec.2020": {
        "inputs": [
@@ -25848,7 +26301,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Rec.709": {
        "inputs": [
@@ -25859,7 +26313,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear S-Gamut3": {
        "inputs": [
@@ -25870,7 +26325,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear S-Gamut3.Cine": {
        "inputs": [
@@ -25881,7 +26337,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear V-Gamut": {
        "inputs": [
@@ -25892,7 +26349,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Venice S-Gamut3": {
        "inputs": [
@@ -25903,7 +26361,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Linear Venice S-Gamut3.Cine": {
        "inputs": [
@@ -25914,7 +26373,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Log3G10 REDWideGamutRGB": {
        "inputs": [
@@ -25925,7 +26385,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Non-Color": {
        "inputs": [
@@ -25936,7 +26397,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.1886": {
        "inputs": [
@@ -25947,7 +26409,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.2020": {
        "inputs": [
@@ -25958,7 +26421,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.2100-HLG": {
        "inputs": [
@@ -25969,7 +26433,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Rec.2100-PQ": {
        "inputs": [
@@ -25980,7 +26445,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 S-Gamut3": {
        "inputs": [
@@ -25991,7 +26457,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 S-Gamut3.Cine": {
        "inputs": [
@@ -26002,7 +26469,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 Venice S-Gamut3": {
        "inputs": [
@@ -26013,7 +26481,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "S-Log3 Venice S-Gamut3.Cine": {
        "inputs": [
@@ -26024,7 +26493,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "V-Log V-Gamut": {
        "inputs": [
@@ -26035,7 +26505,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "sRGB": {
        "inputs": [
@@ -26046,7 +26517,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "sRGB Encoded AP1": {
        "inputs": [
@@ -26057,7 +26529,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "sRGB Encoded P3-D65": {
        "inputs": [
@@ -26068,7 +26541,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "scene_linear": {
        "inputs": [
@@ -26079,7 +26553,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -26952,7 +27427,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "MATTE"
       },
       "IMAGE": {
        "inputs": [
@@ -26965,7 +27441,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "MATTE"
       }
      }
     },
@@ -27494,7 +27971,8 @@
        "labels": {
         "Image": "Image",
         "Z": "Z"
-       }
+       },
+       "color_tag": "FILTER"
       },
       "HEPTAGON": {
        "inputs": [
@@ -27507,7 +27985,8 @@
        "labels": {
         "Image": "Image",
         "Z": "Z"
-       }
+       },
+       "color_tag": "FILTER"
       },
       "HEXAGON": {
        "inputs": [
@@ -27520,7 +27999,8 @@
        "labels": {
         "Image": "Image",
         "Z": "Z"
-       }
+       },
+       "color_tag": "FILTER"
       },
       "PENTAGON": {
        "inputs": [
@@ -27533,7 +28013,8 @@
        "labels": {
         "Image": "Image",
         "Z": "Z"
-       }
+       },
+       "color_tag": "FILTER"
       },
       "SQUARE": {
        "inputs": [
@@ -27546,7 +28027,8 @@
        "labels": {
         "Image": "Image",
         "Z": "Z"
-       }
+       },
+       "color_tag": "FILTER"
       },
       "TRIANGLE": {
        "inputs": [
@@ -27559,7 +28041,8 @@
        "labels": {
         "Image": "Image",
         "Z": "Z"
-       }
+       },
+       "color_tag": "FILTER"
       },
       "CIRCLE": {
        "inputs": [
@@ -27572,7 +28055,8 @@
        "labels": {
         "Image": "Image",
         "Z": "Z"
-       }
+       },
+       "color_tag": "FILTER"
       }
      }
     },
@@ -32445,7 +32929,8 @@
        "labels": {
         "Float Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -32458,7 +32943,8 @@
        "labels": {
         "Vector Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -32510,7 +32996,8 @@
        "labels": {
         "Float Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "X": {
        "inputs": [
@@ -32523,7 +33010,8 @@
        "labels": {
         "Float Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Y": {
        "inputs": [
@@ -32536,7 +33024,8 @@
        "labels": {
         "Float Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Greater": {
        "inputs": [
@@ -32549,7 +33038,8 @@
        "labels": {
         "Float Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Smaller": {
        "inputs": [
@@ -32562,7 +33052,8 @@
        "labels": {
         "Float Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Diagonal": {
        "inputs": [
@@ -32575,7 +33066,8 @@
        "labels": {
         "Float Value": "Value",
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -33066,7 +33558,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSV": {
        "inputs": [
@@ -33080,7 +33573,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HSL": {
        "inputs": [
@@ -33094,7 +33588,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "YCC": {
        "inputs": [
@@ -33108,7 +33603,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "YUV": {
        "inputs": [
@@ -33122,7 +33618,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -33160,7 +33657,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ITUBT709": {
        "inputs": [
@@ -33174,7 +33672,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "JFIF": {
        "inputs": [
@@ -33188,7 +33687,8 @@
        ],
        "labels": {
         "Image": "Image"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -35118,7 +35618,8 @@
         "Rotation": "Rotation",
         "Factor": "Factor",
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Y": {
        "inputs": [
@@ -35133,7 +35634,8 @@
         "Rotation": "Rotation",
         "Factor": "Factor",
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Z": {
        "inputs": [
@@ -35148,7 +35650,8 @@
         "Rotation": "Rotation",
         "Factor": "Factor",
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -35192,7 +35695,8 @@
         "Rotation": "Rotation",
         "Factor": "Factor",
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "X": {
        "inputs": [
@@ -35207,7 +35711,8 @@
         "Rotation": "Rotation",
         "Factor": "Factor",
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Y": {
        "inputs": [
@@ -35222,7 +35727,8 @@
         "Rotation": "Rotation",
         "Factor": "Factor",
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Z": {
        "inputs": [
@@ -35237,7 +35743,8 @@
         "Rotation": "Rotation",
         "Factor": "Factor",
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -35350,7 +35857,8 @@
        "labels": {
         "Primary Axis": "Primary Axis",
         "Secondary Axis": "Secondary Axis"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Y": {
        "inputs": [
@@ -35363,7 +35871,8 @@
        "labels": {
         "Primary Axis": "Primary Axis",
         "Secondary Axis": "Secondary Axis"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Z": {
        "inputs": [
@@ -35376,7 +35885,8 @@
        "labels": {
         "Primary Axis": "Primary Axis",
         "Secondary Axis": "Secondary Axis"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -35413,7 +35923,8 @@
        "labels": {
         "Primary Axis": "Primary Axis",
         "Secondary Axis": "Secondary Axis"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Y": {
        "inputs": [
@@ -35426,7 +35937,8 @@
        "labels": {
         "Primary Axis": "Primary Axis",
         "Secondary Axis": "Secondary Axis"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "Z": {
        "inputs": [
@@ -35439,7 +35951,8 @@
        "labels": {
         "Primary Axis": "Primary Axis",
         "Secondary Axis": "Secondary Axis"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -36985,7 +37498,8 @@
        "labels": {
         "Rotation": "Rotation",
         "Rotate By": "Rotate By"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LOCAL": {
        "inputs": [
@@ -36998,7 +37512,8 @@
        "labels": {
         "Rotation": "Rotation",
         "Rotate By": "Rotate By"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -37883,7 +38398,8 @@
        ],
        "labels": {
         "String": "String"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -37897,7 +38413,8 @@
        "labels": {
         "String": "String",
         "Base": "Base"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -38304,7 +38821,8 @@
        "labels": {
         "Value": "Value",
         "Decimals": "Decimals"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -38319,7 +38837,8 @@
         "Value": "Value",
         "Base": "Base",
         "Padding": "Padding"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -38754,7 +39273,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -38770,7 +39290,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BOOLEAN": {
        "inputs": [
@@ -38786,7 +39307,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -38802,7 +39324,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RGBA": {
        "inputs": [
@@ -38818,7 +39341,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ROTATION": {
        "inputs": [
@@ -38834,7 +39358,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MATRIX": {
        "inputs": [
@@ -38850,7 +39375,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "STRING": {
        "inputs": [
@@ -38866,7 +39392,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MENU": {
        "inputs": [
@@ -38882,7 +39409,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "OBJECT": {
        "inputs": [
@@ -38898,7 +39426,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FONT": {
        "inputs": [
@@ -38914,7 +39443,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT_VECTOR": {
        "inputs": [
@@ -38930,7 +39460,8 @@
         "Index": "Index",
         "Item_0": "0",
         "Item_1": "1"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -39308,7 +39839,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -39326,7 +39858,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BOOLEAN": {
        "inputs": [
@@ -39344,7 +39877,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -39362,7 +39896,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RGBA": {
        "inputs": [
@@ -39380,7 +39915,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ROTATION": {
        "inputs": [
@@ -39398,7 +39934,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MATRIX": {
        "inputs": [
@@ -39416,7 +39953,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "STRING": {
        "inputs": [
@@ -39434,7 +39972,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MENU": {
        "inputs": [
@@ -39452,7 +39991,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "OBJECT": {
        "inputs": [
@@ -39470,7 +40010,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FONT": {
        "inputs": [
@@ -39488,7 +40029,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT_VECTOR": {
        "inputs": [
@@ -39506,7 +40048,8 @@
         "Menu": "Menu",
         "Item_0": "A",
         "Item_1": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -39674,7 +40217,8 @@
        ],
        "labels": {
         "Object": "Object"
-       }
+       },
+       "color_tag": "INPUT"
       },
       "RELATIVE": {
        "inputs": [
@@ -39688,7 +40232,8 @@
        ],
        "labels": {
         "Object": "Object"
-       }
+       },
+       "color_tag": "INPUT"
       }
      }
     }
@@ -39910,7 +40455,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -39925,7 +40471,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BOOLEAN": {
        "inputs": [
@@ -39940,7 +40487,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -39955,7 +40503,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RGBA": {
        "inputs": [
@@ -39970,7 +40519,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ROTATION": {
        "inputs": [
@@ -39985,7 +40535,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MATRIX": {
        "inputs": [
@@ -40000,7 +40551,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "STRING": {
        "inputs": [
@@ -40015,7 +40567,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MENU": {
        "inputs": [
@@ -40030,7 +40583,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "OBJECT": {
        "inputs": [
@@ -40045,7 +40599,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FONT": {
        "inputs": [
@@ -40060,7 +40615,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT_VECTOR": {
        "inputs": [
@@ -40075,7 +40631,8 @@
         "Switch": "Switch",
         "False": "False",
         "True": "True"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -40170,7 +40727,8 @@
        "labels": {
         "Show": "Show",
         "Message": "Message"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "WARNING": {
        "inputs": [
@@ -40183,7 +40741,8 @@
        "labels": {
         "Show": "Show",
         "Message": "Message"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "INFO": {
        "inputs": [
@@ -40196,7 +40755,8 @@
        "labels": {
         "Show": "Show",
         "Message": "Message"
-       }
+       },
+       "color_tag": "INTERFACE"
       }
      }
     }
@@ -40400,7 +40960,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "INT": {
        "inputs": [
@@ -40413,7 +40974,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "BOOLEAN": {
        "inputs": [
@@ -40426,7 +40988,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "VECTOR": {
        "inputs": [
@@ -40439,7 +41002,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "RGBA": {
        "inputs": [
@@ -40452,7 +41016,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "ROTATION": {
        "inputs": [
@@ -40465,7 +41030,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "MATRIX": {
        "inputs": [
@@ -40478,7 +41044,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "STRING": {
        "inputs": [
@@ -40491,7 +41058,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "MENU": {
        "inputs": [
@@ -40504,7 +41072,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "OBJECT": {
        "inputs": [
@@ -40517,7 +41086,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "FONT": {
        "inputs": [
@@ -40530,7 +41100,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       },
       "INT_VECTOR": {
        "inputs": [
@@ -40543,7 +41114,8 @@
        "labels": {
         "Enable": "Enable",
         "Value": "Value"
-       }
+       },
+       "color_tag": "INTERFACE"
       }
      }
     }
@@ -40822,7 +41394,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT": {
        "inputs": [
@@ -40833,7 +41406,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BOOLEAN": {
        "inputs": [
@@ -40844,7 +41418,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -40855,7 +41430,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RGBA": {
        "inputs": [
@@ -40866,7 +41442,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ROTATION": {
        "inputs": [
@@ -40877,7 +41454,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MATRIX": {
        "inputs": [
@@ -40888,7 +41466,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "STRING": {
        "inputs": [
@@ -40899,7 +41478,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MENU": {
        "inputs": [
@@ -40910,7 +41490,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "OBJECT": {
        "inputs": [
@@ -40921,7 +41502,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FONT": {
        "inputs": [
@@ -40932,7 +41514,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INT_VECTOR": {
        "inputs": [
@@ -40943,7 +41526,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -41172,7 +41756,8 @@
         "Value": "Value",
         "Min": "Min",
         "Max": "Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RANGE": {
        "inputs": [
@@ -41187,7 +41772,8 @@
         "Value": "Value",
         "Min": "Min",
         "Max": "Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     }
@@ -41748,7 +42334,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "STEPPED": {
        "inputs": [
@@ -41769,7 +42356,8 @@
         "To Min": "To Min",
         "To Max": "To Max",
         "Steps": "Steps"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTHSTEP": {
        "inputs": [
@@ -41788,7 +42376,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTHERSTEP": {
        "inputs": [
@@ -41807,7 +42396,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -41845,7 +42435,8 @@
         "From Max": "From Max",
         "To Min": "To Min",
         "To Max": "To Max"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FLOAT_VECTOR": {
        "inputs": [
@@ -41864,7 +42455,8 @@
         "From_Max_FLOAT3": "From Max",
         "To_Min_FLOAT3": "To Min",
         "To_Max_FLOAT3": "To Max"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -42172,7 +42764,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SUBTRACT": {
        "inputs": [
@@ -42185,7 +42778,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MULTIPLY": {
        "inputs": [
@@ -42198,7 +42792,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DIVIDE": {
        "inputs": [
@@ -42211,7 +42806,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MULTIPLY_ADD": {
        "inputs": [
@@ -42226,7 +42822,8 @@
         "Value": "Value",
         "Value_001": "Multiplier",
         "Value_002": "Addend"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "POWER": {
        "inputs": [
@@ -42239,7 +42836,8 @@
        "labels": {
         "Value": "Base",
         "Value_001": "Exponent"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LOGARITHM": {
        "inputs": [
@@ -42252,7 +42850,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Base"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SQRT": {
        "inputs": [
@@ -42263,7 +42862,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "INVERSE_SQRT": {
        "inputs": [
@@ -42274,7 +42874,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ABSOLUTE": {
        "inputs": [
@@ -42285,7 +42886,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "EXPONENT": {
        "inputs": [
@@ -42296,7 +42898,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MINIMUM": {
        "inputs": [
@@ -42309,7 +42912,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MAXIMUM": {
        "inputs": [
@@ -42322,7 +42926,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LESS_THAN": {
        "inputs": [
@@ -42335,7 +42940,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Threshold"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "GREATER_THAN": {
        "inputs": [
@@ -42348,7 +42954,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Threshold"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SIGN": {
        "inputs": [
@@ -42359,7 +42966,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COMPARE": {
        "inputs": [
@@ -42374,7 +42982,8 @@
         "Value": "Value",
         "Value_001": "Value",
         "Value_002": "Epsilon"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTH_MIN": {
        "inputs": [
@@ -42389,7 +42998,8 @@
         "Value": "Value",
         "Value_001": "Value",
         "Value_002": "Distance"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SMOOTH_MAX": {
        "inputs": [
@@ -42404,7 +43014,8 @@
         "Value": "Value",
         "Value_001": "Value",
         "Value_002": "Distance"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ROUND": {
        "inputs": [
@@ -42415,7 +43026,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FLOOR": {
        "inputs": [
@@ -42426,7 +43038,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "CEIL": {
        "inputs": [
@@ -42437,7 +43050,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "TRUNC": {
        "inputs": [
@@ -42448,7 +43062,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FRACT": {
        "inputs": [
@@ -42459,7 +43074,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MODULO": {
        "inputs": [
@@ -42472,7 +43088,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "FLOORED_MODULO": {
        "inputs": [
@@ -42485,7 +43102,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "WRAP": {
        "inputs": [
@@ -42500,7 +43118,8 @@
         "Value": "Value",
         "Value_001": "Max",
         "Value_002": "Min"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SNAP": {
        "inputs": [
@@ -42513,7 +43132,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Increment"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "PINGPONG": {
        "inputs": [
@@ -42526,7 +43146,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Scale"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SINE": {
        "inputs": [
@@ -42537,7 +43158,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COSINE": {
        "inputs": [
@@ -42548,7 +43170,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "TANGENT": {
        "inputs": [
@@ -42559,7 +43182,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCSINE": {
        "inputs": [
@@ -42570,7 +43194,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCCOSINE": {
        "inputs": [
@@ -42581,7 +43206,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCTANGENT": {
        "inputs": [
@@ -42592,7 +43218,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ARCTAN2": {
        "inputs": [
@@ -42605,7 +43232,8 @@
        "labels": {
         "Value": "Value",
         "Value_001": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SINH": {
        "inputs": [
@@ -42616,7 +43244,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COSH": {
        "inputs": [
@@ -42627,7 +43256,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "TANH": {
        "inputs": [
@@ -42638,7 +43268,8 @@
        ],
        "labels": {
         "Value": "Value"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "RADIANS": {
        "inputs": [
@@ -42649,7 +43280,8 @@
        ],
        "labels": {
         "Value": "Degrees"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DEGREES": {
        "inputs": [
@@ -42660,7 +43292,8 @@
        ],
        "labels": {
         "Value": "Radians"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -43020,7 +43653,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VECTOR": {
        "inputs": [
@@ -43035,7 +43669,8 @@
         "Factor_Float": "Factor",
         "A_Vector": "A",
         "B_Vector": "B"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "RGBA": {
        "inputs": [
@@ -43050,7 +43685,8 @@
         "Factor_Float": "Factor",
         "A_Color": "A",
         "B_Color": "B"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "ROTATION": {
        "inputs": [
@@ -43065,7 +43701,8 @@
         "Factor_Float": "Factor",
         "A_Rotation": "A",
         "B_Rotation": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -43099,7 +43736,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "NON_UNIFORM": {
        "inputs": [
@@ -43114,7 +43752,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -43233,7 +43872,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DARKEN": {
        "inputs": [
@@ -43248,7 +43888,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "MULTIPLY": {
        "inputs": [
@@ -43263,7 +43904,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "BURN": {
        "inputs": [
@@ -43278,7 +43920,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LIGHTEN": {
        "inputs": [
@@ -43293,7 +43936,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SCREEN": {
        "inputs": [
@@ -43308,7 +43952,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DODGE": {
        "inputs": [
@@ -43323,7 +43968,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "ADD": {
        "inputs": [
@@ -43338,7 +43984,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "OVERLAY": {
        "inputs": [
@@ -43353,7 +44000,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SOFT_LIGHT": {
        "inputs": [
@@ -43368,7 +44016,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "LINEAR_LIGHT": {
        "inputs": [
@@ -43383,7 +44032,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DIFFERENCE": {
        "inputs": [
@@ -43398,7 +44048,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "EXCLUSION": {
        "inputs": [
@@ -43413,7 +44064,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SUBTRACT": {
        "inputs": [
@@ -43428,7 +44080,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "DIVIDE": {
        "inputs": [
@@ -43443,7 +44096,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "HUE": {
        "inputs": [
@@ -43458,7 +44112,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "SATURATION": {
        "inputs": [
@@ -43473,7 +44128,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "COLOR": {
        "inputs": [
@@ -43488,7 +44144,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       },
       "VALUE": {
        "inputs": [
@@ -43503,7 +44160,8 @@
         "Factor_Float": "Factor",
         "A_Float": "A",
         "B_Float": "B"
-       }
+       },
+       "color_tag": "CONVERTER"
       }
      }
     },
@@ -43731,7 +44389,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DARKEN": {
        "inputs": [
@@ -43746,7 +44405,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "MULTIPLY": {
        "inputs": [
@@ -43761,7 +44421,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "BURN": {
        "inputs": [
@@ -43776,7 +44437,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "LIGHTEN": {
        "inputs": [
@@ -43791,7 +44453,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SCREEN": {
        "inputs": [
@@ -43806,7 +44469,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DODGE": {
        "inputs": [
@@ -43821,7 +44485,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "ADD": {
        "inputs": [
@@ -43836,7 +44501,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "OVERLAY": {
        "inputs": [
@@ -43851,7 +44517,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SOFT_LIGHT": {
        "inputs": [
@@ -43866,7 +44533,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "LINEAR_LIGHT": {
        "inputs": [
@@ -43881,7 +44549,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DIFFERENCE": {
        "inputs": [
@@ -43896,7 +44565,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "EXCLUSION": {
        "inputs": [
@@ -43911,7 +44581,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SUBTRACT": {
        "inputs": [
@@ -43926,7 +44597,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "DIVIDE": {
        "inputs": [
@@ -43941,7 +44613,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "HUE": {
        "inputs": [
@@ -43956,7 +44629,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "SATURATION": {
        "inputs": [
@@ -43971,7 +44645,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "COLOR": {
        "inputs": [
@@ -43986,7 +44661,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       },
       "VALUE": {
        "inputs": [
@@ -44001,7 +44677,8 @@
         "Fac": "Factor",
         "Color1": "Color1",
         "Color2": "Color2"
-       }
+       },
+       "color_tag": "COLOR"
       }
      }
     },
@@ -44932,7 +45609,8 @@
         "Frequency": "Frequency",
         "Anisotropy": "Anisotropy",
         "Orientation 2D": "Orientation"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -44953,7 +45631,8 @@
         "Frequency": "Frequency",
         "Anisotropy": "Anisotropy",
         "Orientation 3D": "Orientation"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -45083,7 +45762,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "QUADRATIC": {
        "inputs": [
@@ -45095,7 +45775,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "EASING": {
        "inputs": [
@@ -45107,7 +45788,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "DIAGONAL": {
        "inputs": [
@@ -45119,7 +45801,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SPHERICAL": {
        "inputs": [
@@ -45131,7 +45814,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "QUADRATIC_SPHERE": {
        "inputs": [
@@ -45143,7 +45827,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "RADIAL": {
        "inputs": [
@@ -45155,7 +45840,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -45533,7 +46219,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "2D": {
        "inputs": [
@@ -45555,7 +46242,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -45577,7 +46265,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "4D": {
        "inputs": [
@@ -45601,7 +46290,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -45657,7 +46347,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "RIDGED_MULTIFRACTAL": {
        "inputs": [
@@ -45683,7 +46374,8 @@
         "Offset": "Offset",
         "Gain": "Gain",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "HYBRID_MULTIFRACTAL": {
        "inputs": [
@@ -45709,7 +46401,8 @@
         "Offset": "Offset",
         "Gain": "Gain",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "FBM": {
        "inputs": [
@@ -45731,7 +46424,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "HETERO_TERRAIN": {
        "inputs": [
@@ -45755,7 +46449,8 @@
         "Lacunarity": "Lacunarity",
         "Offset": "Offset",
         "Distortion": "Distortion"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -46085,7 +46780,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "2D": {
        "inputs": [
@@ -46108,7 +46804,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -46131,7 +46828,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "4D": {
        "inputs": [
@@ -46157,7 +46855,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -46209,7 +46908,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "MANHATTAN": {
        "inputs": [
@@ -46232,7 +46932,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "CHEBYCHEV": {
        "inputs": [
@@ -46255,7 +46956,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "MINKOWSKI": {
        "inputs": [
@@ -46280,7 +46982,8 @@
         "Lacunarity": "Lacunarity",
         "Exponent": "Exponent",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -46337,7 +47040,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "F2": {
        "inputs": [
@@ -46360,7 +47064,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SMOOTH_F1": {
        "inputs": [
@@ -46385,7 +47090,8 @@
         "Lacunarity": "Lacunarity",
         "Smoothness": "Smoothness",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "DISTANCE_TO_EDGE": {
        "inputs": [
@@ -46406,7 +47112,8 @@
         "Roughness": "Roughness",
         "Lacunarity": "Lacunarity",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "N_SPHERE_RADIUS": {
        "inputs": [
@@ -46421,7 +47128,8 @@
         "Vector": "Vector",
         "Scale": "Scale",
         "Randomness": "Randomness"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -46646,7 +47354,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "RINGS": {
        "inputs": [
@@ -46670,7 +47379,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -46723,7 +47433,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Y": {
        "inputs": [
@@ -46747,7 +47458,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Z": {
        "inputs": [
@@ -46771,7 +47483,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "DIAGONAL": {
        "inputs": [
@@ -46795,7 +47508,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -46848,7 +47562,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Y": {
        "inputs": [
@@ -46872,7 +47587,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "Z": {
        "inputs": [
@@ -46896,7 +47612,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SPHERICAL": {
        "inputs": [
@@ -46920,7 +47637,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     },
@@ -46968,7 +47686,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "SAW": {
        "inputs": [
@@ -46992,7 +47711,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "TRI": {
        "inputs": [
@@ -47016,7 +47736,8 @@
         "Detail Scale": "Detail Scale",
         "Detail Roughness": "Detail Roughness",
         "Phase Offset": "Phase Offset"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -47149,7 +47870,8 @@
        ],
        "labels": {
         "W": "W"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "2D": {
        "inputs": [
@@ -47161,7 +47883,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "3D": {
        "inputs": [
@@ -47173,7 +47896,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "TEXTURE"
       },
       "4D": {
        "inputs": [
@@ -47187,7 +47911,8 @@
        "labels": {
         "Vector": "Vector",
         "W": "W"
-       }
+       },
+       "color_tag": "TEXTURE"
       }
      }
     }
@@ -47659,7 +48384,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SUBTRACT": {
        "inputs": [
@@ -47672,7 +48398,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MULTIPLY": {
        "inputs": [
@@ -47685,7 +48412,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DIVIDE": {
        "inputs": [
@@ -47698,7 +48426,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MULTIPLY_ADD": {
        "inputs": [
@@ -47713,7 +48442,8 @@
         "Vector": "Vector",
         "Vector_001": "Multiplier",
         "Vector_002": "Addend"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "CROSS_PRODUCT": {
        "inputs": [
@@ -47726,7 +48456,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "PROJECT": {
        "inputs": [
@@ -47739,7 +48470,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "REFLECT": {
        "inputs": [
@@ -47752,7 +48484,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "REFRACT": {
        "inputs": [
@@ -47767,7 +48500,8 @@
         "Vector": "Vector",
         "Vector_001": "Vector",
         "Scale": "IOR"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "FACEFORWARD": {
        "inputs": [
@@ -47782,7 +48516,8 @@
         "Vector": "Vector",
         "Vector_001": "Incident",
         "Vector_002": "Reference"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DOT_PRODUCT": {
        "inputs": [
@@ -47795,7 +48530,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "DISTANCE": {
        "inputs": [
@@ -47808,7 +48544,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "LENGTH": {
        "inputs": [
@@ -47819,7 +48556,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SCALE": {
        "inputs": [
@@ -47832,7 +48570,8 @@
        "labels": {
         "Vector": "Vector",
         "Scale": "Scale"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "NORMALIZE": {
        "inputs": [
@@ -47843,7 +48582,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "ABSOLUTE": {
        "inputs": [
@@ -47854,7 +48594,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "POWER": {
        "inputs": [
@@ -47867,7 +48608,8 @@
        "labels": {
         "Vector": "Base",
         "Vector_001": "Exponent"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SIGN": {
        "inputs": [
@@ -47878,7 +48620,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MINIMUM": {
        "inputs": [
@@ -47891,7 +48634,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MAXIMUM": {
        "inputs": [
@@ -47904,7 +48648,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "ROUND": {
        "inputs": [
@@ -47915,7 +48660,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "FLOOR": {
        "inputs": [
@@ -47926,7 +48672,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "CEIL": {
        "inputs": [
@@ -47937,7 +48684,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "FRACTION": {
        "inputs": [
@@ -47948,7 +48696,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "MODULO": {
        "inputs": [
@@ -47961,7 +48710,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "WRAP": {
        "inputs": [
@@ -47976,7 +48726,8 @@
         "Vector": "Vector",
         "Vector_001": "Max",
         "Vector_002": "Min"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SNAP": {
        "inputs": [
@@ -47989,7 +48740,8 @@
        "labels": {
         "Vector": "Vector",
         "Vector_001": "Increment"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "SINE": {
        "inputs": [
@@ -48000,7 +48752,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "COSINE": {
        "inputs": [
@@ -48011,7 +48764,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "TANGENT": {
        "inputs": [
@@ -48022,7 +48776,8 @@
        ],
        "labels": {
         "Vector": "Vector"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     }
@@ -48211,7 +48966,8 @@
         "Center": "Center",
         "Axis": "Axis",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "X_AXIS": {
        "inputs": [
@@ -48226,7 +48982,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "Y_AXIS": {
        "inputs": [
@@ -48241,7 +48998,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "Z_AXIS": {
        "inputs": [
@@ -48256,7 +49014,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Angle": "Angle"
-       }
+       },
+       "color_tag": "VECTOR"
       },
       "EULER_XYZ": {
        "inputs": [
@@ -48271,7 +49030,8 @@
         "Vector": "Vector",
         "Center": "Center",
         "Rotation": "Rotation"
-       }
+       },
+       "color_tag": "VECTOR"
       }
      }
     },

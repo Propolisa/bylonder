@@ -243,7 +243,6 @@ export function createNodeEditorController(tree, { openAddMenu = () => {}, viewp
       'node.view_all': () => editor.viewAll(),
       'node.view_selected': () => editor.viewAll(true),
       'node.translate_attach': () => editor.startMove(state.pointer, false),
-      'transform.translate': () => editor.startMove(state.pointer, false),
       'wm.call_menu': ({ name }) => name === 'NODE_MT_add' && openAddMenu(state.pointer),
     },
     run(idname, props = {}) {

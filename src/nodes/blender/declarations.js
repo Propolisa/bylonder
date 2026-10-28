@@ -23,9 +23,11 @@ export function defaults(decl) {
   return { properties, values };
 }
 
-// Which sockets the node shows with these properties and values, and their labels: a socket whose availability an
-// enum property or a menu changes follows its value, the others are as declared.
+// Which sockets the node shows with these properties and values, their labels and the node's color tag (its
+// ui_class): a socket whose availability an enum property or a menu changes follows its value, the others are as
+// declared.
 export function availability(decl, properties, values = {}) {
+  let tag = decl.color_tag;
   const inputs = new Set(decl.inputs.filter((s) => s.enabled !== false).map((s) => s.identifier));
   const outputs = new Set(decl.outputs.filter((s) => s.enabled !== false).map((s) => s.identifier));
   const labels = Object.fromEntries(decl.inputs.map((s) => [s.identifier, s.label || s.name]));
@@ -37,10 +39,11 @@ export function availability(decl, properties, values = {}) {
       for (const id of varying) chosen[side].includes(id) ? set.add(id) : set.delete(id);
     }
     Object.assign(labels, chosen.labels);
+    if (variants.some((v) => v.color_tag !== chosen.color_tag)) tag = chosen.color_tag;
   }
   for (const menu of decl.inputs.filter((s) => s.usage)) {
     const item = menu.items.indexOf(values[menu.identifier] ?? menu.default);
     for (const [id, used] of Object.entries(menu.usage)) used === item ? inputs.add(id) : inputs.delete(id);
   }
-  return { inputs, outputs, labels };
+  return { inputs, outputs, labels, tag };
 }

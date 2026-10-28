@@ -1,7 +1,8 @@
 # Writes Blender's shader and compositor node types as Blender declares them: per node its label, description, color
 # tag, width, sockets (identifier, name, type, default, range, subtype, shape, color) and properties (enums with their
-# items, and the sockets each item shows); and the Node Editor theme. The nodes are the types bpy.types has and the
-# idnames Blender's Add menus name (some are aliases, as ShaderNodeBsdfGlossy is of ShaderNodeBsdfAnisotropic).
+# items, and the sockets and color tag each item gives); and the Node Editor theme. The nodes are the types bpy.types
+# has and the idnames Blender's Add menus name (some are aliases, as ShaderNodeBsdfGlossy is of
+# ShaderNodeBsdfAnisotropic).
 # usage: blender -b --factory-startup --python tools/blender-reference/nodes.py -- OUT.json
 import bpy, glob, json, os, re, sys
 
@@ -44,7 +45,7 @@ def socket(s):
 
 def availability(node):
     return {"inputs": [s.identifier for s in node.inputs if s.enabled], "outputs": [s.identifier for s in node.outputs if s.enabled],
-            "labels": {s.identifier: s.label for s in node.inputs if s.enabled and s.label}}
+            "labels": {s.identifier: s.label for s in node.inputs if s.enabled and s.label}, "color_tag": node.color_tag}
 
 
 def prop(node, p):

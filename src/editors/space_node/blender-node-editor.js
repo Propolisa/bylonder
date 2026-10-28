@@ -10,6 +10,25 @@ import { addMenuEntries, addMenuItems } from './node-add-menu.js';
 import { openMenu, searchMenu } from '../interface/menu.js';
 import { keymapHandler } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
+import { registerOperators } from '../../windowmanager/wm-operators.js';
+
+// Blender's Node Editor operators Bylonder runs, on the Node Editor a key went to (`active` while its keymaps run).
+let active = null;
+const on = (idname) => ({ poll: () => !!active, run: (props) => active.run(idname, props) });
+registerOperators({
+  'node.select_all': on('node.select_all'),
+  'node.mute_toggle': on('node.mute_toggle'),
+  'node.hide_toggle': on('node.hide_toggle'),
+  'node.hide_socket_toggle': on('node.hide_socket_toggle'),
+  'node.delete': on('node.delete'),
+  'node.delete_reconnect': on('node.delete_reconnect'),
+  'node.join_nodes': on('node.join_nodes'),
+  'node.link_make': on('node.link_make'),
+  'node.duplicate_move': on('node.duplicate_move'),
+  'node.view_all': on('node.view_all'),
+  'node.view_selected': on('node.view_selected'),
+  'node.translate_attach': on('node.translate_attach'),
+});
 
 export function mountBlenderNodeEditor(host, graph, { changed = () => {} } = {}) {
   const tree = createNodeTree(graph, { changed: (rebuild) => changed(rebuild) });
@@ -27,14 +46,19 @@ export function mountBlenderNodeEditor(host, graph, { changed = () => {} } = {})
     searchMenu('');
   };
 
-  const nodeKeys = keymapHandler(['Node Editor', 'Node Generic'], undefined, (idname, props) => editor.run(idname, props));
-  const otherKeys = keymapHandler(['View2D', 'Frames', 'Screen', 'Window']);
+  // Shift A's wm.call_menu opens this editor's Add menu; registered, it would claim every editor's menus.
+  const menus = keymapHandler(['Node Editor'], undefined, (idname, props) => idname === 'wm.call_menu' && editor.run(idname, props));
+  const keys = keymapHandler(['Node Editor', 'Node Generic', 'View2D', 'Frames', 'Screen', 'Window']);
   const onKey = (e) => {
     if (e.target.closest('input,textarea,select') || e.repeat) return;
-    const handled = editor.modalKey(e.key) || (() => {
+    active = editor;
+    let handled;
+    try {
       const event = { type: keyType(e), value: 'PRESS', shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, oskey: e.metaKey, native: e };
-      return nodeKeys(event) || otherKeys(event);
-    })();
+      handled = editor.modalKey(e.key) || menus(event) || keys(event);
+    } finally {
+      active = null;
+    }
     if (!handled) return;
     e.preventDefault();
     e.stopPropagation();
