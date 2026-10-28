@@ -3,8 +3,7 @@
 import assert from 'node:assert/strict';
 
 const started = performance.now();
-await import('../src/bl_py/__main__.js');
-const registered = globalThis.__py_modules._bpy.registered;
+const { registered } = await import('../src/python/bpy_interface.js');
 const count = (pattern) => Object.keys(registered).filter((name) => pattern.test(name)).length;
 assert.ok(Object.keys(registered).length >= 2000, 'Blender\'s startup registers its classes');
 assert.equal(count(/_HT_/), 26, 'every header Blender registers');

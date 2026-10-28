@@ -744,8 +744,8 @@ export var unregister = function () {
 	}
 	else {
 	}
-	delete bpy.types.Object.selection_sets;
-	delete bpy.types.Object.active_selection_set;
+	bpy.types.Object.selection_sets = null;
+	bpy.types.Object.active_selection_set = null;
 };
 
 //# sourceMappingURL=bl_operators.bone_selection_sets.map

@@ -28,24 +28,51 @@ export const collection = (items = [], active = null) => Object.assign([...items
   find: (name) => items.findIndex((item) => item.name === name),
 });
 
+// What the interface shows of a property (name, ranges, enum items, ...), rna-ui.json, loaded by loadRNAUI() before
+// an editor first draws properties. `load` imports it: bundlers serve JSON as a module without Node's import attribute.
+let ui = null;
+export async function loadRNAUI(load = () => import('./rna-ui.json', { with: { type: 'json' } })) {
+  ui ??= (await load()).default;
+}
+
+// An object as Transcrypt's Python reads it: its renamed names (py_name, py_get, ...) are the object's own.
+const python = (object) => new Proxy(object, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key] : target[rnaName(key)]) });
+
 const TYPES = { B: 'BOOLEAN', I: 'INT', F: 'FLOAT', S: 'STRING', E: 'ENUM', P: 'POINTER', C: 'COLLECTION' };
 const blRnas = new Map();
+export const hasStruct = (struct) => struct in structs;
+// An enum's items by index and by identifier (enum_items['VERTEX'].icon), separators left out.
+const enumItems = (items = []) => {
+  const list = collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value })));
+  for (const item of list) list[item.identifier] = item;
+  return python(list);
+};
+const uiOf = (struct, name) => {
+  for (let s = struct; s; s = structs[s]?.base) if (ui?.[s]?.props[name]) return ui[s].props[name];
+  return {};
+};
 
-// bpy_struct.bl_rna: a struct's RNA, its properties with their types and defaults, its own and its bases'.
+// bpy_struct.bl_rna: a struct's RNA (rna-structs.json and rna-ui.json), its properties with their types, defaults,
+// names and enum items, its own and its bases'.
 export function blRna(struct) {
   if (!blRnas.has(struct)) {
     const properties = [];
     for (let s = structs[struct]; s; s = structs[s.base]) {
       for (const [identifier, [type, value]] of Object.entries(s.props)) {
         if (properties.some((p) => p.identifier === identifier)) continue;
-        const pointer = type === 'P' || type === 'C';
-        properties.push({ identifier, name: identifier, description: '', type: TYPES[type], default: pointer ? null : value, is_readonly: false, enum_items: collection(), get enum_items_static() { return this.enum_items; },
-          get fixed_type() { return pointer ? blRna(value) : null; } });
+        const pointer = type === 'P' || type === 'C', meta = uiOf(struct, identifier);
+        const items = enumItems(meta.items);
+        properties.push(python({ identifier, name: meta.name ?? identifier, description: meta.description ?? '', type: TYPES[type],
+          default: pointer ? null : value, is_readonly: !!meta.readonly, subtype: meta.subtype ?? 'NONE', unit: meta.unit ?? 'NONE',
+          hard_min: meta.min, hard_max: meta.max, soft_min: meta.soft_min, soft_max: meta.soft_max, step: meta.step, precision: meta.precision,
+          icon: meta.icon ?? 'NONE', translation_context: '*', enum_items: items, enum_items_static: items,
+          get fixed_type() { return pointer ? blRna(value) : null; } }));
       }
     }
     const list = collection(properties);
     for (const p of properties) list[p.identifier] = p;
-    blRnas.set(struct, { identifier: struct, name: struct, description: '', base: structs[struct]?.base ? blRna(structs[struct].base) : null, properties: list });
+    blRnas.set(struct, python({ identifier: struct, name: ui?.[struct]?.name ?? struct, description: ui?.[struct]?.description ?? '', translation_context: '*',
+      base: structs[struct]?.base ? blRna(structs[struct].base) : null, properties: python(list) }));
   }
   return blRnas.get(struct);
 }

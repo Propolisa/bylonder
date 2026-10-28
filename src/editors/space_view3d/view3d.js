@@ -3,9 +3,9 @@ import { menuButton } from '../interface/menu.js';
 import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
-import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
+import { menuUI } from '../../windowmanager/wm-operators.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
-import * as spaceView3d from '../../bl_ui/space_view3d.js';
+import { menus } from '../../python/bpy_interface.js';
 import { view_3d, user_interface, cssColor } from '../interface/userdef-default-theme.js';
 import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
@@ -24,19 +24,6 @@ const mixColor = (a, b, t) => cssColor([0, 1, 2].map((i) => a[i] + (b[i] - a[i])
 // The keymaps an Object Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 
-// The Area menu, which Blender defines in C (screen_ops.cc).
-const INFO_MT_area = Object.assign(() => ({
-  draw() {
-    const { layout } = this;
-    layout.operator('screen.area_split', kw({ text: 'Horizontal Split' })).direction = 'HORIZONTAL';
-    layout.operator('screen.area_split', kw({ text: 'Vertical Split' })).direction = 'VERTICAL';
-    layout.separator();
-    layout.operator('screen.screen_full_area', kw({ text: 'Toggle Maximize Area' }));
-    layout.operator('screen.screen_full_area', kw({ text: 'Toggle Fullscreen Area' })).use_hide_panels = true;
-    layout.separator();
-    layout.operator('screen.area_close', kw({ text: 'Close Area' }));
-  },
-}), { bl_label: 'Area' });
 const background = new Color4(...view_3d.background);
 // Blender's startup 3D View (startup.blend: region_3d view_rotation, view_distance and view_location) as an orbit
 // around its location, and its lens: View3D.lens 50 mm on the 36 mm viewport sensor at the viewport's zoom of 2
@@ -121,7 +108,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   selectModes.append(...selectModeButtons);
   // Blender's Object Mode menus, from its own scripts over this view's context.
   // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
-  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
+  const blender = menuUI({ menus, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);

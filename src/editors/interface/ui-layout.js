@@ -7,6 +7,7 @@
 //   keys(idname, props): its shortcut, if bound, enumItems(idname, prop): an enum's items as [identifier, name, description, icon].
 import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js';
+import { setContext } from '../../python/bpy_interface.js';
 import { pyArgs as args } from '../../makesrna/rna.js';
 import { toolIconUrl } from './icon.js';
 
@@ -128,6 +129,7 @@ export function useContext(context) {
   for (const key of Object.keys(context)) contextKeys.add(key);
   Object.assign(bpyContext, context);
   if (context.blend_data) Object.assign(bpyData, context.blend_data);
+  setContext(context);
 }
 
 // Draw functions added to a menu (`Menu.prepend` and `Menu.append`, as add-ons extend Blender's menus) run around its

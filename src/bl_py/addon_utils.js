@@ -1018,7 +1018,7 @@ export var enable = function (module_name) {
 						}) ());
 					}
 				}
-				delete mod.bl_info;
+				mod.bl_info = null;
 			}
 		}
 		var use_owner = is_extension || !__in__ (module_name, _addons_hidden_core);

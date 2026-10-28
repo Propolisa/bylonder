@@ -658,7 +658,10 @@ export var load_scripts_extensions = function () {
 	var _initialize_once = __call__ (getattr, null, _addon_utils, '_initialize_once', null);
 	if (_initialize_once !== null) {
 		__call__ (_initialize_once, null);
-		delete _addon_utils._initialize_once;
+		(function () {
+			var __accu0__ = _addon_utils;
+			return __call__ (__accu0__.__py_setattr__, __accu0__, '_initialize_once', null);
+		}) ();
 	}
 	else {
 		(function () {
@@ -2124,7 +2127,7 @@ export var unregister_tool = function (tool_cls) {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	delete tool_cls._bl_tool;
+	tool_cls._bl_tool = null;
 	var keymap_data = tool_def.keymap;
 	if (keymap_data !== null) {
 		var context = __call__ (_member, null, '_bpy', 'context');

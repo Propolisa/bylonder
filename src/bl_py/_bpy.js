@@ -29,6 +29,29 @@ const top = (stack) => new Proxy({}, {
 export var context = null;
 export var data = null;
 context = top(_contexts); data = top(_datas);
+export var _context_set = function (context, data) {
+	if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
+		var data = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__gt__ (__call__ (len, null, _contexts), 1)) {
+		__call__ (_context_pop, null);
+	}
+	__call__ (_context_push, null, context, data);
+};
 export var _context_push = function (context, data) {
 	if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
 		var data = null;
@@ -424,6 +447,7 @@ export function __py_setattr__ (key, value) {
 		case '_datas': _datas = value; break;
 		case 'context': context = value; break;
 		case 'data': data = value; break;
+		case '_context_set': _context_set = value; break;
 		case '_context_push': _context_push = value; break;
 		case '_context_pop': _context_pop = value; break;
 		case 'register_class': register_class = value; break;

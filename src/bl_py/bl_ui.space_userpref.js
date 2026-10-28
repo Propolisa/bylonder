@@ -5842,7 +5842,7 @@ export var USERPREF_PT_addons =  __class__ ('USERPREF_PT_addons', [AddOnPanel, P
 				throw __except0__;
 			}
 		}
-		delete addon_preferences_class.layout;
+		addon_preferences_class.layout = null;
 	};},
 	get draw_error () {return function (layout, message) {
 		if (arguments.length) {

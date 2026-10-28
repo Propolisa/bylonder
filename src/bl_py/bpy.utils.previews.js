@@ -297,7 +297,7 @@ export var exit_clear_warning = function () {
 	}
 	else {
 	}
-	delete ImagePreviewCollection.__del__;
+	ImagePreviewCollection.__del__ = null;
 };
 (function () {
 	var __accu0__ = atexit;
