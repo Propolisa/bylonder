@@ -157,7 +157,8 @@ def displaced_sphere():
     sphere = bpy.context.view_layer.objects.active
     sphere.modifiers.new("Subdivision", "SUBSURF")
     sphere.modifiers.new("Displace", "DISPLACE").texture = bpy.data.textures.new("Texture", "CLOUDS")
-    area("PROPERTIES").spaces.active.context = "TEXTURE"
+    # The Texture tab shows once a redraw has found the texture user.
+    later(0.5, lambda: setattr(area("PROPERTIES").spaces.active, "context", "TEXTURE"))
     return sphere
 
 

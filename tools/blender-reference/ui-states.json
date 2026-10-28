@@ -22,5 +22,5 @@
   { "id": "scripting", "title": "Scripting workspace: Text Editor, Python Console with its banner, Info", "settle": 3 },
   { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" },
   { "id": "displaced-sphere", "title": "UV Sphere (the cube deleted) with Subdivision Surface and Displace by a new Clouds texture, the Properties editor on the Texture tab", "settle": 3 },
-  { "id": "lava-material", "title": "Shading workspace: the lava material's nodes in the Shader Editor, the displaced sphere in Material Preview", "settle": 8 }
+  { "id": "lava-material", "title": "Shading workspace: the lava material's nodes in the Shader Editor, the displaced sphere in Material Preview (EEVEE compiles its shaders for a minute under software GL)", "settle": 120 }
 ]
