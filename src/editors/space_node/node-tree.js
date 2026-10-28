@@ -119,7 +119,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
   function node(block) {
     const at = location(block), blender = isBlender(block) ? block.declaration : null;
     if (ELBOWS.has(block.getClassName())) return { id: block.uniqueId, block, reroute: true, x: at.x, y: at.y, inputs: block.inputs.map((p) => socket(p)), outputs: block.outputs.map((p) => socket(p)) };
-    let inputs, outs, buttons, tag, label;
+    let inputs, outs, buttons, tag, label, ramp = null;
     if (blender) {
       const shown = availability(blender, block.properties, block.values);
       outs = blender.outputs.filter((s) => shown.outputs.has(s.identifier)).map((s) => ({ ...socket(block.getOutputByName(s.identifier) ?? { name: s.identifier }, s) }));
@@ -130,6 +130,8 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       buttons = Object.entries(blender.properties).filter(([key, p]) => (p.type === 'ENUM' || p.type === 'BOOLEAN') && drawn(block.idname, key, block.properties)).map(([key, p]) => ({
         key, label: p.name, type: p.type, items: p.items, get: () => block.properties[key], set: (v) => { block.properties[key] = v; changed(true); },
       }));
+      // A Color Ramp's ramp (template_color_ramp): its stops' edits rebuild, choosing the active one does not.
+      if (block.properties.color_ramp) ramp = { get: () => block.properties.color_ramp, changed };
       tag = shown.tag;
       label = LABELS[block.idname]?.(block.properties, blender) ?? blender.name;
     } else {
@@ -149,7 +151,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       id: block.uniqueId, block, blender: blender ? block.idname : null, label, tag, x: at.x, y: at.y,
       width: blender?.width ?? Math.max(140, ...[...inputs, ...outs].map((s) => s.label.length * 7 + 50)),
       hidden: !!at.isCollapsed, socketsHidden: !!at.hideSockets, muted: !!(block.mute ?? block.disabled),
-      outputs: shown(outs), inputs: shown(inputs), buttons,
+      outputs: shown(outs), inputs: shown(inputs), buttons, ramp,
     };
   }
   // A Babylon input block's value, as Blender's Value and RGB nodes show theirs.

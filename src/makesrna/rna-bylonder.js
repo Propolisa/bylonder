@@ -591,7 +591,7 @@ const STRUCTS = {
   SpaceOutliner: (space) => ({ type: () => 'OUTLINER', ...Object.fromEntries(Object.keys(space).map((name) => [name,
     { get: () => space[name], set: (owner, value) => { space[name] = value; } }])) }),
 };
-const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
+const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', material: 'MATERIAL', rendered: 'RENDERED' };
 // One of a text's lines (TextLine); writing its body edits the text.
 const textLine = (text, i, r) => rna('TextLine', {
   get body() { return text.lines[i] ?? ''; },

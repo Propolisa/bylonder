@@ -280,7 +280,7 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "resume") views.wake();
   if (e.data.type === "scene-name") world.sceneSettings.renamed(e.data.payload);
   // The workspace's screen (Scripting or Layout), and a project text file changed in the Code workspace.
-  if (e.data.type === "screen") viewportDock.setScreen(e.data.payload);
+  if (e.data.type === "screen") setScreen(e.data.payload);
   if (e.data.type === "text") world.texts.load(e.data.payload.name, e.data.payload.content);
 });
 let ui;
@@ -478,6 +478,15 @@ const mountView = (options) => {
 };
 shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
+// Each screen's 3D Viewport keeps its own shading, as each of Blender's screens has its own: Shading's starts in
+// Material Preview.
+const screenShading = { shading: "material" };
+function setScreen(name) {
+  const previous = viewportDock.screen ?? "layout";
+  viewportDock.setScreen(name);
+  screenShading[previous] = primary.state.shading;
+  primary.setShading(screenShading[name] ?? "solid");
+}
 viewportDock.setFactory("viewport", (host, id) => mountView({ section: host, headerId: id, from: activeView()?.editorCamera || primary.editorCamera }));
 views.setInput(primary);
 views.onFocus = () => viewportCtx.shadingChanged();
@@ -531,6 +540,7 @@ const sequencerEditor = mountSequencerEditor(document.querySelector("#sequencer-
 const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), { adapter: sequencerAdapter, notify });
 for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
 for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());
+world.modifiers.onDrawn(() => views.wake());
 ownObservers = observerCount() - userObservers;
 document.querySelector("#inspector").onclick = inspector;
 document.querySelector("#scene-mode").onclick = () => activeView()?.toggleCameraView();

@@ -41,6 +41,8 @@ const reverts=error=>error.by==='user'||error.name==='EvaluationFailed';
 export function createModifierSystem(world,{commit=()=>{},notify=console.warn,evaluate:evaluator=evaluateHere,jobs=null}={}){
   const cache=new Map(),errors=new Map(),listeners=new Set(),requested=new Map(),good=new Map();let applying=false;
   const emit=()=>listeners.forEach(fn=>fn());
+  // What a finished evaluation drew, for views drawn on demand.
+  const drawnListeners=new Set();
   const target=id=>world.objects.find(n=>nodeId(n)===id&&!deleted(n));
   const run=(owner,name,work)=>jobs?jobs.run(owner,name,work):work();
   function registerChannels(node,modifier){
@@ -114,6 +116,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
       cache.set(node,{signature:request.signature,geometry:node.geometry,result,base:request.base,creation:request.creation});
       good.set(node,request.stack);
     }finally{applying=false;}
+    drawnListeners.forEach(fn=>fn(node));
   }
   function signature(node){
     return JSON.stringify([modifierStack(node),modifierStack(node).map(m=>{const c=context(node,m);return [c.objectMatrix?.asArray(),c.curvePaths,textureOf(m)];})]);
@@ -144,6 +147,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
   const api={
     definitions:modifierDefinitions,stack:modifierStack,errors,
     subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
+    onDrawn(fn){drawnListeners.add(fn);return()=>drawnListeners.delete(fn);},
     add(node,type='GN_ARRAY',values={}){
       if(!node||!hasMesh(node)||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
       const definition=modifierDefinitions.get(type);if(!definition)throw Error('Unknown modifier');

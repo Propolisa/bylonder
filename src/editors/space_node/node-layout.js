@@ -4,7 +4,7 @@
 // a point.
 export const U = 20;
 export const HEADER = U, ROW = 22, SOCKET_RADIUS = 5;
-const TOP = 4, BOTTOM = 6, VECTOR_ROWS = 4;
+const TOP = 4, BOTTOM = 6, VECTOR_ROWS = 4, RAMP_ROWS = 4;
 
 // Blender's node classes (color_tag) as the theme colors of their headers (theme.css --bl-node-*).
 const TAGS = {
@@ -34,6 +34,7 @@ export function nodeLayout(node) {
   node.outputs.filter((s) => !inputs.has(s.align)).forEach((s) => add('output', s));
   node.outputs.filter((s) => s.value).forEach((s) => add('value', s, rowHeight({ ...s, linked: false })));
   node.buttons.forEach((b) => add('button', b));
+  if (node.ramp) add('ramp', node.ramp, ROW * RAMP_ROWS);
   node.inputs.forEach((s) => add('input', s, rowHeight(s)));
   const height = node.hidden ? HEADER : y + BOTTOM;
   const place = (side, socket, row) => sockets.push({

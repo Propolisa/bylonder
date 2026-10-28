@@ -133,8 +133,9 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
     world.renderSettings.setRenderedCameras(renderedCameras);
     world.compositor?.bindCamera(compositorCamera);
   };
-  world.beforeViewRender = ({ rendered, compositor }) => {
+  world.beforeViewRender = ({ rendered, preview = false, compositor }) => {
     world.worlds.setViewportActive(rendered);
+    world.worlds.setPreview(preview);
     world.compositor?.setViewportActive(compositor);
   };
   world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));

@@ -69,6 +69,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
     get camera() { return state.cameraView && ctx.sceneCamera() ? ctx.sceneCamera() : editorCamera; },
     get rendered() { return state.shading === 'rendered' || state.cameraView; },
+    // Material Preview: the scene's materials in studio lighting.
+    get preview() { return state.shading === 'material' && !state.cameraView; },
   };
 
   // Overlays: view name, navigation gizmo and buttons.
@@ -196,7 +198,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     section.classList.toggle('overlays-off', !state.overlays || state.cameraView);
     section.classList.toggle('gizmos-off', !state.show_gizmo);
     section.classList.toggle('camera-view', state.cameraView);
-    world.workbench.setShading(editorCamera, view.rendered ? null : state.shading);
+    world.workbench.setShading(editorCamera, view.rendered || view.preview ? null : state.shading);
     toolbar.el.hidden = !state.show_region_toolbar;
     if (state.show_region_toolbar) toolbar.draw();
     section.classList.toggle('toolbar-shown', state.show_region_toolbar);
@@ -216,9 +218,9 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     authored = null;
     if (!rendered) { authored = scene.clearColor; scene.clearColor = background; }
     ctx.overlays.setEnabled(state.overlays && !rendered);
-    world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
+    world.beforeViewRender({ rendered, preview: view.preview, compositor: view.wantsCompositor });
   };
-  view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; };
+  view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; if (view.preview) world.worlds.setPreview(false); };
   view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); toolOverlay.tick(); };
   view.setDetail = text => { if (detail.textContent !== text) detail.textContent = text; };
   view.sync = sync;

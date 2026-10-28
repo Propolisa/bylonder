@@ -17,9 +17,9 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   const menus = $('topbar-menus');
   const autoRun = $('auto-run');
   // Blender's default workspaces, each opening the screen the scene's window has for it (docs/blender-boundary.md,
-  // Workspaces): Scripting's, else Layout's.
+  // Workspaces): Scripting's and Shading's, else Layout's.
   const workspaces = ['Layout', 'Modeling', 'Sculpting', 'UV Editing', 'Texture Paint', 'Shading', 'Animation', 'Rendering', 'Compositing', 'Geometry Nodes', 'Scripting']
-    .map((name) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, screen: name === 'Scripting' ? 'scripting' : 'layout' }));
+    .map((name) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, screen: ['Scripting', 'Shading'].includes(name) ? name.toLowerCase() : 'layout' }));
   let selected = 'layout';
   const current = () => selected;
   const screen = () => workspaces.find((w) => w.id === selected).screen;
