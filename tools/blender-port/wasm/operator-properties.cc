@@ -177,16 +177,16 @@ PropertyRNA *rna_property_runtime(StructRNA *srna, const char *identifier, Prope
   return prop;
 }
 
-/* Gives the properties the RNA functions rna-fcurve.cc lists, and their structs their bases. */
-static void rna_fcurve_funcs_register()
+/* Gives the properties the RNA functions an RNA file's runtime part lists, and their structs their bases. */
+static void rna_funcs_register(const RnaTables &tables)
 {
-  for (const RnaBase *b = rna_fcurve_bases; b->srna; b++) {
+  for (const RnaBase *b = tables.bases; b->srna; b++) {
     (*b->srna)->base = *b->base;
   }
-  for (const RnaArray *a = rna_fcurve_arrays; a->srna; a++) {
+  for (const RnaArray *a = tables.arrays; a->srna; a++) {
     rna_property_runtime(*a->srna, a->identifier, PropertyType(a->type))->length = a->length;
   }
-  for (const RnaFunc *f = rna_fcurve_funcs; f->srna; f++) {
+  for (const RnaFunc *f = tables.funcs; f->srna; f++) {
     auto &funcs = rna_property_runtime(*f->srna, f->identifier, PropertyType(f->type))->funcs;
     switch (f->member) {
 #define MEMBER(name) \
@@ -210,6 +210,7 @@ static void rna_fcurve_funcs_register()
       MEMBER(int_range)
       MEMBER(length)
       MEMBER(update)
+      MEMBER(update_context)
 #undef MEMBER
     }
   }
@@ -217,7 +218,8 @@ static void rna_fcurve_funcs_register()
 
 PropertyRNA *RNA_struct_type_find_property(StructRNA *srna, const char *identifier)
 {
-  static const bool dna_fields = (define_dna_fields(), rna_fcurve_funcs_register(), true);
+  static const bool dna_fields = (define_dna_fields(), rna_funcs_register(rna_fcurve_tables), rna_funcs_register(rna_space_tables),
+                                   true);
   (void)dna_fields;
   for (StructRNA *type = srna; type; type = type->base) {
     if (PropertyRNA *prop = defined_property(type, identifier)) {
@@ -643,6 +645,9 @@ void RNA_property_update(bContext *C, PointerRNA *ptr, PropertyRNA *prop)
   if (prop->funcs.update) {
     prop->funcs.update(CTX_data_main(C), CTX_data_scene(C), ptr);
   }
+  if (prop->funcs.update_context) {
+    prop->funcs.update_context(C, ptr);
+  }
 }
 void rna_property_update_set(StructRNA *srna, const char *identifier, void (*update)(bContext *C, PointerRNA *ptr))
 {
@@ -911,6 +916,18 @@ bool operator_property_set(PointerRNA *ptr, const char *name, const double *numb
   }
   set_values(ptr, prop, {double(value)});
   return true;
+}
+
+/* A struct type by its identifier (JS names the structs it reads and writes), or null. */
+extern StructRNA **const rna_types[];
+extern "C" __attribute__((export_name("rna_struct_find"))) StructRNA *rna_struct_find(const char *identifier)
+{
+  for (StructRNA **const *type = rna_types; *type; type++) {
+    if ((**type)->identifier == identifier) {
+      return **type;
+    }
+  }
+  return nullptr;
 }
 
 /* A struct's properties in the module read and written from JS by identifier, as Blender's RNA reads and writes them

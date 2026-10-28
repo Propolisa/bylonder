@@ -38,7 +38,10 @@
       6,
       "TIMELINE"
      ]
-    ]
+    ],
+    "funcs": {
+     "update_context": "rna_SpaceDopeSheetEditor_mode_update"
+    }
    },
    "ui_mode": {
     "offset": 274,
@@ -71,7 +74,10 @@
       5,
       "CACHEFILE"
      ]
-    ]
+    ],
+    "funcs": {
+     "update_context": "rna_SpaceDopeSheetEditor_mode_update"
+    }
    },
    "show_seconds": {
     "offset": 272,
@@ -222,7 +228,8 @@
     "size": 8,
     "kind": "struct",
     "custom": true,
-    "type": "POINTER"
+    "type": "POINTER",
+    "funcs": {}
    }
   }
  },
@@ -245,7 +252,10 @@
       1,
       "DRIVERS"
      ]
-    ]
+    ],
+    "funcs": {
+     "update_context": "rna_SpaceGraphEditor_display_mode_update"
+    }
    },
    "show_seconds": {
     "offset": 176,
@@ -377,7 +387,10 @@
     "kind": "int",
     "signed": true,
     "bit": 16384,
-    "type": "BOOLEAN"
+    "type": "BOOLEAN",
+    "funcs": {
+     "update_context": "rna_SpaceGraphEditor_normalize_update"
+    }
    },
    "use_auto_normalization": {
     "offset": 176,

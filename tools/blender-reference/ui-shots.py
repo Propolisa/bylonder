@@ -110,6 +110,15 @@ def drivers_editor():
     later(1.0, lambda: sidebar_tab("GRAPH_EDITOR", "Drivers"))
 
 
+# The cube's location keyed, the 3D View's area a Dope Sheet in a mode (SpaceDopeSheetEditor.ui_mode).
+def dope_sheet_mode(mode):
+    def setup():
+        view = area("VIEW_3D")
+        animation_editor("DOPESHEET", "VIEW_3D")
+        view.spaces.active.ui_mode = mode
+    return setup
+
+
 def properties_tab(name, tab):
     """The object made active and selected alone, and the Properties editor on a tab."""
     def setup():
@@ -172,6 +181,7 @@ SETUP = {
     "graph-editor-large": lambda: animation_editor("FCURVES", "VIEW_3D"),
     "graph-fmodifiers": graph_fmodifiers,
     "drivers-editor": drivers_editor,
+    "action-editor": dope_sheet_mode("ACTION"),
     "object-tab": properties_tab("Cube", "OBJECT"),
     "light-data": properties_tab("Light", "DATA"),
     "camera-data": properties_tab("Camera", "DATA"),

@@ -1,5 +1,5 @@
-/* RNA functions an RNA file's runtime part gives the module's properties by name (rna-fcurve.cc), as a table that
- * needs neither Blender's RNA types nor the module's (operator-properties.hh), which are different structs. */
+/* RNA functions an RNA file's runtime part gives the module's properties by name (rna-fcurve.cc, rna-space.cc), as
+ * tables that need neither Blender's RNA types nor the module's (operator-properties.hh), which are different structs. */
 #pragma once
 
 namespace blender {
@@ -25,6 +25,7 @@ enum RnaFuncMember {
   RNA_FUNC_int_range,
   RNA_FUNC_length,
   RNA_FUNC_update,
+  RNA_FUNC_update_context,
 };
 
 struct RnaFunc {
@@ -47,9 +48,12 @@ struct RnaBase {
   StructRNA **srna, **base;
 };
 
-/* rna_fcurve.cc's, each ending with a null struct type. */
-extern const RnaFunc rna_fcurve_funcs[];
-extern const RnaBase rna_fcurve_bases[];
-extern const RnaArray rna_fcurve_arrays[];
+/* One RNA file's tables (rna-tables.hh), each ending with a null struct type. */
+struct RnaTables {
+  const RnaFunc *funcs;
+  const RnaBase *bases;
+  const RnaArray *arrays;
+};
+extern const RnaTables rna_fcurve_tables, rna_space_tables;
 
 }  // namespace blender

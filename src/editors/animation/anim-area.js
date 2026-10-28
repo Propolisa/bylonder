@@ -13,7 +13,7 @@ export const SPACE_GRAPH = 2, SPACE_ACTION = 12;
 export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_CHANNELS = 2, RGN_TYPE_UI = 4;
 const RGN_FLAG_HIDDEN = 1 << 0;
 // Area.ui_type within a SpaceAction (its mode, eAnimEdit_Context).
-export const ACTION_MODES = { DOPESHEET: 0, ACTION: 1, SHAPEKEY: 2, GPENCIL: 3, MASK: 4, CACHEFILE: 5, TIMELINE: 6 };
+export const ACTION_MODES = { ACTION: 0, SHAPEKEY: 1, GPENCIL: 2, DOPESHEET: 3, MASK: 4, CACHEFILE: 5, TIMELINE: 6 };
 // SpaceGraph.mode (eGraphEdit_Mode) by Area.ui_type.
 export const GRAPH_MODES = { FCURVES: 0, DRIVERS: 1 };
 // wmEventModifierFlag and wmOperatorStatus.
@@ -142,6 +142,12 @@ export class AnimArea {
   sidebarPanels() { return this.inContext(RGN_TYPE_UI, (C) => JSON.parse(cString(x.anim_sidebar_panels(C)))); }
   pressPanelButton(index) { this.inContext(RGN_TYPE_UI, (C) => x.panel_button_press(C, index, -1, 0)); }
   panelButtonApplied(index) { this.inContext(RGN_TYPE_UI, (C) => x.panel_button_applied(C, index)); }
+  // A property of the space set as Blender's RNA sets it (rna_space.cc: its update runs in this area), by number: the
+  // Dope Sheet's mode (SpaceDopeSheetEditor.ui_mode).
+  setSpaceProperty(struct, name, value) {
+    const type = withString(struct, (p) => x.rna_struct_find(p)), space = x.anim_area_space(this.pointer);
+    this.inContext(RGN_TYPE_WINDOW, (C) => withString(name, (p) => x.rna_set(C, type, 0, space, p, 0, value)));
+  }
   // The context's active Action (context.active_action), or null.
   activeAction() {
     const action = this.inContext(RGN_TYPE_UI, (C) => x.anim_active_action(C) >>> 0);

@@ -95,6 +95,13 @@ const SETUP = {
     }
     await app.page.mouse.move(...rest);
   },
+  "action-editor": async (app) => {
+    const rest = await app.point(...REST);
+    await animationEditor("Dope Sheet", "3D Viewport")(app);
+    await app.frame().locator(".anim-header:visible").first().getByRole("button", { name: "Dope Sheet" }).click();
+    await app.frame().getByRole("menuitem", { name: "Action Editor", exact: true }).click();
+    await app.page.mouse.move(...rest);
+  },
   "drivers-editor": async (app) => {
     await app.bylonder((b) => {
       const a = b.world.animation, entry = a.ids.entries().find((e) => e.key === "object:Cube");

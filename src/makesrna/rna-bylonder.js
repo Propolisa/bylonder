@@ -334,7 +334,10 @@ const STRUCTS = {
     show_region_ui: regionShown(4),
     show_region_channels: regionShown(2),
     mode: (editor) => ACTION_MODES[editor.area.settings.mode],
-    ui_mode: (editor) => ACTION_MODES[editor.area.settings.mode],
+    ui_mode: {
+      get: (editor) => ACTION_MODES[editor.area.settings.mode],
+      set: (editor, value) => { editor.area.setSpaceProperty('SpaceDopeSheetEditor', 'ui_mode', ACTION_MODES.indexOf(value)); editor.changed(); },
+    },
     show_sliders: spaceFlag(1 << 1),
     show_seconds: spaceFlag(1 << 2),
     use_auto_merge_keyframes: spaceFlag(1 << 4, true),

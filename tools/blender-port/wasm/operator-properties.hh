@@ -65,6 +65,8 @@ struct PropertyRNA {
     void (*int_range)(PointerRNA *, int *min, int *max, int *softmin, int *softmax);
     int (*length)(const PointerRNA *, int *);
     void (*update)(Main *, Scene *, PointerRNA *);
+    /* An update with the context (PROP_CONTEXT_UPDATE). */
+    void (*update_context)(bContext *, PointerRNA *);
   } funcs = {};
   /* A float's ranges, as RNA_def_property gives them until the definition sets its own. */
   float hardmin = -FLT_MAX, hardmax = FLT_MAX, softmin = -10000.0f, softmax = 10000.0f, step = 10.0f;

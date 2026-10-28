@@ -8,6 +8,7 @@
   { "id": "graph-editor", "title": "Graph Editor in the Timeline's area, the cube's location keyed at frames 1 and 40" },
   { "id": "graph-editor-large", "title": "Graph Editor in the 3D View's area, the cube's location keyed at frames 1 and 40" },
   { "id": "graph-fmodifiers", "title": "Graph Editor in the 3D View's area, a Generator and an Envelope on the active F-Curve, the sidebar's Modifiers tab" },
+  { "id": "action-editor", "title": "Dope Sheet in the 3D View's area switched to the Action Editor, the cube's location keyed at frames 1 and 40" },
   { "id": "drivers-editor", "title": "Drivers editor in the 3D View's area, a driver on the cube's Y location made active, the sidebar's Drivers tab" },
   { "id": "dope-sheet", "title": "Dope Sheet in the Timeline's area, the cube's location keyed at frames 1 and 40" },
   { "id": "object-tab", "title": "Properties: Object tab of the cube" },

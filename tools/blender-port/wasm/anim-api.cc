@@ -9,6 +9,7 @@
 #include "ANIM_keyframing.hh"
 #include "BKE_animsys.h"
 #include "BKE_node.hh"
+#include "BKE_pointcache.h"
 #include "BLF_api.hh"
 #include "BKE_context.hh"
 #include "BKE_curve.hh"
@@ -1069,12 +1070,19 @@ void *ED_region_draw_cb_activate(ARegionType * /*art*/, void (* /*draw*/)(const 
 }
 bool ED_region_draw_cb_exit(ARegionType * /*art*/, void * /*handle*/) { return true; }
 
+/* port-override: Bylonder's objects have no point caches, so the Timeline draws no cache ranges (timeline_draw_cache). */
+void BKE_ptcache_ids_from_object(ListBaseT<PTCacheID> *lb, Object * /*ob*/, Scene * /*scene*/, int /*duplis*/)
+{
+  BLI_listbase_clear(lb);
+}
+
+/* port-override: Bylonder lays an area's regions out on its next draw, from their flags. */
+void ED_region_visibility_change_update(bContext * /*C*/, ScrArea * /*area*/, ARegion * /*region*/) {}
+
 /* port-override: Bylonder's undo steps are made by the editor that ran a button or operator (its commit), not by
  * Blender's undo stack. */
 void ED_undo_push(bContext * /*C*/, const char * /*str*/) {}
 
-/* port-override: Bylonder has no point caches, so the Timeline draws no cache lines (action_draw.cc). */
-void timeline_draw_cache(const SpaceAction * /*saction*/, const Object * /*ob*/, const Scene * /*scene*/) {}
 
 /* As area.cc gives it for a region no other region overlaps. */
 const rcti *ED_region_visible_rect(ARegion *region)

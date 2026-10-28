@@ -64,7 +64,7 @@ Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with sea
 
 ## DOPESHEET_EDITOR > *
 Status: partial
-The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). Markers are the scene's (Scene.timeline_markers in the module), saved with the animation. The Action, Shape Key, Grease Pencil, Mask and Cache File modes are not shown yet.
+The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). Markers are the scene's (Scene.timeline_markers in the module), saved with the animation. The header's mode menu switches between the Dope Sheet, Action Editor, Shape Key Editor, Grease Pencil, Mask and Cache File modes through rna_space.cc's own mode update; Bylonder has no shape keys, Grease Pencil, masks or cache files yet, so those modes list nothing. A Dope Sheet keeps the Timeline's collapsed summary wherever it is opened, as when Blender switches the Timeline's area, so in another area it differs from Blender's new Dope Sheet.
 
 ## GRAPH_EDITOR > *
 Status: partial
