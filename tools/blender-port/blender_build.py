@@ -297,6 +297,9 @@ WRAPPED = ['_ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS
 # Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,
 # fonts); everywhere else Blender's definition wins over the API's stand-in.
 SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager'}
+# The API's seam implementations in other libraries (each a port-override in tools/blender-port/wasm), which win too:
+# what Bylonder's own editor does in Blender's place.
+SEAM_FUNCTIONS = {'blender::ED_view3d_gizmo_mesh_preselect_get_active'}
 
 
 def link_module(host, out, entries, extra, archives, module_libraries):
@@ -359,14 +362,16 @@ def duplicate_losers(stderr, preferred):
         members = [p for p in places if p[1]]
         objects = [p for p in places if not p[1]]
         own = [p for p in places if os.path.basename(p[0]) in preferred]
+        symbol = line.split('duplicate symbol: ')[-1].strip()
         if len(own) == 1:
             loser = next(p for p in places if p not in own)
         elif objects and members:
             library = os.path.basename(members[0][0]).removesuffix('.a')
-            loser = members[0] if library in SEAM_LIBRARIES else objects[0]
+            seam = library in SEAM_LIBRARIES or symbol.split('(')[0] in SEAM_FUNCTIONS
+            loser = members[0] if seam else objects[0]
         else:
             loser = places[1]
-        losers.setdefault(loser, set()).add(line.split('duplicate symbol: ')[-1].strip())
+        losers.setdefault(loser, set()).add(symbol)
     return losers
 
 

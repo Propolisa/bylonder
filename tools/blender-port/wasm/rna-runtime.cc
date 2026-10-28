@@ -10,7 +10,6 @@
 #include "BKE_report.hh"
 #include "BLI_listbase.h"
 #include "BLI_string.h"
-#include "BLI_utildefines.h"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_path.hh"
@@ -83,7 +82,7 @@ static double element(PointerRNA *ptr, PropertyRNA *prop, int index)
 }
 
 /* As a button sets a number (ui_but_value_set): clamped to the property's range. */
-/* Clamped as bpy clamps a value it sets (pyrna_py_to_prop): with CLAMP, also where a range function gives min > max. */
+/* Set as bpy sets it: RNA clamps to the property's range (also where a range function gives min > max). */
 static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double value)
 {
   const bool array = RNA_property_array_check(prop);
@@ -91,22 +90,12 @@ static void set_element(PointerRNA *ptr, PropertyRNA *prop, int index, double va
     case PROP_BOOLEAN:
       array ? RNA_property_boolean_set_index(ptr, prop, index, value != 0.0) : RNA_property_boolean_set(ptr, prop, value != 0.0);
       break;
-    case PROP_INT: {
-      int min, max;
-      RNA_property_int_range(ptr, prop, &min, &max);
-      int v = int(value);
-      CLAMP(v, min, max);
-      array ? RNA_property_int_set_index(ptr, prop, index, v) : RNA_property_int_set(ptr, prop, v);
+    case PROP_INT:
+      array ? RNA_property_int_set_index(ptr, prop, index, int(value)) : RNA_property_int_set(ptr, prop, int(value));
       break;
-    }
-    case PROP_FLOAT: {
-      float min, max;
-      RNA_property_float_range(ptr, prop, &min, &max);
-      float v = float(value);
-      CLAMP(v, min, max);
-      array ? RNA_property_float_set_index(ptr, prop, index, v) : RNA_property_float_set(ptr, prop, v);
+    case PROP_FLOAT:
+      array ? RNA_property_float_set_index(ptr, prop, index, float(value)) : RNA_property_float_set(ptr, prop, float(value));
       break;
-    }
     case PROP_ENUM:
       RNA_property_enum_set(ptr, prop, int(value));
       break;
