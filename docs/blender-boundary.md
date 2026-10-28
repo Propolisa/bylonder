@@ -52,8 +52,12 @@ no counterpart for; the overlap is kept equal both ways.
    `_GEOMETRY`, `_SHADING`, `_SELECT`, ...) is written to Babylon through the same mapping, inside the operator's
    undo step. Writing back does not echo to Main.
 4. **Data only one side has.** Babylon's (node materials, GPU effects, what project code builds) stays Babylon's,
-   and is kept in Main as custom properties where a round trip needs it. Blender's (Actions, curves, text, modifiers,
-   collections) lives in Main, and Babylon holds its evaluated result.
+   and is kept in Main as custom properties where a round trip needs it. Blender's (curves, text, modifiers,
+   collections, Actions, textures) is held on the Babylon side too, in RNA's terms, on the object or scene it belongs to
+   (as a curve's `metadata.wbCreation.curve`), so Bylonder's undo and project save carry it; Main gets it filled when
+   Blender's code needs it (evaluation, an editor, an operator, a `.blend` write), what that code changes comes back,
+   and Babylon also holds its evaluated result. Main is a parallel model that can always be rebuilt from Babylon.
+   Decided 2026-10-28 (replaces "Blender's lives in Main").
 5. **Large data has one owner.** Mesh geometry (and other large buffers: attributes, images) lives in the Babylon
    scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
    needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
