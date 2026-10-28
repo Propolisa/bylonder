@@ -64,7 +64,7 @@ Every subsystem builds on these, one of each:
 - Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry). `transpile.py`'s per-class manifest is the interim path until `src/bl_py` replaces `src/bl_ui`.
 - Blender's C: one WebAssembly module (`tools/blender-port`), with one Blender world in it (Main, Scene, ViewLayer, bContext stand-ins) that every subsystem's data (meshes, curves, text, animation) lives in.
 - Data: one RNA layer over Bylonder's data (`src/makesrna/rna-bylonder.js`) and one `bpy.context` (`src/blenkernel/context.js`).
-- Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps.
+- Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps. An editor runs its keymaps inside its context area (`inArea(area, ...)`), so operators act on that editor (`contextArea()`) and `wm.call_menu` opens the area's own menu (`area.menu(idname)`); editors never keep operator tables of their own.
 - UI: menus through `src/editors/interface/ui-layout.js`; panels through one layout renderer, with one number field carrying Blender's drag behavior.
 
 ## Workspaces

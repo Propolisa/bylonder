@@ -43,7 +43,7 @@ import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createBlenderObjects } from "./editors/object/object-blender.js";
-import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
+import { registerOperators, appendMenu, kw, inArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
@@ -502,7 +502,6 @@ registerOperators({
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(activeView().id) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(activeView().id, direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(activeView().id) },
-  "wm.call_menu": { supports: ({ name }) => !!activeView()?.menu(name), run: ({ name }) => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name)) },
   "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
   "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
 });
@@ -518,8 +517,11 @@ const bylonderKeys = createKeymap([
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
 // Blender's keymaps a 3D View runs: the mode's (Object Mode or Mesh), then the 3D View's and the window's.
-const blenderKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+const view3dKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
   (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true);
+// The 3D View under the pointer as the context area, with its menus for wm.call_menu.
+const view3dArea = { menu: (name) => activeView()?.menu(name) && (() => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name))) };
+const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 const keyLayers = () => {

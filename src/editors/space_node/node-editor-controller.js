@@ -4,6 +4,25 @@
 // input comes in as press, move and release in view pixels, keys as Blender's operators by idname (run).
 import { reactive, markRaw } from 'vue';
 import { nodeLayout, linkPoints, crossing, HEADER, U } from './node-layout.js';
+import { registerOperators, contextArea } from '../../windowmanager/wm-operators.js';
+
+// Blender's Node Editor operators Bylonder runs, on the Node Editor that is the context area.
+const nodeEditor = () => contextArea()?.nodeEditor;
+const on = (idname) => ({ poll: () => !!nodeEditor(), run: (props) => nodeEditor().run(idname, props) });
+registerOperators({
+  'node.select_all': on('node.select_all'),
+  'node.mute_toggle': on('node.mute_toggle'),
+  'node.hide_toggle': on('node.hide_toggle'),
+  'node.hide_socket_toggle': on('node.hide_socket_toggle'),
+  'node.delete': on('node.delete'),
+  'node.delete_reconnect': on('node.delete_reconnect'),
+  'node.join_nodes': on('node.join_nodes'),
+  'node.link_make': on('node.link_make'),
+  'node.duplicate_move': on('node.duplicate_move'),
+  'node.view_all': on('node.view_all'),
+  'node.view_selected': on('node.view_selected'),
+  'node.translate_attach': on('node.translate_attach'),
+});
 
 const DRAG_THRESHOLD = 3;
 const SOCKET_HIT = 10;
