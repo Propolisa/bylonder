@@ -37,8 +37,7 @@ function runBlenderOperator(sync, idname, props, { transaction, notify, keying }
   if (result.report) notify(result.report);
   return result;
 }
-const keyLabel = (keys) => keys?.replace(/\+/g, ' ');
-const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup', 'creation'];
+const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup'];
 
 //   sync: the scene's (createMainSync); transaction(fn): an undo step around a change; notify(text): a report;
 //   keying(run): runs an operator that may insert keys (auto keying), for the animation to take them.
@@ -54,7 +53,6 @@ export function registerObjectOperators(registry, { sync, transaction, notify, k
     registerOperator(idname, {
       supports: (props) => !!action(props),
       poll: (props) => action(props)?.enabled?.() ?? true,
-      keys: (props) => keyLabel(action(props)?.keys[0]),
       enumItems: (prop) => ENUMS[idname]?.[prop],
       confirm: CONFIRM[idname],
       run: (props) => registry.invoke(action(props).id),
@@ -63,8 +61,10 @@ export function registerObjectOperators(registry, { sync, transaction, notify, k
   const extra = (id) => registry.actions.find((action) => action.id === id);
   const bylonder = (id) => 'bylonder.' + id.replace(/-/g, '_');
   for (const id of OBJECT_MENU_EXTRAS) {
-    registerOperator(bylonder(id), { poll: () => extra(id).enabled?.() ?? true, keys: () => keyLabel(extra(id).keys[0]), run: () => registry.invoke(id) });
+    registerOperator(bylonder(id), { poll: () => extra(id).enabled?.() ?? true, run: () => registry.invoke(id) });
   }
+  // F2's panel (TOPBAR_PT_name) renames the active object.
+  registerOperator('wm.call_panel', { supports: ({ name }) => name === 'TOPBAR_PT_name', poll: () => extra('rename').enabled(), run: () => registry.invoke('rename') });
   appendMenu('VIEW3D_MT_object', ({ layout }) => {
     layout.separator();
     for (const id of OBJECT_MENU_EXTRAS) layout.operator(bylonder(id), kw({ text: extra(id).label }));

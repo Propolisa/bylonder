@@ -1,6 +1,6 @@
 // The 3D View's Edit Mode menus: Blender's own (space_view3d.py, in Blender's Python tree) drawn
 // with Bylonder's UILayout, holding the operators Bylonder runs. `api` is Edit Mode's:
-//   context(): bpy.context (blenkernel/context.js), edit(): the EditMesh, exec(idname, props): runs an operator as an undo step, keys(idname, props): its shortcut,
+//   context(): bpy.context (blenkernel/context.js), edit(): the EditMesh, exec(idname, props): runs an operator as an undo step,
 //   macro(steps, event): Blender's macro's operators in turn, module(idname, props, event): one of Blender's modal
 //   operators, start(type, options): a transform, and the
 //   modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
@@ -68,7 +68,7 @@ export function editMeshMenus(api) {
     run: (idname, props) => (actions[idname] ? actions[idname](props) : api.exec(idname, props)),
     supported: (idname) => !!actions[idname] || runsMeshOperator(idname),
     poll: (idname) => !!actions[idname] || api.edit().poll(idname),
-    keys: (idname, props) => api.keys(idname, props) ?? blenderKeys(KEYMAPS, idname, props, true),
+    keys: (idname, props) => blenderKeys(KEYMAPS, idname, props, true),
     enumItems: (idname, prop) => api.edit().enumItems(idname, prop),
   };
   const draw = (idname) => () => drawMenu(idname, ui);
@@ -130,5 +130,5 @@ export function idleApi(record = () => {}) {
       tool_settings: rna('ToolSettings', { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) }),
     });
   };
-  return api = { context, exec: record, macro: ([[idname, props]]) => record(idname, props), module: record, keys: none, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
+  return api = { context, exec: record, macro: ([[idname, props]]) => record(idname, props), module: record, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
 }

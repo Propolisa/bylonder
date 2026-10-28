@@ -82,6 +82,36 @@ const checks = {
     await app.frame().getByRole("menuitem", { name: /^Delete/ }).first().waitFor();
   },
 
+  // Right click runs Blender's keymaps, whose wm.call_menu opens the mode's context menu.
+  async "right click opens Blender's Object and Edit Mode context menus in the 3D View"() {
+    await app.click();
+    await rightClick(...(await app.point()));
+    for (const item of ["Shade Smooth", "Set Origin", "Duplicate Objects"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
+    await app.page.keyboard.press("Escape");
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    await rightClick(...(await app.point()));
+    for (const item of ["Merge Vertices", "Dissolve Vertices"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
+    await app.page.keyboard.press("Escape");
+    await app.page.keyboard.press("3");
+    await rightClick(...(await app.point()));
+    for (const item of ["Inset Faces", "Dissolve Faces"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
+  },
+
+  async "right click on an Outliner row opens Blender's Object menu"() {
+    const canvas = app.frame().locator(".bl-outliner-region");
+    const box = await canvas.boundingBox();
+    const [x, y] = await app.bylonder((b) => b.world.outliner.area.draw().draw.find((c) => c.op === "text" && c.text === "Cube").at);
+    await rightClick(box.x + x + 5, box.y + box.height - y - 4);
+    for (const item of ["Delete Hierarchy", "Select Hierarchy"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
+  },
+
+  async "right click on a property opens Blender's button context menu"() {
+    await app.click();
+    await rightClick(...(await center(app.locator('#properties-section [role="spinbutton"]').first())));
+    for (const item of ["Insert Keyframes", "Reset All to Default Values", "Copy Data Path"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
+  },
+
   async "middle mouse orbits and Shift middle mouse pans"() {
     const view = () => app.frame().evaluate(() => { const c = window.__bylonder.views.input.editorCamera; return { alpha: c.alpha, x: c.target.x }; });
     const drag = async (shift) => {
@@ -209,6 +239,22 @@ const checks = {
     }
   } },
 
+  // A number field's drag changes the value by the pixels moved from the first move on: the End frame, an integer, by
+  // one frame per two pixels; a second drag back undoes it. Inside the window the pointer stays unlocked, so no lock's
+  // first move (Chromium's jump from the lock's origin) reaches the value.
+  async "dragging a number field changes it by the pixels moved"() {
+    const end = app.locator('[role="spinbutton"][aria-label="End"]');
+    for (const [dx, expected] of [[40, "270"], [-40, "250"]]) {
+      const box = await end.boundingBox(), x = box.x + box.width / 2, y = box.y + box.height / 2;
+      await app.page.mouse.move(x, y);
+      await app.page.mouse.down();
+      await app.page.mouse.move(x + dx, y, { steps: 10 });
+      assert.equal(await app.frame().evaluate(() => !!document.pointerLockElement), false);
+      await app.page.mouse.up();
+      assert.equal(await end.getAttribute("aria-valuenow"), expected);
+    }
+  },
+
   "a hemispheric light selects where it is drawn and moves with G X 2": { open: { example: null, node: "sphere" }, async run() {
     // The new project's light has a direction and no position of its own in Babylon.
     const at = () => app.bylonder((b) => {
@@ -330,6 +376,36 @@ const checks = {
     await app.until((b) => b.world.annotations.rulerLayer()?.frames?.some((f) => f.strokes.length));
   },
 
+  // The outline is drawn in screen space (overlay-outline.js): scaling the cube leaves its width in pixels as it was.
+  async "the selection outline keeps its pixel width when the cube is scaled by 3"() {
+    await app.click();
+    const width = async () => {
+      await app.until((b) => b.views.idle);
+      // Outline pixels (orange) on a row across the cube below its origin, as runs: one per silhouette edge it crosses.
+      const runs = await app.bylonder(async (b) => {
+        const { canvas } = b.views.input, { width, height } = canvas;
+        const context = new OffscreenCanvas(width, height).getContext("2d");
+        context.drawImage(await createImageBitmap(canvas), 0, 0);
+        const { data } = context.getImageData(0, Math.round(height * 0.55), width, 1), runs = [];
+        for (let x = 0, run = 0; x <= width; x++) {
+          const [r, g, b] = data.subarray(x * 4, x * 4 + 3), outline = x < width && r - b > 90 && r > 140 && b < 0.6 * g;
+          if (outline) run++;
+          else if (run) { runs.push(run); run = 0; }
+        }
+        return runs;
+      });
+      assert.equal(runs.length, 2, `outline runs ${runs}`);
+      return (runs[0] + runs[1]) / 2;
+    };
+    const unscaled = await width();
+    await app.hover(0.25, 0.75);
+    for (const key of ["s", "3", "Enter"]) await app.page.keyboard.press(key);
+    await app.until((b) => Math.abs(b.world.scene.getMeshByName("Cube").scaling.x - 3) < 1e-6);
+    const scaled = await width();
+    assert.ok(unscaled >= 1 && unscaled <= 4, `outline ${unscaled} px wide`);
+    assert.ok(Math.abs(scaled - unscaled) <= 0.5, `outline ${unscaled} px wide at scale 1, ${scaled} px at scale 3`);
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {
@@ -396,6 +472,16 @@ async function screenOf([bx, by, bz]) {
     return [p.x / width, p.y / height];
   }, [bx, by, bz]);
   return app.point(fx, fy);
+}
+
+async function rightClick(x, y) {
+  await app.page.mouse.move(x, y);
+  await app.page.mouse.click(x, y, { button: "right" });
+}
+
+async function center(locator) {
+  const box = await locator.boundingBox();
+  return [box.x + box.width / 2, box.y + box.height / 2];
 }
 
 async function menu(id, item) {

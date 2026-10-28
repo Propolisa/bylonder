@@ -3,24 +3,28 @@ import { createGridOverlay } from '../../draw/overlay-grid.js';
 import { createExtrasOverlay } from '../../draw/overlay-extra.js';
 import { createCursorOverlay } from '../../draw/overlay-cursor.js';
 import { createOriginOverlay } from '../../draw/overlay-origin.js';
+import { createOutlineOverlay } from '../../draw/overlay-outline.js';
 
 // Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
-// and the extras of cameras, lights and empties. Each view's header, gizmo and shading live in view3d.js.
+// and outlines, and the extras of cameras, lights and empties. Each view's header, gizmo and shading live in view3d.js.
 //   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js);
-//   view3dCursor(): the scene's 3D cursor
-export function createViewportOverlays(scene, extras, origins, view3dCursor) {
+//   outlines: of createOutlineOverlay (overlay-outline.js); view3dCursor(): the scene's 3D cursor
+export function createViewportOverlays(scene, { extras, origins, outlines, view3dCursor }) {
   const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene, view3dCursor), origin = createOriginOverlay(scene, origins);
+  const outline = createOutlineOverlay(scene, outlines);
   const extra = createExtrasOverlay(scene, extras), meshes = [...grid.meshes, ...cursor.meshes];
   let shown = true;
   return {
     extras: extra,
-    // Called per view right before it renders.
-    setEnabled(value) {
+    // Called per view right before it renders, with its state (view3d.js).
+    setEnabled(value, { shading, xray } = {}) {
       extra.setEnabled(value);
       origin.update(value);
+      // Wireframe draws selected objects' edges in the selection colors instead (workbench.js).
+      outline.update(value && shading !== 'wire', { xray: !!xray });
       if (shown !== value) { shown = value; meshes.forEach((mesh) => mesh.setEnabled(value)); }
     },
-    dispose() { grid.dispose(); cursor.dispose(); origin.dispose(); extra.dispose(); },
+    dispose() { grid.dispose(); cursor.dispose(); origin.dispose(); outline.dispose(); extra.dispose(); },
   };
 }
 

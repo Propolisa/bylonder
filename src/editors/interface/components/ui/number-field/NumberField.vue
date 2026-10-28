@@ -1,7 +1,7 @@
 <script setup>
 // Blender's number button and slider (interface_handlers.cc: ui_do_but_NUM, ui_do_but_SLI, ui_numedit_*): drag
-// horizontally past a threshold to change the value live, with the pointer locked so the drag goes on past the screen
-// edge and the cursor comes back where it started; Ctrl snaps (ui_numedit_apply_snapf), Shift is precise; Escape or a
+// horizontally past a threshold to change the value live, through the window's mouse capture, which locks the pointer
+// at the window's edge so the drag goes on past it; Ctrl snaps (ui_numedit_apply_snapf), Shift is precise; Escape or a
 // right click cancels. A click without a drag edits the text, which takes expressions and units; the arrows at a
 // number button's ends step it. Over the button: Ctrl wheel steps, Backspace clears to zero, Minus negates, Ctrl C and
 // Ctrl V copy and paste, Enter edits. Every edit ends in one `commit` (one undo step), as Blender pushes undo on release.
@@ -9,6 +9,7 @@
 //   display(value), editText(value), parse(text): the value as text, as edited text, and back (units, expressions)
 import { computed, onBeforeUnmount, ref } from "vue";
 import { cn } from "../../utils.js";
+import { windowCapture, WINDOW_AREA } from "../../../../../windowmanager/mouse-capture.js";
 
 const props = defineProps({
   modelValue: { type: Number, default: 0 },
@@ -74,14 +75,15 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
-  if (!press) return;
-  if (mode.value === "press") {
-    if (Math.abs(event.clientX - press.x) < DRAG_THRESHOLD) return;
-    mode.value = "drag";
-    press.dx = event.clientX - press.x;
-    root.value.requestPointerLock?.()?.catch?.(() => {});
-  } else press.dx += document.pointerLockElement === root.value ? event.movementX : event.clientX - press.x - press.dx;
+  if (!press || mode.value !== "press" || Math.abs(event.clientX - press.x) < DRAG_THRESHOLD) return;
+  removeEventListener("pointermove", onPointerMove);
+  mode.value = "drag";
+  press.dx = event.clientX - press.x;
   set(dragValue(event));
+  windowCapture().begin({ x: event.clientX, y: event.clientY }, (dx, dy, moved) => {
+    press.dx += dx;
+    set(dragValue(moved));
+  }, cancel, root.value, WINDOW_AREA);
 }
 
 function onPointerUp() {
@@ -111,7 +113,7 @@ function release() {
   removeEventListener("pointermove", onPointerMove);
   removeEventListener("pointerup", onPointerUp);
   removeEventListener("keydown", onDragKey, true);
-  if (document.pointerLockElement === root.value) document.exitPointerLock();
+  if (mode.value === "drag") windowCapture().release();
   mode.value = "idle";
 }
 

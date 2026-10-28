@@ -1,6 +1,6 @@
 // Production check: the built app (dist/) boots in headless Chromium without a page error or console error, its
-// topbar menus and the 3D View header menus open with items, and every workspace tab shows a screen. CI runs it after
-// the build and before deploying, since some failures only happen in the production build.
+// topbar menus, the 3D View header menus and the context menus open with items, and every workspace tab shows a
+// screen. CI runs it after the build and before deploying, since some failures only happen in the production build.
 // usage: npm run build && npm run test:prod   (E2E_URL checks a running server instead)
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
@@ -22,6 +22,15 @@ async function menuItems(where, button) {
   const items = where.locator(".bl-menu .bl-menu-item");
   await items.first().waitFor({ timeout: 10000 });
   return items.count();
+}
+
+// Hovers every item of the open menu, which runs its poll, and the items of the submenus that opens.
+async function hoverItems(where) {
+  for (const item of await where.locator(".bl-menu").first().locator(".bl-menu-item").all()) {
+    if (!(await item.hover({ timeout: 3000 }).then(() => true, () => false))) continue;
+    const submenu = where.locator(".bl-menu.submenu");
+    if (await submenu.count()) for (const sub of await submenu.last().locator(".bl-menu-item").all()) await sub.hover({ timeout: 3000 }).catch(() => {});
+  }
 }
 
 const server = await startServer({ build: false });
@@ -54,18 +63,39 @@ try {
   for (const id of headerMenus) {
     await step(`3D View ${id}`, async () => {
       assert.ok(await menuItems(frame, `.bl-pulldown[data-blender="${id}"]`) > 0, `${id} has items`);
-      // Hovering runs each item's poll, and opens submenus, whose items are hovered in turn.
-      const menu = frame.locator(".bl-menu").first();
-      for (const item of await menu.locator(".bl-menu-item").all()) {
-        if (!(await item.hover({ timeout: 3000 }).then(() => true, () => false))) continue;
-        const submenu = frame.locator(".bl-menu.submenu");
-        if (await submenu.count()) for (const sub of await submenu.last().locator(".bl-menu-item").all()) await sub.hover({ timeout: 3000 }).catch(() => {});
-      }
+      await hoverItems(frame);
       await page.keyboard.press("Escape");
       await page.keyboard.press("Escape");
       noErrors(id);
     });
   }
+
+  // Right click opens Blender's context menus through its keymaps: the 3D View's in Object and Edit Mode and the
+  // Outliner's on an object's row.
+  const contextMenu = async (name, [x, y], before = async () => {}) => {
+    await step(`context menu ${name}`, async () => {
+      await before();
+      await page.mouse.move(x, y);
+      await page.mouse.click(x, y, { button: "right" });
+      await frame.locator(".bl-menu .bl-menu-item").first().waitFor({ timeout: 10000 });
+      await hoverItems(frame);
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("Escape");
+      noErrors(name);
+    });
+  };
+  const view = await frame.locator(".viewport-canvas").first().boundingBox(), center = [view.x + view.width / 2, view.y + view.height / 2];
+  const selectFirst = () => app.bylonder((b) => { b.editor.selection.replace([b.world.objects.find((n) => n.getTotalVertices?.())]); b.editor.reconcile(); });
+  await contextMenu("VIEW3D_MT_object_context_menu", center, selectFirst);
+  await contextMenu("VIEW3D_MT_edit_mesh_context_menu", center, async () => {
+    await page.mouse.move(...center);
+    await page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+  });
+  await page.keyboard.press("Tab");
+  const outliner = await frame.locator(".bl-outliner-region").boundingBox();
+  const row = await app.bylonder((b) => b.world.outliner.area.draw().draw.find((c) => c.op === "text" && c.text === b.world.objects.find((n) => n.getTotalVertices?.()).name).at);
+  await contextMenu("OUTLINER_MT_object", [outliner.x + row[0] + 5, outliner.y + outliner.height - row[1] - 4]);
 
   const tabs = await page.locator("#workspace-tabs [data-workspace]").evaluateAll((els) => els.map((el) => el.dataset.workspace));
   assert.ok(tabs.length >= 11, `workspace tabs: ${tabs}`);
