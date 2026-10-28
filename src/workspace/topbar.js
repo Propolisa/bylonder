@@ -74,7 +74,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   prependMenu('TOPBAR_MT_render', ({ layout }) => { op(layout, 'bylonder.run', 'Run'); op(layout, 'bylonder.stop', 'Stop'); layout.prop(settings, 'auto_run'); layout.separator(); });
   appendMenu('TOPBAR_MT_render', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); });
   appendMenu('TOPBAR_MT_window', ({ layout }) => { layout.separator(); op(layout, 'bylonder.areas_arrange', 'Arrange Areas...'); op(layout, 'bylonder.layout_reset', 'Reset Layout'); });
-  appendMenu('TOPBAR_MT_help', ({ layout }) => { layout.separator(); op(layout, 'bylonder.shortcuts', 'Keyboard Shortcuts'); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); });
+  appendMenu('TOPBAR_MT_help', ({ layout }) => { layout.separator(); layout.operator('wm.splash'); layout.separator(); op(layout, 'bylonder.shortcuts', 'Keyboard Shortcuts'); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); });
   // Open Recent is a menu Blender defines in C (wm_files.cc): the recent files, here the recent projects.
   const TOPBAR_MT_file_open_recent = Object.assign(() => ({
     draw() { for (const project of recent) this.layout.operator('wm.open_mainfile', kw({ text: project.name, icon: 'FILE_BLEND' })).filepath = project.id; },
@@ -113,7 +113,8 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     return label;
   }
 
-  // Laid out like Blender's splash: artwork with logo and version, New File and Recent Files, then Open and links.
+  // Laid out like Blender's splash: Blender's artwork (public/splash.png, release/datafiles/splash.png, with its logo and
+  // credit) and the version, New File and Recent Files, then Open and links.
   function splash() {
     const dialog = document.createElement('dialog');
     dialog.className = 'bl-splash';
@@ -131,9 +132,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     };
     const banner = document.createElement('div');
     banner.className = 'bl-splash-banner';
-    const brand = Object.assign(document.createElement('div'), { className: 'bl-splash-brand' });
-    brand.append(iconEl('bylonder'), Object.assign(document.createElement('strong'), { textContent: 'blember' }));
-    banner.append(brand, versionLabel(), Object.assign(document.createElement('span'), { className: 'bl-splash-credit', textContent: 'Babylon.js workbench' }));
+    banner.append(versionLabel());
     const recent = column('Recent Files', []);
     recentProjects().then((projects) => recent.append(...projects.slice(0, 5).map((p) => item(p.name, 'file_blend', () => openProject(p.id))), item('More…', 'viewzoom', () => document.getElementById('project').focus())));
     const files = Object.assign(document.createElement('div'), { className: 'bl-splash-columns' });
