@@ -16,6 +16,7 @@ import { loadRNAUI, rnaProperty, INFO } from '../src/makesrna/rna.js';
 import { MODULES, panelTypes, drawPanels } from '../src/editors/interface/panels.js';
 import { isLayout } from '../src/editors/interface/layout.js';
 import { propertiesContext, propertiesTabs, TAB_CONTEXTS } from '../src/editors/space_buttons/buttons-context.js';
+import { asObject } from '../src/runtime/object-transform.js';
 
 await loadRNAUI();
 const modules = await Promise.all(MODULES.map((name) => import(`../src/bl_ui/${name}.js`).catch(() => null)));
@@ -24,7 +25,10 @@ const types = panelTypes(modules, { space: 'PROPERTIES' });
 const engine = new NullEngine(), scene = new Scene(engine);
 const cube = MeshBuilder.CreateBox('Cube', { size: 2 }, scene), empty = new TransformNode('Empty', scene);
 const point = new PointLight('Light', new Vector3(4, 6, 1), scene), spot = new SpotLight('Spot', Vector3.Zero(), new Vector3(0, -1, 0), Math.PI / 4, 2, scene);
-const sun = new DirectionalLight('Sun', new Vector3(0, -1, 0), scene), camera = new FreeCamera('Camera', new Vector3(7, 5, -7), scene);
+const sun = new DirectionalLight('Sun', new Vector3(0, -1, 0), scene), camera = new FreeCamera('Camera', new Vector3(7.3589, 4.9583, -6.9258), scene);
+// Blender's default camera, as the Default Cube example builds it.
+camera.rotation = new Vector3((90 - 63.559) * Math.PI / 180, -46.692 * Math.PI / 180, 0);
+[point, spot, sun, camera].forEach(asObject);
 const objects = [cube, empty, point, spot, sun, camera];
 objects.forEach((ob, i) => { ob.metadata = { wbId: 'ob' + i }; });
 objects.scene = scene;
@@ -83,6 +87,12 @@ assert.equal(point.intensity, 0.5);
 selection.replace([camera]);
 context = propertiesContext(r, space);
 context.camera.lens = 50;
+const degrees = (radians) => [...radians].map((r) => Math.round(r * 180 / Math.PI * 1000) / 1000 + 0);
+assert.deepEqual(degrees(context.object.rotation_euler), [63.559, 0, 46.692], "a camera's rotation is Blender's");
+assert.deepEqual([...context.object.location].map((v) => Math.round(v * 1e4) / 1e4), [7.3589, -6.9258, 4.9583]);
+context.object.rotation_euler = [Math.PI / 2, 0, 0];
+assert.deepEqual(degrees(context.object.rotation_euler), [90, 0, 0], 'and writes back');
+assert.ok(Vector3.TransformNormal(new Vector3(0, 0, 1), camera.getWorldMatrix()).subtract(new Vector3(0, 0, 1)).length() < 1e-6, 'looking along Blender +Y, Babylon +Z');
 assert.ok(Math.abs(context.camera.lens - 50) < 1e-9);
 assert.ok(updates.includes('PointLight.energy') && updates.includes('Camera.lens'));
 

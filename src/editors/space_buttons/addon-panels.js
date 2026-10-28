@@ -24,7 +24,7 @@ function chrome(state, ui) {
     const open = ui.isOpen(id, defaultClosed);
     return h('section', { key: id, class: ['bl-panel', subpanel ? 'bl-subpanel' : 'bl-panel-root', 'bl-addon-panel', open && 'is-open'], 'data-blender': id }, [
       h('header', { class: 'bl-panel-header flex items-center', onClick: (e) => { if (!e.target.closest('input,button,select')) ui.toggle(id, e, defaultClosed); } }, [
-        icon(open ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT', 'bl-disclosure'), h('span', { class: 'bl-panel-label truncate' }, title), h('div', { class: 'flex-1' }),
+        icon(open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'), h('span', { class: 'bl-panel-label truncate' }, title), h('div', { class: 'flex-1' }),
         actions ? h('div', { class: 'flex items-center' }, actions()) : null, subpanel ? null : icon('GRIP', 'bl-grip'),
       ]),
       open ? h('div', { class: 'bl-panel-body bl-addon-body' }, content()) : null,

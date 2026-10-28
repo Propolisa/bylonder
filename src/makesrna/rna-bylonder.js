@@ -27,6 +27,34 @@ function setRotation(node, quaternion) {
   else node.rotation.copyFrom(quaternion.toEulerAngles());
 }
 
+// Cameras and lights look along Babylon's local +Z and Blender's -Z: their rotation in Blender's axes is S·M·C, where
+// M is Babylon's, S swaps y and z (Blender's axes) and C flips z, which keeps both frames' x right and y up. Read and
+// written as rotation matrices (column vectors), in Blender's XYZ Euler order.
+const quaternionMatrix = ({ x, y, z, w }) => [
+  [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+  [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+  [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]];
+function matrixQuaternion(m) {
+  const trace = m[0][0] + m[1][1] + m[2][2];
+  if (trace > 0) { const s = 0.5 / Math.sqrt(trace + 1); return new Quaternion((m[2][1] - m[1][2]) * s, (m[0][2] - m[2][0]) * s, (m[1][0] - m[0][1]) * s, 0.25 / s); }
+  const i = m[0][0] > m[1][1] && m[0][0] > m[2][2] ? 0 : m[1][1] > m[2][2] ? 1 : 2, j = (i + 1) % 3, k = (i + 2) % 3;
+  const s = 2 * Math.sqrt(1 + m[i][i] - m[j][j] - m[k][k]), q = [0, 0, 0];
+  q[i] = s / 4; q[j] = (m[j][i] + m[i][j]) / s; q[k] = (m[k][i] + m[i][k]) / s;
+  return new Quaternion(q[0], q[1], q[2], (m[k][j] - m[j][k]) / s);
+}
+// S·M·C, and its inverse S·R·C: S swaps rows 1 and 2, C negates column 2.
+const lookingFrame = (m) => [m[0], m[2], m[1]].map((row) => [row[0], row[1], -row[2]]);
+const eulerXYZ = (m) => [Math.atan2(m[2][1], m[2][2]), Math.asin(Math.max(-1, Math.min(1, -m[2][0]))), Math.atan2(m[1][0], m[0][0])];
+function matrixXYZ([x, y, z]) {
+  const [cx, sx, cy, sy, cz, sz] = [Math.cos(x), Math.sin(x), Math.cos(y), Math.sin(y), Math.cos(z), Math.sin(z)];
+  return [[cy * cz, sx * sy * cz - cx * sz, cx * sy * cz + sx * sz], [cy * sz, sx * sy * sz + cx * cz, cx * sy * sz - sx * cz], [-sy, sx * cy, cx * cy]];
+}
+const looksAlongZ = (ob) => ob instanceof Camera || ob instanceof Light;
+const lookingRotation = {
+  get: (ob) => eulerXYZ(lookingFrame(quaternionMatrix(babylonQuaternion(ob)))),
+  set: (ob, value) => setRotation(ob, matrixQuaternion(lookingFrame(matrixXYZ(value)))),
+};
+
 // A number or boolean array (bpy_prop_array): a copy whose elements write through, with x, y, z (or w, x, y, z).
 function array(get, set, names = 'xyz') {
   const index = (key) => (key.length === 1 && names.includes(key) ? names.indexOf(key) : key);
@@ -103,6 +131,14 @@ const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => s
 const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
 const worldValue = (r, entry, path) => ({ get: () => path.split('.').reduce((o, k) => o[k], entry), set: (value) => r.world.worlds.set(entry, path, value, false) });
 
+// A view layer's objects (LayerObjects): its collection, with the active object, which selecting makes.
+function layerObjects(r) {
+  const objects = collection(r.objects().map((ob) => r.pointer('Object', ob)));
+  Object.defineProperty(objects, 'active', { enumerable: true, get: () => r.pointer('Object', r.host.selection?.nodes.at(-1)),
+    set: (ob) => { r.host.selection?.replace(ob ? [ob[INFO].owner] : []); r.host.update?.('LayerObjects', 'active', objects); } });
+  return rna('LayerObjects', objects);
+}
+
 const STRUCTS = {
   Object: {
     name: { get: (ob) => ob.name, set: (ob, name) => { ob.name = name; } },
@@ -110,8 +146,9 @@ const STRUCTS = {
     mode: (ob, r) => (editing(ob, r) ? 'EDIT' : 'OBJECT'),
     data: (ob, r) => r.pointer(OBJECT_DATA[objectType(ob)]?.(ob), ob),
     location: { ...array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))), channel: objectChannel('position') },
-    rotation_mode: (ob) => (ob.rotationQuaternion ? 'QUATERNION' : 'YXZ'),
-    rotation_euler: { ...array((ob) => eulerFromBabylon(babylonEuler(ob)), (ob, value) => {
+    rotation_mode: (ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : 'YXZ'),
+    rotation_euler: { ...array((ob) => (looksAlongZ(ob) ? lookingRotation.get(ob) : eulerFromBabylon(babylonEuler(ob))), (ob, value) => {
+      if (looksAlongZ(ob)) return lookingRotation.set(ob, value);
       const { x, y, z } = eulerToBabylon(value);
       setRotation(ob, Quaternion.FromEulerAngles(x, y, z));
     }), channel: objectChannel('rotation') },
@@ -238,6 +275,7 @@ const STRUCTS = {
     name: { get: () => layer.name, set: (owner, name, r) => r.world.collections.renameViewLayer(layer.id, name) },
     use: () => true,
     active_layer_collection: (owner, r) => r.pointer('LayerCollection', r.world.collections.byId(layer.active)),
+    objects: (owner, r) => layerObjects(r),
   }),
   LayerCollection: (entry) => ({
     name: () => entry.name ?? 'Scene Collection',

@@ -33,7 +33,6 @@ export function rnaProperty(struct, name) {
   };
 }
 
-const isID = (struct) => { for (let s = struct; s; s = structs[s]?.base) if (s === 'ID') return true; return false; };
 // A path from a struct (data_path), as RNA resolves it: names, ["name"] and [index].
 function resolvePath(struct, path) {
   const parts = path.match(/[A-Za-z_]\w*|\[[^\]]+\]/g) ?? [];
@@ -85,8 +84,7 @@ export function rna(struct, data = {}, { items = {}, channels = {}, owner = null
       if (!prop) return struct === 'Context' ? null : undefined;
       if (!defaults.has(name)) {
         const [type, value, never_none] = prop;
-        // A pointer to data that is part of its owner (not an ID) is there even where RNA does not say it is never None.
-        defaults.set(name, type === 'P' ? (never_none || (value && !isID(value)) ? rna(value) : null) : type === 'C' ? collection() : Array.isArray(value) ? [...value] : value);
+        defaults.set(name, type === 'P' ? (never_none ? rna(value) : null) : type === 'C' ? collection() : Array.isArray(value) ? [...value] : value);
       }
       return defaults.get(name);
     },

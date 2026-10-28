@@ -4,5 +4,8 @@
   { "id": "file-menu", "title": "Topbar: File menu open" },
   { "id": "add-menu", "title": "Add menu (Shift A) over the 3D View" },
   { "id": "edit-mode", "title": "Edit Mode on the default cube (Tab)" },
-  { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" }
+  { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" },
+  { "id": "object-tab", "title": "Properties: Object tab of the cube" },
+  { "id": "light-data", "title": "Properties: Light data tab of the point light" },
+  { "id": "camera-data", "title": "Properties: Camera data tab of the camera" }
 ]

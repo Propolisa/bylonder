@@ -35,7 +35,7 @@ function contextBar(context, space) {
 
 // A header (bpy.types.Header) drawn into a layout.
 function drawHeader(type, context) {
-  const header = type(), layout = new UILayout();
+  const header = type(), layout = new UILayout('row');
   header.layout = layout;
   header.draw(context);
   return layout;
@@ -93,8 +93,9 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
     const tab = state.context;
     const drawn = drawPanels(types, context, { contexts: [TAB_CONTEXTS[tab]], open: ui.isOpen,
       panelOpen: (id, node) => (node.data ? !!node.data[node.property] : ui.isOpen(`layout:${node.idname}`, node.default_closed)) });
-    return [h(LayoutView, { layout: contextBar(context, space), ui }), h(RegionView, { panels: drawn, ui }),
-      ...addonPanels({ world, editor, history, systems, properties, storage, files, tab, node: editor.selection.nodes.at(-1), state, registered: propertyPanels, ui })];
+    const path = { id: 'PROPERTIES_PT_context', hideHeader: true, open: true, body: contextBar(context, space), children: [] };
+    return h(RegionView, { panels: [path, ...drawn], ui },
+      () => addonPanels({ world, editor, history, systems, properties, storage, files, tab, node: editor.selection.nodes.at(-1), state, registered: propertyPanels, ui }));
   };
 
   const app = createApp({

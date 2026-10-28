@@ -44,7 +44,7 @@
   --bl-wcol-tab:#1d1d1d;--bl-wcol-tab-sel:#303030;--bl-wcol-tab-text:#989898;
   --bl-panel-back:#3d3d3d;--bl-panel-sub-back:#0000001f;--bl-panel-outline:#ffffff11;--bl-panel-title:#e6e6e6;
   --bl-text-sel:#ffffff;--bl-icon-object:#e19658;--bl-icon-object-data:#00d4a3;--bl-icon-modifier:#74a2ff;--bl-icon-shading:#cc6670;
-  --bl-icon-scene:#cccccc;--bl-icon-collection:#ffffff;
+  --bl-icon-scene:#cccccc;--bl-icon-collection:#ffffff;--bl-icon-folder:#ccad63;
   --bl-split-label:40%;--bl-button-gap:2px;--bl-row-gap:4px
 }
 @media(pointer:coarse){:root{--bl-header-h:36px;--bl-row:30px}}

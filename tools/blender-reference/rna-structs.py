@@ -1,7 +1,8 @@
 # Writes every RNA struct's properties from Blender itself:
 # - rna-structs.json: per struct its base and, per property, [type initial, default] or, for pointers and collections,
-#   [type initial, struct] and 1 for a pointer that is never None, so Blender's UI scripts read what Bylonder does not
-#   bind as Blender's defaults.
+#   [type initial, struct] and 1 for a pointer that is never None (by RNA, or in the factory startup's data, where a
+#   nested struct such as Object.lineart is there though RNA allows None), so Blender's UI scripts read what Bylonder
+#   does not bind as Blender's defaults.
 # - rna-ui.json: per struct its name and, per property it adds to its base, what the interface shows: name,
 #   description, icon, subtype, unit, read-only, ranges, step and precision, and enum items as
 #   [identifier, name, description, icon]. Loaded when an editor first draws properties (makesrna/rna.js).
@@ -40,6 +41,28 @@ def ui(p):
     return d
 
 
+# The pointers set in the factory startup's data: (struct, property) found not None, walking from bpy.data.
+present, seen = set(), set()
+
+
+def walk(value, depth=0):
+    rna = getattr(value, "bl_rna", None)
+    if rna is None or depth > 4 or (rna.identifier, depth) in seen:
+        return
+    seen.add((rna.identifier, depth))
+    for p in rna.properties:
+        if p.type == "POINTER" and p.identifier not in {"rna_type", "id_data", "original"}:
+            target = getattr(value, p.identifier, None)
+            if target is not None:
+                present.add((rna.identifier, p.identifier))
+                walk(target, depth + 1)
+
+
+for collection in (bpy.data.objects, bpy.data.meshes, bpy.data.lights, bpy.data.cameras, bpy.data.scenes, bpy.data.worlds,
+                   bpy.data.materials, bpy.data.collections, bpy.data.screens, bpy.data.workspaces, bpy.data.window_managers):
+    for data in collection:
+        walk(data)
+
 structs, uis = {}, {}
 for name in dir(bpy.types):
     rna = getattr(getattr(bpy.types, name), "bl_rna", None)
@@ -53,7 +76,7 @@ for name in dir(bpy.types):
         entry = [p.type[0]]
         if p.type in {"POINTER", "COLLECTION"}:
             entry.append(p.fixed_type.identifier if p.fixed_type else None)
-            if p.type == "POINTER" and p.is_never_none:
+            if p.type == "POINTER" and (p.is_never_none or (name, p.identifier) in present):
                 entry.append(1)
         else:
             entry.append(default(p))

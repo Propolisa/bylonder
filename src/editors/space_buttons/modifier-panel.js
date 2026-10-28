@@ -76,7 +76,7 @@ export function modifierTemplates({ world, editor, rna, history }) {
       };
       return h('section', { key: modifier.id, class: ['bl-panel bl-panel-root', open && 'is-open'], 'data-blender': modifier.type }, [
         h('header', { class: 'bl-panel-header flex items-center', onClick: (e) => { if (!e.target.closest('input,button,label')) env.ui.toggle(id, e, false); } }, [
-          icon(open ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT', 'bl-disclosure'),
+          icon(open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'),
           icon(definition?.icon ?? 'MODIFIER', 'bl-modifier-icon'),
           h('div', { class: 'flex min-w-0 flex-1' }, h(LayoutView, { layout: headerLayout(ob, struct), ui: env.ui })),
           h('button', { type: 'button', class: 'bl-widget bl-flat flex h-unit w-unit items-center justify-center', title: 'Extra Operations', 'aria-label': 'Extra Operations',

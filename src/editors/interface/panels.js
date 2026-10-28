@@ -4,6 +4,7 @@
 // with its sub-panels (bl_parent_id).
 import { __in__ } from '../../bl_ui/org.transcrypt.__runtime__.js';
 import { types as bpyTypes } from '../../bl_ui/bpy._app.js';
+import { Panel } from '../../bl_ui/bpy.types.js';
 import { UILayout, useContext } from './layout.js';
 import { rnaProperty, structName } from '../../makesrna/rna.js';
 
@@ -40,7 +41,7 @@ export function panelTypes(modules, { space, region = 'WINDOW' }) {
   registerClasses(modules);
   const classes = modules.flatMap((module) => module?.classes ?? []);
   // Instanced panels (a modifier's, a constraint's) are drawn by the templates that list their data.
-  const panels = classes.filter((cls) => cls.bl_space_type === space && (cls.bl_region_type ?? 'WINDOW') === region && cls.draw && !hasOption(cls, 'INSTANCED'));
+  const panels = classes.filter((cls) => isPanel(cls) && cls.bl_space_type === space && (cls.bl_region_type ?? 'WINDOW') === region && !hasOption(cls, 'INSTANCED'));
   const byId = new Map(), roots = [];
   const insert = (list, type) => {
     let i = list.length;
@@ -60,6 +61,9 @@ export function panelTypes(modules, { space, region = 'WINDOW' }) {
   panels.forEach(add);
   return { roots, byId, add };
 }
+
+// A bpy.types.Panel subclass, or an add-on's panel (a plain object with a draw).
+const isPanel = (cls) => (cls.__bases__ ? cls === Panel || cls.__bases__.some(isPanel) : !!cls.draw);
 
 export const idname = (type) => type.bl_idname || type.__name__;
 

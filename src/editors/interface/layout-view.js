@@ -19,12 +19,14 @@ import { rnaProperty, INFO } from '../../makesrna/rna.js';
 import { operatorValues, isLayout } from './layout.js';
 import { formatLength, formatAngle, parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
+import themes from './icon-themes.json' with { type: 'json' };
 
+// An icon in its theme color, as Blender draws its monochrome icons.
 export const icon = (name, className = '') => (name && name !== 'NONE'
-  ? h('span', { class: 'bl-icon ' + className, style: { maskImage: `url(${iconUrl(name.toLowerCase())})` }, 'aria-hidden': 'true' }) : null);
+  ? h('span', { class: ['bl-icon', themes[name] && 'bl-icon-' + themes[name], className], style: { maskImage: `url(${iconUrl(name.toLowerCase())})` }, 'aria-hidden': 'true' }) : null);
 
 // ---- Values as Blender shows and parses them (ui_but_string_get, ui_but_string_eval_number).
-const SUFFIX = { CAMERA: ' mm', POWER: ' W', MASS: ' kg', TIME_ABSOLUTE: ' s', VELOCITY: ' m/s', ACCELERATION: ' m/s²', TEMPERATURE: ' K',
+const SUFFIX = { CAMERA: ' mm', POWER: ' W', COLOR_TEMPERATURE: ' K', MASS: ' kg', TIME_ABSOLUTE: ' s', VELOCITY: ' m/s', ACCELERATION: ' m/s²', TEMPERATURE: ' K',
   WAVELENGTH: ' nm', FREQUENCY: ' Hz', AREA: ' m²', VOLUME: ' m³' };
 const trimmed = (value, precision = 3) => String(Number(value.toFixed(Math.min(6, precision))));
 export function displayValue(meta, value) {
@@ -50,14 +52,14 @@ function itemChar(meta, i) {
 // ---- Widgets. A widget's class carries its Blender widget type; aligned layouts square the corners where widgets meet.
 const W = 'bl-widget';
 const label = (text, { iconName, className = '', align = 'left' } = {}) => h('div', {
-  class: ['bl-label flex h-unit min-w-0 items-center gap-1 text-xs', align === 'right' ? 'justify-end text-right' : '', className],
+  class: ['bl-label flex h-unit min-w-0 items-center gap-1 text-xs', align === 'right' ? 'justify-end text-right' : '', !text && iconName && 'bl-icon-only', className],
 }, [icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
 
 function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true }) {
   return h('button', {
     type: 'button', title, disabled, 'aria-pressed': pressed, 'aria-label': text || title,
     class: [W, `bl-${kind} flex h-unit min-w-0 items-center justify-center gap-1 rounded-md px-1.5 text-xs`, emboss ? '' : 'bl-flat',
-      pressed && 'is-pressed', inactive && 'opacity-50', iconOnly && 'px-0', className],
+      pressed && 'is-pressed', inactive && 'opacity-50', iconOnly && 'bl-icon-only px-0', className],
     onClick,
   }, [icon(iconName), text && !iconOnly ? h('span', { class: 'truncate' }, text) : null]);
 }
@@ -170,7 +172,7 @@ function expanded(prop, node, { disabled, inactive }) {
   return h('div', { class: 'bl-align-row flex min-w-0 flex-1' }, prop.items().filter(Boolean).map(([id, name, description, iconName]) => {
     const on = flag ? [...(value ?? [])].includes(id) : value === id;
     return button({ text: node.icon_only ? '' : name, iconName: iconName !== 'NONE' ? iconName : null, kind: 'radio', pressed: on, disabled, inactive,
-      title: description || name, iconOnly: node.icon_only, className: 'flex-1',
+      title: description || name, iconOnly: node.icon_only, className: 'flex-1 gap-0.5 px-0.5',
       onClick: () => prop.set(flag ? (on ? [...value].filter((v) => v !== id) : [...(value ?? []), id]) : id) });
   }));
 }
@@ -187,46 +189,59 @@ function decorator(prop, index, ui) {
   }, icon(iconName));
 }
 
-// layout.prop: with use_property_split, a label column (0.4 of the row) and the value, and the decorator column when
-// use_property_decorate; an array is a column of its elements.
+// layout.prop as uiItemFullR lays it out: with use_property_split, a split of a label column (0.4 of the row) and the
+// value, then the decorator column when use_property_decorate. A checkbox keeps its name and takes the layout's heading
+// as its label; an empty name has no label column; an array is a column of its elements, labelled "Name X", "Y", "Z".
 function propItem(node, env) {
   const { ui } = env, prop = resolve(node, ui);
   if (!node.data) return null;
   if (!prop) return label(`property not found: ${node.data?.[INFO]?.struct ?? '?'}.${node.property}`, { className: 'text-[#ff8080]' });
-  const { meta } = prop, value = prop.get();
+  const { meta } = prop;
   const disabled = !env.enabled || !!meta.readonly, inactive = !env.active || !prop.bound;
-  const name = node.text ?? meta.name, index = node.index ?? -1;
-  const isArray = meta.array && index < 0 && meta.type !== 'E' && !(['COLOR', 'COLOR_GAMMA'].includes(meta.subtype) && meta.type === 'F');
+  const name = node.text ?? meta.name, index = node.index ?? -1, iconName = node.icon && node.icon !== 'NONE' ? node.icon : null;
   const options = { disabled, inactive, ui };
-  const heading = () => { const text = env.heading?.text; if (env.heading) env.heading.text = ''; return text ?? ''; };
-  const isCheck = meta.type === 'B' && !node.toggle && !node.icon_only && !(node.icon && node.icon !== 'NONE' && !name);
+  const isArray = meta.array && index < 0 && meta.type !== 'E' && !(['COLOR', 'COLOR_GAMMA'].includes(meta.subtype) && meta.type === 'F');
+  const useSplit = node.split && !env.noSplit;
+  // UI_PROP_SEP_ICON_WIDTH_EXCEPTION: a checkbox keeps its name, in the value column.
+  const isCheck = meta.type === 'B' && !iconName && !node.icon_only && !node.toggle;
+  const splitLabel = useSplit && !isCheck, splitEmptyName = isCheck || node.split_empty_name;
+  const heading = () => { const text = env.heading?.text ?? ''; if (env.heading) env.heading.text = ''; return text; };
+  const elementText = (i, chars) => (isCheck ? chars[i] : '');
 
-  if (meta.type === 'E' && node.expand) return row([expanded(prop, node, options)], env, node, prop);
-  if (isArray) {
-    const n = meta.array, chars = Array.from({ length: n }, (_, i) => itemChar(meta, i));
-    const values = Array.from({ length: n }, (_, i) => widget(prop, node, { ...options, index: i,
-      text: node.split ? (meta.type === 'B' && !node.icon_only && (!node.icon || node.icon === 'NONE') ? chars[i] : '') : (name && chars[i] ? chars[i] : '') }));
-    const column = h('div', { class: [node.expand ? 'bl-align-row flex' : 'bl-align-col flex flex-col', 'min-w-0 flex-1'] }, values);
-    if (!node.split) return column;
-    const labels = Array.from({ length: n }, (_, i) => label(i === 0 ? `${name} ${chars[0]}`.trim() : chars[i], { align: 'right', className: 'bl-split-label' }));
-    return splitRow(h('div', { class: 'flex flex-col' }, labels), column, node.decorate ? h('div', { class: 'flex flex-col' }, values.map((_, i) => decorator(prop, i, ui))) : null);
+  let value;
+  if (meta.type === 'E' && node.expand) value = expanded(prop, node, options);
+  else if (isArray) {
+    const chars = Array.from({ length: meta.array }, (_, i) => itemChar(meta, i)), iconOnly = meta.type === 'B' && !isCheck;
+    value = h('div', { class: [node.expand ? 'bl-align-row flex' : 'bl-align-col flex flex-col', iconOnly ? 'bl-icon-only' : 'min-w-0 flex-1'] },
+      chars.map((char, i) => widget(prop, node, { ...options, index: i, text: useSplit ? elementText(i, chars) : (name && char ? char : '') })));
+  } else value = widget(prop, node, { ...options, text: useSplit && splitLabel ? '' : meta.type === 'E' || meta.type === 'S' || meta.type === 'P' ? '' : name });
+
+  if (!useSplit || (name === '' && !splitEmptyName)) {
+    if (!useSplit && meta.type === 'E' && !node.expand && name && !node.icon_only) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(name), value]);
+    if (!useSplit && (meta.type === 'S' || meta.type === 'P') && name) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(name), value]);
+    return value;
   }
-  if (!node.split) {
-    if (meta.type === 'E' && name && !node.icon_only) return h('div', { class: 'flex min-w-0 flex-1 gap-[var(--bl-row-gap)]' }, [label(name), widget(prop, node, { ...options, text: '' })]);
-    return widget(prop, node, { ...options, text: isCheck || meta.type === 'I' || meta.type === 'F' || meta.type === 'B' ? name : '' });
-  }
-  const left = isCheck ? heading() : name;
-  const right = widget(prop, node, { ...options, text: isCheck ? name : '' });
-  return splitRow(label(left, { align: 'right', className: 'bl-split-label' }), right, node.decorate ? decorator(prop, index, ui) : null);
+  let left;
+  if (splitLabel && isArray) {
+    const chars = Array.from({ length: meta.array }, (_, i) => itemChar(meta, i));
+    left = h('div', { class: 'flex flex-col' }, chars.map((char, i) => label(i === 0 ? `${name} ${char}`.trim() : char, { align: 'right', className: 'bl-split-label' })));
+  } else left = label(splitLabel ? name : heading(), { align: 'right', className: 'bl-split-label' });
+  const decorators = node.decorate
+    ? (isArray ? h('div', { class: 'flex flex-col' }, Array.from({ length: meta.array }, (_, i) => decorator(prop, i, ui))) : decorator(prop, index, ui)) : null;
+  return splitRow(left, value, decorators);
 }
 
-const splitRow = (left, right, deco) => h('div', { class: 'bl-prop-split flex min-w-0 flex-1' }, [
-  h('div', { class: 'flex min-w-0 flex-1' }, [h('div', { class: 'bl-split-left shrink-0' }, left), h('div', { class: 'flex min-w-0 flex-1' }, right)]),
-  deco,
-]);
-const row = (children, env, node, prop) => (node.split
-  ? splitRow(label(node.text ?? prop.meta.name, { align: 'right', className: 'bl-split-label' }), h('div', { class: 'flex min-w-0 flex-1' }, children), node.decorate ? decorator(prop, -1, env.ui) : null)
-  : h('div', { class: 'flex min-w-0 flex-1' }, children));
+// The split of a property's label and value; items added after it to the same row go into its value part, as
+// item_prop_split_layout_hack does (a transform's lock beside its value), not split again.
+function splitRow(left, right, deco) {
+  const value = [right];
+  const vnode = h('div', { class: 'bl-prop-split flex min-w-0 flex-1' }, [
+    h('div', { class: 'flex min-w-0 flex-1' }, [h('div', { class: 'bl-split-left shrink-0' }, left), h('div', { class: 'bl-split-value bl-align-row flex min-w-0 flex-1' }, value)]),
+    deco,
+  ]);
+  vnode.valueSlot = value;
+  return vnode;
+}
 
 function propEnum(node, env) {
   const prop = resolve(node, env.ui);
@@ -255,6 +270,7 @@ function operatorButton(node, env) {
 }
 
 // ---- Templates.
+const NO_FAKE_USER = new Set(['Object', 'Scene', 'Collection', 'WorkSpace', 'Screen']);
 // template_ID: the data-block's browse menu, its name, and New or unlink.
 function templateID(node, env) {
   const { ui } = env, prop = resolve(node, ui);
@@ -267,7 +283,9 @@ function templateID(node, env) {
     id
       ? textField({ value: id.name, disabled: !env.enabled, title: `${prop.meta.name} name`, onChange: (name) => { id.name = name; ui.undoPush('Rename'); } })
       : node.new ? button({ text: 'New', iconName: 'ADD', kind: 'tool', className: 'flex-1', disabled: !ui.supported(node.new, {}), onClick: () => ui.run(node.new, {}) }) : null,
-    id && node.unlink !== '' && prop.meta.readonly !== 1 && node.data[INFO].bound.has(node.property) && id && node.unlink
+    // Data-blocks other than objects, scenes, collections and workspaces can keep a fake user (template_id_cb).
+    id && !NO_FAKE_USER.has(struct) ? propItem({ kind: 'prop', data: id, property: 'use_fake_user', text: '', icon: 'FAKE_USER_OFF', toggle: true }, env) : null,
+    id && node.unlink && node.data[INFO].bound.has(node.property)
       ? button({ iconName: 'X', kind: 'tool', title: 'Unlink', onClick: () => prop.set(null) }) : null,
   ]);
 }
@@ -287,13 +305,13 @@ function templateNodeView(node, env) {
   const rows = [], visit = (socket, depth) => {
     const linked = socket.links?.[0]?.from_node;
     if (linked) {
-      rows.push(splitRow(label(socket.name, { align: 'right', className: 'bl-split-label' }), button({ text: linked.name, kind: 'menu', className: 'bl-node-link flex-1', disabled: true }), null));
+      rows.push(splitRow(label(socket.name, { align: 'right', className: 'bl-split-label' }), button({ text: linked.name, kind: 'popover', className: 'bl-node-link flex-1', disabled: true }), null));
       for (const input of linked.inputs) visit(input, depth + 1);
     } else if ('default_value' in socket && socket[INFO].bound.has('default_value')) {
       rows.push(h('div', { class: 'bl-node-input', style: { paddingLeft: `calc(var(--bl-row) * ${Math.max(0, depth - 1) * 0.5})` } },
         propItem({ kind: 'prop', data: socket, property: 'default_value', text: socket.name, split: true, decorate: false }, env)));
     } else if (depth === 0) {
-      rows.push(splitRow(label(socket.name, { align: 'right', className: 'bl-split-label' }), button({ text: 'None', kind: 'menu', className: 'flex-1', disabled: true }), null));
+      rows.push(splitRow(label(socket.name, { align: 'right', className: 'bl-split-label' }), button({ text: 'None', kind: 'popover', className: 'flex-1', disabled: true }), null));
     }
   };
   visit(node.socket, 0);
@@ -322,7 +340,7 @@ function item(node, env) {
       return menuButton({ text: node.text ?? '', iconName: node.icon, items, disabled: !env.enabled });
     }
     case 'popover': case 'prop_with_popover':
-      return button({ text: node.text ?? '', iconName: node.icon ?? 'DOWNARROW_HLT', kind: 'menu', iconOnly: !node.text, onClick: (e) => env.ui.drawPopover?.(node.panel, e.currentTarget) });
+      return button({ text: node.text ?? '', iconName: node.icon ?? 'DOWNARROW_HLT', kind: 'popover', iconOnly: !node.text, onClick: (e) => env.ui.drawPopover?.(node.panel, e.currentTarget) });
     case 'label': return label(node.text ?? '', { iconName: node.icon, className: !env.active ? 'opacity-50' : '' });
     case 'separator': return h('div', { class: 'bl-separator shrink-0', style: { '--factor': node.factor ?? 1 }, 'data-type': node.type ?? 'AUTO' });
     case 'separator_spacer': return h('div', { class: 'flex-1' });
@@ -339,6 +357,7 @@ function layoutClass(node) {
     case 'split': return ['bl-split flex min-w-0', node.align ? 'bl-align-row' : 'gap-[var(--bl-row-gap)]'];
     case 'box': return ['bl-box flex flex-col gap-[var(--bl-button-gap)] rounded-md p-1.5'];
     case 'grid_flow': case 'column_flow': return ['bl-grid grid min-w-0 gap-x-[var(--bl-row-gap)] gap-y-[var(--bl-button-gap)]', align];
+    case 'root': return ['bl-col bl-root flex min-w-0 flex-col', align];
     default: return ['bl-col flex min-w-0 flex-col', node.align ? '' : 'gap-[var(--bl-button-gap)]', align];
   }
 }
@@ -348,7 +367,15 @@ function layout(node, env) {
   const inner = { ...env, active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
     heading: node.heading ? { text: node.heading } : env.heading };
   if (node.kind === 'panel') return layoutPanel(node, inner);
-  const children = node.children.map((child) => (isLayout(child) ? layout(child, inner) : item(child, inner))).filter(Boolean);
+  const children = [];
+  let slot = null;
+  for (const child of node.children) {
+    const env = slot ? { ...inner, noSplit: true } : inner;
+    const drawn = isLayout(child) ? layout(child, env) : item(child, env);
+    if (!drawn) continue;
+    (slot ?? children).push(drawn);
+    if (node.kind === 'row' && drawn.valueSlot) slot = drawn.valueSlot;
+  }
   if (node.heading && inner.heading.text && !node.use_property_split) children.unshift(label(inner.heading.text));
   const style = {};
   if (node.kind === 'split') {
@@ -366,7 +393,7 @@ function layoutPanel(node, env) {
   const [header, body] = node.children, id = node.idname, open = env.ui.isOpen(`layout:${id}`, node.default_closed);
   return h('div', { class: 'bl-layout-panel flex flex-col' }, [
     h('div', { class: 'bl-subpanel-header flex h-unit items-center gap-1', onClick: (e) => { if (!e.target.closest('input,button')) env.ui.toggle(`layout:${id}`, e, node.default_closed); } },
-      [icon(open ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT', 'bl-disclosure'), layout(header, env)]),
+      [icon(open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'), layout(header, env)]),
     open && body.children.length ? h('div', { class: 'bl-panel-body' }, layout(body, env)) : null,
   ]);
 }
@@ -387,7 +414,7 @@ function panel(drawn, ui, sub = false) {
   const toggle = (e) => { if (!e.target.closest('input,button,[role=spinbutton]')) ui.toggle(drawn.id, e, drawn.closedByDefault); };
   return h('section', { key: drawn.id, class: ['bl-panel', sub ? 'bl-subpanel' : 'bl-panel-root', drawn.open && 'is-open'], 'data-blender': drawn.id }, [
     h('header', { class: 'bl-panel-header flex items-center', onClick: toggle }, [
-      icon(drawn.open ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT', 'bl-disclosure'),
+      icon(drawn.open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'),
       drawn.header ? h('div', { class: 'bl-panel-header-layout flex items-center' }, layout(drawn.header, env)) : null,
       drawn.label ? h('span', { class: 'bl-panel-label truncate' }, drawn.label) : null,
       h('div', { class: 'flex-1' }),
@@ -411,7 +438,8 @@ export const PanelView = defineComponent({
 export const RegionView = defineComponent({
   name: 'RegionView',
   props: { panels: Array, ui: Object },
-  setup: (props) => () => h('div', { class: 'bl-ui bl-region-panels flex flex-col' }, props.panels.map((p) => panel(p, props.ui))),
+  // The default slot: an editor's own panels after these, as add-ons' panels go after Blender's.
+  setup: (props, { slots }) => () => h('div', { class: 'bl-ui bl-region-panels flex flex-col' }, [...props.panels.map((p) => panel(p, props.ui)), slots.default?.()]),
 });
 
 // Blender's panel state, kept by the editor in `state.open` (id: open, where it differs from the panel's default): a

@@ -1,6 +1,7 @@
 /* Blender's widgets and panels for layout-view.js (interface_widgets.cc, interface_panel.cc, interface_layout.cc),
    on the theme tokens in src/theme.css. Sizes are multiples of the UI unit (--bl-row). */
-.bl-region-panels{gap:calc(var(--bl-row)*.2);padding:calc(var(--bl-row)*.25) calc(var(--bl-row)*.4) calc(var(--bl-row)*.4)}
+/* Panels in a region: UI_PANEL_MARGIN_X at the sides, UI_PANEL_MARGIN_Y between. */
+.bl-region-panels{gap:calc(var(--bl-row)*.1);padding:0 calc(var(--bl-row)*.4) calc(var(--bl-row)*.4)}
 .bl-widget{box-shadow:inset 0 0 0 1px var(--bl-wcol-outline),0 1px 0 var(--bl-wcol-emboss);color:var(--bl-text)}
 .bl-widget:disabled,.bl-widget:has(:disabled){opacity:.5;cursor:default}
 .bl-tool,.bl-toggle,.bl-radio{background:var(--bl-wcol-tool)}
@@ -9,6 +10,9 @@
 .bl-flat{background:none!important;box-shadow:none!important}
 .bl-flat:hover:not(:disabled){color:var(--bl-text-sel)}
 .bl-menu-button{position:relative;background:var(--bl-wcol-menu)}
+.bl-popover{background:var(--bl-wcol-menu)}
+.bl-popover:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
+.bl-root{gap:calc(var(--bl-row)*.25)}
 .bl-menu-button:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
 .bl-menu-button::after{content:'';position:absolute;right:calc(var(--bl-row)*.3);top:50%;width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);margin-top:-1px;background:var(--bl-wcol-menu-item);clip-path:polygon(0 0,100% 0,50% 100%);opacity:.8}
 .bl-browse::after{right:calc(var(--bl-row)*.15);width:calc(var(--bl-row)*.3);height:calc(var(--bl-row)*.2)}
@@ -37,6 +41,7 @@
 .bl-row.bl-fit>*{flex:0 0 auto}
 .bl-row>*,.bl-split>*{min-width:0}
 .bl-row>.bl-widget,.bl-row>.bl-option,.bl-row>.bl-label{flex:1 1 0}
+.bl-icon-only{flex:0 0 var(--bl-row)!important;width:var(--bl-row)}
 .bl-emboss-none .bl-widget{background:none;box-shadow:none}
 /* Aligned layouts: widgets touch, sharing their outline, with square corners where they meet. */
 .bl-align-col>*+*{margin-top:-1px}
@@ -48,24 +53,33 @@
 .bl-align-col>.bl-prop-split:not(:first-child),.bl-align-col>.bl-col:not(:first-child){margin-top:-1px}
 /* Panels: a header a unit and a fifth high, the body inset; sub-panels inside their parent. */
 .bl-panel{background:var(--bl-panel-back);border-radius:calc(var(--bl-row)*.2);color:var(--bl-text)}
-.bl-panel-header{height:calc(var(--bl-row)*1.2);padding:0 calc(var(--bl-row)*.25) 0 calc(var(--bl-row)*.2);gap:calc(var(--bl-row)*.2);color:var(--bl-panel-title);font:var(--bl-widget-font);cursor:default;user-select:none}
+/* panel_draw_header: PNL_HEADER high, the chevron 0.2 of it in, the title 1.1 units in, the grip 1.15 units from the end. */
+.bl-panel-header{height:calc(var(--bl-row)*1.25);padding:0 calc(var(--bl-row)*.15) 0 calc(var(--bl-row)*.25);gap:calc(var(--bl-row)*.1);color:var(--bl-panel-title);font:var(--bl-widget-font);cursor:default;user-select:none}
 .bl-panel-header-layout .bl-option{gap:0}
-.bl-disclosure{width:calc(var(--bl-row)*.6)!important;height:calc(var(--bl-row)*.6)!important;opacity:.8}
-.bl-grip{width:calc(var(--bl-row)*.6)!important;opacity:.3}
-.bl-panel-body{display:flex;flex-direction:column;gap:var(--bl-button-gap);padding:calc(var(--bl-row)*.2) calc(var(--bl-row)*.4) calc(var(--bl-row)*.4) calc(var(--bl-row)*.4)}
+.bl-disclosure{width:calc(var(--bl-row)*.8)!important;height:calc(var(--bl-row)*.8)!important;opacity:.8}
+.bl-grip{width:var(--bl-row)!important;opacity:.3}
+.bl-panel-body{display:flex;flex-direction:column;gap:calc(var(--bl-row)*.25);padding:calc(var(--bl-row)*.4) calc(var(--bl-row)*.4) calc(var(--bl-row)*.4)}
 .bl-subpanel{background:none;border-radius:0}
-.bl-subpanel>.bl-panel-header{margin:0 calc(var(--bl-row)*-.4);padding-left:calc(var(--bl-row)*.6);border-top:1px solid var(--bl-panel-outline)}
-.bl-subpanel>.bl-panel-body{padding:calc(var(--bl-row)*.2) 0 calc(var(--bl-row)*.2)}
-.bl-panel-plain{padding:0 0 calc(var(--bl-row)*.2)}
+.bl-subpanel>.bl-panel-header{margin:0 calc(var(--bl-row)*-.4);padding-left:calc(var(--bl-row)*.95)}
+.bl-subpanel>.bl-panel-body{padding:calc(var(--bl-row)*.2) 0}
+/* A panel without a header (HIDE_HEADER): its layout on the region, with the panel's margins. */
+.bl-panel-plain{padding:calc(var(--bl-row)*.4) 0 calc(var(--bl-row)*.3)}
 .bl-subpanel-header{color:var(--bl-panel-title);cursor:default}
 .bl-list{background:var(--bl-wcol-box);box-shadow:inset 0 0 0 1px var(--bl-wcol-outline);padding:calc(var(--bl-row)*.2)}
 .bl-list-item{border-radius:calc(var(--bl-row)*.2);color:var(--bl-text)}
 .bl-list-item.is-active{background:var(--bl-wcol-list-sel);color:var(--bl-text-sel)}
 .bl-list-item:hover:not(.is-active){background:var(--bl-wcol-hover)}
 /* The Properties editor's navigation bar (prop_tabs_enum). */
-.bl-tabs{gap:calc(var(--bl-row)*.1);padding:calc(var(--bl-row)*.4) 0}
-.bl-tab{display:flex;align-items:center;justify-content:center;width:calc(var(--bl-row)*1.4);height:calc(var(--bl-row)*1.4);border:0;border-radius:calc(var(--bl-row)*.25);background:none;color:var(--bl-text);opacity:.8;cursor:pointer}
-.bl-tab:hover{background:var(--bl-wcol-hover);opacity:1}
-.bl-tab[aria-selected=true]{background:var(--bl-wcol-tab-sel);opacity:1}
-.bl-tab-gap{height:calc(var(--bl-row)*.5)}
+/* The Properties editor's navigation bar (prop_tabs_enum at 1.4 scale): tabs that join the main region when active. */
+.bl-navigation-bar{width:calc(var(--bl-row)*1.55);background:var(--bl-wcol-tab);align-items:flex-end!important}
+.bl-tabs{align-items:flex-end;gap:calc(var(--bl-row)*.1);padding:calc(var(--bl-row)*.55) 0}
+.bl-tab{display:flex;align-items:center;justify-content:center;width:calc(var(--bl-row)*1.3);height:calc(var(--bl-row)*1.3);border:0;border-radius:calc(var(--bl-row)*.2) 0 0 calc(var(--bl-row)*.2);background:none;color:var(--bl-text);cursor:pointer}
+.bl-tab .bl-icon{width:calc(var(--bl-row)*.8);height:calc(var(--bl-row)*.8)}
+.bl-tab:hover{background:var(--bl-wcol-hover)}
+.bl-tab[aria-selected=true]{background:var(--bl-region)}
+.bl-tab-gap{height:calc(var(--bl-row)*.35)}
+/* Icons in their theme color (UI_icons.hh, src/editors/interface/icon-themes.json). */
+.bl-icon-scene{color:var(--bl-icon-scene)}.bl-icon-collection{color:var(--bl-icon-collection)}.bl-icon-object{color:var(--bl-icon-object)}
+.bl-icon-object_data{color:var(--bl-icon-object-data)}.bl-icon-modifier{color:var(--bl-icon-modifier)}.bl-icon-shading{color:var(--bl-icon-shading)}.bl-icon-folder{color:var(--bl-icon-folder)}
 .bl-node-link{background:var(--bl-wcol-menu)}
+.bl-properties-header>.bl-row{flex:1}

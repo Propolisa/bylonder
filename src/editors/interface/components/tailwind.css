@@ -5,6 +5,8 @@
 @source "./";
 @source "../../../coverage/";
 @source "../../space_node/";
+@source "../layout-view.js";
+@source "../../space_buttons/";
 @source "../../../workspace/changelog/";
 
 /* shadcn-vue's semantic tokens, defined by Bylonder's theme tokens (src/theme.css). */
