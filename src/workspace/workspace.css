@@ -6,7 +6,8 @@ body{height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-
 @media(pointer:coarse){#preview-toolbar{display:none}body>footer{display:none}#appbar{height:46px;min-height:46px}}
 #appbar #app-source{margin-left:0}#appbar #app-more{margin-left:auto}#app-more summary{border-radius:4px}#app-more>div{border-radius:6px}#app-more>div button{text-align:left}.dock-tabs>button{border:0}.dock-content{isolation:isolate}
 @media(pointer:coarse){#appbar{height:44px;min-height:44px;padding:3px 6px;gap:5px}#appbar #app-source{min-width:36px;min-height:36px;justify-content:center;border:0;font-size:20px}#app-source span{display:none}#appbar #app-more{margin-left:0}#app-more summary{min-width:36px;min-height:36px;padding:2px 8px}#app-more>div{top:48px;min-width:240px}.dock-tabs>button{font-size:13px}.dock-content #code-actions button{font-size:12px;min-height:34px}#code-actions{padding:2px}}
-#appbar{height:var(--bl-topbar-h);min-height:var(--bl-topbar-h);gap:2px;padding:0 4px;background:var(--bl-topbar);border:0;font:var(--bl-font)}
+/* Blender's topbar draws its buttons 3 px below its top (measured on Blender 5.2.3). */
+#appbar{height:var(--bl-topbar-h);min-height:var(--bl-topbar-h);gap:2px;padding:2px 4px 0;background:var(--bl-topbar);border:0;font:var(--bl-font)}
 #appbar .bl-logo{display:inline-flex;align-items:center;padding:0 6px 0 3px;color:var(--bl-text)}#appbar .bl-logo .bl-icon{width:17px;height:17px}
 #topbar-menus{display:flex;gap:0;height:auto;padding:0;background:none;border:0}
 /* template_ID_tabs: each tab its name and a unit wide, after the menus' separator. */

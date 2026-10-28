@@ -50,4 +50,8 @@ void BLI_spin_init(SpinLock * /*spin*/) {}
 void BLI_spin_lock(SpinLock * /*spin*/) {}
 void BLI_spin_unlock(SpinLock * /*spin*/) {}
 void BLI_spin_end(SpinLock * /*spin*/) {}
+void BLI_rw_mutex_init(ThreadRWMutex * /*mutex*/) {}
+void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
+void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
+void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
 }  // namespace blender

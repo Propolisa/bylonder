@@ -125,6 +125,10 @@ StructRNA *ID_code_to_RNA_type(short idcode)
       return RNA_Camera;
     case ID_LA:
       return RNA_Light;
+    case ID_CU_LEGACY:
+      return RNA_Curve;
+    case ID_VF:
+      return RNA_VectorFont;
     case ID_GR:
       return RNA_Collection;
     case ID_AC:

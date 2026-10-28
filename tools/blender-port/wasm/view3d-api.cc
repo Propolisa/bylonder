@@ -17,13 +17,6 @@
 
 namespace blender {
 
-/* As space_view3d.cc defines it. */
-void ED_view3d_init_mats_rv3d(const Object *ob, RegionView3D *rv3d)
-{
-  mul_m4_m4m4(rv3d->viewmatob, rv3d->viewmat, ob->object_to_world().ptr());
-  mul_m4_m4m4(rv3d->persmatob, rv3d->persmat, ob->object_to_world().ptr());
-}
-
 /* As view3d_select.cc defines it. */
 float ED_view3d_select_dist_px() { return 75.0f * U.pixelsize; }
 
@@ -60,12 +53,6 @@ float ED_view3d_grid_view_scale(const Scene *scene, const View3D *v3d, const ARe
 {
   return ED_view3d_grid_scale(scene, v3d, r_grid_unit);
 }
-
-/* No GPU: depth reads are Bylonder's picking (JS). */
-void view3d_operator_needs_gpu(const bContext * /*C*/) {}
-
-/* port-override: playback is Bylonder's (JS), so no screen plays an animation timer here. */
-bScreen *ED_screen_animation_playing(const wmWindowManager * /*wm*/) { return nullptr; }
 
 /* As gpu_matrix.cc defines them; the rest of that file keeps the GPU's matrix stack, which the module has none of. */
 void GPU_matrix_project_3fv(const float world[3], const float model[4][4], const float proj[4][4], const int view[4], float r_win[3])

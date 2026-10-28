@@ -1,10 +1,10 @@
-// The 3D View's regions drawn from Blender's scripts besides the toolbar: the tool settings row (RGN_TYPE_TOOL_HEADER,
-// VIEW3D_HT_tool_header), the header's transform settings (VIEW3D_HT_header.draw_xform_template) and the sidebar
+// The 3D View's regions drawn from Blender's scripts besides the toolbar: the header (VIEW3D_HT_header), the tool
+// settings row (RGN_TYPE_TOOL_HEADER, VIEW3D_HT_tool_header) and the sidebar
 // (RGN_TYPE_UI): its tabs (the panels' bl_category, in the order the panels register) and the panels of the active
 // tab whose context (the mode's, '.objectmode') and poll() match, with their sub-panels. All draw through the shared
 // layout renderer (interface/layout-view.js).
 import { createApp, h, reactive, markRaw } from 'vue';
-import { panels, headers } from '../../python/bpy_interface.js';
+import { panels, headers, menus } from '../../python/bpy_interface.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { panelTypes, drawPanels, headerLayout, idname } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
@@ -18,11 +18,12 @@ const MODULES = [{ classes: [VIEW3D_PT_transform] }, { classes: Object.values(pa
 const MODE_CONTEXTS = { OBJECT: '.objectmode', EDIT_MESH: '.mesh_edit' };
 const polls = (type, context) => { try { return !type.poll || !!type.poll(context); } catch { return false; } };
 
-// `context(region)` gives bpy.context for a region of the view, `ui` runs operators and draws menus (menuUI),
-// `changed()` redraws after an edit, which `undoPush(name)` records.
-export function createRegions({ view, context, ui, changed, undoPush }) {
+// `context(region)` gives bpy.context for a region of the view, `ui` runs operators and draws menus (menuUI), `menu(idname)`
+// draws a menu of the header's (the mode's own), `templates` are the header's C templates, `changed()` redraws after an
+// edit, which `undoPush(name)` records.
+export function createRegions({ view, context, ui, menu, templates, changed, undoPush }) {
+  const headerRegion = Object.assign(document.createElement('div'), { className: 'bl-ui bl-view3d-header' });
   const toolHeader = Object.assign(document.createElement('div'), { className: 'bl-ui bl-tool-header' });
-  const xform = Object.assign(document.createElement('div'), { className: 'bl-ui bl-header-xform' });
   const sidebar = Object.assign(document.createElement('div'), { className: 'bl-ui bl-sidebar' });
   sidebar.setAttribute('aria-label', 'Sidebar');
   const state = reactive({ category: null, open: {}, revision: 0, ready: false });
@@ -36,13 +37,20 @@ export function createRegions({ view, context, ui, changed, undoPush }) {
     get revision() { return state.revision; },
     undoPush: (name) => { undoPush(name); changed(); state.revision++; },
     report: (error) => console.warn(error),
-    run: (idname, props) => ui.run(idname, props),
+    run: (idname, props, event) => ui.run(idname, props, event),
     supported: (idname, props) => ui.supported(idname, props),
     poll: (idname, props) => ui.poll(idname, props),
     isOpen: panels.isOpen,
     toggle: (id, event, closed) => { panels.toggle(id, event, closed); state.revision++; },
     ids: () => [],
-    drawMenu: (idname) => drawMenu(idname, ui),
+    drawMenu: menu,
+    menuLabel: (idname) => menus[idname]?.bl_label,
+    menuContents: (idname) => {
+      const ctx = context(region);
+      return menus[idname] && markRaw(headerLayout(ctx, (layout) => drawHeaderType(menus[idname])(layout, ctx)));
+    },
+    enumItems: (idname, prop) => ui.enumItems(idname, prop),
+    templates,
     popover: (id) => {
       const type = allTypes().find((t) => idname(t) === id);
       if (!type) return null;
@@ -80,8 +88,8 @@ export function createRegions({ view, context, ui, changed, undoPush }) {
   };
 
   const apps = [
+    mount(headerRegion, () => header('HEADER', drawHeaderType(headers.VIEW3D_HT_header))),
     mount(toolHeader, () => header('TOOL_HEADER', drawHeaderType(headers.VIEW3D_HT_tool_header))),
-    mount(xform, () => header('HEADER', (layout, ctx) => headers.VIEW3D_HT_header.draw_xform_template(layout, ctx))),
     mount(sidebar, sidebarRegion),
   ];
 
@@ -92,5 +100,5 @@ export function createRegions({ view, context, ui, changed, undoPush }) {
     sidebar.hidden = !regions.show_region_ui;
     state.revision++;
   }
-  return { toolHeader, xform, sidebar, draw, dispose: () => { apps.forEach((app) => app.unmount()); [toolHeader, xform, sidebar].forEach((el) => el.remove()); } };
+  return { header: headerRegion, toolHeader, sidebar, draw, dispose: () => { apps.forEach((app) => app.unmount()); [headerRegion, toolHeader, sidebar].forEach((el) => el.remove()); } };
 }

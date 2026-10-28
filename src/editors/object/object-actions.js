@@ -38,7 +38,6 @@ export function createObjectActions({
     {id:"creation",blender:"screen.redo_last",label:"Last Creation Settings",keys:[],section:"Create",run:()=>creator.reopen()},
     {id:"frame",blender:"view3d.view_selected",label:"Frame Selected",keys:[],section:"View",enabled:has,run:()=>nav.frame(editor.selected)},
 
-    {id:"edit-text",label:"Edit Text…",keys:["Tab"],section:"Text",enabled:()=>!!active()?.metadata?.wbCreation?.text,run:()=>creator.editText(active())},
     {
       id: "add", blender: "VIEW3D_MT_add",
       label: "Add Object…",

@@ -20,6 +20,7 @@ body>header,body>footer{display:none!important}
 .nav-buttons .bl-icon-button{width:28px;min-width:28px;height:28px;padding:0;border-radius:50%;background:transparent}
 .nav-buttons .bl-icon-button:hover{background:#ffffff26}
 .overlays-off .nav-gizmo,.overlays-off .nav-buttons,.overlays-off .view-label{display:none}
+.gizmos-off .nav-gizmo,.gizmos-off .nav-buttons{display:none}
 .camera-view .nav-gizmo,.camera-view .nav-buttons,.camera-view .view-label .view-detail{display:none}
 #toast{left:50%;transform:translateX(-50%);bottom:10px;background:var(--bl-popup);border:1px solid var(--bl-popup-line);border-radius:5px;color:var(--bl-text);font:var(--bl-font)}
 dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;font:var(--bl-font);box-shadow:0 6px 20px #0008}

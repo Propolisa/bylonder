@@ -1,0 +1,1503 @@
+{
+ "Curve": {
+  "base": "ID",
+  "properties": {
+   "shape_keys": {
+    "name": "Shape Keys",
+    "description": "",
+    "type": "POINTER",
+    "fixed_type": "Key"
+   },
+   "splines": {
+    "name": "Splines",
+    "description": "Collection of splines in this curve data object",
+    "type": "COLLECTION"
+   },
+   "path_duration": {
+    "name": "Path Duration",
+    "description": "The number of frames that are needed to traverse the path, defining the maximum value for the 'Evaluation Time' setting",
+    "type": "INT",
+    "subtype": "TIME",
+    "min": 1,
+    "max": 1048574,
+    "soft_min": 1,
+    "soft_max": 1048574,
+    "step": 1,
+    "default": 100
+   },
+   "use_path": {
+    "name": "Path",
+    "description": "Enable the curve to become a translation path",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_path_follow": {
+    "name": "Follow",
+    "description": "Make curve path children rotate along the path",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_path_clamp": {
+    "name": "Clamp",
+    "description": "Clamp the curve path children so they cannot travel past the start/end point of the curve",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_stretch": {
+    "name": "Stretch",
+    "description": "Option for curve-deform: make deformed child stretch along entire path",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_deform_bounds": {
+    "name": "Bounds Clamp",
+    "description": "Option for curve-deform: Use the mesh bounds to clamp the deformation",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_radius": {
+    "name": "Radius",
+    "description": "Option for paths and curve-deform: apply the curve radius to objects following it and to deformed objects",
+    "type": "BOOLEAN",
+    "default": true
+   },
+   "bevel_mode": {
+    "name": "Bevel Mode",
+    "description": "Determine how to build the curve's bevel geometry",
+    "type": "ENUM",
+    "items": [
+     [
+      "ROUND",
+      "Round",
+      "Use circle for the section of the curve's bevel geometry",
+      0
+     ],
+     [
+      "OBJECT",
+      "Object",
+      "Use an object for the section of the curve's bevel geometry segment",
+      1
+     ],
+     [
+      "PROFILE",
+      "Profile",
+      "Use a custom profile for each quarter of curve's bevel geometry",
+      2
+     ]
+    ],
+    "default": "ROUND"
+   },
+   "bevel_profile": {
+    "name": "Custom Profile Path",
+    "description": "The path for the curve's custom profile",
+    "type": "POINTER",
+    "fixed_type": "CurveProfile"
+   },
+   "bevel_resolution": {
+    "name": "Bevel Resolution",
+    "description": "The number of segments in each quarter-circle of the bevel",
+    "type": "INT",
+    "min": 0,
+    "max": 32,
+    "soft_min": 0,
+    "soft_max": 32,
+    "step": 1,
+    "default": 4
+   },
+   "offset": {
+    "name": "Offset",
+    "description": "Distance to move the curve parallel to its normals",
+    "type": "FLOAT",
+    "subtype": "",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -1.0,
+    "soft_max": 1.0,
+    "step": 0.10000000149011612,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "extrude": {
+    "name": "Extrude",
+    "description": "Length of the depth added in the local Z direction along the curve, perpendicular to its normals",
+    "type": "FLOAT",
+    "subtype": "",
+    "min": 0.0,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 0.10000000149011612,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "bevel_depth": {
+    "name": "Bevel Depth",
+    "description": "Radius of the bevel geometry, not including extrusion",
+    "type": "FLOAT",
+    "subtype": "",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 100.0,
+    "step": 0.10000000149011612,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "resolution_u": {
+    "name": "Resolution U",
+    "description": "Number of computed points in the U direction between every pair of control points",
+    "type": "INT",
+    "min": 1,
+    "max": 1024,
+    "soft_min": 1,
+    "soft_max": 64,
+    "step": 1,
+    "default": 12
+   },
+   "resolution_v": {
+    "name": "Resolution V",
+    "description": "The number of computed points in the V direction between every pair of control points",
+    "type": "INT",
+    "min": 1,
+    "max": 1024,
+    "soft_min": 1,
+    "soft_max": 1024,
+    "step": 1,
+    "default": 12
+   },
+   "render_resolution_u": {
+    "name": "Render Resolution U",
+    "description": "Surface resolution in U direction used while rendering (zero uses preview resolution)",
+    "type": "INT",
+    "min": 0,
+    "max": 1024,
+    "soft_min": 0,
+    "soft_max": 64,
+    "step": 1,
+    "default": 0
+   },
+   "render_resolution_v": {
+    "name": "Render Resolution V",
+    "description": "Surface resolution in V direction used while rendering (zero uses preview resolution)",
+    "type": "INT",
+    "min": 0,
+    "max": 1024,
+    "soft_min": 0,
+    "soft_max": 1024,
+    "step": 1,
+    "default": 0
+   },
+   "eval_time": {
+    "name": "Evaluation Time",
+    "description": "Parametric position along the length of the curve that Objects 'following' it should be at (position is evaluated by dividing by the 'Path Length' value)",
+    "type": "FLOAT",
+    "subtype": "TIME",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -10000.0,
+    "soft_max": 10000.0,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "TIME",
+    "default": 0.0
+   },
+   "bevel_object": {
+    "name": "Bevel Object",
+    "description": "The name of the Curve object that defines the bevel shape",
+    "type": "POINTER",
+    "fixed_type": "Object"
+   },
+   "taper_object": {
+    "name": "Taper Object",
+    "description": "Curve object name that defines the taper (width)",
+    "type": "POINTER",
+    "fixed_type": "Object"
+   },
+   "dimensions": {
+    "name": "Dimensions",
+    "description": "Select 2D or 3D curve type",
+    "type": "ENUM",
+    "items": [
+     [
+      "2D",
+      "2D",
+      "Clamp the Z axis of the curve",
+      0
+     ],
+     [
+      "3D",
+      "3D",
+      "Allow editing on the Z axis of this curve, also allows tilt and curve radius to be used",
+      1
+     ]
+    ],
+    "default": "2D"
+   },
+   "fill_mode": {
+    "name": "Fill Mode",
+    "description": "Mode of filling curve",
+    "type": "ENUM",
+    "items": [
+     [
+      "FULL",
+      "Full",
+      "",
+      0
+     ],
+     [
+      "BACK",
+      "Back",
+      "",
+      4
+     ],
+     [
+      "FRONT",
+      "Front",
+      "",
+      2
+     ],
+     [
+      "HALF",
+      "Half",
+      "",
+      6
+     ]
+    ],
+    "default": "FULL"
+   },
+   "fill_solver": {
+    "name": "Fill Solver",
+    "description": "Triangulation solver for filling 2D curves",
+    "type": "ENUM",
+    "items": [
+     [
+      "SWEEP_LINE",
+      "Sweep Line",
+      "Fast without support for self-intersection",
+      0
+     ],
+     [
+      "CDT",
+      "Delaunay",
+      "Constrained Delaunay Triangulation (CDT), robust with support for self-intersections",
+      1
+     ]
+    ],
+    "default": "SWEEP_LINE"
+   },
+   "fill_rule": {
+    "name": "Fill Rule",
+    "description": "Fill rule for Delaunay fill solver",
+    "type": "ENUM",
+    "items": [
+     [
+      "EVEN_ODD",
+      "Even-Odd",
+      "Alternate inside/outside based on crossing count",
+      0
+     ],
+     [
+      "NONZERO",
+      "Non-Zero",
+      "Overlapping curves with the same winding direction are filled as a union",
+      1
+     ]
+    ],
+    "default": "EVEN_ODD"
+   },
+   "twist_mode": {
+    "name": "Twist Method",
+    "description": "The type of tilt calculation for 3D Curves",
+    "type": "ENUM",
+    "items": [
+     [
+      "Z_UP",
+      "Z-Up",
+      "Use Z-Up axis to calculate the curve twist at each point",
+      0
+     ],
+     [
+      "MINIMUM",
+      "Minimum",
+      "Use the least twist over the entire curve",
+      3
+     ],
+     [
+      "TANGENT",
+      "Tangent",
+      "Use the tangent to calculate twist",
+      4
+     ]
+    ],
+    "default": "MINIMUM"
+   },
+   "taper_radius_mode": {
+    "name": "Taper Radius",
+    "description": "Determine how the effective radius of the spline point is computed when a taper object is specified",
+    "type": "ENUM",
+    "items": [
+     [
+      "OVERRIDE",
+      "Override",
+      "Override the radius of the spline point with the taper radius",
+      0
+     ],
+     [
+      "MULTIPLY",
+      "Multiply",
+      "Multiply the radius of the spline point by the taper radius",
+      1
+     ],
+     [
+      "ADD",
+      "Add",
+      "Add the radius of the bevel point to the taper radius",
+      2
+     ]
+    ],
+    "default": "OVERRIDE"
+   },
+   "bevel_factor_mapping_start": {
+    "name": "Start Mapping Type",
+    "description": "Determine how the geometry start factor is mapped to a spline",
+    "type": "ENUM",
+    "items": [
+     [
+      "RESOLUTION",
+      "Resolution",
+      "Map the geometry factor to the number of subdivisions of a spline (U resolution)",
+      0
+     ],
+     [
+      "SEGMENTS",
+      "Segments",
+      "Map the geometry factor to the length of a segment and to the number of subdivisions of a segment",
+      1
+     ],
+     [
+      "SPLINE",
+      "Spline",
+      "Map the geometry factor to the length of a spline",
+      2
+     ]
+    ],
+    "default": "RESOLUTION"
+   },
+   "bevel_factor_mapping_end": {
+    "name": "End Mapping Type",
+    "description": "Determine how the geometry end factor is mapped to a spline",
+    "type": "ENUM",
+    "items": [
+     [
+      "RESOLUTION",
+      "Resolution",
+      "Map the geometry factor to the number of subdivisions of a spline (U resolution)",
+      0
+     ],
+     [
+      "SEGMENTS",
+      "Segments",
+      "Map the geometry factor to the length of a segment and to the number of subdivisions of a segment",
+      1
+     ],
+     [
+      "SPLINE",
+      "Spline",
+      "Map the geometry factor to the length of a spline",
+      2
+     ]
+    ],
+    "default": "RESOLUTION"
+   },
+   "twist_smooth": {
+    "name": "Twist Smooth",
+    "description": "Smoothing iteration for tangents",
+    "type": "FLOAT",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 100.0,
+    "step": 1.0,
+    "precision": 2,
+    "default": 0.0
+   },
+   "use_fill_caps": {
+    "name": "Fill Caps",
+    "description": "Fill caps for beveled curves",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_map_taper": {
+    "name": "Map Taper",
+    "description": "Map effect of the taper object to the beveled part of the curve",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_auto_texspace": {
+    "name": "Auto Texture Space",
+    "description": "Adjust active object's texture space automatically when transforming object",
+    "type": "BOOLEAN",
+    "default": true
+   },
+   "texspace_location": {
+    "name": "Texture Space Location",
+    "description": "",
+    "type": "FLOAT",
+    "subtype": "TRANSLATION",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -3.4028234663852886e+38,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 1.0,
+    "precision": 5,
+    "unit": "LENGTH",
+    "default": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "size": 3
+   },
+   "texspace_size": {
+    "name": "Texture Space Size",
+    "description": "",
+    "type": "FLOAT",
+    "subtype": "XYZ",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -10000.0,
+    "soft_max": 10000.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "size": 3
+   },
+   "materials": {
+    "name": "Materials",
+    "description": "",
+    "type": "COLLECTION"
+   },
+   "bevel_factor_start": {
+    "name": "Geometry Start Factor",
+    "description": "Define where along the spline the curve geometry starts (0 for the beginning, 1 for the end)",
+    "type": "FLOAT",
+    "subtype": "FACTOR",
+    "min": 0.0,
+    "max": 1.0,
+    "soft_min": 0.0,
+    "soft_max": 1.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   },
+   "bevel_factor_end": {
+    "name": "Geometry End Factor",
+    "description": "Define where along the spline the curve geometry ends (0 for the beginning, 1 for the end)",
+    "type": "FLOAT",
+    "subtype": "FACTOR",
+    "min": 0.0,
+    "max": 1.0,
+    "soft_min": 0.0,
+    "soft_max": 1.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 1.0
+   },
+   "is_editmode": {
+    "name": "Is Editmode",
+    "description": "True when used in editmode",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "animation_data": {
+    "name": "Animation Data",
+    "description": "Animation data for this data-block",
+    "type": "POINTER",
+    "fixed_type": "AnimData"
+   },
+   "cycles": {
+    "name": "Cycles Mesh Settings",
+    "description": "Cycles mesh settings",
+    "type": "POINTER",
+    "fixed_type": "CyclesMeshSettings"
+   }
+  }
+ },
+ "TextCurve": {
+  "base": "Curve",
+  "properties": {
+   "align_x": {
+    "name": "Horizontal Alignment",
+    "description": "Text horizontal alignment from the object or text box center",
+    "type": "ENUM",
+    "items": [
+     [
+      "LEFT",
+      "Left",
+      "Align text to the left",
+      0
+     ],
+     [
+      "CENTER",
+      "Center",
+      "Center text",
+      1
+     ],
+     [
+      "RIGHT",
+      "Right",
+      "Align text to the right",
+      2
+     ],
+     [
+      "JUSTIFY",
+      "Justify",
+      "Align to the left and the right",
+      3
+     ],
+     [
+      "FLUSH",
+      "Flush",
+      "Align to the left and the right, with equal character spacing",
+      4
+     ]
+    ],
+    "default": "LEFT"
+   },
+   "align_y": {
+    "name": "Vertical Alignment",
+    "description": "Text vertical alignment from the object center",
+    "type": "ENUM",
+    "items": [
+     [
+      "TOP",
+      "Top",
+      "Align text to the top",
+      1
+     ],
+     [
+      "TOP_BASELINE",
+      "Top Baseline",
+      "Align text to the top line's baseline",
+      0
+     ],
+     [
+      "CENTER",
+      "Middle",
+      "Align text to the middle",
+      2
+     ],
+     [
+      "BOTTOM_BASELINE",
+      "Bottom Baseline",
+      "Align text to the bottom line's baseline",
+      3
+     ],
+     [
+      "BOTTOM",
+      "Bottom",
+      "Align text to the bottom",
+      4
+     ]
+    ],
+    "default": "TOP_BASELINE"
+   },
+   "overflow": {
+    "name": "TextBox Overflow",
+    "description": "Handle the text behavior when it does not fit in the text boxes",
+    "type": "ENUM",
+    "items": [
+     [
+      "NONE",
+      "Overflow",
+      "Let the text overflow outside the text boxes",
+      0
+     ],
+     [
+      "SCALE",
+      "Scale to Fit",
+      "Scale down the text to fit inside the text boxes",
+      1
+     ],
+     [
+      "TRUNCATE",
+      "Truncate",
+      "Truncate the text that would go outside the text boxes",
+      2
+     ]
+    ],
+    "default": "NONE"
+   },
+   "size": {
+    "name": "Font Size",
+    "description": "",
+    "type": "FLOAT",
+    "min": 9.999999747378752e-05,
+    "max": 10000.0,
+    "soft_min": 0.009999999776482582,
+    "soft_max": 10.0,
+    "step": 1.0,
+    "precision": 3,
+    "default": 1.0
+   },
+   "small_caps_scale": {
+    "name": "Small Caps",
+    "description": "Scale of small capitals",
+    "type": "FLOAT",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 1.0,
+    "step": 1.0,
+    "precision": 2,
+    "default": 0.75
+   },
+   "space_line": {
+    "name": "Distance between lines of text",
+    "description": "",
+    "type": "FLOAT",
+    "min": 0.0,
+    "max": 10.0,
+    "soft_min": 0.0,
+    "soft_max": 10.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 1.0
+   },
+   "space_word": {
+    "name": "Spacing between words",
+    "description": "",
+    "type": "FLOAT",
+    "min": 0.0,
+    "max": 10.0,
+    "soft_min": 0.0,
+    "soft_max": 10.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 1.0
+   },
+   "space_character": {
+    "name": "Global spacing between characters",
+    "description": "",
+    "type": "FLOAT",
+    "min": 0.0,
+    "max": 10.0,
+    "soft_min": 0.0,
+    "soft_max": 10.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 1.0
+   },
+   "shear": {
+    "name": "Shear",
+    "description": "Italic angle of the characters",
+    "type": "FLOAT",
+    "min": -1.0,
+    "max": 1.0,
+    "soft_min": -1.0,
+    "soft_max": 1.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   },
+   "offset_x": {
+    "name": "X Offset",
+    "description": "Horizontal offset from the object origin",
+    "type": "FLOAT",
+    "subtype": "DISTANCE",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -50.0,
+    "soft_max": 50.0,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "offset_y": {
+    "name": "Y Offset",
+    "description": "Vertical offset from the object origin",
+    "type": "FLOAT",
+    "subtype": "DISTANCE",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -50.0,
+    "soft_max": 50.0,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "underline_position": {
+    "name": "Underline Position",
+    "description": "Vertical position of underline",
+    "type": "FLOAT",
+    "min": -0.20000000298023224,
+    "max": 0.800000011920929,
+    "soft_min": -0.20000000298023224,
+    "soft_max": 0.800000011920929,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   },
+   "underline_height": {
+    "name": "Underline Thickness",
+    "description": "",
+    "type": "FLOAT",
+    "min": 0.0,
+    "max": 0.800000011920929,
+    "soft_min": 0.0,
+    "soft_max": 0.800000011920929,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.05000000074505806
+   },
+   "text_boxes": {
+    "name": "TextBoxes",
+    "description": "",
+    "type": "COLLECTION"
+   },
+   "active_textbox": {
+    "name": "Active Text Box",
+    "description": "",
+    "type": "INT",
+    "min": -2147483648,
+    "max": 2147483647,
+    "soft_min": -10000,
+    "soft_max": 10000,
+    "step": 1,
+    "default": 0
+   },
+   "family": {
+    "name": "Object Font",
+    "description": "Use objects as font characters (give font objects a common name followed by the character they represent, eg. 'family-a', 'family-b', etc, set this setting to 'family-', and turn on Vertex Instancing)",
+    "type": "STRING",
+    "default": ""
+   },
+   "body": {
+    "name": "Body Text",
+    "description": "Content of this text object",
+    "type": "STRING",
+    "default": ""
+   },
+   "body_format": {
+    "name": "Character Info",
+    "description": "Stores the style of each character",
+    "type": "COLLECTION"
+   },
+   "follow_curve": {
+    "name": "Text on Curve",
+    "description": "Curve deforming text object",
+    "type": "POINTER",
+    "fixed_type": "Object"
+   },
+   "font": {
+    "name": "Font",
+    "description": "",
+    "type": "POINTER",
+    "fixed_type": "VectorFont"
+   },
+   "font_bold": {
+    "name": "Font Bold",
+    "description": "",
+    "type": "POINTER",
+    "fixed_type": "VectorFont"
+   },
+   "font_italic": {
+    "name": "Font Italic",
+    "description": "",
+    "type": "POINTER",
+    "fixed_type": "VectorFont"
+   },
+   "font_bold_italic": {
+    "name": "Font Bold Italic",
+    "description": "",
+    "type": "POINTER",
+    "fixed_type": "VectorFont"
+   },
+   "edit_format": {
+    "name": "Edit Format",
+    "description": "Editing settings character formatting",
+    "type": "POINTER",
+    "fixed_type": "TextCharacterFormat"
+   },
+   "use_fast_edit": {
+    "name": "Fast Editing",
+    "description": "Don't fill polygons while editing",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "is_select_bold": {
+    "name": "Selected Bold",
+    "description": "Whether the selected text is bold",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "is_select_italic": {
+    "name": "Selected Italic",
+    "description": "Whether the selected text is italics",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "is_select_underline": {
+    "name": "Selected Underline",
+    "description": "Whether the selected text is underlined",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "is_select_smallcaps": {
+    "name": "Selected Small Caps",
+    "description": "Whether the selected text is small caps",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "has_selection": {
+    "name": "Text Selected",
+    "description": "Whether there is any text selected",
+    "type": "BOOLEAN",
+    "default": false
+   }
+  }
+ },
+ "Spline": {
+  "base": null,
+  "properties": {
+   "points": {
+    "name": "Points",
+    "description": "Collection of points that make up this poly or nurbs spline",
+    "type": "COLLECTION"
+   },
+   "bezier_points": {
+    "name": "B\u00e9zier Points",
+    "description": "Collection of points for B\u00e9zier curves only",
+    "type": "COLLECTION"
+   },
+   "tilt_interpolation": {
+    "name": "Tilt Interpolation",
+    "description": "The type of tilt interpolation for 3D, B\u00e9zier curves",
+    "type": "ENUM",
+    "items": [
+     [
+      "LINEAR",
+      "Linear",
+      "",
+      0
+     ],
+     [
+      "CARDINAL",
+      "Cardinal",
+      "",
+      1
+     ],
+     [
+      "BSPLINE",
+      "BSpline",
+      "",
+      2
+     ],
+     [
+      "EASE",
+      "Ease",
+      "",
+      3
+     ]
+    ],
+    "default": "LINEAR"
+   },
+   "radius_interpolation": {
+    "name": "Radius Interpolation",
+    "description": "The type of radius interpolation for B\u00e9zier curves",
+    "type": "ENUM",
+    "items": [
+     [
+      "LINEAR",
+      "Linear",
+      "",
+      0
+     ],
+     [
+      "CARDINAL",
+      "Cardinal",
+      "",
+      1
+     ],
+     [
+      "BSPLINE",
+      "BSpline",
+      "",
+      2
+     ],
+     [
+      "EASE",
+      "Ease",
+      "",
+      3
+     ]
+    ],
+    "default": "LINEAR"
+   },
+   "type": {
+    "name": "Type",
+    "description": "The interpolation type for this curve element",
+    "type": "ENUM",
+    "items": [
+     [
+      "POLY",
+      "Poly",
+      "",
+      0
+     ],
+     [
+      "BEZIER",
+      "B\u00e9zier",
+      "",
+      1
+     ],
+     [
+      "NURBS",
+      "Ease",
+      "",
+      4
+     ]
+    ],
+    "default": "POLY"
+   },
+   "point_count_u": {
+    "name": "Points U",
+    "description": "Total number points for the curve or surface in the U direction",
+    "type": "INT",
+    "subtype": "UNSIGNED",
+    "min": 0,
+    "max": 2147483647,
+    "soft_min": 0,
+    "soft_max": 10000,
+    "step": 1,
+    "default": 0
+   },
+   "point_count_v": {
+    "name": "Points V",
+    "description": "Total number points for the surface on the V direction",
+    "type": "INT",
+    "subtype": "UNSIGNED",
+    "min": 0,
+    "max": 2147483647,
+    "soft_min": 0,
+    "soft_max": 10000,
+    "step": 1,
+    "default": 0
+   },
+   "order_u": {
+    "name": "Order U",
+    "description": "NURBS order in the U direction. Higher values make each point influence a greater area, but have worse performance.",
+    "type": "INT",
+    "min": 2,
+    "max": 64,
+    "soft_min": 2,
+    "soft_max": 6,
+    "step": 1,
+    "default": 0
+   },
+   "order_v": {
+    "name": "Order V",
+    "description": "NURBS order in the V direction. Higher values make each point influence a greater area, but have worse performance.",
+    "type": "INT",
+    "min": 2,
+    "max": 64,
+    "soft_min": 2,
+    "soft_max": 6,
+    "step": 1,
+    "default": 0
+   },
+   "resolution_u": {
+    "name": "Resolution U",
+    "description": "Curve or Surface subdivisions per segment",
+    "type": "INT",
+    "min": 1,
+    "max": 1024,
+    "soft_min": 1,
+    "soft_max": 64,
+    "step": 1,
+    "default": 0
+   },
+   "resolution_v": {
+    "name": "Resolution V",
+    "description": "Surface subdivisions per segment",
+    "type": "INT",
+    "min": 1,
+    "max": 1024,
+    "soft_min": 1,
+    "soft_max": 64,
+    "step": 1,
+    "default": 0
+   },
+   "use_cyclic_u": {
+    "name": "Cyclic U",
+    "description": "Make this curve or surface a closed loop in the U direction",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_cyclic_v": {
+    "name": "Cyclic V",
+    "description": "Make this surface a closed loop in the V direction",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_endpoint_u": {
+    "name": "Endpoint U",
+    "description": "Make this nurbs curve or surface meet the endpoints in the U direction",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_endpoint_v": {
+    "name": "Endpoint V",
+    "description": "Make this nurbs surface meet the endpoints in the V direction",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_bezier_u": {
+    "name": "B\u00e9zier U",
+    "description": "Make this nurbs curve or surface act like a B\u00e9zier spline in the U direction",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_bezier_v": {
+    "name": "B\u00e9zier V",
+    "description": "Make this nurbs surface act like a B\u00e9zier spline in the V direction",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_smooth": {
+    "name": "Smooth",
+    "description": "Smooth the normals of the surface or beveled curve",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "hide": {
+    "name": "Hide",
+    "description": "Hide this curve in Edit mode",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "material_index": {
+    "name": "Material Index",
+    "description": "Material slot index of this curve",
+    "type": "INT",
+    "subtype": "UNSIGNED",
+    "min": 0,
+    "max": 32767,
+    "soft_min": 0,
+    "soft_max": 32767,
+    "step": 1,
+    "default": 0
+   },
+   "character_index": {
+    "name": "Character Index",
+    "description": "Location of this character in the text data (only for text curves)",
+    "type": "INT",
+    "subtype": "UNSIGNED",
+    "min": 0,
+    "max": 2147483647,
+    "soft_min": 0,
+    "soft_max": 10000,
+    "step": 1,
+    "default": 0
+   }
+  }
+ },
+ "SplinePoint": {
+  "base": null,
+  "properties": {
+   "select": {
+    "name": "Select",
+    "description": "Selection status",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "hide": {
+    "name": "Hide",
+    "description": "Visibility status",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "co": {
+    "name": "Point",
+    "description": "Point coordinates",
+    "type": "FLOAT",
+    "subtype": "TRANSLATION",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -3.4028234663852886e+38,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 1.0,
+    "precision": 5,
+    "unit": "LENGTH",
+    "default": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "size": 4
+   },
+   "weight": {
+    "name": "Weight",
+    "description": "NURBS weight",
+    "type": "FLOAT",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -10000.0,
+    "soft_max": 10000.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   },
+   "tilt": {
+    "name": "Tilt",
+    "description": "Tilt in 3D View",
+    "type": "FLOAT",
+    "subtype": "ANGLE",
+    "min": -376.9911193847656,
+    "max": 376.9911193847656,
+    "soft_min": -376.9911193847656,
+    "soft_max": 376.9911193847656,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "ROTATION",
+    "default": 0.0
+   },
+   "weight_softbody": {
+    "name": "Weight",
+    "description": "Softbody goal weight",
+    "type": "FLOAT",
+    "min": 0.009999999776482582,
+    "max": 100.0,
+    "soft_min": 0.009999999776482582,
+    "soft_max": 100.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   },
+   "radius": {
+    "name": "Bevel Radius",
+    "description": "Radius for beveling",
+    "type": "FLOAT",
+    "min": 0.0,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   }
+  }
+ },
+ "BezierSplinePoint": {
+  "base": null,
+  "properties": {
+   "select_left_handle": {
+    "name": "Handle 1 selected",
+    "description": "Handle 1 selection status",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "select_right_handle": {
+    "name": "Handle 2 selected",
+    "description": "Handle 2 selection status",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "select_control_point": {
+    "name": "Control Point selected",
+    "description": "Control point selection status",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "hide": {
+    "name": "Hide",
+    "description": "Visibility status",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "handle_left_type": {
+    "name": "Handle 1 Type",
+    "description": "Handle types",
+    "type": "ENUM",
+    "items": [
+     [
+      "FREE",
+      "Free",
+      "",
+      0
+     ],
+     [
+      "VECTOR",
+      "Vector",
+      "",
+      2
+     ],
+     [
+      "ALIGNED",
+      "Aligned",
+      "",
+      3
+     ],
+     [
+      "AUTO",
+      "Auto",
+      "",
+      1
+     ]
+    ],
+    "default": "FREE"
+   },
+   "handle_right_type": {
+    "name": "Handle 2 Type",
+    "description": "Handle types",
+    "type": "ENUM",
+    "items": [
+     [
+      "FREE",
+      "Free",
+      "",
+      0
+     ],
+     [
+      "VECTOR",
+      "Vector",
+      "",
+      2
+     ],
+     [
+      "ALIGNED",
+      "Aligned",
+      "",
+      3
+     ],
+     [
+      "AUTO",
+      "Auto",
+      "",
+      1
+     ]
+    ],
+    "default": "FREE"
+   },
+   "handle_left": {
+    "name": "Handle 1",
+    "description": "Coordinates of the first handle",
+    "type": "FLOAT",
+    "subtype": "TRANSLATION",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -3.4028234663852886e+38,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 1.0,
+    "precision": 5,
+    "unit": "LENGTH",
+    "default": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "size": 3
+   },
+   "co": {
+    "name": "Control Point",
+    "description": "Coordinates of the control point",
+    "type": "FLOAT",
+    "subtype": "TRANSLATION",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -3.4028234663852886e+38,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 1.0,
+    "precision": 5,
+    "unit": "LENGTH",
+    "default": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "size": 3
+   },
+   "handle_right": {
+    "name": "Handle 2",
+    "description": "Coordinates of the second handle",
+    "type": "FLOAT",
+    "subtype": "TRANSLATION",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -3.4028234663852886e+38,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 1.0,
+    "precision": 5,
+    "unit": "LENGTH",
+    "default": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "size": 3
+   },
+   "tilt": {
+    "name": "Tilt",
+    "description": "Tilt in 3D View",
+    "type": "FLOAT",
+    "subtype": "ANGLE",
+    "min": -376.9911193847656,
+    "max": 376.9911193847656,
+    "soft_min": -376.9911193847656,
+    "soft_max": 376.9911193847656,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "ROTATION",
+    "default": 0.0
+   },
+   "weight_softbody": {
+    "name": "Weight",
+    "description": "Softbody goal weight",
+    "type": "FLOAT",
+    "min": 0.009999999776482582,
+    "max": 100.0,
+    "soft_min": 0.009999999776482582,
+    "soft_max": 100.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   },
+   "radius": {
+    "name": "Bevel Radius",
+    "description": "Radius for beveling",
+    "type": "FLOAT",
+    "min": 0.0,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 3.4028234663852886e+38,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   }
+  }
+ },
+ "TextBox": {
+  "base": null,
+  "properties": {
+   "x": {
+    "name": "TextBox X Offset",
+    "description": "",
+    "type": "FLOAT",
+    "subtype": "DISTANCE",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -50.0,
+    "soft_max": 50.0,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "y": {
+    "name": "TextBox Y Offset",
+    "description": "",
+    "type": "FLOAT",
+    "subtype": "DISTANCE",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -50.0,
+    "soft_max": 50.0,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "width": {
+    "name": "TextBox Width",
+    "description": "",
+    "type": "FLOAT",
+    "subtype": "DISTANCE",
+    "min": 0.0,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 50.0,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   },
+   "height": {
+    "name": "TextBox Height",
+    "description": "",
+    "type": "FLOAT",
+    "subtype": "DISTANCE",
+    "min": 0.0,
+    "max": 3.4028234663852886e+38,
+    "soft_min": 0.0,
+    "soft_max": 50.0,
+    "step": 10.0,
+    "precision": 3,
+    "unit": "LENGTH",
+    "default": 0.0
+   }
+  }
+ },
+ "TextCharacterFormat": {
+  "base": null,
+  "properties": {
+   "use_bold": {
+    "name": "Bold",
+    "description": "",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_italic": {
+    "name": "Italic",
+    "description": "",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_underline": {
+    "name": "Underline",
+    "description": "",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "use_small_caps": {
+    "name": "Small Caps",
+    "description": "",
+    "type": "BOOLEAN",
+    "default": false
+   },
+   "material_index": {
+    "name": "Material Index",
+    "description": "Material slot index of this character",
+    "type": "INT",
+    "subtype": "UNSIGNED",
+    "min": 0,
+    "max": 2147483647,
+    "soft_min": 0,
+    "soft_max": 10000,
+    "step": 1,
+    "default": 0
+   },
+   "kerning": {
+    "name": "Kerning",
+    "description": "Spacing between characters",
+    "type": "FLOAT",
+    "min": -3.4028234663852886e+38,
+    "max": 3.4028234663852886e+38,
+    "soft_min": -10000.0,
+    "soft_max": 10000.0,
+    "step": 10.0,
+    "precision": 3,
+    "default": 0.0
+   }
+  }
+ }
+}

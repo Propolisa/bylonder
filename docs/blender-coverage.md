@@ -100,3 +100,9 @@ Needs the preselection gizmo (`VIEW3D_GGT_mesh_preselect_elem`), which picks the
 ## 3D View Tool: Edit Mesh, Extrude Manifold > *
 Status: partial
 Extrudes and moves as Blender's macro does; the automerge and split of faces the move dissolves into its neighbors is not run yet.
+
+## VIEW3D_MT_curve_add
+Blender's own primitive operators fill the curve, in the module (`ED_curve_add_nurbs_primitive`). Surfaces (Add > Surface) are not offered yet. See `docs/curves-and-text.md`.
+
+## object.text_add
+Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its built-in font, FreeType in the module. Fonts other than the built-in one load from their files' bytes; a font file picker is not offered yet.

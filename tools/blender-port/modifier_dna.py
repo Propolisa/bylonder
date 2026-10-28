@@ -5,6 +5,8 @@ names, as Clang parses the RNA definition files for the module's wasm32 target.
 - src/makesrna/dna-outliner.json: the structs the Outliner draws buttons for and JS binds (Object, ObjectBase,
   Collection, LayerCollection, SpaceOutliner), with each property's type, icon and enum items, which the module's RNA
   takes too (rna_dna_fields in wasm_module.py).
+- src/makesrna/dna-curves.json: a Curve and its Nurb, BezTriple, BPoint, CharInfo and TextBox (rna_curve.cc); with
+  rna-curves.json (tools/blender-reference/curves.py) it lets JS read and write curve and text data in the module.
 
 Usage: tools/blender-port/modifier_dna.py SRC   (SRC: Blender sources of the manifest's tag)
 """
@@ -29,6 +31,7 @@ OUTPUTS = {
     'dna-outliner.json': {'files': ['rna_object.cc', 'rna_layer.cc', 'rna_collection.cc', 'rna_space.cc'],
                           'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
                           'structs': ['Object', 'ObjectBase', 'Collection', 'LayerCollection', 'SpaceOutliner'], 'detail': True},
+    'dna-curves.json': {'files': ['rna_curve.cc'], 'functions': lambda name: name == 'RNA_def_curve', 'structs': None, 'detail': True},
 }
 SDNA_CALL = re.compile(r'RNA_def_property_(boolean|boolean_negative|boolean_bitset_array|int|float|enum|enum_bitflag|pointer|string)_sdna$')
 # RNA_def_property and the shorthands that call it (RNA_def_boolean, RNA_def_float_vector, ...).

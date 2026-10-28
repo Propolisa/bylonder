@@ -18,13 +18,13 @@ import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
 import { iconStyle, toolIconUrl } from './icon.js';
 import { rnaProperty, INFO } from '../../makesrna/rna.js';
-import { operatorValues, isLayout } from './layout.js';
+import { operatorValues, isLayout, UILayout } from './layout.js';
 import { formatLength, formatAngle, parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import themes from './icon-themes.json' with { type: 'json' };
 
 // An icon in its theme color, as Blender draws its monochrome icons.
-export const icon = (name, className = '') => (name && name !== 'NONE'
+export const icon = (name, className = '') => (typeof name === 'string' && name !== 'NONE'
   ? h('span', { class: ['bl-icon', themes[name] && 'bl-icon-' + themes[name], className], style: iconStyle(name), 'aria-hidden': 'true' }) : null);
 
 // ---- Values as Blender shows and parses them (ui_but_string_get, ui_but_string_eval_number).
@@ -93,9 +93,9 @@ const label = (text, { iconName, iconValue, className = '', align = 'left' } = {
   class: ['bl-label flex h-unit min-w-0 items-center gap-1 text-xs', align === 'right' ? 'justify-end text-right' : '', !text && iconName && 'bl-icon-only', className],
 }, [toolIcon(iconValue), icon(iconName), text ? h('span', { class: 'truncate' }, text) : null]);
 
-function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true }) {
+function button({ text, iconName, kind = 'tool', pressed = false, disabled = false, inactive = false, onClick, title, className = '', iconOnly = false, emboss = true, value }) {
   return h('button', {
-    type: 'button', title, disabled, 'aria-pressed': pressed, 'aria-label': text || title,
+    type: 'button', title, disabled, 'aria-pressed': pressed, 'aria-label': text || title, 'data-value': value,
     class: [W, `bl-${kind} flex h-unit min-w-0 items-center justify-center gap-1 rounded-md px-1.5 text-xs`, emboss ? '' : 'bl-flat',
       pressed && 'is-pressed', inactive && 'opacity-50', iconOnly && 'bl-icon-only px-0', className],
     onClick,
@@ -117,11 +117,18 @@ function textField({ value, iconName, disabled, inactive, onChange, title, place
   ]);
 }
 
-const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly, onClick = (e) => openMenu(items, e.currentTarget) }) => h('button', {
+const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly, arrowOnly, onClick = (e) => openMenu(items, e.currentTarget) }) => h('button', {
   type: 'button', title, disabled, 'aria-label': text || title, 'aria-haspopup': 'menu',
-  class: [W, 'bl-menu-button flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md pl-1.5 pr-5 text-xs', inactive && 'opacity-50', iconOnly && 'pr-4'],
+  class: [W, 'bl-menu-button flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md pl-1.5 pr-5 text-xs', inactive && 'opacity-50', iconOnly && 'bl-menu-icon pr-4', arrowOnly && 'bl-arrow-only'],
   onClick,
 }, [icon(iconName), text && !iconOnly ? h('span', { class: 'min-w-0 flex-1 truncate text-left' }, text) : null]);
+
+// operator_menu_enum: the operator with each item of its enum property, greyed where Bylonder does not run it.
+const operatorEnumMenu = (node, ui) => (ui.enumItems?.(node.operator, node.property) ?? []).map(([id, name, , iconName]) => {
+  const props = { ...operatorValues(node.props ?? {}), [node.property]: id };
+  return { label: name, icon: iconName && iconName !== 'NONE' ? iconName.toLowerCase() : undefined, enabled: () => ui.supported(node.operator, props) && ui.poll(node.operator, props),
+    run: () => ui.run(node.operator, props) };
+});
 
 // A menu in a header (ui_item_menu in a header layout): a pull-down, flat until hovered, without a drop-down arrow.
 const pulldown = ({ text, iconName, items, disabled, menu }) => h('button', {
@@ -132,7 +139,7 @@ const pulldown = ({ text, iconName, items, disabled, menu }) => h('button', {
 // label when there are several; a press outside closes it.
 const Popover = defineComponent({
   name: 'Popover',
-  props: { panels: Array, text: String, iconName: String, iconOnly: Boolean, disabled: Boolean, env: Object },
+  props: { panels: Array, text: String, iconName: String, iconOnly: Boolean, arrowOnly: Boolean, disabled: Boolean, env: Object },
   setup(props) {
     const at = ref(null);
     let owner = null;
@@ -149,7 +156,7 @@ const Popover = defineComponent({
     return () => {
       const { ui } = props.env, drawn = props.panels.map((id) => ui.popover?.(id)).filter(Boolean);
       return [
-        menuButton({ text: props.text ?? drawn[0]?.label, iconName: props.iconName, iconOnly: props.iconOnly, disabled: props.disabled, onClick: toggle }),
+        menuButton({ text: props.text ?? drawn[0]?.label, iconName: props.iconName, iconOnly: props.iconOnly, arrowOnly: props.arrowOnly, disabled: props.disabled, onClick: toggle }),
         at.value && drawn.length ? h(Teleport, { to: 'body' }, h('div', {
           class: 'bl-ui bl-popover-block flex flex-col', style: { ...at.value, width: `calc(var(--bl-row) * ${Math.max(...drawn.map((p) => p.units || 10))})` },
         }, drawn.flatMap((p) => [drawn.length > 1 ? label(p.label, { className: 'bl-popover-title' }) : null, layout(p.layout, rootEnv(ui))]))) : null,
@@ -157,8 +164,9 @@ const Popover = defineComponent({
     };
   },
 });
-const popover = (panels, node, env, iconOnly = !node.text && !!node.icon) => h(Popover, {
-  panels, text: node.text, iconName: node.icon, iconOnly, disabled: !env.enabled, env,
+// A popover without text or icon is its arrow alone, a unit wide (ui_item_menu).
+const popover = (panels, node, env, iconName = node.icon ?? node.icon_value, iconOnly = !node.text && !!iconName) => h(Popover, {
+  panels, text: node.text, iconName, iconOnly, arrowOnly: node.text === '' && !iconName, disabled: !env.enabled || !env.active, env,
 });
 
 function colorSwatch({ value, disabled, inactive, onChange, title }) {
@@ -254,7 +262,7 @@ function expanded(prop, node, { disabled, inactive, vertical }) {
   return h('div', { class: vertical ? 'bl-align-col flex min-w-0 flex-1 flex-col' : 'bl-align-row flex min-w-0 flex-1' }, prop.items().filter(Boolean).map(([id, name, description, iconName]) => {
     const on = flag ? [...(value ?? [])].includes(id) : value === id;
     return button({ text: node.icon_only ? '' : name, iconName: iconName !== 'NONE' ? iconName : null, kind: 'radio', pressed: on, disabled, inactive,
-      title: description || name, iconOnly: node.icon_only, className: ['flex-1 gap-0.5 px-0.5', vertical && 'justify-start!'],
+      title: description || name, iconOnly: node.icon_only, value: id, className: ['flex-1 gap-0.5 px-0.5', vertical && 'justify-start!'],
       onClick: () => prop.set(flag ? (on ? [...value].filter((v) => v !== id) : [...(value ?? []), id]) : id) });
   }));
 }
@@ -292,7 +300,8 @@ function propItem(node, env) {
   const elementText = (i, chars) => (isCheck ? chars[i] : '');
 
   let value;
-  if (meta.type === 'E' && node.expand) value = expanded(prop, node, { ...options, vertical: !useSplit && !env.horizontal });
+  // An expanded enum is a row of its items, a column in a flow (item_enum_expand_exec); without a name it shows their icons alone.
+  if (meta.type === 'E' && node.expand) value = expanded(prop, node.text === '' ? { ...node, icon_only: true } : node, { ...options, vertical: !!env.flow });
   else if (isArray) {
     const chars = Array.from({ length: meta.array }, (_, i) => itemChar(meta, i)), iconOnly = meta.type === 'B' && !isCheck;
     value = h('div', { class: [node.expand ? 'bl-align-row flex' : 'bl-align-col flex flex-col', iconOnly ? 'bl-icon-only' : 'min-w-0 flex-1'] },
@@ -364,7 +373,7 @@ function templateID(node, env) {
   const browse = () => [{ heading: `Browse ${prop.meta.name}` }, ...ui.ids(struct).map((other) => ({ label: other.name, checked: () => prop.get() === other, run: () => prop.set(other) }))];
   return h('div', { class: 'bl-align-row flex min-w-0 flex-1' }, [
     h('button', { type: 'button', class: [W, 'bl-menu-button bl-browse flex h-unit w-[calc(var(--bl-row)*1.6)] shrink-0 items-center rounded-md pl-1'],
-      title: `Browse ${prop.meta.name}`, 'aria-label': `Browse ${prop.meta.name}`, disabled: !env.enabled, onClick: (e) => openMenu(browse, e.currentTarget) }, icon(iconName)),
+      title: `Browse ${prop.meta.name}`, 'aria-label': `Browse ${prop.meta.name}`, disabled: !env.enabled, onClick: (e) => openMenu(browse, e.currentTarget) }, icon(iconName, 'bl-icon-id')),
     id
       ? textField({ value: id.name, disabled: !env.enabled, title: `${prop.meta.name} name`, onChange: (name) => { id.name = name; ui.undoPush('Rename'); } })
       : node.new ? button({ text: 'New', iconName: 'ADD', kind: 'tool', className: 'flex-1', disabled: !ui.supported(node.new, {}), onClick: () => ui.run(node.new, {}) }) : null,
@@ -428,7 +437,7 @@ function item(node, env) {
     case 'prop_decorator': return decorator(resolve(node, env.ui), node.index ?? -1, env.ui);
     case 'operator': return operatorButton(node, env);
     case 'operator_menu_enum': case 'menu': case 'prop_with_menu': {
-      const items = node.kind === 'menu' ? () => env.ui.drawMenu?.(node.menu) ?? [] : () => [];
+      const items = node.kind === 'menu' ? () => env.ui.drawMenu?.(node.menu) ?? [] : node.kind === 'operator_menu_enum' ? () => operatorEnumMenu(node, env.ui) : () => [];
       if (node.kind === 'menu' && env.header) return pulldown({ text: node.text ?? env.ui.menuLabel?.(node.menu) ?? '', iconName: node.icon, items, disabled: !env.enabled, menu: node.menu });
       return menuButton({ text: node.text ?? (node.kind === 'menu' ? env.ui.menuLabel?.(node.menu) : null) ?? '', iconName: node.icon, items, disabled: !env.enabled });
     }
@@ -448,7 +457,11 @@ function item(node, env) {
     case 'label': return label(node.text ?? '', { iconName: node.icon, iconValue: node.icon_value, className: !env.active ? 'opacity-50' : '' });
     case 'separator': return h('div', { class: 'bl-separator shrink-0', style: { '--factor': node.factor ?? 1 }, 'data-type': node.type ?? 'AUTO' });
     case 'separator_spacer': return h('div', { class: 'flex-1' });
-    case 'template': return (TEMPLATES[node.name] ?? env.ui.templates?.[node.name])?.(node, env) ?? null;
+    // A template gives its widgets, or a layout it recorded.
+    case 'template': {
+      const drawn = (TEMPLATES[node.name] ?? env.ui.templates?.[node.name])?.(node, env) ?? null;
+      return drawn instanceof UILayout ? layout(drawn, env) : drawn;
+    }
     default: return null;
   }
 }
@@ -468,7 +481,7 @@ function layoutClass(node) {
 
 // A layout's children: with its heading for the first property, its active and enabled state for all it holds.
 function layout(node, env) {
-  const inner = { ...env, header: env.header || node.root_type === 'HEADER', scaleX: (env.scaleX ?? 1) * (node.scale_x || 1), unitScale: node.scale_x || 1, horizontal: node.kind === 'row' || node.kind === 'split', active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
+  const inner = { ...env, flow: node.kind === 'grid_flow' || node.kind === 'column_flow', header: env.header || node.root_type === 'HEADER', scaleX: (env.scaleX ?? 1) * (node.scale_x || 1), unitScale: node.scale_x || 1, active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
     heading: node.heading ? { text: node.heading } : env.heading };
   if (node.kind === 'panel') return layoutPanel(node, inner);
   const children = [];
@@ -477,7 +490,7 @@ function layout(node, env) {
     const env = slot ? { ...inner, noSplit: true } : inner;
     const drawn = isLayout(child) ? layout(child, env) : item(child, env);
     if (!drawn) continue;
-    if (env.header && child.kind === 'prop' && !child.expand) fixWidth(drawn, child, env);
+    if (env.header && ((child.kind === 'prop' && !child.expand) || child.kind === 'operator_menu_enum')) fixWidth(drawn, child, env);
     (slot ?? children).push(drawn);
     if (node.kind === 'row' && drawn.valueSlot) slot = drawn.valueSlot;
   }
@@ -496,9 +509,16 @@ function layout(node, env) {
 
 // A property in a header keeps the width Blender estimates for it, scaled by its layouts (item_scale).
 function fixWidth(drawn, node, env) {
-  const prop = resolve(node, env.ui);
-  if (!prop || (prop.meta.array && (node.index ?? -1) < 0)) return;
-  const width = Math.trunc(headerPropWidth(node, prop, Math.trunc(unitPx() * env.unitScale)) * env.scaleX);
+  const unit = Math.trunc(unitPx() * env.unitScale);
+  let width;
+  // ui_item_menu in a header for a menu with its arrow: its text and 1.85 units.
+  if (node.kind === 'operator_menu_enum') width = textIconWidth(node.text ?? '', node.icon, unit, { text: 1.85, icon: PAD_DEFAULT.icon });
+  else {
+    const prop = resolve(node, env.ui);
+    if (!prop || (prop.meta.array && (node.index ?? -1) < 0)) return;
+    width = headerPropWidth(node, prop, unit);
+  }
+  width = Math.trunc(width * env.scaleX);
   drawn.props = { ...drawn.props, style: { ...drawn.props?.style, flex: `0 0 ${width}px`, width: `${width}px` } };
 }
 

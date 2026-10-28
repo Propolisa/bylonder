@@ -6,10 +6,9 @@ import { module, registered } from '../python/bpy_interface.js';
 import { useContext } from '../editors/interface/layout.js';
 import { registerOperators, kw } from './wm-operators.js';
 
-// WM_toolsystem_default_tool for the 3D View's modes Bylonder has.
-const DEFAULT_TOOL = 'builtin.select_box';
-// The modes (context.mode) Bylonder has.
-const MODES = ['OBJECT', 'EDIT_MESH'];
+// WM_toolsystem_default_tool for the 3D View's modes Bylonder has (OBJECT, EDIT_MESH, EDIT_CURVE, EDIT_TEXT), and
+// whether Blender's startup file also has it as the fallback tool (Select Text is in no select group, so has none).
+const defaultTool = (mode) => (mode === 'EDIT_TEXT' ? ['builtin.select_text', [false]] : ['builtin.select_box', [false, true]]);
 // The gizmo groups with WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP, whose tools drag with the fallback tool off the gizmo.
 const FALLBACK_GIZMOS = new Set(['VIEW3D_GGT_xform_gizmo', 'VIEW3D_GGT_xform_gizmo_context', 'VIEW3D_GGT_xform_extrude', 'MESH_GGT_spin', 'MESH_GGT_spin_redo',
   'VIEW3D_GGT_mesh_preselect_elem', 'VIEW3D_GGT_mesh_preselect_edgering', 'VIEW3D_GGT_tool_generic_handle_normal', 'VIEW3D_GGT_tool_generic_handle_free']);
@@ -43,9 +42,10 @@ export function createToolSystem({ changed = () => {}, context }) {
     properties: (ref, idname) => ref.properties.get(idname) ?? ref.properties.set(idname, {}).get(idname),
     // The active tool in a mode, the default one until one is set (WM_toolsystem_init).
     active(mode, space_type = 'VIEW_3D') {
-      // Blender's startup file has Select Box as the tool and as the fallback tool (the tool header's Drag).
+      // Blender's startup file has the mode's default tool as the tool and as the fallback tool (the tool header's Drag).
       if (!refs.get(key(space_type, mode))?.idname) {
-        python((ctx) => [false, true].forEach((as_fallback) => activate_by_id(ctx, space_type, DEFAULT_TOOL, kw({ as_fallback }))));
+        const [idname, fallbacks] = defaultTool(mode);
+        python((ctx) => fallbacks.forEach((as_fallback) => activate_by_id(ctx, space_type, idname, kw({ as_fallback }))));
       }
       return refs.get(key(space_type, mode)) ?? null;
     },

@@ -2,6 +2,7 @@
 // Blender's edit mesh (an EditMesh, in WebAssembly) is the truth: every change extracts its Mesh arrays, for drawing
 // and picking, and an undo step stores them as Mesh data.
 import { Matrix, Ray, Vector3 } from '@babylonjs/core';
+import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
 import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
 import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS, OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from '../../bmesh/bmesh-wasm.js';
@@ -39,6 +40,8 @@ const INVOKED = new Set(['mesh.rip', 'mesh.rip_edge']);
 const MOUSE_OPERATORS = new Set([...INVOKED, 'mesh.knife_tool', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_delete_at_cursor', 'mesh.spin']);
 const modifierFlags = (e) => (e.shift ? 1 : 0) | (e.ctrl ? 2 : 0) | (e.alt ? 4 : 0) | (e.oskey ? 8 : 0);
 
+const MESH_MODES = ['OBJECT', 'EDIT', 'SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT'];
+
 export function createEditMode({ world, editor, views, history, notify, changed }) {
   const { scene } = world;
   let em = null;
@@ -46,7 +49,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   // scene.tool_settings.mesh_select_mode, kept across Edit Mode sessions as in Blender.
   let selectmode = SCE_SELECT_VERTEX;
 
-  const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.text && !node.metadata?.group;
+  const editable = (node) => node?.getTotalVertices && !node.metadata?.wbCreation?.curve && !node.metadata?.group;
 
   // Extracts what changed of the edit mesh (`extract`, EXTRACT_*), redraws and, for an operator, records an undo step
   // (or, with `amend`, replaces the last one).
@@ -363,6 +366,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     'mesh.select_linked_pick': pick((event, { deselect }) => linkedPick(event, deselect)),
     'mesh.loop_select': pick((event, props) => loopPick(event, 'mesh.loop_select', props)),
     'mesh.edgering_select': pick((event, props) => loopPick(event, 'mesh.edgering_select', props)),
+    // Object and Edit Mode; a mesh's other modes (object_mode_set_itemf) show greyed.
+    'object.mode_set': {
+      supports: ({ mode }) => mode === 'OBJECT' || mode === 'EDIT',
+      poll: ({ mode }) => mode === 'OBJECT' || !!em || editable(activeObject()),
+      run: ({ mode }) => (mode === 'EDIT' ? em || enter() : em && exit()),
+      enumItems: (prop) => (prop === 'mode' ? rnaOperators['object.mode_set'].properties.mode.items.filter(([id]) => MESH_MODES.includes(id)) : []),
+    },
   });
   const viewKeymap = createKeymap([
     { blender: 'VIEW3D_MT_edit_mesh_context_menu', keys: 'RIGHTMOUSE', poll: inView, run: (event) => openMenu(menus.context(), { x: event.x, y: event.y }, '') },

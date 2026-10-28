@@ -60,6 +60,7 @@
 #include "bmesh.hh"
 #include "mesh_intern.hh"
 #include "object_intern.hh"
+#include "curve_intern.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_enum_types.hh"
@@ -855,11 +856,10 @@ void ED_view3d_viewcontext_init_object(ViewContext *vc, Object *obact)
   }
 }
 
-/* Blender's globals, defined as blender.cc, blf.cc and rna_access.cc define them: their types' member defaults are
- * Blender's defaults. */
+/* Blender's globals, defined as blender.cc and rna_access.cc define them: their types' member defaults are Blender's
+ * defaults. (blf.cc, built into the module with Blender's fonts, defines blf_mono_font.) */
 Global G;
 UserDef U;
-int blf_mono_font = -1;
 extern const PointerRNA PointerRNA_NULL = {};
 
 /* Marks the properties after it as advanced in Blender's UI. */

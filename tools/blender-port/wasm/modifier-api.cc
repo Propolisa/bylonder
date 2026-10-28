@@ -35,9 +35,10 @@ using namespace blender;
 
 /* As Blender's main sets them up before any data is made, once, on first use: other files' statics they reach are not
  * constructed yet while the module initializes. */
+void fonts_init();
 void types_ensure()
 {
-  static const bool types = (BKE_cpp_types_init(), BKE_idtype_init(), BKE_modifier_init(), true);
+  static const bool types = (BKE_cpp_types_init(), BKE_idtype_init(), BKE_modifier_init(), fonts_init(), true);
   (void)types;
 }
 

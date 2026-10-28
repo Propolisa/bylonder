@@ -1,6 +1,6 @@
 import { ArcRotateCamera, Color4, Vector3 } from '@babylonjs/core';
-import { menuButton } from '../interface/menu.js';
-import { iconEl, iconButton, iconStyle } from '../interface/icon.js';
+import { iconEl, iconButton } from '../interface/icon.js';
+import { UILayout } from '../interface/layout.js';
 import { createNavigation } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { menuUI } from '../../windowmanager/wm-operators.js';
@@ -22,6 +22,13 @@ const axes = [
 // The navigation gizmo (view3d_gizmo_navigate_type.cc) at its default size, in pixels.
 const WIDGET_RADIUS = 40, AXIS_HANDLE_SIZE = 0.2, AXIS_LINE_WIDTH = 2, AXIS_RING_WIDTH = 80 / 60;
 const mixColor = (a, b, t) => cssColor([0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * t).concat(1));
+// uiTemplateEditModeSelection: Edit Mode's select mode buttons, each mesh.select_mode pressed while its mode is on.
+function selectModeLayout(selectmode) {
+  const row = new UILayout('row', null, { align: true });
+  [['VERT', 'VERTEXSEL'], ['EDGE', 'EDGESEL'], ['FACE', 'FACESEL']].forEach(([type, icon], i) =>
+    row.children.push({ kind: 'operator', operator: 'mesh.select_mode', text: '', icon, depress: !!(selectmode & (1 << i)), props: { type } }));
+  return row;
+}
 // The keymaps an Object Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 
@@ -56,7 +63,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   Object.assign(editorCamera, { minZ: 0.01, maxZ: 1000, lowerRadiusLimit: 0.1, upperRadiusLimit: 10000, inertia: 0 });
   if (from) { editorCamera.alpha = from.alpha; editorCamera.beta = from.beta; editorCamera.radius = from.radius; editorCamera.target.copyFrom(from.target); editorCamera.mode = from.mode; }
   // The view's own state, and its regions' as SpaceView3D's show_region_* (Blender's startup: no sidebar).
-  const state = { shading: 'solid', overlays: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
+  const state = { shading: 'solid', overlays: true, show_gizmo: true, cameraView: false, show_region_header: true, show_region_tool_header: true, show_region_toolbar: true,
     show_region_ui: false };
   const view = {
     id: headerId, section, canvas, editorCamera, state, active: true, wantsCompositor: false,
@@ -92,22 +99,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // The scene camera changed while this view looks through it.
   view.sceneCameraChanged = (next, previous) => { if (!state.cameraView) return; previous?.detachControl(); next?.attachControl(canvas, true); ctx.shadingChanged(); };
 
-  // Header: mode, View, Select, Add, Object menus, overlays and shading.
   const header = dock.header(headerId);
   const editMode = () => world.editMode?.active;
-  const mode = menuButton('Object Mode', () => [
-    { label: 'Object Mode', blender: 'object.mode_set:OBJECT', icon: 'object_datamode', checked: () => !editMode() && !state.cameraView, run: () => { if (editMode()) world.editMode.exit(); if (state.cameraView) toggleCameraView(); } },
-    { label: 'Edit Mode', blender: 'object.mode_set:EDIT', icon: 'editmode_hlt', keys: 'Tab', checked: () => !!editMode(), run: () => editMode() || world.editMode.enter() },
-    { label: 'Camera', blender: 'view3d.view_camera', keys: 'Numpad 0', checked: () => state.cameraView, run: toggleCameraView },
-  ], { icon: 'object_datamode', className: 'bl-dropdown' });
-  // Header select mode buttons (Edit Mode): click switches, Shift click adds or removes a mode.
-  const selectModes = Object.assign(document.createElement('span'), { className: 'bl-group' });
-  const selectModeButtons = [['VERT', 'vertexsel', 'Vertex', 1, '1'], ['EDGE', 'edgesel', 'Edge', 2, '2'], ['FACE', 'facesel', 'Face', 4, '3']].map(([type, icon, title, bit, key]) => {
-    const b = iconButton(icon, `${title} select mode (${key})`, (e) => world.editMode.setSelectMode(type, e?.shiftKey));
-    b.dataset.selectBit = bit;
-    return b;
-  });
-  selectModes.append(...selectModeButtons);
   // Blender's Object Mode menus, from its own scripts over this view's context.
   // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
   const blender = menuUI({ menus, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
@@ -125,39 +118,29 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   });
   section.append(toolbar.el);
   view.toolbar = toolbar;
-  // The tool settings, the header's transform settings and the sidebar, Blender's.
+  // The header, the tool settings and the sidebar, Blender's. Edit Mode's menus and operators are its own; its Add menu
+  // adds Bylonder's primitives.
+  // Mesh Edit Mode's menus and Add menu are Bylonder's; curves and text in Edit Mode draw Blender's.
+  const editMesh = () => editMode() && (world.editMode.kind ?? 'MESH') === 'MESH';
+  const meshItem = (p) => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
+  const meshes = () => {
+    const mesh = creator.catalog.filter((p) => p.id !== 'text'), babylon = mesh.filter((p) => p.group === 'babylon');
+    return [...mesh.filter((p) => !p.group).map(meshItem), ...(babylon.length ? ['-', { label: 'Babylon', icon: 'mesh_data', items: babylon.map(meshItem) }] : [])];
+  };
+  const headerUI = {
+    ...blender,
+    run: (idname, props, event) => (idname === 'mesh.select_mode' ? world.editMode.setSelectMode(props.type, !!event?.shiftKey) : blender.run(idname, props)),
+    supported: (idname, props) => idname === 'mesh.select_mode' || blender.supported(idname, props),
+  };
   const regions = createRegions({
     view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
-    ui: blender,
+    ui: headerUI,
+    menu: (idname) => (!editMesh() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname)),
+    templates: { template_header_3D_mode: () => (editMesh() ? selectModeLayout(world.editMode.selectmode) : null) },
   });
+  header.replaceChildren(regions.header);
   section.append(regions.toolHeader, regions.sidebar);
   view.regions = regions;
-  const viewMenu = menuButton('View', blenderMenu('VIEW3D_MT_view'), { blender: 'VIEW3D_MT_view' });
-  const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
-  const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
-  const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
-  const meshes = () => {
-    const mesh = creator.catalog.filter(p => p.id !== 'text');
-    const babylon = mesh.filter(p => p.group === 'babylon');
-    return [...mesh.filter(p => !p.group).map(meshItem), ...(babylon.length ? ['-', { label: 'Babylon', icon: 'mesh_data', items: babylon.map(meshItem) }] : [])];
-  };
-  const add = menuButton('Add', () => (editMode() ? meshes() : blenderMenu('VIEW3D_MT_add')()), { blender: 'VIEW3D_MT_add' });
-  const object = menuButton('Object', blenderMenu('VIEW3D_MT_object'), { blender: 'VIEW3D_MT_object' });
-  const meshMenu = menuButton('Mesh', () => world.editMode.menus.mesh(), { blender: 'VIEW3D_MT_edit_mesh' });
-  const vertexMenu = menuButton('Vertex', () => world.editMode.menus.vertex(), { blender: 'VIEW3D_MT_edit_mesh_vertices' });
-  const edgeMenu = menuButton('Edge', () => world.editMode.menus.edge(), { blender: 'VIEW3D_MT_edit_mesh_edges' });
-  const faceMenu = menuButton('Face', () => world.editMode.menus.face(), { blender: 'VIEW3D_MT_edit_mesh_faces' });
-  const shadingButtons = [['wire', 'shading_wire', 'Wireframe'], ['solid', 'shading_solid', 'Solid'], ['rendered', 'shading_rendered', 'Rendered']].map(([id, icon, title]) => {
-    const b = iconButton(icon, 'Viewport Shading: ' + title, () => view.setShading(id));
-    b.dataset.shading = id;
-    return b;
-  });
-  const shading = Object.assign(document.createElement('span'), { className: 'bl-group' });
-  shading.append(...shadingButtons);
-  const overlayButton = iconButton('overlay', 'Show Overlays', () => { state.overlays = !state.overlays; sync(); views.wake(); });
-  const spacer = () => Object.assign(document.createElement('span'), { className: 'spacer' });
-  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, meshMenu, vertexMenu, edgeMenu, faceMenu, spacer(), regions.xform, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
-
   // Navigation gizmo and buttons, drawn from this view's camera.
   const drag = (el, fn) => {
     el.addEventListener('pointerdown', e => {
@@ -209,19 +192,10 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   };
 
   const sync = () => {
-    const editing = !!editMode();
-    mode.querySelector('span:not(.bl-icon)').textContent = editing ? 'Edit Mode' : 'Object Mode';
-    Object.assign(mode.querySelector('.bl-icon').style, iconStyle(editing ? 'editmode_hlt' : 'object_datamode'));
-    selectModes.hidden = !editing;
-    selectModeButtons.forEach((b) => b.setAttribute('aria-pressed', String(!!(world.editMode?.selectmode & b.dataset.selectBit))));
-    add.hidden = object.hidden = editing;
-    meshMenu.hidden = vertexMenu.hidden = edgeMenu.hidden = faceMenu.hidden = !editing;
-    select.dataset.blender = selectMenuIds[editing ? 'edit' : 'object'];
     name.textContent = state.cameraView ? 'Camera Perspective' : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
     section.classList.toggle('overlays-off', !state.overlays || state.cameraView);
+    section.classList.toggle('gizmos-off', !state.show_gizmo);
     section.classList.toggle('camera-view', state.cameraView);
-    shadingButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shading === state.shading)));
-    overlayButton.setAttribute('aria-pressed', String(state.overlays));
     world.workbench.setShading(editorCamera, view.rendered ? null : state.shading);
     toolbar.el.hidden = !state.show_region_toolbar;
     if (state.show_region_toolbar) toolbar.draw();

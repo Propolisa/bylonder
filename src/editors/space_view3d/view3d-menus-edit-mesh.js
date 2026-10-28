@@ -67,6 +67,7 @@ export function editMeshMenus(api) {
   };
   const draw = (idname) => () => drawMenu(idname, ui);
   return {
+    menu: (idname) => drawMenu(idname, ui),
     select: draw('VIEW3D_MT_select_edit_mesh'),
     mesh: draw('VIEW3D_MT_edit_mesh'),
     vertex: draw('VIEW3D_MT_edit_mesh_vertices'),

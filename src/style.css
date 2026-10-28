@@ -43,7 +43,8 @@ body > header {
   display: flex;
   gap: 4px;
 }
-button {
+/* Bylonder's own buttons; Blender's interface (.bl-ui) styles its widgets itself. */
+button:not(.bl-ui *) {
   font: inherit;
   font-size: 11px;
   color: inherit;
@@ -53,17 +54,17 @@ button {
   padding: 4px 7px;
   cursor: pointer;
 }
-button:hover {
+button:not(.bl-ui *):hover {
   background: #414141;
 }
-button:disabled {
+button:not(.bl-ui *):disabled {
   opacity: 0.35;
   cursor: default;
 }
 button:focus-visible {
   outline: 2px solid var(--accent);
 }
-button.active {
+button.active:not(.bl-ui *) {
   color: #ffe2b9;
   background: #61462c;
   border-color: #986b38;

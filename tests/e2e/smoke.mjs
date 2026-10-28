@@ -198,7 +198,7 @@ const checks = {
     await app.page.mouse.move(x - 200, y, { steps: 8 });
     await app.page.mouse.up();
     await app.until((b) => b.views.all.filter((v) => v.nav).length === 2);
-    await app.locator('[data-shading="wire"]').nth(1).click();
+    await app.locator('.bl-view3d-header [data-value="WIREFRAME"]').nth(1).click();
     assert.deepEqual(await app.bylonder((b) => b.views.all.filter((v) => v.nav).map((v) => v.state.shading).sort()), ["solid", "wire"]);
   },
 };

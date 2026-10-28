@@ -14,8 +14,8 @@ import { deleted, nodeId, hasMesh } from '../editors/object/identity.js';
 import { address } from '../blenkernel/animation/model.js';
 import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
 import { fileFormats, containers, videoCodecs, qualities } from '../render/formats.js';
-import { textDefaults, updateText } from '../blenkernel/text/text.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
+import { curveStructs } from './rna-curve.js';
 
 // Swapping two axes is its own inverse and flips handedness.
 const axes = ([x, y, z]) => [x, z, y];
@@ -82,8 +82,8 @@ const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
 const lightType = (light) => (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
 const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
 const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera', FONT: () => 'TextCurve', CURVE: () => 'Curve' };
-const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.text ? 'FONT'
-  : ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices && hasMesh(ob) ? 'MESH' : 'EMPTY');
+const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
+  ?? (ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices && hasMesh(ob) ? 'MESH' : 'EMPTY'));
 const editing = (ob, r) => !!ob && r.world.editMode?.object === ob;
 const editTotals = (ob, r) => (editing(ob, r) && r.world.editMode.stats) || { verts: [0], edges: [0], faces: [0] };
 
@@ -111,9 +111,6 @@ const transformLocks = (property) => array((ob) => [...'xzy'].map((axis) => !!ob
 // A light's power in Blender's units from Babylon's intensity: watts for point, spot and area lights (1000 W, Blender's
 // default point light, as intensity 1) and irradiance in W/m² for the sun.
 const watts = (light) => (lightType(light) === 'SUN' ? 1 : 1000);
-// A text object's options, and one of them as an RNA property (with Blender's units where they differ).
-const text = (ob) => ({ ...textDefaults, ...ob.metadata?.wbCreation?.text });
-const textOption = (key, read = (v) => v, write = (v) => v) => ({ get: (ob) => read(text(ob)[key]), set: (ob, value) => { updateText(ob, { [key]: write(value) }); } });
 // A camera's sensor along the fitted axis: Babylon fixes the horizontal or the vertical field of view.
 const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXED;
 const sensor = (camera) => (horizontal(camera) ? 36 : 24);
@@ -304,6 +301,7 @@ const STRUCTS = {
   UnitSettings: Object.fromEntries([['system', 'system'], ['scale_length', 'scale'], ['use_separate', 'separate'], ['system_rotation', 'rotation'],
     ['length_unit', 'length']].map(([name, key]) => [name, {
     get: (world) => world.sceneSettings?.state.unitSettings[key], set: (world, value) => world.sceneSettings.set('unitSettings.' + key, value, false) }])),
+  ...curveStructs,
   // A Graph Editor and a Dope Sheet (editors/animation/anim-editor.js): their space's flags, in the module (rna_space.cc).
   SpaceGraphEditor: {
     type: () => 'GRAPH_EDITOR',
@@ -369,26 +367,6 @@ const STRUCTS = {
     lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; } },
     clip_start: settable('minZ'),
     clip_end: settable('maxZ'),
-  },
-  // Bylonder's text objects (blenkernel/text/text.js): the text and its options, which regenerate the object's mesh.
-  // Blender's extrude is half the depth, its spacings are factors of the font's (Bylonder's line height 1.2 is 1).
-  TextCurve: {
-    name: settable('name'),
-    body: textOption('text'),
-    size: textOption('size'),
-    extrude: textOption('depth', (depth) => depth / 2, (extrude) => extrude * 2),
-    space_character: textOption('spacing', (spacing) => spacing + 1, (factor) => factor - 1),
-    space_line: textOption('lineHeight', (height) => height / 1.2, (factor) => factor * 1.2),
-    align_x: textOption('align', (align) => align.toUpperCase(), (align) => (['LEFT', 'CENTER', 'RIGHT'].includes(align) ? align.toLowerCase() : 'left')),
-    resolution_u: textOption('resolution'),
-    font: (ob) => rna('VectorFont', { name: text(ob).family, filepath: '' }),
-  },
-  // Bylonder's curves (metadata.wbCurve): poly splines of points in Blender's axes.
-  Curve: {
-    name: settable('name'),
-    dimensions: () => '3D',
-    splines: (ob) => collection((ob.metadata?.wbCurve ?? []).map((path) => rna('Spline', {
-      type: 'POLY', use_cyclic_u: path.closed, points: collection(path.points.map((point) => rna('SplinePoint', { co: [...axes(point), 1] }))) }))),
   },
   // A world datablock of the worlds slice (blenkernel/scene/world.js): its Background and volume as Blender's nodes.
   World: (entry) => ({
@@ -484,10 +462,12 @@ const STRUCTS = {
   // A 3D Viewport (space_view3d/view3d.js): its regions, shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',
-    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header'].map((name) => [name,
+    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header', 'show_gizmo'].map((name) => [name,
       { get: (view) => view.state[name], set: (view, value) => setViewState(view, name, !!value) }])),
     shading: (view, r) => r.pointer('View3DShading', view),
     overlay: (view, r) => r.pointer('View3DOverlay', view),
+    // rna_SpaceView3D_icon_from_show_object_viewport_get, by name: every object type visible and selectable.
+    icon_from_show_object_viewport: () => 'VIS_SEL_11',
     region_3d: (view, r) => r.pointer('RegionView3D', view),
   },
   View3DShading: {
