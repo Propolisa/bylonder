@@ -1,0 +1,1 @@
+{"markers_operator":"marker.select_all","props":{"action":"SELECT"},"result":["FINISHED"],"frame":12,"before":[{"name":"F_10","frame":10,"select":true},{"name":"F_30","frame":30,"select":false},{"name":"F_45","frame":45,"select":false}],"after":[{"name":"F_10","frame":10,"select":true},{"name":"F_30","frame":30,"select":true},{"name":"F_45","frame":45,"select":true}]}

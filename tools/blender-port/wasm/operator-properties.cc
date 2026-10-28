@@ -18,6 +18,7 @@
 #include "RNA_types.hh"
 
 #include "operator-properties.hh"
+#include "UI_resources.hh"
 
 namespace blender {
 
@@ -226,7 +227,7 @@ bool RNA_path_resolve_property(const PointerRNA *ptr, const char *path, PointerR
   return true;
 }
 
-const char *RNA_property_ui_name(const PropertyRNA *prop) { return prop->name.empty() ? prop->identifier.c_str() : prop->name.c_str(); }
+const char *RNA_property_ui_name(const PropertyRNA *prop, const PointerRNA * /*ptr*/) { return prop->name.empty() ? prop->identifier.c_str() : prop->name.c_str(); }
 
 /* As rna_access.cc gives the letter of an array item by the property's subtype. */
 char RNA_property_array_item_char(PropertyRNA *prop, int index)
@@ -693,6 +694,16 @@ void RNA_enum_set(PointerRNA *ptr, const char *name, int value) { RNA_property_e
 /* Structs. */
 
 const char *RNA_struct_identifier(const StructRNA *type) { return type->identifier.c_str(); }
+/* port-override: the module's structs carry no UI data, so the ID types' icons (RNA_def_struct_ui_icon in their
+ * rna_*.cc) are listed here; any other struct has RNA's default. */
+int RNA_struct_ui_icon(const StructRNA *type)
+{
+  static const std::map<std::string, int> icons = {{"Object", ICON_OBJECT_DATA}, {"Scene", ICON_SCENE_DATA}, {"Action", ICON_ACTION},
+                                                   {"Material", ICON_MATERIAL_DATA}, {"World", ICON_WORLD_DATA},
+                                                   {"Light", ICON_LIGHT_DATA}, {"Camera", ICON_CAMERA_DATA}};
+  const auto found = type ? icons.find(type->identifier) : icons.end();
+  return found == icons.end() ? ICON_DOT : found->second;
+}
 bool RNA_struct_is_a(const StructRNA *type, const StructRNA *srna) { return type == srna; }
 PropertyRNA *RNA_struct_name_property(const StructRNA *) { return nullptr; }
 PointerRNA RNA_pointer_create_discrete(ID *id, StructRNA *type, void *data) { return PointerRNA{id, type, data}; }
