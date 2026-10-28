@@ -88,7 +88,11 @@ def extract(source, patterns):
     body = [node for node in imports if node.names] + nodes
     source = ast.unparse(ast.Module(body=hoist_imports(body), type_ignores=[]))
     rewritten = ast.unparse(TranscryptFixes().visit(ast.parse(source)))
-    return rewritten + (HELPERS if rewritten != source else '')
+    return rewritten + (HELPERS if uses_helpers(rewritten) else '')
+
+
+def uses_helpers(source):
+    return re.search(r'\b_(merged|joined|formatted|ellipsis|property)\b', source) is not None
 
 
 class TranscryptFixes(ast.NodeTransformer):
@@ -131,6 +135,10 @@ class TranscryptFixes(ast.NodeTransformer):
         if isinstance(node.func, ast.Name) and node.func.id == 'super':
             # super(Class, self) in Class's methods is super(), the only form Transcrypt compiles.
             node.args = []
+        if isinstance(node.func, ast.Name) and node.func.id == 'property' and self.scopes and self.scopes[-1] != 'class':
+            # Transcrypt compiles property() only in a class body; elsewhere it is the runtime's property, by
+            # another name.
+            node.func = ast.Name('_property', ast.Load())
         if isinstance(node.func, ast.Name) and node.func.id == 'zip':
             # zip's strict only checks lengths, and Transcrypt's zip takes it for an iterable.
             node.keywords = [k for k in node.keywords if k.arg != 'strict']
@@ -158,6 +166,86 @@ class TranscryptFixes(ast.NodeTransformer):
             keywords=[]) for value in node.values]
         return ast.Call(func=ast.Attribute(ast.Constant(''), 'join', ast.Load()), args=[ast.List(elts=parts, ctx=ast.Load())], keywords=[])
 
+    def __init__(self):
+        self.scopes = []
+
+    def visit_FunctionDef(self, node):
+        self.scopes.append('function')
+        self.generic_visit(node)
+        self.scopes.pop()
+        return node
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+
+    def visit_ClassDef(self, node):
+        self.scopes.append('class')
+        node = self.dataclass(node)
+        self.scopes.pop()
+        return self.annotations(node)
+
+    @staticmethod
+    def annotations(node):
+        """Annotations without a value in a class body (how Blender's classes declare their properties), which
+        Transcrypt cannot compile, as the __annotations__ dict Blender reads them from."""
+        node.body = [ast.Assign(targets=[s.target], value=s.value) if isinstance(s, ast.AnnAssign) and s.value is not None else s
+                     for s in node.body]
+        annotated = [s for s in node.body if isinstance(s, ast.AnnAssign) and isinstance(s.target, ast.Name)]
+        if not annotated:
+            return ast.fix_missing_locations(node)
+        node.body = [s for s in node.body if s not in annotated]
+        node.body.insert(0, ast.Assign(targets=[ast.Name('__annotations__', ast.Store())], value=ast.Dict(
+            keys=[ast.Constant(s.target.id) for s in annotated], values=[s.annotation for s in annotated])))
+        return ast.fix_missing_locations(node)
+
+    def visit_AnnAssign(self, node):
+        """Other annotations: an assignment, or nothing without a value."""
+        self.generic_visit(node)
+        if self.scopes and self.scopes[-1] == 'class':
+            return node
+        return ast.Assign(targets=[node.target], value=node.value) if node.value is not None else None
+
+    def dataclass(self, node):
+        """@dataclass classes, which Transcrypt cannot compile, as classes with the __init__ dataclasses would make from
+        the annotated fields (defaults and field(default_factory=...) included)."""
+        self.generic_visit(node)
+        names = lambda d: d.id if isinstance(d, ast.Name) else d.attr if isinstance(d, ast.Attribute) else names(d.func) if isinstance(d, ast.Call) else ''
+        if not any(names(d) == 'dataclass' for d in node.decorator_list):
+            return node
+        node.decorator_list = [d for d in node.decorator_list if names(d) != 'dataclass']
+        fields, body = [], []
+        for statement in node.body:
+            if isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
+                fields.append((statement.target.id, statement.value))
+            elif not (isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Constant)):
+                body.append(statement)
+        args, assigns = [], []
+        for name, default in fields:
+            factory = isinstance(default, ast.Call) and names(default.func) == 'field' and next(
+                (k.value for k in default.keywords if k.arg == 'default_factory'), None)
+            value = next((k.value for k in default.keywords if k.arg == 'default'), None) if isinstance(default, ast.Call) and names(default.func) == 'field' else default
+            args.append((name, ast.Constant(None) if factory else value))
+            assigns.append(ast.parse(f'self.{name} = {name}').body[0] if not factory else
+                           ast.parse(f'self.{name} = {name} if {name} is not None else {ast.unparse(factory)}()').body[0])
+        required = [a for a in args if a[1] is None]
+        optional = [a for a in args if a[1] is not None]
+        init = ast.FunctionDef(name='__init__', args=ast.arguments(
+            posonlyargs=[], args=[ast.arg('self')] + [ast.arg(n) for n, _ in required + optional], kwonlyargs=[], kw_defaults=[],
+            defaults=[d for _, d in optional]), body=assigns or [ast.Pass()], decorator_list=[], returns=None, type_params=[])
+        node.body = [init] + body
+        return ast.fix_missing_locations(node)
+
+    def visit_With(self, node):
+        """with x as (a, b), which Transcrypt cannot compile, as with x as tmp, then a, b = tmp."""
+        self.generic_visit(node)
+        unpack = []
+        for i, item in enumerate(node.items):
+            if isinstance(item.optional_vars, (ast.Tuple, ast.List)):
+                name = f'_with{i}'
+                unpack.append(ast.Assign(targets=[item.optional_vars], value=ast.Name(name, ast.Load())))
+                item.optional_vars = ast.Name(name, ast.Store())
+        node.body = unpack + node.body
+        return ast.fix_missing_locations(node)
+
     def visit_Constant(self, node):
         """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel object (identity holds within a module)."""
         return ast.Name('_ellipsis', ast.Load()) if node.value is Ellipsis else node
@@ -179,7 +267,11 @@ def _merged(*dicts):
     return result
 
 
-_ellipsis = object()
+_ellipsis = __pragma__('js', '{}', 'Symbol ("Ellipsis")')
+
+
+def _property(fget=None, fset=None, fdel=None, doc=None):
+    return __pragma__('js', '{}', 'property(fget, fset)')
 
 
 def _formatted(value, conversion, spec):
