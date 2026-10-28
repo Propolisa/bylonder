@@ -134,6 +134,8 @@ StructRNA *ID_code_to_RNA_type(short idcode)
       return RNA_Collection;
     case ID_AC:
       return RNA_Action;
+    case ID_TE:
+      return RNA_Texture;
     default:
       return RNA_ID;
   }

@@ -31,7 +31,8 @@ export function layoutTree(node, data, id) {
     case 'label': return { kind: 'label', text };
     case 'separator': return { kind: 'separator' };
     case 'operator': return { kind: 'operator', operator: node.prop, text: text || undefined, props: {} };
-    case 'template': return { kind: 'template', name: text, data: owner, property: node.prop };
+    // template_id is template_ID, as the Python API names it.
+    case 'template': return { kind: 'template', name: text === 'template_id' ? 'template_ID' : text, data: owner, property: node.prop, new: node.new, unlink: true };
     case 'panel': {
       // A sub-panel: registered (with its label) or a layout panel (panel_prop, its header drawn into).
       const [header, ...rest] = node.children[0]?.kind === 'header' ? node.children : [null, ...node.children];
@@ -73,7 +74,7 @@ export function modifierTemplates({ world, editor, rna, history }) {
       const data = (owner) => (owner === 'Object' ? rna.pointer('Object', ob) : struct);
       const body = () => {
         if (!definition?.mesh) return nodeModifierRows({ world, ob, modifier, definition, history });
-        const [root] = modifierPanel(modifier).children;
+        const [root] = modifierPanel(modifier, (id) => world.textures?.pointer(id) ?? 0).children;
         return root ? h(LayoutView, { layout: { kind: 'column', children: root.children.map((child) => layoutTree(child, data, id)).filter(Boolean) }, ui: env.ui }) : null;
       };
       return h('section', { key: modifier.id, class: ['bl-panel bl-panel-root', open && 'is-open', active && 'is-active'], 'data-blender': modifier.type, onPointerdown: setActive,

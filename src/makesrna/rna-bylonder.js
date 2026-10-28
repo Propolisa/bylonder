@@ -17,6 +17,7 @@ import { fileFormats, containers, videoCodecs, qualities } from '../render/forma
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
 import { isSyntaxHighlightSupported } from '../editors/space_text/text-format.js';
+import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
 
 // Swapping two axes is its own inverse and flips handedness.
 const axes = ([x, y, z]) => [x, z, y];
@@ -102,6 +103,9 @@ function modifierValues({ node, modifier }) {
       : array(() => Object.keys(modifier.values).filter((path) => path.startsWith(name + '[')).map((path) => modifier.values[path]),
         (owner, values, r) => values.forEach((value, i) => set(`${name}[${i}]`, value, r)))]));
 }
+
+// A texture of the textures slice as its type's struct (CloudsTexture), as RNA refines a Texture.
+const texturePointer = (r, entry) => r.pointer(entry && textureStruct(entry.values.type), entry);
 
 // An object transform's animation channels, by Blender's axis (Blender's X, Y, Z are Babylon's x, z, y).
 const objectChannel = (property) => (ob, index) => address('object:' + nodeId(ob), property + '.' + 'xzy'[index]);
@@ -248,6 +252,18 @@ const STRUCTS = {
     show_viewport: modifierFlag('showViewport'),
     show_render: modifierFlag('showRender'),
     ...modifierValues(owner),
+    ...('texture' in owner.modifier.values && { texture: {
+      get: ({ modifier }, r) => texturePointer(r, r.world.textures?.byId(modifier.values.texture)),
+      set: ({ node, modifier }, value, r) => r.world.modifiers.set(node, modifier.id, 'texture', value?.[INFO].owner.id ?? null, { finish: false }),
+    } }),
+  }),
+  // A texture of the textures slice (blenkernel/texture/textures.js): the settings of its type's Tex.
+  Texture: (entry) => ({
+    name: { get: () => entry.name, set: (owner, name, r) => r.world.textures.rename(entry, name) },
+    use_fake_user: { get: () => entry.fakeUser, set: (owner, value, r) => { if (!!value !== entry.fakeUser) r.world.textures.toggleFakeUser(entry); } },
+    users: (owner, r) => r.world.textures.users(entry),
+    ...Object.fromEntries(textureSettings(entry.values.type).map((name) => [name,
+      { get: () => entry.values[name], set: (owner, value, r) => r.world.textures.set(entry, name, value, false) }])),
   }),
   Scene: {
     name: { get: (world) => world.sceneSettings?.state.name ?? 'Scene', set: (world, name) => world.sceneSettings.set('name', name, false) },
@@ -691,6 +707,19 @@ export function createRNA(host) {
         new: add, py_new: add, remove: (...list) => texts.remove(pyArgs(list, ['text']).text?.[INFO].owner),
       });
     },
+    // bpy.data.textures, with new(name, type).
+    textures() {
+      const textures = host.world.textures;
+      if (!textures) return collection();
+      const add = (...list) => {
+        const { name, type } = pyArgs(list, ['name', 'type']), entry = textures.create();
+        if (name) textures.rename(entry, name);
+        if (type) textures.set(entry, 'type', type);
+        return r.texture(entry);
+      };
+      return Object.assign(collection(textures.all().map((entry) => r.texture(entry))), { new: add, py_new: add });
+    },
+    texture: (entry) => texturePointer(r, entry),
     pointer(struct, owner, key = owner) {
       if (!owner || !struct) return null;
       const structs = cache.get(key) ?? cache.set(key, new Map()).get(key);

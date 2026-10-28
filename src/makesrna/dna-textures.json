@@ -1,0 +1,1678 @@
+{
+ "BlendTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "progression": {
+    "offset": 466,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "LINEAR"
+     ],
+     [
+      1,
+      "QUADRATIC"
+     ],
+     [
+      2,
+      "EASING"
+     ],
+     [
+      3,
+      "DIAGONAL"
+     ],
+     [
+      4,
+      "SPHERICAL"
+     ],
+     [
+      5,
+      "QUADRATIC_SPHERE"
+     ],
+     [
+      6,
+      "RADIAL"
+     ]
+    ]
+   },
+   "use_flip_axis": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "HORIZONTAL"
+     ],
+     [
+      2,
+      "VERTICAL"
+     ]
+    ]
+   }
+  }
+ },
+ "CloudsTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "noise_scale": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_depth": {
+    "offset": 452,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "noise_basis": {
+    "offset": 456,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_ORIGINAL"
+     ],
+     [
+      1,
+      "ORIGINAL_PERLIN"
+     ],
+     [
+      2,
+      "IMPROVED_PERLIN"
+     ],
+     [
+      3,
+      "VORONOI_F1"
+     ],
+     [
+      4,
+      "VORONOI_F2"
+     ],
+     [
+      5,
+      "VORONOI_F3"
+     ],
+     [
+      6,
+      "VORONOI_F4"
+     ],
+     [
+      7,
+      "VORONOI_F2_F1"
+     ],
+     [
+      8,
+      "VORONOI_CRACKLE"
+     ],
+     [
+      14,
+      "CELL_NOISE"
+     ]
+    ]
+   },
+   "noise_type": {
+    "offset": 454,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SOFT_NOISE"
+     ],
+     [
+      1,
+      "HARD_NOISE"
+     ]
+    ]
+   },
+   "cloud_type": {
+    "offset": 466,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "GRAYSCALE"
+     ],
+     [
+      1,
+      "COLOR"
+     ]
+    ]
+   },
+   "nabla": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "ColorMapping": {
+  "sdna": "ColorMapping",
+  "size": 816,
+  "properties": {
+   "use_color_ramp": {
+    "offset": 788,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "color_ramp": {
+    "offset": 0,
+    "size": 776,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "brightness": {
+    "offset": 776,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "contrast": {
+    "offset": 780,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "saturation": {
+    "offset": 784,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "blend_type": {
+    "offset": 808,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "MIX"
+     ],
+     [
+      5,
+      "DARKEN"
+     ],
+     [
+      1,
+      "MULTIPLY"
+     ],
+     [
+      7,
+      "LIGHTEN"
+     ],
+     [
+      8,
+      "SCREEN"
+     ],
+     [
+      2,
+      "ADD"
+     ],
+     [
+      9,
+      "OVERLAY"
+     ],
+     [
+      15,
+      "SOFT_LIGHT"
+     ],
+     [
+      16,
+      "LINEAR_LIGHT"
+     ],
+     [
+      6,
+      "DIFFERENCE"
+     ],
+     [
+      3,
+      "SUBTRACT"
+     ],
+     [
+      4,
+      "DIVIDE"
+     ],
+     [
+      10,
+      "HUE"
+     ],
+     [
+      11,
+      "SATURATION"
+     ],
+     [
+      13,
+      "COLOR"
+     ],
+     [
+      12,
+      "VALUE"
+     ]
+    ]
+   },
+   "blend_color": {
+    "offset": 792,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "blend_factor": {
+    "offset": 804,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "DistortedNoiseTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "distortion": {
+    "offset": 420,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_scale": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_basis": {
+    "offset": 458,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_ORIGINAL"
+     ],
+     [
+      1,
+      "ORIGINAL_PERLIN"
+     ],
+     [
+      2,
+      "IMPROVED_PERLIN"
+     ],
+     [
+      3,
+      "VORONOI_F1"
+     ],
+     [
+      4,
+      "VORONOI_F2"
+     ],
+     [
+      5,
+      "VORONOI_F3"
+     ],
+     [
+      6,
+      "VORONOI_F4"
+     ],
+     [
+      7,
+      "VORONOI_F2_F1"
+     ],
+     [
+      8,
+      "VORONOI_CRACKLE"
+     ],
+     [
+      14,
+      "CELL_NOISE"
+     ]
+    ]
+   },
+   "noise_distortion": {
+    "offset": 456,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_ORIGINAL"
+     ],
+     [
+      1,
+      "ORIGINAL_PERLIN"
+     ],
+     [
+      2,
+      "IMPROVED_PERLIN"
+     ],
+     [
+      3,
+      "VORONOI_F1"
+     ],
+     [
+      4,
+      "VORONOI_F2"
+     ],
+     [
+      5,
+      "VORONOI_F3"
+     ],
+     [
+      6,
+      "VORONOI_F4"
+     ],
+     [
+      7,
+      "VORONOI_F2_F1"
+     ],
+     [
+      8,
+      "VORONOI_CRACKLE"
+     ],
+     [
+      14,
+      "CELL_NOISE"
+     ]
+    ]
+   },
+   "nabla": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "ImageTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "use_interpolation": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_flip_axis": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_alpha": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_calculate_alpha": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "invert_alpha": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "filter_size": {
+    "offset": 396,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "extension": {
+    "offset": 488,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "EXTEND"
+     ],
+     [
+      2,
+      "CLIP"
+     ],
+     [
+      4,
+      "CLIP_CUBE"
+     ],
+     [
+      3,
+      "REPEAT"
+     ],
+     [
+      5,
+      "CHECKER"
+     ]
+    ]
+   },
+   "repeat_x": {
+    "offset": 484,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "repeat_y": {
+    "offset": 486,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_mirror_x": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "use_mirror_y": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   },
+   "use_checker_odd": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_checker_even": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "checker_distance": {
+    "offset": 508,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "crop_min_x": {
+    "offset": 468,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "crop_min_y": {
+    "offset": 472,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "crop_max_x": {
+    "offset": 476,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "crop_max_y": {
+    "offset": 480,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "image": {
+    "offset": 556,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "image_user": {
+    "offset": 516,
+    "size": 36,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "use_normal_map": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "MagicTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "turbulence": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_depth": {
+    "offset": 452,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   }
+  }
+ },
+ "MarbleTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "noise_scale": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "turbulence": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_depth": {
+    "offset": 452,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "noise_type": {
+    "offset": 454,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SOFT_NOISE"
+     ],
+     [
+      1,
+      "HARD_NOISE"
+     ]
+    ]
+   },
+   "marble_type": {
+    "offset": 466,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SOFT"
+     ],
+     [
+      1,
+      "SHARP"
+     ],
+     [
+      2,
+      "SHARPER"
+     ]
+    ]
+   },
+   "noise_basis": {
+    "offset": 456,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_ORIGINAL"
+     ],
+     [
+      1,
+      "ORIGINAL_PERLIN"
+     ],
+     [
+      2,
+      "IMPROVED_PERLIN"
+     ],
+     [
+      3,
+      "VORONOI_F1"
+     ],
+     [
+      4,
+      "VORONOI_F2"
+     ],
+     [
+      5,
+      "VORONOI_F3"
+     ],
+     [
+      6,
+      "VORONOI_F4"
+     ],
+     [
+      7,
+      "VORONOI_F2_F1"
+     ],
+     [
+      8,
+      "VORONOI_CRACKLE"
+     ],
+     [
+      14,
+      "CELL_NOISE"
+     ]
+    ]
+   },
+   "noise_basis_2": {
+    "offset": 458,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SIN"
+     ],
+     [
+      1,
+      "SAW"
+     ],
+     [
+      2,
+      "TRI"
+     ]
+    ]
+   },
+   "nabla": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "MusgraveTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "musgrave_type": {
+    "offset": 466,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "MULTIFRACTAL"
+     ],
+     [
+      1,
+      "RIDGED_MULTIFRACTAL"
+     ],
+     [
+      2,
+      "HYBRID_MULTIFRACTAL"
+     ],
+     [
+      3,
+      "FBM"
+     ],
+     [
+      4,
+      "HETERO_TERRAIN"
+     ]
+    ]
+   },
+   "dimension_max": {
+    "offset": 400,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "lacunarity": {
+    "offset": 404,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "octaves": {
+    "offset": 408,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "offset": {
+    "offset": 412,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "gain": {
+    "offset": 416,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_intensity": {
+    "offset": 424,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_scale": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_basis": {
+    "offset": 456,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_ORIGINAL"
+     ],
+     [
+      1,
+      "ORIGINAL_PERLIN"
+     ],
+     [
+      2,
+      "IMPROVED_PERLIN"
+     ],
+     [
+      3,
+      "VORONOI_F1"
+     ],
+     [
+      4,
+      "VORONOI_F2"
+     ],
+     [
+      5,
+      "VORONOI_F3"
+     ],
+     [
+      6,
+      "VORONOI_F4"
+     ],
+     [
+      7,
+      "VORONOI_F2_F1"
+     ],
+     [
+      8,
+      "VORONOI_CRACKLE"
+     ],
+     [
+      14,
+      "CELL_NOISE"
+     ]
+    ]
+   },
+   "nabla": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "NoiseTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {}
+ },
+ "StucciTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "turbulence": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_basis": {
+    "offset": 456,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_ORIGINAL"
+     ],
+     [
+      1,
+      "ORIGINAL_PERLIN"
+     ],
+     [
+      2,
+      "IMPROVED_PERLIN"
+     ],
+     [
+      3,
+      "VORONOI_F1"
+     ],
+     [
+      4,
+      "VORONOI_F2"
+     ],
+     [
+      5,
+      "VORONOI_F3"
+     ],
+     [
+      6,
+      "VORONOI_F4"
+     ],
+     [
+      7,
+      "VORONOI_F2_F1"
+     ],
+     [
+      8,
+      "VORONOI_CRACKLE"
+     ],
+     [
+      14,
+      "CELL_NOISE"
+     ]
+    ]
+   },
+   "noise_scale": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_type": {
+    "offset": 454,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SOFT_NOISE"
+     ],
+     [
+      1,
+      "HARD_NOISE"
+     ]
+    ]
+   },
+   "stucci_type": {
+    "offset": 466,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "PLASTIC"
+     ],
+     [
+      1,
+      "WALL_IN"
+     ],
+     [
+      2,
+      "WALL_OUT"
+     ]
+    ]
+   }
+  }
+ },
+ "TexMapping": {
+  "sdna": "TexMapping",
+  "size": 140,
+  "properties": {
+   "vector_type": {
+    "offset": 44,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "translation": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "rotation": {
+    "offset": 12,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "scale": {
+    "offset": 24,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "min": {
+    "offset": 112,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "max": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "use_min": {
+    "offset": 36,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_max": {
+    "offset": 36,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "mapping_x": {
+    "offset": 40,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "X"
+     ],
+     [
+      2,
+      "Y"
+     ],
+     [
+      3,
+      "Z"
+     ]
+    ]
+   },
+   "mapping_y": {
+    "offset": 41,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "X"
+     ],
+     [
+      2,
+      "Y"
+     ],
+     [
+      3,
+      "Z"
+     ]
+    ]
+   },
+   "mapping_z": {
+    "offset": 42,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "X"
+     ],
+     [
+      2,
+      "Y"
+     ],
+     [
+      3,
+      "Z"
+     ]
+    ]
+   },
+   "mapping": {
+    "offset": 43,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FLAT"
+     ],
+     [
+      1,
+      "CUBE"
+     ],
+     [
+      2,
+      "TUBE"
+     ],
+     [
+      3,
+      "SPHERE"
+     ]
+    ]
+   }
+  }
+ },
+ "Texture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "type": {
+    "offset": 464,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      5,
+      "BLEND"
+     ],
+     [
+      1,
+      "CLOUDS"
+     ],
+     [
+      13,
+      "DISTORTED_NOISE"
+     ],
+     [
+      8,
+      "IMAGE"
+     ],
+     [
+      4,
+      "MAGIC"
+     ],
+     [
+      3,
+      "MARBLE"
+     ],
+     [
+      11,
+      "MUSGRAVE"
+     ],
+     [
+      7,
+      "NOISE"
+     ],
+     [
+      6,
+      "STUCCI"
+     ],
+     [
+      12,
+      "VORONOI"
+     ],
+     [
+      2,
+      "WOOD"
+     ]
+    ]
+   },
+   "use_clamp": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_color_ramp": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "color_ramp": {
+    "offset": 560,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "intensity": {
+    "offset": 372,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "contrast": {
+    "offset": 376,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "saturation": {
+    "offset": 380,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "factor_red": {
+    "offset": 384,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "factor_green": {
+    "offset": 388,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "factor_blue": {
+    "offset": 392,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_preview_alpha": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_nodes": {
+    "offset": 568,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "node_tree": {
+    "offset": 552,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   }
+  }
+ },
+ "TextureSlot": {
+  "sdna": "MTex",
+  "size": 208,
+  "properties": {
+   "texture": {
+    "offset": 12,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "offset": {
+    "offset": 92,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "scale": {
+    "offset": 104,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "color": {
+    "offset": 124,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "blend_type": {
+    "offset": 4,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "MIX"
+     ],
+     [
+      5,
+      "DARKEN"
+     ],
+     [
+      1,
+      "MULTIPLY"
+     ],
+     [
+      7,
+      "LIGHTEN"
+     ],
+     [
+      8,
+      "SCREEN"
+     ],
+     [
+      2,
+      "ADD"
+     ],
+     [
+      9,
+      "OVERLAY"
+     ],
+     [
+      15,
+      "SOFT_LIGHT"
+     ],
+     [
+      16,
+      "LINEAR_LIGHT"
+     ],
+     [
+      6,
+      "DIFFERENCE"
+     ],
+     [
+      3,
+      "SUBTRACT"
+     ],
+     [
+      4,
+      "DIVIDE"
+     ],
+     [
+      10,
+      "HUE"
+     ],
+     [
+      11,
+      "SATURATION"
+     ],
+     [
+      13,
+      "COLOR"
+     ],
+     [
+      12,
+      "VALUE"
+     ]
+    ]
+   },
+   "default_value": {
+    "offset": 140,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "output_node": {
+    "offset": 90,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   }
+  }
+ },
+ "VoronoiTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "weight_1": {
+    "offset": 428,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "weight_2": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "weight_3": {
+    "offset": 436,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "weight_4": {
+    "offset": 440,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "minkovsky_exponent": {
+    "offset": 444,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "distance_metric": {
+    "offset": 448,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "DISTANCE"
+     ],
+     [
+      1,
+      "DISTANCE_SQUARED"
+     ],
+     [
+      2,
+      "MANHATTAN"
+     ],
+     [
+      3,
+      "CHEBYCHEV"
+     ],
+     [
+      4,
+      "MINKOVSKY_HALF"
+     ],
+     [
+      5,
+      "MINKOVSKY_FOUR"
+     ],
+     [
+      6,
+      "MINKOVSKY"
+     ]
+    ]
+   },
+   "color_mode": {
+    "offset": 450,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "INTENSITY"
+     ],
+     [
+      1,
+      "POSITION"
+     ],
+     [
+      2,
+      "POSITION_OUTLINE"
+     ],
+     [
+      3,
+      "POSITION_OUTLINE_INTENSITY"
+     ]
+    ]
+   },
+   "noise_intensity": {
+    "offset": 424,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_scale": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "nabla": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "WoodTexture": {
+  "sdna": "Tex",
+  "size": 584,
+  "properties": {
+   "noise_scale": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "turbulence": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "noise_basis": {
+    "offset": 456,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_ORIGINAL"
+     ],
+     [
+      1,
+      "ORIGINAL_PERLIN"
+     ],
+     [
+      2,
+      "IMPROVED_PERLIN"
+     ],
+     [
+      3,
+      "VORONOI_F1"
+     ],
+     [
+      4,
+      "VORONOI_F2"
+     ],
+     [
+      5,
+      "VORONOI_F3"
+     ],
+     [
+      6,
+      "VORONOI_F4"
+     ],
+     [
+      7,
+      "VORONOI_F2_F1"
+     ],
+     [
+      8,
+      "VORONOI_CRACKLE"
+     ],
+     [
+      14,
+      "CELL_NOISE"
+     ]
+    ]
+   },
+   "noise_type": {
+    "offset": 454,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SOFT_NOISE"
+     ],
+     [
+      1,
+      "HARD_NOISE"
+     ]
+    ]
+   },
+   "wood_type": {
+    "offset": 466,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BANDS"
+     ],
+     [
+      1,
+      "RINGS"
+     ],
+     [
+      2,
+      "BANDNOISE"
+     ],
+     [
+      3,
+      "RINGNOISE"
+     ]
+    ]
+   },
+   "noise_basis_2": {
+    "offset": 458,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SIN"
+     ],
+     [
+      1,
+      "SAW"
+     ],
+     [
+      2,
+      "TRI"
+     ]
+    ]
+   },
+   "nabla": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ }
+}

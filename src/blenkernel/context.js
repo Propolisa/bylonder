@@ -37,7 +37,7 @@ export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region
     workspace: r.pointer('WorkSpace', world),
     tool_settings: scene.tool_settings,
     preferences: rna('Preferences', { system: rna('PreferencesSystem', { ui_scale: 1 }), ...host.preferences }),
-    blend_data: rna('BlendData', { scenes: collection([scene]), objects: scene.objects, get texts() { return r.texts(); } }),
+    blend_data: rna('BlendData', { scenes: collection([scene]), objects: scene.objects, get texts() { return r.texts(); }, get textures() { return r.textures(); } }),
     // The Text Editor's text (CTX_data_edit_text).
     get edit_text() { return space_data.text ?? null; },
     get mode() { const ob = editObject(); return ob ? EDIT_MODES[object(ob).type] ?? 'OBJECT' : 'OBJECT'; },
