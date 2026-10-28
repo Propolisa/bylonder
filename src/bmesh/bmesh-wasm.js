@@ -91,7 +91,8 @@ function runOperator(C, idname, props) {
     x.operator_free(op);
   }
 }
-const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
+export const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
+export const operatorNames = () => [...operatorTypes.keys()];
 // An enum property's items as the operator's UI lists them in a context (its item function, as Blender's menus call
 // it): [identifier, name] pairs.
 function operatorEnumItems(C, idname, prop) {

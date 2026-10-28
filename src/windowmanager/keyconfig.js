@@ -53,6 +53,13 @@ function matches(kmi, event) {
   return kmi.any === true || ['shift', 'ctrl', 'alt'].every((key) => kmi[key] === KM_ANY || !!kmi[key] === !!event[key]);
 }
 
+// The item of a modal keymap ("Transform Modal Map") an event maps to, as wm_event_modalkeymap maps it: the first whose
+// event matches and that `allowed(item)` lets through now (the operator's poll_modal_item), or null.
+export function modalItem(name, event, allowed = () => true) {
+  for (const [item, kmi] of keyconfig().get(name) ?? []) if (matches(kmi, event) && allowed(item)) return item;
+  return null;
+}
+
 // A handler running the named keymaps in order, as the editor's handlers run them, those `active(name)` allows: the
 // first item whose event matches and whose operator Bylonder runs with its properties, and polls, is invoked, by
 // `invoke(idname, props, event)` (an editor's own operators) or else the registered operators.

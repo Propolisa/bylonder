@@ -2,7 +2,7 @@ import { mountNodeEditor } from './editors/space_node/node-editor.js';
 import { createCompositorBackdrop } from './editors/space_node/compositor-backdrop.js';
 import { createNodeContexts } from './editors/space_node/contexts.js';
 import { registerObjects, objectRefs } from './blenkernel/animation/bindings.js';
-import { mountTimeline } from './editors/space_action/timeline.js';
+import { mountAnimEditor, registerAnimOperators } from './editors/animation/anim-editor.js';
 import { mountRuntimeLayout } from "./editors/screen/runtime.js";
 import { createViewportTouch } from "./windowmanager/input/viewport-touch.js";
 import { applyRenderSettings } from "./workspace/render-settings.js";
@@ -13,7 +13,6 @@ import {
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
 import { createOutliner } from "./editors/space_outliner/outliner";
-import { nodeId } from "./editors/object/identity";
 import { createMouseCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
@@ -302,7 +301,8 @@ world.objectActions = createObjectActions({
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
-registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify, ids: animation.ids }));
+const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify, ids: animation.ids, keying: (run) => animation.keying(run) });
+registerObjectOperators(world.objectActions, blenderObjects);
 registerAddOperators(creator);
 // bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
 world.blenderContext = (view) => createContext(blenderRNA, { space: view });
@@ -334,9 +334,12 @@ for (const source of [documentState, world.particles, world.modifiers]) source.s
 world.modifiers.subscribe(() => world.editMode.modifiersChanged());
 viewportDock.setFactory('properties',(host,id)=>ui.create(host,id));
 const insertKeys = () => {registerObjects(animation, objects);animation.insert(objectRefs(editor.selection.roots));};
-const timelineOptions = id => ({insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();},header:viewportDock.header(id),names:ref=>world.objects.find(n=>'object:'+nodeId(n)===ref)?.name});
-const timeline = mountTimeline(document.querySelector('#timeline-section'), animation, timelineOptions('timeline'));
-viewportDock.setFactory('timeline',(host,id)=>mountTimeline(host,animation,timelineOptions(id)));
+// The Timeline, Dope Sheet and Graph Editor: Blender's animation editors, each area its own space (editors/animation).
+registerAnimOperators(animation);
+const ANIM_EDITORS = { timeline: ['DOPESHEET_EDITOR', 'TIMELINE'], dopesheet: ['DOPESHEET_EDITOR', 'DOPESHEET'], graph: ['GRAPH_EDITOR', 'FCURVES'] };
+const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDock.header(id), space: ANIM_EDITORS[type][0], uiType: ANIM_EDITORS[type][1], animation, rna: blenderRNA, objects: blenderObjects, commit });
+const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, document.querySelector(`#${type}-section`), type));
+for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
 const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();ui?.refresh();} });
 document.querySelector("#add-mesh").onclick = () => creator.show();
 document.querySelector("#delete-objects").onclick = () => commands.remove();
@@ -473,7 +476,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.timeline') && !help.open && !creator.open && !world.contextMenu.isOpen;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
 // The Add panel's own keys while a new object waits for its settings.
@@ -550,7 +553,7 @@ engine.runRenderLoop(renderScene);
 
 function dispose() {
   storage.save();
-  timeline.dispose();
+  animEditors.forEach((animEditor) => animEditor.dispose());
   engine.onBeginFrameObservable.remove(perFrame);
   for (const view of viewports()) view.dispose();
   views.dispose();

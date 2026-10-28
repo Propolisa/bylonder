@@ -99,12 +99,30 @@ export class UILayout {
     if (this.ui.menus[idname]) this.items.push(...drawMenu(idname, this.ui));
   }
 
-  // A property of data the context gives, shown as a check item when Bylonder binds it (ui.prop).
+  // A property of data the context gives, shown as a check item when Bylonder binds it (ui.prop). A header shows the
+  // property itself (`property` items: its data, name, icon and text).
   prop(...list) {
-    const { data, property, text } = args(list, ['data', 'property', 'text']), binding = this.ui.prop?.(data, property);
-    if (!binding) return;
-    this.items.push({ label: text ?? binding.label, blender: property, checked: () => !!binding.get(), enabled: () => this.#enabled(), run: () => binding.set(!binding.get()) });
+    const { data, property, text, icon, icon_only, toggle } = args(list, ['data', 'property', 'text', 'text_ctxt', 'translate', 'icon', 'placeholder', 'expand', 'slider', 'toggle', 'icon_only']);
+    const binding = this.ui.prop?.(data, property);
+    if (!binding) {
+      if (this.ui.header && data) this.items.push({ property: { data, name: property, text, icon, iconOnly: !!icon_only, toggle: !!toggle }, active: () => this.#active(), enabled: () => this.#enabled() });
+      return;
+    }
+    this.items.push({ label: text ?? binding.label, blender: property, icon: icon && icon !== 'NONE' ? icon : undefined, iconOnly: !!icon_only || text === '',
+      checked: () => !!binding.get(), enabled: () => this.#enabled(), run: () => binding.set(!binding.get()) });
   }
+  prop_with_popover(...list) { this.prop(...list); }
+  // A panel shown from a button (a header's Playback, Snapping): its label and icon, for the panel renderer to open.
+  popover(...list) {
+    const { panel, text, icon } = args(list, ['panel', 'text', 'text_ctxt', 'translate', 'icon']);
+    if (this.ui.header) this.items.push({ popover: panel, label: text ?? '', icon: icon && icon !== 'NONE' ? icon : undefined, enabled: () => this.#enabled() });
+  }
+  // The header's editor type button is the area's own (the dock's).
+  template_header() {}
+  template_running_jobs() {}
+  separator_spacer() { if (this.ui.header) this.items.push({ spacer: true }); }
+
+  #active() { return this.active !== false && (this.parent?.#active() ?? true); }
 
   separator() { this.items.push('-'); }
   label() {}

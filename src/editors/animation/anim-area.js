@@ -1,7 +1,7 @@
 // An animation editor's area in the module (AnimArea in tools/blender-port/wasm/anim-api.cc): Blender's ScrArea with
 // the SpaceGraph or SpaceAction its space type creates, and that space's regions, in a BlenderMain's context.
 // Operators run in it, in one of its regions, as Blender's handlers run them; drawing reads what it lists.
-import { blenderModule, setOperatorProperties } from '../../bmesh/bmesh-wasm.js';
+import { blenderModule, setOperatorProperties, pollOperator } from '../../bmesh/bmesh-wasm.js';
 import { FCurve, EVENT_TYPES, EVENT_VALUES } from '../../blenkernel/animation/anim-blender.js';
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
@@ -16,7 +16,10 @@ export const ACTION_MODES = { DOPESHEET: 0, ACTION: 1, SHAPEKEY: 2, GPENCIL: 3, 
 // wmEventModifierFlag and wmOperatorStatus.
 export const KM_SHIFT = 1, KM_CTRL = 2, KM_ALT = 4, KM_OSKEY = 8;
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4, OPERATOR_PASS_THROUGH = 8;
+const OPTYPE_UNDO = 1 << 1;
 const EVT_MODAL_MAP = 0x5022;
+// The popups an invoke can open (operator_popup), by number.
+const POPUPS = [null, 'CONFIRM', 'ENUM_MENU'];
 // The gestures an invoke can start (operator_gesture), by number.
 const GESTURES = [null, 'BOX', 'CIRCLE', 'LASSO'];
 // eAnimChannel_Settings, as bits of a channel's settings and values.
@@ -26,7 +29,7 @@ const rect = (dv, p, get) => ({ xmin: get(dv, p), xmax: get(dv, p + 4), ymin: ge
 const float = (dv, p) => dv.getFloat32(p, true), int = (dv, p) => dv.getInt32(p, true);
 // ChannelInfo in anim-api.cc, and the fields of a key column (anim_channel_keys).
 const CHANNEL_NAME = 44;
-const COLUMN_FIELDS = ['frame', 'key_type', 'handle_type', 'extreme_type', 'select', 'block_flag', 'block_select', 'blocks'];
+const COLUMN_FIELDS = ['frame', 'key_type', 'handle_type', 'extreme_type', 'select', 'block_flag', 'block_select', 'hold'];
 
 // A region's View2D: tot and cur in view space, mask in region pixels (inclusive).
 export class View2D {
@@ -64,6 +67,7 @@ export class AnimArea {
     const region = this.region(type);
     if (region) x.anim_region_layout(region, left, bottom, width, height, type === RGN_TYPE_CHANNELS ? V2D_COMMONVIEW_LIST : V2D_COMMONVIEW_CUSTOM);
   }
+  sync() { x.anim_area_sync(this.pointer); }
   get subtype() { return x.anim_area_subtype(this.pointer); }
   set subtype(value) { x.anim_area_subtype_set(this.pointer, value); }
   // The header text the running operator shows (ED_area_status_text).
@@ -79,6 +83,22 @@ export class AnimArea {
   }
   // What the space's refresh does before drawing (the Graph Editor's curve colors).
   refresh() { this.inContext(RGN_TYPE_WINDOW, (C) => x.anim_area_refresh(C, this.pointer)); }
+  // The space's flag (eGraphEdit_Flag or eSAction_Flag), mode, dope sheet filter flags and pivot point.
+  get settings() {
+    const [flag, mode, filterflag, around] = new Int32Array(x.memory.buffer, x.anim_area_settings(this.pointer) >>> 0, 4);
+    return { flag, mode, filterflag, around };
+  }
+  set settings({ flag, filterflag, around }) {
+    const now = this.settings;
+    x.anim_area_settings_set(this.pointer, flag ?? now.flag, filterflag ?? now.filterflag, around ?? now.around);
+  }
+  // The sizes the region's drawing and layout use (anim_ui_metrics), in pixels or its view's units.
+  metrics(type = RGN_TYPE_WINDOW) {
+    const m = new Float32Array(x.memory.buffer, x.anim_ui_metrics(x.anim_region_v2d(this.region(type))) >>> 0, 8);
+    return { channelHeight: m[0], channelSkip: m[1], channelStep: m[2], firstChannelTop: m[3], scrubHeight: m[4], markerHeight: m[5], scrollWidth: m[6], keyframeScale: m[7] };
+  }
+  // Whether an operator polls in a region of this area.
+  poll(idname, regionType = RGN_TYPE_WINDOW) { return this.inContext(regionType, (C) => pollOperator(C, idname)); }
 
   // The channels the area lists, as its channel region draws them; keys() gives each one's key columns.
   channels() {
@@ -91,6 +111,8 @@ export class AnimArea {
       };
     }));
   }
+  // Sets a listed channel's setting (ACHANNEL_SETTING) as its toggle does: 0 off, 1 on, 2 invert (after channels()).
+  channelSetting(index, setting, mode = 2) { this.inContext(RGN_TYPE_CHANNELS, () => x.anim_channel_setting_set(index, setting, mode)); }
   // A listed channel's key columns in a frame range (valid after channels()).
   keys(index, xmin, xmax, max = 4096) {
     return withArrays([new Float32Array(max * 8)], ([p]) => {
@@ -115,19 +137,25 @@ export class AnimArea {
   }
   // Runs an operator (from newOperator) in a region: invoked with an event, else its exec. One that goes modal keeps
   // running: handle() gives it the next events, and it is freed when it ends. One whose invoke started a gesture (a
-  // box, circle or lasso: gesture) waits for the window manager to run it and then gesture.finish(props). Returns its
-  // status.
+  // box, circle or lasso: gesture) waits for the window manager to run it and then gesture.finish(props); one whose
+  // invoke opened a popup (a confirmation or an enum's menu: popup) waits for finishPopup(props). Returns its status.
   run(op, regionType, event = null) {
     this.cancelModal();
     const status = this.inContext(regionType, (C) => (event ? x.operator_invoke(C, op, this.#event(C, event)) : x.operator_exec(C, op)));
-    const modal = x.operator_modal_added() >>> 0, gesture = GESTURES[x.operator_gesture()];
+    const modal = x.operator_modal_added() >>> 0, gesture = GESTURES[x.operator_gesture()], undo = !!(x.operator_type_flag(op) & OPTYPE_UNDO);
+    const popup = POPUPS[x.operator_popup()];
+    this.undo = undo;
+    if (popup) {
+      this.popup = { type: popup, title: cString(x.operator_popup_title()), text: cString(x.operator_popup_text()), op, regionType, undo };
+      return status;
+    }
     if (!(status & OPERATOR_RUNNING_MODAL && modal)) {
       x.operator_free(op);
       return status;
     }
-    if (gesture) this.gesture = { type: gesture, op, regionType };
+    if (gesture) this.gesture = { type: gesture, op, regionType, undo };
     else {
-      this.modal = { op, regionType };
+      this.modal = { op, regionType, undo, keymap: cString(x.operator_modal_keymap(op)) };
       // The window manager gives a modal operator the pointer's place at once (WM_event_add_mousemove).
       if (event) this.handle({ type: 'MOUSEMOVE', value: 'NOTHING', x: event.x, y: event.y });
     }
@@ -136,16 +164,34 @@ export class AnimArea {
   // Ends the gesture an operator waits for, as the gesture's modal does: its properties set (a lasso's path in region
   // pixels), its exec run; or cancelled.
   finishGesture(props, path = null) {
-    const { op, regionType } = this.gesture;
-    this.gesture = null;
+    const { op } = this.gesture;
+    try {
+      return props ? this.applyGesture(props, path) : OPERATOR_CANCELLED;
+    } finally {
+      this.gesture = null;
+      x.operator_free(op);
+    }
+  }
+  // Ends the popup an operator waits for: its exec run with the properties chosen, or cancelled (null).
+  finishPopup(props) {
+    const { op, regionType, undo } = this.popup;
+    this.popup = null;
     try {
       if (!props) return OPERATOR_CANCELLED;
       setOperatorProperties(op, props);
-      if (path) withArrays([Int32Array.from(path.flat())], ([p]) => x.gesture_lasso_path_set(p, path.length));
+      this.undo = undo;
       return this.inContext(regionType, (C) => x.operator_exec(C, op));
     } finally {
       x.operator_free(op);
     }
+  }
+  // Runs the gesture's operator with properties without ending the gesture, as a circle's does as it moves.
+  applyGesture(props, path = null) {
+    const { op, regionType, undo } = this.gesture;
+    setOperatorProperties(op, props);
+    if (path) withArrays([Int32Array.from(path.flat())], ([p]) => x.gesture_lasso_path_set(p, path.length));
+    this.undo = undo;
+    return this.inContext(regionType, (C) => x.operator_exec(C, op));
   }
   // The running operator's modal map value for an item identifier when its modal keymap lets it through now, else -1.
   modalItem(identifier) { return this.modal ? withString(identifier, (p) => x.operator_modal_item(this.modal.op, p)) : -1; }
@@ -156,6 +202,7 @@ export class AnimArea {
       const e = event.modal === undefined ? event : { ...event, type: EVT_MODAL_MAP, value: event.modal };
       const status = x.operator_modal(C, op, this.#event(C, e));
       if (!(status & OPERATOR_RUNNING_MODAL)) {
+        this.undo = this.modal.undo;
         this.modal = null;
         x.operator_free(op);
       }
@@ -165,5 +212,6 @@ export class AnimArea {
   cancelModal() {
     if (this.modal) this.handle({ type: 'ESC' });
     if (this.gesture) this.finishGesture(null);
+    if (this.popup) this.finishPopup(null);
   }
 }

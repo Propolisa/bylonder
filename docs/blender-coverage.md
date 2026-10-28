@@ -57,3 +57,11 @@ Typed values, the Global and Local cycling of repeated axis keys and the header 
 
 ## node.add_node
 Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with search as you type. It adds the Blender nodes Bylonder runs (Math, Mix, Color Balance so far); Babylon's blocks are in a Babylon sub-menu of each category. See `docs/node-editors.md`.
+
+## DOPESHEET_EDITOR > *
+Status: partial
+The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). The sidebar, markers and the Action, Shape Key, Grease Pencil, Mask and Cache File modes are not shown yet.
+
+## GRAPH_EDITOR > *
+Status: partial
+Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Drivers mode, F-Curve modifiers and the sidebar are not shown yet.

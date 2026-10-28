@@ -1,22 +1,22 @@
 // bpy.context for one editor (BKE_context.hh, with the members screen_context.cc and space_view3d.cc give): the
 // window, screen, area and region it is drawn in, and the scene's data through Bylonder's RNA (makesrna/rna-bylonder.js).
-//   r: createRNA(host), area: the editor's Blender type, region: the region's, space: the editor's own data (a 3D
+//   r: createRNA(host), area: the editor's Blender type (uiType its sub-type, TIMELINE), region: the region's, space: the editor's own data (a 3D
 //   Viewport's view, editors/space_view3d/view3d.js), or none for Blender's defaults.
 import { rna, collection } from '../makesrna/rna.js';
 
-const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER: 'SpaceOutliner', DOPESHEET_EDITOR: 'SpaceDopeSheetEditor',
+const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER: 'SpaceOutliner', DOPESHEET_EDITOR: 'SpaceDopeSheetEditor', GRAPH_EDITOR: 'SpaceGraphEditor',
   NODE_EDITOR: 'SpaceNodeEditor', SEQUENCE_EDITOR: 'SpaceSequenceEditor', TEXT_EDITOR: 'SpaceTextEditor', FILE_BROWSER: 'SpaceFileBrowser', TOPBAR: 'Space' };
 const REGION_DATA = { VIEW_3D: 'RegionView3D' };
 // CTX_data_mode_enum for an object in Edit Mode, by its type.
 const EDIT_MODES = { MESH: 'EDIT_MESH', CURVE: 'EDIT_CURVE', FONT: 'EDIT_TEXT' };
 
-export function createContext(r, { area: type = 'VIEW_3D', region: regionType = 'WINDOW', space = null } = {}) {
+export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region: regionType = 'WINDOW', space = null } = {}) {
   const { world, host } = r;
   const object = (ob) => r.pointer('Object', ob);
   const scene = r.pointer('Scene', world), view_layer = rna('ViewLayer', { name: 'ViewLayer' });
   const space_data = space ? r.pointer(SPACES[type], space) : rna(SPACES[type] ?? 'Space');
   const region_data = REGION_DATA[type] && regionType === 'WINDOW' ? space_data.region_3d ?? null : null;
-  const area = rna('Area', { type, ui_type: type, show_menus: true, spaces: collection([space_data]) });
+  const area = rna('Area', { type, ui_type: uiType, show_menus: true, spaces: collection([space_data]) });
   const region = rna('Region', { type: regionType });
   const screen = rna('Screen', { areas: collection([area]) });
   const window = rna('Window', { scene, view_layer, screen });

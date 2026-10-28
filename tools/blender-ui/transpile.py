@@ -88,7 +88,7 @@ def extract(source, patterns):
         todo += [n.id for node in defined[name] for n in ast.walk(node) if isinstance(n, ast.Name) and n.id in defined]
     imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
                and all(alias.name.split('.')[0] in IMPORTABLE | SCRIPTS for alias in node.names if isinstance(node, ast.Import))
-               and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] in IMPORTABLE)]
+               and (not isinstance(node, ast.ImportFrom) or node.module.split('.')[0] in IMPORTABLE | SCRIPTS)]
     nodes = [node for node in tree.body if defined_name(node) in wanted]
     # Only the imported names the taken code uses.
     used = {n.id for node in nodes for n in ast.walk(node) if isinstance(n, ast.Name)}
@@ -394,9 +394,12 @@ def _joined(*lists):
 
 
 def flat_imports(node):
-    """from bl_ui import x as import x: the scripts the manifest names are flat modules."""
+    """from bl_ui import x as import x, and from bl_ui.x import y as from x import y: the scripts the manifest names
+    are flat modules."""
     if isinstance(node, ast.ImportFrom) and node.module == 'bl_ui':
         return [ast.Import(names=[alias]) for alias in node.names]
+    if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith('bl_ui.') and node.module[6:] in SCRIPTS:
+        return [ast.ImportFrom(module=node.module[6:], names=node.names, level=0)]
     return [node]
 
 

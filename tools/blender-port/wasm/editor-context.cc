@@ -465,6 +465,16 @@ EXPORT(operator_invoke) int operator_invoke(bContext *C, wmOperator *op, const w
   return int(op->type->invoke ? op->type->invoke(C, op, event) : op->type->exec ? op->type->exec(C, op) : 0);
 }
 
+/* The name of an operator's modal keymap ("Transform Modal Map"), whose items Bylonder's window manager matches events
+ * to, or an empty string. */
+EXPORT(operator_modal_keymap) const char *operator_modal_keymap(wmOperator *op)
+{
+  return op->type->modalkeymap ? op->type->modalkeymap->idname : "";
+}
+
+/* An operator's type flags (wmOperatorTypeFlag: OPTYPE_UNDO when a run is an undo step). */
+EXPORT(operator_type_flag) int operator_type_flag(wmOperator *op) { return op->type->flag; }
+
 EXPORT(operator_modal) int operator_modal(bContext *C, wmOperator *op, const wmEvent *event)
 {
   return int(op->type->modal(C, op, event));

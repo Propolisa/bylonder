@@ -18,8 +18,9 @@ const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
 
 //   rna: createRNA(host), whose host has the world and selection; transaction(fn): an undo step around a change;
-//   ids: the world's IDs in the module (blender-ids.js), shared with its animation.
-export function createBlenderObjects({ rna, transaction, notify, ids = createBlenderIDs() }) {
+//   ids: the world's IDs in the module (blender-ids.js), shared with its animation; keying(run): runs an operator
+//   that may insert keys (auto keying), for the animation to take them.
+export function createBlenderObjects({ rna, transaction, notify, ids = createBlenderIDs(), keying = (fn) => fn() }) {
   const { world, selection } = rna.host;
   const blender = ids.blender;
   const key = (node) => 'object:' + nodeId(node);
@@ -86,7 +87,7 @@ export function createBlenderObjects({ rna, transaction, notify, ids = createBle
     transaction(() => {
       sync();
       syncMeshes();
-      result = blender.run(idname, props);
+      keying(() => { result = blender.run(idname, props); });
       const objects = result.status & OPERATOR_FINISHED ? changed() : [];
       const unheld = objects.find(({ entry, geometry }) => geometry && !OWN_DATA.includes(entry.type));
       if (unheld) result = { status: 0, report: `Bylonder does not apply this to ${unheld.entry.type === 'FONT' ? 'text' : 'curve'} objects yet` };
@@ -98,6 +99,7 @@ export function createBlenderObjects({ rna, transaction, notify, ids = createBle
 
   return {
     run,
+    sync,
     poll(idname) {
       sync();
       return blender.poll(idname);

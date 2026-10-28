@@ -34,6 +34,7 @@
 #include "ED_view3d.hh"
 #include "WM_message.hh"
 #include "MEM_guardedalloc.h"
+#include "RNA_access.hh"
 #include "RNA_enum_types.hh"
 #include "UI_interface_icons.hh"
 #include "UI_interface_c.hh"
@@ -297,6 +298,14 @@ EXPORT(anim_region_layout) void anim_region_layout(ARegion *region, int x, int y
 
 EXPORT(anim_region_v2d) View2D *anim_region_v2d(ARegion *region) { return &region->v2d; }
 
+/* After sizing an area's regions: the channels follow the main region vertically (V2D_VIEWSYNC_AREA_VERTICAL), as
+ * after Blender's region resize. */
+EXPORT(anim_area_sync) void anim_area_sync(AnimArea *a)
+{
+  ARegion *region = BKE_area_find_region_type(&a->area, RGN_TYPE_WINDOW);
+  ui::view2d_sync(nullptr, &a->area, &region->v2d, V2D_LOCK_COPY);
+}
+
 /* Puts the context in an area's region, as the window manager does before running a region's handlers. */
 EXPORT(anim_context_set) void anim_context_set(bContext *C, AnimArea *a, ARegion *region)
 {
@@ -311,6 +320,47 @@ EXPORT(anim_area_refresh) void anim_area_refresh(bContext *C, AnimArea *a)
     a->area.type->refresh(C, &a->area);
   }
 }
+
+/* The space's settings the editors draw and their headers show: its flag (eGraphEdit_Flag or eSAction_Flag), mode, the
+ * dope sheet's filter flags and the pivot point (SpaceGraph.around). */
+static bDopeSheet *space_dopesheet(SpaceLink *sl)
+{
+  return sl->spacetype == SPACE_GRAPH ? reinterpret_cast<SpaceGraph *>(sl)->ads : &reinterpret_cast<SpaceAction *>(sl)->ads;
+}
+EXPORT(anim_area_settings) const int *anim_area_settings(AnimArea *a)
+{
+  static int settings[4];
+  SpaceLink *sl = anim_area_space(a);
+  if (sl->spacetype == SPACE_GRAPH) {
+    SpaceGraph *sipo = reinterpret_cast<SpaceGraph *>(sl);
+    settings[0] = sipo->flag;
+    settings[1] = sipo->mode;
+    settings[3] = sipo->around;
+  }
+  else {
+    SpaceAction *saction = reinterpret_cast<SpaceAction *>(sl);
+    settings[0] = saction->flag;
+    settings[1] = saction->mode;
+    settings[3] = 0;
+  }
+  settings[2] = space_dopesheet(sl)->filterflag;
+  return settings;
+}
+EXPORT(anim_area_settings_set) void anim_area_settings_set(AnimArea *a, int flag, int filterflag, int around)
+{
+  SpaceLink *sl = anim_area_space(a);
+  if (sl->spacetype == SPACE_GRAPH) {
+    reinterpret_cast<SpaceGraph *>(sl)->flag = eGraphEdit_Flag(flag);
+    reinterpret_cast<SpaceGraph *>(sl)->around = char(around);
+  }
+  else {
+    reinterpret_cast<SpaceAction *>(sl)->flag = eSAction_Flag(flag);
+  }
+  space_dopesheet(sl)->filterflag = eDopeSheet_FilterFlag(filterflag);
+}
+
+/* An FCurve's active keyframe (BKE_fcurve_active_keyframe_index), or -1. */
+EXPORT(anim_fcurve_active_key) int anim_fcurve_active_key(FCurve *fcu) { return BKE_fcurve_active_keyframe_index(fcu); }
 
 /* The header text an operator shows while it runs (ED_area_status_text), or null. */
 EXPORT(anim_area_status) const char *anim_area_status(AnimArea *a) { return a->status.empty() ? nullptr : a->status.c_str(); }
@@ -390,6 +440,24 @@ EXPORT(anim_channels) int anim_channels(bContext *C)
 
 EXPORT(anim_channel_info) const ChannelInfo *anim_channel_info(int index) { return &channel_list().infos[index]; }
 
+/* Sets a listed channel's setting (eAnimChannel_Settings) as its toggle button does (eAnimChannels_SetFlag: 0 off, 1 on,
+ * 2 invert), flushing it to the channels it holds and their parents (ANIM_flush_setting_anim_channels). */
+EXPORT(anim_channel_setting_set) void anim_channel_setting_set(int index, int setting, int mode)
+{
+  ChannelList &list = channel_list();
+  bAnimListElem *ale = static_cast<bAnimListElem *>(BLI_findlink(&list.elems, index));
+  if (!ale) {
+    return;
+  }
+  const eAnimChannel_Settings s = eAnimChannel_Settings(setting);
+  eAnimChannels_SetFlag flag = eAnimChannels_SetFlag(mode);
+  if (flag == ACHANNEL_SETFLAG_INVERT) {
+    flag = ANIM_channel_setting_get(&list.ac, ale, s) > 0 ? ACHANNEL_SETFLAG_CLEAR : ACHANNEL_SETFLAG_ADD;
+  }
+  ANIM_channel_setting_set(&list.ac, ale, s, flag);
+  ANIM_flush_setting_anim_channels(&list.ac, &list.elems, ale, s, flag);
+}
+
 /* The keys of a listed channel in a frame range, as the Dope Sheet draws them (draw_channel_strips): written as
  * ActKeyColumn's frame, key type, handle type, extreme type, selection, and hold block flags and selection. */
 EXPORT(anim_channel_keys) int anim_channel_keys(int index, float xmin, float xmax, float *r_columns, int max)
@@ -454,7 +522,7 @@ EXPORT(anim_channel_keys) int anim_channel_keys(int index, float xmin, float xma
     out[4] = ak.sel;
     out[5] = ak.block.flag;
     out[6] = ak.block.sel;
-    out[7] = ak.totblock;
+    out[7] = actkeyblock_get_valid_hold(&ak);
   }
   ED_keylist_free(keylist);
   return count;
@@ -562,6 +630,18 @@ EXPORT(operator_gesture) int operator_gesture() { return std::exchange(gesture_s
 /* A lasso's path in region pixels (count points of x, y), for its exec. */
 EXPORT(gesture_lasso_path_set) void gesture_lasso_path_set(const int2 *xy, int count) { lasso_path = Span<int2>(xy, count); }
 
+/* Popups an invoke opens (wm_operators.cc): Bylonder's window manager shows them, then runs the operator's exec when
+ * the user confirms, or sets the enum property and runs it when the user picks an item. */
+enum Popup { POPUP_NONE, POPUP_CONFIRM, POPUP_ENUM_MENU };
+static Popup popup_opened = POPUP_NONE;
+static std::string popup_title, popup_text;
+
+/* The popup the last invoke opened (Popup), cleared by asking: its title, and its confirm button's text or the enum
+ * property's identifier. */
+EXPORT(operator_popup) int operator_popup() { return std::exchange(popup_opened, POPUP_NONE); }
+EXPORT(operator_popup_title) const char *operator_popup_title() { return popup_title.c_str(); }
+EXPORT(operator_popup_text) const char *operator_popup_text() { return popup_text.c_str(); }
+
 /* What the editors reach of Blender's window manager and screen, which are Bylonder's (JS). */
 
 namespace blender {
@@ -595,6 +675,79 @@ wmOperatorStatus WM_gesture_lasso_modal(bContext * /*C*/, wmOperator * /*op*/, c
 void WM_gesture_box_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 void WM_gesture_circle_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 void WM_gesture_lasso_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
+static wmOperatorStatus popup_open(Popup popup, const char *title, const char *text)
+{
+  popup_opened = popup;
+  popup_title = title;
+  popup_text = text;
+  return OPERATOR_INTERFACE;
+}
+wmOperatorStatus WM_operator_confirm_ex(bContext * /*C*/, wmOperator *op, const char *title, const char * /*message*/,
+                                        const char *confirm_text, ui::AlertIcon /*icon*/, bool /*cancel_default*/)
+{
+  return popup_open(POPUP_CONFIRM, title ? title : op->type->name, confirm_text ? confirm_text : IFACE_("OK"));
+}
+/* As wm_operators.cc defines it, the menu being Bylonder's. */
+wmOperatorStatus WM_menu_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/)
+{
+  PropertyRNA *prop = op->type->prop;
+  if (prop == nullptr || RNA_property_type(prop) != PROP_ENUM) {
+    return OPERATOR_CANCELLED;
+  }
+  if (RNA_property_is_set(op->ptr, prop)) {
+    return op->type->exec(C, op);
+  }
+  return popup_open(POPUP_ENUM_MENU, op->type->name, RNA_property_identifier(prop));
+}
+
+/* As wm_operators.cc defines them. */
+wmOperatorStatus WM_generic_select_modal(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  PropertyRNA *wait_to_deselect_prop = RNA_struct_find_property(op->ptr, "wait_to_deselect_others");
+  const bool use_select_on_click = RNA_struct_property_is_set(op->ptr, "use_select_on_click");
+  const short init_event_type = short(POINTER_AS_INT(op->customdata));
+  const int mval[2] = {RNA_int_get(op->ptr, "mouse_x"), RNA_int_get(op->ptr, "mouse_y")};
+
+  if (init_event_type == 0) {
+    op->customdata = POINTER_FROM_INT(int(event->type));
+    if (use_select_on_click) {
+      WM_event_add_modal_handler(C, op);
+      return OPERATOR_RUNNING_MODAL | OPERATOR_PASS_THROUGH;
+    }
+    if (event->val == KM_PRESS) {
+      RNA_property_boolean_set(op->ptr, wait_to_deselect_prop, true);
+      const wmOperatorStatus retval = op->type->exec(C, op);
+      if (retval & OPERATOR_RUNNING_MODAL) {
+        WM_event_add_modal_handler(C, op);
+      }
+      return retval | OPERATOR_PASS_THROUGH;
+    }
+    RNA_property_boolean_set(op->ptr, wait_to_deselect_prop, false);
+    return op->type->exec(C, op) | OPERATOR_PASS_THROUGH;
+  }
+  if (event->type == init_event_type && event->val == KM_RELEASE) {
+    RNA_property_boolean_set(op->ptr, wait_to_deselect_prop, false);
+    return op->type->exec(C, op) | OPERATOR_PASS_THROUGH;
+  }
+  if (ISMOUSE_MOTION(event->type)) {
+    const int drag_delta[2] = {mval[0] - event->mval[0], mval[1] - event->mval[1]};
+    if (WM_event_drag_test_with_delta(event, drag_delta)) {
+      return OPERATOR_FINISHED | OPERATOR_PASS_THROUGH;
+    }
+    return OPERATOR_PASS_THROUGH;
+  }
+  return OPERATOR_RUNNING_MODAL | OPERATOR_PASS_THROUGH;
+}
+wmOperatorStatus WM_generic_select_invoke(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  int mval[2];
+  WM_event_drag_start_mval(event, CTX_wm_region(C), mval);
+  RNA_int_set(op->ptr, "mouse_x", mval[0]);
+  RNA_int_set(op->ptr, "mouse_y", mval[1]);
+  op->customdata = POINTER_FROM_INT(0);
+  return op->type->modal(C, op, event);
+}
+
 /* A circle gesture runs its exec once, when it ends. */
 bool WM_gesture_is_modal_first(const wmGesture * /*gesture*/) { return true; }
 Array<int2> WM_gesture_lasso_path_to_array(bContext * /*C*/, wmOperator * /*op*/) { return Array<int2>(lasso_path.as_span()); }
@@ -708,8 +861,9 @@ void BLF_load_font_stack() {}
 int BLF_set_default() { return 0; }
 float BLF_width(int /*fontid*/, const char * /*str*/, size_t /*str_len*/, ResultBLF * /*r_info*/) { return 0.0f; }
 
-/* As scene.cc defines it. */
+/* As scene.cc defines them. */
 double Scene::frames_per_second() const { return double(this->r.frs_sec) / double(this->r.frs_sec_base); }
+float BKE_scene_frame_get(const Scene *scene) { return scene->r.cfra + scene->r.subframe; }
 
 /* port-override: scene.cc's Scene type without its data callbacks (the module world's Scene is main-api.cc's), so the
  * Scene is an ID that has animation data, as in Blender. */

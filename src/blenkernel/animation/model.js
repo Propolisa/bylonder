@@ -282,6 +282,15 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
       syncTime();
       if (apply) evaluate(); else { for (const [ref, ch] of channels) if (ch.available()) pose.set(ref, clone(ch.get())); notify(); }
     },
+    // Runs an operator of another editor that may insert keys (auto keying): the animation takes those it inserted.
+    keying(run) {
+      const keys = () => JSON.stringify(tracks().map((t) => [t.ref, t.fcurve.keys.map((k) => k.co)]));
+      curves = null;
+      const before = keys();
+      run();
+      curves = null;
+      if (keys() !== before) { onChange(api.serialize()); notify(); }
+    },
     // After Blender's operators changed the F-Curves (an animation editor): channels take the new values.
     changed() { changed(); },
     edited() { curves = null; evaluate(); onChange(api.serialize()); },
