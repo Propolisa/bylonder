@@ -300,6 +300,9 @@ function popoverButton(panels, ui, children, group = false, className = 'bl-drop
     const r = b.getBoundingClientRect();
     Object.assign(host.style, { left: r.left + 'px', top: r.bottom + 2 + 'px' });
     document.body.append(host);
+    // Centered under its button and kept in the window, as ui_popup_block_position places it.
+    const width = host.offsetWidth;
+    host.style.left = Math.max(0, Math.min(r.left + (r.width - width) / 2, innerWidth - width)) + 'px';
     const close = (e) => { if (!host.contains(e.target)) { host.remove(); removeEventListener('pointerdown', close, true); } };
     addEventListener('pointerdown', close, true);
   });

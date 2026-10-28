@@ -721,6 +721,10 @@ void button_retval_set(Button *but, int retval) { but->retval = retval; }
 void button_disable(Button *but, const char * /*disabled_hint*/) { but->flag |= BUT_DISABLED; }
 void button_func_identity_compare_set(Button * /*but*/, ButtonIdentityCompareFunc /*cmp_fn*/) {}
 
+/* port-override: JS applies a button within the event that pressed it, so none stays active, nor shows a tooltip. */
+Button *context_active_but_get(const bContext * /*C*/) { return nullptr; }
+void button_tooltip_timer_remove(bContext * /*C*/, Button * /*but*/) {}
+
 /* Whether a text button is being edited: JS edits it in its own field until it applies or cancels the edit. */
 static bool text_edit_cancelled = false;
 bool button_active_only(const bContext * /*C*/, ARegion * /*region*/, Block * /*block*/, Button *but)

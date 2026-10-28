@@ -25,7 +25,7 @@
   ],
   "modules": {
     "bmesh/bmesh.wasm": {
-      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "modifier-api.cc", "panel-layout.cc", "outliner-api.cc", "region-draw.cc"],
+      "api": ["bmesh-api.cc", "operator-properties.cc", "editor-context.cc", "main-api.cc", "modifier-api.cc", "panel-layout.cc", "outliner-api.cc", "region-draw.cc", "drag-drop.cc"],
       "fetch": ["release/datafiles/userdef/userdef_default_theme.c"],
       "defines": ["WITH_OPENSUBDIV", "WITH_BULLET", "WITH_MOD_REMESH", "WITH_OPENVDB"],
       "includes": ["intern/opensubdiv", "intern/dualcon", "intern/rigidbody", "intern/openvdb", "extern/bullet2/src"],
@@ -48,6 +48,7 @@
         "source/blender/editors/object/object_transform.cc",
         "source/blender/editors/object/object_utils.cc",
         "source/blender/editors/object/object_select.cc",
+        "source/blender/editors/object/object_relations.cc",
         "source/blender/editors/screen/screen_context.cc",
         "source/blender/editors/space_outliner",
         "source/blender/editors/space_outliner/tree",
@@ -58,6 +59,7 @@
         "source/blender/editors/interface/view2d/view2d_ops.cc",
         "source/blender/editors/interface/view2d/view2d_edge_pan.cc",
         "source/blender/windowmanager/intern/wm_event_query.cc",
+        {"path": "source/blender/windowmanager/intern/wm_dragdrop.cc", "includes": ["intern/ghost"]},
         "source/blender/animrig/intern/keyframing.cc",
         "source/blender/animrig/intern/keyframing_auto.cc",
         "source/blender/animrig/intern/keyingsets.cc",

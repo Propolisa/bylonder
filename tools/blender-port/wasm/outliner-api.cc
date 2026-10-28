@@ -4,6 +4,7 @@
  * invoke and exec. */
 #include "BKE_context.hh"
 #include "BKE_layer.hh"
+#include "BKE_lib_remap.hh"
 #include "BKE_screen.hh"
 #include "BLI_listbase.h"
 #include "DEG_depsgraph.hh"
@@ -75,6 +76,24 @@ void outliner_operatortypes_ensure()
 }
 
 static ARegion *main_region(ScrArea *area) { return BKE_area_find_region_type(area, RGN_TYPE_WINDOW); }
+
+/* The Outliner areas, which IDs Blender's code removes or remaps are remapped in, as WM_main_remap_editor_id_reference
+ * remaps the window manager's areas (through each space type's id_remap). */
+static Vector<ScrArea *> &areas()
+{
+  static Vector<ScrArea *> list;
+  return list;
+}
+static void areas_id_remap(const bke::id::IDRemapper &mappings)
+{
+  for (ScrArea *area : areas()) {
+    for (SpaceLink &sl : area->spacedata) {
+      if (SpaceType *st = BKE_spacetype_from_id(sl.spacetype); st && st->id_remap) {
+        st->id_remap(area, &sl, mappings);
+      }
+    }
+  }
+}
 static SpaceOutliner *space(ScrArea *area) { return static_cast<SpaceOutliner *>(area->spacedata.first); }
 
 /* An Outliner area, as ED_area_newspace makes one: its space from the space type's create, which also makes its
@@ -82,7 +101,12 @@ static SpaceOutliner *space(ScrArea *area) { return static_cast<SpaceOutliner *>
 EXPORT(outliner_new) ScrArea *outliner_new(bContext *C)
 {
   ui_ensure();
-  static const bool registered = (ED_spacetype_outliner(), true);
+  /* As ED_spacetypes_init registers it and its dropboxes. */
+  static const bool registered = [] {
+    ED_spacetype_outliner();
+    BKE_spacetype_from_id(SPACE_OUTLINER)->dropboxes();
+    return true;
+  }();
   (void)registered;
   SpaceType *st = BKE_spacetype_from_id(SPACE_OUTLINER);
   ScrArea *area = MEM_new<ScrArea>(__func__);
@@ -97,6 +121,8 @@ EXPORT(outliner_new) ScrArea *outliner_new(bContext *C)
   for (ARegion &region : area->regionbase) {
     region.runtime->type = BKE_regiontype_from_id(st, region.regiontype);
   }
+  areas().append(area);
+  BKE_library_callback_remap_editor_id_reference_set(areas_id_remap);
   return area;
 }
 
@@ -104,8 +130,8 @@ EXPORT(outliner_space) SpaceOutliner *outliner_space(ScrArea *area) { return spa
 EXPORT(outliner_region) ARegion *outliner_region(ScrArea *area) { return main_region(area); }
 EXPORT(outliner_region_v2d) View2D *outliner_region_v2d(ScrArea *area) { return &main_region(area)->v2d; }
 
-/* The main region's size in pixels, and its 2D view as outliner_main_region_init sets it up (its keymap and
- * dropboxes are Bylonder's window manager's). */
+/* The main region's size in pixels, and its 2D view and dropboxes as outliner_main_region_init sets them up (its keymap
+ * is Bylonder's window manager's). */
 EXPORT(outliner_region_size) void outliner_region_size(ScrArea *area, int x, int y, int winx, int winy)
 {
   ARegion *region = main_region(area);
@@ -122,6 +148,8 @@ EXPORT(outliner_region_size) void outliner_region_size(ScrArea *area, int x, int
   region->v2d.keeptot = V2D_KEEPTOT_STRICT;
   region->v2d.minzoom = region->v2d.maxzoom = 1.0f;
   ui::view2d_region_reinit(&region->v2d, ui::V2D_COMMONVIEW_LIST, region->winx, region->winy);
+  WM_event_add_dropbox_handler(&region->runtime->handlers,
+                               WM_dropboxmap_find("Outliner", SPACE_OUTLINER, RGN_TYPE_WINDOW));
 }
 
 /* Makes the Outliner and its main region the context's area and region, as the window manager does for its handlers. */

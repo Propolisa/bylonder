@@ -6,6 +6,13 @@
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
 #include "BKE_attribute.hh"
 #include "BKE_collection.hh"
+#include "BKE_node.hh"
+#include "BKE_node_tree_update.hh"
+#include "DNA_light_types.h"
+#include "DNA_linestyle_types.h"
+#include "DNA_material_types.h"
+#include "DNA_texture_types.h"
+#include "DNA_world_types.h"
 #include "BKE_context.hh"
 #include "BKE_wm_runtime.hh"
 #include "DNA_collection_types.h"
@@ -414,6 +421,41 @@ void nodes::node_tree_shader_default(const bContext * /*C*/, Main * /*bmain*/, I
 
 /* As scene.cc defines it. */
 void BKE_scene_object_base_flag_sync_from_base(Base *base) { base->object->base_flag = base->flag; }
+
+/* As node.cc defines them; node.cc comes with Blender's node system, which the module does without. */
+bNodeTree **bke::node_tree_ptr_from_id(ID *id)
+{
+  switch (GS(id->name)) {
+    case ID_MA:
+      return &reinterpret_cast<Material *>(id)->nodetree;
+    case ID_LA:
+      return &reinterpret_cast<Light *>(id)->nodetree;
+    case ID_WO:
+      return &reinterpret_cast<World *>(id)->nodetree;
+    case ID_TE:
+      return &reinterpret_cast<Tex *>(id)->nodetree;
+    case ID_SCE:
+      return &reinterpret_cast<Scene *>(id)->nodetree;
+    case ID_LS:
+      return &reinterpret_cast<FreestyleLineStyle *>(id)->nodetree;
+    default:
+      return nullptr;
+  }
+}
+bNodeTree *bke::node_tree_from_id(ID *id)
+{
+  bNodeTree **nodetree = node_tree_ptr_from_id(id);
+  return (nodetree != nullptr) ? *nodetree : nullptr;
+}
+
+/* port-override: Main holds no node trees (the module has no nodes), so no node tree uses an ID that changed. */
+void bke::node_tree_update_all_users(Main * /*main*/, ID * /*id*/) {}
+
+/* As wm_window.cc defines it for the one window, whose screen has no 3D View of the module's to sync. */
+void WM_windows_scene_data_sync(const ListBaseT<wmWindow> * /*win_lb*/, Scene * /*scene*/) {}
+
+/* port-override: Main holds no node trees (the module has no nodes), so after an ID's removal none has to update. */
+void BKE_ntree_update(Main & /*bmain*/, std::optional<Span<bNodeTree *>> /*modified_trees*/, const NodeTreeUpdateExtraParams & /*params*/) {}
 
 /* As area.cc defines it for the regions Bylonder's areas have, none of which overlap. */
 bool ED_region_is_overlap(int /*spacetype*/, int /*regiontype*/) { return false; }

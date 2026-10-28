@@ -50,9 +50,12 @@ struct StructRNA {
 StructRNA *operator_properties_new(const char *identifier);
 /* The values one call of an operator sets (PointerRNA.data). */
 void *operator_values_new();
+void *operator_values_copy(const void *values);
 void operator_values_free(void *values);
 bool operator_property_set(PointerRNA *ptr, const char *name, const double *numbers, int len, const char *enum_identifier);
 /* Gives a DNA struct's property the update function RNA_property_update runs after a button sets it. */
+/* An operator of a type, with its own copy of the values given (or the defaults). */
+struct wmOperator *operator_create(struct wmOperatorType *ot, const void *values = nullptr);
 void rna_property_update_set(StructRNA *srna, const char *identifier, void (*update)(bContext *C, PointerRNA *ptr));
 
 }  // namespace blender

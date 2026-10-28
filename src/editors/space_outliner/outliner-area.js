@@ -47,6 +47,8 @@ export class OutlinerArea {
       return fn(this.main.C);
     } finally {
       x.outliner_context_set(this.main.C, 0);
+      // The module's scene is not in Main's scenes, which BKE_main_collection_sync resyncs after IDs change.
+      this.main.syncCollections();
     }
   }
   #event(C, { type, value = 'PRESS', region: [rx, ry] = [0, 0], modifier = 0, text = '' }) {
@@ -78,6 +80,7 @@ export class OutlinerArea {
   }
   // Ends the box gesture an operator waits for: its exec run with the gesture's properties, or cancelled (null).
   finishGesture(props) {
+    if (!this.gesture) return { status: OPERATOR_CANCELLED, undo: false };
     const { op, undo } = this.gesture;
     this.gesture = null;
     try {
@@ -89,9 +92,17 @@ export class OutlinerArea {
     }
   }
   cancel() {
+    if (this.dragging) this.dragCancel();
     if (this.modal) this.handle({ type: 'ESC' });
     if (this.gesture) this.finishGesture(null);
   }
+
+  // A drag an operator started (WM_event_start_prepared_drag), moved over the main region: the tooltip of the drop it
+  // would make there; dropped there (the drop operator's status, 0 when none); or cancelled.
+  get dragging() { return !!x.drag_running(this.main.C); }
+  dragUpdate(event) { return this.inContext((C) => cString(x.drag_update(C, this.#event(C, event)))); }
+  drop(event) { return { status: this.inContext((C) => x.drag_drop(C, this.#event(C, event))), undo: true }; }
+  dragCancel() { x.drag_cancel(this.main.C); }
 
   // A button of the last draw pressed as Blender's handlers apply it: a toggle set to `value` (or flipped when not
   // given), with the keys held (KM_*). Returns the toggle's state after.

@@ -35,6 +35,7 @@ StructRNA *operator_properties_new(const char *identifier)
 }
 
 void *operator_values_new() { return new OperatorValues(); }
+void *operator_values_copy(const void *values) { return new OperatorValues(*static_cast<const OperatorValues *>(values)); }
 void operator_values_free(void *values) { delete static_cast<OperatorValues *>(values); }
 
 static PropertyRNA *define(StructOrFunctionRNA *cont, const char *identifier, PropertyType type, std::vector<double> defaults)

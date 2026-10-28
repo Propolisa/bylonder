@@ -183,9 +183,11 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
       finishedModal(area.handle(blenderEvent(wmEvent(e, 'MOUSEMOVE', 'NOTHING'))));
       return;
     }
+    if (area.dragging) return moveDrag(e);
     if (press && !press.dragged && !press.used && Math.hypot(e.clientX - press.x, e.clientY - press.y) >= DRAG_THRESHOLD) {
       press.dragged = true;
       dispatch(wmEvent(press.e, press.type, 'CLICK_DRAG', { region: regionAt(press.e) }));
+      if (area.dragging) moveDrag(e);
       return;
     }
     if (!press) dispatch(wmEvent(e, 'MOUSEMOVE', 'NOTHING'));
@@ -195,6 +197,10 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
     if (world.wm.modal) return;
     if (dragToggle) { dragToggle = null; return; }
     const type = BUTTONS[e.button];
+    if (area.dragging) {
+      press = null;
+      return endDrag(type === 'LEFTMOUSE' ? area.drop(blenderEvent(wmEvent(e, type, 'RELEASE'))) : null);
+    }
     if (area.modal) finishedModal(area.handle(blenderEvent(wmEvent(e, type, 'RELEASE'))));
     else dispatch(wmEvent(e, type, 'RELEASE'));
     if (press && !press.used && !press.dragged && !press.double) dispatch(wmEvent(press.e, type, 'CLICK'));
@@ -209,10 +215,28 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
   canvas.addEventListener('pointerenter', () => canvas.focus({ preventScroll: true }));
   canvas.addEventListener('pointerleave', () => { if (!press) dispatch({ type: 'mousemove', value: 'NOTHING', region: [-1, -1] }); });
   canvas.addEventListener('keydown', (e) => {
-    if (e.repeat && !/arrow|page/.test(keyType(e))) return;
+    if (world.wm.modal || (e.repeat && !/arrow|page/.test(keyType(e)))) return;
+    if (area.dragging && e.key === 'Escape') return handled(e), endDrag(null);
     const event = { type: keyType(e), value: 'PRESS', native: e, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, oskey: e.metaKey, region: pointer, clientX: lastClient.clientX, clientY: lastClient.clientY };
     if (area.modal ? (finishedModal(area.handle(blenderEvent(event))), true) : dispatch(event)) handled(e);
   });
+
+  // A drag an operator started (outliner.item_drag_drop): the drop it would make shows by the pointer, as
+  // wm_drags_draw shows it, and the tree marks its target; the release drops, Escape or another button cancels it.
+  const dragTip = Object.assign(document.createElement('div'), { className: 'bl-tooltip bl-outliner-drag', hidden: true });
+  document.body.append(dragTip);
+  function moveDrag(e) {
+    dragTip.textContent = area.dragUpdate(blenderEvent(wmEvent(e, 'MOUSEMOVE', 'NOTHING')));
+    Object.assign(dragTip.style, { left: `${e.clientX}px`, top: `${e.clientY}px` });
+    dragTip.hidden = !dragTip.textContent;
+    draw();
+  }
+  function endDrag(result) {
+    dragTip.hidden = true;
+    if (result) return finished(result);
+    area.dragCancel();
+    draw();
+  }
 
   const finishedModal = (result) => { if (!area.modal) finished(result); else draw(); };
 
@@ -321,5 +345,5 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
   const unsubscribe = world.collections.subscribe(() => refresh());
   draw();
 
-  return { refresh, draw, area, dispose() { resized.disconnect(); unsubscribe(); area.cancel(); } };
+  return { refresh, draw, area, dispose() { resized.disconnect(); unsubscribe(); area.cancel(); dragTip.remove(); } };
 }
