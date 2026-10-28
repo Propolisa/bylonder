@@ -21,7 +21,6 @@ import { operatorSchema } from './mesh-catalog.js';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { mesh_serialize, mesh_deserialize } from '../../blenkernel/mesh/mesh.js';
 import { objectMesh } from './object-mesh.js';
-import { viewportModifiers, evaluated } from '../../modifiers/blender.js';
 import { mesh_batch_cache_apply } from '../../draw/mesh-batch-cache.js';
 import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap, operatorKeys } from '../../windowmanager/input/keymap.js';
@@ -55,26 +54,22 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     world.onModeChange?.();
   }
 
-  // The object's modifiers evaluated on an edit mesh: the final Mesh to draw shaded, or null without modifiers.
-  function final(edit) {
-    const modifiers = viewportModifiers(world.modifiers?.stack(em.object) ?? []);
-    if (!modifiers.length) return null;
-    try {
-      return evaluated(edit.evaluate(modifiers));
-    } catch (error) {
-      notify(error.message);
-      return null;
-    }
+  // Draws shaded the final Mesh of the object's modifiers, or without them the edit mesh's Mesh.
+  function shade(final, mesh, topology) {
+    em.final = final;
+    mesh_batch_cache_apply(final ?? mesh, em.object, { topology: topology || !!final });
   }
 
   // Draws a Mesh of an edit mesh (the edit mesh, or a preview's copy of it), its active element given as
   // { htype, index }, redrawing what changed (EXTRACT_*). With modifiers the shaded mesh is their result and the
-  // overlay the edit mesh, as Blender draws without On Cage.
+  // overlay the edit mesh, as Blender draws without On Cage. Their result can come later, off the main thread; until
+  // then the last one stays drawn.
   function draw(mesh, active, extract = EXTRACT_ALL, edit = em.edit) {
     const [topology, positions, flags] = [EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS].map((what) => !!(extract & what));
     if (topology || positions) {
-      em.final = final(edit);
-      mesh_batch_cache_apply(em.final ?? mesh, em.object, { topology: topology || !!em.final });
+      const { object } = em, final = world.modifiers?.editFinal(object, mesh, edit.selectmode) ?? null;
+      if (!(final instanceof Promise)) shade(final, mesh, topology);
+      else final.then((result) => { if (result !== undefined && em?.object === object) shade(result, em.mesh, true); });
     }
     em.overlay.update(mesh, { selectmode: em.edit.selectmode, active: active && { type: ACTIVE_TYPE[active.htype], index: active.index }, topology, positions, flags });
   }
@@ -142,7 +137,9 @@ export function createEditMode({ world, editor, views, history, notify, changed 
         const hit = scene.pick(p.x, p.y, (m) => m === object, false, camera);
         if (!hit?.hit) return -1;
         const face = (em.final ?? em.mesh).corner_tri_faces()[hit.faceId];
-        return em.final ? (em.final.orig_index('FACE')?.[face] ?? -1) : face;
+        // A final Mesh drawn while a newer one evaluates can name faces the edit mesh no longer has.
+        const original = em.final ? (em.final.orig_index('FACE')?.[face] ?? -1) : face;
+        return original < em.mesh.faces_num ? original : -1;
       },
     };
   }

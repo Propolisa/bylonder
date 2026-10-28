@@ -2,7 +2,8 @@ import { Matrix, Vector3, VertexData } from '@babylonjs/core';
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { arrayDefinition, realize } from './array.js';
-import { blenderModifierDefinitions, evaluateBlenderModifiers } from './blender.js';
+import { blenderModifierDefinitions, evaluation, estimatedFaces } from './blender.js';
+import { evaluateHere } from './evaluator.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { mesh_batch_cache_vertex_data } from '../draw/mesh-batch-cache.js';
 import { mesh_serialize } from '../blenkernel/mesh/mesh.js';
@@ -26,10 +27,20 @@ export function curve(node,input,{closed=false}={}){
   const paths=Array.isArray(input)&&input[0]?.points?input:[{points:input.getPoints?.()||input,closed}];
   node.metadata={...node.metadata,wbCurve:paths.map(path=>({closed:!!path.closed,points:path.points.map(p=>{const values=p.asArray?.()||p;if(!Array.isArray(values)||values.length!==3||!values.every(Number.isFinite))throw Error('Curve points require three finite coordinates');return [...values];})}))};return node;
 }
-export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={}){
-  const cache=new Map(),errors=new Map(),listeners=new Set();let applying=false;
+// More faces than this, by a stack's estimate, are asked about before evaluating.
+const ASK_FACES=4e6;
+// Gives fn's value, or what its promise resolves to, to ok, and its error to fail: without jobs, evaluations are
+// synchronous (tests).
+const settle=(fn,ok,fail)=>{let value;try{value=fn();}catch(error){return fail(error);}return value instanceof Promise?value.then(ok,fail):ok(value);};
+const then=(value,fn)=>value instanceof Promise?value.then(fn):fn(value);
+// Errors that go back to what evaluated last: the user stopped the evaluation, or the module failed.
+const reverts=error=>error.by==='user'||error.name==='EvaluationFailed';
+// `evaluate` runs Blender's modifiers (evaluator.js); `jobs` (wm-jobs.js) runs evaluations off the main thread.
+export function createModifierSystem(world,{commit=()=>{},notify=console.warn,evaluate:evaluator=evaluateHere,jobs=null}={}){
+  const cache=new Map(),errors=new Map(),listeners=new Set(),requested=new Map(),good=new Map();let applying=false;
   const emit=()=>listeners.forEach(fn=>fn());
   const target=id=>world.objects.find(n=>nodeId(n)===id&&!deleted(n));
+  const run=(owner,name,work)=>jobs?jobs.run(owner,name,work):work();
   function registerChannels(node,modifier){
     const definition=modifierDefinitions.get(modifier.type);if(!definition)return;
     for(const [path,def] of Object.entries(definition.schema))if(def.animatable!==false)world.animation?.register({id:'modifier:'+nodeId(node)+':'+modifier.id,path,label:def.label,group:node.name+' › '+modifier.name,options:def.options,
@@ -52,30 +63,67 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
     if(curvePaths){const transform=curve.computeWorldMatrix(true).multiply(inverse);curvePaths=curvePaths.map(path=>({...path,points:path.points.map(point=>{const v=Vector3.TransformCoordinates(Vector3.FromArray(point),transform);return v.asArray();})}));}
     return {objectMatrix,curvePaths};
   }
-  const blenderMesh=(node,modifiers)=>evaluateBlenderModifiers(objectMesh(node,VertexData.Parse(base(node))),modifiers);
+  const jobName=(node,modifiers)=>node.name+' | '+modifiers.map(m=>m.name).join(', ');
+  const blenderModifiers=stack=>stack.filter(m=>m.showViewport&&modifierDefinitions.get(m.type)?.mesh);
+  // Work running Blender's modifiers on a Mesh, copied now. It asks first when they would make very many faces.
+  function blenderWork(mesh,modifiers,selectmode){
+    const input=evaluation(mesh,modifiers,selectmode),faces=estimatedFaces(mesh,modifiers);
+    const question=`About ${Math.round(faces).toLocaleString('en-US')} faces, which can take very long or run out of memory`;
+    return (signal,job)=>then(faces>ASK_FACES?job?.ask(question):null,()=>evaluator(input,signal));
+  }
+  const objectWork=(node,modifiers)=>blenderWork(objectMesh(node,VertexData.Parse(base(node))),modifiers);
   // Blender's modifiers run first, together, in the module on the object's Mesh; Bylonder's then take their result.
-  function evaluate(node,stack=modifierStack(node)){
+  function evaluate(node,stack,signal,job){
     const visible=stack.filter(m=>m.showViewport),definitions=visible.map(m=>modifierDefinitions.get(m.type));
     if(!definitions.every(Boolean))throw Error('Unsupported modifier: '+visible[definitions.indexOf(undefined)].type);
     const leading=definitions.findIndex(d=>!d.mesh),count=leading<0?visible.length:leading;
     if(definitions.slice(count).some(d=>d.mesh))throw Error('Blender modifiers go before '+definitions[count].name+' in the stack.');
-    const data=count?mesh_batch_cache_vertex_data(blenderMesh(node,visible.slice(0,count))).serialize():base(node);
-    let result={data,matrices:[Matrix.Identity()]};
-    for(const modifier of visible.slice(count))result=modifierDefinitions.get(modifier.type).evaluate(result,modifier,context(node,modifier));
-    return result;
+    const after=visible.slice(count);
+    const finish=mesh=>{
+      // Bylonder's modifiers take serialized data; drawing takes typed arrays, which serializing a big mesh is slow to leave.
+      const data=mesh&&mesh_batch_cache_vertex_data(mesh);
+      let result={data:data?(after.length?data.serialize():data):base(node),matrices:[Matrix.Identity()]};
+      for(const modifier of after)result=modifierDefinitions.get(modifier.type).evaluate(result,modifier,context(node,modifier));
+      return result;
+    };
+    return count?then(objectWork(node,visible.slice(0,count))(signal,job),finish):finish(null);
   }
-  function draw(node,result){
+  function draw(node,result,request){
     applying=true;
     try{
       node.thinInstanceSetBuffer('matrix',null);node.makeGeometryUnique();VertexData.Parse(result.data).applyToMesh(node);
       if(result.matrices.length!==1||!result.matrices[0].isIdentity()){
         const buffer=new Float32Array(result.matrices.length*16);result.matrices.forEach((m,i)=>m.copyToArray(buffer,i*16));node.thinInstanceSetBuffer('matrix',buffer,16,true);node.thinInstanceEnablePicking=true;node.thinInstanceRefreshBoundingInfo(true);
-      }else node.refreshBoundingInfo();
-      cache.set(node,{signature:signature(node),geometry:node.geometry,result,base:node.metadata.wbModifierBase,creation:node.metadata.wbCreation});
+      }
+      cache.set(node,{signature:request.signature,geometry:node.geometry,result,base:request.base,creation:request.creation});
+      good.set(node,request.stack);
     }finally{applying=false;}
   }
   function signature(node){
     return JSON.stringify([modifierStack(node),modifierStack(node).map(m=>{const c=context(node,m);return [c.objectMatrix?.asArray(),c.curvePaths];})]);
+  }
+  function report(node,error){const text=error.message;if(errors.get(nodeId(node))!==text){errors.set(nodeId(node),text);notify(text);emit();}}
+  // Goes back to the stack that evaluated last, as an undo step. When that is the stack as it is (the geometry made
+  // the evaluation too much), Blender's modifiers are hidden in the viewport instead.
+  function revert(node,name,error){
+    const last=good.get(node),stack=modifierStack(node);
+    if(last&&JSON.stringify(last)!==JSON.stringify(stack))node.metadata.wbModifiers=structuredClone(last);
+    else for(const m of blenderModifiers(stack))m.showViewport=false;
+    notify(name+': '+(error.by==='user'?'cancelled':error.message));commit();emit();
+  }
+  // Evaluates an object's stack as a job, drawing the last result until it is done.
+  function start(node,signature,base){
+    const stack=structuredClone(modifierStack(node)),request={signature,base,creation:node.metadata.wbCreation,stack},name=jobName(node,blenderModifiers(stack));
+    const done=()=>{request.done=true;if(requested.get(node)===request)requested.delete(node);};
+    requested.set(node,request);
+    request.promise=settle(()=>run(node,name,(signal,job)=>evaluate(node,stack,signal,job)),result=>{
+      done();if(node.isDisposed())return;draw(node,result,request);errors.delete(nodeId(node));
+    },error=>{
+      if(error.by==='superseded')return done();
+      // A failed stack stays requested, so it is not evaluated again until it changes.
+      if(!reverts(error)){request.done=true;return report(node,error);}
+      done();revert(node,name,error);
+    });
   }
   const api={
     definitions:modifierDefinitions,stack:modifierStack,errors,
@@ -94,9 +142,28 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
     remove(node,id){node.metadata.wbModifiers=modifierStack(node).filter(m=>m.id!==id);api.refresh();commit();emit();},
     move(node,id,index){const stack=modifierStack(node),old=stack.findIndex(m=>m.id===id);if(old<0)return;stack.splice(Math.max(0,Math.min(stack.length-1,index)),0,stack.splice(old,1)[0]);api.refresh();commit();emit();},
     duplicate(node,id){const source=modifierStack(node).find(m=>m.id===id);if(source){const copy=api.add(node,source.type,structuredClone(source.values));api.move(node,copy.id,modifierStack(node).indexOf(source)+1);return copy;}},
-    apply(node,id){const modifier=modifierStack(node).find(m=>m.id===id);if(!modifier)return;const one=[{...modifier,showViewport:true}];
-      if(modifierDefinitions.get(modifier.type).mesh){const mesh=blenderMesh(node,one);node.metadata.wbModifierBase=mesh_batch_cache_vertex_data(mesh).serialize();node.metadata.wbCreation={mesh:mesh_serialize(mesh)};}
-      else{const result=evaluate(node,one),data=realize(result.data,result.matrices);node.metadata.wbModifierBase=data;node.metadata.wbCreation={vertices:data,material:node.material?.name||null};}node.metadata.wbModifiers=modifierStack(node).filter(m=>m.id!==id);cache.delete(node);api.refresh();commit();emit();},
+    // Applies a modifier, as a job of its own: a promise with jobs.
+    apply(node,id){
+      const modifier=modifierStack(node).find(m=>m.id===id);if(!modifier)return;
+      const one=[{...modifier,showViewport:true}],blender=!!modifierDefinitions.get(modifier.type).mesh,from=node.metadata.wbModifierBase;
+      return then(run({},'Apply '+jobName(node,one),blender?objectWork(node,one):(signal,job)=>evaluate(node,one,signal,job)),result=>{
+        if(node.isDisposed()||node.metadata.wbModifierBase!==from||!modifierStack(node).includes(modifier))throw Error(node.name+' changed while applying '+modifier.name);
+        if(blender){node.metadata.wbModifierBase=mesh_batch_cache_vertex_data(result).serialize();node.metadata.wbCreation={mesh:mesh_serialize(result)};}
+        else{const data=realize(result.data,result.matrices);node.metadata.wbModifierBase=data;node.metadata.wbCreation={vertices:data,material:node.material?.name||null};}
+        node.metadata.wbModifiers=modifierStack(node).filter(m=>m.id!==id);cache.delete(node);api.refresh();commit();emit();
+      });
+    },
+    // An object's Blender modifiers in Edit Mode, on a Mesh of its edit mesh in a select mode: the final Mesh, null
+    // without modifiers or when they fail, or undefined when a newer evaluation replaced this one; a promise with jobs.
+    editFinal(node,mesh,selectmode){
+      const stack=structuredClone(modifierStack(node)),modifiers=blenderModifiers(stack),name=jobName(node,modifiers);
+      if(!modifiers.length)return null;
+      return settle(()=>run(node,name,blenderWork(mesh,modifiers,selectmode)),final=>{good.set(node,stack);return final;},error=>{
+        if(error.by==='superseded')return undefined;
+        if(reverts(error))revert(node,name,error);else notify(error.message);
+        return null;
+      });
+    },
     copyToSelected(node,id,nodes){const m=modifierStack(node).find(m=>m.id===id);if(m)for(const other of nodes)if(other!==node&&other.getTotalVertices?.())api.add(other,m.type,structuredClone(m.values));},
     refresh(){
       if(applying)return;
@@ -111,14 +178,16 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn}={
         try{
           for(const modifier of stack)registerChannels(node,modifier);
           if(prior&&(node.geometry!==prior.geometry||node.metadata.wbCreation!==prior.creation)&&node.metadata.wbModifierBase===prior.base){node.metadata.wbModifierBase=meshBase(node);cache.delete(node);}
-          const sig=signature(node);if(cache.get(node)?.signature===sig&&cache.get(node)?.base===node.metadata.wbModifierBase)continue;
-          draw(node,evaluate(node));errors.delete(nodeId(node));
-        }catch(error){const text=error.message;if(errors.get(nodeId(node))!==text){errors.set(nodeId(node),text);notify(text);emit();}}
+          const sig=signature(node),from=node.metadata.wbModifierBase,request=requested.get(node),drawn=cache.get(node);
+          if(drawn?.signature===sig&&drawn.base===from){if(request){requested.delete(node);jobs?.cancel(node);}continue;}
+          if(request?.signature!==sig||request.base!==from)start(node,sig,from);
+        }catch(error){report(node,error);}
       }
     },
+    // Resolves once every object's stack is drawn as it now is, as a render needs it.
+    async settled(){for(;;){api.refresh();const pending=[...requested.values()].filter(r=>!r.done).map(r=>r.promise);if(!pending.length)return;await Promise.all(pending);}},
     source:node=>structuredClone(node.metadata?.wbModifierBase||VertexData.ExtractFromMesh(node).serialize()),
-    evaluated:node=>evaluate(node),
-    dispose(){for(const [node] of cache)if(!node.isDisposed()){node.thinInstanceSetBuffer('matrix',null);if(node.metadata?.wbModifierBase)VertexData.Parse(node.metadata.wbModifierBase).applyToMesh(node);}cache.clear();listeners.clear();}
+    dispose(){for(const node of requested.keys())jobs?.cancel(node);for(const [node] of cache)if(!node.isDisposed()){node.thinInstanceSetBuffer('matrix',null);if(node.metadata?.wbModifierBase)VertexData.Parse(node.metadata.wbModifierBase).applyToMesh(node);}cache.clear();listeners.clear();}
   };
   return api;
 }

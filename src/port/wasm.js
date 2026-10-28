@@ -26,10 +26,16 @@ function wasiFor(memory) {
 // Blender symbols a module still lacks (tools/blender-port/wasm_module.py lists them): reaching one is a gap to port.
 const missing = new Proxy({}, { get: (_, name) => () => { throw new Error(`Blender's ${name} is not in this WebAssembly module`); } });
 
+// Compiled modules by URL, compiled once per realm; a worker is given its creator's (provideModule) instead of
+// compiling the bytes again.
+const compiled = new Map();
+const read = async (url) => (url.protocol === 'file:' ? process.getBuiltinModule('fs/promises').readFile(url) : (await fetch(url)).arrayBuffer());
+export const compile = (url) => compiled.get(url.href) ?? compiled.set(url.href, read(url).then((bytes) => WebAssembly.compile(bytes))).get(url.href);
+export const provideModule = (url, module) => compiled.set(url.href, Promise.resolve(module));
+
 export async function instantiate(url) {
-  const bytes = url.protocol === 'file:' ? await process.getBuiltinModule('fs/promises').readFile(url) : await (await fetch(url)).arrayBuffer();
   let memory;
-  const { instance } = await WebAssembly.instantiate(bytes, { wasi_snapshot_preview1: wasiFor(() => memory), env: missing });
+  const instance = await WebAssembly.instantiate(await compile(url), { wasi_snapshot_preview1: wasiFor(() => memory), env: missing });
   memory = instance.exports.memory;
   instance.exports._initialize?.();
   return new Heap(instance.exports);

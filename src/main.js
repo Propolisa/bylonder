@@ -43,6 +43,8 @@ import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
+import { createJobs } from "./windowmanager/wm-jobs.js";
+import { createRunningJobs } from "./editors/interface/running-jobs.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -117,10 +119,14 @@ const commit = () => history?.commit();
 let views;
 // The 3D Viewports among the engine views (the compositor backdrop is the other kind).
 const viewports = () => views?.all.filter((view) => view.nav) || [];
+// Modifier evaluations off the main thread, shown with Cancel once they take long, asking before enormous ones.
+const jobs = createJobs({ ask: true });
+const runningJobs = createRunningJobs(document.body.appendChild(document.createElement("div")), jobs);
 let built;
 try {
   built = await createWorld({ input, engine, canvas, hooks: {
     commit,
+    jobs,
     saveOverrides: () => saveOverrides(),
     onAnimation: (data) => send("animation", data),
     notify,
@@ -541,6 +547,8 @@ function dispose() {
   sequencerAdapter.dispose();
   unsubscribeAnimation();
   world.modifiers.dispose();
+  jobs.dispose();
+  runningJobs.dispose();
   sdk.dispose();
   creator.dispose();
   world.editMode.dispose();
