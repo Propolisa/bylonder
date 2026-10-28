@@ -53,6 +53,35 @@ const operatorTypes = new Map(Array.from({ length: x.operator_count() }, (_, i) 
 }));
 export const hasOperator = (idname) => operatorTypes.has(idname);
 
+// Runs a Blender operator's exec in a context (bContext), with properties by name (an enum by its item's identifier, an
+// enum flag by a list of them; the rest keep their defaults). Returns its status flags (0 when it does not poll) and the
+// message of the last report it made for the user.
+function runOperator(C, idname, props) {
+  if (!operatorTypes.has(idname)) throw new Error(`${idname} is not in this WebAssembly module`);
+  const op = x.operator_new(operatorTypes.get(idname));
+  try {
+    for (const [name, value] of Object.entries(props)) {
+      const numbers = Float64Array.from([value].flat(), Number);
+      const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
+      const ok = withString(name, (namePointer) => items !== null
+        ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
+        : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
+      if (!ok) throw new Error(`${idname} has no property ${name} = ${value}`);
+    }
+    const status = x.operator_exec(C, op), report = x.operator_report(op);
+    return { status, report: report ? cString(report) : undefined };
+  } finally {
+    x.operator_free(op);
+  }
+}
+const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
+// An enum property's items as the operator's UI lists them in a context (its item function, as Blender's menus call
+// it): [identifier, name] pairs.
+function operatorEnumItems(C, idname, prop) {
+  const text = withString(prop, (name) => cString(x.operator_enum_items(C, operatorTypes.get(idname), name)));
+  return text.split('\n').filter(Boolean).map((line) => line.split('\t'));
+}
+
 // wmOperatorStatus flags.
 export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4;
 
@@ -165,10 +194,12 @@ const freeing = new FinalizationRegistry((context) => x.edit_context_free(contex
 // released then.
 export class EditMesh {
   #context;
+  #C;
   #object_to_world = null;
 
   constructor(bm) {
     this.#context = x.edit_context_new(bm);
+    this.#C = x.edit_context_C(this.#context);
     freeing.register(this, this.#context, this);
   }
 
@@ -235,36 +266,14 @@ export class EditMesh {
     return ownedMesh(this.extract(EXTRACT_ALL));
   }
 
-  // Runs a Blender mesh operator's exec, with properties by name (an enum by its item's identifier, an enum flag by a
-  // list of them; the rest keep their defaults). Returns its status flags (0 when it does not poll) and the message of
-  // the last report it made for the user.
-  run(idname, props = {}) {
-    const op = x.operator_new(operatorTypes.get(idname));
-    try {
-      for (const [name, value] of Object.entries(props)) {
-        const numbers = Float64Array.from([value].flat(), Number);
-        const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
-        const ok = withString(name, (namePointer) => items !== null
-          ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
-          : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
-        if (!ok) throw new Error(`${idname} has no property ${name} = ${value}`);
-      }
-      const status = x.operator_exec(this.#context, op), report = x.operator_report(op);
-      return { status, report: report ? cString(report) : undefined };
-    } finally {
-      x.operator_free(op);
-    }
-  }
+  // Runs a Blender operator's exec on the edit mesh, as runOperator takes it.
+  run(idname, props = {}) { return runOperator(this.#C, idname, props); }
 
   // Whether an operator polls for this edit mesh.
-  poll(idname) { return !!x.operator_poll(this.#context, operatorTypes.get(idname)); }
+  poll(idname) { return pollOperator(this.#C, idname); }
 
-  // An enum property's items as the operator's UI lists them for this edit mesh (its item function, as Blender's
-  // menus call it): [identifier, name] pairs.
-  enumItems(idname, prop) {
-    const text = withString(prop, (name) => cString(x.operator_enum_items(this.#context, operatorTypes.get(idname), name)));
-    return text.split('\n').filter(Boolean).map((line) => line.split('\t'));
-  }
+  // An enum property's items as the operator's UI lists them for this edit mesh.
+  enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
 
   // The selection history (BMesh.selected), oldest first, as { htype, index }.
   get history() {
@@ -302,4 +311,99 @@ export class EditMesh {
   setCoords(indices, coords) {
     withArrays([Int32Array.from(indices), Float32Array.from(coords)], ([i, c]) => x.bm_vert_coords_set(this.#bm, i, c, indices.length));
   }
+}
+
+const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 11 };
+const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
+// A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
+const DOMAINS = { POINT: 0, EDGE: 1, FACE: 2, CORNER: 3 };
+const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num', CORNER: 'corners_num' };
+const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
+
+// Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
+// selection and the active object, and the context operators run in. Other subsystems add their IDs to `bmain` and
+// reach an object's data by `data(ob)`. An object is named by the address
+// add() gives; transforms are in Blender's axes, matrices column-major, as an object's RNA names them.
+export class BlenderMain {
+  #context = x.main_new();
+  #C = x.main_C(this.#context);
+  #attributes = new Map();
+
+  // An object of a type (EMPTY, MESH, CURVE, FONT, LIGHT, CAMERA) with new data of its type.
+  add(type, name) { return withString(name, (p) => x.main_object_add(this.#context, OBJECT_TYPES[type], p)) >>> 0; }
+  remove(ob) {
+    this.#attributes.delete(ob);
+    x.main_object_remove(this.#context, ob);
+  }
+
+  // Its base in the view layer: whether its collection shows it, whether it is hidden, unselectable, selected or active.
+  setBase(ob, { visible = true, hidden = false, hide_select = false, select = false, active = false }) {
+    x.main_base_set(this.#context, ob, visible, hidden, hide_select, select, active);
+  }
+  setParent(ob, parent) { x.object_parent_set(ob, parent ?? 0); }
+  setMode(ob, mode) { x.object_mode_set(ob, mode === 'EDIT' ? 1 : 0); }
+
+  // The object's DNA (ObjectFields in main-api.cc), read and written in place.
+  #fields(ob) {
+    const [location, euler, quaternion, scale, mode, parentinv, world, recalc, dataRecalc] = new Uint32Array(x.memory.buffer, x.object_fields(ob) >>> 0, 9);
+    const floats = (p, n) => new Float32Array(x.memory.buffer, p, n);
+    return { location: floats(location, 3), rotation_euler: floats(euler, 3), rotation_quaternion: floats(quaternion, 4), scale: floats(scale, 3),
+      rotation_mode: new Int16Array(x.memory.buffer, mode, 1), matrix_parent_inverse: floats(parentinv, 16), matrix_world: floats(world, 16),
+      recalc: new Uint32Array(x.memory.buffer, recalc, 1), dataRecalc: dataRecalc && new Uint32Array(x.memory.buffer, dataRecalc, 1) };
+  }
+  // location, rotation_mode, rotation_euler, rotation_quaternion, scale, matrix_parent_inverse and matrix_world.
+  transform(ob) {
+    const { rotation_mode, recalc, dataRecalc, ...arrays } = this.#fields(ob);
+    return { rotation_mode: ROTATION_MODES[rotation_mode[0]], ...Object.fromEntries(Object.entries(arrays).map(([name, values]) => [name, Array.from(values)])) };
+  }
+  // Writes what it is given of transform()'s values but matrix_world, which evaluate() gives.
+  setTransform(ob, { rotation_mode, matrix_world, ...arrays }) {
+    const fields = this.#fields(ob);
+    if (rotation_mode) fields.rotation_mode[0] = ROTATION_MODES.indexOf(rotation_mode);
+    for (const [name, values] of Object.entries(arrays)) fields[name].set(values);
+  }
+  // Folds an object's parent inverse into its own transform, keeping where it is.
+  foldParentInverse(ob) { x.object_parent_inverse_fold(ob); }
+
+  // What the last operator tagged for an update (ID_RECALC_*) on an object and on its data, until evaluate().
+  tags(ob) {
+    const { recalc, dataRecalc } = this.#fields(ob);
+    return { object: recalc[0], data: dataRecalc?.[0] ?? 0 };
+  }
+
+  // The scene's 3D cursor location and its pivot point (V3D_AROUND_*), which operators read.
+  set cursor(location) { new Float32Array(x.memory.buffer, x.main_cursor(this.#context) >>> 0, 3).set(location); }
+  set pivotPoint(pivot) { x.main_pivot_point_set(this.#context, pivot); }
+
+  // World matrices, parents first, as the depsgraph evaluates them; clears the tags.
+  evaluate() { x.main_evaluate(this.#context); }
+
+  // A mesh object's Mesh, with the attributes Blender's Mesh has types for.
+  setMesh(ob, mesh) {
+    withArrays(meshArrays(mesh).slice(0, 5), ([p, e, f, cv, ce]) =>
+      x.object_mesh_set(ob, mesh.verts_num, p, mesh.edges_num, e, mesh.faces_num, f, cv, ce));
+    const attributes = [...mesh.attributes].filter(([, { type }]) => ATTRIBUTE_TYPES[type]);
+    for (const [name, { domain, type, data }] of attributes) {
+      const [code, Type] = ATTRIBUTE_TYPES[type];
+      withString(name, (p) => withArrays([Type.from(data)], ([values]) => x.object_mesh_attribute_add(ob, p, DOMAINS[domain], code, values)));
+    }
+    this.#attributes.set(ob, attributes.map(([name, { domain, type }]) => [name, { domain, type }]));
+  }
+  // A copy of a mesh object's Mesh, with the attributes setMesh gave it.
+  mesh(ob) {
+    const mesh = extractedMesh(x.object_mesh_extract(this.#context, ob) >>> 0);
+    mesh.attributes = new Map((this.#attributes.get(ob) ?? []).map(([name, { domain, type }]) => {
+      const [, Type, size] = ATTRIBUTE_TYPES[type], pointer = withString(name, (p) => x.object_mesh_attribute(ob, p)) >>> 0;
+      return [name, { domain, type, data: new Type(x.memory.buffer, pointer, mesh[DOMAIN_SIZES[domain]] * size) }];
+    }));
+    return ownedMesh(mesh);
+  }
+
+  // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
+  get bmain() { return x.main_bmain(this.#context) >>> 0; }
+  data(ob) { return x.object_data(ob) >>> 0; }
+
+  run(idname, props = {}) { return runOperator(this.#C, idname, props); }
+  poll(idname) { return pollOperator(this.#C, idname); }
+  enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
 }

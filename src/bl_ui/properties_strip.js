@@ -1199,7 +1199,7 @@ export var STRIP_PT_time =  __class__ ('STRIP_PT_time', [StripButtonsPanel, Pane
 			for (var x of length_list) {
 				__accu0__.append (len (x));
 			}
-			return py_iter (__accu0__);
+			return __accu0__;
 		}) ());
 		var max_factor = (1.9 - max_length) / 30;
 		var factor = 0.45;

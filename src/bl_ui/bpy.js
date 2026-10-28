@@ -9,7 +9,7 @@ export {app, utils, _types, _app, path};
 var __name__ = 'bpy';
 export var data = _app.data;
 export var types = _app.types;
-types.Modifier = _types.Modifier;
+Object.assign(types, _types)
 export var context = _app.context;
 
 //# sourceMappingURL=bpy.map

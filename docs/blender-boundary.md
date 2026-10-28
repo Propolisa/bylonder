@@ -30,19 +30,59 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 
 ## The WASM side
 
-`tools/blender-port/wasm/editor-context.cc` builds its own small context around the edit BMesh: a Scene with ToolSettings and one ViewLayer, one Object in Edit Mode with its Mesh, found through the context store. `operator-properties.cc` gives operators and modifier DNA structs RNA by identifier. It should mirror the JS RNA, not hold Bylonder state of its own:
+The module (`src/bmesh/bmesh.wasm`) runs Blender's C++ in two worlds. Both answer the context as Blender does, run operators by their own exec (`operator_exec` on a `bContext`) and take their properties through `operator-properties.cc`, which gives operators and DNA structs RNA by identifier.
 
-- What it reads from Bylonder are the same properties under the same names, set from the JS structs before an operator runs: `ToolSettings.mesh_select_mode` (`edit_context_selectmode_set`), the object's matrix in Blender's axes (`edit_context_object_matrix_set`, from `location`, `rotation_euler` and `scale`), and a modifier's settings by RNA identifier (as now).
-- Next to mirror, as Bylonder gains them: `scene.unit_settings` (operators and `ED_scene_grid_scale` read `scene->unit`), proportional editing and snapping in ToolSettings, `frame_current` for operators that read time, and the 3D Viewport's `RegionView3D` for view-dependent operators.
-- One list of RNA paths then names everything that crosses, so a value Blender's C++ reads is the value Blender's scripts show.
+- **Edit Mode** (`editor-context.cc`, JS `EditMesh`): a Scene with one Object in Edit Mode, whose edit mesh (BMesh) lives in the module and is the truth while editing.
+- **Blender's data** (`main-api.cc`, JS `BlenderMain`): a `Main` holding objects and their data, one Scene with ToolSettings and one ViewLayer whose Bases hold the selection and the active object, and a window whose screen answers context members through Blender's own `screen_context.cc` (`selected_editable_objects`, `active_object`, ...). Blender's `layer.cc` runs on these Bases. The depsgraph is a stand-in: each ID is its own evaluated copy, `main_evaluate` computes world matrices parents first (`BKE_object_where_is_calc`), and `DEG_id_tag_update` leaves its tags on the ID (`recalc`).
+
+### Who owns what
+
+Bylonder's Babylon scene owns all data; the module holds a mirror for as long as an operator needs it. Decided 2026-10-28.
+
+1. **In, through RNA.** Before an operator polls or runs, each object goes in with the values its RNA struct gives (`rna-bylonder.js`), so a value Blender's C++ reads is the value Blender's scripts show: `location`, `rotation_mode`, `rotation_euler`, `rotation_quaternion`, `scale`, `mode`, its parent, and its base (collection visibility, `hide_get`, `hide_select`, `select_get`, active). Scene values come the same way (`scene.cursor.location`, `tool_settings.transform_pivot_point`). Axes are Blender's: Babylon's (x, y, z) is Blender's (x, z, y).
+2. **Object data.** `main_object_add(type, name)` makes an object with new data of its type as `BKE_object_add` does (`BKE_object_obdata_add_from_type`): a Mesh, Curve (text and curves), Light, Camera, or none for an empty. A subsystem then fills that data from Bylonder's: meshes do it with `object_mesh_set` and `object_mesh_attribute_add`, sent again only when the object's Mesh changed (`wbCreation`) and only for selected objects. Data a subsystem does not fill yet stays Blender's default.
+3. **Out, by tags.** After an operator, what it tagged comes back: `ID_RECALC_TRANSFORM` as the object's transform through RNA, `ID_RECALC_GEOMETRY` as its data (a Mesh becomes the object's Mesh data). An operator that changed data Bylonder does not take back yet changes nothing and says so.
+4. **No parent inverse.** Bylonder's objects have none, so one an operator sets folds into the object's own transform, keeping its world matrix (`object_parent_inverse_fold`). A child left sheared by a parent's uneven scale cannot be held that way; Blender holds it in `matrix_parent_inverse`.
+5. **One undo step** per operator, around the write back (`commands.transaction`).
+
+`editors/object/object-blender.js` does this for Object Mode; `editors/object/object-operators.js` registers the operators it runs.
+
+### Adding a subsystem
+
+- Its Blender sources go in the module's `libraries` (`tools/blender-port/manifest.json`); operators defined in a source listed under `operators` are registered by their own functions. A source that needs header directories of its own lists them as the library's `includes`, so the rest of the build stays cached.
+- Its IDs go in the same Main: data of its own (an Action, a node tree) with `BKE_*_add(main_bmain(), name)` in an export of its API file, object data through `object_data(ob)`. `ID_code_to_RNA_type` in `operator-properties.cc` names the module's ID types for context pointers; add the new type there.
+- Its values cross through the same RNA names: read them from the JS structs before an operator, write them back from what it tagged. Data that has no RNA binding yet gets one in `rna-bylonder.js` first.
+
+### Known limits
+
+Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Blender's auto keying stays off in the module, which has no animation data yet. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+
+## Shared foundations
+
+Every subsystem builds on these, one of each:
+
+- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry). `transpile.py`'s per-class manifest is the interim path until `src/bl_py` replaces `src/bl_ui`.
+- Blender's C: one WebAssembly module (`tools/blender-port`), with one Blender world in it (Main, Scene, ViewLayer, bContext stand-ins) that every subsystem's data (meshes, curves, text, animation) lives in.
+- Data: one RNA layer over Bylonder's data (`src/makesrna/rna-bylonder.js`) and one `bpy.context` (`src/blenkernel/context.js`).
+- Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps. An editor runs its keymaps inside its context area (`inArea(area, ...)`), so operators act on that editor (`contextArea()`) and `wm.call_menu` opens the area's own menu (`area.menu(idname)`); editors never keep operator tables of their own.
+- UI: menus through `src/editors/interface/ui-layout.js`; panels through one layout renderer, with one number field carrying Blender's drag behavior.
 
 ## Workspaces
 
 The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.
 
+- The topbar has Blender's eleven default workspace tabs. A tab opens the screen Bylonder has for it: Scripting opens the code workspace (Text Editor, File Browser, Console beside the scene), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, sculpt and paint modes).
+- The Layout screen is startup.blend's: its split positions are read from the file's area vertices (1920 x 1080) and kept as fractions, which Blender scales with the window; areas stay at least one header high. The topbar and status bar are fixed heights in pixels at UI scale, as Blender's global areas.
+- The topbar's right region is Blender's: the Scene selector and the View Layer selector (the scene window's view layers, set through `send`).
+- Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Run is the Text Editor header's Run Script (Ctrl Enter, also Render > Run), as Blender runs a script from there. Project actions are File, Edit and Render menu entries.
+
 ## Menus
 
 Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order.
+
+## Node editors
+
+The Shader Editor and Compositor build on the same foundations: Blender's node declarations and GLSL run as runtime-registered Babylon blocks, and the editor's Add menu and keys are Blender's menus and keymaps. See `docs/node-editors.md`.
 
 ## Using it
 

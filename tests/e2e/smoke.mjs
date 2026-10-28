@@ -55,7 +55,26 @@ const checks = {
     await app.frame().getByRole("menuitem", { name: /^Delete/ }).first().waitFor();
   },
 
-  async "numpad 7 views from top, A selects all, X deletes, Ctrl Z undoes"() {
+  async "middle mouse orbits and Shift middle mouse pans"() {
+    const view = () => app.frame().evaluate(() => { const c = window.__bylonder.views.input.editorCamera; return { alpha: c.alpha, x: c.target.x }; });
+    const drag = async (shift) => {
+      await app.hover(0.5, 0.5);
+      if (shift) await app.page.keyboard.down("Shift");
+      await app.page.mouse.down({ button: "middle" });
+      const [x, y] = await app.point(0.6, 0.55);
+      await app.page.mouse.move(x, y, { steps: 6 });
+      await app.page.mouse.up({ button: "middle" });
+      if (shift) await app.page.keyboard.up("Shift");
+    };
+    const start = await view();
+    await drag(false);
+    const orbited = await view();
+    assert.notEqual(orbited.alpha, start.alpha, "orbit");
+    await drag(true);
+    assert.notEqual((await view()).x, orbited.x, "pan");
+  },
+
+  async "numpad 7 views from top, A selects all, X asks and deletes, Ctrl Z undoes"() {
     await app.click(0.3, 0.8);
     await app.page.keyboard.press("Numpad7");
     await app.until(() => /Top/.test(document.querySelector(".view-name").textContent));
@@ -63,6 +82,7 @@ const checks = {
     await app.until((b) => b.editor.selection.size === b.world.objects.length);
     const { Objects: [, total] } = await app.stats();
     await app.page.keyboard.press("x");
+    await app.frame().getByRole("menuitem", { name: "Delete" }).click();
     await expectStats(({ Objects }) => Objects[1] === 0);
     await app.page.keyboard.press("Control+z");
     await expectStats(({ Objects }) => Objects[1] === total);

@@ -4,7 +4,6 @@ import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
-import { createContext } from '../../blenkernel/context.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
 
@@ -115,7 +114,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   selectModes.append(...selectModeButtons);
   // Blender's Object Mode menus, from its own scripts over this view's context.
   // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
-  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => createContext(ctx.rna, { space: view }), prop: propBinding(ctx.rna.host), keymaps: () => KEYMAPS });
+  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => world.blenderContext(view), prop: propBinding(ctx.rna.host), keymaps: () => KEYMAPS });
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);

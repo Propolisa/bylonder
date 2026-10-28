@@ -23,7 +23,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   };
   let saved={}, menuElement, hovered=null, frameId, disposed=false;
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
-  const state=reactive({profile:currentProfile(),layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(tree),area:null,factoryCount:0});
+  const state=reactive({profile:currentProfile(),layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(tree),area:null,factoryCount:0,width:0,height:0});
   const extras=Array.isArray(saved.extras)?saved.extras.slice(0,20):[];
   for(const extra of extras)if(typeof extra.id==='string'&&extra.id.startsWith('area:')&&items.slice(0,baseCount).some(item=>item.id===extra.type)){
     const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,element});ids.push(extra.id);
@@ -62,7 +62,9 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
     }
   }
   const schedule=()=>{cancelAnimationFrame(frameId);frameId=requestAnimationFrame(position);};
-  const observer=new ResizeObserver(schedule);observer.observe(host);
+  const observer=new ResizeObserver(()=>{state.width=host.clientWidth;state.height=host.clientHeight;schedule();});observer.observe(host);
+  // Blender keeps each area at least one header high (screen_geom_vertices_scale).
+  const minSize=horizontal=>{const header=parseFloat(getComputedStyle(host).getPropertyValue('--bl-header-h'))||26,length=horizontal?state.height:state.width;return length?Math.min(50,100*header/length):8;};
   const persist=()=>{
     saved[state.profile]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focus,tree:JSON.parse(JSON.stringify(state.tree))};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
     try{localStorage.setItem(storageKey,JSON.stringify(state.remember?saved:{remember:false}));}catch{}
@@ -106,7 +108,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
     const live=node.children.map(hasVisible),available=live.some(Boolean)?live:[true,true];
     return h(Splitpanes,{horizontal:state.layout.horizontal[node.id],maximizePanes:false,pushOtherPanes:false,onResize:schedule,onResized:event=>{
       if(live.every(Boolean)){state.layout.sizes[node.id]=event.panes.map(p=>Math.max(1,p.size));persist();}
-    }},{default:()=>node.children.map((child,i)=>h(Pane,{key:i,size:available[i]?(available[1-i]?state.layout.sizes[node.id][i]:100):0,minSize:available[i]&&available[1-i]?8:0,maxSize:available[i]?100:0,class:{'dock-collapsed':!live[i]}},{default:()=>renderNode(child)}))});
+    }},{default:()=>node.children.map((child,i)=>h(Pane,{key:i,size:available[i]?(available[1-i]?state.layout.sizes[node.id][i]:100):0,minSize:available[i]&&available[1-i]?minSize(state.layout.horizontal[node.id]):0,maxSize:available[i]?100:0,class:{'dock-collapsed':!live[i]}},{default:()=>renderNode(child)}))});
   }
   const setFactory=(type,factory)=>{factories.set(type,factory);state.factoryCount=factories.size;for(const item of items)if(item.type===type&&!instances.has(item.id))instances.set(item.id,factory(item.element,item.id));};
   const split=(slot,horizontal)=>{

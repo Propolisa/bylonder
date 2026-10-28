@@ -1,6 +1,7 @@
 import { renderSettings, setupRenderSettings } from "./render-settings.js";
 import { setupSharing } from "./share-ui.js";
 import { mountWorkspaceLayout } from "./layout.js";
+import { RUNTIME_LAYOUT_KEY } from "../editors/screen/model.js";
 import "./workspace.css";
 import "../theme.css";
 import { mountTopbar } from "./topbar.js";
@@ -325,6 +326,8 @@ async function updateProjects() {
     }),
   );
   if (project) $("project").value = project.id;
+  // Blender's window title names the open file.
+  document.title = project ? `${project.name} - Bylonder` : "Bylonder";
 }
 function renderScenes() {
   const select = $("scene");
@@ -377,7 +380,7 @@ $("scene-actions").append(
   menuButton("", () => newSceneTypes.map(([type, label, title]) => ({ label, title, run: action(async () => {
     const id = addScene(project, type);
     await activateScene(id);
-  }) })), { icon: "add", className: "bl-icon-only", title: "New Scene" }),
+  }) })), { icon: "duplicate", className: "bl-icon-only", title: "New Scene" }),
   Object.assign(iconButton("x", "Delete Scene", action(async () => {
     const scene = sceneList(project).find((s) => s.id === activeSceneId(project));
     if (!confirm(`Delete scene "${scene.name}"?`)) return;
@@ -680,7 +683,7 @@ const openRenderSettings = setupRenderSettings(value => {
 });
 $("render-settings").onclick = openRenderSettings;
 document.addEventListener('dock-reset', () => {
-  try { localStorage.removeItem('workbench:layout:viewport:v1'); } catch {}
+  try { localStorage.removeItem(RUNTIME_LAYOUT_KEY); } catch {}
   frame?.contentWindow.postMessage({channel,type:'reset-layout'},location.origin);
 });
 document.querySelectorAll('[data-code-action]').forEach(button => button.onclick = () => { editor.focus(); editor.trigger('toolbar',button.dataset.codeAction,null); });

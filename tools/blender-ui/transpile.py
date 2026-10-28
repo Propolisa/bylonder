@@ -69,7 +69,7 @@ def fetch(path):
 
 # The modules Blender's scripts import that Bylonder has: its own (the packages here: bpy, mathutils, ...) and
 # Transcrypt's math. Other modules come from Blender's scripts, taken as far as the importing code uses them.
-LOCAL = {d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))} | {'math'}
+LOCAL = {d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))} | {'math', 'copy'}
 
 
 # The Blender modules outside the manifest's scripts that the scripts may import (manifest.json's "modules").
@@ -118,7 +118,10 @@ class FlatImports(ast.NodeTransformer):
 def taken(tree, patterns):
     """The module-level nodes matching patterns ('!' excludes) with what they use from the module, in its order."""
     match = lambda name, ps: any(fnmatch.fnmatchcase(name, p) for p in ps)
-    defined = {defined_name(node): node for node in tree.body if defined_name(node)}
+    defined = {}
+    for node in tree.body:
+        if defined_name(node):
+            defined.setdefault(defined_name(node), []).append(node)
     exclude = [p[1:] for p in patterns if p.startswith('!')]
     wanted, todo = set(), [name for name in defined if match(name, patterns) and not match(name, exclude)]
     while todo:
@@ -126,7 +129,7 @@ def taken(tree, patterns):
         if name in wanted:
             continue
         wanted.add(name)
-        todo += [n.id for n in ast.walk(defined[name]) if isinstance(n, ast.Name) and n.id in defined]
+        todo += [n.id for node in defined[name] for n in ast.walk(node) if isinstance(n, ast.Name) and n.id in defined]
     return [node for node in tree.body if defined_name(node) in wanted]
 
 
@@ -176,7 +179,11 @@ def extract(tree, patterns, modules):
     body = [node for node in imports if node.names] + nodes
     source = ast.unparse(ast.Module(body=hoist_imports(body, importable), type_ignores=[]))
     rewritten = ast.unparse(ast.fix_missing_locations(TranscryptFixes().visit(ast.parse(source))))
-    return rewritten + (HELPERS if rewritten != source else '')
+    return rewritten + (HELPERS if uses_helpers(rewritten) else '')
+
+
+def uses_helpers(source):
+    return re.search(r'\b_(merged|joined|formatted|ellipsis|property|super_classmethod)\b', source) is not None
 
 
 def closure(scripts):
@@ -216,47 +223,6 @@ def defined_name(node):
 
 class TranscryptFixes(ast.NodeTransformer):
     """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
-    classes = []
-
-    def visit_ClassDef(self, node):
-        self.classes.append(node.name)
-        self.generic_visit(node)
-        self.classes.pop()
-        return node
-
-    def visit_FunctionDef(self, node):
-        """super().f(...) in a classmethod, which Transcrypt calls with an undefined self, as the base's f bound to cls."""
-        self.generic_visit(node)
-        if self.classes and any(isinstance(d, ast.Name) and d.id == 'classmethod' for d in node.decorator_list) and node.args.args:
-            cls = node.args.args[0].arg
-            for call in ast.walk(node):
-                if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Call) \
-                        and isinstance(call.func.value.func, ast.Name) and call.func.value.func.id == 'super':
-                    call.func = ast.Call(ast.Name('_super_classmethod', ast.Load()),
-                                         [ast.Name(self.classes[-1], ast.Load()), ast.Name(cls, ast.Load()), ast.Constant(call.func.attr)], [])
-        return node
-
-    def hoist_named(self, node, field):
-        """x := y in an if or return, which Transcrypt compiles wrong, as an assignment before it."""
-        assignments = []
-        class Named(ast.NodeTransformer):
-            def visit_NamedExpr(self, named):
-                self.generic_visit(named)
-                assignments.append(ast.Assign([ast.Name(named.target.id, ast.Store())], named.value))
-                return ast.Name(named.target.id, ast.Load())
-            def visit_Lambda(self, other):
-                return other
-            visit_ListComp = visit_SetComp = visit_DictComp = visit_GeneratorExp = visit_Lambda
-        setattr(node, field, Named().visit(getattr(node, field)))
-        return assignments + [node] if assignments else node
-
-    def visit_If(self, node):
-        self.generic_visit(node)
-        return self.hoist_named(node, 'test')
-
-    def visit_Return(self, node):
-        self.generic_visit(node)
-        return self.hoist_named(node, 'value') if node.value else node
     def visit_Dict(self, node):
         self.generic_visit(node)
         if None not in node.keys:
@@ -274,7 +240,7 @@ class TranscryptFixes(ast.NodeTransformer):
 
     def visit_List(self, node):
         self.generic_visit(node)
-        if not any(isinstance(e, ast.Starred) for e in node.elts):
+        if not isinstance(node.ctx, ast.Load) or not any(isinstance(e, ast.Starred) for e in node.elts):
             return node
         parts, run = [], []
         for element in node.elts:
@@ -291,7 +257,22 @@ class TranscryptFixes(ast.NodeTransformer):
     def visit_Call(self, node):
         """f(a=1, **b) as f(**_merged({'a': 1}, b)): Transcrypt compiles the mix wrong, and marks the dict it unpacks,
         which may be shared, as keyword arguments."""
+        if isinstance(node.func, ast.Name) and node.func.id == 'super':
+            node.func._called = True
         self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == 'super':
+            # super(Class, self) in Class's methods is super(), the only form Transcrypt compiles, and only to reach a
+            # method: the super object itself has no JS equivalent.
+            node.args = []
+            if not getattr(node, '_method', False):
+                return ast.Constant(None)
+        if isinstance(node.func, ast.Name) and node.func.id == 'property' and self.scopes and self.scopes[-1] != 'class':
+            # Transcrypt compiles property() only in a class body; elsewhere it is the runtime's property, by
+            # another name.
+            node.func = ast.Name('_property', ast.Load())
+        if isinstance(node.func, ast.Name) and node.func.id == 'type' and len(node.args) == 3:
+            # type(name, bases, attributes), a new class, as Transcrypt's metaclass makes one.
+            return ast.Call(func=ast.Attribute(ast.Name('type', ast.Load()), '__new__', ast.Load()), args=[ast.Name('type', ast.Load()), *node.args], keywords=[])
         if isinstance(node.func, ast.Name) and node.func.id == 'zip':
             # zip's strict only checks lengths, and Transcrypt's zip takes it for an iterable.
             node.keywords = [k for k in node.keywords if k.arg != 'strict']
@@ -301,27 +282,6 @@ class TranscryptFixes(ast.NodeTransformer):
         node.keywords = [ast.keyword(arg=None, value=ast.Call(func=ast.Name('_merged', ast.Load()), args=self.visit_Dict(merged).args
                                                                 if None in merged.keys else [merged], keywords=[]))]
         return node
-
-    def visit_Match(self, node):
-        """match, which Transcrypt lacks, as if and elif on the subject (value, or and sequence patterns, and _)."""
-        self.generic_visit(node)
-        subject = ast.Name('_subject', ast.Load())
-        def test(pattern, value):
-            if isinstance(pattern, ast.MatchValue):
-                return ast.Compare(value, [ast.Eq()], [pattern.value])
-            if isinstance(pattern, ast.MatchOr):
-                return ast.BoolOp(ast.Or(), [test(p, value) for p in pattern.patterns])
-            if isinstance(pattern, ast.MatchSequence):
-                is_sequence = ast.Call(ast.Name('isinstance', ast.Load()), [value, ast.Tuple([ast.Name('list', ast.Load()), ast.Name('tuple', ast.Load())], ast.Load())], [])
-                length = ast.Compare(ast.Call(ast.Name('len', ast.Load()), [value], []), [ast.Eq()], [ast.Constant(len(pattern.patterns))])
-                items = [test(p, ast.Subscript(value, ast.Constant(i), ast.Load())) for i, p in enumerate(pattern.patterns)]
-                return ast.BoolOp(ast.And(), [is_sequence, length, *items])
-            assert isinstance(pattern, ast.MatchAs) and pattern.pattern is None and pattern.name is None, ast.dump(pattern)
-            return ast.Constant(True)
-        chain = None
-        for case in reversed(node.cases):
-            chain = [ast.If(test(case.pattern, subject), case.body, chain or [])]
-        return [ast.Assign([ast.Name('_subject', ast.Store())], node.subject), *(chain or [])]
 
     def visit_Delete(self, node):
         """del d[k], which Transcrypt compiles to a no-op with operator overloading, as d.pop(k)."""
@@ -340,6 +300,210 @@ class TranscryptFixes(ast.NodeTransformer):
             keywords=[]) for value in node.values]
         return ast.Call(func=ast.Attribute(ast.Constant(''), 'join', ast.Load()), args=[ast.List(elts=parts, ctx=ast.Load())], keywords=[])
 
+    def __init__(self):
+        self.scopes, self.classes = [], []
+
+    def visit_FunctionDef(self, node):
+        """super().f(...) in a classmethod, which Transcrypt calls with an undefined self, as the base's f bound to cls."""
+        self.scopes.append('function')
+        self.generic_visit(node)
+        self.scopes.pop()
+        if self.classes and any(isinstance(d, ast.Name) and d.id == 'classmethod' for d in node.decorator_list) and node.args.args:
+            cls = node.args.args[0].arg
+            for call in ast.walk(node):
+                if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Call) \
+                        and isinstance(call.func.value.func, ast.Name) and call.func.value.func.id == 'super':
+                    call.func = ast.Call(ast.Name('_super_classmethod', ast.Load()),
+                                         [ast.Name(self.classes[-1], ast.Load()), ast.Name(cls, ast.Load()), ast.Constant(call.func.attr)], [])
+        return node
+
+    def hoist_named(self, node, field):
+        """x := y in an if or return, which Transcrypt compiles wrong, as an assignment before it."""
+        assignments = []
+
+        class Named(ast.NodeTransformer):
+            def visit_NamedExpr(self, named):
+                self.generic_visit(named)
+                assignments.append(ast.Assign([ast.Name(named.target.id, ast.Store())], named.value))
+                return ast.Name(named.target.id, ast.Load())
+
+            def visit_Lambda(self, other):
+                return other
+            visit_ListComp = visit_SetComp = visit_DictComp = visit_GeneratorExp = visit_Lambda
+        setattr(node, field, Named().visit(getattr(node, field)))
+        return assignments + [node] if assignments else node
+
+    def visit_If(self, node):
+        self.generic_visit(node)
+        return self.hoist_named(node, 'test')
+
+    def visit_Return(self, node):
+        self.generic_visit(node)
+        return self.hoist_named(node, 'value') if node.value else node
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+
+    def visit_ClassDef(self, node):
+        self.scopes.append('class')
+        self.classes.append(node.name)
+        node = self.dataclass(node)
+        self.classes.pop()
+        self.scopes.pop()
+        return self.annotations(node)
+
+    @staticmethod
+    def annotations(node):
+        """Annotations in a class body: with a value, the assignment; property declarations (how Blender's classes declare
+        their properties), which Transcrypt cannot compile, as the __annotations__ dict Blender reads them from."""
+        node.body = [ast.copy_location(ast.Assign(targets=[s.target], value=s.value), s) if isinstance(s, ast.AnnAssign) and s.value is not None else s
+                     for s in node.body]
+        hints = [s for s in node.body if isinstance(s, ast.AnnAssign)]
+        node.body = [s for s in node.body if s not in hints]
+        # Blender registers the annotations that are property declarations (calls such as BoolProperty(...)); type
+        # hints are dropped.
+        annotated = [s for s in hints if isinstance(s.target, ast.Name) and isinstance(s.annotation, ast.Call)]
+        if not annotated:
+            return ast.fix_missing_locations(node)
+        node.body.insert(0, ast.Assign(targets=[ast.Name('__annotations__', ast.Store())], value=ast.Dict(
+            keys=[ast.Constant(s.target.id) for s in annotated], values=[s.annotation for s in annotated])))
+        return ast.fix_missing_locations(node)
+
+    def visit_AnnAssign(self, node):
+        """Other annotations: an assignment, or nothing without a value."""
+        self.generic_visit(node)
+        if self.scopes and self.scopes[-1] == 'class':
+            return node
+        return ast.copy_location(ast.Assign(targets=[node.target], value=node.value), node) if node.value is not None else None
+
+    def dataclass(self, node):
+        """@dataclass classes, which Transcrypt cannot compile, as classes with the __init__ dataclasses would make from
+        the annotated fields (defaults and field(default_factory=...) included)."""
+        self.generic_visit(node)
+        names = lambda d: d.id if isinstance(d, ast.Name) else d.attr if isinstance(d, ast.Attribute) else names(d.func) if isinstance(d, ast.Call) else ''
+        if not any(names(d) == 'dataclass' for d in node.decorator_list):
+            return node
+        node.decorator_list = [d for d in node.decorator_list if names(d) != 'dataclass']
+        fields, body = [], []
+        for statement in node.body:
+            if isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
+                fields.append((statement.target.id, statement.value))
+            elif not (isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Constant)):
+                body.append(statement)
+        args, assigns = [], []
+        for name, default in fields:
+            factory = isinstance(default, ast.Call) and names(default.func) == 'field' and next(
+                (k.value for k in default.keywords if k.arg == 'default_factory'), None)
+            value = next((k.value for k in default.keywords if k.arg == 'default'), None) if isinstance(default, ast.Call) and names(default.func) == 'field' else default
+            args.append((name, ast.Constant(None) if factory else value))
+            assigns.append(ast.parse(f'self.{name} = {name}').body[0] if not factory else
+                           ast.parse(f'self.{name} = {name} if {name} is not None else {ast.unparse(factory)}()').body[0])
+        required = [a for a in args if a[1] is None]
+        optional = [a for a in args if a[1] is not None]
+        init = ast.FunctionDef(name='__init__', args=ast.arguments(
+            posonlyargs=[], args=[ast.arg('self')] + [ast.arg(n) for n, _ in required + optional], kwonlyargs=[], kw_defaults=[],
+            defaults=[d for _, d in optional]), body=assigns or [ast.Pass()], decorator_list=[], returns=None, type_params=[])
+        node.body = [init] + body
+        return ast.fix_missing_locations(node)
+
+    def visit_With(self, node):
+        """with x as (a, b), which Transcrypt cannot compile, as with x as tmp, then a, b = tmp."""
+        self.generic_visit(node)
+        unpack = []
+        for i, item in enumerate(node.items):
+            if isinstance(item.optional_vars, (ast.Tuple, ast.List)):
+                name = f'_with{i}'
+                unpack.append(ast.Assign(targets=[item.optional_vars], value=ast.Name(name, ast.Load())))
+                item.optional_vars = ast.Name(name, ast.Store())
+        node.body = unpack + node.body
+        return ast.fix_missing_locations(node)
+
+    # Python names JS reserves that Transcrypt does not rename (it renames case, default, new, switch and others to
+    # py_*), renamed alike wherever they are names: variables, parameters and keyword arguments.
+    JS_RESERVED = {'private', 'protected', 'public', 'package', 'interface', 'implements', 'static', 'let', 'var', 'super',
+                   'enum', 'await', 'void', 'typeof', 'instanceof', 'function', 'this', 'delete', 'catch', 'throw', 'const',
+                   'debugger', 'do', 'extends', 'export'}
+
+    def visit_Name(self, node):
+        if node.id in self.JS_RESERVED and not (node.id == 'super' and isinstance(node.ctx, ast.Load) and getattr(node, '_called', False)):
+            node.id += '_'
+        return node
+
+    def visit_arg(self, node):
+        if node.arg in self.JS_RESERVED:
+            node.arg += '_'
+        return node
+
+    def visit_keyword(self, node):
+        self.generic_visit(node)
+        if node.arg in self.JS_RESERVED:
+            node.arg += '_'
+        return node
+
+    def visit_Match(self, node):
+        """match statements, which Transcrypt cannot compile, as an if/elif chain on the subject."""
+        self.generic_visit(node)
+        subject = ast.Name('_match_subject', ast.Load())
+        chain = None
+        for case in reversed(node.cases):
+            test, binds = self.pattern(case.pattern, subject)
+            if case.guard is not None:
+                test = ast.BoolOp(ast.And(), [test, case.guard]) if not (isinstance(test, ast.Constant) and test.value is True) else case.guard
+            body = binds + case.body
+            if isinstance(test, ast.Constant) and test.value is True and not binds and chain is None:
+                chain = body
+                continue
+            chain = [ast.If(test=test, body=body, orelse=chain or [])]
+        out = [ast.Assign(targets=[ast.Name('_match_subject', ast.Store())], value=node.subject)] + (chain or [])
+        return [ast.fix_missing_locations(ast.copy_location(n, node)) for n in out]
+
+    def pattern(self, pattern, subject):
+        """A test of the subject and the assignments of the names the pattern captures."""
+        true = ast.Constant(True)
+        if isinstance(pattern, ast.MatchValue):
+            return ast.Compare(subject, [ast.Eq()], [pattern.value]), []
+        if isinstance(pattern, ast.MatchSingleton):
+            return ast.Compare(subject, [ast.Is()], [ast.Constant(pattern.value)]), []
+        if isinstance(pattern, ast.MatchAs):
+            test, binds = self.pattern(pattern.pattern, subject) if pattern.pattern else (true, [])
+            if pattern.name:
+                binds = binds + [ast.Assign(targets=[ast.Name(pattern.name, ast.Store())], value=subject)]
+            return test, binds
+        if isinstance(pattern, ast.MatchOr):
+            return ast.BoolOp(ast.Or(), [self.pattern(p, subject)[0] for p in pattern.patterns]), []
+        if isinstance(pattern, ast.MatchSequence):
+            tests = [ast.Call(ast.Name('isinstance', ast.Load()), [subject, ast.Tuple([ast.Name('list', ast.Load()), ast.Name('tuple', ast.Load())], ast.Load())], []),
+                     ast.Compare(ast.Call(ast.Name('len', ast.Load()), [subject], []), [ast.Eq()], [ast.Constant(len(pattern.patterns))])]
+            binds = []
+            for i, p in enumerate(pattern.patterns):
+                test, bound = self.pattern(p, ast.Subscript(subject, ast.Constant(i), ast.Load()))
+                if not (isinstance(test, ast.Constant) and test.value is True):
+                    tests.append(test)
+                binds += bound
+            return ast.BoolOp(ast.And(), tests), binds
+        if isinstance(pattern, ast.MatchClass):
+            return ast.Call(ast.Name('isinstance', ast.Load()), [subject, pattern.cls], []), []
+        raise NotImplementedError(f'match pattern {ast.dump(pattern)[:80]}')
+
+    def visit_Constant(self, node):
+        """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel object (identity holds within a module), and
+        bytes literals, which it escapes wrong, as bytes of their values."""
+        if node.value is Ellipsis:
+            return ast.Name('_ellipsis', ast.Load())
+        if isinstance(node.value, bytes):
+            return ast.Call(ast.Name('bytes', ast.Load()), [ast.List([ast.Constant(b) for b in node.value], ast.Load())], [])
+        return node
+
+    def visit_Attribute(self, node):
+        if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'super':
+            node.value._method = True
+        self.generic_visit(node)
+        return node
+
+    def visit_GeneratorExp(self, node):
+        """A generator expression, which Transcrypt makes an iterator that tuple() and list() read as empty, as a list."""
+        self.generic_visit(node)
+        return ast.ListComp(elt=node.elt, generators=node.generators)
+
     def visit_comprehension(self, node):
         """Comprehensions loop by index up to len(), which is 0 for iterators (enumerate, zip, generators): the
         iterable as a list."""
@@ -355,6 +519,13 @@ def _merged(*dicts):
     for d in dicts:
         result.update(d)
     return result
+
+
+_ellipsis = __pragma__('js', '{}', 'Symbol ("Ellipsis")')
+
+
+def _property(fget=None, fset=None, fdel=None, doc=None):
+    return __pragma__('js', '{}', 'property(fget, fset)')
 
 
 def _formatted(value, conversion, spec):
@@ -402,11 +573,21 @@ def hoist_imports(body, importable):
         [node for node in body if not isinstance(node, (ast.Import, ast.ImportFrom))]
 
 
+def node_types():
+    """Blender's shader and compositor node types (src/nodes/blender/node-types.json): idname to name and enums."""
+    types = json.load(open(os.path.join(REPO, 'src', 'nodes', 'blender', 'node-types.json')))
+    return {idname: node for tree in ('shader', 'compositor') for idname, node in types[tree].items()}
+
+
 def rna_module():
-    """bpy/_rna.py: the RNA the scripts read when they load (Modifier's type enum), from src/makesrna/rna-modifiers.json."""
+    """bpy/_rna.py: the RNA the scripts read when they load (Modifier's type enum, from src/makesrna/rna-modifiers.json)
+    or draw (node types' names and enums, from node_types())."""
     modifiers = json.load(open(os.path.join(REPO, 'src', 'makesrna', 'rna-modifiers.json')))
     items = ',\n    '.join(f'_Item({t!r}, {d["name"]!r}, {d["icon"]!r}, {d["description"]!r})' for t, d in modifiers['types'].items())
-    return f'''# Generated by transpile.py from src/makesrna/rna-modifiers.json.
+    enum = lambda p: '_Property([' + ', '.join(f'_Item({i!r}, {n!r}, \'\', {d!r})' for i, n, d in p['items']) + '])'
+    nodes = ',\n    '.join(f'{idname!r}: _Node({node["name"]!r}, {{' + ', '.join(f'{k!r}: {enum(p)}' for k, p in node['properties'].items() if p['type'] == 'ENUM') + '})'
+                           for idname, node in node_types().items())
+    return f'''# Generated by transpile.py from src/makesrna/rna-modifiers.json and src/nodes/blender/node-types.json.
 class _Item:
     def __init__(self, identifier, name, icon, description):
         self.identifier, self.name, self.icon, self.description = identifier, name, icon, description
@@ -425,6 +606,16 @@ class _Struct:
 
 Modifier = _Struct({{'type': _Property([
     {items}])}})
+
+
+class _Node(_Struct):
+    def __init__(self, name, properties):
+        _Struct.__init__(self, properties)
+        self.name, self.translation_context, self.bl_rna = name, '*', self
+
+
+nodes = {{
+    {nodes}}}
 '''
 
 
@@ -435,6 +626,8 @@ def main():
         for package in (d for d in os.listdir(HERE) if os.path.exists(os.path.join(HERE, d, '__init__.py'))):
             shutil.copytree(os.path.join(HERE, package), os.path.join(build, package))
         open(os.path.join(build, 'bpy', '_rna.py'), 'w').write(rna_module())
+        # Node types as bpy.types has them, for the scripts that look one up by name (getattr(bpy.types, idname)).
+        open(os.path.join(build, 'bpy', 'types.py'), 'a').write(''.join(f'\n{idname} = _rna.nodes[{idname!r}]' for idname in node_types()))
         # A script's names, or {names, flags}: Transcrypt options for its Python (-o for operator overloading, -t for
         # Python's truth values). A path with * names every script it matches in Blender's folder.
         scripts = {}

@@ -22,13 +22,39 @@ export function registerOperators(table) {
 export const runOperator = (idname, props = {}) => operators.get(idname).run(props);
 
 // Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls; returns
-// whether it ran. run and poll get the event too.
+// whether it ran. run and poll get the event too. An operator with `confirm: { title, button }` asks first, as
+// WM_operator_confirm_ex does, unless its confirm property (default from Blender's RNA) is off.
 export function invokeOperator(idname, props, event) {
   const operator = operators.get(idname);
   if (!operator || !(operator.supports?.(props) ?? true) || !(operator.poll?.(props, event) ?? true)) return false;
-  operator.run(props, event);
+  const confirm = operator.confirm && (props.confirm ?? rnaOperators[idname]?.properties.confirm?.default ?? true);
+  if (confirm) {
+    import('../editors/interface/menu.js').then(({ openMenu }) =>
+      openMenu([{ label: operator.confirm.button, run: () => operator.run(props, event) }], event, operator.confirm.title));
+  }
+  else operator.run(props, event);
   return true;
 }
+
+// The area an event is handled in, Blender's context area: an editor sets it while its keymaps run, so operators act
+// on that editor. An area is { menu(idname): a Blender menu's popup opener, or null when the area has none, ... }.
+let area = null;
+export function inArea(handled, run) {
+  const outer = area;
+  area = handled;
+  try {
+    return run();
+  } finally {
+    area = outer;
+  }
+}
+export const contextArea = () => area;
+
+// wm.call_menu: one of Blender's menus as a popup, from the area that has it.
+registerOperator('wm.call_menu', {
+  supports: ({ name }) => !!area?.menu(name),
+  run: ({ name }, event) => area.menu(name)(event),
+});
 
 const extension = (idname) => extensions.get(idname) ?? extensions.set(idname, { prepend: [], append: [] }).get(idname);
 // Menu.append and Menu.prepend: draw(self, context), drawing into self.layout.

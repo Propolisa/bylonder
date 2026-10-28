@@ -170,11 +170,11 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 				col.prop (con, 'space_object');
 				var space_object = con.space_object;
 				if (__t__ (space_object)) {
-					var _subject = space_object.py_metatype;
-					if (__t__ (_subject == 'ARMATURE')) {
+					var _match_subject = space_object.py_metatype;
+					if (__t__ (_match_subject == 'ARMATURE')) {
 						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
 					}
-					else if (__t__ (__t__ (isinstance (_subject, tuple ([list, tuple]))) && __t__ (len (_subject) == 2) && __t__ (_subject [0] == 'MESH') && _subject [1] == 'LATTICE')) {
+					else if (__t__ (__t__ (isinstance (_match_subject, tuple ([list, tuple]))) && __t__ (len (_match_subject) == 2) && __t__ (_match_subject [0] == 'MESH') && _match_subject [1] == 'LATTICE')) {
 						col.prop_search (con, 'space_subtarget', con.space_object, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
 					}
 				}
@@ -960,11 +960,11 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 				col.prop (con, 'space_object');
 				var space_object = con.space_object;
 				if (__t__ (space_object)) {
-					var _subject = space_object.py_metatype;
-					if (__t__ (_subject == 'ARMATURE')) {
+					var _match_subject = space_object.py_metatype;
+					if (__t__ (_match_subject == 'ARMATURE')) {
 						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
 					}
-					else if (__t__ (__t__ (isinstance (_subject, tuple ([list, tuple]))) && __t__ (len (_subject) == 2) && __t__ (_subject [0] == 'MESH') && _subject [1] == 'LATTICE')) {
+					else if (__t__ (__t__ (isinstance (_match_subject, tuple ([list, tuple]))) && __t__ (len (_match_subject) == 2) && __t__ (_match_subject [0] == 'MESH') && _match_subject [1] == 'LATTICE')) {
 						col.prop_search (con, 'space_subtarget', con.space_object, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
 					}
 				}
@@ -3259,85 +3259,5 @@ export var BONE_PT_bGeometryAttributeConstraint =  __class__ ('BONE_PT_bGeometry
 	});}
 });
 export var classes = tuple ([OBJECT_PT_constraints, BONE_PT_constraints, OBJECT_PT_bChildOfConstraint, OBJECT_PT_bTrackToConstraint, OBJECT_PT_bKinematicConstraint, OBJECT_PT_bFollowPathConstraint, OBJECT_PT_bRotLimitConstraint, OBJECT_PT_bLocLimitConstraint, OBJECT_PT_bSizeLimitConstraint, OBJECT_PT_bRotateLikeConstraint, OBJECT_PT_bLocateLikeConstraint, OBJECT_PT_bSizeLikeConstraint, OBJECT_PT_bSameVolumeConstraint, OBJECT_PT_bTransLikeConstraint, OBJECT_PT_bActionConstraint, OBJECT_PT_bActionConstraint_target, OBJECT_PT_bActionConstraint_action, OBJECT_PT_bLockTrackConstraint, OBJECT_PT_bDistLimitConstraint, OBJECT_PT_bStretchToConstraint, OBJECT_PT_bMinMaxConstraint, OBJECT_PT_bClampToConstraint, OBJECT_PT_bTransformConstraint, OBJECT_PT_bTransformConstraint_source, OBJECT_PT_bTransformConstraint_destination, OBJECT_PT_bShrinkwrapConstraint, OBJECT_PT_bDampTrackConstraint, OBJECT_PT_bPivotConstraint, OBJECT_PT_bFollowTrackConstraint, OBJECT_PT_bCameraSolverConstraint, OBJECT_PT_bObjectSolverConstraint, OBJECT_PT_bTransformCacheConstraint, OBJECT_PT_bTransformCacheConstraint_time, OBJECT_PT_bTransformCacheConstraint_velocity, OBJECT_PT_bTransformCacheConstraint_layers, OBJECT_PT_bArmatureConstraint, OBJECT_PT_bArmatureConstraint_bones, OBJECT_PT_bGeometryAttributeConstraint, BONE_PT_bChildOfConstraint, BONE_PT_bTrackToConstraint, BONE_PT_bKinematicConstraint, BONE_PT_bFollowPathConstraint, BONE_PT_bRotLimitConstraint, BONE_PT_bLocLimitConstraint, BONE_PT_bSizeLimitConstraint, BONE_PT_bRotateLikeConstraint, BONE_PT_bLocateLikeConstraint, BONE_PT_bSizeLikeConstraint, BONE_PT_bSameVolumeConstraint, BONE_PT_bTransLikeConstraint, BONE_PT_bActionConstraint, BONE_PT_bActionConstraint_target, BONE_PT_bActionConstraint_action, BONE_PT_bLockTrackConstraint, BONE_PT_bDistLimitConstraint, BONE_PT_bStretchToConstraint, BONE_PT_bMinMaxConstraint, BONE_PT_bClampToConstraint, BONE_PT_bTransformConstraint, BONE_PT_bTransformConstraint_from, BONE_PT_bTransformConstraint_to, BONE_PT_bShrinkwrapConstraint, BONE_PT_bDampTrackConstraint, BONE_PT_bSplineIKConstraint, BONE_PT_bSplineIKConstraint_fitting, BONE_PT_bSplineIKConstraint_chain_scaling, BONE_PT_bPivotConstraint, BONE_PT_bFollowTrackConstraint, BONE_PT_bCameraSolverConstraint, BONE_PT_bObjectSolverConstraint, BONE_PT_bTransformCacheConstraint, BONE_PT_bTransformCacheConstraint_time, BONE_PT_bTransformCacheConstraint_velocity, BONE_PT_bTransformCacheConstraint_layers, BONE_PT_bArmatureConstraint, BONE_PT_bArmatureConstraint_bones, BONE_PT_bGeometryAttributeConstraint]);
-export var _merged = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var dicts = tuple ();
-	}
-	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
-	}
-	return result;
-};
-export var _formatted = function (value, conversion, spec) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
-					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	if (__t__ (conversion == 'r')) {
-		var value = repr (value);
-	}
-	else if (__t__ (conversion == 's')) {
-		var value = str (value);
-	}
-	return (__t__ (spec) ? (('{:' + spec) + '}').format (value) : str (value));
-};
-export var _joined = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var lists = tuple ();
-	}
-	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
-	}
-	return result;
-};
-export var _super_classmethod = function (owner, cls, method) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
-					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
-};
 
 //# sourceMappingURL=properties_constraint.map

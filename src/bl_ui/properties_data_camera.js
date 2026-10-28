@@ -772,6 +772,38 @@ export var _merged = function () {
 	}
 	return result;
 };
+export var _ellipsis = Symbol ("Ellipsis")
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

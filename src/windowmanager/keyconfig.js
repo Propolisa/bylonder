@@ -45,7 +45,8 @@ function matches(kmi, event) {
 }
 
 // A handler running the named keymaps in order, as the editor's handlers run them, those `active(name)` allows: the
-// first item whose event matches and whose operator Bylonder runs with its properties, and polls, is invoked.
+// first item whose event matches and whose operator Bylonder runs with its properties, and polls, is invoked, by
+// `invoke(idname, props, event)` (an editor's own operators) or else the registered operators.
 export function keymapHandler(names, active = () => true) {
   return (event) => {
     for (const name of names.filter(active)) {

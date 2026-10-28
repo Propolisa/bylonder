@@ -30,7 +30,7 @@ export var PROPERTIES_HT_header =  __class__ ('PROPERTIES_HT_header', [Header], 
 			for (var tab_info of tabs_attr_infos) {
 				__accu0__.append (getattr (space, tab_info [0]));
 			}
-			return py_iter (__accu0__);
+			return __accu0__;
 		}) ());
 	};},
 	get draw () {return __get__ (this, function (self, context) {
@@ -87,7 +87,7 @@ export var has_hidden_tabs = function (space) {
 		for (var tab_info of tabs_attr_infos) {
 			__accu0__.append (getattr (space, tab_info [0]));
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) ())));
 };
 export var PROPERTIES_PT_navigation_bar =  __class__ ('PROPERTIES_PT_navigation_bar', [Panel], {
@@ -288,85 +288,5 @@ export var PROPERTIES_PT_visibility =  __class__ ('PROPERTIES_PT_visibility', [P
 	});}
 });
 export var classes = tuple ([PROPERTIES_HT_header, PROPERTIES_PT_navigation_bar, PROPERTIES_PT_options, PROPERTIES_PT_visibility]);
-export var _merged = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var dicts = tuple ();
-	}
-	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
-	}
-	return result;
-};
-export var _formatted = function (value, conversion, spec) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
-					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	if (__t__ (conversion == 'r')) {
-		var value = repr (value);
-	}
-	else if (__t__ (conversion == 's')) {
-		var value = str (value);
-	}
-	return (__t__ (spec) ? (('{:' + spec) + '}').format (value) : str (value));
-};
-export var _joined = function () {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-			}
-		}
-		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
-	}
-	else {
-		var lists = tuple ();
-	}
-	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
-	}
-	return result;
-};
-export var _super_classmethod = function (owner, cls, method) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
-					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
-};
 
 //# sourceMappingURL=space_properties.map

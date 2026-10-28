@@ -42,9 +42,11 @@ import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
-import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
+import { createBlenderObjects } from "./editors/object/object-blender.js";
+import { registerOperators, appendMenu, kw, inArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
+import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
 const viewportDock = mountRuntimeLayout();
@@ -219,6 +221,10 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "reset-layout") viewportDock.reset();
   if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
   if (e.data.type === "help") help.showModal();
+  if (e.data.type === "view-layer") {
+    const cols = world.collections, { op, id } = e.data.payload;
+    ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
+  }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
@@ -295,9 +301,11 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-registerObjectOperators(world.objectActions);
-registerAddOperators(creator);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
+registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify }));
+registerAddOperators(creator);
+// bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
+world.blenderContext = (view) => createContext(blenderRNA, { space: view });
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
@@ -478,8 +486,8 @@ const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["ri
 registerOperators({
   "anim.keyframe_insert": { run: () => insertKeys() },
   "anim.keyframe_delete_v3d": { run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
-  "view3d.rotate": { poll: inView, run: (props, event) => event.view.nav.rotate(event) },
-  "view3d.move": { poll: inView, run: (props, event) => event.view.nav.move(event) },
+  "view3d.rotate": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.rotate(event) },
+  "view3d.move": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.move(event) },
   "view3d.zoom": { supports: ({ delta }) => !!delta, poll: () => !!activeView(), run: ({ delta }, event) => (event?.view ?? activeView()).nav.wheelZoom(delta) },
   "ed.undo": { run: () => undoRedo(false) },
   "ed.redo": { run: () => undoRedo(true) },
@@ -494,7 +502,6 @@ registerOperators({
   "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(activeView().id) },
   "screen.area_split": { run: ({ direction }) => viewportDock.split(activeView().id, direction === "HORIZONTAL") },
   "screen.area_close": { run: () => viewportDock.close(activeView().id) },
-  "wm.call_menu": { supports: ({ name }) => !!activeView()?.menu(name), run: ({ name }) => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name)) },
   "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
   "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
 });
@@ -509,9 +516,12 @@ const bylonderKeys = createKeymap([
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs, Object Mode's only outside Edit Mode, whose own keymap runs before them.
-const blenderKeys = keymapHandler(["Object Mode", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => name !== "Object Mode" || !world.editMode.active);
+// Blender's keymaps a 3D View runs: the mode's (Object Mode or Mesh), then the 3D View's and the window's.
+const view3dKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true);
+// The 3D View under the pointer as the context area, with its menus for wm.call_menu.
+const view3dArea = { menu: (name) => activeView()?.menu(name) && (() => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name))) };
+const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 const keyLayers = () => {

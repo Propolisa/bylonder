@@ -10,3 +10,7 @@ def smpte_from_frame(frame, fps=None, fps_base=None):
     total = abs(int(frame))
     sign = '-' if frame < 0 else ''
     return '{}{:02d}:{:02d}:{:02d}:{:02d}'.format(sign, total // (3600 * fps), total // (60 * fps) % 60, total // fps % 60, total % fps)
+
+
+def escape_identifier(text):
+    return text.replace('\\', '\\\\').replace('"', '\\"')

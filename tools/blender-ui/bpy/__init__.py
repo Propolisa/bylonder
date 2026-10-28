@@ -6,6 +6,6 @@ from bpy import types as _types
 data = _app.data
 # bpy.types as the scripts read it at draw time: Blender's registered classes and RNA structs, filled from JS.
 types = _app.types
-# What the scripts read of bpy.types when they load.
-types.Modifier = _types.Modifier
+# Starting with the base classes and node types of bpy/types.py.
+__pragma__('js', '{}', 'Object.assign(types, _types)')
 context = _app.context
