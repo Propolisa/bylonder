@@ -7,6 +7,7 @@ import { createNodeEditorController } from '../src/editors/space_node/node-edito
 import { addMenuEntries, addMenuItems } from '../src/editors/space_node/node-add-menu.js';
 import { subitems } from '../src/editors/interface/ui-layout.js';
 import { keymapHandler } from '../src/windowmanager/keyconfig.js';
+import { inArea } from '../src/windowmanager/wm-operators.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 new ArcRotateCamera('Camera', 0, 1, 5, Vector3.Zero(), scene);
@@ -73,8 +74,8 @@ editor.pointerUp([middle[0], middle[1] + 40], { button: 2 });
 assert.equal(mix.getInputByName('Factor_Float').connectedPoint, null, 'the cut link is removed');
 
 // Blender's Node Editor keymap: M mutes, H collapses, Ctrl J frames, A selects all, X deletes.
-const keys = keymapHandler(['Node Editor'], undefined, (idname, props) => editor.run(idname, props));
-const press = (type, mods = {}) => keys({ type, value: 'PRESS', shift: false, ctrl: false, alt: false, ...mods });
+const keys = keymapHandler(['Node Editor']), area = { nodeEditor: editor, menu: () => null };
+const press = (type, mods = {}) => inArea(area, () => keys({ type, value: 'PRESS', shift: false, ctrl: false, alt: false, ...mods }));
 editor.selectAll('DESELECT');
 click(screen([tree.location(mix).x + 20, tree.location(mix).y + 10]));
 assert.ok(press('m') && mix.mute, 'M mutes');
