@@ -74,7 +74,9 @@ no counterpart for; the overlap is kept equal both ways.
    use without mixing the source objects' own properties. Converting between worlds happens on export and import
    (`.babylon`, JS, `.blend`), by the least lossy mapping, with user settings for the tradeoffs, and every loss is
    reported in Blender's Info editor (a Babylon spot light written as a Blender spot light: its exponent and its
-   angle falloff approximated). Decided 2026-10-28.
+   angle falloff approximated). Decided 2026-10-28. Done for lights (`blenkernel/light/light-home.js`, converted as
+   Blender's glTF exporter does) and worlds: a Blender world's linear color lights the scene evenly, a code scene's
+   clear color is Babylon's background only (`blenkernel/scene/world-babylon.js`).
 5. **Large data has one owner.** Mesh geometry (and other large buffers: attributes, images) lives in the Babylon
    scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
    needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released

@@ -17,6 +17,7 @@ import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.j
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
 import { createLight } from './light/light-home.js';
+import { createWorld } from './scene/world.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { moduleModifiers, blenderModifierDefinitions, asBlenderModifier } from '../modifiers/blender.js';
 import { mesh_serialize } from './mesh/mesh.js';
@@ -282,11 +283,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     pull(record, material);
     if (!graph) pullTree(ma, rna.pointer('Material', material), name, warnings);
   }
-  // A read World: the scene's background color, which Bylonder's authored world reads.
+  // A read World: the scene's world as Blender's, which Bylonder's authored world reads.
   function adoptWorld(wo, scene, warnings) {
     const background = blender.nodeTree(wo).nodes.find((node) => node.idname === 'ShaderNodeBackground');
     const color = background?.inputs.Color ?? dnaGet('World', wo, 'color');
-    if (color) scene.clearColor.set(color[0], color[1], color[2], 1);
+    createWorld(scene, color && { color: [...color].slice(0, 3) });
     if (background && background.inputs.Strength !== 1) warnings.push(`World "${blender.name(wo)}": its strength opens as 1`);
     ids.adopted.set('world', wo);
   }

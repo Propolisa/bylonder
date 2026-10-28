@@ -209,8 +209,7 @@ export function createExtrasOverlay(scene, { objects, color: themeColor = (node,
     return [EMPTY_SHAPES[node.metadata?.empty_display_type] ?? 'plain_axes'];
   };
   const extraNodes = () => [
-    ...scene.cameras.filter((c) => !c.name.startsWith('__')),
-    ...scene.lights,
+    ...[...scene.cameras, ...scene.lights].filter((n) => !n.name.startsWith('__')),
     ...objects().filter(isEmpty),
   ];
   function rebuild() {

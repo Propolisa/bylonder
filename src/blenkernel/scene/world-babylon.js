@@ -1,17 +1,20 @@
-import { Color3, Color4, CubeTexture, HDRCubeTexture, Scene } from '@babylonjs/core';
+import { Color3, Color4, CubeTexture, HDRCubeTexture, HemisphericLight, Scene, Vector3 } from '@babylonjs/core';
 
 // Babylon adapter for a World datablock. Babylon has no World object, so a world is pushed into
 // scene.clearColor, environmentTexture/environmentIntensity, a skybox and fog. Nothing else touches these.
 export const fogModes = { NONE: Scene.FOGMODE_NONE, SCATTER: Scene.FOGMODE_EXP, EXP2: Scene.FOGMODE_EXP2, LINEAR: Scene.FOGMODE_LINEAR };
 const rgb = color => [color.r, color.g, color.b].map(v => +v.toFixed(6));
+const linear = color => rgb(new Color3(color.r, color.g, color.b).toLinearSpace());
 
-// Reads what the code-built scene set up, as World fields.
+// Reads what the code-built scene set up, as World fields: a world Blender's (createWorld), or Babylon's clear color.
 export function readAuthoredWorld(scene, defaults) {
   const texture = scene.environmentTexture, skyboxes = scene.meshes.filter(m => m.infiniteDistance && !m.name.startsWith('__'));
+  const blender = scene.metadata?.wbWorld;
   return {
+    home: blender ? defaults.home : 'BABYLON',
     background: texture
-      ? { ...defaults.background, input: 'ENVIRONMENT', image: 'scene', color: rgb(scene.clearColor), strength: scene.environmentIntensity, rotation: texture.rotationY || 0 }
-      : { ...defaults.background, input: 'COLOR', color: rgb(scene.clearColor) },
+      ? { ...defaults.background, input: 'ENVIRONMENT', image: 'scene', color: linear(scene.clearColor), strength: scene.environmentIntensity, rotation: texture.rotationY || 0 }
+      : { ...defaults.background, input: 'COLOR', color: blender?.color ?? linear(scene.clearColor) },
     volume: { type: Object.entries(fogModes).find(([, mode]) => mode === scene.fogMode)?.[0] || 'NONE', color: rgb(scene.fogColor), density: scene.fogDensity, start: scene.fogStart, end: scene.fogEnd },
     visibility: { camera: texture ? skyboxes.some(m => m.isEnabled(false)) : true },
   };
@@ -22,6 +25,9 @@ export function createWorldRenderer(scene, { asset = path => path, studio } = {}
   const authoredSkyboxes = scene.meshes.filter(m => m.infiniteDistance && !m.name.startsWith('__'));
   const textures = new Map(authoredTexture ? [['scene', authoredTexture]] : []);
   let skybox = null, skyboxKey = '', rendered = false, useAuthored = false;
+  // A world color lights everything evenly in Blender: a hemispheric light with equal sky and ground gives each
+  // surface its albedo times it. Switched by intensity, not enabled state, which would recompile materials per view.
+  const worldLight = Object.assign(new HemisphericLight('__worldLight', Vector3.Up(), scene), { specular: Color3.Black(), intensity: 0, doNotSerialize: true, metadata: { editable: false } });
   const texture = key => {
     if (!key) return null;
     if (!textures.has(key)) {
@@ -38,6 +44,7 @@ export function createWorldRenderer(scene, { asset = path => path, studio } = {}
   const gate = () => {
     authoredSkyboxes.forEach(mesh => mesh.setEnabled(useAuthored && rendered));
     skybox?.setEnabled(rendered);
+    worldLight.intensity = rendered ? 1 : 0;
     scene.fogEnabled = rendered;
   };
   const setSkybox = (key, tex, background) => {
@@ -95,8 +102,10 @@ export function createWorldRenderer(scene, { asset = path => path, studio } = {}
       if (env) env.rotationY = background.rotation;
       scene.environmentTexture = env;
       scene.environmentIntensity = env ? background.strength : 1;
-      const color = background ? background.color.map(v => v * (env ? 1 : background.strength)) : [0, 0, 0];
-      scene.clearColor = new Color4(...color.map(v => Math.min(1, v)), 1);
+      const color = Color3.FromArray(background ? background.color.map(v => v * (env ? 1 : background.strength)) : [0, 0, 0]);
+      scene.clearColor = Color4.FromColor3(color.toGammaSpace().clampToRef(0, 1, new Color3()));
+      worldLight.diffuse = world?.home === 'BLENDER' && !env ? color : Color3.Black();
+      worldLight.groundColor = worldLight.diffuse.clone();
       setSkybox(background?.image, env && world.visibility.camera ? env : null, background);
       if (preview) {
         Object.assign(preview, { env: scene.environmentTexture, intensity: scene.environmentIntensity });
@@ -110,6 +119,7 @@ export function createWorldRenderer(scene, { asset = path => path, studio } = {}
     setRendered(value) { if (rendered !== value) { rendered = value; gate(); } },
     dispose() {
       skybox?.dispose(false, true);
+      worldLight.dispose();
       previewSkybox?.dispose(false, true);
       for (const [key, tex] of textures) if (key !== 'scene') tex.dispose();
     },

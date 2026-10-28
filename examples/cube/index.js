@@ -1,4 +1,4 @@
-import { createPrimitive, createLight } from '@workbench/sdk';
+import { createPrimitive, createLight, createWorld } from '@workbench/sdk';
 
 export const createScene = function () {
   const scene = new BABYLON.Scene(engine);
@@ -16,5 +16,6 @@ export const createScene = function () {
   // startup.blend's light: Blender's 1000 W point light.
   const light = createLight('Light', 'POINT', { energy: 1000, shadow_soft_size: 0.1 }, scene);
   light.position.set(4.0762, 5.9039, 1.0055);
+  createWorld(scene);
   return scene;
 };

@@ -1,7 +1,9 @@
+import { BLENDER } from '../light/light-home.js';
 import { createWorldRenderer, readAuthoredWorld } from './world-babylon.js';
 
 // World datablocks (Blender's bpy.data.worlds plus scene.world). Shaped like Blender's World:
-//   background: the Background shader node (Color input as RGB or Environment Texture, Strength)
+//   home:       BLENDER (its color lights the scene) or BABYLON (a code scene's clear color: background only)
+//   background: the Background shader node (Color input as linear RGB or Environment Texture, Strength)
 //   volume:     the Volume output (None, Volume Scatter, or a Babylon fog mode)
 //   visibility: Ray Visibility (camera: environment visible as the background)
 // The Babylon side lives in world-babylon.js. Document slice "worlds".
@@ -10,6 +12,7 @@ export const environmentFile = /\.(env|hdr|dds)$/i;
 const clone = value => JSON.parse(JSON.stringify(value));
 // Blender's default world: Background node with 0.05 grey, strength 1.
 export const worldDefaults = {
+  home: BLENDER,
   background: { input: 'COLOR', color: [0.05, 0.05, 0.05], image: STUDIO, rotation: 0, strength: 1 },
   volume: { type: 'NONE', color: [0.8, 0.8, 0.8], density: 0.05, start: 10, end: 100 },
   visibility: { camera: true },
@@ -21,6 +24,11 @@ export const worldChannels = [
 ];
 const resolve = (entry, path) => { const keys = path.split('.'), key = keys.pop(); return { owner: keys.reduce((o, k) => o?.[k], entry), key }; };
 export const getPath = (entry, path) => { const { owner, key } = resolve(entry, path); return owner?.[key]; };
+
+// A scene's world as Blender's (bpy.data.worlds.new as scene.world): its color, linear, lights the scene.
+export function createWorld(scene, { color = worldDefaults.background.color } = {}) {
+  scene.metadata = { ...scene.metadata, wbWorld: { color } };
+}
 
 export function createWorlds(world, { commit = () => {}, asset } = {}) {
   const { scene, animation } = world;
@@ -68,9 +76,9 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
     showPreview(value) { renderer.showPreview(value); },
     link(entry) { state.active = entry?.id ?? null; changed(); },
     unlink() { state.active = null; changed(); },
-    // Blender's world.new copies the current world when there is one.
+    // Blender's world.new copies the current world when there is one, as Blender's.
     create(from = active()) {
-      const entry = { ...clone(from || { ...worldDefaults, name: 'World' }), id: crypto.randomUUID(), created: true, fakeUser: false };
+      const entry = { ...clone(from || { ...worldDefaults, name: 'World' }), home: BLENDER, id: crypto.randomUUID(), created: true, fakeUser: false };
       entry.name = unique(entry.name);
       state.worlds.push(entry); state.active = entry.id; changed();
       return entry;
