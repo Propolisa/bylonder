@@ -21,7 +21,7 @@ import '../interface/components/tailwind.css';
 
 const modules = Promise.all(MODULES.map((name) => import(`../../bl_ui/${name}.js`).catch(() => null)));
 
-// PROPERTIES_PT_context (buttons_panel_context_draw, C in Blender): the path of the data the tab shows, and the pin.
+// The path bar (buttons_panel_context_draw, C in Blender): the path of the data the tab shows, and the pin.
 function contextBar(context, space) {
   const layout = new UILayout(), row = layout.row(kw({ align: true }));
   propertiesPath(context, space.context).forEach((struct, i) => {
@@ -93,7 +93,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
     const tab = state.context;
     const drawn = drawPanels(types, context, { contexts: [TAB_CONTEXTS[tab]], open: ui.isOpen,
       panelOpen: (id, node) => (node.data ? !!node.data[node.property] : ui.isOpen(`layout:${node.idname}`, node.default_closed)) });
-    const path = { id: 'PROPERTIES_PT_context', hideHeader: true, open: true, body: contextBar(context, space), children: [] };
+    const path = { id: 'context-path', hideHeader: true, open: true, body: contextBar(context, space), children: [] };
     return h(RegionView, { panels: [path, ...drawn], ui },
       () => addonPanels({ world, editor, history, systems, properties, storage, files, tab, node: editor.selection.nodes.at(-1), state, registered: propertyPanels, ui }));
   };
