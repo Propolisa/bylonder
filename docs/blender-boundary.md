@@ -150,7 +150,9 @@ as its own (File > Save Project As).
 
 ### Known limits
 
-Text and curve objects get their Curve data for an operator and give it back when it tags their geometry (`docs/curves-and-text.md`). Operators that would change a light's or camera's data change nothing (`revert`). Material textures (Image Texture nodes), Area lights' shape, snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; objects Blender's code adds do not come to Babylon yet (deleted ones do).
+Text and curve objects get their Curve data for an operator and give it back when it tags their geometry (`docs/curves-and-text.md`). Operators that would change a light's or camera's data change nothing (`revert`). Material textures (Image Texture nodes), Area lights' shape, snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; objects Blender's code adds do not come to Babylon yet (deleted ones do). In a saved file, Bylonder's own modifier types (Geometry Nodes Array) are missing, a Node Material is a Principled BSDF
+with Blender's defaults (its graph is kept in `bylonder_node_material`), and a Standard material gives only its color,
+alpha and emission color.
 
 ### Animation
 
