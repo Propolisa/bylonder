@@ -30,7 +30,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -45,16 +45,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -285,7 +285,7 @@ export var _paths_with_extension_repos = function () {
 	return addon_paths;
 };
 export var _fake_module = function (mod_name, mod_path, speedy) {
-	if (typeof speedy == 'undefined' || (speedy != null && speedy.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof speedy == 'undefined' || (speedy != null && globalThis.Object.hasOwn (speedy, "__kwargtrans__"))) {;
 		var speedy = true;
 	};
 	if (arguments.length) {
@@ -680,8 +680,8 @@ export var check = function (module_name) {
 		var __accu0__ = sys.modules;
 		return __call__ (__accu0__.py_get, __accu0__, module_name);
 	}) ();
-	var loaded_state = mod !== null && __call__ (getattr, null, mod, '__addon_enabled__', Ellipsis);
-	if (loaded_state === Ellipsis) {
+	var loaded_state = mod !== null && __call__ (getattr, null, mod, '__addon_enabled__', _ellipsis);
+	if (loaded_state === _ellipsis) {
 		__call__ (print, null, 'Warning: addon-module', module_name, "found module but without '__addon_enabled__' field, possible name collision from file:", __call__ (repr, null, __call__ (getattr, null, mod, '__file__', '<unknown>')));
 		var loaded_state = false;
 	}
@@ -3462,13 +3462,13 @@ export var _initialize_extensions_repos_once = function () {
 	}) ();
 };
 export var extensions_refresh = function (ensure_wheels, addon_modules_pending, handle_error) {
-	if (typeof ensure_wheels == 'undefined' || (ensure_wheels != null && ensure_wheels.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof ensure_wheels == 'undefined' || (ensure_wheels != null && globalThis.Object.hasOwn (ensure_wheels, "__kwargtrans__"))) {;
 		var ensure_wheels = true;
 	};
-	if (typeof addon_modules_pending == 'undefined' || (addon_modules_pending != null && addon_modules_pending.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof addon_modules_pending == 'undefined' || (addon_modules_pending != null && globalThis.Object.hasOwn (addon_modules_pending, "__kwargtrans__"))) {;
 		var addon_modules_pending = null;
 	};
-	if (typeof handle_error == 'undefined' || (handle_error != null && handle_error.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof handle_error == 'undefined' || (handle_error != null && globalThis.Object.hasOwn (handle_error, "__kwargtrans__"))) {;
 		var handle_error = null;
 	};
 	if (arguments.length) {

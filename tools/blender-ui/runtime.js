@@ -44,3 +44,5 @@ Object.defineProperty (Function.prototype, '__dict__', { configurable: true, get
     }
     return own;
 } });
+// A module with a module-level __getattr__ (PEP 562, bpy.ops) as its importers see it: its names, then __getattr__.
+globalThis.__py_module_getattr__ = (module) => new Proxy (module, { get: (target, key) => (key in target || typeof key != 'string' ? target [key] : target.__getattr__ (key)) });

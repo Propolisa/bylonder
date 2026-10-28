@@ -412,7 +412,7 @@ export var EEVEE_MATERIAL_PT_thickness =  __class__ ('EEVEE_MATERIAL_PT_thicknes
 	});}
 });
 export var draw_material_surface_settings = function (layout, mat, is_eevee) {
-	if (typeof is_eevee == 'undefined' || (is_eevee != null && is_eevee.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof is_eevee == 'undefined' || (is_eevee != null && globalThis.Object.hasOwn (is_eevee, "__kwargtrans__"))) {;
 		var is_eevee = true;
 	};
 	if (arguments.length) {
@@ -463,7 +463,7 @@ export var draw_material_surface_settings = function (layout, mat, is_eevee) {
 	}
 };
 export var draw_material_volume_settings = function (layout, mat, is_eevee) {
-	if (typeof is_eevee == 'undefined' || (is_eevee != null && is_eevee.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof is_eevee == 'undefined' || (is_eevee != null && globalThis.Object.hasOwn (is_eevee, "__kwargtrans__"))) {;
 		var is_eevee = true;
 	};
 	if (arguments.length) {

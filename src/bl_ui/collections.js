@@ -4,13 +4,13 @@ import * as abc from './collections.abc.js';
 export {abc};
 var __name__ = 'collections';
 export var namedtuple = function (typename, field_names, defaults, rename, module) {
-	if (typeof defaults == 'undefined' || (defaults != null && defaults.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof defaults == 'undefined' || (defaults != null && globalThis.Object.hasOwn (defaults, "__kwargtrans__"))) {;
 		var defaults = null;
 	};
-	if (typeof rename == 'undefined' || (rename != null && rename.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof rename == 'undefined' || (rename != null && globalThis.Object.hasOwn (rename, "__kwargtrans__"))) {;
 		var rename = false;
 	};
-	if (typeof module == 'undefined' || (module != null && module.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof module == 'undefined' || (module != null && globalThis.Object.hasOwn (module, "__kwargtrans__"))) {;
 		var module = null;
 	};
 	if (arguments.length) {
@@ -164,7 +164,7 @@ export var namedtuple = function (typename, field_names, defaults, rename, modul
 };
 export var OrderedDict = dict;
 export var defaultdict = function (default_factory) {
-	if (typeof default_factory == 'undefined' || (default_factory != null && default_factory.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof default_factory == 'undefined' || (default_factory != null && globalThis.Object.hasOwn (default_factory, "__kwargtrans__"))) {;
 		var default_factory = null;
 	};
 	if (arguments.length) {
@@ -186,7 +186,7 @@ export var defaultdict = function (default_factory) {
 	return new Proxy(values, {get: (target, key) => key in target || typeof key !== 'string' || !default_factory ? target[key] : (target[key] = default_factory())});
 };
 export var Counter = function (iterable) {
-	if (typeof iterable == 'undefined' || (iterable != null && iterable.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof iterable == 'undefined' || (iterable != null && globalThis.Object.hasOwn (iterable, "__kwargtrans__"))) {;
 		var iterable = tuple ([]);
 	};
 	if (arguments.length) {
@@ -209,10 +209,10 @@ export var Counter = function (iterable) {
 	return counts;
 };
 export var deque = function (iterable, maxlen) {
-	if (typeof iterable == 'undefined' || (iterable != null && iterable.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof iterable == 'undefined' || (iterable != null && globalThis.Object.hasOwn (iterable, "__kwargtrans__"))) {;
 		var iterable = tuple ([]);
 	};
-	if (typeof maxlen == 'undefined' || (maxlen != null && maxlen.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof maxlen == 'undefined' || (maxlen != null && globalThis.Object.hasOwn (maxlen, "__kwargtrans__"))) {;
 		var maxlen = null;
 	};
 	if (arguments.length) {

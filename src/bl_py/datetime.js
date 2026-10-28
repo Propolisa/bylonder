@@ -599,25 +599,25 @@ export var _divide_and_round = function (a, b) {
 export var timedelta =  __class__ ('timedelta', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, days, seconds, microseconds, milliseconds, minutes, hours, weeks) {
-		if (typeof days == 'undefined' || (days != null && days.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof days == 'undefined' || (days != null && globalThis.Object.hasOwn (days, "__kwargtrans__"))) {;
 			var days = 0;
 		};
-		if (typeof seconds == 'undefined' || (seconds != null && seconds.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof seconds == 'undefined' || (seconds != null && globalThis.Object.hasOwn (seconds, "__kwargtrans__"))) {;
 			var seconds = 0;
 		};
-		if (typeof microseconds == 'undefined' || (microseconds != null && microseconds.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof microseconds == 'undefined' || (microseconds != null && globalThis.Object.hasOwn (microseconds, "__kwargtrans__"))) {;
 			var microseconds = 0;
 		};
-		if (typeof milliseconds == 'undefined' || (milliseconds != null && milliseconds.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof milliseconds == 'undefined' || (milliseconds != null && globalThis.Object.hasOwn (milliseconds, "__kwargtrans__"))) {;
 			var milliseconds = 0;
 		};
-		if (typeof minutes == 'undefined' || (minutes != null && minutes.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof minutes == 'undefined' || (minutes != null && globalThis.Object.hasOwn (minutes, "__kwargtrans__"))) {;
 			var minutes = 0;
 		};
-		if (typeof hours == 'undefined' || (hours != null && hours.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof hours == 'undefined' || (hours != null && globalThis.Object.hasOwn (hours, "__kwargtrans__"))) {;
 			var hours = 0;
 		};
-		if (typeof weeks == 'undefined' || (weeks != null && weeks.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof weeks == 'undefined' || (weeks != null && globalThis.Object.hasOwn (weeks, "__kwargtrans__"))) {;
 			var weeks = 0;
 		};
 		if (arguments.length) {
@@ -916,10 +916,10 @@ globalThis.Object.defineProperty (timedelta, 'resolution', {get: function () {re
 export var date =  __class__ ('date', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, year, month, day) {
-		if (typeof month == 'undefined' || (month != null && month.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof month == 'undefined' || (month != null && globalThis.Object.hasOwn (month, "__kwargtrans__"))) {;
 			var month = null;
 		};
-		if (typeof day == 'undefined' || (day != null && day.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof day == 'undefined' || (day != null && globalThis.Object.hasOwn (day, "__kwargtrans__"))) {;
 			var day = null;
 		};
 		if (arguments.length) {
@@ -1013,13 +1013,13 @@ export var date =  __class__ ('date', [object], {
 		return _ymd2ord (self._year, self._month, self._day);
 	});},
 	get py_replace () {return __get__ (this, function (self, year, month, day) {
-		if (typeof year == 'undefined' || (year != null && year.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof year == 'undefined' || (year != null && globalThis.Object.hasOwn (year, "__kwargtrans__"))) {;
 			var year = null;
 		};
-		if (typeof month == 'undefined' || (month != null && month.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof month == 'undefined' || (month != null && globalThis.Object.hasOwn (month, "__kwargtrans__"))) {;
 			var month = null;
 		};
-		if (typeof day == 'undefined' || (day != null && day.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof day == 'undefined' || (day != null && globalThis.Object.hasOwn (day, "__kwargtrans__"))) {;
 			var day = null;
 		};
 		if (arguments.length) {
@@ -1211,19 +1211,19 @@ export var _tzinfo_class = tzinfo;
 export var time =  __class__ ('time', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, hour, minute, second, microsecond, tzinfo) {
-		if (typeof hour == 'undefined' || (hour != null && hour.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof hour == 'undefined' || (hour != null && globalThis.Object.hasOwn (hour, "__kwargtrans__"))) {;
 			var hour = 0;
 		};
-		if (typeof minute == 'undefined' || (minute != null && minute.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof minute == 'undefined' || (minute != null && globalThis.Object.hasOwn (minute, "__kwargtrans__"))) {;
 			var minute = 0;
 		};
-		if (typeof second == 'undefined' || (second != null && second.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof second == 'undefined' || (second != null && globalThis.Object.hasOwn (second, "__kwargtrans__"))) {;
 			var second = 0;
 		};
-		if (typeof microsecond == 'undefined' || (microsecond != null && microsecond.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof microsecond == 'undefined' || (microsecond != null && globalThis.Object.hasOwn (microsecond, "__kwargtrans__"))) {;
 			var microsecond = 0;
 		};
-		if (typeof tzinfo == 'undefined' || (tzinfo != null && tzinfo.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tzinfo == 'undefined' || (tzinfo != null && globalThis.Object.hasOwn (tzinfo, "__kwargtrans__"))) {;
 			var tzinfo = null;
 		};
 		if (arguments.length) {
@@ -1312,7 +1312,7 @@ export var time =  __class__ ('time', [object], {
 		}
 	});},
 	get _cmp () {return __get__ (this, function (self, other, allow_mixed) {
-		if (typeof allow_mixed == 'undefined' || (allow_mixed != null && allow_mixed.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof allow_mixed == 'undefined' || (allow_mixed != null && globalThis.Object.hasOwn (allow_mixed, "__kwargtrans__"))) {;
 			var allow_mixed = false;
 		};
 		if (arguments.length) {
@@ -1361,7 +1361,7 @@ export var time =  __class__ ('time', [object], {
 		return _cmp (tuple ([myhhmm, self._second, self._microsecond]), tuple ([othhmm, other._second, other._microsecond]));
 	});},
 	get _tzstr () {return __get__ (this, function (self, sep) {
-		if (typeof sep == 'undefined' || (sep != null && sep.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof sep == 'undefined' || (sep != null && globalThis.Object.hasOwn (sep, "__kwargtrans__"))) {;
 			var sep = ':';
 		};
 		var off = self.utcoffset ();
@@ -1448,19 +1448,19 @@ export var time =  __class__ ('time', [object], {
 		return offset;
 	});},
 	get py_replace () {return __get__ (this, function (self, hour, minute, second, microsecond, tzinfo) {
-		if (typeof hour == 'undefined' || (hour != null && hour.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof hour == 'undefined' || (hour != null && globalThis.Object.hasOwn (hour, "__kwargtrans__"))) {;
 			var hour = null;
 		};
-		if (typeof minute == 'undefined' || (minute != null && minute.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof minute == 'undefined' || (minute != null && globalThis.Object.hasOwn (minute, "__kwargtrans__"))) {;
 			var minute = null;
 		};
-		if (typeof second == 'undefined' || (second != null && second.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof second == 'undefined' || (second != null && globalThis.Object.hasOwn (second, "__kwargtrans__"))) {;
 			var second = null;
 		};
-		if (typeof microsecond == 'undefined' || (microsecond != null && microsecond.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof microsecond == 'undefined' || (microsecond != null && globalThis.Object.hasOwn (microsecond, "__kwargtrans__"))) {;
 			var microsecond = null;
 		};
-		if (typeof tzinfo == 'undefined' || (tzinfo != null && tzinfo.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tzinfo == 'undefined' || (tzinfo != null && globalThis.Object.hasOwn (tzinfo, "__kwargtrans__"))) {;
 			var tzinfo = true;
 		};
 		if (arguments.length) {
@@ -1513,25 +1513,25 @@ globalThis.Object.defineProperty (time, 'max', {get: function () {return _tm_max
 export var datetime =  __class__ ('datetime', [date], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, year, month, day, hour, minute, second, microsecond, tzinfo) {
-		if (typeof month == 'undefined' || (month != null && month.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof month == 'undefined' || (month != null && globalThis.Object.hasOwn (month, "__kwargtrans__"))) {;
 			var month = null;
 		};
-		if (typeof day == 'undefined' || (day != null && day.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof day == 'undefined' || (day != null && globalThis.Object.hasOwn (day, "__kwargtrans__"))) {;
 			var day = null;
 		};
-		if (typeof hour == 'undefined' || (hour != null && hour.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof hour == 'undefined' || (hour != null && globalThis.Object.hasOwn (hour, "__kwargtrans__"))) {;
 			var hour = 0;
 		};
-		if (typeof minute == 'undefined' || (minute != null && minute.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof minute == 'undefined' || (minute != null && globalThis.Object.hasOwn (minute, "__kwargtrans__"))) {;
 			var minute = 0;
 		};
-		if (typeof second == 'undefined' || (second != null && second.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof second == 'undefined' || (second != null && globalThis.Object.hasOwn (second, "__kwargtrans__"))) {;
 			var second = 0;
 		};
-		if (typeof microsecond == 'undefined' || (microsecond != null && microsecond.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof microsecond == 'undefined' || (microsecond != null && globalThis.Object.hasOwn (microsecond, "__kwargtrans__"))) {;
 			var microsecond = 0;
 		};
-		if (typeof tzinfo == 'undefined' || (tzinfo != null && tzinfo.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tzinfo == 'undefined' || (tzinfo != null && globalThis.Object.hasOwn (tzinfo, "__kwargtrans__"))) {;
 			var tzinfo = null;
 		};
 		if (arguments.length) {
@@ -1617,7 +1617,7 @@ export var datetime =  __class__ ('datetime', [date], {
 		return cls (y, m, d, hh, mm, ss, us, tz);
 	});},
 	get fromtimestamp () {return __getcm__ (this, function (cls, t, tz) {
-		if (typeof tz == 'undefined' || (tz != null && tz.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tz == 'undefined' || (tz != null && globalThis.Object.hasOwn (tz, "__kwargtrans__"))) {;
 			var tz = null;
 		};
 		_check_tzinfo_arg (tz);
@@ -1631,7 +1631,7 @@ export var datetime =  __class__ ('datetime', [date], {
 		return cls._fromtimestamp (t, true, null);
 	});},
 	get now () {return __getcm__ (this, function (cls, tz) {
-		if (typeof tz == 'undefined' || (tz != null && tz.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tz == 'undefined' || (tz != null && globalThis.Object.hasOwn (tz, "__kwargtrans__"))) {;
 			var tz = null;
 		};
 		var t = _time.time ();
@@ -1703,28 +1703,28 @@ export var datetime =  __class__ ('datetime', [date], {
 		return time (self.hour, self.minute, self.second, self.microsecond, self._tzinfo);
 	});},
 	get py_replace () {return __get__ (this, function (self, year, month, day, hour, minute, second, microsecond, tzinfo) {
-		if (typeof year == 'undefined' || (year != null && year.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof year == 'undefined' || (year != null && globalThis.Object.hasOwn (year, "__kwargtrans__"))) {;
 			var year = null;
 		};
-		if (typeof month == 'undefined' || (month != null && month.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof month == 'undefined' || (month != null && globalThis.Object.hasOwn (month, "__kwargtrans__"))) {;
 			var month = null;
 		};
-		if (typeof day == 'undefined' || (day != null && day.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof day == 'undefined' || (day != null && globalThis.Object.hasOwn (day, "__kwargtrans__"))) {;
 			var day = null;
 		};
-		if (typeof hour == 'undefined' || (hour != null && hour.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof hour == 'undefined' || (hour != null && globalThis.Object.hasOwn (hour, "__kwargtrans__"))) {;
 			var hour = null;
 		};
-		if (typeof minute == 'undefined' || (minute != null && minute.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof minute == 'undefined' || (minute != null && globalThis.Object.hasOwn (minute, "__kwargtrans__"))) {;
 			var minute = null;
 		};
-		if (typeof second == 'undefined' || (second != null && second.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof second == 'undefined' || (second != null && globalThis.Object.hasOwn (second, "__kwargtrans__"))) {;
 			var second = null;
 		};
-		if (typeof microsecond == 'undefined' || (microsecond != null && microsecond.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof microsecond == 'undefined' || (microsecond != null && globalThis.Object.hasOwn (microsecond, "__kwargtrans__"))) {;
 			var microsecond = null;
 		};
-		if (typeof tzinfo == 'undefined' || (tzinfo != null && tzinfo.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tzinfo == 'undefined' || (tzinfo != null && globalThis.Object.hasOwn (tzinfo, "__kwargtrans__"))) {;
 			var tzinfo = true;
 		};
 		if (arguments.length) {
@@ -1775,7 +1775,7 @@ export var datetime =  __class__ ('datetime', [date], {
 		return datetime (year, month, day, hour, minute, second, microsecond, tzinfo);
 	});},
 	get astimezone () {return __get__ (this, function (self, tz) {
-		if (typeof tz == 'undefined' || (tz != null && tz.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof tz == 'undefined' || (tz != null && globalThis.Object.hasOwn (tz, "__kwargtrans__"))) {;
 			var tz = null;
 		};
 		if (arguments.length) {
@@ -1852,7 +1852,7 @@ export var datetime =  __class__ ('datetime', [date], {
 		return '{} {} {} {}:{}:{} {}'.format (_DAYNAMES [weekday], _MONTHNAMES [self._month], zfill (self._day, 2), zfill (self._hour, 2), zfill (self._minute, 2), zfill (self._second, 2), zfill (self._year, 4));
 	});},
 	get isoformat () {return __get__ (this, function (self, sep) {
-		if (typeof sep == 'undefined' || (sep != null && sep.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof sep == 'undefined' || (sep != null && globalThis.Object.hasOwn (sep, "__kwargtrans__"))) {;
 			var sep = 'T';
 		};
 		var s = '{}-{}-{}{}'.format (zfill (self._year, 4), zfill (self._month, 2), zfill (self._day, 2), sep) + _format_time (self._hour, self._minute, self._second, self._microsecond);
@@ -1973,7 +1973,7 @@ export var datetime =  __class__ ('datetime', [date], {
 		}
 	});},
 	get _cmp () {return __get__ (this, function (self, other, allow_mixed) {
-		if (typeof allow_mixed == 'undefined' || (allow_mixed != null && allow_mixed.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof allow_mixed == 'undefined' || (allow_mixed != null && globalThis.Object.hasOwn (allow_mixed, "__kwargtrans__"))) {;
 			var allow_mixed = false;
 		};
 		var mytz = self._tzinfo;
@@ -2084,7 +2084,7 @@ export var _Omitted = '@#$^&$^';
 export var timezone =  __class__ ('timezone', [tzinfo], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, offset, py_name) {
-		if (typeof py_name == 'undefined' || (py_name != null && py_name.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_name == 'undefined' || (py_name != null && globalThis.Object.hasOwn (py_name, "__kwargtrans__"))) {;
 			var py_name = _Omitted;
 		};
 		if (arguments.length) {
@@ -2132,7 +2132,7 @@ export var timezone =  __class__ ('timezone', [tzinfo], {
 		self._name = py_name;
 	});},
 	get _create () {return __getcm__ (this, function (cls, offset, py_name) {
-		if (typeof py_name == 'undefined' || (py_name != null && py_name.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_name == 'undefined' || (py_name != null && globalThis.Object.hasOwn (py_name, "__kwargtrans__"))) {;
 			var py_name = _Omitted;
 		};
 		if (arguments.length) {

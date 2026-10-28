@@ -32,7 +32,7 @@ export var PresetPanel =  __class__ ('PresetPanel', [object], {
 		}) ();
 	});},
 	get draw_menu () {return __getcm__ (this, function (cls, layout, text) {
-		if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof text == 'undefined' || (text != null && globalThis.Object.hasOwn (text, "__kwargtrans__"))) {;
 			var text = null;
 		};
 		if (arguments.length) {

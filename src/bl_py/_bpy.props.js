@@ -206,7 +206,7 @@ export var CollectionProperty = function () {
 	return __call__ (_PropertyDeferred, null, CollectionProperty, keywords);
 };
 export var RemoveProperty = function (cls, attr) {
-	if (typeof attr == 'undefined' || (attr != null && attr.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof attr == 'undefined' || (attr != null && globalThis.Object.hasOwn (attr, "__kwargtrans__"))) {;
 		var attr = '';
 	};
 	if (arguments.length) {

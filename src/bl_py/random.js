@@ -59,7 +59,7 @@ export var _random_integer = function () {
 	return y;
 };
 export var seed = function (x) {
-	if (typeof x == 'undefined' || (x != null && x.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof x == 'undefined' || (x != null && globalThis.Object.hasOwn (x, "__kwargtrans__"))) {;
 		var x = int (_bitmask3 * Math.random ());
 	};
 	if (arguments.length) {

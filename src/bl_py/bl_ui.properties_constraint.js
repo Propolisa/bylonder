@@ -159,13 +159,13 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		}
 	};},
 	get space_template () {return function (layout, con, target, owner, separator) {
-		if (typeof target == 'undefined' || (target != null && target.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof target == 'undefined' || (target != null && globalThis.Object.hasOwn (target, "__kwargtrans__"))) {;
 			var target = true;
 		};
-		if (typeof owner == 'undefined' || (owner != null && owner.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof owner == 'undefined' || (owner != null && globalThis.Object.hasOwn (owner, "__kwargtrans__"))) {;
 			var owner = true;
 		};
-		if (typeof separator == 'undefined' || (separator != null && separator.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof separator == 'undefined' || (separator != null && globalThis.Object.hasOwn (separator, "__kwargtrans__"))) {;
 			var separator = true;
 		};
 		if (arguments.length) {
@@ -233,7 +233,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		}
 	};},
 	get target_template () {return function (layout, con, subtargets) {
-		if (typeof subtargets == 'undefined' || (subtargets != null && subtargets.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof subtargets == 'undefined' || (subtargets != null && globalThis.Object.hasOwn (subtargets, "__kwargtrans__"))) {;
 			var subtargets = true;
 		};
 		if (arguments.length) {

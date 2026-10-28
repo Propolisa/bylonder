@@ -132,10 +132,10 @@ export var add_object_align_init = function (context, operator) {
 	return __matmul__ (location, rotation);
 };
 export var object_data_add = function (context, obdata, operator, py_name) {
-	if (typeof operator == 'undefined' || (operator != null && operator.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof operator == 'undefined' || (operator != null && globalThis.Object.hasOwn (operator, "__kwargtrans__"))) {;
 		var operator = null;
 	};
-	if (typeof py_name == 'undefined' || (py_name != null && py_name.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof py_name == 'undefined' || (py_name != null && globalThis.Object.hasOwn (py_name, "__kwargtrans__"))) {;
 		var py_name = null;
 	};
 	if (arguments.length) {

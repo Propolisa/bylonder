@@ -29,7 +29,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -44,16 +44,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -5758,7 +5758,7 @@ export var IMAGE_PT_tools_active =  __class__ ('IMAGE_PT_tools_active', [ToolSel
 	keymap_prefix: 'Image Editor Tool:',
 	tool_fallback_id: 'builtin.select',
 	get tools_from_context () {return __getcm__ (this, function* (cls, context, mode) {
-		if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 			var mode = null;
 		};
 		if (arguments.length) {
@@ -5830,7 +5830,7 @@ export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelec
 	keymap_prefix: 'Node Editor Tool:',
 	tool_fallback_id: 'builtin.select',
 	get tools_from_context () {return __getcm__ (this, function* (cls, context, mode) {
-		if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 			var mode = null;
 		};
 		if (arguments.length) {
@@ -5905,7 +5905,7 @@ export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolS
 	keymap_prefix: '3D View Tool:',
 	tool_fallback_id: 'builtin.select',
 	get tools_from_context () {return __getcm__ (this, function* (cls, context, mode) {
-		if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 			var mode = null;
 		};
 		if (arguments.length) {
@@ -6079,7 +6079,7 @@ export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', 
 	keymap_prefix: 'Sequence Editor Tool:',
 	tool_fallback_id: 'builtin.select',
 	get tools_from_context () {return __getcm__ (this, function* (cls, context, mode) {
-		if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 			var mode = null;
 		};
 		if (arguments.length) {

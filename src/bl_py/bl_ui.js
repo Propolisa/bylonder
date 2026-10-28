@@ -304,13 +304,13 @@ export var unregister = function () {
 export var UI_UL_list =  __class__ ('UI_UL_list', [bpy.types.UIList], {
 	__module__: __name__,
 	get filter_items_by_name () {return function (pattern, bitflag, py_items, propname, flags, reverse) {
-		if (typeof propname == 'undefined' || (propname != null && propname.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof propname == 'undefined' || (propname != null && globalThis.Object.hasOwn (propname, "__kwargtrans__"))) {;
 			var propname = 'name';
 		};
-		if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 			var flags = null;
 		};
-		if (typeof reverse == 'undefined' || (reverse != null && reverse.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof reverse == 'undefined' || (reverse != null && globalThis.Object.hasOwn (reverse, "__kwargtrans__"))) {;
 			var reverse = false;
 		};
 		if (arguments.length) {
@@ -363,7 +363,7 @@ export var UI_UL_list =  __class__ ('UI_UL_list', [bpy.types.UIList], {
 		return flags;
 	};},
 	get sort_items_helper () {return function (sort_data, key, reverse) {
-		if (typeof reverse == 'undefined' || (reverse != null && reverse.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof reverse == 'undefined' || (reverse != null && globalThis.Object.hasOwn (reverse, "__kwargtrans__"))) {;
 			var reverse = false;
 		};
 		if (arguments.length) {
@@ -389,18 +389,18 @@ export var UI_UL_list =  __class__ ('UI_UL_list', [bpy.types.UIList], {
 		var __iterable0__ = __call__ (py_enumerate, null, sort_data);
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
-			var _item1 = __getitem__ (__iterable0__, __index0__);
-			var _unpacked2 = __call__ (list, null, _item1);
-			var newidx = __getitem__ (_unpacked2, 0);
-			var _unpacked3 = __call__ (list, null, __getitem__ (_unpacked2, 1));
-			var orgidx = __getitem__ (_unpacked3, 0);
-			var _ = __call__ (list, null, __getslice__ (_unpacked3, 1, null, 1));
+			var _item12 = __getitem__ (__iterable0__, __index0__);
+			var _unpacked13 = __call__ (list, null, _item12);
+			var newidx = __getitem__ (_unpacked13, 0);
+			var _unpacked14 = __call__ (list, null, __getitem__ (_unpacked13, 1));
+			var orgidx = __getitem__ (_unpacked14, 0);
+			var _ = __call__ (list, null, __getslice__ (_unpacked14, 1, null, 1));
 			__setitem__ (neworder, orgidx, newidx);
 		}
 		return neworder;
 	};},
 	get sort_items_by_name () {return __getcm__ (this, function (cls, py_items, propname) {
-		if (typeof propname == 'undefined' || (propname != null && propname.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof propname == 'undefined' || (propname != null && globalThis.Object.hasOwn (propname, "__kwargtrans__"))) {;
 			var propname = 'name';
 		};
 		if (arguments.length) {

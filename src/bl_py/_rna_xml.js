@@ -7,6 +7,146 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = '_rna_xml';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol.for ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var __all__ = tuple (['xml_file_run', 'xml_file_write']);
 export var build_property_typemap = function (skip_classes, skip_typemap) {
 	if (arguments.length) {
@@ -130,34 +270,34 @@ export var print_ln = function (data) {
 	__call__ (print, null, data, __kwargtrans__ ({end: ''}));
 };
 export var rna2xml = function (fw, root_node, root_rna, root_rna_skip, root_ident, ident_val, skip_classes, skip_typemap, pretty_format, method) {
-	if (typeof fw == 'undefined' || (fw != null && fw.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fw == 'undefined' || (fw != null && globalThis.Object.hasOwn (fw, "__kwargtrans__"))) {;
 		var fw = print_ln;
 	};
-	if (typeof root_node == 'undefined' || (root_node != null && root_node.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof root_node == 'undefined' || (root_node != null && globalThis.Object.hasOwn (root_node, "__kwargtrans__"))) {;
 		var root_node = '';
 	};
-	if (typeof root_rna == 'undefined' || (root_rna != null && root_rna.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof root_rna == 'undefined' || (root_rna != null && globalThis.Object.hasOwn (root_rna, "__kwargtrans__"))) {;
 		var root_rna = null;
 	};
-	if (typeof root_rna_skip == 'undefined' || (root_rna_skip != null && root_rna_skip.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof root_rna_skip == 'undefined' || (root_rna_skip != null && globalThis.Object.hasOwn (root_rna_skip, "__kwargtrans__"))) {;
 		var root_rna_skip = __call__ (set, null);
 	};
-	if (typeof root_ident == 'undefined' || (root_ident != null && root_ident.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof root_ident == 'undefined' || (root_ident != null && globalThis.Object.hasOwn (root_ident, "__kwargtrans__"))) {;
 		var root_ident = '';
 	};
-	if (typeof ident_val == 'undefined' || (ident_val != null && ident_val.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof ident_val == 'undefined' || (ident_val != null && globalThis.Object.hasOwn (ident_val, "__kwargtrans__"))) {;
 		var ident_val = '  ';
 	};
-	if (typeof skip_classes == 'undefined' || (skip_classes != null && skip_classes.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof skip_classes == 'undefined' || (skip_classes != null && globalThis.Object.hasOwn (skip_classes, "__kwargtrans__"))) {;
 		var skip_classes = tuple ([bpy.types.Operator, bpy.types.Panel, bpy.types.KeyingSet, bpy.types.Header, bpy.types.PropertyGroup]);
 	};
-	if (typeof skip_typemap == 'undefined' || (skip_typemap != null && skip_typemap.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof skip_typemap == 'undefined' || (skip_typemap != null && globalThis.Object.hasOwn (skip_typemap, "__kwargtrans__"))) {;
 		var skip_typemap = null;
 	};
-	if (typeof pretty_format == 'undefined' || (pretty_format != null && pretty_format.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof pretty_format == 'undefined' || (pretty_format != null && globalThis.Object.hasOwn (pretty_format, "__kwargtrans__"))) {;
 		var pretty_format = true;
 	};
-	if (typeof method == 'undefined' || (method != null && method.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof method == 'undefined' || (method != null && globalThis.Object.hasOwn (method, "__kwargtrans__"))) {;
 		var method = 'DATA';
 	};
 	if (arguments.length) {
@@ -614,8 +754,8 @@ export var xml2rna = function (root_xml) {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var attr = __getitem__ (__iterable0__, __index0__);
-			var subvalue = __call__ (getattr, null, value, attr, Ellipsis);
-			if (subvalue === Ellipsis) {
+			var subvalue = __call__ (getattr, null, value, attr, _ellipsis);
+			if (subvalue === _ellipsis) {
 				__call__ (print, null, (function () {
 					var __accu0__ = '{:s}.{:s} not found';
 					return __call__ (__accu0__.format, __accu0__, py_typeof (value).__name__, attr);
@@ -822,7 +962,7 @@ export var _get_context_val = function (context, path) {
 				var __accu0__ = 'Error: {!r}, path {!r} not found';
 				return __call__ (__accu0__.format, __accu0__, ex, path);
 			}) ());
-			var value = Ellipsis;
+			var value = _ellipsis;
 		}
 		else {
 			throw __except0__;
@@ -831,7 +971,7 @@ export var _get_context_val = function (context, path) {
 	return value;
 };
 export var xml_file_run = function (context, filepath, rna_map, secure_types) {
-	if (typeof secure_types == 'undefined' || (secure_types != null && secure_types.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof secure_types == 'undefined' || (secure_types != null && globalThis.Object.hasOwn (secure_types, "__kwargtrans__"))) {;
 		var secure_types = null;
 	};
 	if (arguments.length) {
@@ -870,7 +1010,7 @@ export var xml_file_run = function (context, filepath, rna_map, secure_types) {
 			return __call__ (__accu0__.getElementsByTagName, __accu0__, xml_tag);
 		}) (), 0);
 		var value = __call__ (_get_context_val, null, context, rna_path);
-		if (value !== Ellipsis && value !== null) {
+		if (value !== _ellipsis && value !== null) {
 			__call__ (xml2rna, null, xml_node, __kwargtrans__ ({root_rna: value, secure_types: secure_types}));
 		}
 	}
@@ -922,6 +1062,13 @@ export {_globals, _import, _lazy, _member, _module};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
 		case '__all__': __all__ = value; break;
 		case 'build_property_typemap': build_property_typemap = value; break;
 		case 'print_ln': print_ln = value; break;

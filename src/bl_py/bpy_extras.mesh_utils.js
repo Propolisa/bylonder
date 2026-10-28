@@ -314,7 +314,7 @@ export var edge_face_count = function (mesh) {
 	}) ();
 };
 export var edge_loops_from_edges = function (mesh, edges) {
-	if (typeof edges == 'undefined' || (edges != null && edges.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof edges == 'undefined' || (edges != null && globalThis.Object.hasOwn (edges, "__kwargtrans__"))) {;
 		var edges = null;
 	};
 	if (arguments.length) {
@@ -415,10 +415,10 @@ export var edge_loops_from_edges = function (mesh, edges) {
 	return line_polys;
 };
 export var ngon_tessellate = function (from_data, indices, fix_loops, debug_print) {
-	if (typeof fix_loops == 'undefined' || (fix_loops != null && fix_loops.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fix_loops == 'undefined' || (fix_loops != null && globalThis.Object.hasOwn (fix_loops, "__kwargtrans__"))) {;
 		var fix_loops = true;
 	};
-	if (typeof debug_print == 'undefined' || (debug_print != null && debug_print.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof debug_print == 'undefined' || (debug_print != null && globalThis.Object.hasOwn (debug_print, "__kwargtrans__"))) {;
 		var debug_print = true;
 	};
 	if (arguments.length) {

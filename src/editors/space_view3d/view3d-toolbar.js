@@ -7,7 +7,7 @@ import { pyArgs } from '../../makesrna/rna.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { useContext } from '../interface/layout.js';
 import { openMenu, closeMenus } from '../interface/menu.js';
-import { WM_MT_toolsystem_submenu } from '../../bl_ui/space_toolsystem_common.js';
+import { registered } from '../../python/bpy_interface.js';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { toolIconUrl } from '../interface/icon.js';
@@ -92,7 +92,7 @@ export function createToolbar({ panel, context, ui, run, keys, width = TOOLBAR_S
       press.opened = true;
       clearTimeout(press.timer);
       tooltip.hidden = true;
-      const items = drawMenu('WM_MT_toolsystem_submenu', { ...ui, menus: { WM_MT_toolsystem_submenu }, context: () => ({ ...ctx, button_operator: node.props }) });
+      const items = drawMenu('WM_MT_toolsystem_submenu', { ...ui, menus: { WM_MT_toolsystem_submenu: registered.WM_MT_toolsystem_submenu }, context: () => ({ ...ctx, button_operator: node.props }) });
       openMenu(items, b, '', { side: true, scale: 2, hold: true });
     };
     b.onpointerdown = (e) => {

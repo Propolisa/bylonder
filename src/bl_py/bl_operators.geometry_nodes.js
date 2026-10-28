@@ -35,7 +35,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -50,16 +50,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -151,7 +151,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var add_empty_geometry_node_group = function (py_name, add_geometry_input) {
-	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && add_geometry_input.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && globalThis.Object.hasOwn (add_geometry_input, "__kwargtrans__"))) {;
 		var add_geometry_input = true;
 	};
 	if (arguments.length) {
@@ -198,7 +198,7 @@ export var add_empty_geometry_node_group = function (py_name, add_geometry_input
 	return group;
 };
 export var geometry_node_group_empty_new = function (py_name, add_geometry_input) {
-	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && add_geometry_input.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && globalThis.Object.hasOwn (add_geometry_input, "__kwargtrans__"))) {;
 		var add_geometry_input = true;
 	};
 	if (arguments.length) {
@@ -225,7 +225,7 @@ export var geometry_node_group_empty_new = function (py_name, add_geometry_input
 	return group;
 };
 export var geometry_node_group_empty_modifier_new = function (py_name, add_geometry_input) {
-	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && add_geometry_input.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && globalThis.Object.hasOwn (add_geometry_input, "__kwargtrans__"))) {;
 		var add_geometry_input = true;
 	};
 	if (arguments.length) {

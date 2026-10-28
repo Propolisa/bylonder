@@ -37,7 +37,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -52,16 +52,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -572,19 +572,19 @@ export var prettyface =  __class__ ('prettyface', [object], {
 	});}
 });
 export var lightmap_uvpack = function (meshes, PREF_SEL_ONLY, PREF_NEW_UVLAYER, PREF_PACK_IN_ONE, PREF_BOX_DIV, PREF_MARGIN_DIV) {
-	if (typeof PREF_SEL_ONLY == 'undefined' || (PREF_SEL_ONLY != null && PREF_SEL_ONLY.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof PREF_SEL_ONLY == 'undefined' || (PREF_SEL_ONLY != null && globalThis.Object.hasOwn (PREF_SEL_ONLY, "__kwargtrans__"))) {;
 		var PREF_SEL_ONLY = true;
 	};
-	if (typeof PREF_NEW_UVLAYER == 'undefined' || (PREF_NEW_UVLAYER != null && PREF_NEW_UVLAYER.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof PREF_NEW_UVLAYER == 'undefined' || (PREF_NEW_UVLAYER != null && globalThis.Object.hasOwn (PREF_NEW_UVLAYER, "__kwargtrans__"))) {;
 		var PREF_NEW_UVLAYER = false;
 	};
-	if (typeof PREF_PACK_IN_ONE == 'undefined' || (PREF_PACK_IN_ONE != null && PREF_PACK_IN_ONE.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof PREF_PACK_IN_ONE == 'undefined' || (PREF_PACK_IN_ONE != null && globalThis.Object.hasOwn (PREF_PACK_IN_ONE, "__kwargtrans__"))) {;
 		var PREF_PACK_IN_ONE = false;
 	};
-	if (typeof PREF_BOX_DIV == 'undefined' || (PREF_BOX_DIV != null && PREF_BOX_DIV.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof PREF_BOX_DIV == 'undefined' || (PREF_BOX_DIV != null && globalThis.Object.hasOwn (PREF_BOX_DIV, "__kwargtrans__"))) {;
 		var PREF_BOX_DIV = 8;
 	};
-	if (typeof PREF_MARGIN_DIV == 'undefined' || (PREF_MARGIN_DIV != null && PREF_MARGIN_DIV.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof PREF_MARGIN_DIV == 'undefined' || (PREF_MARGIN_DIV != null && globalThis.Object.hasOwn (PREF_MARGIN_DIV, "__kwargtrans__"))) {;
 		var PREF_MARGIN_DIV = 512;
 	};
 	if (arguments.length) {

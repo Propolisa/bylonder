@@ -29,7 +29,8 @@ function property(struct, name) {
 
 // `load` imports rna-ui.json: bundlers serve JSON as a module without Node's import attribute.
 let ui = null;
-export async function loadRNAUI(load = () => import('./rna-ui.json', { with: { type: 'json' } })) {
+// The default is Node's (tests): the app passes the bundler's import.
+export async function loadRNAUI(load = () => import(/* @vite-ignore */ './rna-ui.json', { with: { type: 'json' } })) {
   ui ??= (await load()).default;
 }
 

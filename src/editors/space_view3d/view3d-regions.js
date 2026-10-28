@@ -4,10 +4,7 @@
 // tab whose context (the mode's, '.objectmode') and poll() match, with their sub-panels. All draw through the shared
 // layout renderer (interface/layout-view.js).
 import { createApp, h, reactive, markRaw } from 'vue';
-import * as spaceView3d from '../../bl_ui/space_view3d.js';
-import * as spaceView3dToolbar from '../../bl_ui/space_view3d_toolbar.js';
-import * as spaceView3dSidebar from '../../bl_ui/space_view3d_sidebar.js';
-import * as spaceTopbar from '../../bl_ui/space_topbar.js';
+import { panels, headers } from '../../python/bpy_interface.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { panelTypes, drawPanels, headerLayout, idname } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
@@ -16,7 +13,7 @@ import { VIEW3D_PT_transform } from './view3d-buttons.js';
 import './view3d-regions.css';
 
 // Panel types in the order Blender registers them: C panels (view3d_buttons_register), then the scripts' modules.
-const MODULES = [{ classes: [VIEW3D_PT_transform] }, spaceView3d, spaceView3dSidebar, spaceView3dToolbar, spaceTopbar];
+const MODULES = [{ classes: [VIEW3D_PT_transform] }, { classes: Object.values(panels) }];
 // view3d_buttons_region_layout: the context string of each mode.
 const MODE_CONTEXTS = { OBJECT: '.objectmode', EDIT_MESH: '.mesh_edit' };
 const polls = (type, context) => { try { return !type.poll || !!type.poll(context); } catch { return false; } };
@@ -83,8 +80,8 @@ export function createRegions({ view, context, ui, changed, undoPush }) {
   };
 
   const apps = [
-    mount(toolHeader, () => header('TOOL_HEADER', drawHeaderType(spaceView3d.VIEW3D_HT_tool_header))),
-    mount(xform, () => header('HEADER', (layout, ctx) => spaceView3d.VIEW3D_HT_header.draw_xform_template(layout, ctx))),
+    mount(toolHeader, () => header('TOOL_HEADER', drawHeaderType(headers.VIEW3D_HT_tool_header))),
+    mount(xform, () => header('HEADER', (layout, ctx) => headers.VIEW3D_HT_header.draw_xform_template(layout, ctx))),
     mount(sidebar, sidebarRegion),
   ];
 
