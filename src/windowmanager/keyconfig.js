@@ -1,11 +1,20 @@
 // Blender's default key configuration (keymap_data/blender_default.py, transpiled into src/bl_ui): the keymaps events
 // run through and the shortcuts Blender's menus show (WM_key_event_operator_string).
-import { generate_keymaps } from '../bl_ui/blender_default.js';
+import { generate_keymaps, Params } from '../bl_ui/blender_default.js';
 import { keysLabel } from './input/keymap.js';
-import { invokeOperator } from './wm-operators.js';
+import { invokeOperator, kw } from './wm-operators.js';
+
+// The parameters the default key configuration (presets/keyconfig/Blender.py) passes with its default preferences.
+export const KEYCONFIG_PARAMS = {
+  select_mouse: 'LEFT', use_mouse_emulate_3_button: false, spacebar_action: 'PLAY', use_key_activate_tools: false, use_region_toggle_pie: false,
+  v3d_tilde_action: 'VIEW', use_v3d_mmb_pan: false, v3d_alt_mmb_drag_action: 'RELATIVE', use_select_all_toggle: false, use_v3d_tab_menu: false,
+  use_v3d_shade_ex_pie: false, use_gizmo_drag: true, use_fallback_tool: true, use_fallback_tool_select_handled: false, use_alt_tool_or_cursor: false,
+  use_alt_click_leader: false, use_pie_click_drag: false, use_file_single_click: false, use_alt_navigation: true,
+};
+export const defaultKeymaps = () => generate_keymaps(Params(kw(KEYCONFIG_PARAMS)));
 
 let keymaps;
-const keyconfig = () => (keymaps ??= new Map(generate_keymaps().map(([name, , { items }]) => [name, items])));
+const keyconfig = () => (keymaps ??= new Map(defaultKeymaps().map(([name, , { items }]) => [name, items])));
 
 const MODIFIERS = [['shift', 'Shift'], ['ctrl', 'Ctrl'], ['alt', 'Alt'], ['oskey', 'Cmd']];
 const eventText = (event) => [...MODIFIERS.filter(([key]) => event[key] === true).map(([, text]) => text), keysLabel(event.type)].join(' ');

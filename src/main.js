@@ -302,7 +302,7 @@ world.objectActions = createObjectActions({
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
-registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify }));
+registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify, ids: animation.ids }));
 registerAddOperators(creator);
 // bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
 world.blenderContext = (view) => createContext(blenderRNA, { space: view });

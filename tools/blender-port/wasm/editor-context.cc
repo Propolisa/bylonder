@@ -59,6 +59,9 @@
 #include "operator-properties.hh"
 #include "extraction.hh"
 
+#include <algorithm>
+#include <string>
+
 using namespace blender;
 using namespace blender::ed::mesh;
 using namespace blender::ed::object;
@@ -288,6 +291,11 @@ struct OperatorDefinition {
   wmOperatorType *type = nullptr;
 };
 
+void anim_operatortypes();
+namespace blender::ed::transform {
+void keymap_transform(wmKeyConfig *keyconf);
+}
+
 /* Operators registered through WM_operatortype_append (the transform operators), defined as they are appended. */
 static Vector<OperatorDefinition> &appended_operators()
 {
@@ -313,9 +321,15 @@ static Vector<OperatorDefinition> &operators()
 #undef OPERATOR
     };
     ed::transform::transform_operatortypes();
+    anim_operatortypes();
     table.extend(appended_operators());
     return table;
   }();
+  static bool keymaps = false;
+  if (!keymaps) {
+    keymaps = true;
+    ed::transform::keymap_transform(nullptr);
+  }
   return table;
 }
 
@@ -406,9 +420,124 @@ EXPORT(operator_exec) int operator_exec(bContext *C, wmOperator *op)
   return int(op->type->exec(C, op));
 }
 
+/* The event an operator's invoke or modal gets (wmEvent): its type and value (wmEventType, KM_PRESS...), where it is in
+ * the context's region (Blender's y up), its modifier keys (wmEventModifierFlag), its text and the previous press. */
+EXPORT(wm_event_set)
+wmEvent *wm_event_set(bContext *C, int type, int val, int x, int y, int modifier, const char *utf8, int prev_type, int prev_val)
+{
+  static wmEvent event;
+  event = {};
+  event.type = wmEventType(type);
+  event.val = short(val);
+  const ARegion *region = CTX_wm_region(C);
+  const int2 origin = region ? int2(region->winrct.xmin, region->winrct.ymin) : int2(0);
+  event.mval[0] = x;
+  event.mval[1] = y;
+  event.xy[0] = x + origin.x;
+  event.xy[1] = y + origin.y;
+  event.modifier = wmEventModifierFlag(modifier);
+  STRNCPY(event.utf8_buf, utf8);
+  event.prev_type = wmEventType(prev_type);
+  event.prev_val = short(prev_val);
+  event.prev_press_type = wmEventType(prev_type);
+  event.prev_xy[0] = event.prev_press_xy[0] = event.xy[0];
+  event.prev_xy[1] = event.prev_press_xy[1] = event.xy[1];
+  return &event;
+}
+
+/* The operator a modal handler was added for since the last call (WM_event_add_modal_handler), or null. */
+static wmOperator *modal_added = nullptr;
+EXPORT(operator_modal_added) wmOperator *operator_modal_added()
+{
+  wmOperator *op = modal_added;
+  modal_added = nullptr;
+  return op;
+}
+
+/* Polls and runs an operator's invoke (or its exec when it has none) with an event: its wmOperatorStatus flags, or 0
+ * when it does not poll. One that returns OPERATOR_RUNNING_MODAL gets the following events through operator_modal. */
+EXPORT(operator_invoke) int operator_invoke(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  if (op->type->poll && !op->type->poll(C)) {
+    return 0;
+  }
+  op->flag |= OP_IS_INVOKE;
+  return int(op->type->invoke ? op->type->invoke(C, op, event) : op->type->exec ? op->type->exec(C, op) : 0);
+}
+
+EXPORT(operator_modal) int operator_modal(bContext *C, wmOperator *op, const wmEvent *event)
+{
+  return int(op->type->modal(C, op, event));
+}
+
+/* Whether a modal operator's modal keymap lets an item through now (wmKeyMap.poll_modal_item), and the value of its
+ * item by identifier (-1 when it has none). */
+EXPORT(operator_modal_item) int operator_modal_item(wmOperator *op, const char *identifier)
+{
+  wmKeyMap *keymap = op->type->modalkeymap;
+  if (!keymap || !keymap->modal_items) {
+    return -1;
+  }
+  for (const EnumPropertyItem *item = static_cast<const EnumPropertyItem *>(keymap->modal_items); item->identifier; item++) {
+    if (STREQ(item->identifier, identifier)) {
+      return !keymap->poll_modal_item || keymap->poll_modal_item(op, item->value) ? item->value : -1;
+    }
+  }
+  return -1;
+}
+
 /* What the operators reach of Blender beyond the module. */
 
 namespace blender {
+
+/* As wm_operator_type.cc defines it, over the module's operator table. */
+wmOperatorType *WM_operatortype_find(const char *idname, bool /*quiet*/)
+{
+  std::string name = idname;
+  if (const char *dot = strchr(idname, '.')) {
+    name = std::string(idname, dot) + "_OT_" + (dot + 1);
+    std::transform(name.begin(), name.begin() + (dot - idname), name.begin(), ::toupper);
+  }
+  for (int i = 0; i < operator_count(); i++) {
+    if (name == operators()[i].name) {
+      return operator_type(i);
+    }
+  }
+  return nullptr;
+}
+
+/* port-override: Bylonder's window manager keeps the modal handler (JS); it learns of it by operator_modal_added. */
+wmEventHandler_Op *WM_event_add_modal_handler(bContext * /*C*/, wmOperator *op)
+{
+  modal_added = op;
+  return reinterpret_cast<wmEventHandler_Op *>(op);
+}
+
+/* As wm_keymap.cc defines them for modal keymaps, which keep their items' enum here; the items' keys are Blender's
+ * keymap data in JS, which matches events to them. */
+wmKeyMap *WM_modalkeymap_ensure(wmKeyConfig * /*keyconf*/, const char *idname, const EnumPropertyItem *items)
+{
+  static Vector<std::unique_ptr<wmKeyMap>> keymaps;
+  for (std::unique_ptr<wmKeyMap> &keymap : keymaps) {
+    if (STREQ(keymap->idname, idname)) {
+      return keymap.get();
+    }
+  }
+  keymaps.append(std::make_unique<wmKeyMap>());
+  wmKeyMap *keymap = keymaps.last().get();
+  STRNCPY(keymap->idname, idname);
+  keymap->flag = KEYMAP_MODAL;
+  keymap->modal_items = items;
+  return keymap;
+}
+wmKeyMap *WM_modalkeymap_find(wmKeyConfig * /*keyconf*/, const char *idname) { return WM_modalkeymap_ensure(nullptr, idname, nullptr); }
+void WM_modalkeymap_assign(wmKeyMap *km, const char *opname)
+{
+  if (wmOperatorType *ot = WM_operatortype_find(opname, true)) {
+    ot->modalkeymap = km;
+  }
+}
+wmKeyMap *WM_keymap_active(const wmWindowManager * /*wm*/, wmKeyMap *keymap) { return keymap; }
 
 /* As object_edit.cc defines them; object_edit.cc comes with the rest of Blender's object editing. */
 Object *ed::object::context_object(const bContext *C)
@@ -469,18 +598,6 @@ float ED_scene_grid_scale(const Scene *scene, const char **r_grid_unit)
   return 1.0f;
 }
 
-/* As view2d.cc defines it: transform reads the region's 2D view when the context has no 3D View. */
-void ui::view2d_view_to_region_m4(const View2D *v2d, float matrix[4][4])
-{
-  rctf mask;
-  unit_m4(matrix);
-  BLI_rctf_rcti_copy(&mask, &v2d->mask);
-  BLI_rctf_transform_calc_m4_pivot_min(&v2d->cur, &mask, matrix);
-}
-
-/* As area.cc defines it for no area, as when transform runs in Blender's background mode; the editor shows the
- * header text itself. */
-void ED_area_status_text(ScrArea *area, const char * /*str*/) { BLI_assert(area == nullptr); }
 
 /* port-override: the editor draws its own status bar for its tools, so what operators put there goes nowhere. */
 WorkspaceStatus::WorkspaceStatus(bContext * /*C*/) : workspace_(nullptr), wm_(nullptr) {}
