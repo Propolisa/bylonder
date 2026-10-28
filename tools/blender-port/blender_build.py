@@ -264,29 +264,47 @@ WRAPPED = ['_ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS
 
 
 def link_module(host, out, entries, extra, archives):
-    """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) first, then Blender's libraries,
-    as the module build links them. What the API defines that a library linked in also defines is a duplicate: the API's
-    stand-in, which goes for Blender's own; the link names them."""
+    """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) first, then Blender's libraries.
+    An archive member that defines what the API defines is left out, as the API replaces it: the API's seam
+    implementations (region-draw.cc's BLF recording) and its stand-ins, which go for Blender's own. The members left out
+    are listed (wasm-build/replaced.json); each one the API stops replacing comes back."""
     built = glue(host, out, entries, extra)
     failed = [(s, e) for s, o, e in built if not o]
     if failed:
         sys.exit('\n'.join(f'{os.path.basename(s)} does not build: {first_error(e)}' for s, e in failed))
     module = os.path.join(out, 'bylonder.wasm')
+    ar = shutil.which('llvm-ar') or shutil.which('llvm-ar-18')
+    linked = os.path.join(out, 'module-archives')
+    shutil.rmtree(linked, ignore_errors=True)
+    os.makedirs(linked)
+    copies = [shutil.copy(a, linked) for a in archives]
     strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
-    link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
-            '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
-            *(f'-Wl,--wrap={w}' for w in WRAPPED), *(o for _, o, _ in built), *archives, *archives, '-lwasi-emulated-process-clocks',
-            '-Wl,--allow-undefined', '-o', module]
-    result = subprocess.run(link, capture_output=True, text=True)
+    replaced = {}
+    while True:
+        link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
+                '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
+                *(f'-Wl,--wrap={w}' for w in WRAPPED), *(o for _, o, _ in built), *copies, *copies, '-lwasi-emulated-process-clocks',
+                '-Wl,--allow-undefined', '-o', module]
+        result = subprocess.run(link, capture_output=True, text=True)
+        # wasm-ld: "duplicate symbol: S" then ">>> defined in A" and ">>> defined in lib.a(member.o)".
+        members, lines = {}, result.stderr.splitlines()
+        for i, line in enumerate(lines):
+            if 'duplicate symbol: ' in line:
+                for where in lines[i + 1:i + 3]:
+                    match = re.search(r'defined in (\S+\.a)\((\S+)\)', where)
+                    if match:
+                        members.setdefault((match.group(1), match.group(2)), []).append(line.split('duplicate symbol: ')[-1])
+        if not members:
+            break
+        for (archive, member), symbols in members.items():
+            subprocess.run([ar, 'd', archive, member], check=True)
+            replaced[f'{os.path.basename(archive)}({member})'] = demangle(symbols)
+    json.dump(dict(sorted(replaced.items())), open(os.path.join(out, 'replaced.json'), 'w'), indent=1)
     if result.returncode:
-        stand_ins = sorted({line.split('duplicate symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'duplicate symbol: ' in line})
-        if stand_ins:
-            json.dump(demangle(stand_ins), open(os.path.join(out, 'stand-ins.json'), 'w'), indent=1)
-            sys.exit(f'module link: {len(stand_ins)} API definitions Blender\'s libraries also define (wasm-build/stand-ins.json)')
         sys.exit(f'module link failed:\n{result.stderr[-3000:]}')
     missing = wasm_module.live_imports(module)
-    print(f'{module}: {os.path.getsize(module)} bytes; {len(missing)} imports, which throw when called', file=sys.stderr)
-
+    print(f'{module}: {os.path.getsize(module)} bytes; {len(replaced)} Blender objects the API replaces (replaced.json); '
+          f'{len(missing)} imports, which throw when called', file=sys.stderr)
 
 if __name__ == '__main__':
     main()

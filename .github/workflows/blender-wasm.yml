@@ -66,5 +66,5 @@ jobs:
           name: blender-wasm
           path: |
             seam-report.json
-            work/wasm-build/stand-ins.json
+            work/wasm-build/replaced.json
             work/wasm-build/*.wasm
