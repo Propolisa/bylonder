@@ -8,6 +8,8 @@
 
 #include "MEM_guardedalloc.h"
 
+#include "DNA_ID.h"
+
 #include "BLI_utildefines.h"
 
 #include "RNA_access.hh"
@@ -82,6 +84,32 @@ static void define_dna_fields()
     prop.dna = def.dna;
   }
 }
+
+/* port-override: rna_ID.cc's runtime part comes with Blender's generated RNA; these are the module's ID types. */
+StructRNA *ID_code_to_RNA_type(short idcode)
+{
+  switch (ID_Type(idcode)) {
+    case ID_OB:
+      return RNA_Object;
+    case ID_ME:
+      return RNA_Mesh;
+    case ID_SCE:
+      return RNA_Scene;
+    case ID_CA:
+      return RNA_Camera;
+    case ID_LA:
+      return RNA_Light;
+    case ID_CU_LEGACY:
+      return RNA_Curve;
+    case ID_VF:
+      return RNA_VectorFont;
+    default:
+      return RNA_ID;
+  }
+}
+
+/* As rna_access.cc defines it; the module's types have no subtypes to refine to. */
+PointerRNA RNA_id_pointer_create(ID *id) { return id ? PointerRNA{id, ID_code_to_RNA_type(GS(id->name)), id} : PointerRNA_NULL; }
 
 PropertyRNA *RNA_struct_type_find_property(StructRNA *srna, const char *identifier)
 {

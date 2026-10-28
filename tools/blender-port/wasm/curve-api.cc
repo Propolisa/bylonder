@@ -1,12 +1,9 @@
-/* Blender's Curve and Text objects: a Curve ID (OB_CURVES_LEGACY or OB_FONT) and its Object, evaluated as the
- * depsgraph evaluates them (BKE_displist_make_curveTypes, BKE_vfont_to_curve for text) to the mesh Blender draws,
- * and edited by Blender's own curve and font editors (editcurve.cc, editfont.cc) with their operators and Blender's
- * transform.
- *
- * The object owns its ID for now; what it needs of a Scene (tool settings, a view layer whose active base is the
- * object, for the editors' context) is its own, until the module's Main holds them. JS writes the Curve's settings at
- * their DNA offsets (dna-curves.json), its splines and text through the functions below, and reads the evaluated mesh
- * through an ExtractionHeader. */
+/* Blender's Curve and Text objects in the module's Main (main-api.cc makes them with main_object_add, OB_CURVES_LEGACY
+ * or OB_FONT): their splines and text in and out, evaluation as the depsgraph evaluates them (BKE_displist_make_curveTypes,
+ * BKE_vfont_to_curve for text) to the mesh Blender draws, and Edit Mode with Blender's own curve and font editors
+ * (editcurve.cc, editfont.cc), whose operators run on the Main's context. Settings are written by JS at their DNA
+ * offsets (dna-curves.json). Fonts are VFont IDs in the Main, Blender's built-in font (bfont.pfb, embedded as
+ * Blender's datatoc embeds it) or a font file's bytes packed into one. */
 #include "BKE_context.hh"
 #include "BKE_curve.hh"
 #include "BKE_curve_to_mesh.hh"
@@ -14,20 +11,15 @@
 #include "BKE_displist.h"
 #include "BKE_geometry_set.hh"
 #include "BKE_global.hh"
-#include "BKE_idtype.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
 #include "BKE_mesh.hh"
-#include "BKE_modifier.hh"
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
 #include "BKE_packedFile.hh"
-#include "BKE_report.hh"
-#include "BKE_scene.hh"
 #include "BKE_screen.hh"
 #include "BKE_vfont.hh"
 #include "BKE_vfontdata.hh"
-#include "BKE_cpp_types.hh"
 #include "BLF_api.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
@@ -46,11 +38,9 @@
 #include "ED_select_utils.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
-#include "RNA_prototypes.hh"
 #include "WM_types.hh"
 
 #include "extraction.hh"
-#include "operator-properties.hh"
 
 using namespace blender;
 
@@ -59,121 +49,15 @@ using namespace blender;
 extern const char datatoc_bfont_pfb[];
 extern const int datatoc_bfont_pfb_size;
 
-/* As Blender's main sets them up before data is made: ID and modifier types, fonts (BLF and the built-in font), and
- * the Main that holds fonts (BKE_vfont_builtin_ensure looks in G_MAIN). */
-static void curve_types_ensure()
+/* As Blender's main sets fonts up before any data is made (BLF_init, BKE_vfont_builtin_register); types_ensure
+ * (modifier-api.cc) calls it. */
+void fonts_init()
 {
-  static const bool types = [] {
-    BKE_cpp_types_init();
-    BKE_idtype_init();
-    BKE_modifier_init();
-    BLF_init();
-    BKE_vfont_builtin_register(datatoc_bfont_pfb, datatoc_bfont_pfb_size);
-    if (!G_MAIN) {
-      G_MAIN = BKE_main_new();
-    }
-    return true;
-  }();
-  (void)types;
+  BLF_init();
+  BKE_vfont_builtin_register(datatoc_bfont_pfb, datatoc_bfont_pfb_size);
 }
 
-struct CurveObject {
-  bContext *C = nullptr;
-  Vector<std::unique_ptr<bContextStore>> stores;
-  Scene scene = {};
-  ToolSettings tool_settings = {};
-  ViewLayer view_layer = {};
-  Base base = {};
-  Object object = {};
-  /* The 3D View an operator picks in: its region, view and overlay (handle display). */
-  ScrArea area = {};
-  ARegion region = {};
-  RegionView3D rv3d = {};
-  View3D v3d = {};
-  /* The edit data as it was when a transform began, which each step starts from. */
-  ListBaseT<Nurb> snapshot = {nullptr, nullptr};
-  ExtractionHeader header = {};
-  /* Splines and text as curve_nurbs_get and curve_text_get give them. */
-  Vector<int> ints;
-  Vector<float> floats;
-  std::string text;
-};
-
-static Curve &curve_of(CurveObject *co) { return *id_cast<Curve *>(co->object.data); }
-
-/* A Curve as BKE_curve_add makes one (OB_CURVES_LEGACY or OB_FONT), and an object of it, as add_type makes one. */
-EXPORT(curve_object_new) CurveObject *curve_object_new(int ob_type, const char *name)
-{
-  curve_types_ensure();
-  CurveObject *co = MEM_new<CurveObject>(__func__);
-  Curve *cu = static_cast<Curve *>(BKE_libblock_alloc(nullptr, ID_CU_LEGACY, name, LIB_ID_CREATE_NO_MAIN));
-  BKE_curve_init(cu, ObjectType(ob_type));
-  Object &ob = co->object;
-  ob.type = ob_type;
-  ob.data = &cu->id;
-  STRNCPY(ob.id.name, "OBCurve");
-  ob.runtime = MEM_new<bke::ObjectRuntime>(__func__);
-  ob.runtime->object_to_world = float4x4::identity();
-  ob.runtime->world_to_object = float4x4::identity();
-
-  co->base.object = &ob;
-  co->base.flag = BASE_SELECTED | BASE_ENABLED_AND_VISIBLE_IN_DEFAULT_VIEWPORT;
-  BLI_addtail(&co->view_layer.object_bases, &co->base);
-  co->view_layer.basact = &co->base;
-  BLI_addtail(&co->scene.view_layers, &co->view_layer);
-  co->scene.toolsettings = &co->tool_settings;
-
-  co->region.runtime = MEM_new<bke::ARegionRuntime>(__func__);
-  co->region.regiontype = RGN_TYPE_WINDOW;
-  co->region.regiondata = &co->rv3d;
-  co->v3d.spacetype = SPACE_VIEW3D;
-  co->v3d.overlay.handle_display = CURVE_HANDLE_SELECTED;
-  co->area.spacetype = SPACE_VIEW3D;
-  BLI_addtail(&co->area.spacedata, &co->v3d);
-  BLI_addtail(&co->area.regionbase, &co->region);
-
-  co->C = CTX_create();
-  CTX_data_scene_set(co->C, &co->scene);
-  CTX_wm_area_set(co->C, &co->area);
-  CTX_wm_region_set(co->C, &co->region);
-  PointerRNA object_ptr = {&ob.id, RNA_Object, &ob};
-  CTX_store_add(co->stores, "active_object", &object_ptr);
-  CTX_store_set(co->C, CTX_store_add(co->stores, "object", &object_ptr));
-  return co;
-}
-
-static void edit_free(CurveObject *co)
-{
-  ED_curve_editnurb_free(&co->object);
-  ED_curve_editfont_free(&co->object);
-  BKE_nurbList_free(&co->snapshot);
-}
-
-EXPORT(curve_object_free) void curve_object_free(CurveObject *co)
-{
-  CTX_free(co->C);
-  edit_free(co);
-  BKE_object_free_derived_caches(&co->object);
-  while (ModifierData *md = static_cast<ModifierData *>(BLI_pophead(&co->object.modifiers))) {
-    BKE_modifier_free(md);
-  }
-  BKE_id_free(nullptr, co->object.data);
-  MEM_delete(co->region.runtime);
-  MEM_delete(co->object.runtime);
-  MEM_delete(co);
-}
-
-EXPORT(curve_object_curve) Curve *curve_object_curve(CurveObject *co) { return &curve_of(co); }
-/* The object, whose modifier stack modifier_add and modifier_clear (modifier-api.cc) change. */
-EXPORT(curve_object_object) Object *curve_object_object(CurveObject *co) { return &co->object; }
-
-/* The object's matrix (column-major, Blender's axes), which the Curve modifier and Follow Path read. */
-EXPORT(curve_object_matrix_set) void curve_object_matrix_set(CurveObject *co, const float *object_to_world)
-{
-  bke::ObjectRuntime &runtime = *co->object.runtime;
-  std::copy_n(object_to_world, 16, runtime.object_to_world.base_ptr());
-  runtime.world_to_object = math::invert(runtime.object_to_world);
-}
+static Curve &curve_of(Object *ob) { return *id_cast<Curve *>(ob->data); }
 
 /* Splines as ints and floats: per spline NURB_INTS ints, then per point BEZT_INTS ints and BEZT_FLOATS floats for a
  * Bezier spline, else BP_INTS and BP_FLOATS. */
@@ -188,43 +72,45 @@ struct NurbsHeader {
 };
 
 /* The edit splines in Edit Mode, else the curve's. */
-static ListBaseT<Nurb> &nurbs_of(CurveObject *co) { return *BKE_curve_nurbs_get(&curve_of(co)); }
+static ListBaseT<Nurb> &nurbs_of(Object *ob) { return *BKE_curve_nurbs_get(&curve_of(ob)); }
 
-EXPORT(curve_nurbs_get) const NurbsHeader *curve_nurbs_get(CurveObject *co)
+/* The splines in curve_nurbs_set's layout, valid until the next call. */
+EXPORT(curve_nurbs_get) const NurbsHeader *curve_nurbs_get(Object *ob)
 {
   static NurbsHeader header;
-  co->ints.clear();
-  co->floats.clear();
+  static Vector<int> ints;
+  static Vector<float> floats;
+  ints.clear();
+  floats.clear();
   int nurbs_num = 0;
-  for (const Nurb &nu : nurbs_of(co)) {
-    co->ints.extend({nu.type, nu.flag, nu.pntsu, nu.pntsv, nu.orderu, nu.orderv, nu.resolu, nu.resolv, nu.flagu, nu.flagv, nu.mat_nr,
-                     nu.hide, nu.charidx, nu.tilt_interp, nu.radius_interp});
+  for (const Nurb &nu : nurbs_of(ob)) {
+    ints.extend({nu.type, nu.flag, nu.pntsu, nu.pntsv, nu.orderu, nu.orderv, nu.resolu, nu.resolv, nu.flagu, nu.flagv, nu.mat_nr, nu.hide,
+                 nu.charidx, nu.tilt_interp, nu.radius_interp});
     if (nu.bezt) {
       for (const BezTriple &bezt : Span(nu.bezt, nu.pntsu)) {
-        co->ints.extend({bezt.h1, bezt.h2, bezt.f1, bezt.f2, bezt.f3, bezt.hide});
-        co->floats.extend(Span(&bezt.vec[0][0], 9));
-        co->floats.extend({bezt.tilt, bezt.weight, bezt.radius});
+        ints.extend({bezt.h1, bezt.h2, bezt.f1, bezt.f2, bezt.f3, bezt.hide});
+        floats.extend(Span(&bezt.vec[0][0], 9));
+        floats.extend({bezt.tilt, bezt.weight, bezt.radius});
       }
     }
     else {
       for (const BPoint &bp : Span(nu.bp, nu.pntsu * nu.pntsv)) {
-        co->ints.extend({bp.f1, bp.hide});
-        co->floats.extend(Span(bp.vec, 4));
-        co->floats.extend({bp.tilt, bp.weight, bp.radius});
+        ints.extend({bp.f1, bp.hide});
+        floats.extend(Span(bp.vec, 4));
+        floats.extend({bp.tilt, bp.weight, bp.radius});
       }
     }
     nurbs_num++;
   }
-  const Curve &cu = curve_of(co);
-  header = {nurbs_num, int(co->ints.size()), int(co->floats.size()), co->ints.data(), co->floats.data(), cu.actnu, cu.actvert};
+  const Curve &cu = curve_of(ob);
+  header = {nurbs_num, int(ints.size()), int(floats.size()), ints.data(), floats.data(), cu.actnu, cu.actvert};
   return &header;
 }
 
-/* Replaces the splines (the edit splines in Edit Mode) with those of curve_nurbs_get's layout, their knots
- * calculated as reading a file does. */
-EXPORT(curve_nurbs_set) void curve_nurbs_set(CurveObject *co, int nurbs_num, const int *ints, const float *floats, int actnu, int actvert)
+/* Replaces the splines (the edit splines in Edit Mode), their knots calculated as reading a file does. */
+EXPORT(curve_nurbs_set) void curve_nurbs_set(Object *ob, int nurbs_num, const int *ints, const float *floats, int actnu, int actvert)
 {
-  ListBaseT<Nurb> &nurbs = nurbs_of(co);
+  ListBaseT<Nurb> &nurbs = nurbs_of(ob);
   BKE_nurbList_free(&nurbs);
   for (int n = 0; n < nurbs_num; n++) {
     Nurb *nu = MEM_new<Nurb>(__func__);
@@ -280,13 +166,13 @@ EXPORT(curve_nurbs_set) void curve_nurbs_set(CurveObject *co, int nurbs_num, con
     }
     BLI_addtail(&nurbs, nu);
   }
-  Curve &cu = curve_of(co);
+  Curve &cu = curve_of(ob);
   cu.actnu = actnu;
   cu.actvert = actvert;
 }
 
-/* Text: its body (UTF-8, the edit text in Edit Mode), each character's format, the cursor and selection, and in Edit
- * Mode where the evaluated layout puts the cursor and the selection. */
+/* Text: its body (UTF-8; the edit text in Edit Mode), each character's format, the cursor and selection, the text
+ * boxes, and in Edit Mode where the evaluated layout put the cursor and the selection boxes. */
 struct TextHeader {
   const char *body;
   int len_char32;
@@ -299,12 +185,12 @@ struct TextHeader {
   int totbox, actbox;
 };
 
-EXPORT(curve_text_get) const TextHeader *curve_text_get(CurveObject *co)
+EXPORT(curve_text_get) const TextHeader *curve_text_get(Object *ob)
 {
   static TextHeader header;
-  Curve &cu = curve_of(co);
+  Curve &cu = curve_of(ob);
   if (EditFont *ef = cu.editfont) {
-    ED_curve_editfont_load(&co->object);
+    ED_curve_editfont_load(ob);
     header = {cu.str, cu.len_char32, ef->textbufinfo, ef->pos, ef->selstart, ef->selend, &ef->textcurs[0][0], ef->selboxes,
               ef->selboxes_len, cu.tb, cu.totbox, cu.actbox};
   }
@@ -314,11 +200,11 @@ EXPORT(curve_text_get) const TextHeader *curve_text_get(CurveObject *co)
   return &header;
 }
 
-/* Sets the text (UTF-8) and its characters' formats (one per character, or null for the default), as reading a
- * file sets them; in Edit Mode the edit text is made from them again. */
-EXPORT(curve_text_set) void curve_text_set(CurveObject *co, const char *body, const CharInfo *info, int pos, int selstart, int selend)
+/* Sets the text (UTF-8) and its characters' formats (one per character, or null for none), as reading a file sets
+ * them; in Edit Mode the edit text is made from them again. */
+EXPORT(curve_text_set) void curve_text_set(Object *ob, const char *body, const CharInfo *info, int pos, int selstart, int selend)
 {
-  Curve &cu = curve_of(co);
+  Curve &cu = curve_of(ob);
   MEM_SAFE_DELETE(cu.str);
   MEM_SAFE_DELETE(cu.strinfo);
   size_t len_bytes;
@@ -334,26 +220,26 @@ EXPORT(curve_text_set) void curve_text_set(CurveObject *co, const char *body, co
   cu.selstart = selstart;
   cu.selend = selend;
   if (cu.editfont) {
-    ED_curve_editfont_make(&co->object);
+    ED_curve_editfont_make(ob);
     cu.editfont->selstart = selstart;
     cu.editfont->selend = selend;
   }
 }
 
-/* Sets the text boxes (x, y, width, height each) and the active one. */
-EXPORT(curve_text_boxes_set) void curve_text_boxes_set(CurveObject *co, const float *boxes, int totbox, int actbox)
+/* Sets the text boxes (x, y, width and height each) and the active one. */
+EXPORT(curve_text_boxes_set) void curve_text_boxes_set(Object *ob, const float *boxes, int totbox, int actbox)
 {
-  Curve &cu = curve_of(co);
+  Curve &cu = curve_of(ob);
   cu.totbox = std::clamp(totbox, 1, MAXTEXTBOX);
   cu.actbox = actbox;
   std::copy_n(boxes, 4 * cu.totbox, &cu.tb[0].x);
 }
 
-/* A font of a TrueType, OpenType or Type 1 file's bytes, packed as a font added to a file is when packed. */
-EXPORT(curve_vfont_new) VFont *curve_vfont_new(const void *data, int size, const char *filepath)
+/* A font in the Main from a TrueType, OpenType or Type 1 file's bytes, packed as Blender packs a font file; null when
+ * FreeType cannot read it. */
+EXPORT(curve_vfont_new) VFont *curve_vfont_new(Main *bmain, const void *data, int size, const char *filepath)
 {
-  curve_types_ensure();
-  VFont *vfont = static_cast<VFont *>(BKE_id_new_nomain(ID_VF, filepath));
+  VFont *vfont = static_cast<VFont *>(BKE_id_new(bmain, ID_VF, BLI_path_basename(filepath)));
   BKE_vfont_data_free(vfont);
   void *copy = MEM_new_uninitialized(size, __func__);
   memcpy(copy, data, size);
@@ -361,37 +247,46 @@ EXPORT(curve_vfont_new) VFont *curve_vfont_new(const void *data, int size, const
   STRNCPY(vfont->filepath, filepath);
   BKE_vfont_data_ensure(vfont);
   if (!vfont->data) {
-    BKE_id_free(nullptr, vfont);
+    BKE_id_free(bmain, vfont);
     return nullptr;
   }
+  id_us_min(&vfont->id);
   return vfont;
 }
 
-EXPORT(curve_vfont_builtin) VFont *curve_vfont_builtin()
-{
-  curve_types_ensure();
-  return BKE_vfont_builtin_ensure();
-}
+/* Blender's built-in font, in G_MAIN as BKE_vfont_builtin_ensure keeps it. */
+EXPORT(curve_vfont_builtin) VFont *curve_vfont_builtin() { return BKE_vfont_builtin_ensure(); }
 
+/* The font's name as its file names it. */
 EXPORT(curve_vfont_name) const char *curve_vfont_name(const VFont *vfont) { return vfont->data ? vfont->data->name : vfont->id.name + 2; }
 
-/* Sets the regular, bold, italic or bold italic font (0 to 3). */
-EXPORT(curve_text_font_set) void curve_text_font_set(CurveObject *co, int slot, VFont *vfont)
+/* Sets the regular, bold, italic or bold italic font (0 to 3), as RNA's font setters do. */
+EXPORT(curve_text_font_set) void curve_text_font_set(Object *ob, int slot, VFont *vfont)
 {
-  Curve &cu = curve_of(co);
+  Curve &cu = curve_of(ob);
   VFont **fonts[] = {&cu.vfont, &cu.vfontb, &cu.vfonti, &cu.vfontbi};
+  if (*fonts[slot]) {
+    id_us_min(&(*fonts[slot])->id);
+  }
   *fonts[slot] = vfont;
+  id_us_plus(&vfont->id);
 }
 
-/* Evaluates the object as the depsgraph does in the viewport (its modifiers included) and extracts the mesh Blender
- * draws, which stays until the next evaluation: the mesh of a filled, extruded or beveled curve, or the wire of its
- * evaluated curves (curve_to_wire_mesh, as Object > Convert makes one); null when it has neither. */
-EXPORT(curve_object_eval) const ExtractionHeader *curve_object_eval(CurveObject *co)
+/* The object a Curve's pointer (bevel_object, taper_object, follow_curve) names, at its DNA offset. */
+EXPORT(curve_object_pointer_set) void curve_object_pointer_set(Object *ob, int offset, Object *target)
 {
-  Object &ob = co->object;
-  Depsgraph *depsgraph = BKE_scene_ensure_depsgraph(nullptr, &co->scene, &co->view_layer);
-  BKE_displist_make_curveTypes(depsgraph, &co->scene, &ob, false);
-  bke::GeometrySet &geometry = *ob.runtime->geometry_set_eval;
+  *reinterpret_cast<Object **>(reinterpret_cast<char *>(ob->data) + offset) = target;
+}
+
+/* Evaluates a curve or text object as the depsgraph does in the viewport (its modifiers included; objects it follows
+ * are evaluated first, by the caller) and extracts the mesh Blender draws, valid until the next evaluation: the mesh
+ * of a filled, extruded or beveled curve, or the wire of its evaluated curves (curve_to_wire_mesh, as Object > Convert
+ * makes it); null when it has neither. */
+EXPORT(curve_object_eval) const ExtractionHeader *curve_object_eval(bContext *C, Object *ob)
+{
+  static ExtractionHeader header;
+  BKE_displist_make_curveTypes(CTX_data_ensure_evaluated_depsgraph(C), CTX_data_scene(C), ob, false);
+  bke::GeometrySet &geometry = *ob->runtime->geometry_set_eval;
   if (!geometry.has_mesh() && geometry.has_curves()) {
     geometry.replace_mesh(bke::curve_to_wire_mesh(geometry.get_curves()->geometry.wrap()));
   }
@@ -399,97 +294,111 @@ EXPORT(curve_object_eval) const ExtractionHeader *curve_object_eval(CurveObject 
   if (!mesh) {
     return nullptr;
   }
-  mesh_extraction(*mesh, co->header);
-  return &co->header;
+  mesh_extraction(*mesh, header);
+  return &header;
 }
 
-/* Edit Mode: the edit splines or edit text (ED_curve_editnurb_make, ED_curve_editfont_make), as object.editmode_toggle
- * makes them, and back. */
-EXPORT(curve_object_edit_enter) void curve_object_edit_enter(CurveObject *co)
+/* Edit Mode data, as object.editmode_toggle makes it (ED_curve_editnurb_make, ED_curve_editfont_make) and loads it
+ * back; the object's mode and base are the caller's (object_mode_set, main_base_set). */
+EXPORT(curve_edit_make) void curve_edit_make(Object *ob)
 {
-  Object &ob = co->object;
-  if (ob.type == OB_FONT) {
-    ED_curve_editfont_make(&ob);
+  if (ob->type == OB_FONT) {
+    ED_curve_editfont_make(ob);
   }
   else {
-    ED_curve_editnurb_make(&ob);
+    ED_curve_editnurb_make(ob);
   }
-  ob.mode = OB_MODE_EDIT;
-  PointerRNA object_ptr = {&ob.id, RNA_Object, &ob};
-  CTX_store_set(co->C, CTX_store_add(co->stores, "edit_object", &object_ptr));
 }
 
-EXPORT(curve_object_edit_exit) void curve_object_edit_exit(CurveObject *co)
+static ListBaseT<Nurb> snapshot = {nullptr, nullptr};
+
+EXPORT(curve_edit_load_free) void curve_edit_load_free(Main *bmain, Object *ob)
 {
-  Object &ob = co->object;
-  if (ob.type == OB_FONT) {
-    ED_curve_editfont_load(&ob);
+  if (ob->type == OB_FONT) {
+    ED_curve_editfont_load(ob);
+    ED_curve_editfont_free(ob);
   }
   else {
-    ED_curve_editnurb_load(G_MAIN, &ob);
+    ED_curve_editnurb_load(bmain, ob);
+    ED_curve_editnurb_free(ob);
   }
-  edit_free(co);
-  ob.mode = OB_MODE_OBJECT;
-  PointerRNA none = {};
-  CTX_store_set(co->C, CTX_store_add(co->stores, "edit_object", &none));
+  BKE_nurbList_free(&snapshot);
 }
 
-/* Operators (made by operator_new) in the object's context. */
-EXPORT(curve_operator_poll) bool curve_operator_poll(CurveObject *co, wmOperator *op) { return !op->type->poll || op->type->poll(co->C); }
-
-/* Polls and runs an operator's exec: its wmOperatorStatus flags, or 0 when it does not poll or has no exec. */
-EXPORT(curve_operator_exec) int curve_operator_exec(CurveObject *co, wmOperator *op)
+/* A transform's steps each start from the edit splines as they were when it began, as Blender's transform restores
+ * its TransData; each step then runs Blender's transform operator with the step's values. */
+EXPORT(curve_edit_snapshot) void curve_edit_snapshot(Object *ob)
 {
-  if (!op->type->exec || !curve_operator_poll(co, op)) {
-    return 0;
-  }
-  return int(op->type->exec(co->C, op));
+  BKE_nurbList_free(&snapshot);
+  BKE_nurbList_duplicate(&snapshot, &nurbs_of(ob));
 }
-
-/* Sets a string property (font.text_insert's text). */
-EXPORT(operator_string_set) void operator_string_set(wmOperator *op, const char *name, const char *value) { RNA_string_set(op->ptr, name, value); }
-
-/* The 3D View the object's operators pick in: the region's size and the view's matrices (column-major, Blender's
- * axes), as Blender's view sets them before drawing (ED_view3d_update_viewmat). */
-EXPORT(curve_view_set) void curve_view_set(CurveObject *co, int winx, int winy, const float *viewmat, const float *winmat)
+EXPORT(curve_edit_restore) void curve_edit_restore(Object *ob)
 {
-  RegionView3D &rv3d = co->rv3d;
-  co->region.winx = short(winx);
-  co->region.winy = short(winy);
-  co->region.winrct = {0, winx - 1, 0, winy - 1};
-  std::copy_n(viewmat, 16, &rv3d.viewmat[0][0]);
-  std::copy_n(winmat, 16, &rv3d.winmat[0][0]);
-  invert_m4_m4(rv3d.viewinv, rv3d.viewmat);
-  mul_m4_m4m4(rv3d.persmat, rv3d.winmat, rv3d.viewmat);
-  invert_m4_m4(rv3d.persinv, rv3d.persmat);
-  rv3d.is_persp = winmat[11] != 0.0f;
+  ListBaseT<Nurb> &nurbs = nurbs_of(ob);
+  BKE_nurbList_free(&nurbs);
+  BKE_nurbList_duplicate(&nurbs, &snapshot);
 }
 
 /* view3d.select in Edit Mode: Blender's pick at a region pixel within dist_px (ED_view3d_select_dist_px, which reads
- * the UI scale), as ED_curve_editnurb_select_pick picks. */
+ * the UI scale), as ED_curve_editnurb_select_pick picks, in a context with a 3D View (view3d_region_attach). */
 EXPORT(curve_select_pick)
-bool curve_select_pick(CurveObject *co, int x, int y, int dist_px, int sel_op, bool deselect_all, bool select_passthrough)
+bool curve_select_pick(bContext *C, int x, int y, int dist_px, int sel_op, bool deselect_all, bool select_passthrough)
 {
   const int mval[2] = {x, y};
   SelectPick_Params params{};
   params.sel_op = eSelectOp(sel_op);
   params.deselect_all = deselect_all;
   params.select_passthrough = select_passthrough;
-  return ED_curve_editnurb_select_pick(co->C, mval, dist_px, params);
+  return ED_curve_editnurb_select_pick(C, mval, dist_px, params);
 }
 
-/* A transform's steps each start from the edit splines as they were when it began (Blender's transform restores its
- * TransData; here Blender's transform operator runs again from them with the step's values). */
-EXPORT(curve_edit_snapshot) void curve_edit_snapshot(CurveObject *co)
+/* Sets a string property (font.text_insert's text). */
+EXPORT(operator_string_set) void operator_string_set(wmOperator *op, const char *name, const char *value) { RNA_string_set(op->ptr, name, value); }
+
+/* A 3D View's area and window region, for operators that pick or project (curve picking, transform): the region's size
+ * and the view's matrices (column-major, Blender's axes) as ED_view3d_update_viewmat sets them, and the overlay's
+ * handle display. */
+struct View3DRegion {
+  ScrArea area = {};
+  ARegion region = {};
+  RegionView3D rv3d = {};
+  View3D v3d = {};
+};
+
+EXPORT(view3d_region_new) View3DRegion *view3d_region_new()
 {
-  BKE_nurbList_free(&co->snapshot);
-  BKE_nurbList_duplicate(&co->snapshot, &nurbs_of(co));
+  View3DRegion *r = MEM_new<View3DRegion>(__func__);
+  r->region.runtime = MEM_new<bke::ARegionRuntime>(__func__);
+  r->region.regiontype = RGN_TYPE_WINDOW;
+  r->region.regiondata = &r->rv3d;
+  r->v3d.spacetype = SPACE_VIEW3D;
+  r->v3d.overlay.handle_display = CURVE_HANDLE_SELECTED;
+  r->area.spacetype = SPACE_VIEW3D;
+  BLI_addtail(&r->area.spacedata, &r->v3d);
+  BLI_addtail(&r->area.regionbase, &r->region);
+  return r;
 }
-EXPORT(curve_edit_restore) void curve_edit_restore(CurveObject *co)
+
+EXPORT(view3d_region_set) void view3d_region_set(View3DRegion *r, int winx, int winy, const float *viewmat, const float *winmat, int handle_display)
 {
-  ListBaseT<Nurb> &nurbs = nurbs_of(co);
-  BKE_nurbList_free(&nurbs);
-  BKE_nurbList_duplicate(&nurbs, &co->snapshot);
+  RegionView3D &rv3d = r->rv3d;
+  r->region.winx = short(winx);
+  r->region.winy = short(winy);
+  r->region.winrct = {0, winx - 1, 0, winy - 1};
+  std::copy_n(viewmat, 16, &rv3d.viewmat[0][0]);
+  std::copy_n(winmat, 16, &rv3d.winmat[0][0]);
+  invert_m4_m4(rv3d.viewinv, rv3d.viewmat);
+  mul_m4_m4m4(rv3d.persmat, rv3d.winmat, rv3d.viewmat);
+  invert_m4_m4(rv3d.persinv, rv3d.persmat);
+  rv3d.is_persp = winmat[11] != 0.0f;
+  r->v3d.overlay.handle_display = char(handle_display);
+}
+
+/* Makes the region the context's area and region (or none), as Blender's handlers set them around an operator. */
+EXPORT(view3d_region_attach) void view3d_region_attach(bContext *C, View3DRegion *r)
+{
+  CTX_wm_area_set(C, r ? &r->area : nullptr);
+  CTX_wm_region_set(C, r ? &r->region : nullptr);
 }
 
 /* What curve evaluation reaches of Blender beyond the module. */
@@ -497,7 +406,7 @@ EXPORT(curve_edit_restore) void curve_edit_restore(CurveObject *co)
 namespace blender {
 
 /* port-override: the module has no depsgraph to say which curves something follows (the Curve modifier, Follow
- * Path), so every curve has its path evaluated, as Blender does for a curve something follows. */
+ * Path, text on a curve), so every curve has its path evaluated, as Blender does for a curve something follows. */
 int DEG_get_eval_flags_for_id(const Depsgraph * /*graph*/, const ID * /*id*/) { return DAG_EVAL_NEED_CURVE_PATH; }
 
 }  // namespace blender

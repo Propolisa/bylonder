@@ -16,6 +16,13 @@ const toggle = (label, checked, run) => {
   return b;
 };
 
+// Bylonder's Node Editor (blender-node-editor.js), loaded when first shown.
+const blenderEditor = (graph, changed) => (host) => {
+  let mounted = null, disposed = false;
+  import('./blender-node-editor.js').then(({ mountBlenderNodeEditor }) => { if (!disposed) mounted = mountBlenderNodeEditor(host, graph, { changed }); });
+  return { frameAll: () => mounted?.frameAll(), dispose: () => { disposed = true; mounted?.dispose(); } };
+};
+
 const newButton = (run) => {
   const b = iconButton('add', 'New compositor node group', run);
   b.classList.add('bl-text-toggle');
@@ -31,9 +38,11 @@ export function createNodeContexts({ world, editor }) {
       if (!mesh) return { key: 'none', message: 'Select a mesh object to edit its material nodes.' };
       if (!material) return { key: 'empty:' + mesh.uniqueId, title: mesh.name, message: 'The active material slot is empty.', buttons: [['New Material', () => world.materials.newMaterial(mesh, undefined, 'node'), 'add']] };
       if (!(material instanceof NodeMaterial)) return { key: 'flat:' + material.uniqueId, title: material.name, message: material.name + ' is a ' + world.materials.types[world.materials.type(material)]?.title + ' material.', buttons: [['Use Nodes', () => world.materials.convert(material, 'node'), 'node_material']] };
+      const edited = debounce(() => world.materials.markGraphEdited(material));
       return {
         key: 'node:' + material.uniqueId, title: material.name, graph: material,
-        onShow: () => watchBuilds(material, debounce(() => world.materials.markGraphEdited(material))),
+        mount: blenderEditor(material, (rebuild) => { if (rebuild) material.build(); edited(); }),
+        onShow: () => watchBuilds(material, edited),
       };
     },
     geometry() {
@@ -51,7 +60,11 @@ export function createNodeContexts({ world, editor }) {
       const c = world.compositor;
       // Blender 5 shows the compositor node group as a datablock: New when there is none, its name and X otherwise.
       if (!c.enabled || !c.graph) return { key: 'off:' + c.enabled, title: '', actions: [newButton(() => c.setEnabled(true))], message: 'Add a compositor node group to composite the scene through a Babylon frame graph.', buttons: [['New', () => c.setEnabled(true), 'add']] };
-      return { key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [iconButton('x', 'Remove the compositor', () => c.setEnabled(false))], graph: c.graph, hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading or camera view.' };
+      return {
+        key: 'on:' + c.graph.uniqueId, title: 'Compositing', actions: [iconButton('x', 'Remove the compositor', () => c.setEnabled(false))], graph: c.graph,
+        hint: 'The composite shows in the backdrop, and in a viewport in Rendered shading or camera view.',
+        mount: blenderEditor(c.graph, (rebuild) => c.edit(rebuild)),
+      };
     },
     particles() {
       const mesh = activeMesh(), entry = world.particles.active(mesh);

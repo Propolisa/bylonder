@@ -42,6 +42,7 @@ import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
+import { createBlenderObjects } from "./editors/object/object-blender.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
@@ -220,6 +221,10 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "reset-layout") viewportDock.reset();
   if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
   if (e.data.type === "help") help.showModal();
+  if (e.data.type === "view-layer") {
+    const cols = world.collections, { op, id } = e.data.payload;
+    ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
+  }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
@@ -296,9 +301,9 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-registerObjectOperators(world.objectActions);
-registerAddOperators(creator);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
+registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify }));
+registerAddOperators(creator);
 // bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
 world.blenderContext = (view) => createContext(blenderRNA, { space: view });
 world.dock = viewportDock;

@@ -52,6 +52,7 @@
 
 #include "bmesh.hh"
 #include "mesh_intern.hh"
+#include "object_intern.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_prototypes.hh"
@@ -60,6 +61,7 @@
 
 using namespace blender;
 using namespace blender::ed::mesh;
+using namespace blender::ed::object;
 
 #define EXPORT(name) extern "C" __attribute__((export_name(#name)))
 
@@ -105,7 +107,8 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
   ctx->object.data = &ctx->mesh.id;
   STRNCPY(ctx->object.id.name, "OBMesh");
   ctx->base.object = &ctx->object;
-  ctx->base.flag = BASE_SELECTED | BASE_ENABLED_AND_VISIBLE_IN_DEFAULT_VIEWPORT;
+  ctx->base.flag = BASE_SELECTED | BASE_ENABLED_AND_MAYBE_VISIBLE_IN_VIEWPORT | BASE_ENABLED_AND_VISIBLE_IN_DEFAULT_VIEWPORT;
+  ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);
   BLI_addtail(&ctx->view_layer.object_bases, &ctx->base);
   ctx->view_layer.basact = &ctx->base;
   BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
@@ -125,6 +128,9 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
   return ctx;
 }
 
+/* The context its operators run in. */
+EXPORT(edit_context_C) bContext *edit_context_C(EditContext *ctx) { return ctx->C; }
+
 EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
 {
   CTX_free(ctx->C);
@@ -133,6 +139,8 @@ EXPORT(edit_context_free) void edit_context_free(EditContext *ctx)
     BKE_modifier_free(md);
   }
   MEM_delete(ctx->region.runtime);
+  MEM_delete(ctx->view_layer.runtime->object_bases_hash);
+  MEM_delete(ctx->view_layer.runtime);
   BM_mesh_free(ctx->mesh.runtime->edit_mesh->bm);
   ctx->mesh.runtime->edit_mesh.reset();
   MEM_delete(ctx->mesh.runtime);
@@ -359,16 +367,16 @@ EXPORT(operator_report) const char *operator_report(wmOperator *op)
   return report ? report->message : nullptr;
 }
 
-/* An enum property's items as the operator's UI lists them in this context (its item function, when it has one), as
+/* An enum property's items as the operator's UI lists them in a context (its item function, when it has one), as
  * "identifier\tname" lines; separators and headings are left out. */
-EXPORT(operator_enum_items) const char *operator_enum_items(EditContext *ctx, int type, const char *name)
+EXPORT(operator_enum_items) const char *operator_enum_items(bContext *C, int type, const char *name)
 {
   static std::string text;
   wmOperatorType *ot = operator_type(type);
   PointerRNA ptr = {nullptr, ot->srna, operator_values_new()};
   PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
   bool free = false;
-  const EnumPropertyItem *items = prop->itemf ? prop->itemf(ctx->C, &ptr, prop, &free) : prop->items;
+  const EnumPropertyItem *items = prop->itemf ? prop->itemf(C, &ptr, prop, &free) : prop->items;
   text.clear();
   for (const EnumPropertyItem *item = items; item && item->identifier; item++) {
     if (item->identifier[0]) {
@@ -383,44 +391,24 @@ EXPORT(operator_enum_items) const char *operator_enum_items(EditContext *ctx, in
 }
 
 /* Whether an operator polls, as Blender greys out a menu entry that does not. */
-EXPORT(operator_poll) bool operator_poll(EditContext *ctx, int type)
+EXPORT(operator_poll) bool operator_poll(bContext *C, int type)
 {
   wmOperatorType *ot = operator_type(type);
-  return !ot->poll || ot->poll(ctx->C);
+  return !ot->poll || ot->poll(C);
 }
 
 /* Polls and runs an operator's exec: its wmOperatorStatus flags, or 0 when it does not poll or has no exec. */
-EXPORT(operator_exec) int operator_exec(EditContext *ctx, wmOperator *op)
+EXPORT(operator_exec) int operator_exec(bContext *C, wmOperator *op)
 {
-  if (!op->type->exec || (op->type->poll && !op->type->poll(ctx->C))) {
+  if (!op->type->exec || (op->type->poll && !op->type->poll(C))) {
     return 0;
   }
-  return int(op->type->exec(ctx->C, op));
+  return int(op->type->exec(C, op));
 }
 
 /* What the operators reach of Blender beyond the module. */
 
 namespace blender {
-
-/* port-override: one base in the view layer, so the bases in a mode are the active one when it is in that mode. */
-void BKE_view_layer_bases_in_mode_iterator_begin(BLI_Iterator *iter, void *data_in)
-{
-  ObjectsInModeIteratorData *data = static_cast<ObjectsInModeIteratorData *>(data_in);
-  Base *base = data->base_active;
-  iter->data = data_in;
-  iter->current = base;
-  iter->valid = base && (base->object->mode & data->object_mode);
-}
-void BKE_view_layer_bases_in_mode_iterator_next(BLI_Iterator *iter) { iter->valid = false; }
-void BKE_view_layer_bases_in_mode_iterator_end(BLI_Iterator * /*iter*/) {}
-ViewLayer *BKE_view_layer_default_view(const Scene *scene) { return static_cast<ViewLayer *>(scene->view_layers.first); }
-ViewLayer *BKE_view_layer_find(const Scene *scene, const char * /*layer_name*/) { return BKE_view_layer_default_view(scene); }
-Base *BKE_view_layer_base_find(ViewLayer *view_layer, Object *ob)
-{
-  return static_cast<Base *>(BLI_findptr(&view_layer->object_bases, ob, offsetof(Base, object)));
-}
-bool BKE_view_layer_synced_ensure(const Main & /*bmain*/, const Scene * /*scene*/, ViewLayer * /*view_layer*/) { return true; }
-void _BKE_view_layer_synced_ensure_or_assert(const Main * /*bmain*/, const Scene * /*scene*/, ViewLayer * /*view_layer*/) {}
 
 /* As object_edit.cc defines them; object_edit.cc comes with the rest of Blender's object editing. */
 Object *ed::object::context_object(const bContext *C)
@@ -580,6 +568,9 @@ eEvaluationMode DEG_get_mode(const Depsgraph * /*graph*/) { return DAG_EVAL_VIEW
 float DEG_get_ctime(const Depsgraph *graph) { return BKE_scene_ctime_get(no_depsgraph(graph).scene); }
 ID *DEG_get_evaluated_id(const Depsgraph * /*depsgraph*/, ID *id) { return id; }
 const ID *DEG_get_evaluated_id(const Depsgraph * /*depsgraph*/, const ID *id) { return id; }
+/* No graph, so none of its evaluation to trace or count. */
+uint64_t DEG_get_update_count(const Depsgraph * /*depsgraph*/) { return 0; }
+void DEG_debug_print_eval(Depsgraph * /*depsgraph*/, const char * /*function_name*/, const char * /*object_name*/, const void * /*object_address*/) {}
 /* No graph, so no custom data any of its evaluations asked for. */
 void DEG_get_customdata_mask_for_object(const Depsgraph * /*graph*/, Object * /*object*/, CustomData_MeshMasks * /*r_mask*/) {}
 
@@ -645,11 +636,18 @@ void WM_operatortype_props_advanced_begin(wmOperatorType * /*ot*/) {}
 /* Gives an operator a modal variant for adjusting it interactively in Blender's UI; its exec is unchanged. */
 void WM_operator_type_modal_from_exec_for_object_edit_coords(wmOperatorType * /*ot*/) {}
 
-/* No window, depsgraph or view to update. */
+/* No window or view to update. */
 void ED_workspace_status_text(bContext * /*C*/, const char * /*str*/) {}
 void ED_region_tag_redraw(ARegion * /*region*/) {}
-void DEG_id_tag_update(ID * /*id*/, unsigned int /*flags*/) {}
-void DEG_id_tag_update_ex(Main * /*bmain*/, ID * /*id*/, unsigned int /*flags*/) {}
+/* port-override: no depsgraph to flush tags through, so they stay on the ID (`recalc`), where the editor reads what an
+ * operator changed. */
+void DEG_id_tag_update(ID *id, unsigned int flags)
+{
+  if (id) {
+    id->recalc |= flags;
+  }
+}
+void DEG_id_tag_update_ex(Main * /*bmain*/, ID *id, unsigned int flags) { DEG_id_tag_update(id, flags); }
 void WM_main_add_notifier(uint /*type*/, void * /*reference*/) {}
 void WM_event_add_notifier(const bContext * /*C*/, uint /*type*/, void * /*reference*/) {}
 

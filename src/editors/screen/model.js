@@ -1,3 +1,4 @@
+export const RUNTIME_LAYOUT_KEY = 'workbench:layout:viewport:v2';
 export function profile(width, height, coarse) {
   if (!coarse && width >= 900) return 'desktop';
   return width > height ? 'landscape' : 'portrait';

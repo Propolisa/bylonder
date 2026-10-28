@@ -1,9 +1,9 @@
-import { menuButton } from '../editors/interface/menu.js';
+import { menuButton, openMenu } from '../editors/interface/menu.js';
 import { drawMenu, menuCoverage } from '../editors/interface/ui-layout.js';
 import { registerOperators, appendMenu, prependMenu, kw, menuUI, menuClasses } from '../windowmanager/wm-operators.js';
 import * as spaceTopbar from '../bl_ui/space_topbar.js';
 import { templates } from '../bl_ui/bpy._app.js';
-import { iconEl } from '../editors/interface/icon.js';
+import { iconEl, iconButton } from '../editors/interface/icon.js';
 import { openPreferences } from './preferences.js';
 import { fullDate, timeAgo } from './relative-time.js';
 
@@ -17,23 +17,31 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   const bar = $('appbar');
   const menus = $('topbar-menus');
   const autoRun = $('auto-run');
-  const workspaces = { layout: 'Layout', scripting: 'Scripting' };
-  const current = () => (dock.maximized === 'scene' ? 'layout' : dock.maximized ? null : 'scripting');
+  // Blender's default workspaces, each opening the screen Bylonder has for it (docs/blender-boundary.md, Workspaces).
+  const workspaces = ['Layout', 'Modeling', 'Sculpting', 'UV Editing', 'Texture Paint', 'Shading', 'Animation', 'Rendering', 'Compositing', 'Geometry Nodes', 'Scripting']
+    .map((name) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, screen: name === 'Scripting' ? 'scripting' : 'layout' }));
+  const screen = () => (dock.maximized === 'scene' ? 'layout' : dock.maximized ? null : 'scripting');
+  let selected = 'layout';
+  const current = () => (workspaces.find((w) => w.id === selected).screen === screen() ? selected : workspaces.find((w) => w.screen === screen())?.id);
   const setWorkspace = id => {
-    if (id === 'layout' ? dock.maximized !== 'scene' : dock.maximized) dock.maximize(id === 'layout' ? 'scene' : dock.maximized);
-    if (id === 'scripting') dock.show('code');
+    selected = id;
+    const target = workspaces.find((w) => w.id === id).screen;
+    if (target === 'layout' ? dock.maximized !== 'scene' : dock.maximized) dock.maximize(target === 'layout' ? 'scene' : dock.maximized);
+    if (target === 'scripting') dock.show('code');
     sync();
   };
   const recent = [];
+  // Projects are Bylonder's .blend files: Open lists them.
+  const openProjects = () => Promise.resolve().then(recentProjects).then((projects) => openMenu(projects.map((p) => ({ label: p.name, icon: 'file_blend', run: () => openProject(p.id) })), { x: innerWidth / 2 - 100, y: 60 }, 'Open'));
   // Recent projects for Open Recent, read when the menus open: the app makes its project repository after the topbar.
   const refreshRecent = () => Promise.resolve().then(recentProjects).then((projects) => recent.splice(0, Infinity, ...projects.slice(0, 10)), () => {});
   const url = (href) => () => open(href, '_blank', 'noopener');
   const blenderDocs = 'https://docs.blender.org/';
   const URL_PRESETS = { MANUAL: blenderDocs + 'manual/en/latest/', API: blenderDocs + 'api/current/', RELEASE_NOTES: 'https://developer.blender.org/docs/release_notes/' };
-  const ids = Object.keys(workspaces);
+  const ids = workspaces.map((w) => w.id);
   registerOperators({
     'wm.read_homefile': { keys: () => 'Ctrl N', run: ({ app_template: name = '' }) => (name ? openExample(examples.find((e) => e.title === name)) : click('new-project')()) },
-    'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : $('project').focus()) },
+    'wm.open_mainfile': { keys: () => 'Ctrl O', run: ({ filepath }) => (filepath ? openProject(filepath) : openProjects()) },
     'wm.save_mainfile': { keys: () => 'Ctrl S', run: click('checkpoint') },
     'wm.save_as_mainfile': { keys: ({ copy }) => (copy ? undefined : 'Shift Ctrl S'), run: ({ copy }) => click(copy ? 'export' : 'fork-project')() },
     'ed.undo': { keys: () => 'Ctrl Z', run: () => send('invoke', 'undo') },
@@ -93,11 +101,11 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   }
   bar.querySelector('.bl-logo').remove();
   const tabs = $('workspace-tabs');
-  for (const [id, label] of Object.entries(workspaces)) {
+  for (const { id, name } of workspaces) {
     const b = document.createElement('button');
     b.type = 'button';
     b.dataset.workspace = id;
-    b.textContent = label;
+    b.textContent = name;
     b.onclick = () => setWorkspace(id);
     tabs.append(b);
   }
@@ -134,7 +142,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     banner.className = 'bl-splash-banner';
     banner.append(versionLabel());
     const recent = column('Recent Files', []);
-    recentProjects().then((projects) => recent.append(...projects.slice(0, 5).map((p) => item(p.name, 'file_blend', () => openProject(p.id))), item('More…', 'viewzoom', () => document.getElementById('project').focus())));
+    recentProjects().then((projects) => recent.append(...projects.slice(0, 5).map((p) => item(p.name, 'file_blend', () => openProject(p.id))), item('More…', 'viewzoom', openProjects)));
     const files = Object.assign(document.createElement('div'), { className: 'bl-splash-columns' });
     files.append(column('New File', [item('General', 'file_new', newProject), ...examples.map(example => item(example.title, 'file_new', () => openExample(example)))]), recent);
     const links = Object.assign(document.createElement('div'), { className: 'bl-splash-columns bl-splash-links' });
@@ -148,11 +156,20 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     document.body.append(dialog);
     dialog.showModal();
   }
-  const hints = $('status-hints'), stats = $('scene-stats');
+  const hints = $('status-hints'), stats = $('scene-stats'), viewLayer = $('view-layer');
+  const viewLayerOp = (op) => () => send('view-layer', { op, id: viewLayer.value });
+  viewLayer.onchange = viewLayerOp('set');
+  const removeViewLayer = iconButton('x', 'Remove View Layer', viewLayerOp('remove'));
+  $('view-layer-actions').append(iconButton('duplicate', 'Add View Layer', viewLayerOp('add')), removeViewLayer);
   return {
     sync,
     splash,
-    status({ hints: list = [], stats: text = '' }) {
+    status({ hints: list = [], stats: text = '', viewLayers }) {
+      if (viewLayers) {
+        viewLayer.replaceChildren(...viewLayers.list.map(([value, textContent]) => Object.assign(document.createElement('option'), { value, textContent })));
+        viewLayer.value = viewLayers.active;
+        removeViewLayer.disabled = viewLayers.list.length < 2;
+      }
       hints.replaceChildren(...list.map(([icons, label]) => {
         const span = document.createElement('span');
         span.className = 'bl-hint';
