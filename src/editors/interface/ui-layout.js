@@ -31,6 +31,9 @@ function entry(ui, enabled, idname, props, label, icon, enumValue) {
   };
 }
 
+// A submenu's context holds the pointers its layout set (uiLayoutSetContextPointer), as Blender's menu buttons pass theirs.
+const withPointers = (ui, pointers) => (pointers ? { ...ui, context: () => new Proxy(ui.context(), { get: (context, key) => (key in pointers ? pointers[key] : context[key]) }) } : ui);
+
 // A layout's items as menu entries, in order, through its rows and columns; a layout's `enabled` applies to all it holds.
 function entries(node, ui, enabled = true) {
   if (isLayout(node)) return node.children.flatMap((child) => entries(child, ui, enabled && node.enabled !== false));
@@ -43,7 +46,7 @@ function entries(node, ui, enabled = true) {
     case 'operator_menu_enum': return [{ label: node.text ?? operatorName(node.operator), blender: node.operator, items: enumEntries() }];
     case 'menu': {
       const menu = ui.menus[node.menu];
-      return menu ? [{ label: node.text ?? menu.bl_label, icon: iconOf(node.icon), blender: node.menu, keys: ui.keys(node.menu), items: () => drawMenu(node.menu, ui) }] : [];
+      return menu ? [{ label: node.text ?? menu.bl_label, icon: iconOf(node.icon), blender: node.menu, keys: ui.keys(node.menu), items: () => drawMenu(node.menu, withPointers(ui, node.context?.pointers)) }] : [];
     }
     case 'menu_contents': return ui.menus[node.menu] ? drawMenu(node.menu, ui) : [];
     // A property of data the context gives, shown as a check item when Bylonder binds it (ui.prop).

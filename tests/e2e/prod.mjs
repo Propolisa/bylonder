@@ -96,6 +96,18 @@ try {
   const outliner = await frame.locator(".bl-outliner-region").boundingBox();
   const row = await app.bylonder((b) => b.world.outliner.area.draw().draw.find((c) => c.op === "text" && c.text === b.world.objects.find((n) => n.getTotalVertices?.()).name).at);
   await contextMenu("OUTLINER_MT_object", [outliner.x + row[0] + 5, outliner.y + outliner.height - row[1] - 4]);
+  const header = await frame.locator(".dock-heading").first().boundingBox();
+  await contextMenu("Header", [header.x + header.width - 40, header.y + header.height / 2]);
+  await step("OBJECT_MT_move_to_collection", async () => {
+    await selectFirst();
+    await page.mouse.move(...center);
+    await page.keyboard.press("m");
+    await frame.locator(".bl-menu .bl-menu-item").first().waitFor({ timeout: 10000 });
+    await hoverItems(frame);
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    noErrors("OBJECT_MT_move_to_collection");
+  });
 
   const tabs = await page.locator("#workspace-tabs [data-workspace]").evaluateAll((els) => els.map((el) => el.dataset.workspace));
   assert.ok(tabs.length >= 11, `workspace tabs: ${tabs}`);

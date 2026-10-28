@@ -10,6 +10,7 @@ import { applyRenderSettings } from "./workspace/render-settings.js";
 import { createObjectActions } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
+import { createHud } from "./editors/interface/hud.js";
 import { createOutliner } from "./editors/space_outliner/space-outliner.js";
 import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
@@ -46,8 +47,8 @@ import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createMainSync } from "./blenkernel/main-sync.js";
-import { registerOperators, runOperator, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
-import { keymapHandler } from "./windowmanager/keyconfig.js";
+import { registerOperators, runOperator, pollOperator, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
+import { keymapHandler, blenderKeys } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
 import { tagRedraw } from "./draw/overlay-tool.js";
@@ -321,6 +322,8 @@ const nav = { frame: (node) => activeView()?.nav.frame(node) };
 const commands = createObjectCommands(world, editor, history, () =>
   refreshUI(),
 );
+// The HUD region's Adjust Last Operation panel, for Add and Edit Mode operators.
+world.hud = createHud(document.querySelector("#redo-panel"));
 creator = createAddMesh(
   world,
   editor,
@@ -538,11 +541,6 @@ const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !docum
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event?.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
-// The Add panel's own keys while a new object waits for its settings.
-const creatorKeys = createKeymap([
-  { keys: "ESC", poll: () => creator.pending, run: () => creator.finish(false) },
-  { keys: "RET", poll: () => creator.pending, run: () => creator.finish() },
-]);
 // The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
 const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
 registerOperators({
@@ -562,9 +560,9 @@ registerOperators({
   "view3d.view_persportho": { run: () => activeView()?.nav.toggle() },
   "view3d.view_axis": { supports: ({ type, align_active }) => !!AXIS_VIEWS[type] && !align_active, run: ({ type }) => activeView()?.nav.view(...AXIS_VIEWS[type]) },
   "view3d.view_selected": { supports: ({ use_all_regions }) => !use_all_regions, poll: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },
-  "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(activeView().id) },
-  "screen.area_split": { run: ({ direction }) => viewportDock.split(activeView().id, direction === "HORIZONTAL") },
-  "screen.area_close": { run: () => viewportDock.close(activeView().id) },
+  "screen.screen_full_area": { supports: ({ use_hide_panels }) => !use_hide_panels, run: () => viewportDock.maximize(screenArea()) },
+  "screen.area_split": { run: ({ direction }) => viewportDock.split(screenArea(), direction === "HORIZONTAL") },
+  "screen.area_close": { run: () => viewportDock.close(screenArea()) },
   // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
   "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : editor).selectOperator(event, props) },
   "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
@@ -604,6 +602,34 @@ appendMenu("VIEW3D_MT_view", ({ layout }) => {
   layout.separator();
   layout.operator("bylonder.inspector", kw({ text: "Babylon Inspector" }));
 });
+// The area the screen operators act on: the one whose header menu runs them, else the one under the pointer.
+let headerArea = null;
+const screenArea = () => headerArea ?? viewportDock.hovered ?? activeView().id;
+// A header's context menu (screen.region_context_menu, ED_screens_header_tools_menu_create), its screen operators
+// acting on that area. Bylonder's areas always show their header and menus, at the top.
+viewportDock.onHeaderMenu((id, event) => {
+  const view = views.all.find((v) => v.id === id && v.nav);
+  const inHeader = (run) => () => { headerArea = id; try { run(); } finally { headerArea = null; } };
+  const operator = (label, idname, props = {}, icon) => ({ label, icon, blender: idname, keys: blenderKeys(["Screen", "Window"], idname, props, true),
+    enabled: () => pollOperator(idname, props), run: inHeader(() => runOperator(idname, props)) });
+  const toggle = (name) => () => { view.state[name] = !view.state[name]; view.sync(); };
+  openMenu([
+    { label: "Show Header", checked: () => true, enabled: () => false },
+    ...(view ? [{ label: "Show Tool Settings", checked: () => view.state.show_region_tool_header, run: toggle("show_region_tool_header") }] : []),
+    { label: "Show Menus", checked: () => true, enabled: () => false },
+    "-",
+    operator("Flip to Bottom", "screen.region_flip"),
+    "-",
+    operator("Horizontal Split", "screen.area_split", { direction: "HORIZONTAL" }, "split_horizontal"),
+    operator("Vertical Split", "screen.area_split", { direction: "VERTICAL" }, "split_vertical"),
+    "-",
+    operator(viewportDock.maximized === id ? "Back to Previous" : "Maximize Area", "screen.screen_full_area"),
+    operator("Focus Mode", "screen.screen_full_area", { use_hide_panels: true }),
+    operator("Duplicate Area into New Window", "screen.area_dupli"),
+    "-",
+    operator("Close Area", "screen.area_close", {}, "x"),
+  ], event, "Header");
+});
 // Bylonder's own keys, below Blender's keymaps.
 const bylonderKeys = createKeymap([
   { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
@@ -624,10 +650,10 @@ const view3dArea = {
     return menu && ((event) => openMenu(menu.items(), event ?? editor.pointer, menu.title));
   },
 };
-const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
+const blenderKeymaps = (event) => inArea(view3dArea, () => view3dKeys(event));
 // A menu of the 3D View opened as wm.call_menu opens it (the touch controls' long press), at a point of the page.
 world.callMenu = (name, at) => inArea(view3dArea, () => view3dArea.menu(name)?.(at));
-// The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
+// The handler stack below modal handlers: the gizmo map, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 // The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's transform gizmos drag
 // themselves; the tools' gizmos run their keymaps).
@@ -635,8 +661,8 @@ const gizmoState = (event) => (world.editMode.active || !TOOL_GIZMOS[world.tools
 const gizmoKeys = (event) => (event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight) || tools.keymap(event);
 const keyLayers = () => {
   const view = activeView();
-  if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
-  return [creatorKeys, gizmoKeys, world.editMode.keymap, blenderKeys, bylonderKeys];
+  if (!view || view.state.cameraView) return [blenderKeymaps, bylonderKeys];
+  return [gizmoKeys, world.editMode.keymap, blenderKeymaps, bylonderKeys];
 };
 
 let last = 0;
@@ -676,6 +702,7 @@ function dispose() {
   runningJobs.dispose();
   sdk.dispose();
   creator.dispose();
+  world.hud.dispose();
   tools.dispose();
   world.editMode.dispose();
   world.outliner.dispose();

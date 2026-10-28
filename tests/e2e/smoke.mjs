@@ -112,6 +112,42 @@ const checks = {
     for (const item of ["Insert Keyframes", "Reset All to Default Values", "Copy Data Path"]) await app.frame().getByRole("menuitem", { name: item }).first().waitFor();
   },
 
+  // The HUD region's panel draws the operator's RNA properties; a change re-runs it.
+  async "Add > Cylinder shows Adjust Last Operation, whose Vertices rebuild it"() {
+    await app.click(0.3, 0.3);
+    await app.page.keyboard.press("Shift+a");
+    await app.frame().getByRole("menuitem", { name: "Mesh" }).first().click();
+    await app.frame().getByRole("menuitem", { name: "Cylinder" }).first().click();
+    const hud = app.locator("#redo-panel");
+    await hud.getByText("Add Cylinder").waitFor();
+    for (const name of ["Vertices", "Radius", "Align", "Location X", "Rotation X"]) await hud.getByText(name, { exact: true }).first().waitFor();
+    const vertices = () => app.bylonder((b) => b.editor.selection.nodes[0].getTotalVertices());
+    const before = await vertices();
+    await hud.locator("[role=spinbutton]").first().dblclick();
+    await app.page.keyboard.press("Control+A");
+    await app.page.keyboard.type("8");
+    await app.page.keyboard.press("Enter");
+    await app.until((b, n) => b.editor.selection.nodes[0].getTotalVertices() < n, before);
+  },
+
+  async "M opens Blender's Move to Collection menu, whose collection takes the object"() {
+    await app.bylonder((b) => b.world.collections.create({ name: "Props" }));
+    await app.click();
+    await app.page.keyboard.press("m");
+    await app.frame().locator(".bl-menu-item", { hasText: /^New Collection/ }).first().waitFor();
+    await app.frame().locator(".bl-menu-item", { hasText: /^Collection/ }).first().click();
+    await app.frame().locator(".bl-menu-item", { hasText: /^Props/ }).first().click();
+    await app.until((b) => b.world.collections.all().find((c) => c.name === "Props").objects.length === 1);
+  },
+
+  async "right click on an area header opens Blender's Header menu, whose Vertical Split splits it"() {
+    const areas = await app.frame().locator(".dock-leaf").count();
+    const box = await app.frame().locator(".dock-heading").first().boundingBox();
+    await rightClick(box.x + box.width - 40, box.y + box.height / 2);
+    await app.frame().locator(".bl-menu-item", { hasText: /^Vertical Split/ }).click();
+    await app.until((b, n) => document.querySelectorAll(".dock-leaf").length === n + 1, areas);
+  },
+
   async "middle mouse orbits and Shift middle mouse pans"() {
     const view = () => app.frame().evaluate(() => { const c = window.__bylonder.views.input.editorCamera; return { alpha: c.alpha, x: c.target.x }; });
     const drag = async (shift) => {

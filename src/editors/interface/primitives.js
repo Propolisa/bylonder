@@ -1,18 +1,10 @@
 import { format, parse, editText } from '../../blenkernel/unit.js';
-import { h,defineComponent,computed } from 'vue';
+import { h,defineComponent } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { Color3 } from '@babylonjs/core';
-import { icon,iconButton } from './icons.js';
+import { iconButton } from './icons.js';
 import { openMenu } from './menu.js';
-export const Panel=defineComponent({props:['title','panelId','state','subpanel','actions','defaultClosed'],setup(props,{slots}){
-  const closed=computed(()=>props.defaultClosed?!props.state.opened?.includes(props.panelId):props.state.closed?.includes(props.panelId));
-  const toggle=event=>{if(props.defaultClosed&&!event?.ctrlKey){props.state.opened=closed.value?[...(props.state.opened||[]),props.panelId]:props.state.opened.filter(id=>id!==props.panelId);return;}if(event?.ctrlKey){props.state.closed=closed.value?props.state.panels.filter(id=>id!==props.panelId):props.state.panels.filter(id=>id.startsWith(props.panelId+'.'));}else props.state.closed=closed.value?props.state.closed.filter(id=>id!==props.panelId):[...(props.state.closed||[]),props.panelId];};
-  return()=>h('section',{class:['bl-panel',{'bl-subpanel':props.subpanel}],tabindex:-1,onKeydown:event=>{if(event.key.toLowerCase()==='a'&&!event.target.closest('input,select')){event.preventDefault();event.stopPropagation();toggle(event);}}},[
-    h('div',{class:'bl-panel-header',onClick:toggle,title:`${props.title} · Click to collapse; Ctrl-click to isolate`},[h('span',{class:'bl-disclosure'},closed.value?'▸':'▾'),h('span',props.title),h('span',{class:'bl-panel-actions',onClick:e=>e.stopPropagation()},props.actions?.()),icon('GRIP')]),
-    !closed.value?h('div',{class:'bl-panel-content'},slots.default?.()):null
-  ]);
-}});
-// A Bylonder property row (the rows of Bylonder's own panels and the redo panel): label, value and keyframe decorator.
+// A Bylonder property row (the rows of Bylonder's own panels): label, value and keyframe decorator.
 // Numbers are Blender's number button (NumberField), with the field's step and unit.
 const numberMeta=field=>({type:field.integer?'I':'F',min:field.min,max:field.max,soft_min:field.min,soft_max:field.max,
   step:field.integer?(field.step??1):((field.step??0.01)*100)/(field.unit==='angle'?Math.PI/180:1),unit:field.unit==='length'?'LENGTH':field.unit==='angle'?'ROTATION':undefined,description:field.description});

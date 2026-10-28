@@ -1,6 +1,6 @@
 # Writes the RNA definition of every operator (name, description, properties with defaults, limits, enum items as
 # [identifier, name, description, icon]) to src/makesrna/rna-operators.json, for the labels and enum entries Blender's
-# menus show and the fields of Bylonder's operator panels.
+# menus show and the fields of Bylonder's operator panels. Properties keep RNA's order, as Blender draws them.
 # usage: blender -b --factory-startup --python tools/blender-reference/operators.py -- OUT.json
 import bpy, json, sys
 
@@ -41,8 +41,8 @@ if __name__ == "__main__":
         for name in dir(getattr(bpy.ops, module)):
             idname = module + "." + name
             rna = getattr(getattr(bpy.ops, module), name).get_rna_type()
-            out[idname] = {"name": rna.name, "description": rna.description,
-                           "properties": {p.identifier: prop(p) for p in rna.properties if p.identifier != "rna_type"}}
+            out[idname] = {"description": rna.description, "name": rna.name,
+                           "properties": {p.identifier: dict(sorted(prop(p).items())) for p in rna.properties if p.identifier != "rna_type"}}
     with open(out_path, "w") as f:
-        json.dump(out, f, separators=(",", ":"), sort_keys=True)
+        json.dump(dict(sorted(out.items())), f, separators=(",", ":"))
     print("operators written", len(out))

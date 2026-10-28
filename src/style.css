@@ -6,17 +6,6 @@
   background: #202020;
   font-synthesis: none;
   --accent: #e8a24d;
-  --tp-base-background-color: #292929;
-  --tp-base-shadow-color: transparent;
-  --tp-container-background-color: #ffffff05;
-  --tp-container-foreground-color: #ccc;
-  --tp-input-background-color: #1e1e1e;
-  --tp-input-foreground-color: #ddd;
-  --tp-label-foreground-color: #aaa;
-  --tp-button-background-color: #3b3b3b;
-  --tp-button-foreground-color: #ddd;
-  --tp-base-font-family: system-ui, sans-serif;
-  --tp-base-border-radius: 2px;
 }
 * {
   box-sizing: border-box;
@@ -64,21 +53,6 @@ canvas {
   outline: none;
   touch-action: none;
 }
-.tp-dfwv {
-  width: 100% !important;
-}
-.tp-rotv {
-  font-size: 11px !important;
-}
-.tp-fldv {
-  margin-bottom: 3px !important;
-}
-.tp-fldv_t {
-  height: 26px !important;
-}
-.tp-lblv {
-  padding: 3px 4px !important;
-}
 .view-label {
   position: absolute;
   pointer-events: none;
@@ -122,9 +96,8 @@ dialog::backdrop {
 [hidden] {
   display: none !important;
 }
-#creation-panel,#redo-panel{position:absolute;width:265px;max-height:70%;overflow:auto;padding:6px;z-index:12}
 #viewport-section{position:relative;overflow:hidden}#panel{display:flex;flex-direction:column;overflow:auto}#properties-section{overflow:auto;background:#292929}.runtime-dock .dock-content{background:#292929}.runtime-dock .dock-tabs{justify-content:flex-start}.runtime-dock .dock-tabs button{font-size:11px}
 #touch-controls{display:none;padding-bottom:env(safe-area-inset-bottom)}.scene-mode #touch-controls{display:none}
 .touch-primary select{min-width:0;max-width:125px;background:#292c32;color:#eee;border:0;border-radius:4px;font-size:13px;padding:4px 6px}.touch-primary{background:#24262be8;border:1px solid #45484f;border-radius:7px;padding:3px;box-shadow:0 3px 12px #0004}.touch-primary button{border:0;background:transparent}.touch-transform-options{background:#24262be8;border:1px solid #45484f;border-radius:6px;padding:3px}.touch-transform-options button{border:0}.touch-row select{min-height:40px}.touch-row button{border-radius:4px}
-@media(pointer:coarse){.view-label{display:none}#touch-controls{position:absolute;bottom:8px;left:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}.touch-row{display:flex;justify-content:center;gap:2px;pointer-events:auto}.touch-row button{min-height:40px;min-width:38px;padding:4px 7px;background:#292c32ed;font-size:12px}.touch-row button.active{background:#654827}.touch-primary select{width:112px}.runtime-dock #toast{bottom:64px}#pane{--tp-container-unit-size:34px;--tp-base-font-size:13px}#pane input{font-size:16px}#creation-panel{left:6px;bottom:64px;max-width:calc(100% - 12px);max-height:65%;--tp-container-unit-size:34px}.scene-mode #touch-controls{display:none}}
-@media(pointer:coarse) and (orientation:landscape){.touch-row{justify-content:flex-start}.runtime-dock #toast{bottom:56px}#creation-panel{bottom:54px}}
+@media(pointer:coarse){.view-label{display:none}#touch-controls{position:absolute;bottom:8px;left:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}.touch-row{display:flex;justify-content:center;gap:2px;pointer-events:auto}.touch-row button{min-height:40px;min-width:38px;padding:4px 7px;background:#292c32ed;font-size:12px}.touch-row button.active{background:#654827}.touch-primary select{width:112px}.runtime-dock #toast{bottom:64px}#pane input{font-size:16px}#redo-panel{bottom:64px}.scene-mode #touch-controls{display:none}}
+@media(pointer:coarse) and (orientation:landscape){.touch-row{justify-content:flex-start}.runtime-dock #toast{bottom:56px}#redo-panel{bottom:54px}}
