@@ -17,7 +17,7 @@ import { createOutliner } from "./editors/space_outliner/space-outliner.js";
 import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
-import { createMouseCapture } from "./windowmanager/mouse-capture";
+import { windowCapture } from "./windowmanager/mouse-capture";
 import { createEventSystem, dragStart } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
@@ -306,7 +306,7 @@ history = createHistory(world.objects, () => {
   animation.load(data?.animation,{apply:false});
 },beforeCommit:()=>{world.collections.adopt();animation.captureEdits();}});
 animation.setCommit(()=>history.commit());
-const capture = createMouseCapture(notify);
+const capture = windowCapture(notify);
 world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e) });
 const editor = createEditor(
   world,

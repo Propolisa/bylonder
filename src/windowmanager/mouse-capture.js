@@ -1,8 +1,16 @@
 /** One owner for relative mouse input. Pointer lock is optional, never assumed.
- *  Moves are measured in client coordinates; a session locks the element it started on (the 3D Viewport being dragged)
- *  only once the pointer nears its edge, as Blender wraps the cursor at the region's edge. Chromium's first move under a
- *  new lock jumps from the lock's origin (and synthetic input keeps doing so), so it is dropped. */
+ *  Moves are measured in client coordinates; a session locks the element it started on (the 3D Viewport or number field
+ *  being dragged) only once the pointer nears the edge of its area (the viewport itself, the window for a field), as
+ *  Blender wraps the cursor there. Chromium's first move under a new lock jumps from the lock's origin (and synthetic
+ *  input keeps doing so), so it is dropped. */
 const EDGE_PX = 16;
+
+// The window as an area: a number field's drag wraps at the window's edge.
+export const WINDOW_AREA = { getBoundingClientRect: () => ({ left: 0, top: 0, right: innerWidth, bottom: innerHeight }) };
+
+let shared = null;
+// The window's one capture, which main.js creates with its notifier.
+export const windowCapture = (notify = () => {}) => (shared ??= createMouseCapture(notify));
 export function createMouseCapture(notify) {
   let session = null, requested = null; // requested: the element we last asked to lock
   const release = () => {
@@ -27,8 +35,8 @@ export function createMouseCapture(notify) {
       lost(); // Browser Escape can release lock without delivering keydown.
     }
   };
-  const nearEdge = ({ clientX: x, clientY: y }, element) => {
-    const r = element?.getBoundingClientRect?.();
+  const nearEdge = ({ clientX: x, clientY: y }, area) => {
+    const r = area?.getBoundingClientRect?.();
     return !!r && (x < r.left + EDGE_PX || y < r.top + EDGE_PX || x > r.right - EDGE_PX || y > r.bottom - EDGE_PX);
   };
   const lock = () => {
@@ -50,7 +58,7 @@ export function createMouseCapture(notify) {
     const dy = locked ? event.movementY : event.clientY - session.y;
     session.x = event.clientX;
     session.y = event.clientY;
-    if (!locked && nearEdge(event, session.element)) lock();
+    if (!locked && nearEdge(event, session.area)) lock();
     session.onMove(dx, dy, event);
   };
   const blur = () => {
@@ -68,9 +76,9 @@ export function createMouseCapture(notify) {
     get active() {
       return !!session;
     },
-    begin(point, onMove, onLost, element) {
+    begin(point, onMove, onLost, element, area = element) {
       if (session) return false;
-      session = { element, x: point.x, y: point.y, onMove, onLost, locked: false, skip: false, requested: false, warned: false };
+      session = { element, area, x: point.x, y: point.y, onMove, onLost, locked: false, skip: false, requested: false, warned: false };
       return true;
     },
     release,
