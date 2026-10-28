@@ -43,3 +43,18 @@ const drawn = types.filter((type) => {
   }
 }).length;
 assert.ok(drawn >= 517, `${drawn} of ${types.length} menus and headers draw without an editor's data`);
+
+// Blender's Python operators' polls run in Blender's default context except those that read an editor's data.
+const operators = Object.entries(registered).filter(([idname, cls]) => idname.includes('.') && cls.poll);
+const polled = operators.filter(([, cls]) => {
+  try {
+    setContext({});
+    cls.poll(module('_bpy').context);
+    return true;
+  } catch {
+    return false;
+  }
+}).length;
+assert.ok(polled >= 109, `${polled} of ${operators.length} Python operator polls run without an editor's data`);
+setContext({ mode: 'OBJECT', active_object: null });
+assert.equal(registered['object.quick_fur'].poll(module('_bpy').context), false, 'Add > Curve > Fur: no active mesh, with its poll message set');

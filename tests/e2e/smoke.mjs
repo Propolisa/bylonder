@@ -185,6 +185,25 @@ const checks = {
     await app.until((b) => b.editor.selection.nodes.some((n) => n.name === "Empty"));
   },
 
+  "a hemispheric light selects where it is drawn and moves with G X 2": { open: { example: null, node: "sphere" }, async run() {
+    // The new project's light has a direction and no position of its own in Babylon.
+    const at = () => app.bylonder((b) => {
+      const light = b.world.objects.find((o) => o.getClassName?.() === "HemisphericLight");
+      light.position.set(1, 0.5, 3);
+      const view = b.views.input, { width, height } = view.canvas;
+      const p = BABYLON.Vector3.Project(light.getAbsolutePosition(), BABYLON.Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
+      return [p.x / width, p.y / height];
+    });
+    const [fx, fy] = await at();
+    await app.click(fx, fy);
+    await app.until((b) => b.editor.selection.nodes.map((n) => n.getClassName?.()).join() === "HemisphericLight");
+    await app.page.keyboard.press("g");
+    await app.page.keyboard.press("x");
+    await app.page.keyboard.type("2");
+    await app.page.keyboard.press("Enter");
+    await app.until((b) => Math.abs(b.editor.selection.nodes[0].position.x - 3) < 1e-4);
+  } },
+
   async "Cursor tool places the 3D cursor on the cube's surface"() {
     await app.locator('[data-tool="builtin.cursor"]').click();
     await app.click(0.5, 0.45);
