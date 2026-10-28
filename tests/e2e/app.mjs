@@ -5,8 +5,11 @@ import { createRequire } from "node:module";
 import { preview } from "vite";
 
 const root = new URL("../..", import.meta.url).pathname;
-// Playwright comes from the environment (preinstalled with its Chromium), not from package.json.
-export const { chromium } = createRequire(import.meta.url)("playwright");
+// Playwright comes from the environment (preinstalled with its Chromium), not from package.json. Pyodide loads from
+// its CDN, through the environment's proxy where one is set (Chromium bypasses it for the local server).
+const playwright = createRequire(import.meta.url)("playwright");
+const proxy = process.env.HTTPS_PROXY && { proxy: { server: process.env.HTTPS_PROXY, bypass: "localhost,127.0.0.1" } };
+export const chromium = { launch: (options) => playwright.chromium.launch({ ...proxy, ...options }) };
 
 const mtime = (file) => statSync(root + file, { throwIfNoEntry: false })?.mtimeMs ?? 0;
 const stale = () => {

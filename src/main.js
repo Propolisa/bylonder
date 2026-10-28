@@ -61,6 +61,12 @@ import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
+import { createTexts } from "./blenkernel/texts.js";
+import { mountTextEditor } from "./editors/space_text/text-editor.js";
+import { registerTextOperators } from "./editors/space_text/text-ops.js";
+import { mountConsole } from "./editors/space_console/console.js";
+import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
+import { mountInfo } from "./editors/space_info/info.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -122,6 +128,8 @@ const input = await new Promise((resolve) => {
   });
   send("ready", {});
 });
+// The workspace's screen, which the topbar's tabs choose.
+viewportDock.setScreen(input.screen);
 // The engine renders into a hidden working canvas; every 3D Viewport is an engine view (src/editors/space_view3d/views.js).
 // User code gets the primary viewport's canvas, for camera.attachControl and input.
 const workCanvas = Object.assign(document.createElement("canvas"), { className: "engine-working-canvas" });
@@ -269,6 +277,9 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "suspend") animation.pause();
   if (e.data.type === "resume") views.wake();
   if (e.data.type === "scene-name") world.sceneSettings.renamed(e.data.payload);
+  // The workspace's screen (Scripting or Layout), and a project text file changed in the Code workspace.
+  if (e.data.type === "screen") viewportDock.setScreen(e.data.payload);
+  if (e.data.type === "text") world.texts.load(e.data.payload.name, e.data.payload.content);
 });
 let ui;
 let sceneChanged = () => {};
@@ -335,7 +346,9 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit });
+// bpy.data.texts: the project's text files, each edit saved with the project.
+world.texts = createTexts({ files: input.texts, save: (name, content) => send("text", { name, content }) });
+const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit, notify });
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
 // The mode the tool system and Blender's keymaps go by (context.mode).
@@ -398,6 +411,15 @@ const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDo
 const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, document.querySelector(`#${type}-section`), type));
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
 const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();refreshUI();} });
+// The Scripting workspace's editors: Text Editor, Python Console and Info.
+registerTextOperators(world.texts);
+registerConsoleOperators();
+const scriptingEditors = [
+  // A script or console line runs after the Add panel's object is done, as a new operator ends Blender's redo.
+  mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), rna: blenderRNA, texts: world.texts, beforeRun: () => creator.finish() }),
+  mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
+  mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info"), rna: blenderRNA }),
+];
 document.querySelector("#add-mesh").onclick = () => creator.show();
 document.querySelector("#delete-objects").onclick = () => commands.remove();
 document.querySelector("#duplicate-objects").onclick = () =>
@@ -530,7 +552,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner') && !help.open && !creator.open && !world.contextMenu.isOpen;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
@@ -654,6 +676,8 @@ engine.runRenderLoop(renderScene);
 function dispose() {
   storage.save();
   animEditors.forEach((animEditor) => animEditor.dispose());
+  world.texts.flush();
+  scriptingEditors.forEach((area) => area.dispose());
   engine.onBeginFrameObservable.remove(perFrame);
   for (const view of viewports()) view.dispose();
   views.dispose();

@@ -55,8 +55,11 @@ const KEYMAP_TYPES = { WHEELINMOUSE: 'WHEELUPMOUSE', WHEELOUTMOUSE: 'WHEELDOWNMO
 const KM_ANY = -1;
 
 // wm_eventmatch for what Bylonder's events carry: no key modifiers yet, and Cmd counted as Ctrl.
+// A repeated key matches only items that take repeats; text input is any key press that types a character (`text`).
 function matches(kmi, event) {
   if (kmi.key_modifier || (kmi.direction && kmi.direction !== 'ANY' && kmi.direction !== event.direction)) return false;
+  if (event.repeat && !kmi.repeat) return false;
+  if (kmi.type === 'TEXTINPUT') return event.value === 'PRESS' && !!event.text;
   const type = event.type.toUpperCase();
   if ((KEYMAP_TYPES[kmi.type] ?? kmi.type) !== (EVENT_TYPES[type] ?? type)) return false;
   if (kmi.value !== 'ANY' && kmi.value !== event.value) return false;

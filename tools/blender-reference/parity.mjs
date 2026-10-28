@@ -89,6 +89,11 @@ const SETUP = {
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
   "curve-edit": (app) => addAndEdit(app, "curve.primitive_bezier_circle_add"),
   "text-edit": (app) => addAndEdit(app, "object.text_add"),
+  // The console prints Blender's banner once CPython has loaded.
+  scripting: async (app) => {
+    await app.page.click('[data-workspace="scripting"]');
+    await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console")?.textContent ?? ""), null, 180000);
+  },
   "outliner-expanded": async (app) => {
     const box = await app.locator(".bl-outliner-region").boundingBox();
     await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

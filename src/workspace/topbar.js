@@ -16,17 +16,17 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   const bar = $('appbar');
   const menus = $('topbar-menus');
   const autoRun = $('auto-run');
-  // Blender's default workspaces, each opening the screen Bylonder has for it (docs/blender-boundary.md, Workspaces).
+  // Blender's default workspaces, each opening the screen the scene's window has for it (docs/blender-boundary.md,
+  // Workspaces): Scripting's, else Layout's.
   const workspaces = ['Layout', 'Modeling', 'Sculpting', 'UV Editing', 'Texture Paint', 'Shading', 'Animation', 'Rendering', 'Compositing', 'Geometry Nodes', 'Scripting']
     .map((name) => ({ id: name.toLowerCase().replaceAll(' ', '-'), name, screen: name === 'Scripting' ? 'scripting' : 'layout' }));
-  const screen = () => (dock.maximized === 'scene' ? 'layout' : dock.maximized ? null : 'scripting');
   let selected = 'layout';
-  const current = () => (workspaces.find((w) => w.id === selected).screen === screen() ? selected : workspaces.find((w) => w.screen === screen())?.id);
+  const current = () => selected;
+  const screen = () => workspaces.find((w) => w.id === selected).screen;
   const setWorkspace = id => {
     selected = id;
-    const target = workspaces.find((w) => w.id === id).screen;
-    if (target === 'layout' ? dock.maximized !== 'scene' : dock.maximized) dock.maximize(target === 'layout' ? 'scene' : dock.maximized);
-    if (target === 'scripting') dock.show('code');
+    if (dock.maximized !== 'scene') dock.maximize('scene');
+    send('screen', screen());
     sync();
   };
   const recent = [];
@@ -63,6 +63,8 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
     'bylonder.stop': { run: click('stop') },
     'bylonder.render_settings': { run: click('render-settings') },
     'bylonder.areas_arrange': { run: () => dock.openMenu() },
+    // The project's code (Monaco, files and the browser console's output) beside the scene, as an add-on's workbench.
+    'bylonder.project_code': { run: () => { if (dock.maximized === 'scene') { dock.maximize('scene'); dock.show('code'); } else dock.maximize('scene'); } },
     'bylonder.layout_reset': { run: () => dock.reset() },
     'bylonder.shortcuts': { keys: () => '?', run: () => send('help') },
     'bylonder.docs': { run: url(import.meta.env.BASE_URL + 'docs.html') },
@@ -80,7 +82,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   appendMenu('TOPBAR_MT_edit', ({ layout }) => { layout.separator(); layout.prop(settings, 'remember'); op(layout, 'bylonder.scene_edits_clear', 'Clear Scene Edits'); });
   prependMenu('TOPBAR_MT_render', ({ layout }) => { op(layout, 'bylonder.run', 'Run'); op(layout, 'bylonder.stop', 'Stop'); layout.prop(settings, 'auto_run'); layout.separator(); });
   appendMenu('TOPBAR_MT_render', ({ layout }) => { layout.separator(); op(layout, 'bylonder.render_settings', 'Viewport Resolution...'); });
-  appendMenu('TOPBAR_MT_window', ({ layout }) => { layout.separator(); op(layout, 'bylonder.areas_arrange', 'Arrange Areas...'); op(layout, 'bylonder.layout_reset', 'Reset Layout'); });
+  appendMenu('TOPBAR_MT_window', ({ layout }) => { layout.separator(); op(layout, 'bylonder.project_code', 'Toggle Project Code'); op(layout, 'bylonder.areas_arrange', 'Arrange Areas...'); op(layout, 'bylonder.layout_reset', 'Reset Layout'); });
   appendMenu('TOPBAR_MT_help', ({ layout }) => { layout.separator(); layout.operator('wm.splash'); layout.separator(); op(layout, 'bylonder.shortcuts', 'Keyboard Shortcuts'); op(layout, 'bylonder.docs', 'Bylonder Documentation'); op(layout, 'bylonder.babylon_docs', 'Babylon.js Documentation'); });
   // Open Recent is a menu Blender defines in C (wm_files.cc): the recent files, here the recent projects.
   const TOPBAR_MT_file_open_recent = Object.assign(() => ({
@@ -163,6 +165,7 @@ export function mountTopbar({ dock, send, examples, openExample, newProject, rec
   $('view-layer-actions').append(iconButton('duplicate', 'Add View Layer', viewLayerOp('add')), removeViewLayer);
   return {
     sync,
+    screen,
     splash,
     status({ hints: list = [], stats: text = '', viewLayers }) {
       if (viewLayers) {
