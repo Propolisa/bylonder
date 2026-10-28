@@ -323,6 +323,34 @@ EXPORT(anim_area_new) AnimArea *anim_area_new(bContext *C, int spacetype, int su
   return a;
 }
 
+/* A region drawn by its own draw callback (the region type's draw: action_channel_region_draw,
+ * graph_channel_region_draw, ...), or its overlay's (graph_main_region_draw_overlay: the current frame, scrollers and
+ * value scale), recorded by region-draw.cc: returns the recording's JSON. */
+extern "C" void region_draw_begin(int winx, int winy);
+extern "C" const char *region_draw_end();
+EXPORT(anim_region_draw) const char *anim_region_draw(bContext *C, AnimArea *a, int regiontype, bool overlay)
+{
+  ARegion *region = BKE_area_find_region_type(&a->area, regiontype);
+  CTX_wm_area_set(C, &a->area);
+  CTX_wm_region_set(C, region);
+  region_draw_begin(region->winx, region->winy);
+  ui::theme::theme_set(a->area.spacetype, regiontype);
+  (overlay ? region->runtime->type->draw_overlay : region->runtime->type->draw)(C, region);
+  CTX_wm_area_set(C, nullptr);
+  CTX_wm_region_set(C, nullptr);
+  return region_draw_end();
+}
+
+/* The space's dope sheet filter text (bDopeSheet.searchstr, DopeSheet.filter_text) and flag (ADS_FLAG_*). */
+static bDopeSheet *space_dopesheet(SpaceLink *sl);
+extern "C" SpaceLink *anim_area_space(AnimArea *a);
+EXPORT(anim_dopesheet_search) char *anim_dopesheet_search(AnimArea *a) { return space_dopesheet(anim_area_space(a))->searchstr; }
+EXPORT(anim_dopesheet_flag) int anim_dopesheet_flag(AnimArea *a) { return space_dopesheet(anim_area_space(a))->flag; }
+EXPORT(anim_dopesheet_flag_set) void anim_dopesheet_flag_set(AnimArea *a, int flag)
+{
+  space_dopesheet(anim_area_space(a))->flag = eDopeSheet_Flag(flag);
+}
+
 /* A region's flags (RGN_FLAG_HIDDEN: shown or not), as the screen reads and sets them. */
 EXPORT(anim_region_flag) int anim_region_flag(ARegion *region) { return region ? region->flag : 0; }
 EXPORT(anim_region_flag_set) void anim_region_flag_set(ARegion *region, int flag) { region->flag = eRegion_Flag(flag); }
@@ -361,14 +389,24 @@ EXPORT(anim_area_subtype) int anim_area_subtype(AnimArea *a)
 }
 EXPORT(anim_area_region) ARegion *anim_area_region(AnimArea *a, int regiontype) { return area_region(a, regiontype); }
 
-/* A region's size and place in the area (bottom-left origin, Blender's y up), as the screen lays it out; its view keeps
- * its zoom as view2d_region_reinit keeps it for the region's view type. */
-EXPORT(anim_region_layout) void anim_region_layout(ARegion *region, int x, int y, int width, int height, int view_type)
+/* A region's size and place in the area (bottom-left origin, Blender's y up), then the region type's init as ED_area_init
+ * runs it on each layout (its view keeps its zoom, its scrollers as the type sets them). */
+EXPORT(anim_region_layout) void anim_region_layout(bContext *C, ARegion *region, int x, int y, int width, int height)
 {
   region->winrct = {x, x + width - 1, y, y + height - 1};
   region->winx = short(width);
   region->winy = short(height);
-  ui::view2d_region_reinit(&region->v2d, short(view_type), width, height);
+  /* port-override: the sidebar's panels are Bylonder's (anim-buttons.js), so its region skips ED_region_panels_init. */
+  if (region->runtime->type->init && region->regiontype != RGN_TYPE_UI) {
+    region->runtime->type->init(CTX_wm_manager(C), region);
+  }
+  /* As region_azones_scrollbars_init: scrollers are hidden until the mouse comes near (which Bylonder leaves out). */
+  if (region->v2d.scroll & V2D_SCROLL_VERTICAL) {
+    region->v2d.alpha_vert = 0;
+  }
+  if (region->v2d.scroll & V2D_SCROLL_HORIZONTAL) {
+    region->v2d.alpha_hor = 0;
+  }
 }
 
 EXPORT(anim_region_v2d) View2D *anim_region_v2d(ARegion *region) { return &region->v2d; }
@@ -957,6 +995,31 @@ wmTimer *WM_event_timer_add(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmEven
 }
 void WM_event_timer_remove(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmTimer * /*timer*/) {}
 
+/* port-override: keys come from Bylonder's keymaps (keyconfig.js), so a region's init adds no keymap handlers. */
+wmKeyMap *WM_keymap_ensure(wmKeyConfig * /*keyconf*/, const char * /*idname*/, int /*spaceid*/, int /*regionid*/)
+{
+  static wmKeyMap keymap = {};
+  return &keymap;
+}
+wmEventHandler_Keymap *WM_event_add_keymap_handler(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
+{
+  return nullptr;
+}
+wmEventHandler_Keymap *WM_event_add_keymap_handler_poll(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/,
+                                                        EventHandlerPoll /*poll*/)
+{
+  return nullptr;
+}
+wmEventHandler_Keymap *WM_event_add_keymap_handler_v2d_mask(ListBaseT<wmEventHandler> * /*handlers*/, wmKeyMap * /*keymap*/)
+{
+  return nullptr;
+}
+bool WM_event_handler_region_v2d_mask_no_marker_poll(const wmWindow * /*win*/, const ScrArea * /*area*/,
+                                                     const ARegion * /*region*/, const wmEvent * /*event*/)
+{
+  return true;
+}
+
 /* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks. */
 void *ED_region_draw_cb_activate(ARegionType * /*art*/, void (* /*draw*/)(const bContext *, ARegion *, void *), void * /*customdata*/,
                                  int /*type*/)
@@ -965,6 +1028,9 @@ void *ED_region_draw_cb_activate(ARegionType * /*art*/, void (* /*draw*/)(const 
   return &handle;
 }
 bool ED_region_draw_cb_exit(ARegionType * /*art*/, void * /*handle*/) { return true; }
+
+/* port-override: Bylonder has no point caches, so the Timeline draws no cache lines (action_draw.cc). */
+void timeline_draw_cache(const SpaceAction * /*saction*/, const Object * /*ob*/, const Scene * /*scene*/) {}
 
 /* As area.cc gives it for a region no other region overlaps. */
 const rcti *ED_region_visible_rect(ARegion *region)

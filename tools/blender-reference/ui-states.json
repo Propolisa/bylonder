@@ -6,6 +6,7 @@
   { "id": "edit-mode", "title": "Edit Mode on the default cube (Tab)" },
   { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" },
   { "id": "graph-editor", "title": "Graph Editor in the Timeline's area, the cube's location keyed at frames 1 and 40" },
+  { "id": "graph-editor-large", "title": "Graph Editor in the 3D View's area, the cube's location keyed at frames 1 and 40" },
   { "id": "dope-sheet", "title": "Dope Sheet in the Timeline's area, the cube's location keyed at frames 1 and 40" },
   { "id": "object-tab", "title": "Properties: Object tab of the cube" },
   { "id": "light-data", "title": "Properties: Light data tab of the point light" },

@@ -4,9 +4,9 @@
 // and Blender's operators run there in Blender's C, modal ones (transform, frame change, view panning) getting the
 // following events with modal keymaps applied. The window manager's part (gestures, event values, redraws) is here;
 // the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
-import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
+import { AnimArea, iconName, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, RGN_TYPE_UI, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
   OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
-import { regionCanvas, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, drawChannels, channelRows, channelToggles, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
+import { regionCanvas, drawMarkers, UI_MARKER_MARGIN_Y, drawGrid, drawFrameRange, drawScrubbing, channelRows, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
 import { newOperator, operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { keymapHandler, modalItem } from '../../windowmanager/keyconfig.js';
@@ -18,13 +18,16 @@ import { drawMenu } from '../interface/ui-layout.js';
 import { headerLayout, drawPanels, panelTypes } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
 import { GRAPH_PANELS } from './anim-buttons.js';
+import { drawRecording, buttonAt } from '../interface/region-draw.js';
 import { loadRNAUI } from '../../makesrna/rna.js';
 import { menus as MENUS, headers as HEADER_TYPES, panels as PANEL_TYPES } from '../../python/bpy_interface.js';
 import { propBinding, operatorProperties } from '../../makesrna/rna-bylonder.js';
 import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { UILayout } from '../interface/layout.js';
 import { createContext } from '../../blenkernel/context.js';
-import { createApp, h, reactive, markRaw } from 'vue';
+import { createApp, h, reactive, markRaw, shallowRef } from 'vue';
+import { layoutTree } from '../space_buttons/modifier-panel.js';
+import { operatorIdname } from '../../makesrna/rna.js';
 import '../interface/layout-view.css';
 import '../interface/components/tailwind.css';
 import './anim-editor.css';
@@ -185,6 +188,22 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     ];
   } });
   sidebarApp.mount(sidebar);
+
+  // The channel region's block layouts (ED_time_scrub_channel_search_draw), over its canvas where the draw laid them.
+  const channelLayouts = shallowRef([]);
+  const channelOverlay = Object.assign(document.createElement('div'), { className: 'bl-ui anim-channel-layouts' });
+  const recordedOwner = (struct) => (struct === 'DopeSheet' ? rna.pointer('DopeSheet', editor) : null);
+  const withIconNames = (node) => ({ ...node, ...(node.icon ? { icon: iconName(node.icon) } : {}), children: (node.children ?? []).map(withIconNames) });
+  const channelLayoutsApp = createApp({ render: () => {
+    void headerState.revision;
+    if (!headerState.ready) return null;
+    return channelLayouts.value.map(({ at: [x, y, width], layout }) => h('div', {
+      class: 'anim-block-layout', style: { left: x + 'px', top: size.height - y + 'px', width: width + 'px' },
+    }, [h(LayoutView, { layout: layoutTree(withIconNames(layout), recordedOwner, space), ui: layoutUI })]));
+  } });
+  channelLayoutsApp.mount(channelOverlay);
+  for (const type of ['pointerdown', 'pointerup', 'keydown', 'keyup', 'wheel']) channelOverlay.addEventListener(type, (e) => e.stopPropagation());
+  section.append(channelOverlay);
   const headerApp = createApp({ render: () => {
     void headerState.revision;
     return headerState.ready ? h(LayoutView, { layout: headerLayout(context(), drawHeaderType(HEADER_TYPES[HEADERS[space]])), ui: layoutUI }) : null;
@@ -380,7 +399,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
 
   const onPointerDown = (e) => {
     section.focus({ preventScroll: true });
-    if (channelToggleClick(e)) return;
+    if (channelButtonClick(e)) return;
     const type = BUTTONS[e.button], event = regionEvent(e, type, 'PRESS', area.modal?.regionType ?? gesture?.region);
     section.setPointerCapture(e.pointerId);
     const handled = dispatch(event);
@@ -421,19 +440,18 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   const onContextMenu = (e) => e.preventDefault();
 
   // A click on a channel's toggle (expand, visibility, mute, lock), which Blender's channel list draws as buttons.
-  function channelToggleClick(e) {
-    if (e.button !== 0 || area.modal || gesture) return false;
+  // A click on a button the channel region's draw defined (a channel's toggles: expand, visibility, mute, lock...),
+  // pressed as Blender's handlers press it; an operator's button runs its operator.
+  function channelButtonClick(e) {
+    if (e.button !== 0 || area.modal || gesture || !channelRecording) return false;
     const event = regionEvent(e, 'LEFTMOUSE', 'PRESS');
     if (event.region !== RGN_TYPE_CHANNELS) return false;
+    const button = buttonAt(channelRecording, event.x, event.y);
+    if (!button) return false;
     sync();
-    const channels = area.channels(), v2d = area.v2d(RGN_TYPE_CHANNELS), metrics = area.metrics(RGN_TYPE_CHANNELS);
-    const [, vy] = v2d.toView(event.x, event.y);
-    const row = channelRows(channels, v2d, metrics).find(({ ymin, ymax }) => vy >= ymin && vy <= ymax);
-    if (!row) return false;
-    const toggle = channelToggles(row.channel, size.channels, { graph }).toggles.find(({ x }) => event.x >= x && event.x < x + 16);
-    if (!toggle) return false;
-    area.channelSetting(row.channel.index, ACHANNEL_SETTING[toggle.setting]);
-    if (toggle.setting !== 'EXPAND') commit();
+    if (button.operator) editor.invoke(operatorIdname(button.operator), {}, event);
+    else area.press(RGN_TYPE_CHANNELS, button.index, event.modifier);
+    commit();
     animation.edited();
     redraw();
     return true;
@@ -462,7 +480,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
   }
 
 
-  let scheduled = 0, lastStatus = null;
+  let scheduled = 0, lastStatus = null, channelRecording = null;
   function redraw() {
     if (!scheduled) scheduled = requestAnimationFrame(draw);
   }
@@ -492,12 +510,14 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     }
     if (markersShown()) drawMarkers(main, v2d, animation.anim.markers, frame, redraw);
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
-    drawScrubbing(main, v2d, frame, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
+    drawScrubbing(main, v2d, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
+    drawRecording(main.ctx, area.draw(RGN_TYPE_WINDOW, true), { height: size.height, scale: globalThis.devicePixelRatio || 1, redraw });
     if (size.channels) {
-      const view = regionCanvas(channelsCanvas, size.channels, size.height), chv = area.v2d(RGN_TYPE_CHANNELS);
-      drawChannels(view, chv, channels, area.metrics(RGN_TYPE_CHANNELS), { graph, redraw });
-      view.ctx.fillStyle = `rgb(${theme.regions.scrubbing.back.slice(0, 3).map((c) => Math.round(c * 255)).join(',')})`;
-      view.ctx.fillRect(0, 0, view.width, metrics.scrubHeight);
+      const view = regionCanvas(channelsCanvas, size.channels, size.height);
+      channelRecording = area.draw(RGN_TYPE_CHANNELS);
+      drawRecording(view.ctx, channelRecording, { height: size.height, scale: globalThis.devicePixelRatio || 1, redraw });
+      // The block layouts the draw made (the channel filter beside the scrubbing area), by the shared renderer.
+      channelLayouts.value = channelRecording.draw.filter((op) => op.op === 'layout');
     }
     const text = area.status;
     if (text !== lastStatus) {
@@ -532,6 +552,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       cancelAnimationFrame(scheduled);
       headerApp.unmount();
       sidebarApp.unmount();
+      channelLayoutsApp.unmount();
       area.dispose();
     },
   };

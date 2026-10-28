@@ -25,6 +25,7 @@
 #include "RNA_access.hh"
 #include "UI_interface_c.hh"
 #include "UI_interface_icons.hh"
+#include "UI_interface_layout.hh"
 #include "UI_resources.hh"
 #include "WM_api.hh"
 
@@ -168,9 +169,18 @@ void wmOrtho2_region_pixelspace(const ARegion *region) { wmOrtho2(0.0f, region->
 void GPU_matrix_identity_set() {}
 void GPU_matrix_push() {}
 void GPU_matrix_pop() {}
+/* The projection is the ortho rectangle (wmOrtho2): pushed and popped as a stack. */
+static Vector<rctf> &projections()
+{
+  static Vector<rctf> stack;
+  return stack;
+}
+void GPU_matrix_push_projection() { projections().append(rec.ortho); }
+void GPU_matrix_pop_projection() { rec.ortho = projections().pop_last(); }
 void GPU_blend(GPUBlend /*blend*/) {}
 GPUBlend GPU_blend_get() { return GPU_BLEND_ALPHA; }
 void GPU_line_smooth(bool /*enable*/) {}
+void GPU_polygon_smooth(bool /*enable*/) {}
 void GPU_line_width(float width) { rec.line_width = width; }
 void GPU_scissor(int x, int y, int width, int height)
 {
@@ -443,6 +453,27 @@ void draw_roundbox_4fv(const rctf *rect, bool filled, float rad, const float col
   draw_roundbox_4fv_ex(rect, (filled) ? col : nullptr, nullptr, 1.0f, col, U.pixelsize, rad);
 }
 
+/* A scroller as interface_widgets.cc draws it, its back in the theme's inner color and its slider in the item color,
+ * both as flat round boxes (the widget shader's shading is left out). */
+void draw_widget_scroll(uiWidgetColors *wcol, const rcti *rect, const rcti *slider, int /*state*/)
+{
+  const bool horizontal = BLI_rcti_size_x(rect) > BLI_rcti_size_y(rect);
+  const float rad = wcol->roundness * (horizontal ? BLI_rcti_size_y(rect) : BLI_rcti_size_x(rect));
+  const auto box = [&](const rcti *r, const uchar col[4]) {
+    rctf rf;
+    BLI_rctf_rcti_copy(&rf, r);
+    float colv[4], outv[4];
+    rgba_uchar_to_float(colv, col);
+    rgba_uchar_to_float(outv, wcol->outline);
+    draw_roundbox_corner_set(CNR_ALL);
+    draw_roundbox_4fv_ex(&rf, colv, nullptr, 1.0f, outv, U.pixelsize, rad);
+  };
+  box(rect, wcol->inner);
+  if (BLI_rcti_size_x(slider) >= 2 && BLI_rcti_size_y(slider) >= 2) {
+    box(slider, wcol->item);
+  }
+}
+
 /* Nothing is batched, so there is nothing to flush before icons draw. */
 void widgetbase_draw_cache_flush() {}
 
@@ -501,6 +532,11 @@ int BLF_height_max(int fontid)
 }
 int BLF_ascender(int fontid) { return int(region_font_ascender(font(fontid).size)); }
 int BLF_descender(int fontid) { return int(region_font_descender(font(fontid).size)); }
+/* The font's ascender stands in for the text's ink height, which JS does not measure. */
+float BLF_height(int fontid, const char * /*str*/, size_t /*str_len*/, ResultBLF * /*r_info*/)
+{
+  return region_font_ascender(font(fontid).size);
+}
 void BLF_width_and_height(int fontid, const char *str, size_t str_len, float *r_width, float *r_height)
 {
   *r_width = BLF_width(fontid, str, str_len);
@@ -520,6 +556,13 @@ void BLF_draw(int fontid, const char *str, size_t str_len, ResultBLF * /*r_info*
   }
   s += '}';
 }
+void BLF_draw_default(float x, float y, float z, const char *str, size_t str_len)
+{
+  BLF_position(BLF_default(), x, y, z);
+  BLF_draw(BLF_default(), str, str_len);
+}
+void BLF_batch_draw_begin() {}
+void BLF_batch_draw_end() {}
 
 /* The colors an icon's edit (icon_source_edit_cb) gives its themed groups: it edits a probe with one group per id of
  * svg_replace_color_attributes. */
@@ -605,6 +648,12 @@ struct Button {
   int bit_index = -1;
   ButtonHandleFunc func = nullptr;
   void *func_arg1 = nullptr, *func_arg2 = nullptr;
+  ButtonHandleNFunc funcN = nullptr;
+  void *func_argN = nullptr;
+  ButtonArgNFree func_argN_free_fn = nullptr;
+  ButtonArgNCopy func_argN_copy_fn = nullptr;
+  wmOperatorType *optype = nullptr;
+  PointerRNA *opptr = nullptr;
   std::function<void(bContext &C, StringRefNull oldname)> rename_func;
   bool active_only = false;
 };
@@ -701,6 +750,87 @@ Button *uiDefIconButR_prop(Block *block, ButtonType type, int icon, int x, int y
   but->min = min;
   but->max = max;
   return but;
+}
+
+Button *uiDefButR(Block *block, ButtonType type, std::optional<StringRef> str, int x, int y, short width, short height,
+                  PointerRNA *ptr, StringRefNull propname, int index, float min, float max, std::optional<StringRef> tip)
+{
+  PropertyRNA *prop = RNA_struct_find_property(ptr, propname.c_str());
+  Button *but = uiDefIconButR_prop(block, type, ICON_NONE, x, y, width, height, ptr, prop, index, min, max, tip);
+  but->icon = ICON_NONE;
+  but->str = str.value_or(prop ? RNA_property_ui_name(prop) : "");
+  return but;
+}
+
+/* An operator's button, run by its idname when pressed (JS runs it as the button's operator). */
+Button *uiDefIconButO(Block *block, ButtonType type, StringRefNull opname, wm::OpCallContext /*opcontext*/, int icon, int x,
+                      int y, short width, short height, std::optional<StringRef> tip)
+{
+  Button *but = button_add(block, type, icon, "", x, y, width, height, tip);
+  but->optype = WM_operatortype_find(opname.c_str(), false);
+  return but;
+}
+PointerRNA *button_operator_ptr_ensure(Button *but)
+{
+  if (!but->opptr) {
+    but->opptr = MEM_new<PointerRNA>(__func__, WM_operator_properties_create_ptr(but->optype));
+  }
+  return but->opptr;
+}
+
+void button_funcN_set(Button *but, ButtonHandleNFunc funcN, void *argN, void *arg2, ButtonArgNFree func_argN_free_fn,
+                      ButtonArgNCopy func_argN_copy_fn)
+{
+  but->funcN = funcN;
+  but->func_argN = argN;
+  but->func_arg2 = arg2;
+  but->func_argN_free_fn = func_argN_free_fn;
+  but->func_argN_copy_fn = func_argN_copy_fn;
+}
+
+/* A block's layout (block_layout): recorded by panel-layout.cc, and written into the draw where the block lays it out,
+ * for JS to draw with the shared layout renderer. */
+Layout &layout_record_begin(const char *kind);
+void layout_record_align_set(const Layout &layout, bool align);
+std::string layout_record_json(const Layout &layout);
+void layout_record_clear();
+struct BlockLayout {
+  Layout *layout;
+  int x, y, size;
+};
+static Vector<BlockLayout> block_layouts;
+Layout &block_layout(Block * /*block*/, LayoutDirection /*dir*/, LayoutType type, int x, int y, int size, int /*em*/,
+                     int /*padding*/, const uiStyle * /*style*/)
+{
+  /* As interface_layout.cc's block_layout: a header's root lays its items out in a row. */
+  Layout &layout = layout_record_begin(type == LayoutType::Header ? "row" : "column");
+  block_layouts.append({&layout, x, y, size});
+  return layout;
+}
+void block_layout_set_current(Block * /*block*/, Layout * /*layout*/) {}
+/* The block's alignment, recorded on the layout its items go into. */
+void block_align_begin(Block * /*block*/)
+{
+  if (!block_layouts.is_empty()) {
+    layout_record_align_set(*block_layouts.last().layout, true);
+  }
+}
+void block_align_end(Block * /*block*/) {}
+void block_bounds_set_normal(Block * /*block*/, int /*addval*/) {}
+int2 block_layout_resolve(Block * /*block*/)
+{
+  for (const BlockLayout &block_layout : block_layouts) {
+    std::string &s = command("layout");
+    s += ",\"at\":[";
+    number(s, block_layout.x);
+    s += ',';
+    number(s, block_layout.y);
+    s += ',';
+    number(s, block_layout.size);
+    s += "],\"layout\":" + layout_record_json(*block_layout.layout) + '}';
+  }
+  block_layouts.clear();
+  return {0, 0};
 }
 
 void button_func_set(Button *but, ButtonHandleFunc func, void *arg1, void *arg2)
@@ -898,6 +1028,9 @@ void block_draw(const bContext * /*C*/, Block *block)
     if (but->active_only) {
       s += ",\"active\":true";
     }
+    if (but->optype) {
+      string_json(s += ",\"operator\":", but->optype->idname);
+    }
     if (button_is_toggle(but.get())) {
       s += (but->flag & UI_SELECT) ? ",\"selected\":true" : ",\"selected\":false";
     }
@@ -912,6 +1045,16 @@ void block_draw(const bContext * /*C*/, Block *block)
 /* Starts recording a region's draw, `winx` by `winy` pixels; the last draw's buttons go. */
 EXPORT(region_draw_begin) void region_draw_begin(int winx, int winy)
 {
+  for (ui::Button *but : buttons()) {
+    if (but->func_argN && but->func_argN_free_fn) {
+      but->func_argN_free_fn(but->func_argN);
+    }
+    if (but->opptr) {
+      WM_operator_properties_free(but->opptr);
+      MEM_delete(but->opptr);
+    }
+  }
+  ui::layout_record_clear();
   buttons().clear();
   blocks().clear();
   rec = {};
@@ -943,6 +1086,9 @@ EXPORT(region_button_press) int region_button_press(bContext *C, int index, int 
   }
   if (but->func) {
     but->func(C, but->func_arg1, but->func_arg2);
+  }
+  if (but->funcN) {
+    but->funcN(C, but->func_argN, but->func_arg2);
   }
   if (but->rnaprop) {
     RNA_property_update(C, &but->rnapoin, but->rnaprop);

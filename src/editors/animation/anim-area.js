@@ -8,10 +8,10 @@ import '../interface/region-draw.js';
 const { exports: x, withArrays, withString, cString } = blenderModule;
 const view = () => new DataView(x.memory.buffer);
 
-// Blender's space and region types (eSpace_Type, eRegion_Type) and View2D view types (V2D_COMMONVIEW_*).
+// Blender's space and region types (eSpace_Type, eRegion_Type).
 export const SPACE_GRAPH = 2, SPACE_ACTION = 12;
 export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_CHANNELS = 2, RGN_TYPE_UI = 4;
-const V2D_COMMONVIEW_CUSTOM = -1, V2D_COMMONVIEW_LIST = 1, RGN_FLAG_HIDDEN = 1 << 0;
+const RGN_FLAG_HIDDEN = 1 << 0;
 // Area.ui_type within a SpaceAction (its mode, eAnimEdit_Context).
 export const ACTION_MODES = { DOPESHEET: 0, ACTION: 1, SHAPEKEY: 2, GPENCIL: 3, MASK: 4, CACHEFILE: 5, TIMELINE: 6 };
 // wmEventModifierFlag and wmOperatorStatus.
@@ -50,6 +50,9 @@ export class View2D {
   }
 }
 
+// An icon's name by its id (UI_icons.hh), as region-draw.cc names them.
+export const iconName = (icon) => cString(x.ui_icon_name(icon));
+
 export class AnimArea {
   // A space made for a sub-type (a SpaceAction's mode), as an area asks for one; -1 for its default.
   constructor(main, spacetype, subtype = -1) {
@@ -67,9 +70,21 @@ export class AnimArea {
   // Sizes a region (pixels, from the area's bottom left, y up); its view keeps its zoom as Blender's does.
   layout(type, left, bottom, width, height) {
     const region = this.region(type);
-    if (region) x.anim_region_layout(region, left, bottom, width, height, type === RGN_TYPE_CHANNELS ? V2D_COMMONVIEW_LIST : V2D_COMMONVIEW_CUSTOM);
+    if (region) x.anim_region_layout(this.main.C, region, left, bottom, width, height);
   }
   sync() { x.anim_area_sync(this.pointer); }
+  // A region drawn by its own draw callback, or its overlay's, as region-draw.cc records it ({ draw, buttons }).
+  draw(type, overlay = false) { return JSON.parse(cString(x.anim_region_draw(this.main.C, this.pointer, type, overlay))); }
+  // A button of a region's last draw pressed as Blender's handlers apply it (a toggle flipped), with the keys held.
+  press(type, index, modifier = 0) { return this.inContext(type, (C) => x.region_button_press(C, index, -1, modifier)); }
+  // The space's dope sheet: its filter text (DopeSheet.filter_text) and flag (ADS_FLAG_*).
+  get filterText() { return cString(x.anim_dopesheet_search(this.pointer)); }
+  set filterText(text) {
+    const bytes = new TextEncoder().encode(text).slice(0, 63), p = x.anim_dopesheet_search(this.pointer) >>> 0;
+    new Uint8Array(x.memory.buffer, p, 64).fill(0).set(bytes);
+  }
+  get dopesheetFlag() { return x.anim_dopesheet_flag(this.pointer); }
+  set dopesheetFlag(flag) { x.anim_dopesheet_flag_set(this.pointer, flag); }
   // Whether a region shows (RGN_FLAG_HIDDEN clear).
   shown(type) { const region = this.region(type); return !!region && !(x.anim_region_flag(region) & RGN_FLAG_HIDDEN); }
   show(type, value) {

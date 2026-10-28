@@ -158,6 +158,9 @@ export function drawRecording(ctx, { draw, iconColors = {} }, { height, scale = 
       }
       ctx.font = fontOf(op.size);
       ctx.fillStyle = css(op.color);
+      // BLF draws from the left of the baseline, whatever the canvas was drawing before.
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
       ctx.fillText(op.text, Math.round(op.at[0]), Math.round(y(op.at[1])));
     } else if (op.op === 'icon') {
       const raster = icon(op.icon, op.size, scale, !!op.multicolor, iconColors);

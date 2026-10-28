@@ -26,7 +26,7 @@ export function layoutTree(node, data, id) {
   const owner = data(node.owner), text = node.text;
   switch (node.kind) {
     case 'prop': case 'search':
-      return { kind: 'prop', data: owner, property: node.prop, text, index: node.index, split: !!node.split, decorate: node.decorate !== false,
+      return { kind: 'prop', data: owner, property: node.prop, text, index: node.index, split: !!node.split, decorate: node.decorate !== false, icon: node.icon,
         ...Object.fromEntries(Object.entries(FLAG).map(([key, bit]) => [key, !!(node.flag & bit)])) };
     case 'label': return { kind: 'label', text };
     case 'separator': return { kind: 'separator' };

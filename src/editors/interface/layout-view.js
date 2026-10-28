@@ -216,7 +216,7 @@ function widget(prop, node, { text, index = -1, disabled, inactive, ui }) {
     next[index] = v;
     prop.set(next, finish);
   };
-  const iconName = [node.icon, meta.type === 'B' ? meta.icon : null].find((name) => name && name !== 'NONE') ?? null;
+  const iconName = [node.icon, 'BS'.includes(meta.type) ? meta.icon : null].find((name) => name && name !== 'NONE') ?? null;
   switch (meta.type) {
     case 'B': {
       const checked = node.invert_checkbox ? !element : !!element;

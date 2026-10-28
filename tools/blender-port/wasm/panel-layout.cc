@@ -31,8 +31,8 @@ struct Node {
   std::string kind, prop, owner, heading;
   /* \x01: none, so the widget shows its RNA name. */
   std::string text = "\x01";
-  int index = -1, flag = 0;
-  bool split = false, decorate = true;
+  int index = -1, flag = 0, icon = 0;
+  bool split = false, decorate = true, align = false;
   const Layout *layout = nullptr;
   std::vector<std::unique_ptr<Node>> children;
 };
@@ -82,20 +82,17 @@ void Layout::estimate_impl() {}
 void Layout::resolve_impl() {}
 Block *Layout::block() const { return nullptr; }
 
-Layout &Layout::column(bool /*align*/) { return sub_layout(this, "column"); }
-Layout &Layout::column(bool /*align*/, StringRef heading)
+static Layout &aligned_layout(const Layout *parent, const char *kind, bool align, StringRef heading = "")
 {
-  Layout &layout = sub_layout(this, "column");
+  Layout &layout = sub_layout(parent, kind);
+  nodes[&layout]->align = align;
   nodes[&layout]->heading = heading;
   return layout;
 }
-Layout &Layout::row(bool /*align*/) { return sub_layout(this, "row"); }
-Layout &Layout::row(bool /*align*/, StringRef heading)
-{
-  Layout &layout = sub_layout(this, "row");
-  nodes[&layout]->heading = heading;
-  return layout;
-}
+Layout &Layout::column(bool align) { return aligned_layout(this, "column", align); }
+Layout &Layout::column(bool align, StringRef heading) { return aligned_layout(this, "column", align, heading); }
+Layout &Layout::row(bool align) { return aligned_layout(this, "row", align); }
+Layout &Layout::row(bool align, StringRef heading) { return aligned_layout(this, "row", align, heading); }
 Layout &Layout::box() { return sub_layout(this, "box"); }
 Layout &Layout::split(float /*percentage*/, bool /*align*/) { return sub_layout(this, "split"); }
 
@@ -105,9 +102,10 @@ void Layout::emboss_set(EmbossType /*emboss*/) {}
 void Layout::operator_context_set(wm::OpCallContext /*opcontext*/) {}
 void Layout::context_ptr_set(StringRef /*name*/, const PointerRNA * /*ptr*/) {}
 
-void Layout::prop(PointerRNA *ptr, StringRefNull propname, eUI_Item_Flag flag, std::optional<StringRef> name, int /*icon*/)
+void Layout::prop(PointerRNA *ptr, StringRefNull propname, eUI_Item_Flag flag, std::optional<StringRef> name, int icon)
 {
   Node &node = add(this, "prop");
+  node.icon = icon;
   node.prop = propname;
   node.owner = owner(ptr);
   node.flag = int(flag);
@@ -245,6 +243,12 @@ static void write(std::ostringstream &out, const Node &node)
     out << ",\"text\":";
     quote(out, node.text);
   }
+  if (node.icon) {
+    out << ",\"icon\":" << node.icon;
+  }
+  if (node.align) {
+    out << ",\"align\":true";
+  }
   out << ",\"index\":" << node.index << ",\"flag\":" << node.flag << ",\"split\":" << node.split << ",\"decorate\":" << node.decorate;
   if (node.layout) {
     out << ",\"active\":" << LayoutInternal::active(*node.layout) << ",\"enabled\":" << LayoutInternal::enabled(*node.layout)
@@ -282,6 +286,33 @@ static void draw_panel(const bContext *C, PanelType *type, Node &parent, bool ro
   for (LinkData &link : type->children) {
     draw_panel(C, static_cast<PanelType *>(link.data), node, false);
   }
+}
+
+/* A layout recorded on its own (a region's block layout, block_layout in region-draw.cc), as `kind`: its root, until
+ * layout_record_clear. */
+static std::vector<std::unique_ptr<Node>> roots;
+Layout &layout_record_begin(const char *kind)
+{
+  Layout &layout = *layouts.emplace_back(std::make_unique<Layout>(ItemType(0), nullptr));
+  Node &node = *roots.emplace_back(std::make_unique<Node>());
+  node.kind = kind;
+  node.layout = &layout;
+  nodes[&layout] = &node;
+  return layout;
+}
+void layout_record_align_set(const Layout &layout, bool align) { nodes.at(&layout)->align = align; }
+std::string layout_record_json(const Layout &layout)
+{
+  std::ostringstream out;
+  out << std::boolalpha;
+  write(out, *nodes.at(&layout));
+  return out.str();
+}
+void layout_record_clear()
+{
+  roots.clear();
+  nodes.clear();
+  layouts.clear();
 }
 
 }  // namespace blender::ui

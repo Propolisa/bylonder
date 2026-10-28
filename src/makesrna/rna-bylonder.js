@@ -347,6 +347,10 @@ const STRUCTS = {
     dopesheet: (editor, r) => r.pointer('DopeSheet', editor),
   },
   DopeSheet: {
+    filter_text: { get: (editor) => editor.area.filterText, set: (editor, value) => { editor.area.filterText = value; editor.changed(); } },
+    // ADS_FLAG_INVERT_FILTER.
+    use_filter_invert: { get: (editor) => !!(editor.area.dopesheetFlag & (1 << 4)),
+      set: (editor, value) => { const flag = editor.area.dopesheetFlag; editor.area.dopesheetFlag = value ? flag | (1 << 4) : flag & ~(1 << 4); editor.changed(); } },
     show_only_selected: dopesheetFilter(1 << 0),
     show_hidden: dopesheetFilter(1 << 26),
     show_only_errors: dopesheetFilter(1 << 28),
