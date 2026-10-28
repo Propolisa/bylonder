@@ -2338,7 +2338,9 @@ const __str_methods__ = {
     swapcase () { return [...this].map ((c) => (c == c.toUpperCase () ? c.toLowerCase () : c.toUpperCase ())).join (''); },
     title () { return this.toLowerCase ().replace (/(^|[^A-Za-z])([a-z])/g, (m, before, c) => before + c.toUpperCase ()); },
     translate (table) { return [...this].map ((c) => { const to = table [c.charCodeAt (0)]; return to === undefined ? c : to === null ? '' : typeof to == 'number' ? String.fromCharCode (to) : to; }).join (''); },
+    // str stands in for bytes: encode and decode are identities.
     encode () { return String (this); },
+    decode () { return String (this); },
 };
 const __list_methods__ = {
     clear () { this.length = 0; },

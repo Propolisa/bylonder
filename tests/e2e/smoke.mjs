@@ -4,6 +4,7 @@
 // usage: npm run test:e2e [-- name filter]
 import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
+import { unzipSync, strFromU8 } from "fflate";
 import { chromium, openApp, startServer } from "./app.mjs";
 
 const renderStatus = ".render-result [data-status]";
@@ -45,6 +46,32 @@ const checks = {
     await rendered();
     assert.match(await app.locator(renderStatus).textContent(), /^Finished 2 frames/);
     assert.ok((await download).suggestedFilename());
+  },
+
+  async "File > Export writes the evaluated scene as .babylon, .js and .js with live modifiers"() {
+    await app.bylonder((b) => b.world.modifiers.add(b.world.scene.getMeshByName("Cube"), "SUBSURF", { levels: 2 }));
+    const exported = async (item) => {
+      const download = app.page.waitForEvent("download", { timeout: 60000 });
+      await app.page.click('[data-blender="TOPBAR_MT_file"]');
+      await app.page.getByRole("menuitem", { name: /^Export/ }).first().hover();
+      await app.page.getByRole("menuitem", { name: item }).click();
+      const chunks = [];
+      for await (const chunk of await (await download).createReadStream()) chunks.push(chunk);
+      return Buffer.concat(chunks);
+    };
+    const json = JSON.parse(await exported("Babylon (.babylon)"));
+    assert.deepEqual(json.meshes.map((m) => m.name), ["Cube"]);
+    assert.equal(json.activeCameraID, "Camera");
+    assert.equal(json.geometries.vertexData[0].indices.length, 96 * 2 * 3, "the subdivided cube");
+    assert.match(String(await exported("JavaScript (.js)")), /export async function createScene\(engine, canvas\)/);
+    // Live Modifiers: the module, whose subdivided cube keeps its stack, and the polyfill next to it.
+    const zip = unzipSync(await exported("JavaScript, Live Modifiers (.zip)"));
+    const module = strFromU8(Object.entries(zip).find(([name]) => name.endsWith(".js") && !name.includes("/"))[1]);
+    assert.match(module, /bylonderModifiers/);
+    assert.match(module, /liveModifiers/);
+    assert.match(strFromU8(zip["bylonder-modifiers/modifiers.js"]), /export async function liveModifiers/);
+    assert.ok(zip["bylonder-modifiers/modifiers-worker.js"].length > 0);
+    assert.deepEqual(Array.from(zip["bylonder-modifiers/modifiers.wasm"].subarray(0, 4)), [0, 0x61, 0x73, 0x6d], "a WebAssembly module");
   },
 
   async "topbar File menu and 3D View Object menu open"() {

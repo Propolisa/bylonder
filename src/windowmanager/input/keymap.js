@@ -2,6 +2,7 @@
 // "Any LEFT_CTRL RELEASE"), `blender` the operator, menu or modal item they run, so scripts/blender-coverage.mjs
 // can count them. Events are window manager events (wm-event-system.js): { type, value, shift, ctrl, alt, oskey }.
 import { runOperator } from '../wm-operators.js';
+import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 
 const MODIFIERS = ['shift', 'ctrl', 'alt', 'oskey'];
 const VALUES = { press: 'PRESS', release: 'RELEASE', click: 'CLICK', click_drag: 'CLICK_DRAG', drag: 'CLICK_DRAG', double_click: 'DOUBLE_CLICK', double: 'DOUBLE_CLICK', any_value: 'ANY' };
@@ -62,14 +63,26 @@ const modifierKeys = (event) => [event.shift && 'shift', event.ctrl && 'ctrl', e
 // Every keymap made, as Blender's key configuration, for the shortcuts menus show.
 const keyconfig = [];
 
-// The keys bound to an operator with these properties (WM_key_event_operator_string): a binding with the same
-// properties, else one with none. `blender` may name `idname:VALUE` for an enum value.
+// An operator button's properties as a binding's are compared with them: those set away from the operator's defaults
+// (wm_keymap_item_find compares a button's properties, then them without the ones at their defaults).
+export const setProperties = (idname, props = {}) =>
+  Object.fromEntries(Object.entries(props).filter(([name, value]) => value !== rnaOperators[idname]?.properties[name]?.default));
+
+// A binding's properties are a button's set ones, no more and no fewer (IDP_EqualsProperties_ex, strict, as
+// ui_but_event_operator_string asks).
+export const sameProperties = (bound = {}, props = {}) =>
+  Object.keys(bound).length === Object.keys(props).length && Object.entries(bound).every(([key, value]) => props[key] === value);
+
+// The keys bound to an operator with these properties (WM_key_event_operator_string): a binding with the properties
+// the button sets. `blender` may name `idname:VALUE` for an enum value, which then is the binding's property.
 export function operatorKeys(idname, props = {}, keymaps = keyconfig) {
-  const values = Object.values(props).filter((value) => typeof value === 'string');
-  const bindings = keymaps.flatMap((map) => map.items)
-    .filter((item) => [item.blender].flat().some((id) => id === idname || values.some((value) => id === `${idname}:${value}`)));
-  const exact = bindings.find((item) => item.props && Object.entries(item.props).every(([key, value]) => props[key] === value));
-  return (exact ?? bindings.find((item) => !item.props))?.keys;
+  const set = setProperties(idname, props), values = Object.values(set).filter((value) => typeof value === 'string');
+  const bindings = keymaps.flatMap((map) => map.items).flatMap((item) => [item.blender].flat().map((id) => {
+    if (id === idname) return { item, props: item.props };
+    const value = values.find((v) => id === `${idname}:${v}`);
+    return value === undefined ? null : { item, props: { ...item.props, ...Object.fromEntries(Object.entries(set).filter(([, v]) => v === value)) } };
+  })).filter(Boolean);
+  return bindings.find((binding) => sameProperties(binding.props, set))?.item.keys;
 }
 
 // Runs the first binding whose keys match the event and whose poll passes. Returns whether one ran. A binding without

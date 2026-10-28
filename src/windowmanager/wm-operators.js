@@ -2,7 +2,7 @@
 // the menus and headers drawn from Blender's own scripts (src/bl_py, drawn by editors/interface/ui-layout.js).
 // Operators Blender lacks (Bylonder's project and code features) are registered as `bylonder.*`, and added to Blender's
 // menus with appendMenu, as add-ons extend Blender.
-import { operatorKeys } from './input/keymap.js';
+import { operatorKeys, setProperties } from './input/keymap.js';
 import { blenderKeys } from './keyconfig.js';
 import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
 import { operatorFinished } from './wm-reports.js';
@@ -79,6 +79,13 @@ export const prependMenu = (idname, draw) => extension(idname).prepend.push(draw
 // Python keyword arguments for a layout call from JS, as Transcrypt passes them.
 export const kw = (keywords) => ({ ...keywords, __kwargtrans__: null });
 
+// An operator's own keys(props) as a binding of the properties it reads: a button setting others has no shortcut.
+function ownKeys(operator, props) {
+  if (!operator?.keys) return undefined;
+  const read = new Set(), keys = operator.keys(new Proxy(props, { get: (target, name) => (read.add(name), target[name]) }));
+  return Object.keys(props).every((name) => read.has(name)) ? keys : undefined;
+}
+
 // What drawMenu needs (see ui-layout.js), from the menus (classes by idname), the context the scripts read, the
 // properties Bylonder binds (prop(data, name) giving { label, get, set }) and the Blender keymaps whose shortcuts the
 // menus show where Bylonder binds none (keymaps() giving their names, in the order Blender's handlers run).
@@ -90,7 +97,8 @@ export const menuUI = ({ menus, context, prop, keymaps = () => ['Window', 'Scree
   supported: (idname, props) => !!operatorFor(idname) && (operatorFor(idname).supports?.(props) ?? true),
   poll: (idname, props) => operatorFor(idname)?.poll?.(props) ?? true,
   run: runOperator,
-  keys: (idname, props) => operatorFor(idname)?.keys?.(props) ?? operatorKeys(idname, props) ?? blenderKeys(keymaps(), idname, props),
+  // An operator button's shortcut, as Blender's buttons find it: a binding whose properties are the ones the button sets.
+  keys: (idname, props) => ownKeys(operatorFor(idname), setProperties(idname, props)) ?? operatorKeys(idname, props) ?? blenderKeys(keymaps(), idname, props, true),
   enumItems: (idname, prop) => operatorFor(idname)?.enumItems?.(prop) ?? rnaOperators[idname]?.properties[prop]?.items ?? [],
 });
 

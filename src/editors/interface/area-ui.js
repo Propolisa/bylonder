@@ -10,7 +10,7 @@ import { propBinding } from '../../makesrna/rna-bylonder.js';
 import { menuUI, inArea, invokeOperator, registerOperator, contextArea } from '../../windowmanager/wm-operators.js';
 import { keymapHandler } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { headerLayout, panelTypes, drawPanels } from './panels.js';
+import { headerLayout, panelTypes, drawPanels, drawType } from './panels.js';
 import { panelState } from './layout-view.js';
 import { useContext } from './layout.js';
 import { drawMenu } from './ui-layout.js';
@@ -55,7 +55,7 @@ export function areaUI({ area, context, keymaps, rna, ids = () => [], idIcon }) 
     structIcon: () => idIcon,
     drawMenu: menuItems,
     menuLabel: (idname) => MENUS[idname]?.bl_label,
-    menuContents: (idname) => MENUS[idname] && markRaw(headerLayout(context(), (layout) => Object.assign(MENUS[idname](), { layout }).draw(context()))),
+    menuContents: (idname) => MENUS[idname] && markRaw(headerLayout(context(), (layout) => drawType(MENUS[idname], layout, context()))),
     popover: (id) => {
       const type = PANELS[id];
       if (!type) return null;
@@ -64,7 +64,7 @@ export function areaUI({ area, context, keymaps, rna, ids = () => [], idIcon }) 
     },
   });
   // A header type's layout (TEXT_HT_header, TEXT_HT_footer).
-  const header = (idname) => headerLayout(context(), (layout) => Object.assign(HEADERS[idname](), { layout }).draw(context()));
+  const header = (idname) => headerLayout(context(), (layout) => drawType(HEADERS[idname], layout, context()));
   // A region's panels (the sidebar's TEXT_PT_*), in Blender's order and filtered by poll.
   const regionPanels = (space, region) => drawPanels(panelTypes([{ classes: Object.values(PANELS) }], { space, region }), context(), { contexts: [], open: panels.isOpen });
   const keys = keymapHandler(keymaps);

@@ -1,6 +1,6 @@
 // Blender's default key configuration (presets/keyconfig/keymap_data/blender_default.py, in Blender's Python tree): the
 // keymaps events run through and the shortcuts Blender's menus show (WM_key_event_operator_string).
-import { keysLabel } from './input/keymap.js';
+import { keysLabel, setProperties } from './input/keymap.js';
 import { invokeOperator, kw } from './wm-operators.js';
 
 // The key configuration Blender loads (presets/keyconfig/Blender.py's load) with its preferences' defaults: left click
@@ -36,10 +36,11 @@ const agrees = (bound, props) => (bound ?? []).every(([key, value]) => !(key in 
 const equals = (bound, props) => (bound ?? []).length === Object.keys(props).length && agrees(bound, props) &&
   (bound ?? []).every(([key]) => key in props);
 
-// The key text of the first binding of the operator, with the menu's properties (exactly them when strict), in the
-// named keymaps in order.
+// The key text of the first binding of the operator, with the menu's properties (exactly them when strict, then
+// exactly those set away from their defaults, as wm_keymap_item_find tries), in the named keymaps in order.
 export function blenderKeys(names, idname, props = {}, strict = false) {
-  for (const [id, set] of callers(idname) ?? [[idname, props]]) {
+  const tries = strict ? [[idname, props], [idname, setProperties(idname, props)]] : [[idname, props]];
+  for (const [id, set] of callers(idname) ?? tries) {
     for (const name of names) {
       const item = keyconfig().get(name)?.find(([op, , data]) => op === id && (strict ? equals : agrees)(data?.properties, set) &&
         (!callers(idname) || data?.properties?.some(([key, value]) => key === 'name' && value === idname)));

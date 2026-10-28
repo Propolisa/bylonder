@@ -357,7 +357,9 @@ def build(root, name, spec, tag):
         extra, key = library_flags(spec_lib, tree, deps, spec)
         objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args + extra, patches + key)
         built = [o for o in objects.values() if o]
-        archive = os.path.join(out_dir, lib.replace('/', '_') + '.a')
+        # Archives are per module: modules sharing the build (and objects) may be linked at the same time.
+        archive = os.path.join(out_dir, 'archives', name.replace('/', '_'), lib.replace('/', '_') + '.a')
+        os.makedirs(os.path.dirname(archive), exist_ok=True)
         if os.path.exists(archive):
             os.remove(archive)
         subprocess.run([shutil.which('llvm-ar') or shutil.which('llvm-ar-18'), 'rcs', archive, *built], check=True)

@@ -68,7 +68,7 @@ export function editMeshMenus(api) {
     run: (idname, props) => (actions[idname] ? actions[idname](props) : api.exec(idname, props)),
     supported: (idname) => !!actions[idname] || runsMeshOperator(idname),
     poll: (idname) => !!actions[idname] || api.edit().poll(idname),
-    keys: (idname, props) => api.keys(idname, props) ?? blenderKeys(KEYMAPS, idname, props),
+    keys: (idname, props) => api.keys(idname, props) ?? blenderKeys(KEYMAPS, idname, props, true),
     enumItems: (idname, prop) => api.edit().enumItems(idname, prop),
   };
   const draw = (idname) => () => drawMenu(idname, ui);
