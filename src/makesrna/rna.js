@@ -7,6 +7,14 @@ import structs from './rna-structs.json' with { type: 'json' };
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));
 
+// A function's arguments as Python passes them, positional and then keywords: Transcrypt passes keywords as a last
+// object marked __kwargtrans__.
+export function pyArgs(list, names) {
+  const last = list.at(-1), keywords = last && Object.hasOwn(last, '__kwargtrans__') ? last : {};
+  const positional = keywords === last ? list.slice(0, -1) : list;
+  return Object.fromEntries(names.map((name, i) => [name, keywords[name] ?? positional[i]]));
+}
+
 function property(struct, name) {
   for (let s = structs[struct]; s; s = structs[s.base]) if (s.props[name]) return s.props[name];
   return null;
@@ -20,6 +28,28 @@ export const collection = (items = [], active = null) => Object.assign([...items
   find: (name) => items.findIndex((item) => item.name === name),
 });
 
+const TYPES = { B: 'BOOLEAN', I: 'INT', F: 'FLOAT', S: 'STRING', E: 'ENUM', P: 'POINTER', C: 'COLLECTION' };
+const blRnas = new Map();
+
+// bpy_struct.bl_rna: a struct's RNA, its properties with their types and defaults, its own and its bases'.
+export function blRna(struct) {
+  if (!blRnas.has(struct)) {
+    const properties = [];
+    for (let s = structs[struct]; s; s = structs[s.base]) {
+      for (const [identifier, [type, value]] of Object.entries(s.props)) {
+        if (properties.some((p) => p.identifier === identifier)) continue;
+        const pointer = type === 'P' || type === 'C';
+        properties.push({ identifier, name: identifier, description: '', type: TYPES[type], default: pointer ? null : value, is_readonly: false, enum_items: collection(), get enum_items_static() { return this.enum_items; },
+          get fixed_type() { return pointer ? blRna(value) : null; } });
+      }
+    }
+    const list = collection(properties);
+    for (const p of properties) list[p.identifier] = p;
+    blRnas.set(struct, { identifier: struct, name: struct, description: '', base: structs[struct]?.base ? blRna(structs[struct].base) : null, properties: list });
+  }
+  return blRnas.get(struct);
+}
+
 // A struct of a type (Object, Scene, ...) holding `data`, a plain object of what Bylonder binds; getters in it are
 // read each time and setters written through. Writing a property Bylonder does not bind keeps it on this struct only.
 export function rna(struct, data = {}) {
@@ -30,7 +60,7 @@ export function rna(struct, data = {}) {
       const name = rnaName(key);
       if (name in target) return target[name];
       if (key in target) return target[key];
-      if (name === 'bl_rna') return { identifier: struct };
+      if (name === 'bl_rna') return blRna(struct);
       const prop = property(struct, name);
       // Context members outside Context's RNA (object, sculpt_object, ...) are None where the context lacks them.
       if (!prop) return struct === 'Context' ? null : undefined;

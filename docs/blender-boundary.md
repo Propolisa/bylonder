@@ -73,6 +73,26 @@ Every subsystem builds on these, one of each:
 - Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps. An editor runs its keymaps inside its context area (`inArea(area, ...)`), so operators act on that editor (`contextArea()`) and `wm.call_menu` opens the area's own menu (`area.menu(idname)`); editors never keep operator tables of their own.
 - UI: menus through `src/editors/interface/ui-layout.js`; panels through one layout renderer, with one number field carrying Blender's drag behavior.
 
+## Blender's Python tree
+
+`src/bl_py` is all of Blender's `scripts/startup` and `scripts/modules` (283 modules), loaded whole: `bpy.main()` runs
+Blender's startup, which registers its classes (2094: every menu, panel, header and Python operator) in
+`_bpy.registered` (`tests/bl-py.test.js`). Decisions:
+
+- Fixes are generic, in the transpiler (`TranscryptFixes` and `Walrus` in `transpile.py`, `runtime.js` for the runtime,
+  applied to both pipelines by `finish()`), or in tree.py for what spans modules. Never edit `src/bl_py`.
+- The tree's modules compile with operator overloading and iterable conversion (`opov`, `iconv`) for Python's
+  semantics (list `+`, loops over iterators); Transcrypt's own library modules compile without.
+- Module semantics: imported names are module attributes (re-exported); assigning a module's attribute
+  (`bpy.context = ...`) calls its `__py_setattr__`; cycles become JS namespace imports; `__import__` and `globals()`
+  look modules up in the registry.
+- `bpy.context` and `bpy.data` are proxies over what Bylonder pushes (`_bpy._context_push(context, data)`), as Blender
+  sets the window manager's context; with none pushed, Blender's RNA defaults (`makesrna/rna.js`). `bl_rna` is
+  `blRna(struct)` from the same RNA data.
+- Python's library modules Transcrypt lacks are at the boundary (`boundary/`), as small as Blender's scripts need;
+  values Blender's C reports (`bpy.app`, handlers, translation contexts, file extensions) are copied from the
+  reference binary. `os` is a read-only file system of Blender's scripts in Blender's layout (`_files`).
+
 ## Workspaces
 
 The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.
@@ -85,6 +105,18 @@ The app opens in the Layout workspace: the window is Blender's (topbar, editors,
 ## Menus
 
 Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order.
+
+## 3D View regions
+
+The toolbar, tool settings, header transform settings and sidebar are Blender's scripts, transpiled whole where they are systems.
+
+- Tool system: `space_toolsystem_common.py` and `space_toolsystem_toolbar.py` are transpiled as whole modules. `windowmanager/wm-toolsystem.js` keeps Blender's state (bToolRef per mode, `workspace_tool_type`, the group memory `_tool_group_active`) and runs Blender's Python for everything else: `draw_cls` draws the toolbar, `activate_by_id` sets the tool, `wm.tool_set_by_id` cycles. The active tool's keymaps run before the mode's, in the order of `wm_event_get_keymap_from_toolsystem_ex`, including the fallback tool's keymap off the gizmo, with the tool's stored operator properties. Blender's keyconfig loads with the preference defaults of `Blender.py` (left click select, fallback tool on).
+- Tool icons are Blender's `.dat` triangle files, converted to SVG by `tools/blender-ui/tool_icons.py`.
+- The toolbar (`editors/space_view3d/view3d-toolbar.js`) records `draw_cls`'s layout calls and draws Blender's one icon column: groups open their flyout on a 0.2 s hold or a drag, the region snaps to Blender's widths.
+- The Transform panel is C (`view3d_buttons.cc`). It is ported as the layout calls it makes (`view3d-buttons.js`), not built to WASM: it only reads and writes RNA, so the layout calls are the whole of it.
+- Panels and headers draw through `editors/space_view3d/region-layout.js` and `.css`, an interim renderer used only by `view3d-regions.js`. It is to be replaced by the shared layout renderer (Properties editor), with no other caller to change.
+- Transform orientation slots are stored per scene but no transform reads them yet.
+- Select Box, Circle and Lasso share `do_mesh_region_select` (`view3d-select.js`) in Edit Mode; in Object Mode box select tests vertices and circle and lasso the object origin, as Blender does. The gestures are `windowmanager/wm-gesture-*.js` with Blender's modal maps.
 
 ## Node editors
 

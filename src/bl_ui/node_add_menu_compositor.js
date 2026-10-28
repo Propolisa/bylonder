@@ -11,7 +11,7 @@ export var NODE_MT_compositor_node_input_base =  __class__ ('NODE_MT_compositor_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -51,7 +51,7 @@ export var NODE_MT_compositor_node_input_constant_base =  __class__ ('NODE_MT_co
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -86,7 +86,7 @@ export var NODE_MT_compositor_node_input_scene_base =  __class__ ('NODE_MT_compo
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -116,7 +116,7 @@ export var NODE_MT_compositor_node_output_base =  __class__ ('NODE_MT_compositor
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -146,7 +146,7 @@ export var NODE_MT_compositor_node_color_base =  __class__ ('NODE_MT_compositor_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -188,7 +188,7 @@ export var NODE_MT_compositor_node_color_adjust_base =  __class__ ('NODE_MT_comp
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -219,7 +219,7 @@ export var NODE_MT_compositor_node_filter_base =  __class__ ('NODE_MT_compositor
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -255,7 +255,7 @@ export var NODE_MT_compositor_node_filter_blur_base =  __class__ ('NODE_MT_compo
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -283,7 +283,7 @@ export var NODE_MT_compositor_node_keying_base =  __class__ ('NODE_MT_compositor
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -314,7 +314,7 @@ export var NODE_MT_compositor_node_mask_base =  __class__ ('NODE_MT_compositor_n
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -345,7 +345,7 @@ export var NODE_MT_compositor_node_tracking_base =  __class__ ('NODE_MT_composit
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -370,7 +370,7 @@ export var NODE_MT_compositor_node_transform_base =  __class__ ('NODE_MT_composi
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -406,7 +406,7 @@ export var NODE_MT_compositor_node_texture_base =  __class__ ('NODE_MT_composito
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -437,7 +437,7 @@ export var NODE_MT_compositor_node_utilities_base =  __class__ ('NODE_MT_composi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -449,6 +449,7 @@ export var NODE_MT_compositor_node_utilities_base =  __class__ ('NODE_MT_composi
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
 		self.draw_menu (layout, __kwargtrans__ ({path: 'Utilities/Math'}));
 		self.draw_menu (layout, __kwargtrans__ ({path: 'Utilities/Vector'}));
@@ -477,7 +478,7 @@ export var NODE_MT_compositor_node_vector_base =  __class__ ('NODE_MT_compositor
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -515,7 +516,7 @@ export var NODE_MT_compositor_node_math_base =  __class__ ('NODE_MT_compositor_n
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -543,7 +544,7 @@ export var NODE_MT_compositor_node_text_base =  __class__ ('NODE_MT_compositor_n
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -580,7 +581,7 @@ export var NODE_MT_compositor_utilities_matrix_base =  __class__ ('NODE_MT_compo
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -612,7 +613,7 @@ export var NODE_MT_compositor_node_rotation_base =  __class__ ('NODE_MT_composit
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -649,7 +650,7 @@ export var NODE_MT_compositor_node_creative_base =  __class__ ('NODE_MT_composit
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -676,7 +677,7 @@ export var NODE_MT_compositor_node_all_base =  __class__ ('NODE_MT_compositor_no
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -688,6 +689,7 @@ export var NODE_MT_compositor_node_all_base =  __class__ ('NODE_MT_compositor_no
 		}
 		else {
 		}
+		// pass;
 		var layout = self.layout;
 		self.draw_menu (layout, 'Input');
 		self.draw_menu (layout, 'Output');
@@ -713,5 +715,6 @@ export var NODE_MT_compositor_node_all_base =  __class__ ('NODE_MT_compositor_no
 });
 export var add_menus = dict ({'NODE_MT_category_compositor_input': NODE_MT_compositor_node_input_base, 'NODE_MT_category_compositor_input_constant': NODE_MT_compositor_node_input_constant_base, 'NODE_MT_category_compositor_input_scene': NODE_MT_compositor_node_input_scene_base, 'NODE_MT_category_compositor_output': NODE_MT_compositor_node_output_base, 'NODE_MT_category_compositor_color': NODE_MT_compositor_node_color_base, 'NODE_MT_category_compositor_color_adjust': NODE_MT_compositor_node_color_adjust_base, 'NODE_MT_category_compositor_filter': NODE_MT_compositor_node_filter_base, 'NODE_MT_category_compositor_filter_blur': NODE_MT_compositor_node_filter_blur_base, 'NODE_MT_category_compositor_creative': NODE_MT_compositor_node_creative_base, 'NODE_MT_category_compositor_texture': NODE_MT_compositor_node_texture_base, 'NODE_MT_category_compositor_keying': NODE_MT_compositor_node_keying_base, 'NODE_MT_category_compositor_mask': NODE_MT_compositor_node_mask_base, 'NODE_MT_category_compositor_tracking': NODE_MT_compositor_node_tracking_base, 'NODE_MT_category_compositor_transform': NODE_MT_compositor_node_transform_base, 'NODE_MT_category_compositor_utilities': NODE_MT_compositor_node_utilities_base, 'NODE_MT_category_compositor_vector': NODE_MT_compositor_node_vector_base, 'NODE_MT_category_compositor_math': NODE_MT_compositor_node_math_base, 'NODE_MT_category_compositor_text': NODE_MT_compositor_node_text_base, 'NODE_MT_category_compositor_matrix': NODE_MT_compositor_utilities_matrix_base, 'NODE_MT_category_compositor_rotation': NODE_MT_compositor_node_rotation_base, 'NODE_MT_compositor_node_add_all': NODE_MT_compositor_node_all_base});
 var add_menus = node_add_menu.generate_menus (add_menus, __kwargtrans__ ({template: node_add_menu.AddNodeMenu, base_dict: node_add_menu.add_base_pathing_dict}));
+export var _classes_in_order = ['NODE_MT_compositor_node_input_base', 'NODE_MT_compositor_node_input_constant_base', 'NODE_MT_compositor_node_input_scene_base', 'NODE_MT_compositor_node_output_base', 'NODE_MT_compositor_node_color_base', 'NODE_MT_compositor_node_color_adjust_base', 'NODE_MT_compositor_node_filter_base', 'NODE_MT_compositor_node_filter_blur_base', 'NODE_MT_compositor_node_keying_base', 'NODE_MT_compositor_node_mask_base', 'NODE_MT_compositor_node_tracking_base', 'NODE_MT_compositor_node_transform_base', 'NODE_MT_compositor_node_texture_base', 'NODE_MT_compositor_node_utilities_base', 'NODE_MT_compositor_node_vector_base', 'NODE_MT_compositor_node_math_base', 'NODE_MT_compositor_node_text_base', 'NODE_MT_compositor_utilities_matrix_base', 'NODE_MT_compositor_node_rotation_base', 'NODE_MT_compositor_node_creative_base', 'NODE_MT_compositor_node_all_base'];
 
 //# sourceMappingURL=node_add_menu_compositor.map

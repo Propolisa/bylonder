@@ -3,18 +3,127 @@ var bpy = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {operator_context} from './_bl_ui_utils.layout.js';
 import {pi} from './math.js';
+import {ToolSelectPanelHelper} from './space_toolsystem_common.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt_} from './bpy.app.translations.js';
-import {Menu} from './bpy.types.js';
+import {ToolActivePanelHelper} from './space_toolsystem_common.js';
+import {Header, Menu, Panel} from './bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 var __name__ = '__main__';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	for (var d of dicts) {
+		result.py_update (d);
+	}
+	return result;
+};
+export var _ellipsis = Symbol ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (conversion == 'r') {
+		var value = repr (value);
+	}
+	else if (conversion == 's') {
+		var value = str (value);
+	}
+	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	for (var py_items of lists) {
+		result.extend (list (py_items));
+	}
+	return result;
+};
 export var _toggle_xray_operator = function (layout, context, text) {
 	if (typeof text == 'undefined' || (text != null && text.hasOwnProperty ("__kwargtrans__"))) {;
 		var text = null;
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -42,13 +151,1109 @@ export var _toggle_xray_operator = function (layout, context, text) {
 	}
 	layout.operator ('view3d.toggle_xray', __kwargtrans__ ({text: text, icon: 'XRAY', depress: draw_depressed}));
 };
+export var VIEW3D_HT_tool_header =  __class__ ('VIEW3D_HT_tool_header', [Header], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'TOOL_HEADER',
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		self.draw_tool_settings (context);
+		layout.separator_spacer ();
+		self.draw_mode_settings (context);
+	});},
+	get draw_tool_settings () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var tool_mode = context.mode;
+		var tool = ToolSelectPanelHelper.draw_active_tool_header (context, layout, __kwargtrans__ ({tool_key: tuple (['VIEW_3D', tool_mode])}));
+		var draw_fn = getattr (_draw_tool_settings_context_mode, tool_mode, null);
+		if (draw_fn !== null) {
+			var is_valid_context = draw_fn (context, layout, tool);
+		}
+		var draw_3d_brush_settings = function (layout, tool_mode) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+							case 'tool_mode': var tool_mode = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			layout.popover ('VIEW3D_PT_tools_brush_settings_advanced', __kwargtrans__ ({text: 'Brush'}));
+			if (tool_mode != 'PAINT_WEIGHT') {
+				layout.popover ('VIEW3D_PT_tools_brush_texture');
+			}
+			if (tool_mode == 'PAINT_TEXTURE') {
+				layout.popover ('VIEW3D_PT_tools_mask_texture');
+			}
+			layout.popover ('VIEW3D_PT_tools_brush_stroke');
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+			layout.popover ('VIEW3D_PT_tools_brush_display');
+		};
+		if (tool_mode == 'SCULPT') {
+			if (is_valid_context) {
+				draw_3d_brush_settings (layout, tool_mode);
+			}
+		}
+		else if (tool_mode == 'PAINT_VERTEX') {
+			if (is_valid_context) {
+				draw_3d_brush_settings (layout, tool_mode);
+			}
+		}
+		else if (tool_mode == 'PAINT_WEIGHT') {
+			if (is_valid_context) {
+				draw_3d_brush_settings (layout, tool_mode);
+			}
+		}
+		else if (tool_mode == 'PAINT_TEXTURE') {
+			if (is_valid_context) {
+				draw_3d_brush_settings (layout, tool_mode);
+			}
+		}
+		else if (tool_mode == 'EDIT_ARMATURE') {
+			// pass;
+		}
+		else if (tool_mode == 'EDIT_CURVE') {
+			// pass;
+		}
+		else if (tool_mode == 'EDIT_MESH') {
+			// pass;
+		}
+		else if (tool_mode == 'POSE') {
+			// pass;
+		}
+		else if (tool_mode == 'PARTICLE') {
+			// pass;
+		}
+		else if (tool_mode == 'PAINT_GREASE_PENCIL') {
+			if (is_valid_context) {
+				var brush = context.tool_settings.gpencil_paint.brush;
+				if (brush) {
+					if (!__in__ (brush.gpencil_brush_type, new set (['FILL', 'TINT', 'ERASE']))) {
+						layout.popover ('VIEW3D_PT_tools_grease_pencil_v3_brush_advanced');
+						layout.popover ('VIEW3D_PT_tools_grease_pencil_v3_brush_stroke');
+					}
+					if (brush.gpencil_brush_type == 'FILL') {
+						layout.popover ('VIEW3D_PT_tools_grease_pencil_v3_brush_fill_advanced');
+					}
+					layout.popover ('VIEW3D_PT_tools_grease_pencil_paint_appearance');
+				}
+			}
+		}
+		else if (tool_mode == 'SCULPT_GREASE_PENCIL') {
+			if (is_valid_context) {
+				var brush = context.tool_settings.gpencil_sculpt_paint.brush;
+				if (brush) {
+					var tool = brush.gpencil_sculpt_brush_type;
+					if (__in__ (tool, new set (['SMOOTH', 'RANDOMIZE']))) {
+						layout.popover ('VIEW3D_PT_tools_grease_pencil_sculpt_brush_popover');
+					}
+					layout.popover ('VIEW3D_PT_tools_grease_pencil_sculpt_appearance');
+				}
+			}
+		}
+		else if (__in__ (tool_mode, new set (['WEIGHT_GPENCIL', 'WEIGHT_GREASE_PENCIL']))) {
+			if (is_valid_context) {
+				layout.popover ('VIEW3D_PT_tools_grease_pencil_weight_appearance');
+			}
+		}
+		else if (__in__ (tool_mode, new set (['VERTEX_GPENCIL', 'VERTEX_GREASE_PENCIL']))) {
+			if (is_valid_context) {
+				layout.popover ('VIEW3D_PT_tools_grease_pencil_vertex_appearance');
+			}
+		}
+	});},
+	get draw_mode_settings () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var mode_string = context.mode;
+		var tool_settings = context.tool_settings;
+		var row_for_mirror = function () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.label (__kwargtrans__ ({icon: 'MOD_MIRROR'}));
+			var sub = row.row (__kwargtrans__ ({align: true}));
+			sub.scale_x = 0.6;
+			return tuple ([row, sub]);
+		};
+		if (mode_string == 'EDIT_ARMATURE') {
+			var ob = context.object;
+			var __left0__ = row_for_mirror ();
+			var _row = __left0__ [0];
+			var sub = __left0__ [1];
+			sub.prop (ob.data, 'use_mirror_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}
+		else if (mode_string == 'POSE') {
+			var ob = context.object;
+			var __left0__ = row_for_mirror ();
+			var _row = __left0__ [0];
+			var sub = __left0__ [1];
+			sub.prop (ob.pose, 'use_mirror_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}
+		else if (__in__ (mode_string, new set (['EDIT_MESH', 'PAINT_WEIGHT', 'SCULPT', 'PAINT_VERTEX', 'PAINT_TEXTURE']))) {
+			var ob = context.object;
+			var __left0__ = row_for_mirror ();
+			var row = __left0__ [0];
+			var sub = __left0__ [1];
+			sub.prop (ob, 'use_mesh_mirror_x', __kwargtrans__ ({text: 'X', toggle: true}));
+			sub.prop (ob, 'use_mesh_mirror_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+			sub.prop (ob, 'use_mesh_mirror_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+			if (mode_string == 'EDIT_MESH') {
+				layout.prop (tool_settings, 'use_mesh_automerge', __kwargtrans__ ({text: ''}));
+			}
+			else if (mode_string == 'PAINT_WEIGHT') {
+				row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_tools_weightpaint_symmetry_for_topbar', text: ''}));
+			}
+			else if (mode_string == 'SCULPT') {
+				row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_sculpt_symmetry_for_topbar', text: ''}));
+			}
+			else if (mode_string == 'PAINT_VERTEX') {
+				row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_tools_vertexpaint_symmetry_for_topbar', text: ''}));
+			}
+		}
+		else if (mode_string == 'SCULPT_CURVES') {
+			var ob = context.object;
+			var __left0__ = row_for_mirror ();
+			var _row = __left0__ [0];
+			var sub = __left0__ [1];
+			sub.prop (ob.data, 'use_mirror_x', __kwargtrans__ ({text: 'X', toggle: true}));
+			sub.prop (ob.data, 'use_mirror_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+			sub.prop (ob.data, 'use_mirror_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.prop (ob.data, 'use_sculpt_collision', __kwargtrans__ ({icon: 'MOD_PHYSICS', icon_only: true, toggle: true}));
+			var sub = row.row (__kwargtrans__ ({align: true}));
+			sub.active = ob.data.use_sculpt_collision;
+			sub.prop (ob.data, 'surface_collision_distance');
+		}
+		var popover_kw = dict ({'space_type': 'VIEW_3D', 'region_type': 'UI', 'category': 'Tool'});
+		if (mode_string == 'SCULPT') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.sculpt_mode'}), popover_kw)));
+		}
+		else if (mode_string == 'PAINT_VERTEX') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.vertexpaint'}), popover_kw)));
+		}
+		else if (mode_string == 'PAINT_WEIGHT') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.weightpaint'}), popover_kw)));
+		}
+		else if (mode_string == 'PAINT_TEXTURE') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.imagepaint'}), popover_kw)));
+		}
+		else if (mode_string == 'EDIT_TEXT') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.text_edit'}), popover_kw)));
+		}
+		else if (mode_string == 'EDIT_ARMATURE') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.armature_edit'}), popover_kw)));
+		}
+		else if (mode_string == 'EDIT_METABALL') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.mball_edit'}), popover_kw)));
+		}
+		else if (mode_string == 'EDIT_LATTICE') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.lattice_edit'}), popover_kw)));
+		}
+		else if (mode_string == 'EDIT_CURVE') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.curve_edit'}), popover_kw)));
+		}
+		else if (mode_string == 'EDIT_MESH') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.mesh_edit'}), popover_kw)));
+		}
+		else if (mode_string == 'POSE') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.posemode'}), popover_kw)));
+		}
+		else if (mode_string == 'PARTICLE') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.particlemode'}), popover_kw)));
+		}
+		else if (mode_string == 'OBJECT') {
+			layout.popover_group (__kwargtrans__ (_merged (dict ({'context': '.objectmode'}), popover_kw)));
+		}
+		if (__in__ (mode_string, new set (['EDIT_GREASE_PENCIL', 'PAINT_GREASE_PENCIL', 'SCULPT_GREASE_PENCIL', 'WEIGHT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL']))) {
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.prop (tool_settings, 'use_grease_pencil_multi_frame_editing', __kwargtrans__ ({text: ''}));
+			if (__in__ (mode_string, new set (['EDIT_GREASE_PENCIL', 'SCULPT_GREASE_PENCIL', 'WEIGHT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL']))) {
+				var sub = row.row (__kwargtrans__ ({align: true}));
+				sub.active = tool_settings.use_grease_pencil_multi_frame_editing;
+				sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_grease_pencil_multi_frame', text: 'Multiframe'}));
+			}
+		}
+		if (mode_string == 'PAINT_GREASE_PENCIL') {
+			layout.prop (tool_settings, 'use_gpencil_draw_additive', __kwargtrans__ ({text: '', icon: 'FREEZE'}));
+			layout.prop (tool_settings, 'use_gpencil_automerge_strokes', __kwargtrans__ ({text: ''}));
+			layout.prop (tool_settings, 'use_gpencil_weight_data_add', __kwargtrans__ ({text: '', icon: 'WPAINT_HLT'}));
+			layout.prop (tool_settings, 'use_gpencil_draw_onback', __kwargtrans__ ({text: '', icon: 'MOD_OPACITY'}));
+		}
+	});}
+});
+export var _draw_tool_settings_context_mode =  __class__ ('_draw_tool_settings_context_mode', [object], {
+	__module__: __name__,
+	get SCULPT () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var paint = context.tool_settings.sculpt;
+		var brush = paint.brush;
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		if (brush === null) {
+			return false;
+		}
+		var capabilities = brush.sculpt_capabilities;
+		var ups = paint.unified_paint_settings;
+		if (capabilities.has_color) {
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.ui_units_x = 4;
+			UnifiedPaintPanel.prop_unified_color (row, context, brush, 'color', __kwargtrans__ ({text: ''}));
+			UnifiedPaintPanel.prop_unified_color (row, context, brush, 'secondary_color', __kwargtrans__ ({text: ''}));
+			row.separator ();
+			layout.prop (brush, 'blend', __kwargtrans__ ({text: '', expand: false}));
+		}
+		var size = 'size';
+		var size_owner = (ups.use_unified_size ? ups : brush);
+		if (size_owner.use_locked_size == 'SCENE') {
+			var size = 'unprojected_size';
+		}
+		UnifiedPaintPanel.prop_unified (layout, context, brush, size, __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', text: 'Size', slider: true, header: true}));
+		var pressure_name = (capabilities.has_strength_pressure ? 'use_pressure_strength' : null);
+		UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: pressure_name, unified_name: 'use_unified_strength', text: 'Strength', header: true}));
+		if (capabilities.has_direction) {
+			layout.row ().prop (brush, 'direction', __kwargtrans__ ({expand: true, text: ''}));
+		}
+		return true;
+	};},
+	get PAINT_TEXTURE () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var paint = context.tool_settings.image_paint;
+		var brush = paint.brush;
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		if (brush === null) {
+			return false;
+		}
+		brush_basic_texpaint_settings (layout, context, brush, __kwargtrans__ ({compact: true}));
+		return true;
+	};},
+	get PAINT_VERTEX () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var paint = context.tool_settings.vertex_paint;
+		var brush = paint.brush;
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		if (brush === null) {
+			return false;
+		}
+		brush_basic_texpaint_settings (layout, context, brush, __kwargtrans__ ({compact: true}));
+		return true;
+	};},
+	get PAINT_WEIGHT () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var paint = context.tool_settings.weight_paint;
+		var brush = paint.brush;
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		if (brush === null) {
+			return false;
+		}
+		var capabilities = brush.weight_paint_capabilities;
+		if (capabilities.has_weight) {
+			UnifiedPaintPanel.prop_unified (layout, context, brush, 'weight', __kwargtrans__ ({unified_name: 'use_unified_weight', slider: true, header: true}));
+		}
+		UnifiedPaintPanel.prop_unified (layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', slider: true, text: 'Size', header: true}));
+		UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: 'use_pressure_strength', unified_name: 'use_unified_strength', header: true}));
+		return true;
+	};},
+	get SCULPT_GREASE_PENCIL () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var paint = context.tool_settings.gpencil_sculpt_paint;
+		var brush = paint.brush;
+		if (brush === null) {
+			return false;
+		}
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		var capabilities = brush.sculpt_capabilities;
+		var ups = paint.unified_paint_settings;
+		var size = 'size';
+		var size_owner = (ups.use_unified_size ? ups : brush);
+		if (size_owner.use_locked_size == 'SCENE') {
+			var size = 'unprojected_size';
+		}
+		UnifiedPaintPanel.prop_unified (layout, context, brush, size, __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', text: 'Size', slider: true, header: true}));
+		var pressure_name = (capabilities.has_strength_pressure ? 'use_pressure_strength' : null);
+		UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: pressure_name, unified_name: 'use_unified_strength', text: 'Strength', header: true}));
+		if (__in__ (brush.gpencil_sculpt_brush_type, new set (['THICKNESS', 'STRENGTH', 'PINCH', 'TWIST']))) {
+			layout.row ().prop (brush, 'direction', __kwargtrans__ ({expand: true, text: ''}));
+		}
+		layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		return true;
+	};},
+	get WEIGHT_GREASE_PENCIL () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var paint = context.tool_settings.gpencil_weight_paint;
+		var brush = paint.brush;
+		if (brush === null) {
+			return false;
+		}
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		brush_basic_grease_pencil_weight_settings (layout, context, brush, __kwargtrans__ ({compact: true}));
+		layout.popover ('VIEW3D_PT_tools_grease_pencil_weight_options', __kwargtrans__ ({text: 'Options'}));
+		layout.popover ('VIEW3D_PT_tools_grease_pencil_brush_weight_falloff', __kwargtrans__ ({text: 'Falloff'}));
+		return true;
+	};},
+	get VERTEX_GREASE_PENCIL () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var tool_settings = context.tool_settings;
+		var paint = tool_settings.gpencil_vertex_paint;
+		var brush = paint.brush;
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		if (!__in__ (brush.gpencil_vertex_brush_type, new set (['BLUR', 'AVERAGE', 'SMEAR']))) {
+			layout.separator (__kwargtrans__ ({factor: 0.4}));
+			var ups = paint.unified_paint_settings;
+			var prop_owner = (ups.use_unified_color ? ups : brush);
+			layout.prop_with_popover (prop_owner, 'color', __kwargtrans__ ({text: '', panel: 'TOPBAR_PT_grease_pencil_vertex_color'}));
+		}
+		brush_basic_grease_pencil_vertex_settings (layout, context, brush, __kwargtrans__ ({compact: true}));
+		return true;
+	};},
+	get PARTICLE () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var tool_settings = context.tool_settings;
+		var settings = tool_settings.particle_edit;
+		var brush = settings.brush;
+		var tool = settings.tool;
+		if (tool == 'NONE') {
+			return false;
+		}
+		layout.prop (brush, 'size', __kwargtrans__ ({slider: true}));
+		if (tool == 'ADD') {
+			layout.prop (brush, 'count');
+			layout.prop (settings, 'use_default_interpolate');
+			layout.prop (brush, 'steps', __kwargtrans__ ({slider: true}));
+			layout.prop (settings, 'default_key_count', __kwargtrans__ ({slider: true}));
+		}
+		else {
+			layout.prop (brush, 'strength', __kwargtrans__ ({slider: true}));
+			if (tool == 'LENGTH') {
+				layout.row ().prop (brush, 'length_mode', __kwargtrans__ ({expand: true}));
+			}
+			else if (tool == 'PUFF') {
+				layout.row ().prop (brush, 'puff_mode', __kwargtrans__ ({expand: true}));
+				layout.prop (brush, 'use_puff_volume');
+			}
+			else if (tool == 'COMB') {
+				var row = layout.row ();
+				row.active = settings.is_editable;
+				row.prop (settings, 'use_emitter_deflect', __kwargtrans__ ({text: 'Deflect Emitter'}));
+				var sub = row.row (__kwargtrans__ ({align: true}));
+				sub.active = settings.use_emitter_deflect;
+				sub.prop (settings, 'emitter_distance', __kwargtrans__ ({text: 'Distance'}));
+			}
+		}
+		return true;
+	};},
+	get SCULPT_CURVES () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		var tool_settings = context.tool_settings;
+		var paint = tool_settings.curves_sculpt;
+		var brush = paint.brush;
+		BrushAssetShelf.draw_popup_selector (layout, context, brush);
+		if (brush === null) {
+			return false;
+		}
+		UnifiedPaintPanel.prop_unified (layout, context, brush, 'size', __kwargtrans__ ({unified_name: 'use_unified_size', pressure_name: 'use_pressure_size', text: 'Size', slider: true, header: true}));
+		if (!__in__ (brush.curves_sculpt_brush_type, new set (['ADD', 'DELETE']))) {
+			var use_strength_pressure = !__in__ (brush.curves_sculpt_brush_type, new set (['SLIDE']));
+			UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({unified_name: 'use_unified_strength', pressure_name: (use_strength_pressure ? 'use_pressure_strength' : null), header: true}));
+		}
+		var curves_tool = brush.curves_sculpt_brush_type;
+		if (curves_tool == 'COMB') {
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff', __kwargtrans__ ({text: 'Brush Falloff'}));
+			layout.popover ('VIEW3D_PT_curves_sculpt_parameter_falloff', __kwargtrans__ ({text: 'Curve Falloff'}));
+		}
+		else if (curves_tool == 'ADD') {
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.prop (brush.curves_sculpt_settings, 'add_amount');
+			layout.popover ('VIEW3D_PT_curves_sculpt_add_shape', __kwargtrans__ ({text: 'Curve Shape'}));
+			layout.prop (brush, 'use_frontface', __kwargtrans__ ({text: 'Front Faces Only'}));
+		}
+		else if (curves_tool == 'GROW_SHRINK') {
+			layout.prop (brush, 'direction', __kwargtrans__ ({expand: true, text: ''}));
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.popover ('VIEW3D_PT_curves_sculpt_grow_shrink_scaling', __kwargtrans__ ({text: 'Scaling'}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		}
+		else if (curves_tool == 'SNAKE_HOOK') {
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		}
+		else if (curves_tool == 'DELETE') {
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+		}
+		else if (curves_tool == 'SELECTION_PAINT') {
+			layout.prop (brush, 'direction', __kwargtrans__ ({expand: true, text: ''}));
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		}
+		else if (curves_tool == 'PINCH') {
+			layout.prop (brush, 'direction', __kwargtrans__ ({expand: true, text: ''}));
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		}
+		else if (curves_tool == 'SMOOTH') {
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		}
+		else if (curves_tool == 'PUFF') {
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		}
+		else if (curves_tool == 'DENSITY') {
+			layout.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.prop (brush.curves_sculpt_settings, 'density_mode', __kwargtrans__ ({text: '', expand: true}));
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.prop (brush.curves_sculpt_settings, 'minimum_distance', __kwargtrans__ ({text: 'Distance Min'}));
+			row.operator_context = 'INVOKE_REGION_WIN';
+			row.operator ('sculpt_curves.min_distance_edit', __kwargtrans__ ({text: '', icon: 'DRIVER_DISTANCE'}));
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.enabled = brush.curves_sculpt_settings.density_mode != 'REMOVE';
+			row.prop (brush.curves_sculpt_settings, 'density_add_attempts', __kwargtrans__ ({text: 'Count Max'}));
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+			layout.popover ('VIEW3D_PT_curves_sculpt_add_shape', __kwargtrans__ ({text: 'Curve Shape'}));
+		}
+		else if (curves_tool == 'SLIDE') {
+			layout.popover ('VIEW3D_PT_tools_brush_falloff');
+		}
+		return true;
+	};},
+	get PAINT_GREASE_PENCIL () {return function (context, layout, tool) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (tool === null || !(tool.use_brushes)) {
+			return false;
+		}
+		if (__in__ (tool.idname, new set (['builtin.arc', 'builtin.curve', 'builtin.line', 'builtin.box', 'builtin.circle', 'builtin.polyline']))) {
+			return false;
+		}
+		var tool_settings = context.tool_settings;
+		var paint = tool_settings.gpencil_paint;
+		var brush = paint.brush;
+		if (brush === null) {
+			return false;
+		}
+		var row = layout.row (__kwargtrans__ ({align: true}));
+		BrushAssetShelf.draw_popup_selector (row, context, brush);
+		var grease_pencil_tool = brush.gpencil_brush_type;
+		if (__in__ (grease_pencil_tool, new set (['DRAW', 'FILL']))) {
+			brush_basic__draw_color_selector (context, layout, brush, brush.gpencil_settings);
+		}
+		if (grease_pencil_tool == 'TINT') {
+			row.separator (__kwargtrans__ ({factor: 0.4}));
+			row.prop_with_popover (brush, 'color', __kwargtrans__ ({text: '', panel: 'TOPBAR_PT_grease_pencil_vertex_color'}));
+		}
+		brush_basic_grease_pencil_paint_settings (layout, context, brush, null, __kwargtrans__ ({compact: true}));
+		return true;
+	};}
+});
+export var draw_topbar_grease_pencil_layer_panel = function (context, layout) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var grease_pencil = context.object.data;
+	var layer = grease_pencil.layers.active;
+	var group = grease_pencil.layer_groups.active;
+	var icon = 'OUTLINER_DATA_GP_LAYER';
+	var node_name = null;
+	if (layer || group) {
+		var icon = (layer ? 'OUTLINER_DATA_GP_LAYER' : 'GREASEPENCIL_LAYER_GROUP');
+		var node_name = (layer ? layer.py_name : group.py_name);
+		var max_width = 25;
+		if (len (node_name) > max_width) {
+			var node_name = (node_name.__getslice__ (null, max_width - 5, 1) + '..') + node_name.__getslice__ (-(3), null, 1);
+		}
+	}
+	var sub = layout.row ();
+	sub.popover (__kwargtrans__ ({panel: 'TOPBAR_PT_grease_pencil_layers', text: node_name, icon: icon}));
+};
+export var VIEW3D_HT_header =  __class__ ('VIEW3D_HT_header', [Header], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	get draw_xform_template () {return function (layout, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var obj = context.active_object;
+		var object_mode = (obj === null ? 'OBJECT' : obj.mode);
+		var has_pose_mode = object_mode == 'POSE' || object_mode == 'WEIGHT_PAINT' && context.pose_object !== null;
+		var tool_settings = context.tool_settings;
+		var scene = context.scene;
+		if (has_pose_mode || __in__ (object_mode, new set (['OBJECT', 'EDIT', 'EDIT_GPENCIL']))) {
+			var orient_slot = scene.transform_orientation_slots [0];
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			var sub = row.row ();
+			sub.prop_with_popover (orient_slot, 'type', __kwargtrans__ ({text: '', panel: 'VIEW3D_PT_transform_orientations'}));
+		}
+		if (has_pose_mode || __in__ (object_mode, new set (['OBJECT', 'EDIT', 'EDIT_GPENCIL', 'SCULPT_GREASE_PENCIL']))) {
+			layout.prop (tool_settings, 'transform_pivot_point', __kwargtrans__ ({text: '', icon_only: true}));
+		}
+		var show_snap = false;
+		if (obj === null) {
+			var show_snap = true;
+		}
+		else if (has_pose_mode || !__in__ (object_mode, new set (['SCULPT', 'SCULPT_CURVES', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT', 'PAINT_GREASE_PENCIL', 'SCULPT_GREASE_PENCIL', 'WEIGHT_GREASE_PENCIL', 'VERTEX_GREASE_PENCIL']))) {
+			var show_snap = true;
+		}
+		else {
+			var paint_settings = UnifiedPaintPanel.paint_settings (context);
+			if (paint_settings) {
+				var brush = paint_settings.brush;
+				if (brush && hasattr (brush, 'stroke_method') && brush.stroke_method == 'CURVE') {
+					var show_snap = true;
+				}
+			}
+		}
+		if (show_snap) {
+			var snap_items = bpy.types.ToolSettings.bl_rna.properties ['snap_elements'].enum_items;
+			var snap_elements = tool_settings.snap_elements;
+			if (len (snap_elements) == 1) {
+				var text = '';
+				for (var elem of snap_elements) {
+					var icon = snap_items [elem].icon;
+					break;
+				}
+			}
+			else {
+				var text = iface_ ('Mix', i18n_contexts.editor_view3d);
+				var icon = 'NONE';
+			}
+			// pass;
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			row.prop (tool_settings, 'use_snap', __kwargtrans__ ({text: ''}));
+			var sub = row.row (__kwargtrans__ ({align: true}));
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_snapping', icon: icon, text: text, translate: false}));
+		}
+		if (__in__ (object_mode, new set (['EDIT', 'PARTICLE_EDIT', 'SCULPT_GREASE_PENCIL', 'EDIT_GPENCIL', 'OBJECT'])) && context.mode != 'EDIT_ARMATURE') {
+			var row = layout.row (__kwargtrans__ ({align: true}));
+			var kw = dict ({});
+			if (object_mode == 'OBJECT') {
+				var attr = 'use_proportional_edit_objects';
+			}
+			else {
+				var attr = 'use_proportional_edit';
+				if (tool_settings.use_proportional_edit) {
+					if (tool_settings.use_proportional_connected) {
+						kw ['icon'] = 'PROP_CON';
+					}
+					else if (tool_settings.use_proportional_projected) {
+						kw ['icon'] = 'PROP_PROJECTED';
+					}
+					else {
+						kw ['icon'] = 'PROP_ON';
+					}
+				}
+				else {
+					kw ['icon'] = 'PROP_OFF';
+				}
+			}
+			row.prop (tool_settings, attr, __kwargtrans__ (_merged (dict ({'icon_only': true}), kw)));
+			var sub = row.row (__kwargtrans__ ({align: true}));
+			sub.active = getattr (tool_settings, attr);
+			sub.prop_with_popover (tool_settings, 'proportional_edit_falloff', __kwargtrans__ ({text: '', icon_only: true, panel: 'VIEW3D_PT_proportional_edit'}));
+		}
+		if (object_mode == 'EDIT' && obj.py_metatype == 'GREASEPENCIL') {
+			draw_topbar_grease_pencil_layer_panel (context, layout);
+		}
+	};},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var tool_settings = context.tool_settings;
+		var view = context.space_data;
+		var shading = view.shading;
+		layout.row (__kwargtrans__ ({align: true})).template_header ();
+		var row = layout.row (__kwargtrans__ ({align: true}));
+		var obj = context.active_object;
+		var mode_string = context.mode;
+		var object_mode = (obj === null ? 'OBJECT' : obj.mode);
+		var has_pose_mode = object_mode == 'POSE' || object_mode == 'WEIGHT_PAINT' && context.pose_object !== null;
+		var act_mode_item = bpy.types.Object.bl_rna.properties ['mode'].enum_items [object_mode];
+		var act_mode_i18n_context = bpy.types.Object.bl_rna.properties ['mode'].translation_context;
+		var sub = row.row (__kwargtrans__ ({align: true}));
+		sub.operator_menu_enum ('object.mode_set', 'mode', __kwargtrans__ ({text: iface_ (act_mode_item.py_name, act_mode_i18n_context), icon: act_mode_item.icon}));
+		// pass;
+		layout.template_header_3D_mode ();
+		if (obj) {
+			if (object_mode == 'PARTICLE_EDIT') {
+				var row = layout.row ();
+				row.prop (tool_settings.particle_edit, 'select_mode', __kwargtrans__ ({text: '', expand: true}));
+			}
+			else if (__in__ (object_mode, new set (['EDIT', 'SCULPT_CURVES'])) && obj.py_metatype == 'CURVES') {
+				var curves = obj.data;
+				var row = layout.row (__kwargtrans__ ({align: true}));
+				var domain = curves.selection_domain;
+				row.operator ('curves.set_selection_domain', __kwargtrans__ ({text: '', icon: 'CURVE_BEZCIRCLE', depress: domain == 'POINT'})).domain = 'POINT';
+				row.operator ('curves.set_selection_domain', __kwargtrans__ ({text: '', icon: 'CURVE_PATH', depress: domain == 'CURVE'})).domain = 'CURVE';
+			}
+		}
+		if (obj && obj.py_metatype == 'GREASEPENCIL') {
+			if (object_mode == 'EDIT') {
+				var row = layout.row (__kwargtrans__ ({align: true}));
+				row.operator ('grease_pencil.set_selection_mode', __kwargtrans__ ({text: '', icon: 'GP_SELECT_POINTS', depress: tool_settings.gpencil_selectmode_edit == 'POINT'})).mode = 'POINT';
+				row.operator ('grease_pencil.set_selection_mode', __kwargtrans__ ({text: '', icon: 'GP_SELECT_STROKES', depress: tool_settings.gpencil_selectmode_edit == 'STROKE'})).mode = 'STROKE';
+				row.operator ('grease_pencil.set_selection_mode', __kwargtrans__ ({text: '', icon: 'GP_SELECT_BETWEEN_STROKES', depress: tool_settings.gpencil_selectmode_edit == 'SEGMENT'})).mode = 'SEGMENT';
+			}
+			if (object_mode == 'SCULPT_GREASE_PENCIL') {
+				var row = layout.row (__kwargtrans__ ({align: true}));
+				row.prop (tool_settings, 'use_gpencil_select_mask_point', __kwargtrans__ ({text: ''}));
+				row.prop (tool_settings, 'use_gpencil_select_mask_stroke', __kwargtrans__ ({text: ''}));
+				row.prop (tool_settings, 'use_gpencil_select_mask_segment', __kwargtrans__ ({text: ''}));
+			}
+			if (object_mode == 'VERTEX_GREASE_PENCIL') {
+				var row = layout.row (__kwargtrans__ ({align: true}));
+				row.prop (tool_settings, 'use_gpencil_vertex_select_mask_point', __kwargtrans__ ({text: ''}));
+				row.prop (tool_settings, 'use_gpencil_vertex_select_mask_stroke', __kwargtrans__ ({text: ''}));
+				row.prop (tool_settings, 'use_gpencil_vertex_select_mask_segment', __kwargtrans__ ({text: ''}));
+			}
+		}
+		var overlay = view.overlay;
+		VIEW3D_MT_editor_menus.draw_collapsible (context, layout);
+		layout.separator_spacer ();
+		if (__in__ (object_mode, new set (['PAINT_GREASE_PENCIL', 'SCULPT_GREASE_PENCIL']))) {
+			if (object_mode == 'PAINT_GREASE_PENCIL') {
+				var sub = layout.row (__kwargtrans__ ({align: true}));
+				sub.prop_with_popover (tool_settings, 'gpencil_stroke_placement_view3d', __kwargtrans__ ({text: '', panel: 'VIEW3D_PT_grease_pencil_origin'}));
+			}
+			var sub = layout.row (__kwargtrans__ ({align: true}));
+			sub.active = tool_settings.gpencil_stroke_placement_view3d != 'SURFACE';
+			sub.prop_with_popover (tool_settings.gpencil_sculpt, 'lock_axis', __kwargtrans__ ({text: '', panel: 'VIEW3D_PT_grease_pencil_lock'}));
+			draw_topbar_grease_pencil_layer_panel (context, layout);
+			if (object_mode == 'PAINT_GREASE_PENCIL') {
+				var tool = context.workspace.tools.from_space_view3d_mode (object_mode);
+				if (tool && tool.idname == 'builtin_brush.Draw') {
+					var settings = tool_settings.gpencil_sculpt.guide;
+					var row = layout.row (__kwargtrans__ ({align: true}));
+					row.prop (settings, 'use_guide', __kwargtrans__ ({text: '', icon: 'GRID'}));
+					var sub = row.row (__kwargtrans__ ({align: true}));
+					sub.active = settings.use_guide;
+					sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_grease_pencil_guide', text: 'Guides'}));
+				}
+			}
+			if (object_mode == 'SCULPT_GREASE_PENCIL') {
+				layout.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_grease_pencil_sculpt_automasking', text: '', icon: VIEW3D_HT_header._grease_pencil_sculpt_automasking_icon (tool_settings.gpencil_sculpt)}));
+			}
+		}
+		else if (object_mode == 'SCULPT') {
+			var tool = ToolSelectPanelHelper.tool_active_from_context (context);
+			var is_paint_tool = false;
+			if (tool.use_brushes) {
+				var paint = tool_settings.sculpt;
+				var brush = paint.brush;
+				if (brush) {
+					var is_paint_tool = __in__ (brush.sculpt_brush_type, new set (['PAINT', 'SMEAR']));
+				}
+			}
+			else {
+				var is_paint_tool = tool && tool.use_paint_canvas;
+			}
+			var shading = VIEW3D_PT_shading.get_shading (context);
+			var color_type = shading.color_type;
+			var row = layout.row ();
+			row.active = is_paint_tool && color_type == 'VERTEX';
+			if (context.preferences.experimental.use_sculpt_texture_paint) {
+				var canvas_source = tool_settings.paint_mode.canvas_source;
+				var icon = (canvas_source == 'COLOR_ATTRIBUTE' ? 'GROUP_VCOL' : canvas_source);
+				row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_slots_paint_canvas', icon: icon}));
+				row.active = is_paint_tool;
+			}
+			else {
+				row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_slots_color_attributes', icon: 'GROUP_VCOL'}));
+			}
+			layout.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_sculpt_snapping', icon: 'SNAP_INCREMENT', text: '', translate: false}));
+			layout.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_sculpt_automasking', text: '', icon: VIEW3D_HT_header._mesh_paint_automasking_icon (tool_settings.sculpt)}));
+		}
+		else if (object_mode == 'VERTEX_PAINT') {
+			var row = layout.row ();
+			row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_slots_color_attributes', icon: 'GROUP_VCOL'}));
+		}
+		else if (object_mode == 'VERTEX_GREASE_PENCIL') {
+			draw_topbar_grease_pencil_layer_panel (context, layout);
+		}
+		else if (object_mode == 'WEIGHT_PAINT') {
+			var row = layout.row ();
+			row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_slots_vertex_groups', icon: 'GROUP_VERTEX'}));
+			layout.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_sculpt_snapping', icon: 'SNAP_INCREMENT', text: '', translate: false}));
+		}
+		else if (object_mode == 'WEIGHT_GREASE_PENCIL') {
+			var row = layout.row ();
+			row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_slots_vertex_groups', icon: 'GROUP_VERTEX'}));
+			draw_topbar_grease_pencil_layer_panel (context, row);
+		}
+		else if (object_mode == 'TEXTURE_PAINT') {
+			var tool_mode = tool_settings.image_paint.mode;
+			var icon = (tool_mode == 'MATERIAL' ? 'MATERIAL' : 'IMAGE_DATA');
+			var row = layout.row ();
+			row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_slots_projectpaint', icon: icon}));
+			row.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_mask', icon: VIEW3D_HT_header._texture_mask_icon (tool_settings.image_paint), text: ''}));
+		}
+		else {
+			VIEW3D_HT_header.draw_xform_template (layout, context);
+		}
+		layout.separator_spacer ();
+		layout.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_object_type_visibility', icon_value: view.icon_from_show_object_viewport, text: ''}));
+		var row = layout.row (__kwargtrans__ ({align: true}));
+		row.prop (view, 'show_gizmo', __kwargtrans__ ({text: '', toggle: true, icon: 'GIZMO'}));
+		var sub = row.row (__kwargtrans__ ({align: true}));
+		sub.active = view.show_gizmo;
+		sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_gizmo_display', text: ''}));
+		var row = layout.row (__kwargtrans__ ({align: true}));
+		row.prop (overlay, 'show_overlays', __kwargtrans__ ({icon: 'OVERLAY', text: ''}));
+		var sub = row.row (__kwargtrans__ ({align: true}));
+		sub.active = overlay.show_overlays;
+		sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay', text: ''}));
+		if (mode_string == 'EDIT_MESH') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_edit_mesh', text: '', icon: 'EDITMODE_HLT'}));
+		}
+		if (mode_string == 'EDIT_CURVE') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_edit_curve', text: '', icon: 'EDITMODE_HLT'}));
+		}
+		else if (mode_string == 'EDIT_CURVES') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_edit_curves', text: '', icon: 'EDITMODE_HLT'}));
+		}
+		else if (mode_string == 'SCULPT') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_sculpt', text: '', icon: 'SCULPTMODE_HLT'}));
+		}
+		else if (mode_string == 'SCULPT_CURVES') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_sculpt_curves', text: '', icon: 'SCULPTMODE_HLT'}));
+		}
+		else if (mode_string == 'PAINT_WEIGHT') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_weight_paint', text: '', icon: 'WPAINT_HLT'}));
+		}
+		else if (mode_string == 'PAINT_TEXTURE') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_texture_paint', text: '', icon: 'TPAINT_HLT'}));
+		}
+		else if (mode_string == 'PAINT_VERTEX') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_vertex_paint', text: '', icon: 'VPAINT_HLT'}));
+		}
+		else if (obj !== null && obj.py_metatype == 'GREASEPENCIL') {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_grease_pencil_options', text: '', icon: 'OUTLINER_DATA_GREASEPENCIL'}));
+		}
+		if (has_pose_mode || __in__ (object_mode, new set (['EDIT_ARMATURE', 'OBJECT'])) && VIEW3D_PT_overlay_bones.is_using_wireframe (context)) {
+			sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_overlay_bones', text: '', icon: 'POSE_HLT'}));
+		}
+		var row = layout.row ();
+		row.active = object_mode == 'EDIT' || __in__ (shading.py_metatype, new set (['WIREFRAME', 'SOLID']));
+		_toggle_xray_operator (row, context, __kwargtrans__ ({text: ''}));
+		var row = layout.row (__kwargtrans__ ({align: true}));
+		row.prop (shading, 'type', __kwargtrans__ ({text: '', expand: true}));
+		var sub = row.row (__kwargtrans__ ({align: true}));
+		sub.popover (__kwargtrans__ ({panel: 'VIEW3D_PT_shading', text: ''}));
+	});},
+	get _mesh_paint_automasking_icon () {return function (paint) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'paint': var paint = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var automask_enabled = paint.mesh_automasking_settings.use_automasking_topology || paint.mesh_automasking_settings.use_automasking_face_sets || paint.mesh_automasking_settings.use_automasking_boundary_edges || paint.mesh_automasking_settings.use_automasking_boundary_face_sets || paint.mesh_automasking_settings.use_automasking_cavity || paint.mesh_automasking_settings.use_automasking_cavity_inverted || paint.mesh_automasking_settings.use_automasking_start_normal || paint.mesh_automasking_settings.use_automasking_view_normal;
+		return (automask_enabled ? 'CLIPUV_DEHLT' : 'CLIPUV_HLT');
+	};},
+	get _grease_pencil_sculpt_automasking_icon () {return function (gpencil_sculpt) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'gpencil_sculpt': var gpencil_sculpt = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var automask_enabled = gpencil_sculpt.use_automasking_stroke || gpencil_sculpt.use_automasking_layer_stroke || gpencil_sculpt.use_automasking_material_stroke || gpencil_sculpt.use_automasking_material_active || gpencil_sculpt.use_automasking_layer_active;
+		return (automask_enabled ? 'CLIPUV_DEHLT' : 'CLIPUV_HLT');
+	};},
+	get _texture_mask_icon () {return function (ipaint) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'ipaint': var ipaint = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var mask_enabled = ipaint.use_stencil_layer || ipaint.use_cavity;
+		return (mask_enabled ? 'CLIPUV_DEHLT' : 'CLIPUV_HLT');
+	};}
+});
 export var VIEW3D_MT_editor_menus =  __class__ ('VIEW3D_MT_editor_menus', [Menu], {
 	__module__: __name__,
 	bl_label: '',
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -169,7 +1374,7 @@ export var ShowHideMenu =  __class__ ('ShowHideMenu', [object], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -194,7 +1399,7 @@ export var VIEW3D_MT_transform_base =  __class__ ('VIEW3D_MT_transform_base', [o
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -222,7 +1427,7 @@ export var VIEW3D_MT_transform =  __class__ ('VIEW3D_MT_transform', [VIEW3D_MT_t
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -263,7 +1468,7 @@ export var VIEW3D_MT_transform_object =  __class__ ('VIEW3D_MT_transform_object'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -293,7 +1498,7 @@ export var VIEW3D_MT_transform_armature =  __class__ ('VIEW3D_MT_transform_armat
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -339,7 +1544,7 @@ export var VIEW3D_MT_mirror =  __class__ ('VIEW3D_MT_mirror', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -373,7 +1578,7 @@ export var VIEW3D_MT_snap =  __class__ ('VIEW3D_MT_snap', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -403,7 +1608,7 @@ export var VIEW3D_MT_uv_map =  __class__ ('VIEW3D_MT_uv_map', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -435,7 +1640,7 @@ export var VIEW3D_MT_view =  __class__ ('VIEW3D_MT_view', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -495,7 +1700,7 @@ export var VIEW3D_MT_view_local =  __class__ ('VIEW3D_MT_view_local', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -518,7 +1723,7 @@ export var VIEW3D_MT_view_cameras =  __class__ ('VIEW3D_MT_view_cameras', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -542,7 +1747,7 @@ export var VIEW3D_MT_view_viewpoint =  __class__ ('VIEW3D_MT_view_viewpoint', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -573,7 +1778,7 @@ export var VIEW3D_MT_view_navigation =  __class__ ('VIEW3D_MT_view_navigation', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -612,7 +1817,7 @@ export var VIEW3D_MT_view_align =  __class__ ('VIEW3D_MT_view_align', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -643,7 +1848,7 @@ export var VIEW3D_MT_view_align_selected =  __class__ ('VIEW3D_MT_view_align_sel
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -684,7 +1889,7 @@ export var VIEW3D_MT_view_regions =  __class__ ('VIEW3D_MT_view_regions', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -709,7 +1914,7 @@ export var VIEW3D_MT_select_object_more_less =  __class__ ('VIEW3D_MT_select_obj
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -746,7 +1951,7 @@ export var VIEW3D_MT_select_object =  __class__ ('VIEW3D_MT_select_object', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -785,7 +1990,7 @@ export var VIEW3D_MT_select_pose_more_less =  __class__ ('VIEW3D_MT_select_pose_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -819,7 +2024,7 @@ export var VIEW3D_MT_select_pose =  __class__ ('VIEW3D_MT_select_pose', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -858,7 +2063,7 @@ export var VIEW3D_MT_select_particle =  __class__ ('VIEW3D_MT_select_particle', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -896,7 +2101,7 @@ export var VIEW3D_MT_edit_mesh_select_similar =  __class__ ('VIEW3D_MT_edit_mesh
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -920,7 +2125,7 @@ export var VIEW3D_MT_edit_mesh_select_by_trait =  __class__ ('VIEW3D_MT_edit_mes
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -954,7 +2159,7 @@ export var VIEW3D_MT_edit_mesh_select_more_less =  __class__ ('VIEW3D_MT_edit_me
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -980,7 +2185,7 @@ export var VIEW3D_MT_edit_mesh_select_linked =  __class__ ('VIEW3D_MT_edit_mesh_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1004,7 +2209,7 @@ export var VIEW3D_MT_edit_mesh_select_loops =  __class__ ('VIEW3D_MT_edit_mesh_s
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1031,7 +2236,7 @@ export var VIEW3D_MT_select_edit_mesh =  __class__ ('VIEW3D_MT_select_edit_mesh'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1076,7 +2281,7 @@ export var VIEW3D_MT_select_edit_curve =  __class__ ('VIEW3D_MT_select_edit_curv
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1118,7 +2323,7 @@ export var VIEW3D_MT_select_edit_surface =  __class__ ('VIEW3D_MT_select_edit_su
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1157,7 +2362,7 @@ export var VIEW3D_MT_select_edit_text =  __class__ ('VIEW3D_MT_select_edit_text'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1194,7 +2399,7 @@ export var VIEW3D_MT_select_edit_metaball =  __class__ ('VIEW3D_MT_select_edit_m
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1226,7 +2431,7 @@ export var VIEW3D_MT_edit_lattice_context_menu =  __class__ ('VIEW3D_MT_edit_lat
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1252,7 +2457,7 @@ export var VIEW3D_MT_select_edit_lattice =  __class__ ('VIEW3D_MT_select_edit_la
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1288,7 +2493,7 @@ export var VIEW3D_MT_select_edit_armature =  __class__ ('VIEW3D_MT_select_edit_a
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1338,7 +2543,7 @@ export var VIEW3D_MT_select_edit_grease_pencil =  __class__ ('VIEW3D_MT_select_e
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1385,7 +2590,7 @@ export var VIEW3D_MT_paint_grease_pencil =  __class__ ('VIEW3D_MT_paint_grease_p
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1415,7 +2620,7 @@ export var VIEW3D_MT_paint_vertex_grease_pencil =  __class__ ('VIEW3D_MT_paint_v
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1445,7 +2650,7 @@ export var VIEW3D_MT_select_paint_mask =  __class__ ('VIEW3D_MT_select_paint_mas
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1483,7 +2688,7 @@ export var VIEW3D_MT_select_paint_mask_vertex =  __class__ ('VIEW3D_MT_select_pa
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1523,7 +2728,7 @@ export var VIEW3D_MT_select_edit_pointcloud =  __class__ ('VIEW3D_MT_select_edit
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1550,7 +2755,7 @@ export var VIEW3D_MT_edit_curves_select_more_less =  __class__ ('VIEW3D_MT_edit_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1573,7 +2778,7 @@ export var VIEW3D_MT_select_edit_curves =  __class__ ('VIEW3D_MT_select_edit_cur
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1606,7 +2811,7 @@ export var VIEW3D_MT_select_sculpt_curves =  __class__ ('VIEW3D_MT_select_sculpt
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1638,7 +2843,7 @@ export var VIEW3D_MT_mesh_add =  __class__ ('VIEW3D_MT_mesh_add', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1674,7 +2879,7 @@ export var VIEW3D_MT_curve_add =  __class__ ('VIEW3D_MT_curve_add', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1711,7 +2916,7 @@ export var VIEW3D_MT_surface_add =  __class__ ('VIEW3D_MT_surface_add', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1739,7 +2944,7 @@ export var VIEW3D_MT_edit_metaball_context_menu =  __class__ ('VIEW3D_MT_edit_me
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1770,7 +2975,7 @@ export var VIEW3D_MT_metaball_add =  __class__ ('VIEW3D_MT_metaball_add', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1795,7 +3000,7 @@ export var VIEW3D_MT_armature_add =  __class__ ('VIEW3D_MT_armature_add', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1821,7 +3026,7 @@ export var VIEW3D_MT_light_add =  __class__ ('VIEW3D_MT_light_add', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1846,7 +3051,7 @@ export var VIEW3D_MT_lightprobe_add =  __class__ ('VIEW3D_MT_lightprobe_add', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1871,7 +3076,7 @@ export var VIEW3D_MT_camera_add =  __class__ ('VIEW3D_MT_camera_add', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1897,7 +3102,7 @@ export var VIEW3D_MT_volume_add =  __class__ ('VIEW3D_MT_volume_add', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1922,7 +3127,7 @@ export var VIEW3D_MT_grease_pencil_add =  __class__ ('VIEW3D_MT_grease_pencil_ad
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1953,7 +3158,7 @@ export var VIEW3D_MT_lattice_add =  __class__ ('VIEW3D_MT_lattice_add', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1980,7 +3185,7 @@ export var VIEW3D_MT_empty_add =  __class__ ('VIEW3D_MT_empty_add', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2011,7 +3216,7 @@ export var VIEW3D_MT_add =  __class__ ('VIEW3D_MT_add', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2083,7 +3288,7 @@ export var VIEW3D_MT_image_add =  __class__ ('VIEW3D_MT_image_add', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2108,7 +3313,7 @@ export var VIEW3D_MT_object_relations =  __class__ ('VIEW3D_MT_object_relations'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2133,7 +3338,7 @@ export var VIEW3D_MT_object_liboverride =  __class__ ('VIEW3D_MT_object_liboverr
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2158,7 +3363,7 @@ export var VIEW3D_MT_object =  __class__ ('VIEW3D_MT_object', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2225,7 +3430,7 @@ export var VIEW3D_MT_object_animation =  __class__ ('VIEW3D_MT_object_animation'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2258,7 +3463,7 @@ export var VIEW3D_MT_object_rigid_body =  __class__ ('VIEW3D_MT_object_rigid_bod
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2291,7 +3496,7 @@ export var VIEW3D_MT_object_clear =  __class__ ('VIEW3D_MT_object_clear', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2317,7 +3522,7 @@ export var VIEW3D_MT_object_context_menu =  __class__ ('VIEW3D_MT_object_context
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2516,7 +3721,7 @@ export var VIEW3D_MT_object_shading =  __class__ ('VIEW3D_MT_object_shading', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2539,7 +3744,7 @@ export var VIEW3D_MT_object_apply =  __class__ ('VIEW3D_MT_object_apply', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2600,7 +3805,7 @@ export var VIEW3D_MT_object_parent =  __class__ ('VIEW3D_MT_object_parent', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2639,7 +3844,7 @@ export var VIEW3D_MT_object_track =  __class__ ('VIEW3D_MT_object_track', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2663,7 +3868,7 @@ export var VIEW3D_MT_object_collection =  __class__ ('VIEW3D_MT_object_collectio
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2693,7 +3898,7 @@ export var VIEW3D_MT_object_constraints =  __class__ ('VIEW3D_MT_object_constrai
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2718,7 +3923,7 @@ export var VIEW3D_MT_object_modifiers =  __class__ ('VIEW3D_MT_object_modifiers'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2749,7 +3954,7 @@ export var VIEW3D_MT_object_quick_effects =  __class__ ('VIEW3D_MT_object_quick_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2775,7 +3980,7 @@ export var VIEW3D_MT_object_showhide =  __class__ ('VIEW3D_MT_object_showhide', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2800,7 +4005,7 @@ export var VIEW3D_MT_object_cleanup =  __class__ ('VIEW3D_MT_object_cleanup', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2826,7 +4031,7 @@ export var VIEW3D_MT_object_asset =  __class__ ('VIEW3D_MT_object_asset', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2850,7 +4055,7 @@ export var VIEW3D_MT_make_single_user =  __class__ ('VIEW3D_MT_make_single_user'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2917,7 +4122,7 @@ export var VIEW3D_MT_object_convert =  __class__ ('VIEW3D_MT_object_convert', [M
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2952,7 +4157,7 @@ export var VIEW3D_MT_make_links =  __class__ ('VIEW3D_MT_make_links', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2993,7 +4198,7 @@ export var VIEW3D_MT_paint_vertex =  __class__ ('VIEW3D_MT_paint_vertex', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3025,7 +4230,7 @@ export var VIEW3D_MT_hook =  __class__ ('VIEW3D_MT_hook', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3065,7 +4270,7 @@ export var VIEW3D_MT_vertex_group =  __class__ ('VIEW3D_MT_vertex_group', [Menu]
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3103,7 +4308,7 @@ export var VIEW3D_MT_greasepencil_vertex_group =  __class__ ('VIEW3D_MT_greasepe
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3126,7 +4331,7 @@ export var VIEW3D_MT_paint_weight_lock =  __class__ ('VIEW3D_MT_paint_weight_loc
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3188,7 +4393,7 @@ export var VIEW3D_MT_paint_weight =  __class__ ('VIEW3D_MT_paint_weight', [Menu]
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3236,7 +4441,7 @@ export var VIEW3D_MT_paint_weight =  __class__ ('VIEW3D_MT_paint_weight', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3257,7 +4462,7 @@ export var VIEW3D_MT_sculpt =  __class__ ('VIEW3D_MT_sculpt', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3322,7 +4527,7 @@ export var VIEW3D_MT_sculpt_transform =  __class__ ('VIEW3D_MT_sculpt_transform'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3349,7 +4554,7 @@ export var VIEW3D_MT_sculpt_showhide =  __class__ ('VIEW3D_MT_sculpt_showhide', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3387,7 +4592,7 @@ export var VIEW3D_MT_sculpt_trim =  __class__ ('VIEW3D_MT_sculpt_trim', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3423,7 +4628,7 @@ export var VIEW3D_MT_add_object =  __class__ ('VIEW3D_MT_add_object', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3459,7 +4664,7 @@ export var VIEW3D_MT_sculpt_curves =  __class__ ('VIEW3D_MT_sculpt_curves', [Men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3485,7 +4690,7 @@ export var VIEW3D_MT_mask =  __class__ ('VIEW3D_MT_mask', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3570,7 +4775,7 @@ export var VIEW3D_MT_face_sets =  __class__ ('VIEW3D_MT_face_sets', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3622,7 +4827,7 @@ export var VIEW3D_MT_sculpt_set_pivot =  __class__ ('VIEW3D_MT_sculpt_set_pivot'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3653,7 +4858,7 @@ export var VIEW3D_MT_face_sets_init =  __class__ ('VIEW3D_MT_face_sets_init', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3690,7 +4895,7 @@ export var VIEW3D_MT_random_mask =  __class__ ('VIEW3D_MT_random_mask', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3717,7 +4922,7 @@ export var VIEW3D_MT_particle =  __class__ ('VIEW3D_MT_particle', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3753,7 +4958,7 @@ export var VIEW3D_MT_particle_context_menu =  __class__ ('VIEW3D_MT_particle_con
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3808,7 +5013,7 @@ export var VIEW3D_MT_pose =  __class__ ('VIEW3D_MT_pose', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3855,7 +5060,7 @@ export var VIEW3D_MT_pose_transform =  __class__ ('VIEW3D_MT_pose_transform', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3883,7 +5088,7 @@ export var VIEW3D_MT_pose_slide =  __class__ ('VIEW3D_MT_pose_slide', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3912,7 +5117,7 @@ export var VIEW3D_MT_pose_propagate =  __class__ ('VIEW3D_MT_pose_propagate', [M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3939,7 +5144,7 @@ export var VIEW3D_MT_pose_motion =  __class__ ('VIEW3D_MT_pose_motion', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3962,7 +5167,7 @@ export var VIEW3D_MT_bone_collections =  __class__ ('VIEW3D_MT_bone_collections'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3986,7 +5191,7 @@ export var VIEW3D_MT_bone_collections =  __class__ ('VIEW3D_MT_bone_collections'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4013,7 +5218,7 @@ export var VIEW3D_MT_pose_ik =  __class__ ('VIEW3D_MT_pose_ik', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4036,7 +5241,7 @@ export var VIEW3D_MT_pose_constraints =  __class__ ('VIEW3D_MT_pose_constraints'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4060,7 +5265,7 @@ export var VIEW3D_MT_pose_names =  __class__ ('VIEW3D_MT_pose_names', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4090,7 +5295,7 @@ export var VIEW3D_MT_pose_apply =  __class__ ('VIEW3D_MT_pose_apply', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4117,7 +5322,7 @@ export var VIEW3D_MT_pose_context_menu =  __class__ ('VIEW3D_MT_pose_context_men
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4163,7 +5368,7 @@ export var BoneOptions =  __class__ ('BoneOptions', [object], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4217,7 +5422,7 @@ export var VIEW3D_MT_edit_mesh =  __class__ ('VIEW3D_MT_edit_mesh', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4273,7 +5478,7 @@ export var VIEW3D_MT_edit_mesh_context_menu =  __class__ ('VIEW3D_MT_edit_mesh_c
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4288,7 +5493,7 @@ export var VIEW3D_MT_edit_mesh_context_menu =  __class__ ('VIEW3D_MT_edit_mesh_c
 		var count_selected_items_for_objects_in_mode = function () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -4318,6 +5523,7 @@ export var VIEW3D_MT_edit_mesh_context_menu =  __class__ ('VIEW3D_MT_edit_mesh_c
 		var selected_verts_len = __left0__ [0];
 		var selected_edges_len = __left0__ [1];
 		var selected_faces_len = __left0__ [2];
+		// pass;
 		var layout = self.layout;
 		var with_freestyle = bpy.app.build_options.freestyle;
 		layout.operator_context = 'INVOKE_REGION_WIN';
@@ -4450,7 +5656,7 @@ export var VIEW3D_MT_edit_mesh_select_mode =  __class__ ('VIEW3D_MT_edit_mesh_se
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4475,7 +5681,7 @@ export var VIEW3D_MT_edit_mesh_extrude =  __class__ ('VIEW3D_MT_edit_mesh_extrud
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4517,7 +5723,7 @@ export var VIEW3D_MT_edit_mesh_vertices =  __class__ ('VIEW3D_MT_edit_mesh_verti
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4569,7 +5775,7 @@ export var VIEW3D_MT_edit_mesh_edges =  __class__ ('VIEW3D_MT_edit_mesh_edges', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4628,7 +5834,7 @@ export var VIEW3D_MT_edit_mesh_faces_data =  __class__ ('VIEW3D_MT_edit_mesh_fac
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4665,7 +5871,7 @@ export var VIEW3D_MT_edit_mesh_faces =  __class__ ('VIEW3D_MT_edit_mesh_faces', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4715,7 +5921,7 @@ export var VIEW3D_MT_edit_mesh_normals_select_strength =  __class__ ('VIEW3D_MT_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4745,7 +5951,7 @@ export var VIEW3D_MT_edit_mesh_normals_set_strength =  __class__ ('VIEW3D_MT_edi
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4775,7 +5981,7 @@ export var VIEW3D_MT_edit_mesh_normals_average =  __class__ ('VIEW3D_MT_edit_mes
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4799,7 +6005,7 @@ export var VIEW3D_MT_edit_mesh_normals =  __class__ ('VIEW3D_MT_edit_mesh_normal
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4841,7 +6047,7 @@ export var VIEW3D_MT_edit_mesh_shading =  __class__ ('VIEW3D_MT_edit_mesh_shadin
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4873,7 +6079,7 @@ export var VIEW3D_MT_edit_mesh_weights =  __class__ ('VIEW3D_MT_edit_mesh_weight
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4896,7 +6102,7 @@ export var VIEW3D_MT_edit_mesh_clean =  __class__ ('VIEW3D_MT_edit_mesh_clean', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4929,7 +6135,7 @@ export var VIEW3D_MT_edit_mesh_delete =  __class__ ('VIEW3D_MT_edit_mesh_delete'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4961,7 +6167,7 @@ export var VIEW3D_MT_edit_mesh_merge =  __class__ ('VIEW3D_MT_edit_mesh_merge', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4986,7 +6192,7 @@ export var VIEW3D_MT_edit_mesh_split =  __class__ ('VIEW3D_MT_edit_mesh_split', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5015,7 +6221,7 @@ export var VIEW3D_MT_edit_greasepencil_delete =  __class__ ('VIEW3D_MT_edit_grea
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5043,7 +6249,7 @@ export var VIEW3D_MT_edit_greasepencil_delete =  __class__ ('VIEW3D_MT_edit_grea
 export var draw_curve = function (self, _context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -5084,7 +6290,7 @@ export var VIEW3D_MT_edit_curve_ctrlpoints =  __class__ ('VIEW3D_MT_edit_curve_c
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5131,7 +6337,7 @@ export var VIEW3D_MT_edit_curve_segments =  __class__ ('VIEW3D_MT_edit_curve_seg
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5154,7 +6360,7 @@ export var VIEW3D_MT_edit_curve_clean =  __class__ ('VIEW3D_MT_edit_curve_clean'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5176,7 +6382,7 @@ export var VIEW3D_MT_edit_curve_context_menu =  __class__ ('VIEW3D_MT_edit_curve
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5228,7 +6434,7 @@ export var VIEW3D_MT_edit_curve_delete =  __class__ ('VIEW3D_MT_edit_curve_delet
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5261,7 +6467,7 @@ export var VIEW3D_MT_edit_font_chars =  __class__ ('VIEW3D_MT_edit_font_chars', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5305,7 +6511,7 @@ export var VIEW3D_MT_edit_font_kerning =  __class__ ('VIEW3D_MT_edit_font_kernin
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5332,7 +6538,7 @@ export var VIEW3D_MT_edit_font_delete =  __class__ ('VIEW3D_MT_edit_font_delete'
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5357,7 +6563,7 @@ export var VIEW3D_MT_edit_font =  __class__ ('VIEW3D_MT_edit_font', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5397,7 +6603,7 @@ export var VIEW3D_MT_edit_font_context_menu =  __class__ ('VIEW3D_MT_edit_font_c
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5426,7 +6632,7 @@ export var VIEW3D_MT_edit_meta =  __class__ ('VIEW3D_MT_edit_meta', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5456,7 +6662,7 @@ export var VIEW3D_MT_edit_meta_showhide =  __class__ ('VIEW3D_MT_edit_meta_showh
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5480,7 +6686,7 @@ export var VIEW3D_MT_edit_lattice =  __class__ ('VIEW3D_MT_edit_lattice', [Menu]
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5510,7 +6716,7 @@ export var VIEW3D_MT_edit_armature =  __class__ ('VIEW3D_MT_edit_armature', [Men
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5565,7 +6771,7 @@ export var VIEW3D_MT_armature_context_menu =  __class__ ('VIEW3D_MT_armature_con
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5610,7 +6816,7 @@ export var VIEW3D_MT_edit_armature_names =  __class__ ('VIEW3D_MT_edit_armature_
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5637,7 +6843,7 @@ export var VIEW3D_MT_edit_armature_parent =  __class__ ('VIEW3D_MT_edit_armature
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5660,7 +6866,7 @@ export var VIEW3D_MT_edit_armature_roll =  __class__ ('VIEW3D_MT_edit_armature_r
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5685,7 +6891,7 @@ export var VIEW3D_MT_edit_armature_delete =  __class__ ('VIEW3D_MT_edit_armature
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5710,7 +6916,7 @@ export var VIEW3D_MT_weight_grease_pencil =  __class__ ('VIEW3D_MT_weight_grease
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5738,7 +6944,7 @@ export var VIEW3D_MT_edit_greasepencil_animation =  __class__ ('VIEW3D_MT_edit_g
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5767,7 +6973,7 @@ export var VIEW3D_MT_edit_greasepencil_showhide =  __class__ ('VIEW3D_MT_edit_gr
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5792,7 +6998,7 @@ export var VIEW3D_MT_edit_greasepencil_cleanup =  __class__ ('VIEW3D_MT_edit_gre
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5821,7 +7027,7 @@ export var VIEW3D_MT_edit_greasepencil =  __class__ ('VIEW3D_MT_edit_greasepenci
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5865,7 +7071,7 @@ export var VIEW3D_MT_edit_greasepencil_stroke =  __class__ ('VIEW3D_MT_edit_grea
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5919,7 +7125,7 @@ export var VIEW3D_MT_edit_greasepencil_point =  __class__ ('VIEW3D_MT_edit_greas
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5950,7 +7156,7 @@ export var VIEW3D_MT_edit_curves_add =  __class__ ('VIEW3D_MT_edit_curves_add', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5973,7 +7179,7 @@ export var VIEW3D_MT_edit_curves =  __class__ ('VIEW3D_MT_edit_curves', [Menu], 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6008,7 +7214,7 @@ export var VIEW3D_MT_edit_curves_control_points =  __class__ ('VIEW3D_MT_edit_cu
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6031,7 +7237,7 @@ export var VIEW3D_MT_edit_curves_segments =  __class__ ('VIEW3D_MT_edit_curves_s
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6054,7 +7260,7 @@ export var VIEW3D_MT_edit_curves_context_menu =  __class__ ('VIEW3D_MT_edit_curv
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6092,7 +7298,7 @@ export var VIEW3D_MT_edit_pointcloud =  __class__ ('VIEW3D_MT_edit_pointcloud', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6121,7 +7327,7 @@ export var VIEW3D_MT_object_mode_pie =  __class__ ('VIEW3D_MT_object_mode_pie', 
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6145,7 +7351,7 @@ export var VIEW3D_MT_view_pie =  __class__ ('VIEW3D_MT_view_pie', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6170,7 +7376,7 @@ export var VIEW3D_MT_transform_gizmo_pie =  __class__ ('VIEW3D_MT_transform_gizm
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6197,7 +7403,7 @@ export var VIEW3D_MT_shading_pie =  __class__ ('VIEW3D_MT_shading_pie', [Menu], 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6221,7 +7427,7 @@ export var VIEW3D_MT_shading_ex_pie =  __class__ ('VIEW3D_MT_shading_ex_pie', [M
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6250,7 +7456,7 @@ export var VIEW3D_MT_pivot_pie =  __class__ ('VIEW3D_MT_pivot_pie', [Menu], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6286,7 +7492,7 @@ export var VIEW3D_MT_orientations_pie =  __class__ ('VIEW3D_MT_orientations_pie'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6310,7 +7516,7 @@ export var VIEW3D_MT_snap_pie =  __class__ ('VIEW3D_MT_snap_pie', [Menu], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6340,7 +7546,7 @@ export var VIEW3D_MT_proportional_editing_falloff_pie =  __class__ ('VIEW3D_MT_p
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6364,7 +7570,7 @@ export var VIEW3D_MT_sculpt_mask_edit_pie =  __class__ ('VIEW3D_MT_sculpt_mask_e
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6405,7 +7611,7 @@ export var VIEW3D_MT_sculpt_automasking_pie =  __class__ ('VIEW3D_MT_sculpt_auto
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6438,7 +7644,7 @@ export var VIEW3D_MT_grease_pencil_sculpt_automasking_pie =  __class__ ('VIEW3D_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6467,7 +7673,7 @@ export var VIEW3D_MT_sculpt_face_sets_edit_pie =  __class__ ('VIEW3D_MT_sculpt_f
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6496,7 +7702,7 @@ export var VIEW3D_MT_wpaint_vgroup_lock_pie =  __class__ ('VIEW3D_MT_wpaint_vgro
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6544,13 +7750,717 @@ export var VIEW3D_MT_wpaint_vgroup_lock_pie =  __class__ ('VIEW3D_MT_wpaint_vgro
 		props.mask = __left0__ [1];
 	});}
 });
+export var VIEW3D_PT_active_tool =  __class__ ('VIEW3D_PT_active_tool', [Panel, ToolActivePanelHelper], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'Tool',
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return context.area.py_metatype == 'VIEW_3D';
+	});}
+});
+export var VIEW3D_PT_active_tool_duplicate =  __class__ ('VIEW3D_PT_active_tool_duplicate', [Panel, ToolActivePanelHelper], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'Tool',
+	bl_options: new set (['HIDE_HEADER']),
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return context.area.py_metatype != 'VIEW_3D';
+	});}
+});
+export var VIEW3D_PT_view3d_properties =  __class__ ('VIEW3D_PT_view3d_properties', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'View',
+	bl_label: 'View',
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var view = context.space_data;
+		layout.use_property_split = true;
+		layout.use_property_decorate = false;
+		var col = layout.column ();
+		var subcol = col.column ();
+		subcol.active = bool (view.region_3d.view_perspective != 'CAMERA' || view.region_quadviews);
+		subcol.prop (view, 'lens', __kwargtrans__ ({text: 'Focal Length'}));
+		var subcol = col.column (__kwargtrans__ ({align: true}));
+		subcol.prop (view, 'clip_start', __kwargtrans__ ({text: 'Clip Start'}));
+		subcol.prop (view, 'clip_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_camera}));
+		layout.separator ();
+		var col = layout.column (__kwargtrans__ ({align: false, heading: 'Local Camera'}));
+		col.use_property_decorate = false;
+		var row = col.row (__kwargtrans__ ({align: true}));
+		var sub = row.row (__kwargtrans__ ({align: true}));
+		sub.prop (view, 'use_local_camera', __kwargtrans__ ({text: ''}));
+		var sub = sub.row (__kwargtrans__ ({align: true}));
+		sub.enabled = view.use_local_camera;
+		sub.prop (view, 'camera', __kwargtrans__ ({text: ''}));
+		var sub = col.row ();
+		sub.active = view.region_3d.view_perspective == 'CAMERA';
+		sub.prop (view.overlay, 'show_camera_passepartout', __kwargtrans__ ({text: 'Passepartout'}));
+		layout.separator ();
+		var col = layout.column (__kwargtrans__ ({align: true}));
+		col.prop (view, 'use_render_border');
+		col.active = view.region_3d.view_perspective != 'CAMERA';
+	});}
+});
+export var VIEW3D_PT_view3d_lock =  __class__ ('VIEW3D_PT_view3d_lock', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'View',
+	bl_label: 'View Lock',
+	bl_parent_id: 'VIEW3D_PT_view3d_properties',
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		layout.use_property_split = true;
+		layout.use_property_decorate = false;
+		var view = context.space_data;
+		var col = layout.column (__kwargtrans__ ({align: true}));
+		var sub = col.column ();
+		sub.active = bool (view.region_3d.view_perspective != 'CAMERA' || view.region_quadviews);
+		sub.prop (view, 'lock_object');
+		var lock_object = view.lock_object;
+		if (lock_object) {
+			if (lock_object.py_metatype == 'ARMATURE') {
+				sub.prop_search (view, 'lock_bone', lock_object.data, (lock_object.mode == 'EDIT' ? 'edit_bones' : 'bones'), __kwargtrans__ ({text: 'Bone'}));
+			}
+		}
+		var col = layout.column (__kwargtrans__ ({heading: 'Lock', align: true}));
+		if (!(lock_object)) {
+			col.prop (view, 'lock_cursor', __kwargtrans__ ({text: 'To 3D Cursor'}));
+		}
+		col.prop (view, 'lock_camera', __kwargtrans__ ({text: 'Camera to View'}));
+		col.prop (view.region_3d, 'lock_rotation', __kwargtrans__ ({text: 'Rotation'}));
+	});}
+});
+export var VIEW3D_PT_view3d_cursor =  __class__ ('VIEW3D_PT_view3d_cursor', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'View',
+	bl_label: '3D Cursor',
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var cursor = context.scene.cursor;
+		layout.column ().prop (cursor, 'location', __kwargtrans__ ({text: 'Location'}));
+		var rotation_mode = cursor.rotation_mode;
+		if (rotation_mode == 'QUATERNION') {
+			layout.column ().prop (cursor, 'rotation_quaternion', __kwargtrans__ ({text: 'Rotation'}));
+		}
+		else if (rotation_mode == 'AXIS_ANGLE') {
+			layout.column ().prop (cursor, 'rotation_axis_angle', __kwargtrans__ ({text: 'Rotation'}));
+		}
+		else {
+			layout.column ().prop (cursor, 'rotation_euler', __kwargtrans__ ({text: 'Rotation'}));
+		}
+		layout.prop (cursor, 'rotation_mode', __kwargtrans__ ({text: ''}));
+	});}
+});
+export var VIEW3D_PT_collections =  __class__ ('VIEW3D_PT_collections', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'View',
+	bl_label: 'Collections',
+	bl_options: new set (['DEFAULT_CLOSED']),
+	get _draw_collection () {return __get__ (this, function (self, layout, view_layer, use_local_collections, collection, index) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+						case 'view_layer': var view_layer = __allkwargs0__ [__attrib0__]; break;
+						case 'use_local_collections': var use_local_collections = __allkwargs0__ [__attrib0__]; break;
+						case 'collection': var collection = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var need_separator = index;
+		for (var child of collection.children) {
+			index++;
+			if (child.exclude) {
+				continue;
+			}
+			if (child.collection.hide_viewport) {
+				continue;
+			}
+			if (need_separator) {
+				layout.separator ();
+				var need_separator = false;
+			}
+			var icon = 'BLANK1';
+			if (child.has_selected_objects (view_layer)) {
+				var icon = 'LAYER_ACTIVE';
+			}
+			else if (child.has_objects ()) {
+				var icon = 'LAYER_USED';
+			}
+			else {
+				// pass;
+			}
+			var row = layout.row ();
+			row.use_property_decorate = false;
+			var sub = row.py_split (__kwargtrans__ ({factor: 0.98}));
+			var subrow = sub.row ();
+			subrow.alignment = 'LEFT';
+			subrow.operator ('object.hide_collection', __kwargtrans__ ({text: child.py_name, icon: icon, emboss: false})).collection_index = index;
+			var sub = row.py_split ();
+			var subrow = sub.row (__kwargtrans__ ({align: true}));
+			subrow.alignment = 'RIGHT';
+			if (!(use_local_collections)) {
+				subrow.active = collection.is_visible;
+				subrow.prop (child, 'hide_viewport', __kwargtrans__ ({text: '', emboss: false}));
+			}
+			else {
+				subrow.active = collection.visible_get ();
+				var icon = (child.visible_get () ? 'HIDE_OFF' : 'HIDE_ON');
+				var props = subrow.operator ('object.hide_collection', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+				props.collection_index = index;
+				props.toggle = true;
+			}
+		}
+		for (var child of collection.children) {
+			var index = self._draw_collection (layout, view_layer, use_local_collections, child, index);
+		}
+		return index;
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		layout.use_property_split = false;
+		var view = context.space_data;
+		var view_layer = context.view_layer;
+		layout.use_property_split = true;
+		layout.prop (view, 'use_local_collections');
+		layout.separator ();
+		self._draw_collection (layout, view_layer, view.use_local_collections, view_layer.layer_collection, 0);
+	});}
+});
+export var VIEW3D_PT_shading =  __class__ ('VIEW3D_PT_shading', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Shading',
+	bl_ui_units_x: 12,
+	get get_shading () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var view = context.space_data;
+		if (view.py_metatype == 'VIEW_3D') {
+			return view.shading;
+		}
+		else {
+			return context.scene.display.shading;
+		}
+	});},
+	get draw () {return __get__ (this, function (self, _context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case '_context': var _context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		layout.label (__kwargtrans__ ({text: 'Viewport Shading'}));
+	});}
+});
+export var VIEW3D_PT_overlay_bones =  __class__ ('VIEW3D_PT_overlay_bones', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Bones',
+	get is_using_wireframe () {return function (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var mode = context.mode;
+		if (__in__ (mode, new set (['POSE', 'PAINT_WEIGHT']))) {
+			var armature = context.pose_object;
+		}
+		else if (mode == 'EDIT_ARMATURE') {
+			var armature = context.edit_object;
+		}
+		else {
+			return false;
+		}
+		return armature && armature.display_type == 'WIRE';
+	};},
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var mode = context.mode;
+		return mode == 'POSE' || mode == 'PAINT_WEIGHT' && context.pose_object || mode == 'EDIT_ARMATURE' && VIEW3D_PT_overlay_bones.is_using_wireframe (context);
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var shading = VIEW3D_PT_shading.get_shading (context);
+		var view = context.space_data;
+		var mode = context.mode;
+		var overlay = view.overlay;
+		var display_all = overlay.show_overlays;
+		layout.label (__kwargtrans__ ({text: 'Armature Overlays'}));
+		var col = layout.column ();
+		col.active = display_all;
+		if (mode == 'POSE') {
+			var row = col.row ();
+			row.prop (overlay, 'show_xray_bone', __kwargtrans__ ({text: ''}));
+			var sub = row.row ();
+			sub.active = display_all && overlay.show_xray_bone;
+			sub.prop (overlay, 'xray_alpha_bone', __kwargtrans__ ({text: 'Fade Geometry'}));
+		}
+		else if (mode == 'PAINT_WEIGHT') {
+			var row = col.row ();
+			row.prop (overlay, 'show_xray_bone');
+			var row = col.row ();
+			row.active = shading.py_metatype == 'WIREFRAME';
+			row.prop (overlay, 'bone_wire_alpha');
+		}
+	});}
+});
+export var VIEW3D_PT_snapping =  __class__ ('VIEW3D_PT_snapping', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Snapping',
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var tool_settings = context.tool_settings;
+		var obj = context.active_object;
+		var object_mode = (obj === null ? 'OBJECT' : obj.mode);
+		var layout = self.layout;
+		var col = layout.column ();
+		col.label (__kwargtrans__ ({text: 'Snap Base'}));
+		var row = col.row (__kwargtrans__ ({align: true}));
+		row.prop (tool_settings, 'snap_target', __kwargtrans__ ({expand: true}));
+		col.label (__kwargtrans__ ({text: 'Snap Target'}));
+		col.prop (tool_settings, 'snap_elements_base', __kwargtrans__ ({expand: true}));
+		col.label (__kwargtrans__ ({text: 'Snap Target for Individual Elements'}));
+		col.prop (tool_settings, 'snap_elements_individual', __kwargtrans__ ({expand: true}));
+		col.separator ();
+		if (__in__ ('INCREMENT', tool_settings.snap_elements)) {
+			col.prop (tool_settings, 'use_snap_grid_absolute');
+		}
+		if (__in__ ('VOLUME', tool_settings.snap_elements)) {
+			col.prop (tool_settings, 'use_snap_peel_object');
+		}
+		if (__in__ ('FACE_NEAREST', tool_settings.snap_elements)) {
+			col.prop (tool_settings, 'use_snap_to_same_target');
+			if (object_mode == 'EDIT') {
+				col.prop (tool_settings, 'snap_face_nearest_steps');
+			}
+		}
+		col.separator ();
+		col.prop (tool_settings, 'use_snap_align_rotation');
+		col.prop (tool_settings, 'use_snap_backface_culling');
+		col.separator ();
+		if (obj) {
+			col.label (__kwargtrans__ ({text: 'Target Selection'}));
+			var col_targetsel = col.column (__kwargtrans__ ({align: true}));
+			if (object_mode == 'EDIT' && !__in__ (obj.py_metatype, new set (['LATTICE', 'META', 'FONT']))) {
+				col_targetsel.prop (tool_settings, 'use_snap_self', __kwargtrans__ ({text: 'Include Active', icon: 'EDITMODE_HLT'}));
+				col_targetsel.prop (tool_settings, 'use_snap_edit', __kwargtrans__ ({text: 'Include Edited', icon: 'OUTLINER_DATA_MESH'}));
+				col_targetsel.prop (tool_settings, 'use_snap_nonedit', __kwargtrans__ ({text: 'Include Non-Edited', icon: 'OUTLINER_OB_MESH'}));
+			}
+			col_targetsel.prop (tool_settings, 'use_snap_selectable', __kwargtrans__ ({text: 'Exclude Non-Selectable', icon: 'RESTRICT_SELECT_OFF'}));
+		}
+		col.label (__kwargtrans__ ({text: 'Affect'}));
+		var row = col.row (__kwargtrans__ ({align: true}));
+		row.prop (tool_settings, 'use_snap_translate', __kwargtrans__ ({text: 'Move', text_ctxt: i18n_contexts.operator_default, toggle: true}));
+		row.prop (tool_settings, 'use_snap_rotate', __kwargtrans__ ({text: 'Rotate', text_ctxt: i18n_contexts.operator_default, toggle: true}));
+		row.prop (tool_settings, 'use_snap_scale', __kwargtrans__ ({text: 'Scale', text_ctxt: i18n_contexts.operator_default, toggle: true}));
+		col.label (__kwargtrans__ ({text: 'Rotation Increment'}));
+		var row = col.row (__kwargtrans__ ({align: true}));
+		row.prop (tool_settings, 'snap_angle_increment_3d', __kwargtrans__ ({text: ''}));
+		row.prop (tool_settings, 'snap_angle_increment_3d_precision', __kwargtrans__ ({text: ''}));
+	});}
+});
+export var VIEW3D_PT_proportional_edit =  __class__ ('VIEW3D_PT_proportional_edit', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Proportional Editing',
+	bl_ui_units_x: 8,
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var tool_settings = context.tool_settings;
+		var col = layout.column ();
+		col.active = (context.mode == 'OBJECT' ? tool_settings.use_proportional_edit_objects : tool_settings.use_proportional_edit);
+		if (context.mode != 'OBJECT') {
+			col.prop (tool_settings, 'use_proportional_connected');
+			var sub = col.column ();
+			sub.active = !(tool_settings.use_proportional_connected);
+			sub.prop (tool_settings, 'use_proportional_projected');
+			col.separator ();
+		}
+		col.prop (tool_settings, 'proportional_edit_falloff', __kwargtrans__ ({expand: true}));
+		col.prop (tool_settings, 'proportional_distance');
+	});}
+});
+export var VIEW3D_PT_transform_orientations =  __class__ ('VIEW3D_PT_transform_orientations', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'HEADER',
+	bl_label: 'Transform Orientations',
+	bl_ui_units_x: 8,
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		layout.label (__kwargtrans__ ({text: 'Transform Orientations'}));
+		var scene = context.scene;
+		var orient_slot = scene.transform_orientation_slots [0];
+		var orientation = orient_slot.custom_orientation;
+		var row = layout.row ();
+		var col = row.column ();
+		col.prop (orient_slot, 'type', __kwargtrans__ ({expand: true}));
+		row.operator ('transform.create_orientation', __kwargtrans__ ({text: '', icon: 'ADD', emboss: false})).use = true;
+		if (orientation) {
+			var row = layout.row (__kwargtrans__ ({align: false}));
+			row.prop (orientation, 'name', __kwargtrans__ ({text: '', icon: 'OBJECT_ORIGIN'}));
+			row.operator ('transform.delete_orientation', __kwargtrans__ ({text: '', icon: 'X', emboss: false}));
+		}
+	});}
+});
+export var VIEW3D_PT_view3d_stereo =  __class__ ('VIEW3D_PT_view3d_stereo', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'View',
+	bl_label: 'Stereoscopy',
+	bl_options: new set (['DEFAULT_CLOSED']),
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var scene = context.scene;
+		var multiview = scene.render.use_multiview;
+		return multiview;
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var layout = self.layout;
+		var view = context.space_data;
+		var basic_stereo = context.scene.render.views_format == 'STEREO_3D';
+		var col = layout.column ();
+		col.row ().prop (view, 'stereo_3d_camera', __kwargtrans__ ({expand: true}));
+		col.label (__kwargtrans__ ({text: 'Display'}));
+		var row = col.row ();
+		row.active = basic_stereo;
+		row.prop (view, 'show_stereo_3d_cameras');
+		var row = col.row ();
+		row.active = basic_stereo;
+		var py_split = row.py_split ();
+		py_split.prop (view, 'show_stereo_3d_convergence_plane');
+		var py_split = row.py_split ();
+		py_split.prop (view, 'stereo_3d_convergence_plane_alpha', __kwargtrans__ ({text: 'Alpha'}));
+		py_split.active = view.show_stereo_3d_convergence_plane;
+		var row = col.row ();
+		var py_split = row.py_split ();
+		py_split.prop (view, 'show_stereo_3d_volume');
+		var py_split = row.py_split ();
+		py_split.active = view.show_stereo_3d_volume;
+		py_split.prop (view, 'stereo_3d_volume_alpha', __kwargtrans__ ({text: 'Alpha'}));
+	});}
+});
+export var VIEW3D_PT_context_properties =  __class__ ('VIEW3D_PT_context_properties', [Panel], {
+	__module__: __name__,
+	bl_space_type: 'VIEW_3D',
+	bl_region_type: 'UI',
+	bl_category: 'Item',
+	bl_label: 'Properties',
+	bl_options: new set (['DEFAULT_CLOSED']),
+	get _active_context_member () {return function (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var obj = context.object;
+		if (obj) {
+			var object_mode = obj.mode;
+			if (object_mode == 'POSE') {
+				return 'active_pose_bone';
+			}
+			else if (object_mode == 'EDIT' && obj.py_metatype == 'ARMATURE') {
+				return 'active_bone';
+			}
+			else {
+				return 'object';
+			}
+		}
+		return '';
+	};},
+	get poll () {return __getcm__ (this, function (cls, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var member = cls._active_context_member (context);
+		if (member) {
+			var __left0__ = rna_prop_ui.rna_idprop_context_value (context, member, object);
+			var context_member = __left0__ [0];
+			var member = __left0__ [1];
+			return context_member && rna_prop_ui.rna_idprop_has_properties (context_member);
+		}
+		return false;
+	});},
+	get draw () {return __get__ (this, function (self, context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var member = VIEW3D_PT_context_properties._active_context_member (context);
+		if (member) {
+			rna_prop_ui.draw (self.layout, context, member, object, __kwargtrans__ ({use_edit: false}));
+		}
+	});}
+});
 export var VIEW3D_MT_greasepencil_material_active =  __class__ ('VIEW3D_MT_greasepencil_material_active', [Menu], {
 	__module__: __name__,
 	bl_label: 'Active Material',
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6571,7 +8481,7 @@ export var VIEW3D_MT_greasepencil_material_active =  __class__ ('VIEW3D_MT_greas
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6605,7 +8515,7 @@ export var VIEW3D_MT_grease_pencil_assign_material =  __class__ ('VIEW3D_MT_grea
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6640,7 +8550,7 @@ export var VIEW3D_MT_greasepencil_edit_context_menu =  __class__ ('VIEW3D_MT_gre
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6727,5 +8637,6 @@ export var VIEW3D_MT_greasepencil_edit_context_menu =  __class__ ('VIEW3D_MT_gre
 		}
 	});}
 });
+export var _classes_in_order = ['VIEW3D_HT_tool_header', '_draw_tool_settings_context_mode', 'VIEW3D_HT_header', 'VIEW3D_MT_editor_menus', 'ShowHideMenu', 'VIEW3D_MT_transform_base', 'VIEW3D_MT_transform', 'VIEW3D_MT_transform_object', 'VIEW3D_MT_transform_armature', 'VIEW3D_MT_mirror', 'VIEW3D_MT_snap', 'VIEW3D_MT_uv_map', 'VIEW3D_MT_view', 'VIEW3D_MT_view_local', 'VIEW3D_MT_view_cameras', 'VIEW3D_MT_view_viewpoint', 'VIEW3D_MT_view_navigation', 'VIEW3D_MT_view_align', 'VIEW3D_MT_view_align_selected', 'VIEW3D_MT_view_regions', 'VIEW3D_MT_select_object_more_less', 'VIEW3D_MT_select_object', 'VIEW3D_MT_select_pose_more_less', 'VIEW3D_MT_select_pose', 'VIEW3D_MT_select_particle', 'VIEW3D_MT_edit_mesh_select_similar', 'VIEW3D_MT_edit_mesh_select_by_trait', 'VIEW3D_MT_edit_mesh_select_more_less', 'VIEW3D_MT_edit_mesh_select_linked', 'VIEW3D_MT_edit_mesh_select_loops', 'VIEW3D_MT_select_edit_mesh', 'VIEW3D_MT_select_edit_curve', 'VIEW3D_MT_select_edit_surface', 'VIEW3D_MT_select_edit_text', 'VIEW3D_MT_select_edit_metaball', 'VIEW3D_MT_edit_lattice_context_menu', 'VIEW3D_MT_select_edit_lattice', 'VIEW3D_MT_select_edit_armature', 'VIEW3D_MT_select_edit_grease_pencil', 'VIEW3D_MT_paint_grease_pencil', 'VIEW3D_MT_paint_vertex_grease_pencil', 'VIEW3D_MT_select_paint_mask', 'VIEW3D_MT_select_paint_mask_vertex', 'VIEW3D_MT_select_edit_pointcloud', 'VIEW3D_MT_edit_curves_select_more_less', 'VIEW3D_MT_select_edit_curves', 'VIEW3D_MT_select_sculpt_curves', 'VIEW3D_MT_mesh_add', 'VIEW3D_MT_curve_add', 'VIEW3D_MT_surface_add', 'VIEW3D_MT_edit_metaball_context_menu', 'VIEW3D_MT_metaball_add', 'VIEW3D_MT_armature_add', 'VIEW3D_MT_light_add', 'VIEW3D_MT_lightprobe_add', 'VIEW3D_MT_camera_add', 'VIEW3D_MT_volume_add', 'VIEW3D_MT_grease_pencil_add', 'VIEW3D_MT_lattice_add', 'VIEW3D_MT_empty_add', 'VIEW3D_MT_add', 'VIEW3D_MT_image_add', 'VIEW3D_MT_object_relations', 'VIEW3D_MT_object_liboverride', 'VIEW3D_MT_object', 'VIEW3D_MT_object_animation', 'VIEW3D_MT_object_rigid_body', 'VIEW3D_MT_object_clear', 'VIEW3D_MT_object_context_menu', 'VIEW3D_MT_object_shading', 'VIEW3D_MT_object_apply', 'VIEW3D_MT_object_parent', 'VIEW3D_MT_object_track', 'VIEW3D_MT_object_collection', 'VIEW3D_MT_object_constraints', 'VIEW3D_MT_object_modifiers', 'VIEW3D_MT_object_quick_effects', 'VIEW3D_MT_object_showhide', 'VIEW3D_MT_object_cleanup', 'VIEW3D_MT_object_asset', 'VIEW3D_MT_make_single_user', 'VIEW3D_MT_object_convert', 'VIEW3D_MT_make_links', 'VIEW3D_MT_paint_vertex', 'VIEW3D_MT_hook', 'VIEW3D_MT_vertex_group', 'VIEW3D_MT_greasepencil_vertex_group', 'VIEW3D_MT_paint_weight_lock', 'VIEW3D_MT_paint_weight', 'VIEW3D_MT_sculpt', 'VIEW3D_MT_sculpt_transform', 'VIEW3D_MT_sculpt_showhide', 'VIEW3D_MT_sculpt_trim', 'VIEW3D_MT_add_object', 'VIEW3D_MT_sculpt_curves', 'VIEW3D_MT_mask', 'VIEW3D_MT_face_sets', 'VIEW3D_MT_sculpt_set_pivot', 'VIEW3D_MT_face_sets_init', 'VIEW3D_MT_random_mask', 'VIEW3D_MT_particle', 'VIEW3D_MT_particle_context_menu', 'VIEW3D_MT_particle_showhide', 'VIEW3D_MT_pose', 'VIEW3D_MT_pose_transform', 'VIEW3D_MT_pose_slide', 'VIEW3D_MT_pose_propagate', 'VIEW3D_MT_pose_motion', 'VIEW3D_MT_bone_collections', 'VIEW3D_MT_pose_ik', 'VIEW3D_MT_pose_constraints', 'VIEW3D_MT_pose_names', 'VIEW3D_MT_pose_showhide', 'VIEW3D_MT_pose_apply', 'VIEW3D_MT_pose_context_menu', 'BoneOptions', 'VIEW3D_MT_bone_options_toggle', 'VIEW3D_MT_bone_options_enable', 'VIEW3D_MT_bone_options_disable', 'VIEW3D_MT_edit_mesh', 'VIEW3D_MT_edit_mesh_context_menu', 'VIEW3D_MT_edit_mesh_select_mode', 'VIEW3D_MT_edit_mesh_extrude', 'VIEW3D_MT_edit_mesh_vertices', 'VIEW3D_MT_edit_mesh_edges', 'VIEW3D_MT_edit_mesh_faces_data', 'VIEW3D_MT_edit_mesh_faces', 'VIEW3D_MT_edit_mesh_normals_select_strength', 'VIEW3D_MT_edit_mesh_normals_set_strength', 'VIEW3D_MT_edit_mesh_normals_average', 'VIEW3D_MT_edit_mesh_normals', 'VIEW3D_MT_edit_mesh_shading', 'VIEW3D_MT_edit_mesh_weights', 'VIEW3D_MT_edit_mesh_clean', 'VIEW3D_MT_edit_mesh_delete', 'VIEW3D_MT_edit_mesh_merge', 'VIEW3D_MT_edit_mesh_split', 'VIEW3D_MT_edit_mesh_showhide', 'VIEW3D_MT_edit_greasepencil_delete', 'VIEW3D_MT_edit_curve', 'VIEW3D_MT_edit_curve_ctrlpoints', 'VIEW3D_MT_edit_curve_segments', 'VIEW3D_MT_edit_curve_clean', 'VIEW3D_MT_edit_curve_context_menu', 'VIEW3D_MT_edit_curve_delete', 'VIEW3D_MT_edit_curve_showhide', 'VIEW3D_MT_edit_surface', 'VIEW3D_MT_edit_font_chars', 'VIEW3D_MT_edit_font_kerning', 'VIEW3D_MT_edit_font_delete', 'VIEW3D_MT_edit_font', 'VIEW3D_MT_edit_font_context_menu', 'VIEW3D_MT_edit_meta', 'VIEW3D_MT_edit_meta_showhide', 'VIEW3D_MT_edit_lattice', 'VIEW3D_MT_edit_armature', 'VIEW3D_MT_armature_context_menu', 'VIEW3D_MT_edit_armature_names', 'VIEW3D_MT_edit_armature_parent', 'VIEW3D_MT_edit_armature_roll', 'VIEW3D_MT_edit_armature_delete', 'VIEW3D_MT_weight_grease_pencil', 'VIEW3D_MT_edit_greasepencil_animation', 'VIEW3D_MT_edit_greasepencil_showhide', 'VIEW3D_MT_edit_greasepencil_cleanup', 'VIEW3D_MT_edit_greasepencil', 'VIEW3D_MT_edit_greasepencil_stroke', 'VIEW3D_MT_edit_greasepencil_point', 'VIEW3D_MT_edit_curves_add', 'VIEW3D_MT_edit_curves', 'VIEW3D_MT_edit_curves_control_points', 'VIEW3D_MT_edit_curves_segments', 'VIEW3D_MT_edit_curves_context_menu', 'VIEW3D_MT_edit_pointcloud', 'VIEW3D_MT_object_mode_pie', 'VIEW3D_MT_view_pie', 'VIEW3D_MT_transform_gizmo_pie', 'VIEW3D_MT_shading_pie', 'VIEW3D_MT_shading_ex_pie', 'VIEW3D_MT_pivot_pie', 'VIEW3D_MT_orientations_pie', 'VIEW3D_MT_snap_pie', 'VIEW3D_MT_proportional_editing_falloff_pie', 'VIEW3D_MT_sculpt_mask_edit_pie', 'VIEW3D_MT_sculpt_automasking_pie', 'VIEW3D_MT_grease_pencil_sculpt_automasking_pie', 'VIEW3D_MT_sculpt_face_sets_edit_pie', 'VIEW3D_MT_wpaint_vgroup_lock_pie', 'VIEW3D_PT_active_tool', 'VIEW3D_PT_active_tool_duplicate', 'VIEW3D_PT_view3d_properties', 'VIEW3D_PT_view3d_lock', 'VIEW3D_PT_view3d_cursor', 'VIEW3D_PT_collections', 'VIEW3D_PT_shading', 'VIEW3D_PT_overlay_bones', 'VIEW3D_PT_snapping', 'VIEW3D_PT_proportional_edit', 'VIEW3D_PT_transform_orientations', 'VIEW3D_PT_view3d_stereo', 'VIEW3D_PT_context_properties', 'VIEW3D_MT_greasepencil_material_active', 'VIEW3D_MT_grease_pencil_assign_material', 'VIEW3D_MT_greasepencil_edit_context_menu'];
 
 //# sourceMappingURL=space_view3d.map

@@ -24,8 +24,8 @@ export function __nest__ (headObject, tailNames, value) {
             current = current [tailChain [index]];
         }
     }
-    for (let attrib of Object.getOwnPropertyNames (value)) {
-        Object.defineProperty (current, attrib, {
+    for (let attrib of globalThis.Object.getOwnPropertyNames (value)) {
+        globalThis.Object.defineProperty (current, attrib, {
             get () {return value [attrib];},
             enumerable: true,
             configurable: true
@@ -43,7 +43,7 @@ export function __get__ (aThis, func, quotedFuncName) {
     if (aThis) {
         if (aThis.hasOwnProperty ('__class__') || typeof aThis == 'string' || aThis instanceof String) {
             if (quotedFuncName) {
-                Object.defineProperty (aThis, quotedFuncName, {
+                globalThis.Object.defineProperty (aThis, quotedFuncName, {
                     value: function () {
                         var args = [] .slice.apply (arguments);
                         return func.apply (null, [aThis] .concat (args));
@@ -94,39 +94,52 @@ export var py_metatype = {
         for (var index = bases.length - 1; index >= 0; index--) {
             var base = bases [index];
             for (var attrib in base) {
-                var descrip = Object.getOwnPropertyDescriptor (base, attrib);
+                var descrip = globalThis.Object.getOwnPropertyDescriptor (base, attrib);
                 if (descrip == null) {
                     continue;
                 }
-                Object.defineProperty (cls, attrib, descrip);
+                globalThis.Object.defineProperty (cls, attrib, descrip);
             }
             for (let symbol of Object.getOwnPropertySymbols (base)) {
-                let descrip = Object.getOwnPropertyDescriptor (base, symbol);
-                Object.defineProperty (cls, symbol, descrip);
+                let descrip = globalThis.Object.getOwnPropertyDescriptor (base, symbol);
+                globalThis.Object.defineProperty (cls, symbol, descrip);
             }
         }
         cls.__metaclass__ = meta;
         cls.__name__ = name.startsWith ('py_') ? name.slice (3) : name;
         cls.__bases__ = bases;
+        __classes__.push (cls);
+        cls.__subclasses__ = function () {return __classes__.filter (function (c) {return c.__bases__.includes (cls);});};
         for (var attrib in attribs) {
-            var descrip = Object.getOwnPropertyDescriptor (attribs, attrib);
-            Object.defineProperty (cls, attrib, descrip);
+            var descrip = globalThis.Object.getOwnPropertyDescriptor (attribs, attrib);
+            globalThis.Object.defineProperty (cls, attrib, descrip);
         }
         for (let symbol of Object.getOwnPropertySymbols (attribs)) {
-            let descrip = Object.getOwnPropertyDescriptor (attribs, symbol);
-            Object.defineProperty (cls, symbol, descrip);
+            let descrip = globalThis.Object.getOwnPropertyDescriptor (attribs, symbol);
+            globalThis.Object.defineProperty (cls, symbol, descrip);
         }
         return cls;
     }
 };
 py_metatype.__metaclass__ = py_metatype;
+var __classes__ = [];
+String.prototype.title = function () {
+    return this.replace (/[a-z]+/gi, function (word) {return word [0].toUpperCase () + word.slice (1).toLowerCase ();});
+};
+globalThis.Object.getPrototypeOf (function* () {}).prototype.send = function (value) {
+    var result = this.next (value);
+    if (result.done) {
+        throw StopIteration ();
+    }
+    return result.value;
+};
 export var object = {
     __init__: function (self) {},
     __metaclass__: py_metatype,
     __name__: 'object',
     __bases__: [],
     __new__: function (args) {
-        var instance = Object.create (this, {__class__: {value: this, enumerable: true}});
+        var instance = globalThis.Object.create (this, {__class__: {value: this, enumerable: true}});
         if ('__getattr__' in this || '__setattr__' in this) {
             instance.__proxy__ = new Proxy (instance, {
                 get: function (target, name) {
@@ -194,7 +207,7 @@ export function property (getter, setter) {
 }
 export function __setproperty__ (anObject, name, descriptor) {
     if (!anObject.hasOwnProperty (name)) {
-        Object.defineProperty (anObject, name, descriptor);
+        globalThis.Object.defineProperty (anObject, name, descriptor);
     }
 }
 export function assert (condition, message) {
@@ -256,7 +269,10 @@ export function dir (obj) {
 export function setattr (obj, name, value) {
     obj [name] = value;
 };
-export function getattr (obj, name) {
+export function getattr (obj, name, py_default) {
+    if (arguments.length > 2 && (obj === null || obj === undefined || !(name in Object (obj) || 'py_' + name in Object (obj)))) {
+        return py_default;
+    }
     return name in obj ? obj [name] : obj ['py_' + name];
 };
 export function hasattr (obj, name) {
@@ -312,7 +328,8 @@ export function len (anObject) {
     return length;
 };
 export function __i__ (any) {
-    return py_typeof (any) == dict ? any.py_keys () : any;
+    if (py_typeof (any) == dict) return any.py_keys ();
+    return any == null || typeof any == 'string' || Array.isArray (any) || '__getitem__' in Object (any) ? any : Array.from (any);
 }
 export function __k__ (keyed, key) {
     var result = keyed [key];
@@ -1173,21 +1190,25 @@ String.prototype.__getslice__ = function (start, stop, step) {
     }
     return result;
 };
+var __format_spec__ = function (value, spec) {
+    var fixed = spec && /^\.(\d+)f$/.exec (spec);
+    return fixed ? Number (value).toFixed (+fixed [1]) : str (value);
+};
 __setproperty__ (String.prototype, 'format', {
     get: function () {return __get__ (this, function (self) {
         var args = tuple ([] .slice.apply (arguments).slice (1));
         var autoIndex = 0;
-        return self.replace (/\{(\w*)\}/g, function (match, key) {
+        return self.replace (/\{(\w*)(?::([^}]*))?\}/g, function (match, key, spec) {
             if (key == '') {
                 key = autoIndex++;
             }
             if (key == +key) {
-                return args [key] === undefined ? match : str (args [key]);
+                return args [key] === undefined ? match : __format_spec__ (args [key], spec);
             }
             else {
                 for (var index = 0; index < args.length; index++) {
                     if (typeof args [index] == 'object' && args [index][key] !== undefined) {
-                        return str (args [index][key]);
+                        return __format_spec__ (args [index][key], spec);
                     }
                 }
                 return match;
@@ -1386,7 +1407,7 @@ function __pop__ (aKey, aDefault) {
     return aDefault;
 }
 function __popitem__ () {
-    const aKeys = Object.keys (this);
+    const aKeys = globalThis.Object.keys (this);
     if (aKeys.length === 0) {
         throw KeyError ("popitem(): dictionary is empty", new Error ());
     }
@@ -1954,12 +1975,12 @@ export var Exception =  __class__ ('Exception', [BaseException], {
 		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
 					}
 				}
 				delete kwargs.__kwargtrans__;
@@ -2083,7 +2104,7 @@ export var _sort = function (iterable, key, reverse) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2100,7 +2121,7 @@ export var _sort = function (iterable, key, reverse) {
 		iterable.sort ((function __lambda__ (a, b) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2119,7 +2140,7 @@ export var _sort = function (iterable, key, reverse) {
 		iterable.sort ((function __lambda__ (a, b) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2143,7 +2164,7 @@ export var sorted = function (iterable) {
 	var reverse = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2170,7 +2191,7 @@ export var __sort__ = function (iterable) {
 	var reverse = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2234,7 +2255,7 @@ export var __Terminal__ =  __class__ ('__Terminal__', [object], {
 		var end = '\n';
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2273,7 +2294,7 @@ export var __Terminal__ =  __class__ ('__Terminal__', [object], {
 	get input () {return __get__ (this, function (self, question) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2295,4 +2316,90 @@ export var __terminal__ = __Terminal__ ();
 export var print = __terminal__.print;
 export var input = __terminal__.input;
 
-//# sourceMappingURL=org.transcrypt.__runtime__.map
+//# sourceMappingURL=org.transcrypt.__runtime__.map// Python's str and list methods Blender's scripts call that Transcrypt's runtime lacks (transpile.py appends this).
+const __str_methods__ = {
+    casefold () { return this.toLowerCase (); },
+    center (width, fill = ' ') { const pad = Math.max (0, width - this.length), left = Math.floor (pad / 2); return fill.repeat (left) + this + fill.repeat (pad - left); },
+    count (sub) { return sub ? this.split (sub).length - 1 : this.length + 1; },
+    expandtabs (size = 8) { return this.replace (/\t/g, ' '.repeat (size)); },
+    index (sub, start) { const at = this.indexOf (sub, start); if (at < 0) throw ValueError ('substring not found'); return at; },
+    rindex (sub) { const at = this.lastIndexOf (sub); if (at < 0) throw ValueError ('substring not found'); return at; },
+    isascii () { return /^[\x00-\x7f]*$/.test (this); },
+    isidentifier () { return /^[A-Za-z_][A-Za-z0-9_]*$/.test (this); },
+    isprintable () { return !/[\x00-\x1f\x7f]/.test (this); },
+    istitle () { return this.length > 0 && this == this.title (); },
+    ljust (width, fill = ' ') { return this.padEnd (width, fill); },
+    rjust (width, fill = ' ') { return this.padStart (width, fill); },
+    zfill (width) { const sign = /^[+-]/.test (this) ? this [0] : ''; return sign + this.slice (sign.length).padStart (width - sign.length, '0'); },
+    partition (sep) { const at = this.indexOf (sep); return at < 0 ? [String (this), '', ''] : [this.slice (0, at), sep, this.slice (at + sep.length)]; },
+    rpartition (sep) { const at = this.lastIndexOf (sep); return at < 0 ? ['', '', String (this)] : [this.slice (0, at), sep, this.slice (at + sep.length)]; },
+    removeprefix (prefix) { return this.startsWith (prefix) ? this.slice (prefix.length) : String (this); },
+    removesuffix (suffix) { return suffix && this.endsWith (suffix) ? this.slice (0, -suffix.length) : String (this); },
+    swapcase () { return [...this].map ((c) => (c == c.toUpperCase () ? c.toLowerCase () : c.toUpperCase ())).join (''); },
+    title () { return this.toLowerCase ().replace (/(^|[^A-Za-z])([a-z])/g, (m, before, c) => before + c.toUpperCase ()); },
+    translate (table) { return [...this].map ((c) => { const to = table [c.charCodeAt (0)]; return to === undefined ? c : to === null ? '' : typeof to == 'number' ? String.fromCharCode (to) : to; }).join (''); },
+    encode () { return String (this); },
+};
+const __list_methods__ = {
+    clear () { this.length = 0; },
+    copy () { return this.slice (); },
+    count (item) { return this.filter ((x) => __eq__ (x, item)).length; },
+};
+for (const [methods, prototype] of [[__str_methods__, String.prototype], [__list_methods__, Array.prototype]]) {
+    for (const [key, value] of globalThis.Object.entries (methods)) {
+        if (!(key in prototype)) globalThis.Object.defineProperty (prototype, key, { value, writable: true, configurable: true });
+    }
+}
+// A keyword argument's Python name, for **kwargs: Transcrypt renames those that collide with JS or its runtime.
+export var __pyname__ = (key) => (key == 'py_metatype' ? 'type' : key.startsWith ('py_') ? key.slice (3) : key);
+// A class's __dict__: its own attributes. Transcrypt copies its bases' onto it, so those still the bases' are left out.
+globalThis.Object.defineProperty (Function.prototype, '__dict__', { configurable: true, get () {
+    const own = dict (), bases = this.__bases__ ?? [];
+    for (const key of globalThis.Object.keys (this)) {
+        const mine = globalThis.Object.getOwnPropertyDescriptor (this, key);
+        const inherited = bases.some ((base) => { const theirs = globalThis.Object.getOwnPropertyDescriptor (base, key); return theirs && theirs.value === mine.value && theirs.get === mine.get; });
+        if (!inherited && !['__metaclass__', '__name__', '__bases__'].includes (key)) own [key] = this [key];
+    }
+    return own;
+} });
+
+export {_copy};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__envir__': __envir__ = value; break;
+		case 'py_metatype': py_metatype = value; break;
+		case 'object': object = value; break;
+		case 'abs': abs = value; break;
+		case 'py_enumerate': py_enumerate = value; break;
+		case 'bytes': bytes = value; break;
+		case 'pow': pow = value; break;
+		case 'BaseException': BaseException = value; break;
+		case 'Exception': Exception = value; break;
+		case 'IterableError': IterableError = value; break;
+		case 'StopIteration': StopIteration = value; break;
+		case 'ValueError': ValueError = value; break;
+		case 'KeyError': KeyError = value; break;
+		case 'AssertionError': AssertionError = value; break;
+		case 'NotImplementedError': NotImplementedError = value; break;
+		case 'IndexError': IndexError = value; break;
+		case 'AttributeError': AttributeError = value; break;
+		case 'py_TypeError': py_TypeError = value; break;
+		case 'Warning': Warning = value; break;
+		case 'UserWarning': UserWarning = value; break;
+		case 'DeprecationWarning': DeprecationWarning = value; break;
+		case 'RuntimeWarning': RuntimeWarning = value; break;
+		case '_sort': _sort = value; break;
+		case 'sorted': sorted = value; break;
+		case '__sort__': __sort__ = value; break;
+		case 'map': map = value; break;
+		case 'filter': filter = value; break;
+		case 'divmod': divmod = value; break;
+		case '__Terminal__': __Terminal__ = value; break;
+		case '__terminal__': __terminal__ = value; break;
+		case 'print': print = value; break;
+		case 'input': input = value; break;
+		case '__pyname__': __pyname__ = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

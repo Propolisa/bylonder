@@ -7,13 +7,8 @@
 //   keys(idname, props): its shortcut, if bound, enumItems(idname, prop): an enum's items as [identifier, name, description, icon].
 import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js';
-
-// Python's keyword arguments: Transcrypt passes them as a last object marked __kwargtrans__.
-function args(list, names) {
-  const last = list.at(-1), keywords = last && Object.hasOwn(last, '__kwargtrans__') ? last : {};
-  const positional = keywords === last ? list.slice(0, -1) : list;
-  return Object.fromEntries(names.map((name, i) => [name, keywords[name] ?? positional[i]]));
-}
+import { pyArgs as args } from '../../makesrna/rna.js';
+import { toolIconUrl } from './icon.js';
 
 // OperatorProperties: what a menu sets on an entry; a macro's operators (props.MESH_OT_rip) have their own.
 const MACRO_PART = /_OT_/;
@@ -70,8 +65,11 @@ export class UILayout {
   }
 
   operator(...list) {
-    const { operator: idname, text, icon } = args(list, ['operator', 'text', 'text_ctxt', 'translate', 'icon']), props = properties();
-    this.items.push(this.#entry(idname, props, text ?? operatorName(idname), undefined, icon));
+    const { operator: idname, text, icon, icon_value } = args(list, ['operator', 'text', 'text_ctxt', 'translate', 'icon', 'emboss', 'depress', 'icon_value']);
+    const props = properties(), entry = this.#entry(idname, props, text ?? operatorName(idname), undefined, icon);
+    // A tool's icon, which bpy.app.icons names.
+    if (typeof icon_value === 'string') entry.image = toolIconUrl(icon_value);
+    this.items.push(entry);
     return props;
   }
 
@@ -108,7 +106,7 @@ export class UILayout {
       if (this.ui.header && data) this.items.push({ property: { data, name: property, text, icon, iconOnly: !!icon_only, toggle: !!toggle }, active: () => this.#active(), enabled: () => this.#enabled() });
       return;
     }
-    this.items.push({ label: text ?? binding.label, blender: property, icon: icon && icon !== 'NONE' ? icon : undefined, iconOnly: !!icon_only || text === '',
+    this.items.push({ label: text ?? binding.label, blender: property, keys: binding.keys, icon: icon && icon !== 'NONE' ? icon : undefined, iconOnly: !!icon_only || text === '',
       checked: () => !!binding.get(), enabled: () => this.#enabled(), run: () => binding.set(!binding.get()) });
   }
   prop_with_popover(...list) { this.prop(...list); }
@@ -142,7 +140,7 @@ export class UILayout {
 // bpy.context, which some scripts read in place of the context they are given, is the one being drawn with, and
 // bpy.data has what its blend_data binds.
 const contextKeys = new Set();
-function useContext(context) {
+export function useContext(context) {
   contextKeys.forEach((key) => delete bpyContext[key]);
   contextKeys.clear();
   for (const key of Object.keys(context)) contextKeys.add(key);

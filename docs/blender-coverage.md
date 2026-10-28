@@ -65,3 +65,9 @@ The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animat
 ## GRAPH_EDITOR > *
 Status: partial
 Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Drivers mode, F-Curve modifiers and the sidebar are not shown yet.
+## VIEW3D_PT_transform
+The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/space_view3d/view3d-buttons.js`. Edit Mode's Median panel is not ported yet.
+
+## VIEW3D_HT_header > *
+The transform settings (`draw_xform_template`) draw from Blender's Python. Transform orientation slots are stored but no transform uses them yet.
+

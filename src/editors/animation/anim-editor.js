@@ -5,13 +5,13 @@
 // following events with modal keymaps applied. The window manager's part (gestures, event values, redraws) is here;
 // the header is drawn from Blender's scripts (space_graph.py, space_dopesheet.py, space_time.py).
 import { AnimArea, SPACE_GRAPH, SPACE_ACTION, RGN_TYPE_WINDOW, RGN_TYPE_CHANNELS, ACTION_MODES, ACHANNEL_SETTING, KM_SHIFT, KM_CTRL, KM_ALT, KM_OSKEY,
-  OPERATOR_RUNNING_MODAL, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
+  OPERATOR_RUNNING_MODAL, OPERATOR_CANCELLED, OPERATOR_FINISHED, OPERATOR_PASS_THROUGH } from './anim-area.js';
 import { regionCanvas, drawGrid, drawFrameRange, drawScrubbing, drawChannels, channelRows, channelToggles, drawKeyRows, drawCurves, drawGesture } from './anim-draw.js';
 import theme from '../interface/theme-default.json' with { type: 'json' };
 import { newOperator, operatorNames } from '../../bmesh/bmesh-wasm.js';
 import { keymapHandler, modalItem } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI, PASS_THROUGH } from '../../windowmanager/wm-operators.js';
+import { inArea, contextArea, registerOperator, registerOperators, runOperator, menuUI } from '../../windowmanager/wm-operators.js';
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
 import { drawHeader } from '../interface/header.js';
@@ -86,6 +86,9 @@ const modifiers = (e) => (e.shiftKey ? KM_SHIFT : 0) | (e.ctrlKey ? KM_CTRL : 0)
 //   Dope Sheet's (TIMELINE or DOPESHEET); animation: the scene's (blenkernel/animation/model.js); rna: createRNA(host)
 //   for the header's context; objects: the Object Mode mirror (its sync() puts the objects' bases in the module);
 //   commit(): an undo step.
+// A module operator's status as the registry's operators return it: the event goes on after a pass through or a cancel.
+const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' : status === OPERATOR_CANCELLED ? 'CANCELLED' : 'FINISHED');
+
 export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, objects, commit = () => {} }) {
   const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space]);
   if (space === 'DOPESHEET_EDITOR') area.subtype = ACTION_MODES[uiType];
@@ -145,12 +148,12 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     if (area.gesture) startGesture(event);
     if (area.popup) openPopup(idname, event);
     after(status);
-    return status & OPERATOR_PASS_THROUGH ? PASS_THROUGH : undefined;
+    return statusName(status);
   };
   editor.macro = (steps, event) => {
     for (const [idname, props] of steps) {
       const result = editor.invoke(idname, props, event);
-      if (result === PASS_THROUGH || area.modal) break;
+      if (result === 'PASS_THROUGH' || area.modal) break;
     }
   };
   // wm.context_toggle on this editor's context (space_data.show_handles).

@@ -12,9 +12,7 @@ const operators = new Map(), spaceOperators = new Map(), extensions = new Map();
 // with some properties only and enumItems(prop) for its enum properties' items where they differ from Blender's
 // (src/makesrna/rna-operators.json), as [identifier, name, description, icon]. One registered for a space type
 // ('GRAPH_EDITOR') runs when the context area is of that space, as Blender's operators act on the context area's space
-// (transform in a Graph Editor moves keys); elsewhere the operator registered without one runs. A run that returns
-// PASS_THROUGH did not handle the event, so the keymap goes on to its next item.
-export const PASS_THROUGH = Symbol('PASS_THROUGH');
+// (transform in a Graph Editor moves keys); elsewhere the operator registered without one runs.
 export function registerOperator(idname, operator, space = null) {
   if (space) (spaceOperators.get(space) ?? spaceOperators.set(space, new Map()).get(space)).set(idname, operator);
   else operators.set(idname, operator);
@@ -28,19 +26,19 @@ const operatorFor = (idname) => (area?.space && spaceOperators.get(area.space)?.
 
 export const runOperator = (idname, props = {}) => operatorFor(idname).run(props);
 
-// Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls; returns
-// whether it ran. run and poll get the event too. An operator with `confirm: { title, button }` asks first, as
-// WM_operator_confirm_ex does, unless its confirm property (default from Blender's RNA) is off.
+// Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls. Returns
+// false when it did not run, else what run returned, as Blender's operators do: 'FINISHED' (or nothing),
+// 'CANCELLED' or 'PASS_THROUGH', after which the event goes on to the next handler. run and poll get the event too.
+// An operator with `confirm: { title, button }` asks first, as WM_operator_confirm_ex does, unless its confirm property
+// (default from Blender's RNA) is off.
 export function invokeOperator(idname, props, event) {
   const operator = operatorFor(idname);
   if (!operator || !(operator.supports?.(props) ?? true) || !(operator.poll?.(props, event) ?? true)) return false;
   const confirm = operator.confirm && (props.confirm ?? rnaOperators[idname]?.properties.confirm?.default ?? true);
-  if (confirm) {
-    import('../editors/interface/menu.js').then(({ openMenu }) =>
-      openMenu([{ label: operator.confirm.button, run: () => operator.run(props, event) }], event, operator.confirm.title));
-  }
-  else return operator.run(props, event) !== PASS_THROUGH;
-  return true;
+  if (!confirm) return operator.run(props, event) ?? 'FINISHED';
+  import('../editors/interface/menu.js').then(({ openMenu }) =>
+    openMenu([{ label: operator.confirm.button, run: () => operator.run(props, event) }], event, operator.confirm.title));
+  return 'FINISHED';
 }
 
 // The area an event is handled in, Blender's context area: an editor sets it while its keymaps run, so operators act

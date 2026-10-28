@@ -73,6 +73,8 @@ const SETUP = {
   },
   "graph-editor": animationEditor("Graph Editor"),
   "dope-sheet": animationEditor("Dope Sheet"),
+  toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
+  "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
 };
 
 async function captureBylonder(browser, url, state) {

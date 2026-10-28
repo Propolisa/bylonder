@@ -4,15 +4,16 @@ import { generate_keymaps, Params } from '../bl_ui/blender_default.js';
 import { keysLabel } from './input/keymap.js';
 import { invokeOperator, kw } from './wm-operators.js';
 
-// The parameters the default key configuration (presets/keyconfig/Blender.py) passes with its default preferences.
-export const KEYCONFIG_PARAMS = {
-  select_mouse: 'LEFT', use_mouse_emulate_3_button: false, spacebar_action: 'PLAY', use_key_activate_tools: false, use_region_toggle_pie: false,
-  v3d_tilde_action: 'VIEW', use_v3d_mmb_pan: false, v3d_alt_mmb_drag_action: 'RELATIVE', use_select_all_toggle: false, use_v3d_tab_menu: false,
-  use_v3d_shade_ex_pie: false, use_gizmo_drag: true, use_fallback_tool: true, use_fallback_tool_select_handled: false, use_alt_tool_or_cursor: false,
-  use_alt_click_leader: false, use_pie_click_drag: false, use_file_single_click: false, use_alt_navigation: true,
+// The key configuration Blender loads (presets/keyconfig/Blender.py's load) with its preferences' defaults: left click
+// select, Space plays, fallback tools.
+const PREFERENCES = {
+  select_mouse: 'LEFT', use_mouse_emulate_3_button: false, spacebar_action: 'PLAY', use_key_activate_tools: false,
+  use_region_toggle_pie: false, v3d_tilde_action: 'VIEW', use_v3d_mmb_pan: false, v3d_alt_mmb_drag_action: 'RELATIVE',
+  use_select_all_toggle: false, use_v3d_tab_menu: false, use_v3d_shade_ex_pie: false, use_gizmo_drag: true, use_fallback_tool: true,
+  use_fallback_tool_select_handled: false, use_alt_tool_or_cursor: false, use_alt_click_leader: false, use_pie_click_drag: false,
+  use_file_single_click: false, use_alt_navigation: true,
 };
-export const defaultKeymaps = () => generate_keymaps(Params(kw(KEYCONFIG_PARAMS)));
-
+export const defaultKeymaps = () => generate_keymaps(Params(kw(PREFERENCES)));
 let keymaps;
 const keyconfig = () => (keymaps ??= new Map(defaultKeymaps().map(([name, , { items }]) => [name, items])));
 
@@ -27,11 +28,16 @@ const callers = (idname) => (/_(MT|PT)_/.test(idname)
 // The binding's properties agree with the ones the menu sets (IDP_EqualsProperties_ex, not strict).
 const agrees = (bound, props) => (bound ?? []).every(([key, value]) => !(key in props) || props[key] === value);
 
-// The key text of the first binding of the operator, with the menu's properties, in the named keymaps in order.
-export function blenderKeys(names, idname, props = {}) {
+// The binding's properties are the ones given, no more and no fewer (is_strict).
+const equals = (bound, props) => (bound ?? []).length === Object.keys(props).length && agrees(bound, props) &&
+  (bound ?? []).every(([key]) => key in props);
+
+// The key text of the first binding of the operator, with the menu's properties (exactly them when strict), in the
+// named keymaps in order.
+export function blenderKeys(names, idname, props = {}, strict = false) {
   for (const [id, set] of callers(idname) ?? [[idname, props]]) {
     for (const name of names) {
-      const item = keyconfig().get(name)?.find(([op, , data]) => op === id && agrees(data?.properties, set) &&
+      const item = keyconfig().get(name)?.find(([op, , data]) => op === id && (strict ? equals : agrees)(data?.properties, set) &&
         (!callers(idname) || data?.properties?.some(([key, value]) => key === 'name' && value === idname)));
       if (item) return eventText(item[1]);
     }
@@ -60,14 +66,17 @@ export function modalItem(name, event, allowed = () => true) {
   return null;
 }
 
-// A handler running the named keymaps in order, as the editor's handlers run them, those `active(name)` allows: the
-// first item whose event matches and whose operator Bylonder runs with its properties, and polls, is invoked, by
-// `invoke(idname, props, event)` (an editor's own operators) or else the registered operators.
-export function keymapHandler(names, active = () => true) {
+// A handler running the named keymaps in order (or those `names(event)` gives), as the editor's handlers run
+// them, those `active(name)` allows: the first item whose event matches and whose operator Bylonder runs with its
+// properties, and polls, is invoked; one that cancels or passes through lets the event go on. `defaults(name, idname)`
+// gives properties an item's own override (a tool's settings for its keymap).
+export function keymapHandler(names, active = () => true, defaults = () => ({})) {
   return (event) => {
-    for (const name of names.filter(active)) {
+    for (const name of (typeof names === 'function' ? names(event) : names).filter(active)) {
       for (const [idname, kmi, data] of keyconfig().get(name) ?? []) {
-        if (!matches(kmi, event) || !invokeOperator(idname, Object.fromEntries(data?.properties ?? []), event)) continue;
+        if (!matches(kmi, event)) continue;
+        const result = invokeOperator(idname, { ...defaults(name, idname), ...Object.fromEntries(data?.properties ?? []) }, event);
+        if (!result || result === 'CANCELLED' || result === 'PASS_THROUGH') continue;
         event.native?.preventDefault();
         return true;
       }
