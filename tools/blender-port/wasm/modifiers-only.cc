@@ -1,15 +1,15 @@
 /* The modifier kernels module (modifiers.wasm): modifier-api.cc without the rest of the scene module. It holds the
  * modifiers that evaluate on a mesh alone (MESH_ONLY in src/modifiers/blender.js); the other types are left out of its
- * library and are unknown here, as modifier-api.cc makes Geometry Nodes unknown. */
+ * library and are unknown here, as modifier-api.cc makes Geometry Nodes unknown. Armature, Curve and Lattice stay:
+ * BKE_modifier_init makes one of each (the virtual modifiers), and an unknown type's ModifierData has no size, so its
+ * name would be written past the end of a block. */
 #include "BKE_modifier.hh"
 
 namespace blender {
 
-ModifierTypeInfo modifierType_Armature = {};
 ModifierTypeInfo modifierType_Boolean = {};
 ModifierTypeInfo modifierType_Cloth = {};
 ModifierTypeInfo modifierType_Collision = {};
-ModifierTypeInfo modifierType_Curve = {};
 ModifierTypeInfo modifierType_DataTransfer = {};
 ModifierTypeInfo modifierType_DynamicPaint = {};
 ModifierTypeInfo modifierType_Explode = {};
@@ -41,7 +41,6 @@ ModifierTypeInfo modifierType_GreasePencilWeightAngle = {};
 ModifierTypeInfo modifierType_GreasePencilWeightProximity = {};
 ModifierTypeInfo modifierType_Hook = {};
 ModifierTypeInfo modifierType_LaplacianDeform = {};
-ModifierTypeInfo modifierType_Lattice = {};
 ModifierTypeInfo modifierType_Mask = {};
 ModifierTypeInfo modifierType_MeshToVolume = {};
 ModifierTypeInfo modifierType_MeshCache = {};

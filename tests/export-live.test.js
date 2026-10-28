@@ -3,6 +3,7 @@ import { writeFileSync, mkdtempSync, mkdirSync, copyFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { NullEngine, Scene, MeshBuilder, FreeCamera, Vector3, VertexBuffer } from '@babylonjs/core';
 import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
@@ -16,6 +17,11 @@ import { bundleWorker } from '../scripts/modifiers-polyfill.mjs';
 // its result must be the applied export's geometry, for each modifier type and for an animated setting.
 assert.equal(await bundleWorker(), (await import('node:fs')).readFileSync(new URL('../src/io_scene_babylon/polyfill/modifiers-worker.bundle.js', import.meta.url), 'utf8'),
   'modifiers-worker.bundle.js is out of date: run node scripts/modifiers-polyfill.mjs');
+
+// Every modifier Bylonder offers evaluates in the committed module without trapping (the build's check, which it also
+// runs with the module's data moved: tools/blender-port/check-modifiers.mjs).
+const checked = execFileSync('node', [new URL('../tools/blender-port/check-modifiers.mjs', import.meta.url).pathname, new URL('../src/modifiers/modifiers.wasm', import.meta.url).pathname], { encoding: 'utf8' });
+assert.deepEqual(checked.split('\n').filter((line) => line.includes('error:')), [], 'no modifier reports an error');
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const camera = new FreeCamera('Camera', new Vector3(0, 5, -20), scene);

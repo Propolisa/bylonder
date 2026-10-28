@@ -145,7 +145,14 @@ Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Mo
   `animrig`, `windowmanager`, the interface and the Outliner, blenfont and FreeType, and OpenVDB (built without
   `WITH_OPENVDB`, so Remesh's Voxel mode reports that it is unavailable). Modifier types outside `MESH_ONLY`
   (`src/modifiers/blender.js`) are left out of its `modifiers/intern` and declared empty in `modifiers-only.cc`, as
-  `modifier-api.cc` makes Geometry Nodes unknown. Archives are per module in the shared build directory.
+  `modifier-api.cc` makes Geometry Nodes unknown, except the ones Blender's own code makes: `BKE_modifier_init` makes
+  an Armature, Curve and Lattice modifier, and an empty type's ModifierData has no size, so its name was written past
+  the end of a block (2026-10-28: the module passed or trapped depending on where its data landed). Archives are per
+  module in the shared build directory.
+- **Layout check.** A module's manifest `check` (here `tools/blender-port/check-modifiers.mjs`, every offered modifier
+  on Blender's cube) runs after each link, on the module and on copies linked with 100, 4000 and 70000 bytes of data
+  ahead of its own, and the build fails unless all print the same: a module whose results depend on where its data
+  lands reads or writes memory it does not own. `tests/export-live.test.js` runs the check on the committed module.
 - **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`: 15.4 MB, 4.4 MB gzipped), with
   `modifiers.js` (4 KB) and the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
   3.1 MB gzipped: OpenVDB's templates alone were a third of its code. What remains is mostly what `BKE_idtype_init`
