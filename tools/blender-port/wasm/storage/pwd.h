@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 struct passwd {
+  char *pw_name;
   char *pw_dir;
 };
 struct passwd *getpwuid(uid_t uid);

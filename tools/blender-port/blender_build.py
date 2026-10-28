@@ -44,23 +44,24 @@ def module_inputs(host, out):
     return os.path.realpath(os.path.join(host, '..', 'blender')), spec, includes
 
 
-def dependency_archives(host, out):
-    """The libraries Blender links from outside its tree that the module builds from source (FreeType, OpenSubdiv,
-    OpenVDB, zstd: the manifest's `dependency` libraries), as the module build compiles them."""
+def module_archives(host, out):
+    """The manifest's libraries the module build makes that Blender's build does not: those from outside Blender's tree
+    (FreeType, OpenSubdiv, OpenVDB, zstd) and Blender's renamed copies (blenfont as vfont_BLF_ for text objects, as the
+    interface's BLF_ functions are region-draw.cc's), compiled as the module build compiles them."""
     tree, spec, _ = module_inputs(host, out)
     deps, includes, versions = wasm_module.dependencies(out, spec['dependencies'])
     ar = shutil.which('llvm-ar') or shutil.which('llvm-ar-18')
     archives = []
-    for entry in (e for e in spec['libraries'] if isinstance(e, dict) and 'dependency' in e):
+    for entry in (e for e in spec['libraries'] if isinstance(e, dict) and ('dependency' in e or 'rename' in e)):
         extra, key = wasm_module.library_flags(entry, tree, deps, spec)
         built = [o for o in wasm_module.compile_all(out, wasm_module.library_sources(entry, tree, deps),
                                                     includes + wasm_module.flags(tree, spec) + extra, versions + key).values() if o]
-        archive = os.path.join(out, 'archives', f'{entry["dependency"]}_{entry["path"].replace("/", "_")}.a')
+        archive = os.path.join(out, 'archives', f'{entry.get("dependency", "renamed")}_{entry["path"].replace("/", "_")}.a')
         if os.path.exists(archive):
             os.remove(archive)
         subprocess.run([ar, 'rcs', archive, *built], check=True)
         archives.append(archive)
-        print(f'{entry["dependency"]}/{entry["path"]}: {len(built)} sources', file=sys.stderr)
+        print(f'{entry.get("dependency", "renamed")}/{entry["path"]}: {len(built)} sources', file=sys.stderr)
     return archives
 
 
@@ -82,6 +83,10 @@ def wasm_command(entry, extra):
         if arg in ('-o', '-c', '-MF', '-MT', '-MQ'):
             skip = arg != '-c'
             continue
+        # A host include directory given as two arguments (-isystem /usr/include/OpenImageIO).
+        if arg in ('-I', '-isystem') and i + 2 < len(args) and args[i + 2].startswith('/usr/'):
+            skip = True
+            continue
         if arg == entry['file'] or arg.endswith(os.path.basename(entry['file'])) and os.path.isabs(arg) or DROP.match(arg) or arg == '-MD':
             continue
         keep.append(arg)
@@ -92,6 +97,7 @@ def wasm_command(entry, extra):
 REPO = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 # The work directory (configure_host.sh's DIR), set by main.
 WORK = {}
+SHIMS = wasm_module.own_headers()[:8]
 
 
 def compile_one(objects, entry, extra):
@@ -109,11 +115,13 @@ def compile_one(objects, entry, extra):
     obj = os.path.join(objects, f'{os.path.basename(source)}.{digest}.o')
     if os.path.exists(obj):
         return source, obj, None
-    if os.path.exists(obj + '.failed'):
-        return source, None, open(obj + '.failed').read()
+    # A failure is tried again when the module's own headers (compat.h, wasm/include) change.
+    failed = f'{obj}.{SHIMS}.failed'
+    if os.path.exists(failed):
+        return source, None, open(failed).read()
     result = subprocess.run([*command, '-c', source, '-o', obj], cwd=entry['directory'], capture_output=True, text=True)
     if result.returncode:
-        open(obj + '.failed', 'w').write(result.stderr[-4000:])
+        open(failed, 'w').write(result.stderr[-4000:])
         return source, None, result.stderr[-4000:]
     return source, obj, None
 
@@ -150,7 +158,7 @@ def wasm_tool(host, out, name, libraries, by_any, extra, link=True):
     tree, spec, includes = module_inputs(host, out)
     subprocess.run(['clang++', *includes, *wasm_module.flags(tree, spec), '-c', os.path.join(WASM, 'platform.cc'), '-o', platform], check=True)
     tool = os.path.join(out, name + '.wasm')
-    subprocess.run(['clang++', '--target=wasm32-wasi', *built, platform, '-lwasi-emulated-process-clocks', '-Wl,--allow-undefined', '-o', tool], check=True)
+    subprocess.run(['clang++', '--target=wasm32-wasi', *built, platform, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-Wl,--allow-undefined', '-o', tool], check=True)
     return tool
 
 
@@ -252,10 +260,11 @@ def main():
                 os.remove(archive)
             subprocess.run([ar, 'rcs', archive, *built], check=True)
             archives.append(archive)
-    archives += dependency_archives(host, out)
+    module_libraries = module_archives(host, out)
+    archives += module_libraries
     # Everything linked as one reactor with every symbol kept, so each library's unresolved symbols show.
     link = ['clang++', '--target=wasm32-wasi', '-mexec-model=reactor', '-Wl,--whole-archive', *archives, '-Wl,--no-whole-archive',
-            '-lwasi-emulated-process-clocks', '-Wl,--error-limit=0', '-Wl,--warn-unresolved-symbols', '-Wl,--allow-undefined',
+            '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman', '-Wl,--error-limit=0', '-Wl,--warn-unresolved-symbols', '-Wl,--allow-undefined',
             '-o', os.path.join(out, 'blender-all.wasm')]
     result = subprocess.run(link, capture_output=True, text=True)
     unresolved = sorted({line.split('undefined symbol: ')[-1].strip() for line in result.stderr.splitlines() if 'undefined symbol: ' in line})
@@ -278,7 +287,7 @@ def main():
     total = sum(len(d) for d in results.values())
     compiled = sum(1 for d in results.values() for _, o, _ in d if o)
     print(f'{compiled} of {total} sources compile; link exit {result.returncode}; {len(names)} unresolved symbols; report {report}', file=sys.stderr)
-    link_module(host, out, entries, extra, archives)
+    link_module(host, out, entries, extra, archives, module_libraries)
 
 
 # Bylonder's own path resolution for its custom properties (rna-runtime.cc).
@@ -290,10 +299,10 @@ WRAPPED = ['_ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS
 SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager'}
 
 
-def link_module(host, out, entries, extra, archives):
+def link_module(host, out, entries, extra, archives, module_libraries):
     """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) with Blender's libraries.
-    Where both define a symbol, the loser's definition is made weak (wasm_weaken.py): the API wins in SEAM_LIBRARIES,
-    Blender everywhere else. Each one is listed (wasm-build/replaced.json), so the API's stand-ins can go one by one."""
+    Where both define a symbol, the loser's definition is made weak (wasm_weaken.py): the module build's own libraries
+    (module_archives) win, the API wins in SEAM_LIBRARIES, Blender everywhere else. Each one is listed (wasm-build/replaced.json), so the API's stand-ins can go one by one."""
     built = glue(host, out, entries, extra)
     failed = [(s, e) for s, o, e in built if not o]
     if failed:
@@ -310,10 +319,10 @@ def link_module(host, out, entries, extra, archives):
     while True:
         link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
-                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, *copies, *copies, '-lwasi-emulated-process-clocks',
+                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, *copies, *copies, '-lwasi-emulated-process-clocks', '-lwasi-emulated-mman',
                 '-Wl,--allow-undefined', '-o', module]
         result = subprocess.run(link, capture_output=True, text=True)
-        losers = duplicate_losers(result.stderr)
+        losers = duplicate_losers(result.stderr, {os.path.basename(a) for a in module_libraries})
         if not losers:
             break
         changed = False
@@ -333,7 +342,7 @@ def link_module(host, out, entries, extra, archives):
           file=sys.stderr)
 
 
-def duplicate_losers(stderr):
+def duplicate_losers(stderr, preferred):
     """{(file, archive member or None): symbols} whose definitions should yield, from wasm-ld's "duplicate symbol: S"
     lines, each followed by ">>> defined in" both places."""
     losers, lines = {}, stderr.splitlines()
@@ -346,7 +355,10 @@ def duplicate_losers(stderr):
             continue
         members = [p for p in places if p[1]]
         objects = [p for p in places if not p[1]]
-        if objects and members:
+        own = [p for p in places if os.path.basename(p[0]) in preferred]
+        if len(own) == 1:
+            loser = next(p for p in places if p not in own)
+        elif objects and members:
             library = os.path.basename(members[0][0]).removesuffix('.a')
             loser = members[0] if library in SEAM_LIBRARIES else objects[0]
         else:

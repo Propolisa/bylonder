@@ -2,6 +2,21 @@
  * Blender's ModifierData (JS writes their settings at the offsets of their DNA structs), and mesh_create_eval_final
  * evaluates them as the depsgraph would. The result's arrays are read in place through an ExtractionHeader. */
 #include "BKE_attribute.hh"
+#include "BKE_blender.hh"
+#include "BKE_brush.hh"
+#include "BKE_callbacks.hh"
+#include "BKE_material.hh"
+#include "BKE_particle.h"
+#include "BKE_shader_fx.hh"
+#include "BKE_volume.hh"
+#include "BLI_threads.h"
+#include "DNA_genfile.h"
+#include "FN_init.hh"
+#include "IMB_imbuf.hh"
+#include "RE_engine.h"
+#include "RE_texture.h"
+#include "RNA_define.hh"
+#include "SEQ_modifier.hh"
 #include "BKE_node.hh"
 #include "BKE_cpp_types.hh"
 #include "BKE_customdata.hh"
@@ -45,9 +60,35 @@ using namespace blender;
 /* As Blender's main sets them up before any data is made, once, on first use: other files' statics they reach are not
  * constructed yet while the module initializes. */
 void fonts_init();
+/* What Blender's main initializes (creator.cc), in its order, without the window system and Python. */
+static void blender_init()
+{
+  BLI_threadapi_init();
+  DNA_sdna_current_init();
+  BKE_blender_globals_init();
+  BKE_cpp_types_init();
+  fn::multi_function::register_common_functions();
+  BKE_idtype_init();
+  BKE_modifier_init();
+  seq::modifiers_init();
+  BKE_shaderfx_init();
+  BKE_volumes_init();
+  DEG_register_node_types();
+  BKE_callback_global_init();
+  IMB_init();
+  RNA_init();
+  RE_texture_rng_init();
+  RE_engines_init();
+  bke::node_system_init();
+  BKE_brush_system_init();
+  BKE_particle_init_rng();
+  fonts_init();
+  BKE_materials_init();
+}
+
 void types_ensure()
 {
-  static const bool types = (BKE_cpp_types_init(), BKE_idtype_init(), BKE_modifier_init(), fonts_init(), true);
+  static const bool types = (blender_init(), true);
   (void)types;
 }
 

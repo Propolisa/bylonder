@@ -1,0 +1,39 @@
+/* libc++ without threads has no <thread>. A module has one thread: this_thread is exact, and starting another traps
+ * (as a call the module imports does). */
+#pragma once
+
+#include <chrono>
+#include <cstdlib>
+#include <time.h>
+
+namespace std {
+class thread {
+ public:
+  class id {
+   public:
+    bool operator==(const id &) const = default;
+  };
+  thread() noexcept = default;
+  template<class F, class... Args> explicit thread(F &&, Args &&...) { abort(); }
+  bool joinable() const noexcept { return false; }
+  void join() {}
+  void detach() {}
+  id get_id() const noexcept { return {}; }
+  static unsigned hardware_concurrency() noexcept { return 1; }
+};
+
+namespace this_thread {
+inline thread::id get_id() noexcept { return {}; }
+inline void yield() noexcept {}
+template<class Rep, class Period> void sleep_for(const chrono::duration<Rep, Period> &duration)
+{
+  const auto ns = chrono::duration_cast<chrono::nanoseconds>(duration).count();
+  const timespec time = {time_t(ns / 1000000000), long(ns % 1000000000)};
+  nanosleep(&time, nullptr);
+}
+template<class Clock, class Duration> void sleep_until(const chrono::time_point<Clock, Duration> &time)
+{
+  sleep_for(time - Clock::now());
+}
+}  // namespace this_thread
+}  // namespace std

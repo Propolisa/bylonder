@@ -753,22 +753,6 @@ namespace blender {
 /* port-override: Blender's menus are drawn by Bylonder's window manager (JS), which opens the menu named here. */
 void WM_menu_name_call(bContext * /*C*/, const char *menu_name, wm::OpCallContext /*context*/) { menu_called = menu_name; }
 
-/* As wm_operator_type.cc defines it, over the module's operator table. */
-wmOperatorType *WM_operatortype_find(const char *idname, bool /*quiet*/)
-{
-  std::string name = idname;
-  if (const char *dot = strchr(idname, '.')) {
-    name = std::string(idname, dot) + "_OT_" + (dot + 1);
-    std::transform(name.begin(), name.begin() + (dot - idname), name.begin(), ::toupper);
-  }
-  for (int i = 0; i < operator_count(); i++) {
-    if (name == operators()[i]->idname) {
-      return operator_type(i);
-    }
-  }
-  return nullptr;
-}
-
 /* port-override: Bylonder's window manager keeps the modal handler (JS); it learns of it by operator_modal_added. */
 wmEventHandler_Op *WM_event_add_modal_handler(bContext * /*C*/, wmOperator *op)
 {

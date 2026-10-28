@@ -104,9 +104,6 @@ static void collections_synced(BlenderMain *ctx);
 EXPORT(main_new) BlenderMain *main_new()
 {
   types_ensure();
-  /* As Blender's main does once, for the files it writes. */
-  static const bool sdna = (DNA_sdna_current_init(), true);
-  (void)sdna;
   BlenderMain *ctx = MEM_new<BlenderMain>(__func__);
   /* As BKE_main_new makes it, without the working color space: the module has no color management. */
   ctx->bmain = MEM_new<Main>(__func__);

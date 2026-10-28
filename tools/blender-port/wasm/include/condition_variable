@@ -1,0 +1,43 @@
+/* libc++ without threads has no <condition_variable>. On one thread nothing else notifies: a wait whose condition does
+ * not hold already traps, a timed wait times out. */
+#pragma once
+
+#include <chrono>
+#include <cstdlib>
+
+namespace std {
+enum class cv_status { no_timeout, timeout };
+
+class condition_variable {
+ public:
+  void notify_one() noexcept {}
+  void notify_all() noexcept {}
+  template<class Lock> void wait(Lock &) { abort(); }
+  template<class Lock, class Predicate> void wait(Lock &, Predicate ready)
+  {
+    if (!ready()) {
+      abort();
+    }
+  }
+  template<class Lock, class Rep, class Period> cv_status wait_for(Lock &, const chrono::duration<Rep, Period> &)
+  {
+    return cv_status::timeout;
+  }
+  template<class Lock, class Rep, class Period, class Predicate>
+  bool wait_for(Lock &, const chrono::duration<Rep, Period> &, Predicate ready)
+  {
+    return ready();
+  }
+  template<class Lock, class Clock, class Duration>
+  cv_status wait_until(Lock &, const chrono::time_point<Clock, Duration> &)
+  {
+    return cv_status::timeout;
+  }
+  template<class Lock, class Clock, class Duration, class Predicate>
+  bool wait_until(Lock &, const chrono::time_point<Clock, Duration> &, Predicate ready)
+  {
+    return ready();
+  }
+};
+using condition_variable_any = condition_variable;
+}  // namespace std

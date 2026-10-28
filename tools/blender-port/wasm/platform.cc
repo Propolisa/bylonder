@@ -56,5 +56,10 @@ WEAK void BLI_rw_mutex_init(ThreadRWMutex * /*mutex*/) {}
 WEAK void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
 WEAK void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
 WEAK void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
+/* port-override: image files are the browser's to decode; OpenImageIO and OpenEXR are past the seam. */
+WEAK void OIIO_init() {}
+WEAK void imb_initopenexr() {}
+WEAK void imb_exitopenexr() {}
+WEAK void imb_init_dds() {}
 }  // namespace blender
 #undef WEAK
