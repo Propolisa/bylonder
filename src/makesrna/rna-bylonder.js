@@ -3,9 +3,11 @@
 // (rna.js). Values are in Blender's axes (Z up, right-handed): Babylon's (x, y, z) is Blender's (x, z, y).
 // A write is RNA's set and update: it changes Bylonder's data and calls host.update (the notifier); undo steps are
 // pushed by the UI that made the edit (host.undoPush), as Blender's buttons push them, never by RNA.
+// A binding with `sync` (true, or a test of the owner) is also kept equal in Blender's Main, at the DNA field Blender's
+// RNA names (blenkernel/main-sync.js): the same declaration reads and writes both ways.
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
-import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
+import { Camera, Color3, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
 import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import rnaOperators from './rna-operators.json' with { type: 'json' };
@@ -118,6 +120,8 @@ const textOption = (key, read = (v) => v, write = (v) => v) => ({ get: (ob) => r
 const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXED;
 const sensor = (camera) => (horizontal(camera) ? 36 : 24);
 const settable = (key) => ({ get: (owner) => owner[key], set: (owner, value) => { owner[key] = value; } });
+const synced = (binding, sync = true) => ({ ...(typeof binding === 'function' ? { get: binding } : binding), sync });
+const quaternion = (ob) => !!ob.rotationQuaternion;
 // Enum items for Bylonder's own choices, as RNA's [identifier, name, description, icon].
 const choices = (table, label = (entry) => entry.label) => () => Object.entries(table).map(([id, entry]) => [id, label(entry), '', 'NONE']);
 // A slice's setting by path, written without a commit (the UI that made the edit pushes the undo step).
@@ -140,6 +144,10 @@ const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => s
 const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
 // A Babylon material's inputs as Principled BSDF sockets: a PBR material's own, a Standard material's color and alpha.
 const color3 = (owner, key) => ({ get: () => [owner[key].r, owner[key].g, owner[key].b, 1], set: ([red, green, blue]) => owner[key].set(red, green, blue) });
+const baseColor = (material) => (material.getClassName() === 'PBRMaterial' ? material.albedoColor : material.diffuseColor ?? new Color3(0.8, 0.8, 0.8));
+// A PBR material's value, which other materials do without (Blender's default when read).
+const pbrValue = (key, fallback) => ({ get: (material) => (material.getClassName() === 'PBRMaterial' ? material[key] ?? fallback : fallback),
+  set: (material, value) => { if (material.getClassName() === 'PBRMaterial') material[key] = value; } });
 const materialValue = (material, path) => {
   const keys = path.split('.'), key = keys.pop(), owner = () => keys.reduce((o, k) => o?.[k], material);
   return owner()?.[key] === undefined ? null : { get: () => owner()[key], set: (value) => { owner()[key] = value; } };
@@ -176,16 +184,16 @@ const STRUCTS = {
     type: objectType,
     mode: (ob, r) => (editing(ob, r) ? 'EDIT' : 'OBJECT'),
     data: (ob, r) => r.pointer(OBJECT_DATA[objectType(ob)]?.(ob), ob),
-    location: { ...array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))), channel: objectChannel('position') },
-    rotation_mode: (ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : 'YXZ'),
+    location: { ...array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))), channel: objectChannel('position'), sync: true },
+    rotation_mode: synced((ob) => (ob.rotationQuaternion ? 'QUATERNION' : looksAlongZ(ob) ? 'XYZ' : 'YXZ')),
     rotation_euler: { ...array((ob) => (looksAlongZ(ob) ? lookingRotation.get(ob) : eulerFromBabylon(babylonEuler(ob))), (ob, value) => {
       if (looksAlongZ(ob)) return lookingRotation.set(ob, value);
       const { x, y, z } = eulerToBabylon(value);
       setRotation(ob, Quaternion.FromEulerAngles(x, y, z));
-    }), channel: objectChannel('rotation') },
-    rotation_quaternion: array((ob) => { const q = babylonQuaternion(ob); return [q.w, -q.x, -q.z, -q.y]; },
-      (ob, [w, x, y, z]) => setRotation(ob, new Quaternion(-x, -z, -y, w)), 'wxyz'),
-    scale: { ...array((ob) => axes(ob.scaling.asArray()), (ob, value) => ob.scaling.copyFromFloats(...axes(value))), channel: objectChannel('scaling') },
+    }), channel: objectChannel('rotation'), sync: (ob) => !quaternion(ob) },
+    rotation_quaternion: synced(array((ob) => { const q = babylonQuaternion(ob); return [q.w, -q.x, -q.z, -q.y]; },
+      (ob, [w, x, y, z]) => setRotation(ob, new Quaternion(-x, -z, -y, w)), 'wxyz'), quaternion),
+    scale: { ...array((ob) => axes(ob.scaling.asArray()), (ob, value) => ob.scaling.copyFromFloats(...axes(value))), channel: objectChannel('scaling'), sync: true },
     lock_location: transformLocks('position'),
     lock_rotation: transformLocks('rotation'),
     lock_scale: transformLocks('scaling'),
@@ -210,9 +218,9 @@ const STRUCTS = {
     hide_select: { get: (ob) => ob.isPickable === false || !!ob.metadata?.wbLocked, set: (ob, value) => {
       ob.metadata = { ...ob.metadata, wbLocked: !!value };
       if ('isPickable' in ob) ob.isPickable = !value;
-    } },
-    hide_render: { get: (ob) => !!ob.metadata?.wbHideRender, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideRender: !!value }; } },
-    hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; } },
+    }, sync: true },
+    hide_render: { get: (ob) => !!ob.metadata?.wbHideRender, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideRender: !!value }; }, sync: true },
+    hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; }, sync: true },
     hide_get: (ob) => () => !ob.isEnabled(false),
     hide_set: (ob, r) => (hide) => { ob.setEnabled(!hide); r.host.update?.('Object', 'hide', ob); },
     visible_get: (ob) => () => !deleted(ob) && ob.isEnabled() && ob.isVisible !== false,
@@ -236,10 +244,15 @@ const STRUCTS = {
     node_tree: (material, r) => nodeTree(r, ['Material Output', 'ShaderNodeOutputMaterial', [
       ['Surface', 'NodeSocketShader', ['Principled BSDF', 'ShaderNodeBsdfPrincipled', principledInputs(material)]],
       ['Volume', 'NodeSocketShader', null]]]),
-    use_backface_culling: settable('backFaceCulling'),
-    alpha_threshold: settable('alphaCutOff'),
-    surface_render_method: { get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
-      set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } },
+    use_backface_culling: synced(settable('backFaceCulling')),
+    alpha_threshold: synced(settable('alphaCutOff')),
+    surface_render_method: synced({ get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
+      set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } }),
+    // Viewport Display: the surface's color, metalness and roughness, as Blender's Solid shading shows a material.
+    diffuse_color: synced(array((material) => [...baseColor(material).asArray(), material.alpha ?? 1],
+      (material, [red, green, blue, alpha]) => { baseColor(material).set(red, green, blue); material.alpha = alpha; }, 'rgba')),
+    metallic: synced(pbrValue('metallic', 0)),
+    roughness: synced(pbrValue('roughness', 0.5)),
   },
   Modifier: (owner) => ({
     name: modifierFlag('name'),
@@ -256,8 +269,8 @@ const STRUCTS = {
       get: (world) => world.animation.time.state[key], set: (world, value) => world.animation.time.configure({ [key]: value }, { record: false }) }])),
     camera: (world, r) => r.pointer('Object', world.sceneSettings?.camera()),
     objects: (world, r) => collection(r.objects().map((ob) => r.pointer('Object', ob))),
-    use_gravity: { get: (world) => world.sceneSettings?.state.useGravity ?? true, set: (world, value) => world.sceneSettings.set('useGravity', value, false) },
-    gravity: array((world) => axes(world.scene.gravity.asArray()), (world, value) => world.sceneSettings.set('gravity', axes(value), false)),
+    use_gravity: { get: (world) => world.sceneSettings?.state.useGravity ?? true, set: (world, value) => world.sceneSettings.set('useGravity', value, false), sync: true },
+    gravity: synced(array((world) => axes(world.scene.gravity.asArray()), (world, value) => world.sceneSettings.set('gravity', axes(value), false))),
     render: (world, r) => r.pointer('RenderSettings', world),
     world: { get: (world, r) => r.pointer('World', world.worlds?.active()), set: (world, value) => world.worlds.link(value?.[INFO].owner ?? null) },
     eevee: (world, r) => r.pointer('SceneEEVEE', world),
@@ -281,10 +294,10 @@ const STRUCTS = {
     use_keyframe_insert_auto: { get: (world) => world.animation.time.state.autoKey, set: (world, value) => world.animation.time.configure({ autoKey: !!value }, { record: false }) },
   },
   RenderSettings: {
-    fps: { get: (world) => world.animation.time.state.fps, set: (world, fps) => world.animation.time.configure({ fps }, { record: false }) },
+    fps: { get: (world) => world.animation.time.state.fps, set: (world, fps) => world.animation.time.configure({ fps }, { record: false }), sync: true },
     ...Object.fromEntries([['resolution_x', 'resolutionX'], ['resolution_y', 'resolutionY'], ['resolution_percentage', 'resolutionPercentage'],
       ['use_motion_blur', 'useMotionBlur'], ['motion_blur_shutter', 'motionBlurShutter'], ['use_sequencer', 'useSequencer']].map(([name, key]) => [name, {
-      get: (world) => world.renderSettings?.state.render[key], set: (world, value) => world.renderSettings.set('render.' + key, value, false) }])),
+      get: (world) => world.renderSettings?.state.render[key], set: (world, value) => world.renderSettings.set('render.' + key, value, false), sync: name !== 'use_sequencer' }])),
     image_settings: (world, r) => r.pointer('ImageFormatSettings', world),
     // Bylonder renders with Babylon, set up as Blender's EEVEE (render-babylon.js): the engines are Blender's, their
     // choice decides which of Blender's render panels show.
@@ -295,7 +308,7 @@ const STRUCTS = {
   },
   UnitSettings: Object.fromEntries([['system', 'system'], ['scale_length', 'scale'], ['use_separate', 'separate'], ['system_rotation', 'rotation'],
     ['length_unit', 'length']].map(([name, key]) => [name, {
-    get: (world) => world.sceneSettings?.state.unitSettings[key], set: (world, value) => world.sceneSettings.set('unitSettings.' + key, value, false) }])),
+    get: (world) => world.sceneSettings?.state.unitSettings[key], set: (world, value) => world.sceneSettings.set('unitSettings.' + key, value, false), sync: true }])),
   // A Graph Editor and a Dope Sheet (editors/animation/anim-editor.js): their space's flags, in the module (rna_space.cc).
   SpaceGraphEditor: {
     type: () => 'GRAPH_EDITOR',
@@ -338,29 +351,30 @@ const STRUCTS = {
   },
   Light: {
     name: settable('name'),
-    type: lightType,
-    color: array((light) => light.diffuse.asArray(), (light, value) => light.diffuse.copyFromFloats(...value), 'rgb'),
-    energy: { get: (light) => light.intensity * watts(light), set: (light, value) => { light.intensity = value / watts(light); } },
-    shadow_soft_size: settable('radius'),
-    use_shadow: settable('shadowEnabled'),
-    spot_size: settable('angle'),
-    spot_blend: { get: (light) => (light.angle ? 1 - light.innerAngle / light.angle : 0), set: (light, value) => { light.innerAngle = (1 - value) * light.angle; } },
+    type: synced(lightType),
+    color: synced(array((light) => light.diffuse.asArray(), (light, value) => light.diffuse.copyFromFloats(...value), 'rgb')),
+    energy: { get: (light) => light.intensity * watts(light), set: (light, value) => { light.intensity = value / watts(light); }, sync: true },
+    shadow_soft_size: synced(settable('radius'), (light) => lightType(light) !== 'SUN'),
+    use_shadow: synced(settable('shadowEnabled')),
+    spot_size: synced(settable('angle'), (light) => lightType(light) === 'SPOT'),
+    spot_blend: { get: (light) => (light.angle ? 1 - light.innerAngle / light.angle : 0), set: (light, value) => { light.innerAngle = (1 - value) * light.angle; },
+      sync: (light) => lightType(light) === 'SPOT' },
   },
   Camera: {
     name: settable('name'),
-    type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; } },
+    type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; }, sync: true },
     // A horizontally fixed field of view is Blender's Auto fit for landscape output.
     sensor_fit: { get: (camera) => (horizontal(camera) ? 'AUTO' : 'VERTICAL'), set: (camera, fit) => {
       const lens = sensor(camera) / 2 / Math.tan(camera.fov / 2);
       camera.fovMode = fit === 'VERTICAL' ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED;
       camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens);
-    } },
-    lens: { get: (camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), set: (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); } },
+    }, sync: true },
+    lens: { get: (camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), set: (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); }, sync: true },
     angle: settable('fov'),
     // How the lens is shown (millimeters or field of view), kept with the camera.
-    lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; } },
-    clip_start: settable('minZ'),
-    clip_end: settable('maxZ'),
+    lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; }, sync: true },
+    clip_start: synced(settable('minZ')),
+    clip_end: synced(settable('maxZ')),
   },
   // Bylonder's text objects (blenkernel/text/text.js): the text and its options, which regenerate the object's mesh.
   // Blender's extrude is half the depth, its spacings are factors of the font's (Bylonder's line height 1.2 is 1).
@@ -385,7 +399,7 @@ const STRUCTS = {
   // A world datablock of the worlds slice (blenkernel/scene/world.js): its Background and volume as Blender's nodes.
   World: (entry) => ({
     name: { get: () => entry.name, set: (owner, name, r) => r.world.worlds.rename(entry, name) },
-    color: array(() => entry.background.color, (owner, value, r) => r.world.worlds.set(entry, 'background.color', value, false), 'rgb'),
+    color: synced(array(() => entry.background.color, (owner, value, r) => r.world.worlds.set(entry, 'background.color', value, false), 'rgb')),
     use_nodes: () => true,
     node_tree: (owner, r) => nodeTree(r, ['World Output', 'ShaderNodeOutputWorld', [
       ['Surface', 'NodeSocketShader', ['Background', 'ShaderNodeBackground', [
@@ -398,8 +412,9 @@ const STRUCTS = {
   // A collection of the collections slice (blenkernel/scene/collections.js).
   Collection: (entry) => ({
     name: { get: () => entry.name ?? 'Scene Collection', set: (owner, name, r) => r.world.collections.rename(entry.id, name) },
-    hide_select: { get: () => !!entry.hideSelect, set: (owner, value, r) => r.world.collections.set(entry.id, { hideSelect: !!value }) },
-    hide_viewport: { get: () => !!entry.hideViewport, set: (owner, value, r) => r.world.collections.set(entry.id, { hideViewport: !!value }) },
+    hide_select: { get: () => !!entry.hideSelect, set: (owner, value, r) => r.world.collections.set(entry.id, { hideSelect: !!value }), sync: true },
+    hide_viewport: { get: () => !!entry.hideViewport, set: (owner, value, r) => r.world.collections.set(entry.id, { hideViewport: !!value }), sync: true },
+    hide_render: { get: () => !!entry.hideRender, set: (owner, value, r) => r.world.collections.set(entry.id, { hideRender: !!value }), sync: true },
     children: (owner, r) => collection(entry.children.map((id) => r.pointer('Collection', r.world.collections.byId(id)))),
   }),
   ViewLayer: (layer) => ({
@@ -411,6 +426,9 @@ const STRUCTS = {
   LayerCollection: (entry) => ({
     name: () => entry.name ?? 'Scene Collection',
     collection: (owner, r) => r.pointer('Collection', entry),
+    exclude: { get: (owner, r) => !!r.world.collections.layerFlags(entry.id).exclude, set: (owner, value, r) => r.world.collections.setLayer(entry.id, { exclude: !!value }), sync: true },
+    hide_viewport: { get: (owner, r) => !!r.world.collections.layerFlags(entry.id).hideViewport,
+      set: (owner, value, r) => r.world.collections.setLayer(entry.id, { hideViewport: !!value }), sync: true },
   }),
   SceneEEVEE: {
     taa_samples: sliceValue('renderSettings', 'eevee.taaSamples'),
@@ -541,6 +559,22 @@ function setViewState(view, key, value) {
   view.sync?.();
 }
 
+// A struct's bindings over an owner, as { get, set, ... } by name: its own table or its nearest base's (PointLight binds
+// as Light).
+function bindingsOf(struct, owner) {
+  let base = struct;
+  while (base && !STRUCTS[base]) base = baseOf(base);
+  const bindings = STRUCTS[base] ?? {}, table = typeof bindings === 'function' ? bindings(owner) : bindings;
+  return Object.fromEntries(Object.entries(table).map(([name, binding]) => [name, typeof binding === 'function' ? { get: binding } : binding]));
+}
+
+// The properties of a struct over an owner that are kept equal in Blender's Main (main-sync.js): [name, { get(), set(value) }]
+// pairs, set undefined for a read-only one. Their writes do not notify; the caller does once.
+export function syncBindings(r, struct, owner) {
+  return Object.entries(bindingsOf(struct, owner)).filter(([, { sync }]) => (typeof sync === 'function' ? sync(owner) : sync))
+    .map(([name, { get, set }]) => [name, { get: () => get(owner, r), set: set && ((value) => set(owner, value, r)) }]);
+}
+
 // The RNA of one host's data: pointer(struct, owner) is the struct over a Bylonder owner (None for none), one per owner
 // so scripts see the same struct each time; `key` is the owner's identity when the owner is made per call.
 export function createRNA(host) {
@@ -556,14 +590,9 @@ export function createRNA(host) {
       return structs.get(struct);
     },
   };
-  // A struct's bindings are its own table or its nearest base's (PointLight binds as Light).
   function bind(struct, owner) {
-    let base = struct;
-    while (base && !STRUCTS[base]) base = baseOf(base);
-    const bindings = STRUCTS[base] ?? {};
-    const table = typeof bindings === 'function' ? bindings(owner) : bindings, data = {}, items = {}, channels = {};
-    for (const [name, binding] of Object.entries(table)) {
-      const { get, set, items: enumItems, channel } = typeof binding === 'function' ? { get: binding } : binding;
+    const data = {}, items = {}, channels = {};
+    for (const [name, { get, set, items: enumItems, channel }] of Object.entries(bindingsOf(struct, owner))) {
       Object.defineProperty(data, name, {
         enumerable: true,
         get: () => get(owner, r),

@@ -6,12 +6,14 @@
  * Other subsystems keep their IDs in the same Main (main_bmain) and their object data on its objects (object_data). */
 #include "BKE_attribute.hh"
 #include "BKE_collection.hh"
+#include "BKE_idprop.hh"
+#include "BKE_material.hh"
+#include "BKE_world.h"
 #include "BKE_node.hh"
+#include "BKE_node_runtime.hh"
 #include "BKE_node_tree_update.hh"
 #include "DNA_light_types.h"
-#include "DNA_linestyle_types.h"
 #include "DNA_material_types.h"
-#include "DNA_texture_types.h"
 #include "DNA_world_types.h"
 #include "BKE_context.hh"
 #include "BKE_wm_runtime.hh"
@@ -22,6 +24,7 @@
 #include "BKE_main.hh"
 #include "BKE_mesh.h"
 #include "BKE_mesh.hh"
+#include "BKE_mesh_runtime.hh"
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
 #include "BKE_workspace.hh"
@@ -43,6 +46,9 @@
 #include "WM_api.hh"
 
 #include "extraction.hh"
+
+#include <cfloat>
+#include <string>
 
 using namespace blender;
 
@@ -413,6 +419,208 @@ EXPORT(object_mesh_attribute) const void *object_mesh_attribute(Object *ob, cons
   return reader && reader.varray.is_span() ? reader.varray.get_internal_span().data() : nullptr;
 }
 
+/* A mesh object's Mesh without its geometry, as it is at rest: Bylonder's scene owns geometry, and fills the Mesh only
+ * while Blender's code needs it. Its material slots stay. */
+EXPORT(object_mesh_clear) void object_mesh_clear(Object *ob) { BKE_mesh_clear_geometry(id_cast<Mesh *>(ob->data)); }
+
+/* A mesh object's Mesh with its modifiers applied, as the viewport evaluates it, read through the header until the next
+ * call. */
+EXPORT(object_mesh_eval) const ExtractionHeader *object_mesh_eval(BlenderMain *ctx, Object *ob)
+{
+  static Mesh *result = nullptr;
+  if (result) {
+    BKE_id_free(nullptr, result);
+  }
+  Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(ctx->C);
+  CustomData_MeshMasks mask = CD_MASK_MESH;
+  result = bke::mesh_create_eval_final(depsgraph, &ctx->scene, ob, &mask);
+  mesh_extraction(*result, ctx->extraction);
+  return &ctx->extraction;
+}
+
+/* Data that is not an object's: a Material or a World, whose users are those that use it. */
+EXPORT(main_material_add) Material *main_material_add(BlenderMain *ctx, const char *name)
+{
+  Material *ma = BKE_material_add(ctx->bmain, name);
+  id_us_min(&ma->id);
+  return ma;
+}
+EXPORT(main_world_add) World *main_world_add(BlenderMain *ctx, const char *name)
+{
+  World *world = BKE_world_add(ctx->bmain, name);
+  id_us_min(&world->id);
+  return world;
+}
+EXPORT(main_id_remove) void main_id_remove(BlenderMain *ctx, ID *id) { BKE_id_delete(ctx->bmain, id); }
+EXPORT(id_users) int id_users(const ID *id) { return id->us; }
+EXPORT(id_fake_user_set) void id_fake_user_set_export(ID *id, bool fake)
+{
+  if (fake) {
+    id_fake_user_set(id);
+  }
+  else {
+    id_fake_user_clear(id);
+  }
+}
+
+/* The scene's world (null for none), which it uses. */
+EXPORT(main_scene_world_set) void main_scene_world_set(BlenderMain *ctx, World *world)
+{
+  if (ctx->scene.world == world) {
+    return;
+  }
+  if (ctx->scene.world) {
+    id_us_min(&ctx->scene.world->id);
+  }
+  ctx->scene.world = world;
+  if (world) {
+    id_us_plus(&world->id);
+  }
+}
+EXPORT(main_scene_world) World *main_scene_world(BlenderMain *ctx) { return ctx->scene.world; }
+
+/* An object's material slots, set whole (null for an empty slot), on its data as Blender assigns them by default. */
+EXPORT(object_materials_set) void object_materials_set(BlenderMain *ctx, Object *ob, Material **materials, int count)
+{
+  BKE_object_material_array_assign(ctx->bmain, ob, &materials, count, false);
+}
+EXPORT(object_materials) int object_materials(Object *ob, Material **r_materials)
+{
+  const int count = *BKE_object_material_len_p(ob);
+  for (int i = 0; r_materials && i < count; i++) {
+    r_materials[i] = BKE_object_material_get(ob, short(i + 1));
+  }
+  return count;
+}
+
+/* An ID's custom string property, for what only Bylonder has that a round trip needs; null when it has none. */
+EXPORT(id_property_string_set) void id_property_string_set(ID *id, const char *name, const char *value)
+{
+  IDP_ReplaceInGroup(IDP_EnsureProperties(id), bke::idprop::create(name, StringRefNull(value)).release());
+}
+EXPORT(id_property_string) const char *id_property_string(const ID *id, const char *name)
+{
+  const IDProperty *prop = id->properties ? IDP_GetPropertyTypeFromGroup(id->properties, name, IDP_STRING) : nullptr;
+  return prop ? IDP_string_get(prop) : nullptr;
+}
+
+/* An ID's shader node tree (a Material's or World's), built node by node: nodes by idname, which Blender's node types
+ * (not in the module) recognize when the file is read, their sockets by type and identifier with their values, and
+ * links. */
+static bNodeTree &tree_of(ID *owner) { return *bke::node_tree_from_id(owner); }
+
+EXPORT(node_tree_clear) void node_tree_clear(BlenderMain *ctx, ID *owner)
+{
+  bNodeTree &ntree = tree_of(owner);
+  while (bNode *node = static_cast<bNode *>(ntree.nodes.first)) {
+    bke::node_remove_node(ctx->bmain, ntree, *node, true, false);
+  }
+}
+
+EXPORT(node_add) bNode *node_add(ID *owner, const char *idname, const char *name, float x, float y, float width)
+{
+  bNodeTree &ntree = tree_of(owner);
+  bNode *node = bke::node_add_node(nullptr, ntree, UString(idname));
+  STRNCPY(node->name, name);
+  bke::node_unique_name(ntree, *node);
+  node->location[0] = x;
+  node->location[1] = y;
+  node->width = width;
+  return node;
+}
+
+/* A socket of a type (eNodeSocketDatatype) and subtype (PropertySubType), with its value: what Blender's socket type,
+ * registered with the node types, would allocate. */
+EXPORT(node_socket_add)
+bNodeSocket *node_socket_add(ID *owner, bNode *node, bool output, int type, int subtype, const char *identifier, const char *name,
+                             const float *value, int count)
+{
+  bNodeSocket *sock = bke::node_add_static_socket(tree_of(owner), *node, output ? SOCK_OUT : SOCK_IN, type, subtype, identifier, name);
+  switch (type) {
+    case SOCK_FLOAT: {
+      bNodeSocketValueFloat *data = MEM_new<bNodeSocketValueFloat>(__func__);
+      data->subtype = subtype;
+      data->value = count ? value[0] : 0.0f;
+      data->min = -FLT_MAX;
+      data->max = FLT_MAX;
+      sock->default_value = data;
+      break;
+    }
+    case SOCK_RGBA: {
+      bNodeSocketValueRGBA *data = MEM_new<bNodeSocketValueRGBA>(__func__);
+      for (int i = 0; i < 4; i++) {
+        data->value[i] = i < count ? value[i] : 1.0f;
+      }
+      sock->default_value = data;
+      break;
+    }
+    case SOCK_VECTOR: {
+      bNodeSocketValueVector *data = MEM_new<bNodeSocketValueVector>(__func__);
+      data->subtype = subtype;
+      data->dimensions = 3;
+      for (int i = 0; i < count && i < 4; i++) {
+        data->value[i] = value[i];
+      }
+      data->min = -FLT_MAX;
+      data->max = FLT_MAX;
+      sock->default_value = data;
+      break;
+    }
+    default:
+      break;
+  }
+  return sock;
+}
+
+EXPORT(node_link_add) void node_link_add(ID *owner, bNode *from, bNodeSocket *from_socket, bNode *to, bNodeSocket *to_socket)
+{
+  bke::node_add_link(tree_of(owner), *from, *from_socket, *to, *to_socket);
+}
+
+/* An ID's node tree as JSON: each node's idname and name with its inputs' identifiers and values (numbers, or null),
+ * and the links (from node, from socket, to node, to socket), until the next call. */
+EXPORT(node_tree_describe) const char *node_tree_describe(ID *owner)
+{
+  static std::string text;
+  text = "{\"nodes\":[";
+  const bNodeTree &ntree = tree_of(owner);
+  auto quoted = [](const char *s) { return std::string("\"") + s + "\""; };
+  bool first = true;
+  for (const bNode &node : ntree.nodes) {
+    text += (first ? "" : ",") + std::string("{\"idname\":") + quoted(node.idname) + ",\"name\":" + quoted(node.name) + ",\"inputs\":{";
+    first = false;
+    bool first_socket = true;
+    for (const bNodeSocket &sock : node.inputs) {
+      std::string value = "null";
+      if (sock.default_value && sock.type == SOCK_FLOAT) {
+        value = std::to_string(static_cast<const bNodeSocketValueFloat *>(sock.default_value)->value);
+      }
+      else if (sock.default_value && (sock.type == SOCK_RGBA || sock.type == SOCK_VECTOR)) {
+        const float *v = sock.type == SOCK_RGBA ? static_cast<const bNodeSocketValueRGBA *>(sock.default_value)->value
+                                                : static_cast<const bNodeSocketValueVector *>(sock.default_value)->value;
+        const int n = sock.type == SOCK_RGBA ? 4 : 3;
+        value = "[";
+        for (int i = 0; i < n; i++) {
+          value += (i ? "," : "") + std::to_string(v[i]);
+        }
+        value += "]";
+      }
+      text += (first_socket ? "" : ",") + quoted(sock.identifier) + ":" + value;
+      first_socket = false;
+    }
+    text += "}}";
+  }
+  text += "],\"links\":[";
+  first = true;
+  for (const bNodeLink &link : ntree.links) {
+    text += (first ? "[" : ",[") + quoted(link.fromnode->name) + "," + quoted(link.fromsock->identifier) + "," + quoted(link.tonode->name) + "," +
+            quoted(link.tosock->identifier) + "]";
+    first = false;
+  }
+  text += "]}";
+  return text.c_str();
+}
+
 /* What the operators reach of Blender beyond the module. */
 
 namespace blender {
@@ -424,40 +632,8 @@ void nodes::node_tree_shader_default(const bContext * /*C*/, Main * /*bmain*/, I
 /* As scene.cc defines it. */
 void BKE_scene_object_base_flag_sync_from_base(Base *base) { base->object->base_flag = base->flag; }
 
-/* As node.cc defines them; node.cc comes with Blender's node system, which the module does without. */
-bNodeTree **bke::node_tree_ptr_from_id(ID *id)
-{
-  switch (GS(id->name)) {
-    case ID_MA:
-      return &reinterpret_cast<Material *>(id)->nodetree;
-    case ID_LA:
-      return &reinterpret_cast<Light *>(id)->nodetree;
-    case ID_WO:
-      return &reinterpret_cast<World *>(id)->nodetree;
-    case ID_TE:
-      return &reinterpret_cast<Tex *>(id)->nodetree;
-    case ID_SCE:
-      return &reinterpret_cast<Scene *>(id)->nodetree;
-    case ID_LS:
-      return &reinterpret_cast<FreestyleLineStyle *>(id)->nodetree;
-    default:
-      return nullptr;
-  }
-}
-bNodeTree *bke::node_tree_from_id(ID *id)
-{
-  bNodeTree **nodetree = node_tree_ptr_from_id(id);
-  return (nodetree != nullptr) ? *nodetree : nullptr;
-}
-
-/* port-override: Main holds no node trees (the module has no nodes), so no node tree uses an ID that changed. */
-void bke::node_tree_update_all_users(Main * /*main*/, ID * /*id*/) {}
-
 /* As wm_window.cc defines it for the one window, whose screen has no 3D View of the module's to sync. */
 void WM_windows_scene_data_sync(const ListBaseT<wmWindow> * /*win_lb*/, Scene * /*scene*/) {}
-
-/* port-override: Main holds no node trees (the module has no nodes), so after an ID's removal none has to update. */
-void BKE_ntree_update(Main & /*bmain*/, std::optional<Span<bNodeTree *>> /*modified_trees*/, const NodeTreeUpdateExtraParams & /*params*/) {}
 
 /* As area.cc defines it for the regions Bylonder's areas have, none of which overlap. */
 bool ED_region_is_overlap(int /*spacetype*/, int /*regiontype*/) { return false; }

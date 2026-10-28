@@ -86,12 +86,12 @@ const modifiers = (e) => (e.shiftKey ? KM_SHIFT : 0) | (e.ctrlKey ? KM_CTRL : 0)
 
 //   section: the area's element; header: its header element; space: GRAPH_EDITOR or DOPESHEET_EDITOR; uiType: the
 //   Dope Sheet's (TIMELINE or DOPESHEET); animation: the scene's (blenkernel/animation/model.js); rna: createRNA(host)
-//   for the header's context; objects: the Object Mode mirror (its sync() puts the objects' bases in the module);
+//   for the header's context; sync: the scene's Main (blenkernel/main-sync.js), made current before Blender's code;
 //   commit(): an undo step.
 // A module operator's status as the registry's operators return it: the event goes on after a pass through or a cancel.
 const statusName = (status) => (status & OPERATOR_PASS_THROUGH ? 'PASS_THROUGH' : status === OPERATOR_CANCELLED ? 'CANCELLED' : 'FINISHED');
 
-export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, objects, commit = () => {} }) {
+export function mountAnimEditor(section, { header, space, uiType = space === 'GRAPH_EDITOR' ? 'FCURVES' : 'DOPESHEET', animation, rna, sync: scene, commit = () => {} }) {
   const area = new AnimArea(animation.ids.blender, SPACE_TYPES[space]);
   if (space === 'DOPESHEET_EDITOR') area.subtype = ACTION_MODES[uiType];
   const timeline = uiType === 'TIMELINE', graph = space === 'GRAPH_EDITOR';
@@ -151,7 +151,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
 
   // Before Blender's code reads them: the scene's time, and the objects' bases (selection, visibility).
   function sync() {
-    objects?.sync?.();
+    scene?.flush();
     animation.syncTime();
   }
   // After it ran: the keys it changed reach the channels, the frame it set reaches the scene, and a finished

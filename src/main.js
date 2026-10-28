@@ -45,7 +45,7 @@ import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
-import { createBlenderObjects } from "./editors/object/object-blender.js";
+import { createMainSync } from "./blenkernel/main-sync.js";
 import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
@@ -341,11 +341,15 @@ world.toolsystem = createToolSystem({
   context: () => world.blenderContext(contextView()),
   changed: () => { applyTool(); viewports().forEach((view) => view.sync()); },
 });
-const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify, ids: animation.ids, keying: (run) => animation.keying(run) });
-registerObjectOperators(world.objectActions, blenderObjects);
+// Blender's Main, kept equal to the scene both ways (blenkernel/main-sync.js), which Blender's code runs on. Slices hooks
+// do not see (collections, materials, worlds, modifiers) mark it changed.
+world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
+for (const slice of [world.collections, world.materials, world.worlds, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
+world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
+registerObjectOperators(world.objectActions, { sync: world.mainSync, transaction: commands.transaction, notify, keying: (run) => animation.keying(run) });
 registerAddOperators(creator);
 world.dock = viewportDock;
-world.outliner = createOutliner({ world, editor, commands, objects: blenderObjects, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
+world.outliner = createOutliner({ world, editor, commands, sync: world.mainSync, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
 const touch = createViewportTouch(world, editor, creator, views);
 // Like Blender, objects hidden or excluded through their collections drop out of the selection.
 world.collections.subscribe(() => {
@@ -378,7 +382,7 @@ const insertKeys = () => {registerObjects(animation, objects);animation.insert(o
 // The Timeline, Dope Sheet and Graph Editor: Blender's animation editors, each area its own space (editors/animation).
 registerAnimOperators(animation);
 const ANIM_EDITORS = { timeline: ['DOPESHEET_EDITOR', 'TIMELINE'], dopesheet: ['DOPESHEET_EDITOR', 'DOPESHEET'], graph: ['GRAPH_EDITOR', 'FCURVES'] };
-const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDock.header(id), space: ANIM_EDITORS[type][0], uiType: ANIM_EDITORS[type][1], animation, rna: blenderRNA, objects: blenderObjects, commit });
+const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDock.header(id), space: ANIM_EDITORS[type][0], uiType: ANIM_EDITORS[type][1], animation, rna: blenderRNA, sync: world.mainSync, commit });
 const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, document.querySelector(`#${type}-section`), type));
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
 const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();refreshUI();} });

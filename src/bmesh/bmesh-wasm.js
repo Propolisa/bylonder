@@ -427,6 +427,34 @@ export class BlenderMain {
     return ownedMesh(mesh);
   }
 
+  // Empties a mesh object's Mesh of its geometry, keeping its material slots: Main holds geometry only while Blender's
+  // code needs it.
+  clearMesh(ob) {
+    x.object_mesh_clear(ob);
+    this.#attributes.delete(ob);
+  }
+  // A mesh object's Mesh with its modifiers applied, as Blender's viewport evaluates it: a Mesh that is its own.
+  evaluatedMesh(ob) { return ownedMesh(extractedMesh(x.object_mesh_eval(this.#context, ob) >>> 0)); }
+  // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
+  setModifiers(ob, modifiers) { return setModifiers(ob, modifiers).errors; }
+
+  // Materials and worlds, by address: their users are those that use them.
+  addMaterial(name) { return withString(name, (p) => x.main_material_add(this.#context, p)) >>> 0; }
+  addWorld(name) { return withString(name, (p) => x.main_world_add(this.#context, p)) >>> 0; }
+  removeID(id) { x.main_id_remove(this.#context, id); }
+  users(id) { return x.id_users(id); }
+  setFakeUser(id, fake) { x.id_fake_user_set(id, fake); }
+  get world() { return x.main_scene_world(this.#context) >>> 0; }
+  set world(world) { x.main_scene_world_set(this.#context, world ?? 0); }
+  // An object's material slots (0 for an empty one), set whole on its data.
+  setMaterials(ob, materials) {
+    withArrays([Uint32Array.from(materials)], ([p]) => x.object_materials_set(this.#context, ob, p, materials.length));
+  }
+  materials(ob) { return addresses((p) => x.object_materials(ob, p)); }
+  // An ID's custom string property (null when it has none), for what only Bylonder has.
+  setProperty(id, name, value) { withString(name, (n) => withString(value, (v) => x.id_property_string_set(id, n, v))); }
+  property(id, name) { const p = withString(name, (n) => x.id_property_string(id, n)) >>> 0; return p ? cString(p) : null; }
+
   // The Main's address and an object's data's address (0 for an empty), for subsystems with their own exports.
   get bmain() { return x.main_bmain(this.#context) >>> 0; }
   get scene() { return x.main_scene(this.#context) >>> 0; }

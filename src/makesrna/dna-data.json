@@ -1,0 +1,4326 @@
+{
+ "AreaLight": {
+  "sdna": "Light",
+  "size": 504,
+  "properties": {
+   "energy": {
+    "offset": 384,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_buffer_clip_start": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_soft_size": {
+    "offset": 392,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_filter_radius": {
+    "offset": 476,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_maximum_resolution": {
+    "offset": 480,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_shadow_jitter": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "shadow_jitter_overblur": {
+    "offset": 484,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_max_distance": {
+    "offset": 440,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_count": {
+    "offset": 452,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "shadow_cascade_exponent": {
+    "offset": 444,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_fade": {
+    "offset": 448,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_absolute_resolution": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "type": "BOOLEAN"
+   },
+   "shape": {
+    "offset": 404,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SQUARE"
+     ],
+     [
+      1,
+      "RECTANGLE"
+     ],
+     [
+      4,
+      "DISK"
+     ],
+     [
+      5,
+      "ELLIPSE"
+     ]
+    ]
+   },
+   "size": {
+    "offset": 408,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "size_y": {
+    "offset": 412,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "spread": {
+    "offset": 420,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ },
+ "Camera": {
+  "sdna": "Camera",
+  "size": 1984,
+  "properties": {
+   "type": {
+    "offset": 360,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "PERSP"
+     ],
+     [
+      1,
+      "ORTHO"
+     ],
+     [
+      2,
+      "PANO"
+     ],
+     [
+      3,
+      "CUSTOM"
+     ]
+    ]
+   },
+   "sensor_fit": {
+    "offset": 412,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "HORIZONTAL"
+     ],
+     [
+      2,
+      "VERTICAL"
+     ]
+    ]
+   },
+   "passepartout_alpha": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "clip_start": {
+    "offset": 372,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "clip_end": {
+    "offset": 376,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "lens": {
+    "offset": 380,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "sensor_width": {
+    "offset": 392,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "sensor_height": {
+    "offset": 396,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ortho_scale": {
+    "offset": 384,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "display_size": {
+    "offset": 388,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shift_x": {
+    "offset": 400,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shift_y": {
+    "offset": 404,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "stereo": {
+    "offset": 1728,
+    "size": 24,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "show_limits": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "show_mist": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "show_passepartout": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "show_safe_areas": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "show_safe_center": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "show_name": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "show_sensor": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   },
+   "show_background_images": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN"
+   },
+   "lens_unit": {
+    "offset": 364,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "MILLIMETERS"
+     ],
+     [
+      32,
+      "FOV"
+     ]
+    ]
+   },
+   "composition_guide_color": {
+    "offset": 1752,
+    "size": 4,
+    "kind": "float",
+    "length": 4,
+    "type": "FLOAT"
+   },
+   "show_composition_center": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "show_composition_center_diagonal": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "show_composition_thirds": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "show_composition_golden": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "show_composition_golden_tria_a": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "show_composition_golden_tria_b": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "show_composition_harmony_tri_a": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "show_composition_harmony_tri_b": {
+    "offset": 362,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "panorama_type": {
+    "offset": 413,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "EQUIRECTANGULAR"
+     ],
+     [
+      5,
+      "EQUIANGULAR_CUBEMAP_FACE"
+     ],
+     [
+      3,
+      "MIRRORBALL"
+     ],
+     [
+      1,
+      "FISHEYE_EQUIDISTANT"
+     ],
+     [
+      2,
+      "FISHEYE_EQUISOLID"
+     ],
+     [
+      4,
+      "FISHEYE_LENS_POLYNOMIAL"
+     ],
+     [
+      6,
+      "CENTRAL_CYLINDRICAL"
+     ]
+    ]
+   },
+   "fisheye_fov": {
+    "offset": 420,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fisheye_lens": {
+    "offset": 424,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "latitude_min": {
+    "offset": 428,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "latitude_max": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "longitude_min": {
+    "offset": 436,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "longitude_max": {
+    "offset": 440,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fisheye_polynomial_k0": {
+    "offset": 444,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fisheye_polynomial_k1": {
+    "offset": 448,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fisheye_polynomial_k2": {
+    "offset": 452,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fisheye_polynomial_k3": {
+    "offset": 456,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "fisheye_polynomial_k4": {
+    "offset": 460,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "central_cylindrical_range_u_min": {
+    "offset": 464,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "central_cylindrical_range_u_max": {
+    "offset": 468,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "central_cylindrical_range_v_min": {
+    "offset": 472,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "central_cylindrical_range_v_max": {
+    "offset": 476,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "central_cylindrical_radius": {
+    "offset": 480,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "custom_filepath": {
+    "offset": 492,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 1024,
+    "type": "STRING"
+   },
+   "custom_shader": {
+    "offset": 488,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "custom_mode": {
+    "offset": 1584,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "INTERNAL"
+     ],
+     [
+      1,
+      "EXTERNAL"
+     ]
+    ]
+   },
+   "custom_bytecode": {
+    "offset": 1580,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "STRING"
+   },
+   "custom_bytecode_hash": {
+    "offset": 1516,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "dof": {
+    "offset": 1628,
+    "size": 92,
+    "kind": "struct",
+    "type": "POINTER"
+   }
+  }
+ },
+ "Light": {
+  "sdna": "Light",
+  "size": 504,
+  "properties": {
+   "type": {
+    "offset": 360,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "POINT"
+     ],
+     [
+      1,
+      "SUN"
+     ],
+     [
+      2,
+      "SPOT"
+     ],
+     [
+      4,
+      "AREA"
+     ]
+    ]
+   },
+   "use_temperature": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16777216,
+    "type": "BOOLEAN"
+   },
+   "color": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "length": 3
+   },
+   "temperature": {
+    "offset": 380,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "specular_factor": {
+    "offset": 460,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "diffuse_factor": {
+    "offset": 456,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "transmission_factor": {
+    "offset": 464,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "volume_factor": {
+    "offset": 468,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_custom_distance": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1048576,
+    "type": "BOOLEAN"
+   },
+   "cutoff_distance": {
+    "offset": 472,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_shadow": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "exposure": {
+    "offset": 388,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "normalize": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 33554432,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "node_tree": {
+    "offset": 492,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "use_nodes": {
+    "offset": 430,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "custom": true,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "Material": {
+  "sdna": "Material",
+  "size": 504,
+  "properties": {
+   "surface_render_method": {
+    "offset": 362,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "DITHERED"
+     ],
+     [
+      1,
+      "BLENDED"
+     ]
+    ]
+   },
+   "displacement_method": {
+    "offset": 458,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BUMP"
+     ],
+     [
+      1,
+      "DISPLACEMENT"
+     ],
+     [
+      2,
+      "BOTH"
+     ]
+    ]
+   },
+   "blend_method": {
+    "offset": 468,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "OPAQUE"
+     ],
+     [
+      3,
+      "CLIP"
+     ],
+     [
+      4,
+      "HASHED"
+     ],
+     [
+      5,
+      "BLEND"
+     ]
+    ]
+   },
+   "alpha_threshold": {
+    "offset": 460,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_transparency_overlap": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "show_transparent_back": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_backface_culling": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_backface_culling_shadow": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_backface_culling_lightprobe_volume": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_transparent_shadow": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "use_raytrace_refraction": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_screen_refraction": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_sss_translucency": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "refraction_depth": {
+    "offset": 464,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "thickness_mode": {
+    "offset": 459,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SPHERE"
+     ],
+     [
+      1,
+      "SLAB"
+     ]
+    ]
+   },
+   "use_thickness_from_shadow": {
+    "offset": 470,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": -128,
+    "type": "BOOLEAN"
+   },
+   "volume_intersection_method": {
+    "offset": 471,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FAST"
+     ],
+     [
+      1,
+      "ACCURATE"
+     ]
+    ]
+   },
+   "max_vertex_displacement": {
+    "offset": 472,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "preview_render_type": {
+    "offset": 417,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FLAT"
+     ],
+     [
+      1,
+      "SPHERE"
+     ],
+     [
+      2,
+      "CUBE"
+     ],
+     [
+      10,
+      "HAIR"
+     ],
+     [
+      3,
+      "SHADERBALL"
+     ],
+     [
+      12,
+      "CLOTH"
+     ],
+     [
+      13,
+      "FLUID"
+     ]
+    ]
+   },
+   "use_preview_world": {
+    "offset": 420,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "pass_index": {
+    "offset": 422,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "node_tree": {
+    "offset": 424,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "use_nodes": {
+    "offset": 416,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "paint_active_slot": {
+    "offset": 452,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "paint_clone_slot": {
+    "offset": 454,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "diffuse_color": {
+    "offset": 364,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "length": 4
+   },
+   "specular_color": {
+    "offset": 380,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "length": 3
+   },
+   "roughness": {
+    "offset": 408,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "specular_intensity": {
+    "offset": 400,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "metallic": {
+    "offset": 412,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "line_color": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "length": 4,
+    "type": "FLOAT"
+   },
+   "line_priority": {
+    "offset": 448,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "grease_pencil": {
+    "offset": 492,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "lineart": {
+    "offset": 496,
+    "size": 8,
+    "kind": "struct",
+    "type": "POINTER"
+   }
+  }
+ },
+ "PointLight": {
+  "sdna": "Light",
+  "size": 504,
+  "properties": {
+   "use_soft_falloff": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2097152,
+    "type": "BOOLEAN"
+   },
+   "energy": {
+    "offset": 384,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_buffer_clip_start": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_soft_size": {
+    "offset": 392,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_filter_radius": {
+    "offset": 476,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_maximum_resolution": {
+    "offset": 480,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_shadow_jitter": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "shadow_jitter_overblur": {
+    "offset": 484,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_max_distance": {
+    "offset": 440,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_count": {
+    "offset": 452,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "shadow_cascade_exponent": {
+    "offset": 444,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_fade": {
+    "offset": 448,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_absolute_resolution": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "RenderSettings": {
+  "sdna": "RenderData",
+  "size": 4316,
+  "properties": {
+   "image_settings": {
+    "offset": 0,
+    "size": 336,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "resolution_x": {
+    "offset": 464,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "resolution_y": {
+    "offset": 468,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "resolution_percentage": {
+    "offset": 462,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "preview_pixel_size": {
+    "offset": 3880,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "1"
+     ],
+     [
+      2,
+      "2"
+     ],
+     [
+      4,
+      "4"
+     ],
+     [
+      8,
+      "8"
+     ]
+    ]
+   },
+   "pixel_aspect_x": {
+    "offset": 532,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "pixel_aspect_y": {
+    "offset": 536,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ppm_factor": {
+    "offset": 540,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ppm_base": {
+    "offset": 544,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "ffmpeg": {
+    "offset": 336,
+    "size": 80,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "fps": {
+    "offset": 500,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "fps_base": {
+    "offset": 548,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "frame_map_old": {
+    "offset": 444,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "frame_map_new": {
+    "offset": 440,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "dither_intensity": {
+    "offset": 560,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "filter_size": {
+    "offset": 552,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "film_transparent": {
+    "offset": 502,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_freestyle": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 33554432,
+    "type": "BOOLEAN"
+   },
+   "threads": {
+    "offset": 450,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "INT"
+   },
+   "threads_mode": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      524288,
+      "FIXED"
+     ]
+    ]
+   },
+   "use_motion_blur": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384,
+    "type": "BOOLEAN"
+   },
+   "motion_blur_shutter": {
+    "offset": 3900,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "motion_blur_position": {
+    "offset": 3904,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "START"
+     ],
+     [
+      0,
+      "CENTER"
+     ],
+     [
+      2,
+      "END"
+     ]
+    ]
+   },
+   "motion_blur_shutter_curve": {
+    "offset": 3908,
+    "size": 376,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "hair_type": {
+    "offset": 3896,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "STRAND"
+     ],
+     [
+      1,
+      "STRIP"
+     ],
+     [
+      2,
+      "CYLINDER"
+     ]
+    ]
+   },
+   "hair_subdiv": {
+    "offset": 3898,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_high_quality_normals": {
+    "offset": 2468,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "anisotropic_filter": {
+    "offset": 2470,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "FILTER_0"
+     ],
+     [
+      2,
+      "FILTER_2"
+     ],
+     [
+      4,
+      "FILTER_4"
+     ],
+     [
+      8,
+      "FILTER_8"
+     ],
+     [
+      16,
+      "FILTER_16"
+     ]
+    ]
+   },
+   "use_border": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "border_min_x": {
+    "offset": 504,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "border_min_y": {
+    "offset": 512,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "border_max_x": {
+    "offset": 508,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "border_max_y": {
+    "offset": 516,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_crop_to_border": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   },
+   "use_placeholder": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "use_overwrite": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "save_output": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 268435456,
+    "type": "BOOLEAN"
+   },
+   "use_compositing": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "use_sequencer": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_file_extension": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_lock_interface": {
+    "offset": 488,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 41,
+    "consecutive": 1
+   },
+   "filepath": {
+    "offset": 572,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 1024,
+    "type": "STRING"
+   },
+   "use_render_cache": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1048576,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_time": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_date": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_frame": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_frame_range": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32768,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_camera": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_lens": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2048,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_scene": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_note": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_marker": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_filename": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_sequencer_strip": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_render_time": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN"
+   },
+   "stamp_note_text": {
+    "offset": 1604,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 768,
+    "type": "STRING"
+   },
+   "use_stamp": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_labels": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16384,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "metadata_input": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SCENE"
+     ],
+     [
+      4096,
+      "STRIPS"
+     ]
+    ]
+   },
+   "use_stamp_memory": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8192,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_hostname": {
+    "offset": 1596,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 65536,
+    "type": "BOOLEAN"
+   },
+   "stamp_font_size": {
+    "offset": 1600,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "stamp_foreground": {
+    "offset": 2372,
+    "size": 4,
+    "kind": "float",
+    "length": 4,
+    "type": "FLOAT"
+   },
+   "stamp_background": {
+    "offset": 2388,
+    "size": 4,
+    "kind": "float",
+    "length": 4,
+    "type": "FLOAT"
+   },
+   "sequencer_gl_preview": {
+    "offset": 2404,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "use_sequencer_override_scene_strip": {
+    "offset": 2405,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_single_layer": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "views": {
+    "offset": 3884,
+    "size": 8,
+    "kind": "struct",
+    "type": null
+   },
+   "use_multiview": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2097152,
+    "type": "BOOLEAN"
+   },
+   "views_format": {
+    "offset": 3894,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "STEREO_3D"
+     ],
+     [
+      1,
+      "MULTIVIEW"
+     ]
+    ]
+   },
+   "engine": {
+    "offset": 2436,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 32,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BLENDER_EEVEE"
+     ]
+    ]
+   },
+   "use_simplify": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 16777216,
+    "type": "BOOLEAN"
+   },
+   "simplify_subdivision": {
+    "offset": 2410,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "simplify_child_particles": {
+    "offset": 2416,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "simplify_subdivision_render": {
+    "offset": 2412,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "simplify_child_particles_render": {
+    "offset": 2420,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "simplify_volumes": {
+    "offset": 2424,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_simplify_normals": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_texture_cache": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "type": "BOOLEAN"
+   },
+   "use_auto_generate_texture_cache": {
+    "offset": 492,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "simplify_gpencil": {
+    "offset": 2414,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "simplify_gpencil_onplay": {
+    "offset": 2414,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "simplify_gpencil_antialiasing": {
+    "offset": 2414,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "simplify_gpencil_view_fill": {
+    "offset": 2414,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "simplify_gpencil_modifier": {
+    "offset": 2414,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "simplify_gpencil_shader_fx": {
+    "offset": 2414,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "simplify_gpencil_tint": {
+    "offset": 2414,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_persistent_data": {
+    "offset": 496,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 67108864,
+    "type": "BOOLEAN"
+   },
+   "line_thickness_mode": {
+    "offset": 2428,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "ABSOLUTE"
+     ],
+     [
+      2,
+      "RELATIVE"
+     ]
+    ]
+   },
+   "line_thickness": {
+    "offset": 2432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "bake": {
+    "offset": 2472,
+    "size": 1404,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "compositor_device": {
+    "offset": 4284,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "CPU"
+     ],
+     [
+      1,
+      "GPU"
+     ]
+    ]
+   },
+   "compositor_precision": {
+    "offset": 4288,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "FULL"
+     ]
+    ]
+   },
+   "compositor_denoise_device": {
+    "offset": 4292,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "AUTO"
+     ],
+     [
+      1,
+      "CPU"
+     ],
+     [
+      2,
+      "GPU"
+     ]
+    ]
+   },
+   "compositor_denoise_preview_quality": {
+    "offset": 4296,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "HIGH"
+     ],
+     [
+      1,
+      "BALANCED"
+     ],
+     [
+      2,
+      "FAST"
+     ]
+    ]
+   },
+   "compositor_denoise_final_quality": {
+    "offset": 4300,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "HIGH"
+     ],
+     [
+      1,
+      "BALANCED"
+     ],
+     [
+      2,
+      "FAST"
+     ]
+    ]
+   }
+  }
+ },
+ "Scene": {
+  "sdna": "Scene",
+  "size": 6672,
+  "properties": {
+   "camera": {
+    "offset": 360,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "background_set": {
+    "offset": 368,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "world": {
+    "offset": 364,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "frame_current": {
+    "offset": 928,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "INT"
+   },
+   "frame_subframe": {
+    "offset": 940,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "frame_start": {
+    "offset": 932,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "INT"
+   },
+   "frame_end": {
+    "offset": 936,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "INT"
+   },
+   "frame_step": {
+    "offset": 968,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "time_jump_unit": {
+    "offset": 4820,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "FRAME"
+     ],
+     [
+      1,
+      "SECOND"
+     ]
+    ]
+   },
+   "time_jump_delta": {
+    "offset": 4816,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "lock_frame_selection_to_range": {
+    "offset": 960,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "allow_preroll": {
+    "offset": 960,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_preview_range": {
+    "offset": 960,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "custom": true,
+    "type": "BOOLEAN",
+    "icon": 558,
+    "consecutive": 0
+   },
+   "frame_preview_start": {
+    "offset": 944,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "INT"
+   },
+   "frame_preview_end": {
+    "offset": 948,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "INT"
+   },
+   "show_subframe": {
+    "offset": 960,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "show_keys_from_selected_only": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_stamp_note": {
+    "offset": 2116,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 768,
+    "type": "STRING"
+   },
+   "is_nla_tweakmode": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_custom_simulation_range": {
+    "offset": 460,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "simulation_frame_start": {
+    "offset": 5416,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "simulation_frame_end": {
+    "offset": 5420,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "playback_loop_mode": {
+    "offset": 4948,
+    "size": 1,
+    "kind": "int",
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "INFINITE"
+     ],
+     [
+      1,
+      "STOP_END_FRAME"
+     ],
+     [
+      2,
+      "STOP_START_FRAME"
+     ],
+     [
+      3,
+      "RESTORE"
+     ],
+     [
+      4,
+      "BOUNCE"
+     ]
+    ]
+   },
+   "compositing_node_group": {
+    "offset": 468,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "use_nodes": {
+    "offset": 462,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "sequence_editor": {
+    "offset": 472,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "rigidbody_world": {
+    "offset": 5392,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "tool_settings": {
+    "offset": 476,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "unit_settings": {
+    "offset": 4964,
+    "size": 16,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "gravity": {
+    "offset": 4988,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "use_gravity": {
+    "offset": 5000,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "render": {
+    "offset": 512,
+    "size": 4316,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "safe_areas": {
+    "offset": 480,
+    "size": 32,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "cursor": {
+    "offset": 384,
+    "size": 64,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "use_audio_scrub": {
+    "offset": 4848,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "audio_doppler_speed": {
+    "offset": 4836,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "audio_doppler_factor": {
+    "offset": 4840,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "audio_distance_model": {
+    "offset": 4844,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "INVERSE"
+     ],
+     [
+      2,
+      "INVERSE_CLAMPED"
+     ],
+     [
+      3,
+      "LINEAR"
+     ],
+     [
+      4,
+      "LINEAR_CLAMPED"
+     ],
+     [
+      5,
+      "EXPONENT"
+     ],
+     [
+      6,
+      "EXPONENT_CLAMPED"
+     ]
+    ]
+   },
+   "audio_volume": {
+    "offset": 4852,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "annotation": {
+    "offset": 4980,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "active_clip": {
+    "offset": 4984,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "view_settings": {
+    "offset": 5096,
+    "size": 160,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "display_settings": {
+    "offset": 5256,
+    "size": 72,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "sequencer_colorspace_settings": {
+    "offset": 5328,
+    "size": 64,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "view_layers": {
+    "offset": 5400,
+    "size": 8,
+    "kind": "struct",
+    "type": null
+   },
+   "collection": {
+    "offset": 5408,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "display": {
+    "offset": 5424,
+    "size": 976,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "eevee": {
+    "offset": 6400,
+    "size": 240,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "grease_pencil_settings": {
+    "offset": 6640,
+    "size": 16,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "hydra": {
+    "offset": 6656,
+    "size": 8,
+    "kind": "struct",
+    "type": "POINTER"
+   }
+  }
+ },
+ "SpotLight": {
+  "sdna": "Light",
+  "size": 504,
+  "properties": {
+   "energy": {
+    "offset": 384,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_buffer_clip_start": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_soft_size": {
+    "offset": 392,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_filter_radius": {
+    "offset": 476,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_maximum_resolution": {
+    "offset": 480,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_shadow_jitter": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "shadow_jitter_overblur": {
+    "offset": 484,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_max_distance": {
+    "offset": 440,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_count": {
+    "offset": 452,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "shadow_cascade_exponent": {
+    "offset": 444,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_fade": {
+    "offset": 448,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_absolute_resolution": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "type": "BOOLEAN"
+   },
+   "use_square": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "spot_blend": {
+    "offset": 400,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "spot_size": {
+    "offset": 396,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "show_cone": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 131072,
+    "type": "BOOLEAN"
+   },
+   "use_soft_falloff": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 2097152,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "SunLight": {
+  "sdna": "Light",
+  "size": 504,
+  "properties": {
+   "angle": {
+    "offset": 424,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "energy": {
+    "offset": 384,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_buffer_clip_start": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_soft_size": {
+    "offset": 392,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_filter_radius": {
+    "offset": 476,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_maximum_resolution": {
+    "offset": 480,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_shadow_jitter": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 8388608,
+    "type": "BOOLEAN"
+   },
+   "shadow_jitter_overblur": {
+    "offset": 484,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_max_distance": {
+    "offset": 440,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_count": {
+    "offset": 452,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "shadow_cascade_exponent": {
+    "offset": 444,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "shadow_cascade_fade": {
+    "offset": 448,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_absolute_resolution": {
+    "offset": 364,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "bit": 4194304,
+    "type": "BOOLEAN"
+   }
+  }
+ },
+ "ToolSettings": {
+  "sdna": "ToolSettings",
+  "size": 1080,
+  "properties": {
+   "sculpt": {
+    "offset": 8,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "curves_sculpt": {
+    "offset": 48,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "use_auto_normalize": {
+    "offset": 743,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_lock_relative": {
+    "offset": 744,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_multipaint": {
+    "offset": 745,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "vertex_group_user": {
+    "offset": 746,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "ACTIVE"
+     ],
+     [
+      2,
+      "ALL"
+     ]
+    ]
+   },
+   "vertex_group_subset": {
+    "offset": 747,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "ALL"
+     ],
+     [
+      3,
+      "BONE_DEFORM"
+     ],
+     [
+      4,
+      "OTHER_DEFORM"
+     ]
+    ]
+   },
+   "vertex_paint": {
+    "offset": 0,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "weight_paint": {
+    "offset": 4,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "image_paint": {
+    "offset": 248,
+    "size": 236,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "paint_mode": {
+    "offset": 484,
+    "size": 48,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "uv_sculpt": {
+    "offset": 12,
+    "size": 20,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "gpencil_paint": {
+    "offset": 32,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "gpencil_vertex_paint": {
+    "offset": 36,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "gpencil_sculpt_paint": {
+    "offset": 40,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "gpencil_weight_paint": {
+    "offset": 44,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "particle_edit": {
+    "offset": 532,
+    "size": 160,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "uv_sculpt_lock_borders": {
+    "offset": 749,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "uv_sculpt_all_islands": {
+    "offset": 749,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "lock_object_mode": {
+    "offset": 61,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "workspace_tool_type": {
+    "offset": 750,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "DEFAULT"
+     ],
+     [
+      0,
+      "FALLBACK"
+     ]
+    ]
+   },
+   "use_proportional_edit": {
+    "offset": 736,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 585,
+    "consecutive": 0
+   },
+   "use_proportional_edit_objects": {
+    "offset": 738,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "type": "BOOLEAN",
+    "icon": 584,
+    "consecutive": 1
+   },
+   "use_proportional_projected": {
+    "offset": 736,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_proportional_connected": {
+    "offset": 736,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_proportional_edit_mask": {
+    "offset": 739,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "type": "BOOLEAN",
+    "icon": 584,
+    "consecutive": 1
+   },
+   "use_proportional_action": {
+    "offset": 740,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "type": "BOOLEAN",
+    "icon": 584,
+    "consecutive": 1
+   },
+   "use_proportional_fcurve": {
+    "offset": 741,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "type": "BOOLEAN",
+    "icon": 584,
+    "consecutive": 1
+   },
+   "lock_markers": {
+    "offset": 742,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 0,
+    "type": "BOOLEAN"
+   },
+   "proportional_edit_falloff": {
+    "offset": 737,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SMOOTH"
+     ],
+     [
+      1,
+      "SPHERE"
+     ],
+     [
+      2,
+      "ROOT"
+     ],
+     [
+      7,
+      "INVERSE_SQUARE"
+     ],
+     [
+      3,
+      "SHARP"
+     ],
+     [
+      4,
+      "LINEAR"
+     ],
+     [
+      5,
+      "CONSTANT"
+     ],
+     [
+      6,
+      "RANDOM"
+     ]
+    ]
+   },
+   "proportional_size": {
+    "offset": 692,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "proportional_distance": {
+    "offset": 692,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "double_threshold": {
+    "offset": 56,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "transform_pivot_point": {
+    "offset": 707,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "BOUNDING_BOX_CENTER"
+     ],
+     [
+      1,
+      "CURSOR"
+     ],
+     [
+      2,
+      "INDIVIDUAL_ORIGINS"
+     ],
+     [
+      3,
+      "MEDIAN_POINT"
+     ],
+     [
+      4,
+      "ACTIVE_ELEMENT"
+     ]
+    ]
+   },
+   "use_transform_pivot_point_align": {
+    "offset": 708,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_transform_data_origin": {
+    "offset": 708,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_transform_skip_children": {
+    "offset": 708,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_transform_correct_face_attributes": {
+    "offset": 64,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_transform_correct_keep_connected": {
+    "offset": 64,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_mesh_automerge": {
+    "offset": 60,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 5,
+    "consecutive": 1
+   },
+   "use_mesh_automerge_and_split": {
+    "offset": 60,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN",
+    "icon": 5,
+    "consecutive": 1
+   },
+   "use_snap": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 37,
+    "consecutive": 1
+   },
+   "use_snap_node": {
+    "offset": 720,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 37,
+    "consecutive": 1
+   },
+   "use_snap_sequencer": {
+    "offset": 722,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 37,
+    "consecutive": 1
+   },
+   "use_snap_uv": {
+    "offset": 730,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 37,
+    "consecutive": 1
+   },
+   "use_snap_align_rotation": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_snap_grid_absolute": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "snap_angle_increment_2d": {
+    "offset": 976,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "snap_angle_increment_2d_precision": {
+    "offset": 980,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "snap_angle_increment_3d": {
+    "offset": 984,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "snap_angle_increment_3d_precision": {
+    "offset": 988,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "snap_elements": {
+    "offset": 710,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      256,
+      "INCREMENT"
+     ],
+     [
+      128,
+      "GRID"
+     ],
+     [
+      5,
+      "VERTEX"
+     ],
+     [
+      16,
+      "EDGE"
+     ],
+     [
+      32,
+      "FACE"
+     ],
+     [
+      64,
+      "VOLUME"
+     ],
+     [
+      2,
+      "EDGE_MIDPOINT"
+     ],
+     [
+      8,
+      "EDGE_PERPENDICULAR"
+     ],
+     [
+      2048,
+      "FACE_MIDPOINT"
+     ],
+     [
+      1024,
+      "FACE_PROJECT"
+     ],
+     [
+      512,
+      "FACE_NEAREST"
+     ]
+    ]
+   },
+   "snap_elements_base": {
+    "offset": 710,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      256,
+      "INCREMENT"
+     ],
+     [
+      128,
+      "GRID"
+     ],
+     [
+      5,
+      "VERTEX"
+     ],
+     [
+      16,
+      "EDGE"
+     ],
+     [
+      32,
+      "FACE"
+     ],
+     [
+      64,
+      "VOLUME"
+     ],
+     [
+      2,
+      "EDGE_MIDPOINT"
+     ],
+     [
+      8,
+      "EDGE_PERPENDICULAR"
+     ],
+     [
+      2048,
+      "FACE_MIDPOINT"
+     ]
+    ]
+   },
+   "snap_elements_individual": {
+    "offset": 710,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "snap_face_nearest_steps": {
+    "offset": 734,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_snap_to_same_target": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 128,
+    "type": "BOOLEAN"
+   },
+   "use_snap_anim": {
+    "offset": 724,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 37,
+    "consecutive": 1
+   },
+   "use_snap_driver": {
+    "offset": 726,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 37,
+    "consecutive": 1
+   },
+   "use_snap_time_absolute": {
+    "offset": 724,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "use_snap_driver_absolute": {
+    "offset": 726,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "snap_anim_element": {
+    "offset": 714,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "FRAME"
+     ],
+     [
+      2,
+      "SECOND"
+     ],
+     [
+      4,
+      "MARKER"
+     ]
+    ]
+   },
+   "use_snap_playhead": {
+    "offset": 728,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 39,
+    "consecutive": 1
+   },
+   "snap_playhead_element": {
+    "offset": 716,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "FRAME"
+     ],
+     [
+      2,
+      "SECOND"
+     ],
+     [
+      4,
+      "MARKER"
+     ],
+     [
+      8,
+      "KEY"
+     ],
+     [
+      16,
+      "Strip"
+     ]
+    ]
+   },
+   "snap_playhead_frame_step": {
+    "offset": 994,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "snap_playhead_second_step": {
+    "offset": 992,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "playhead_snap_distance": {
+    "offset": 996,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "snap_uv_element": {
+    "offset": 712,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": [
+     [
+      256,
+      "INCREMENT"
+     ],
+     [
+      128,
+      "GRID"
+     ],
+     [
+      5,
+      "VERTEX"
+     ]
+    ]
+   },
+   "snap_target": {
+    "offset": 732,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "CLOSEST"
+     ],
+     [
+      1,
+      "CENTER"
+     ],
+     [
+      2,
+      "MEDIAN"
+     ],
+     [
+      3,
+      "ACTIVE"
+     ]
+    ]
+   },
+   "use_snap_peel_object": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_snap_backface_culling": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN"
+   },
+   "use_snap_self": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_snap_edit": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   },
+   "use_snap_nonedit": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 512,
+    "type": "BOOLEAN"
+   },
+   "use_snap_selectable": {
+    "offset": 718,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN"
+   },
+   "use_snap_translate": {
+    "offset": 733,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "use_snap_rotate": {
+    "offset": 733,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_snap_scale": {
+    "offset": 733,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "plane_axis": {
+    "offset": 970,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "plane_axis_auto": {
+    "offset": 973,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "plane_depth": {
+    "offset": 971,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SURFACE"
+     ],
+     [
+      1,
+      "CURSOR_PLANE"
+     ],
+     [
+      2,
+      "CURSOR_VIEW"
+     ]
+    ]
+   },
+   "plane_orientation": {
+    "offset": 972,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "SURFACE"
+     ],
+     [
+      1,
+      "DEFAULT"
+     ]
+    ]
+   },
+   "snap_elements_tool": {
+    "offset": 968,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      2111,
+      "GEOMETRY"
+     ],
+     [
+      0,
+      "DEFAULT"
+     ]
+    ]
+   },
+   "use_gpencil_draw_additive": {
+    "offset": 162,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_gpencil_draw_onback": {
+    "offset": 162,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "use_gpencil_thumbnail_list": {
+    "offset": 162,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "negative": true,
+    "type": "BOOLEAN"
+   },
+   "use_gpencil_weight_data_add": {
+    "offset": 162,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_gpencil_automerge_strokes": {
+    "offset": 162,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN",
+    "icon": 5,
+    "consecutive": 1
+   },
+   "gpencil_sculpt": {
+    "offset": 180,
+    "size": 64,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "gpencil_interpolate": {
+    "offset": 244,
+    "size": 4,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "gpencil_stroke_placement_view3d": {
+    "offset": 163,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "ORIGIN"
+     ],
+     [
+      33,
+      "CURSOR"
+     ],
+     [
+      5,
+      "SURFACE"
+     ],
+     [
+      9,
+      "STROKE"
+     ]
+    ]
+   },
+   "gpencil_stroke_snap_mode": {
+    "offset": 163,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      16,
+      "ENDS"
+     ],
+     [
+      64,
+      "FIRST"
+     ]
+    ]
+   },
+   "gpencil_surface_offset": {
+    "offset": 168,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_gpencil_project_only_selected": {
+    "offset": 163,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": -128,
+    "type": "BOOLEAN"
+   },
+   "gpencil_selectmode_edit": {
+    "offset": 172,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "POINT"
+     ],
+     [
+      1,
+      "STROKE"
+     ],
+     [
+      2,
+      "SEGMENT"
+     ]
+    ]
+   },
+   "use_gpencil_select_mask_point": {
+    "offset": 173,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 303,
+    "consecutive": 0
+   },
+   "use_gpencil_select_mask_stroke": {
+    "offset": 173,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN",
+    "icon": 304,
+    "consecutive": 0
+   },
+   "use_gpencil_select_mask_segment": {
+    "offset": 173,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN",
+    "icon": 302,
+    "consecutive": 0
+   },
+   "use_gpencil_vertex_select_mask_point": {
+    "offset": 748,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 303,
+    "consecutive": 0
+   },
+   "use_gpencil_vertex_select_mask_stroke": {
+    "offset": 748,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN",
+    "icon": 304,
+    "consecutive": 0
+   },
+   "use_gpencil_vertex_select_mask_segment": {
+    "offset": 748,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN",
+    "icon": 302,
+    "consecutive": 0
+   },
+   "use_grease_pencil_multi_frame_editing": {
+    "offset": 162,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 300,
+    "consecutive": 0
+   },
+   "annotation_stroke_placement_view2d": {
+    "offset": 164,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      33,
+      "IMAGE"
+     ],
+     [
+      0,
+      "VIEW"
+     ]
+    ]
+   },
+   "annotation_stroke_placement_view3d": {
+    "offset": 165,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      33,
+      "CURSOR"
+     ],
+     [
+      0,
+      "VIEW"
+     ],
+     [
+      5,
+      "SURFACE"
+     ]
+    ]
+   },
+   "use_annotation_stroke_endpoints": {
+    "offset": 165,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "use_annotation_project_only_selected": {
+    "offset": 165,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": -128,
+    "type": "BOOLEAN"
+   },
+   "annotation_thickness": {
+    "offset": 166,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "type": "INT"
+   },
+   "use_keyframe_insert_auto": {
+    "offset": 702,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 25,
+    "consecutive": 1
+   },
+   "auto_keying_mode": {
+    "offset": 702,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bitflag": true,
+    "type": "ENUM",
+    "items": [
+     [
+      2,
+      "ADD_REPLACE_KEYS"
+     ],
+     [
+      4,
+      "REPLACE_KEYS"
+     ]
+    ]
+   },
+   "use_record_with_nla": {
+    "offset": 700,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1024,
+    "type": "BOOLEAN"
+   },
+   "use_keyframe_insert_keyingset": {
+    "offset": 700,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 64,
+    "type": "BOOLEAN",
+    "icon": 541,
+    "consecutive": 0
+   },
+   "use_keyframe_cycle_aware": {
+    "offset": 700,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 256,
+    "type": "BOOLEAN"
+   },
+   "keyframe_type": {
+    "offset": 704,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "anim_mirror_object": {
+    "offset": 1000,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "anim_mirror_bone": {
+    "offset": 1008,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "length": 64,
+    "type": "STRING"
+   },
+   "anim_relative_object": {
+    "offset": 1004,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "POINTER"
+   },
+   "anim_fix_to_cam_use_loc": {
+    "offset": 1072,
+    "size": 1,
+    "kind": "int",
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "anim_fix_to_cam_use_rot": {
+    "offset": 1072,
+    "size": 1,
+    "kind": "int",
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "anim_fix_to_cam_use_scale": {
+    "offset": 1072,
+    "size": 1,
+    "kind": "int",
+    "bit": 4,
+    "type": "BOOLEAN"
+   },
+   "uv_select_mode": {
+    "offset": 66,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "VERTEX"
+     ],
+     [
+      2,
+      "EDGE"
+     ],
+     [
+      4,
+      "FACE"
+     ]
+    ]
+   },
+   "uv_sticky_select_mode": {
+    "offset": 67,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      1,
+      "DISABLED"
+     ],
+     [
+      0,
+      "SHARED_LOCATION"
+     ],
+     [
+      2,
+      "SHARED_VERTEX"
+     ]
+    ]
+   },
+   "use_uv_select_sync": {
+    "offset": 65,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN",
+    "icon": 631,
+    "consecutive": 0
+   },
+   "use_uv_select_island": {
+    "offset": 65,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 4,
+    "type": "BOOLEAN",
+    "icon": 630,
+    "consecutive": 0
+   },
+   "show_uv_local_view": {
+    "offset": 65,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 2,
+    "type": "BOOLEAN"
+   },
+   "use_uv_custom_region": {
+    "offset": 65,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "mesh_select_mode": {
+    "offset": 62,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "bitset": 3,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "vertex_group_weight": {
+    "offset": 52,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_edge_path_live_unwrap": {
+    "offset": 706,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "normal_vector": {
+    "offset": 944,
+    "size": 4,
+    "kind": "float",
+    "length": 3,
+    "type": "FLOAT"
+   },
+   "curve_paint_settings": {
+    "offset": 872,
+    "size": 32,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "statvis": {
+    "offset": 904,
+    "size": 40,
+    "kind": "struct",
+    "type": "POINTER"
+   },
+   "custom_bevel_profile_preset": {
+    "offset": 960,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "sequencer_tool_settings": {
+    "offset": 964,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   }
+  }
+ },
+ "UnitSettings": {
+  "sdna": "UnitSettings",
+  "size": 16,
+  "properties": {
+   "system": {
+    "offset": 4,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "NONE"
+     ],
+     [
+      1,
+      "METRIC"
+     ],
+     [
+      2,
+      "IMPERIAL"
+     ]
+    ]
+   },
+   "system_rotation": {
+    "offset": 5,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      0,
+      "DEGREES"
+     ],
+     [
+      2,
+      "RADIANS"
+     ]
+    ]
+   },
+   "scale_length": {
+    "offset": 0,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_separate": {
+    "offset": 6,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "type": "BOOLEAN"
+   },
+   "length_unit": {
+    "offset": 8,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "mass_unit": {
+    "offset": 9,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "time_unit": {
+    "offset": 10,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   },
+   "temperature_unit": {
+    "offset": 11,
+    "size": 1,
+    "kind": "int",
+    "signed": true,
+    "custom": true,
+    "type": "ENUM",
+    "items": []
+   }
+  }
+ },
+ "World": {
+  "sdna": "World",
+  "size": 480,
+  "properties": {
+   "use_eevee_finite_volume": {
+    "offset": 394,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 8,
+    "type": "BOOLEAN"
+   },
+   "color": {
+    "offset": 368,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT",
+    "length": 3
+   },
+   "node_tree": {
+    "offset": 452,
+    "size": 4,
+    "kind": "pointer",
+    "type": "POINTER"
+   },
+   "use_nodes": {
+    "offset": 446,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 1,
+    "custom": true,
+    "type": "BOOLEAN"
+   },
+   "lightgroup": {
+    "offset": 456,
+    "size": 4,
+    "kind": "pointer",
+    "custom": true,
+    "type": "STRING"
+   },
+   "probe_resolution": {
+    "offset": 420,
+    "size": 4,
+    "kind": "int",
+    "signed": true,
+    "type": "ENUM",
+    "items": [
+     [
+      7,
+      "128"
+     ],
+     [
+      8,
+      "256"
+     ],
+     [
+      9,
+      "512"
+     ],
+     [
+      10,
+      "1024"
+     ],
+     [
+      11,
+      "2048"
+     ],
+     [
+      12,
+      "4096"
+     ]
+    ]
+   },
+   "sun_threshold": {
+    "offset": 424,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "sun_angle": {
+    "offset": 428,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_sun_shadow": {
+    "offset": 394,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 16,
+    "type": "BOOLEAN"
+   },
+   "sun_shadow_maximum_resolution": {
+    "offset": 432,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "sun_shadow_filter_radius": {
+    "offset": 440,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   },
+   "use_sun_shadow_jitter": {
+    "offset": 394,
+    "size": 2,
+    "kind": "int",
+    "signed": true,
+    "bit": 32,
+    "type": "BOOLEAN"
+   },
+   "sun_shadow_jitter_overblur": {
+    "offset": 436,
+    "size": 4,
+    "kind": "float",
+    "type": "FLOAT"
+   }
+  }
+ }
+}

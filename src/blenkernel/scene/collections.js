@@ -135,7 +135,7 @@ export function createCollections(world, { commit = () => {} } = {}) {
       sync();
     },
     refresh: sync,
-    // A whole state from Blender's code (collections-blender.js), as one edit.
+    // A whole state from Blender's code (main-sync.js), as one edit.
     assign(next) {
       if (JSON.stringify(next) === JSON.stringify(state)) return;
       state = clone(next); changed();
