@@ -3,7 +3,7 @@
 // layout, kept in Babylon's format so the graph opens the same in Babylon's own editors. Every edit goes through
 // here and ends in `changed(rebuild)`.
 import { InputBlock, NodeMaterial, NodeMaterialBlockConnectionPointTypes as M, NodeRenderGraphBlockConnectionPointTypes as R } from '@babylonjs/core';
-import { BlenderShaderBlock, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
+import { isBlenderShader, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
 import { BlenderCompositorBlock, compositorNodeClasses } from '../../nodes/blender/compositor-nodes.js';
 import { availability } from '../../nodes/blender/declarations.js';
 import { categoryOf } from './block-categories.js';
@@ -27,7 +27,19 @@ const ELBOWS = new Set(['ElbowBlock', 'NodeRenderGraphElbowBlock']), REROUTE = '
 // Babylon's port names (worldPosition, rgba) as Blender labels (World Position, RGBA).
 const ACRONYMS = /^(rgba?|xyz|xy|uv|ior)$/i;
 const titleCase = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ').map((w) => (ACRONYMS.test(w) ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1))).join(' ');
-export const isBlender = (block) => block instanceof BlenderShaderBlock || block instanceof BlenderCompositorBlock;
+export const isBlender = (block) => isBlenderShader(block) || block instanceof BlenderCompositorBlock;
+// Bylonder's helper blocks, which link Blender nodes to Babylon's geometry and outputs: named `blender:`, or feeding
+// only what is hidden (a Blender node's own inputs Bylonder links, other helpers). Not drawn.
+const internalInput = (input) => isBlender(input.ownerBlock) && input.ownerBlock.declared?.(input.name) === false;
+const isHelper = (block, seen = new Set()) => {
+  if (block.name?.startsWith('blender:')) return true;
+  if (seen.has(block)) return false;
+  seen.add(block);
+  const ends = block.outputs.flatMap((output) => output.endpoints);
+  return ends.length > 0 && ends.every((end) => internalInput(end) || isHelper(end.ownerBlock, seen));
+};
+// A link Bylonder's editor draws: between drawn blocks, into a Blender node's own socket.
+const drawnLink = (input) => !isHelper(input.connectedPoint.ownerBlock) && !internalInput(input);
 
 // Babylon's editable block properties (@editableInPropertyPage) along the block's class chain.
 export function babylonProperties(block) {
@@ -56,7 +68,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     outputs().forEach((b) => { found.delete(b); visit(b); });
     graph.attachedBlocks.forEach((b) => b.inputs.forEach((i) => visit(i.connectedPoint?.ownerBlock)));
     for (const block of found) if (!graph.attachedBlocks.includes(block)) graph.attachedBlocks.push(block);
-    return [...found];
+    return [...found].filter((block) => !isHelper(block));
   };
   const byId = (id) => blocks().find((b) => b.uniqueId === id);
 
@@ -159,7 +171,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     return block ?? (type && type !== M.AutoDetect ? new InputBlock(name, undefined, type) : null);
   };
 
-  const links = () => blocks().flatMap((block) => block.inputs.filter((i) => i.connectedPoint).map((input) => ({ from: input.connectedPoint, to: input })));
+  const links = () => blocks().flatMap((block) => block.inputs.filter((i) => i.connectedPoint && drawnLink(i)).map((input) => ({ from: input.connectedPoint, to: input })));
 
   const tree = {
     kind, graph, catalog, blenderClasses,
@@ -191,6 +203,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
         if (input) block.values[input[1]] = value; else if (block.properties) block.properties[key] = value;
       }
       graph.attachedBlocks.push(block);
+      block.attach?.(graph);
       editor().locations.push({ blockId: block.uniqueId, x, y, isCollapsed: false });
       changed(true);
       return block;

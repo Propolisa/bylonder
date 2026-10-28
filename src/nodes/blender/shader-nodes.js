@@ -4,12 +4,12 @@
 // uniforms, as Blender's GPU_uniform, so editing a value needs no rebuild.
 //
 // What Blender's GPU code reads of the point it shades (g_data, attributes, the object's texture space) comes from
-// Babylon's geometry: hidden inputs (named `__...`) linked to Babylon blocks named the same way, which Bylonder's
+// Babylon's geometry: hidden inputs (named `__...`) linked to Babylon blocks named `blender:...`, which Bylonder's
 // editor does not draw. A closure (a SHADER socket) is the radiance it sends toward the view and its alpha: Principled
 // BSDF is Babylon's PBR block lit by Babylon's lights, Emission adds its radiance, and Material Output writes the
 // fragment through Babylon's image processing.
 import {
-  Constants, FragmentOutputBlock, ImageProcessingBlock, InputBlock, NodeMaterialBlock, NodeMaterialBlockConnectionPointTypes as T,
+  Color4, Constants, FragmentOutputBlock, ImageProcessingBlock, InputBlock, NodeMaterialBlock, NodeMaterialBlockConnectionPointTypes as T,
   NodeMaterialBlockTargets as Targets, NodeMaterialSystemValues as System, PBRMetallicRoughnessBlock, RawTexture, ReflectionBlock, RegisterClass,
   Texture, TransformBlock, VertexOutputBlock,
 } from '@babylonjs/core';
@@ -109,32 +109,39 @@ const NEEDS = {
 };
 const geometryOf = (idname) => [...new Set((NEEDS[idname] ?? []).flatMap((value) => POINT[value]))];
 
-// A Bylonder helper block of a material, found by name or made.
+// A Bylonder helper block of a material, found by name or made (`blender:` and the name: GLSL takes a block's name
+// into its variables' names, where two underscores are reserved).
 function helper(material, name, make) {
-  const found = material.attachedBlocks.find((b) => b.name === name);
+  const full = 'blender:' + name.replace(/^__/, '');
+  const found = material.attachedBlocks.find((b) => b.name === full);
   if (found) return found;
-  const block = make(name);
+  const block = make(full);
   material.attachedBlocks.push(block);
   return block;
 }
+// An attribute's block is named as the attribute (Babylon reads it by its name), and shared.
 function geometryBlock(material, name) {
   const [kind, value, type] = GEOMETRY[name];
-  return helper(material, name, () => {
-    const block = new InputBlock(name, undefined, type);
-    if (kind === 'attribute') block.setAsAttribute(value); else block.setAsSystemValue(value);
+  if (kind === 'attribute') {
+    const found = material.attachedBlocks.find((b) => b.isAttribute && b.name === value);
+    if (found) return found;
+    const block = new InputBlock(value, undefined, type);
+    block.setAsAttribute(value);
+    material.attachedBlocks.push(block);
     return block;
-  });
+  }
+  return helper(material, name, (full) => Object.assign(new InputBlock(full, undefined, type), { systemValue: value }));
 }
 // Links `from` into `to` unless it already is.
 const wire = (from, to) => { if (to.connectedPoint !== from) { to.connectedPoint?.disconnectFrom(to); from.connectTo(to, true); } };
-const transformed = (material, name, vector, w) => helper(material, name, () => {
-  const block = new TransformBlock(name);
+const transformed = (material, name, w) => helper(material, name, (full) => {
+  const block = new TransformBlock(full);
   block.complementW = w;
   return block;
 });
 // Position times World, the world position Babylon's blocks take.
 function worldPosition(material) {
-  const block = transformed(material, '__worldPosition', 'position', 1);
+  const block = transformed(material, '__worldPosition', 1);
   wire(geometryBlock(material, '__position').output, block.vector);
   wire(geometryBlock(material, '__world').output, block.transform);
   return block;
@@ -192,7 +199,8 @@ const blenderShader = (Base) => class extends Base {
       this.registerOutput(s.identifier, type, Targets.Fragment);
       adaptOutput(Object.assign(this.getOutputByName(s.identifier), { displayName: s.name }), type, s.type);
     }
-    for (const name of geometryOf(idname)) this.registerInput(name, GEOMETRY[name][2], true);
+    // Read in the fragment shader: Babylon carries an attribute there as a varying.
+    for (const name of geometryOf(idname)) this.registerInput(name, GEOMETRY[name][2], true, Targets.Fragment);
   }
 
   getClassName() { return this.idname; }
@@ -241,7 +249,7 @@ const blenderShader = (Base) => class extends Base {
           return declare('bl_window', 'vec3', `vec3(${clip}.xy / ${clip}.w * 0.5 + 0.5, 0.0)`);
         }
         case '$reflection': {
-          const P = links.get('$P'), N = links.get('$N'), incident = `normalize(${geometry('__cameraPosition')}.xzy - ${P})`;
+          const P = link('$P'), N = link('$N'), incident = `normalize(${geometry('__cameraPosition')}.xzy - ${P})`;
           return declare('bl_reflection', 'vec3', `-reflect(${incident}, ${N})`);
         }
         // Generated: the position in the mesh's texture space, from [-1, 1] to [0, 1] as the orco attribute is.
@@ -257,16 +265,14 @@ const blenderShader = (Base) => class extends Base {
         // port-override: Blender evaluates the height again at offset positions (GPU_differentiate_float_function);
         // the height's screen derivatives stand for that, as Blender's GPU_FAST_DERIVATIVE path takes them.
         case '$height_xy': {
-          const height = links.get('Height');
-          return declare('bl_height_xy', 'vec2', `vec2(${height}) + ${links.get('Filter Width')} * vec2(dFdx(${height}), dFdy(${height}))`);
+          const height = link('Height');
+          return declare('bl_height_xy', 'vec2', `vec2(${height}) + ${link('Filter Width')} * vec2(dFdx(${height}), dFdy(${height}))`);
         }
         default: throw Error(`${this.name}: no ${id}`);
       }
     };
-    return {
-      get: (id) => (links.has(id) || id.startsWith('@') ? links.get(id) : links.set(id, id.startsWith('$') ? point(id) : input(id)).get(id)),
-      set: (id, v) => links.set(id, v),
-    };
+    const link = (id) => (links.has(id) || id.startsWith('@') ? links.get(id) : links.set(id, id.startsWith('$') ? point(id) : input(id)).get(id));
+    return { get: link, set: (id, v) => links.set(id, v) };
   }
 
   // The node's steps compiled into the fragment shader; its outputs' variables written.
@@ -280,7 +286,8 @@ const blenderShader = (Base) => class extends Base {
       });
       // Blender's hashes take 32 bit integers, which a fragment shader's default (mediump) need not be.
       state._emitFunction('bl_precision', 'precision highp int;\n', '');
-      state.compilationString += compileSteps(this.declaration, steps, links, {
+      // Compiled before it is added: the values of the shaded point are declared as the steps first use them.
+      const code = compileSteps(this.declaration, steps, links, {
         emit: (key, code) => state._emitFunction(key, code, ''),
         free: (prefix) => state._getFreeVariableName(prefix),
         sampler: (table) => {
@@ -291,6 +298,7 @@ const blenderShader = (Base) => class extends Base {
         },
         functions: STAND_INS,
       });
+      state.compilationString += code;
     }
     return links;
   }
@@ -370,7 +378,7 @@ export class ShaderNodeBsdfPrincipled extends blenderShader(PBRMetallicRoughness
     for (const point of [this.baseColor, this.metallic, this.roughness, this.indexOfRefraction, this.opacity]) point._blenderValue = null;
     const position = geometryBlock(material, '__position'), world = geometryBlock(material, '__world');
     wire(worldPosition(material).output, this.worldPosition);
-    const normal = transformed(material, '__worldNormal', 'normal', 0);
+    const normal = transformed(material, '__worldNormal', 0);
     wire(geometryBlock(material, '__normal').output, normal.vector);
     wire(world.output, normal.transform);
     wire(normal.output, this.worldNormal);
@@ -450,7 +458,7 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
     const processing = helper(material, `__imageProcessing ${this.uniqueId}`, (name) => Object.assign(new ImageProcessingBlock(name), { convertInputToLinearSpace: false }));
     const surface = this.getInputByName('Surface').connectedPoint;
     if (surface) wire(surface, processing.color);
-    else wire(helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: { r: 0, g: 0, b: 0, a: 1, asArray: () => [0, 0, 0, 1] } })).output, processing.color);
+    else wire(helper(material, '__black', (name) => Object.assign(new InputBlock(name, undefined, T.Color4), { value: new Color4(0, 0, 0, 1) })).output, processing.color);
     wire(processing.output, this.rgba);
   }
 
@@ -463,7 +471,8 @@ export class ShaderNodeOutputMaterial extends blenderShader(FragmentOutputBlock)
 // generation converts at the link: one Color output can feed a Color3 albedo and other Blender nodes' Float inputs.
 // Between Blender nodes, the sockets' own types decide (a closure links only to a closure).
 function adaptOutput(point, own, socket) {
-  const babylonTargets = () => point.endpoints.filter((e) => !isBlenderShader(e.ownerBlock) && e.type !== own);
+  // An input that takes its type from its link (AutoDetect) takes this output's own.
+  const babylonTargets = () => point.endpoints.filter((e) => !isBlenderShader(e.ownerBlock) && e._type !== own && e._type !== T.AutoDetect);
   Object.defineProperty(point, 'type', { get: () => babylonTargets()[0]?.type ?? own, set: () => {}, configurable: true });
   const check = point.checkCompatibilityState.bind(point);
   point.checkCompatibilityState = (other) => {
@@ -497,4 +506,15 @@ export function blenderDefaultTree(material) {
   material.attachedBlocks.push(principled);
   output.attach(material);
   material.editorData = { locations: [{ blockId: principled.uniqueId, x: 10, y: -300 }, { blockId: output.uniqueId, x: 300, y: -300 }], frames: [] };
+}
+
+// Babylon drops a build asked for while one waits for its blocks' code, so the latest asks again once that one ends.
+const QUEUED = Symbol('queued');
+export function buildMaterial(material) {
+  if (!material._buildIsInProgress) return material.build();
+  if (material[QUEUED]) return;
+  material[QUEUED] = true;
+  const again = () => { if (material[QUEUED]) { material[QUEUED] = false; buildMaterial(material); } };
+  material.onBuildObservable.addOnce(again);
+  material.onBuildErrorObservable.addOnce(again);
 }

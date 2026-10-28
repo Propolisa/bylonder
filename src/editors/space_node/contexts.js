@@ -3,6 +3,7 @@ import { iconButton } from '../interface/icon.js';
 import { modifierStack } from '../../modifiers/stack.js';
 import { geometryGraph, isEvaluating, storeGeometryGraph } from '../../nodes/geometry-nodes.js';
 import { mountLogicEditor } from './logic-editor.js';
+import { buildMaterial } from '../../nodes/blender/shader-nodes.js';
 
 const debounce = (fn, ms = 400) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
 const observed = new WeakSet();
@@ -41,7 +42,7 @@ export function createNodeContexts({ world, editor }) {
       const edited = debounce(() => world.materials.markGraphEdited(material));
       return {
         key: 'node:' + material.uniqueId, title: material.name, graph: material,
-        mount: blenderEditor(material, (rebuild) => { if (rebuild) material.build(); edited(); }),
+        mount: blenderEditor(material, (rebuild) => { if (rebuild) buildMaterial(material); edited(); }),
         onShow: () => watchBuilds(material, edited),
       };
     },
