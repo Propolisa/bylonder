@@ -21,8 +21,11 @@ export const createScene = function () {
   // A 50 mm lens on a 36 mm sensor, fitted horizontally.
   camera.fovMode = BABYLON.Camera.FOVMODE_HORIZONTAL_FIXED;
   camera.fov = 2 * Math.atan(18 / 50);
+  camera.minZ = 0.1;
+  camera.maxZ = 100;
 
-  new BABYLON.PointLight('Light', new BABYLON.Vector3(4.0762, 5.9039, 1.0055), scene);
+  // A 1000 W point light (intensity 1) of radius 0.1 m.
+  new BABYLON.PointLight('Light', new BABYLON.Vector3(4.0762, 5.9039, 1.0055), scene).radius = 0.1;
   return scene;
 };
 `,

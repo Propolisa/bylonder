@@ -44,11 +44,11 @@ export function layoutTree(node, data, id) {
 }
 
 // The modifier header's layout (modifier_panel_header): the type's icon, name, toggles, extra operations and remove.
-function headerLayout(ob, modifier) {
-  const layout = new UILayout(), row = layout.row(kw({ align: true }));
-  row.prop(modifier, 'name', kw({ text: '' }));
-  const toggles = layout.row(kw({ align: true }));
-  for (const [property, iconName] of [['show_viewport', 'RESTRICT_VIEW_OFF'], ['show_render', 'RESTRICT_RENDER_OFF']]) toggles.prop(modifier, property, kw({ text: '', icon: iconName }));
+function headerLayout(modifier) {
+  const layout = new UILayout('row'), row = layout.row(kw({ align: true }));
+  row.row(kw({ align: true })).prop(modifier, 'name', kw({ text: '' }));
+  const toggles = row.row(kw({ align: true }));
+  for (const property of ['show_in_editmode', 'show_viewport', 'show_render']) toggles.prop(modifier, property, kw({ text: '' }));
   return layout;
 }
 
@@ -58,7 +58,8 @@ export function modifierTemplates({ world, editor, rna, history }) {
     if (!ob?.getTotalVertices?.()) return null;
     const stack = modifierStack(ob), structs = rna.pointer('Object', ob).modifiers;
     return h('div', { class: 'flex flex-col gap-[calc(var(--bl-row)*.2)]' }, stack.map((modifier, index) => {
-      const struct = structs[index], id = 'modifier:' + modifier.id, open = env.ui.isOpen(id, false);
+      const struct = structs[index], id = 'modifier:' + modifier.id, open = env.ui.isOpen(id, false), active = structs.active === struct;
+      const setActive = () => { if (!active) { ob.metadata = { ...ob.metadata, wbActiveModifier: modifier.id }; env.ui.undoPush('Set Active Modifier'); } };
       const definition = world.modifiers.definitions.get(modifier.type);
       const operations = () => [
         ['Apply', 'CHECKMARK', () => world.modifiers.apply(ob, modifier.id)],
@@ -74,11 +75,12 @@ export function modifierTemplates({ world, editor, rna, history }) {
         const [root] = modifierPanel(modifier).children;
         return root ? h(LayoutView, { layout: { kind: 'column', children: root.children.map((child) => layoutTree(child, data, id)).filter(Boolean) }, ui: env.ui }) : null;
       };
-      return h('section', { key: modifier.id, class: ['bl-panel bl-panel-root', open && 'is-open'], 'data-blender': modifier.type }, [
+      return h('section', { key: modifier.id, class: ['bl-panel bl-panel-root', open && 'is-open', active && 'is-active'], 'data-blender': modifier.type, onPointerdown: setActive,
+        onPointerenter: () => env.ui.hover?.(modifier.id), onPointerleave: () => env.ui.hover?.(null) }, [
         h('header', { class: 'bl-panel-header flex items-center', onClick: (e) => { if (!e.target.closest('input,button,label')) env.ui.toggle(id, e, false); } }, [
           icon(open ? 'DOWNARROW_HLT' : 'RIGHTARROW', 'bl-disclosure'),
           icon(definition?.icon ?? 'MODIFIER', 'bl-modifier-icon'),
-          h('div', { class: 'flex min-w-0 flex-1' }, h(LayoutView, { layout: headerLayout(ob, struct), ui: env.ui })),
+          h('div', { class: 'flex min-w-0 flex-1' }, h(LayoutView, { layout: headerLayout(struct), ui: env.ui })),
           h('button', { type: 'button', class: 'bl-widget bl-flat flex h-unit w-unit items-center justify-center', title: 'Extra Operations', 'aria-label': 'Extra Operations',
             onClick: (e) => openMenu(operations, e.currentTarget) }, icon('DOWNARROW_HLT')),
           h('button', { type: 'button', class: 'bl-widget bl-flat flex h-unit w-unit items-center justify-center', title: 'Remove Modifier', 'aria-label': 'Remove Modifier',

@@ -13,7 +13,7 @@ const modifierType = (idname, props) =>
 
 const modifierAddUI = (world, node, added) => ({
   menus,
-  context: () => ({ object: { py_metatype: 'MESH' } }),
+  context: () => ({ object: { py_metatype: 'MESH', __bool__: () => true } }),
   supported: (idname, props) => world.modifiers.definitions.has(modifierType(idname, props)),
   poll: () => true,
   keys: () => undefined,

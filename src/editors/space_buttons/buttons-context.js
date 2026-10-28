@@ -3,6 +3,7 @@
 // editor shows above its panels.
 import { createContext } from '../../blenkernel/context.js';
 import { INFO } from '../../makesrna/rna.js';
+import modifierTypes from '../../makesrna/rna-modifiers.json' with { type: 'json' };
 
 // Blender's tabs in order (ED_buttons_tabs_list), null between groups.
 const TABS = ['TOOL', null, 'RENDER', 'OUTPUT', 'VIEW_LAYER', 'SCENE', 'WORLD', null, 'COLLECTION', null, 'OBJECT', 'MODIFIER', 'SHADERFX',
@@ -22,7 +23,7 @@ export const TAB_CONTEXTS = { TOOL: '.workspace', RENDER: 'render', OUTPUT: 'out
 // RNA_struct_ui_icon of the structs the path shows.
 const ICONS = { Scene: 'SCENE_DATA', ViewLayer: 'RENDER_RESULT', World: 'WORLD', Collection: 'OUTLINER_COLLECTION', Object: 'OBJECT_DATA',
   Material: 'MATERIAL', Mesh: 'MESH_DATA', Camera: 'CAMERA_DATA', PointLight: 'LIGHT_DATA', SpotLight: 'LIGHT_DATA', SunLight: 'LIGHT_DATA', AreaLight: 'LIGHT_DATA' };
-export const structIcon = (struct) => ICONS[struct?.[INFO]?.struct] ?? 'DOT';
+export const structIcon = (struct) => ICONS[struct?.[INFO]?.struct] ?? modifierTypes.types[struct?.type]?.icon ?? 'DOT';
 
 // Whether a tab has something to show for an object (buttons_context_path_*).
 function available(tab, ob, context) {
@@ -81,5 +82,6 @@ export function propertiesPath(context, tab) {
   if (!sceneLevel && tab !== 'COLLECTION' && tab !== 'TOOL' && ob) path.push(ob);
   if (tab === 'DATA' && ob?.data) path.push(ob.data);
   if (tab === 'MATERIAL' && context.material) path.push(context.material);
+  if (tab === 'MODIFIER' && ob?.modifiers.active) path.push(ob.modifiers.active);
   return path.filter(Boolean);
 }

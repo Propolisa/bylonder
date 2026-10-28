@@ -128,7 +128,7 @@ function widget(prop, node, { text, index = -1, disabled, inactive, ui }) {
     next[index] = v;
     prop.set(next, finish);
   };
-  const iconName = node.icon && node.icon !== 'NONE' ? node.icon : null;
+  const iconName = [node.icon, meta.type === 'B' ? meta.icon : null].find((name) => name && name !== 'NONE') ?? null;
   switch (meta.type) {
     case 'B': {
       const checked = node.invert_checkbox ? !element : !!element;
@@ -198,7 +198,8 @@ function propItem(node, env) {
   if (!prop) return label(`property not found: ${node.data?.[INFO]?.struct ?? '?'}.${node.property}`, { className: 'text-[#ff8080]' });
   const { meta } = prop;
   const disabled = !env.enabled || !!meta.readonly, inactive = !env.active || !prop.bound;
-  const name = node.text ?? meta.name, index = node.index ?? -1, iconName = node.icon && node.icon !== 'NONE' ? node.icon : null;
+  // A property's own icon (RNA_property_ui_icon) where the call gives none.
+  const name = node.text ?? meta.name, index = node.index ?? -1, iconName = [node.icon, meta.icon].find((name) => name && name !== 'NONE') ?? null;
   const options = { disabled, inactive, ui };
   const isArray = meta.array && index < 0 && meta.type !== 'E' && !(['COLOR', 'COLOR_GAMMA'].includes(meta.subtype) && meta.type === 'F');
   const useSplit = node.split && !env.noSplit;
@@ -383,9 +384,10 @@ function layout(node, env) {
     children.forEach((child, i) => { child.props = { ...child.props, style: { flex: `0 0 calc(${(i === 0 ? first : (1 - first) / Math.max(1, children.length - 1)) * 100}% - var(--bl-row-gap))` } }; });
   }
   if (node.kind === 'grid_flow' || node.kind === 'column_flow') style.gridTemplateColumns = node.columns > 0 ? `repeat(${node.columns}, minmax(0, 1fr))` : 'repeat(auto-fill, minmax(calc(var(--bl-row) * 7), 1fr))';
-  if (node.scale_y && node.scale_y !== 1) style['--bl-row'] = `calc(20px * ${node.scale_y})`;
   if (node.ui_units_x) style.width = `calc(var(--bl-row) * ${node.ui_units_x})`;
-  return h('div', { class: [layoutClass(node), EMBOSS_NONE.has(node.emboss) && 'bl-emboss-none', node.alert && 'bl-alert'], style }, children);
+  // A layout of icon buttons only keeps their size in a row, as their estimated widths would.
+  const fit = children.length && children.every((child) => JSON.stringify(child.props?.class ?? '').includes('bl-icon-only'));
+  return h('div', { class: [layoutClass(node), EMBOSS_NONE.has(node.emboss) && 'bl-emboss-none', node.alert && 'bl-alert', fit && 'bl-fit bl-icon-only-group'], style }, children);
 }
 
 // A layout panel (UILayout.panel): a header with a disclosure triangle, then the body when open.

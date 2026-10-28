@@ -9,7 +9,10 @@ import { UILayout } from '../interface/layout.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { openMenu } from '../interface/menu.js';
-import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
+import { menuUI, menuClasses, kw, inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
+import { keymapHandler } from '../../windowmanager/keyconfig.js';
+import { keyType } from '../../windowmanager/input/keymap.js';
+import './properties-operators.js';
 import { propertiesContext, propertiesTabs, propertiesPath, TAB_CONTEXTS, structIcon } from './buttons-context.js';
 import { propertyPanels } from './registry.js';
 import { addonPanels } from './addon-panels.js';
@@ -49,7 +52,8 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
   const save = () => { try { localStorage.setItem(key, JSON.stringify({ context: state.context, open: state.open })); } catch { /* Storage blocked. */ } };
   let context, types, navigation, menus;
   const space = markRaw({
-    get context() { return state.context; },
+    // The tab shown: the one the user chose (mainbuser) while the data has it, else the first there is (buttons_context_compute).
+    get context() { const tabs = space.tabs().filter(Boolean).map(([id]) => id); return tabs.includes(state.context) ? state.context : tabs[0]; },
     set context(value) { state.context = value; save(); state.revision++; },
     get pin() { return state.pin && !deleted(state.pin.owner) ? state.pin.struct : null; },
     setPin(value) { state.pin = value ? { struct: context.object, owner: editor.selection.nodes.at(-1) } : null; state.revision++; },
@@ -59,23 +63,45 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
   });
   const panels = panelState(state, () => []);
   const operatorUI = () => menuUI({ menus, context: () => context });
+  const ob = () => editor.selection.nodes.at(-1);
+  // A menu as a popup under the button that opened it, or at the pointer for a key.
+  const popup = (items) => (event) => openMenu(items, event?.currentTarget instanceof Element ? event.currentTarget : { x: event?.native?.clientX ?? editor.pointer?.x ?? 0, y: event?.native?.clientY ?? editor.pointer?.y ?? 0 });
+  let hovered = null;
+  // This editor as the context area (wm-operators.js): its menus, and what its operators act on (properties-operators.js).
+  const area = {
+    menu: (name) => (name === 'OBJECT_MT_modifier_add' ? popup(() => modifierAddMenu(world, ob(), () => {})) : menus?.[name] ? popup(() => drawMenu(name, operatorUI())) : null),
+    properties: {
+      cycle(step) { const tabs = space.tabs().filter(Boolean).map(([id]) => id); space.context = tabs[(tabs.indexOf(space.context) + step + tabs.length) % tabs.length]; },
+      startFilter: () => host.querySelector('.bl-properties-header input, input[aria-label="Live search filtering string"]')?.focus(),
+      clearFilter: () => { space.search = ''; },
+      canAddModifier: () => space.context === 'MODIFIER' && !!ob()?.getTotalVertices?.(),
+    },
+    modifier: () => {
+      const node = ob(), id = hovered ?? world.modifiers?.stack(node ?? {})?.at(-1)?.id;
+      if (!node || !id || space.context !== 'MODIFIER') return null;
+      const stack = world.modifiers.stack(node), index = stack.findIndex((m) => m.id === id);
+      return index < 0 ? null : { remove: () => world.modifiers.remove(node, id), duplicate: () => world.modifiers.duplicate(node, id), apply: () => world.modifiers.apply(node, id) };
+    },
+  };
+  const keys = keymapHandler(['Property Editor', 'Frames', 'Screen', 'Window']);
+  const onKeydown = (e) => {
+    if (e.target.closest('input,textarea,select') || e.repeat) return;
+    const event = { type: keyType(e), value: 'PRESS', shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, oskey: e.metaKey, native: e };
+    if (inArea(area, () => keys(event))) { e.preventDefault(); e.stopPropagation(); }
+  };
   const ui = {
     get revision() { return state.revision; },
     undoPush: (name) => { rna.host.undoPush?.(name); state.revision++; },
     report: (error) => world.notify?.(error.message),
-    // wm.call_menu opens the menu under its button: Add Modifier's from the modifier types Bylonder has.
-    run: (idname, props, event) => {
-      if (idname !== 'wm.call_menu') return operatorUI().run(idname, props, event);
-      const ob = editor.selection.nodes.at(-1);
-      openMenu(props.name === 'OBJECT_MT_modifier_add' ? modifierAddMenu(world, ob, () => {}) : drawMenu(props.name, operatorUI()), event.currentTarget);
-    },
-    supported: (idname, props) => (idname === 'wm.call_menu' ? !!menus[props.name] : operatorUI().supported(idname, props)),
-    poll: (idname, props) => operatorUI().poll(idname, props),
+    run: (idname, props, event) => inArea(area, () => invokeOperator(idname, props, event)),
+    supported: (idname, props) => inArea(area, () => operatorUI().supported(idname, props)),
+    poll: (idname, props) => inArea(area, () => operatorUI().poll(idname, props)),
     isOpen: (id, closed) => panels.isOpen(id, closed),
     toggle: (id, event, closed) => { panels.toggle(id, event, closed); save(); state.revision++; },
+    hover: (modifierId) => { hovered = modifierId; },
     structIcon,
     ids: (struct) => ({
-      Object: () => rna.objects().map((ob) => rna.pointer('Object', ob)),
+      Object: () => rna.objects().map((node) => rna.pointer('Object', node)),
       World: () => world.worlds?.all().map((entry) => rna.pointer('World', entry)) ?? [],
       Collection: () => world.collections?.all().map((entry) => rna.pointer('Collection', entry)) ?? [],
       Scene: () => [context.scene],
@@ -90,7 +116,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
   };
 
   const region = () => {
-    const tab = state.context;
+    const tab = space.context;
     const drawn = drawPanels(types, context, { contexts: [TAB_CONTEXTS[tab]], open: ui.isOpen,
       panelOpen: (id, node) => (node.data ? !!node.data[node.property] : ui.isOpen(`layout:${node.idname}`, node.default_closed)) });
     const path = { id: 'context-path', hideHeader: true, open: true, body: contextBar(context, space), children: [] };
@@ -103,11 +129,11 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       void state.revision;
       if (!state.ready) return h('section', { class: 'bl-ui bl-properties' });
       context = propertiesContext(rna, space);
-      if (!space.tabs().some((tab) => tab?.[0] === state.context)) state.context = 'OBJECT' in TAB_CONTEXTS && space.tabs().some((tab) => tab?.[0] === 'OBJECT') ? 'OBJECT' : 'SCENE';
       const nav = drawPanels(navigation, context, { contexts: [] });
       const headerLayout = drawHeader(menus.PROPERTIES_HT_header ?? (() => ({ draw() {} })), context);
       const header = h(LayoutView, { layout: headerLayout, ui });
-      return h('section', { class: 'bl-ui bl-properties flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PROPERTIES' }, [
+      return h('section', { class: 'bl-ui bl-properties flex h-full flex-col overflow-hidden bg-region', 'data-blender': 'PROPERTIES', tabindex: -1, onKeydown,
+        onPointerenter: (e) => e.currentTarget.focus({ preventScroll: true }) }, [
         headerHost ? h(Teleport, { to: headerHost }, [h('div', { class: 'bl-ui bl-properties-header flex min-w-0 flex-1 items-center' }, [header])]) : header,
         h('div', { class: 'flex min-h-0 flex-1' }, [
           h('div', { class: 'bl-navigation-bar flex shrink-0 flex-col items-center', 'data-blender': 'PROPERTIES_PT_navigation_bar' }, nav.map((p) => h(LayoutView, { layout: p.body, ui }))),

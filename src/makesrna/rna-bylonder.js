@@ -162,7 +162,11 @@ const STRUCTS = {
     active_material_index: { get: (ob, r) => r.world.materials?.active(ob) ?? 0, set: (ob, index, r) => r.world.materials.setActive(ob, index) },
     parent: (ob, r) => (r.world.objects.includes(ob.parent) ? r.pointer('Object', ob.parent) : null),
     children: (ob, r) => collection(r.objects().filter((child) => child.parent === ob).map((child) => r.pointer('Object', child))),
-    modifiers: (ob, r) => collection(modifierStack(ob).map((modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, modifier))),
+    // The active modifier is the one last made active (object.modifier_set_active, or added), else the last.
+    modifiers: (ob, r) => {
+      const stack = modifierStack(ob), structs = stack.map((modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, modifier));
+      return collection(structs, structs[stack.findIndex((m) => m.id === ob.metadata?.wbActiveModifier)] ?? structs.at(-1) ?? null);
+    },
     material_slots: (ob, r) => collection((r.world.materials?.slots(ob) ?? []).map((material, slot_index) =>
       rna('MaterialSlot', { name: material?.name ?? '', material: r.pointer('Material', material), slot_index }))),
     active_material: (ob, r) => r.pointer('Material', r.world.materials?.activeMaterial(ob)),
@@ -248,6 +252,8 @@ const STRUCTS = {
     } },
     lens: { get: (camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), set: (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); } },
     angle: settable('fov'),
+    // How the lens is shown (millimeters or field of view), kept with the camera.
+    lens_unit: { get: (camera) => camera.metadata?.wbLensUnit ?? 'MILLIMETERS', set: (camera, unit) => { camera.metadata = { ...camera.metadata, wbLensUnit: unit }; } },
     clip_start: settable('minZ'),
     clip_end: settable('maxZ'),
   },

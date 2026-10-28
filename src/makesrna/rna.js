@@ -68,6 +68,8 @@ export function rna(struct, data = {}, { items = {}, channels = {}, owner = null
   return new Proxy(data, {
     get(target, key, receiver) {
       if (key === INFO) return info;
+      // A struct is true in Python, whatever it holds (Transcrypt's truth test counts an object's keys).
+      if (key === '__bool__') return () => true;
       if (typeof key !== 'string') return target[key];
       const name = rnaName(key);
       if (name in target) return target[name];
