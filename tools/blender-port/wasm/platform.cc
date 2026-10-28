@@ -41,17 +41,20 @@ extern "C" void __cxa_throw(void *, void *, void (*)(void *)) { std::abort(); }
 /* thread_local destructors: a reactor module never exits its one thread. */
 extern "C" int __cxa_thread_atexit(void (*)(void *), void *, void *) { return 0; }
 
+/* Weak: where Blender's own threads.cc builds (over wasm/include/pthread.h) it gives the same one-thread answers. */
+#define WEAK __attribute__((weak))
 namespace blender {
 /* port-override: WASI has no threads; Blender's own task_range.cc runs ranges serially without TBB. */
-int BLI_system_thread_count() { return 1; }
-int BLI_thread_is_main() { return 1; }
+WEAK int BLI_system_thread_count() { return 1; }
+WEAK int BLI_thread_is_main() { return 1; }
 /* port-override: one thread holds every lock. */
-void BLI_spin_init(SpinLock * /*spin*/) {}
-void BLI_spin_lock(SpinLock * /*spin*/) {}
-void BLI_spin_unlock(SpinLock * /*spin*/) {}
-void BLI_spin_end(SpinLock * /*spin*/) {}
-void BLI_rw_mutex_init(ThreadRWMutex * /*mutex*/) {}
-void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
-void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
-void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
+WEAK void BLI_spin_init(SpinLock * /*spin*/) {}
+WEAK void BLI_spin_lock(SpinLock * /*spin*/) {}
+WEAK void BLI_spin_unlock(SpinLock * /*spin*/) {}
+WEAK void BLI_spin_end(SpinLock * /*spin*/) {}
+WEAK void BLI_rw_mutex_init(ThreadRWMutex * /*mutex*/) {}
+WEAK void BLI_rw_mutex_end(ThreadRWMutex * /*mutex*/) {}
+WEAK void BLI_rw_mutex_lock(ThreadRWMutex * /*mutex*/, int /*mode*/) {}
+WEAK void BLI_rw_mutex_unlock(ThreadRWMutex * /*mutex*/) {}
 }  // namespace blender
+#undef WEAK

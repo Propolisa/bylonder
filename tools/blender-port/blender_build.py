@@ -29,7 +29,8 @@ SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles
 DROP = re.compile(r'^(-DFMT_SHARED|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
 FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
-         '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-include', os.path.join(WASM, 'compat.h'),
+         '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
+         '-I' + os.path.join(WASM, 'process'), '-include', os.path.join(WASM, 'compat.h'),
          # Before any source includes it inside a namespace (makesrna.cc), where WASI's unistd.h declarations then clash.
          '-include', 'sys/stat.h']
 
