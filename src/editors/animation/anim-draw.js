@@ -36,33 +36,68 @@ export function regionCanvas(canvas, width, height) {
   return { ctx, width, height, y: (y) => height - y };
 }
 
-// view2d's major step for frames: the smallest of 1, 2, 5, 10... at least U.v2d_min_gridsize (45) pixels apart.
-export function frameStep(v2d, width) {
-  const { cur } = v2d, perFrame = width / (cur.xmax - cur.xmin);
-  for (let scale = 1; ; scale *= 10) for (const step of [1, 2, 5]) if (step * scale * perFrame >= 45) return step * scale;
+// view2d_draw.cc's grid: major lines at least U.v2d_min_gridsize pixels and a label apart, as a multiple or a
+// division (by 2, 3 or 5) of a base (the frame rate for frames, 10 for values); fractions only where the editor
+// shows subframes.
+const MIN_MAJOR_LINE_DISTANCE = 45, SUBFRAME_RANGE = 100;
+function divisor(distance) {
+  const divisors = [2, 3, 5];
+  return divisors.find((d) => distance % d === 0 && distance / d === 2) ?? divisors.find((d) => distance % d === 0) ?? distance;
 }
-function valueStep(v2d, height) {
-  const { cur } = v2d, perUnit = height / (cur.ymax - cur.ymin);
-  for (let scale = 1e-4; scale < 1e9; scale *= 10) for (const step of [1, 2, 5]) if (step * scale * perUnit >= 45) return step * scale;
-  return 1;
+function gridStep(base, pixels, span, minDistance) {
+  if (span === 0) return 1;
+  const perUnit = pixels / span;
+  let distance = Math.max(base, 1);
+  if (perUnit * distance > minDistance) {
+    while (distance > 1) {
+      const result = Math.trunc(distance / divisor(distance));
+      if (perUnit * result < minDistance) break;
+      distance = result;
+    }
+  } else while (perUnit * distance < minDistance && distance < 2 ** 30) distance *= 2;
+  return distance;
+}
+function gridStepFractions(base, pixels, span, minDistance) {
+  const distance = gridStep(base, pixels, span, minDistance);
+  return distance > 1 ? distance : gridStep(SUBFRAME_RANGE, pixels, span * SUBFRAME_RANGE, minDistance) / SUBFRAME_RANGE;
+}
+// The frames' major step: no closer than the widest label at the view's ends (get_min_line_distance_x).
+function frameStep(view, v2d, { fps, fractions }) {
+  const { cur } = v2d, label = (f) => view.ctx.measureText(Math.abs(f).toFixed(3)).width + 6;
+  const minDistance = Math.max(MIN_MAJOR_LINE_DISTANCE, label(cur.xmin), label(cur.xmax));
+  return (fractions ? gridStepFractions : gridStep)(Math.round(fps), view.width, cur.xmax - cur.xmin, minDistance);
+}
+const valueStep = (view, v2d) => gridStepFractions(10, view.height, v2d.cur.ymax - v2d.cur.ymin, MIN_MAJOR_LINE_DISTANCE);
+
+// Parallel lines every `distance` across the view (draw_parallel_lines), vertical at frames or horizontal at values.
+function drawLines(view, v2d, distance, color, vertical) {
+  const { ctx, width, height } = view, { cur } = v2d, [lo, hi] = vertical ? [cur.xmin, cur.xmax] : [cur.ymin, cur.ymax];
+  const start = Math.ceil(lo / distance) * distance, steps = start <= hi ? Math.floor((hi - start) / distance) + 1 : 0;
+  if (!steps || steps >= (vertical ? width : height)) return;
+  ctx.strokeStyle = css(color);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i < steps; i++) {
+    const at = start + i * distance;
+    if (vertical) { const x = Math.round(v2d.toRegion(at, 0)[0]) + 0.5; ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+    else { const y = view.y(Math.round(v2d.toRegion(0, at)[1])) + 0.5; ctx.moveTo(0, y); ctx.lineTo(width, y); }
+  }
+  ctx.stroke();
+}
+// Minor lines (the grid color shaded by 16) between major ones where they stay apart (view2d_draw_lines).
+function drawMajorMinor(view, v2d, grid, major, vertical, minor = true) {
+  if (minor) {
+    const distance = major > 1 ? Math.round(major) : Math.round(major * SUBFRAME_RANGE), lineDistance = major / divisor(distance);
+    if ((view.width / (v2d.cur.xmax - v2d.cur.xmin)) * lineDistance > MIN_MAJOR_LINE_DISTANCE / 5) drawLines(view, v2d, lineDistance, shade(grid, 16), vertical);
+  }
+  drawLines(view, v2d, major, grid, vertical);
 }
 
-// The view's vertical lines at every half major step (frames), and in the Graph Editor the horizontal ones (values).
-export function drawGrid(view, v2d, grid, { values = false } = {}) {
-  const { ctx, width, height } = view, step = frameStep(v2d, width), { cur } = v2d;
-  ctx.lineWidth = 1;
-  for (let f = Math.floor(cur.xmin / (step / 2)) * (step / 2); f <= cur.xmax; f += step / 2) {
-    const x = Math.round(v2d.toRegion(f, 0)[0]) + 0.5;
-    ctx.strokeStyle = css(grid, Math.abs(f / step - Math.round(f / step)) < 1e-6 ? 1 : 0.5);
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-  }
-  if (!values) return;
-  const vstep = valueStep(v2d, height);
-  for (let v = Math.floor(cur.ymin / vstep) * vstep; v <= cur.ymax; v += vstep / 2) {
-    const y = view.y(Math.round(v2d.toRegion(0, v)[1])) + 0.5;
-    ctx.strokeStyle = css(grid, Math.abs(v / vstep - Math.round(v / vstep)) < 1e-6 ? 1 : 0.5);
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-  }
+// The region's grid as the Dope Sheet (frames) or the Graph Editor (subframes and values) draws it.
+export function drawGrid(view, v2d, grid, { values = false, fps = 24 } = {}) {
+  const major = frameStep(view, v2d, { fps, fractions: values });
+  drawMajorMinor(view, v2d, grid, major, true, values || major > 1);
+  if (values) drawMajorMinor(view, v2d, grid, valueStep(view, v2d), false);
 }
 
 // The scene's range outside the frame range darkened, and the preview range's shading (ANIM_draw_framerange,
@@ -76,18 +111,23 @@ export function drawFrameRange(view, v2d, { start, end, previewStart, previewEnd
   if (right < width) ctx.fillRect(right, 0, width - right, height);
 }
 
+// A frame's label, with as many decimals as the step needs (frame_to_string).
+const frameLabel = (f, step) => (step >= 1 ? String(Math.trunc(f)) : f.toFixed(step >= 0.5 ? 1 : step >= 0.01 ? 2 : 3));
+
 // The time scrubbing area at the region's top: its band, frame numbers and the current frame's box; and the playhead
 // down the region (time_scrub_ui.cc).
-export function drawScrubbing(view, v2d, frame, scrubHeight, { seconds = false, fps = 24 } = {}) {
+export function drawScrubbing(view, v2d, frame, scrubHeight, { seconds = false, fps = 24, fractions = false } = {}) {
   const { ctx, width, height } = view, top = 0;
   ctx.fillStyle = css(theme.regions.scrubbing.back);
   ctx.fillRect(0, top, width, scrubHeight);
-  const step = frameStep(v2d, width), { cur } = v2d;
+  const step = frameStep(view, v2d, { fps, fractions }), { cur } = v2d;
   ctx.fillStyle = css(theme.regions.scrubbing.text);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  for (let f = Math.ceil(cur.xmin / step) * step; f <= cur.xmax; f += step) {
-    ctx.fillText(seconds ? `${Math.floor(f / fps)}+${f % fps}` : String(f), v2d.toRegion(f, 0)[0], top + scrubHeight / 2);
+  const first = Math.ceil(cur.xmin / step);
+  for (let i = first; i * step <= cur.xmax; i++) {
+    const f = i * step;
+    ctx.fillText(seconds ? `${Math.floor(f / fps)}+${f % fps}` : frameLabel(f, step), v2d.toRegion(f, 0)[0], top + scrubHeight / 2);
   }
   const x = v2d.toRegion(frame, 0)[0];
   ctx.fillStyle = css(anim.playhead);

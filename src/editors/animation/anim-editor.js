@@ -324,26 +324,16 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     if (!width || !height) return false;
     const channels = timeline ? 0 : Math.min(CHANNELS_WIDTH[space], Math.round(width / 3));
     if (width !== size.width || height !== size.height || channels !== size.channels) {
-      const first = !size.width;
       size = { width, height, channels };
       area.layout(RGN_TYPE_CHANNELS, 0, 0, channels, height);
       area.layout(RGN_TYPE_WINDOW, channels, 0, width - channels, height);
       area.sync();
       Object.assign(channelsCanvas.style, { width: channels + 'px', height: height + 'px' });
       Object.assign(mainCanvas.style, { left: channels + 'px', width: width - channels + 'px', height: height + 'px' });
-      if (first) editor.viewAll?.();
     }
     return true;
   }
-  editor.viewAll = () => {
-    sync();
-    const hasKeys = animation.action.tracks.length > 0;
-    if (hasKeys) area.run(newOperator(graph ? 'graph.view_all' : 'action.view_all'), RGN_TYPE_WINDOW);
-    else if (timeline || !hasKeys) {
-      const { frameStart, frameEnd } = animation.time.state, v2d = area.v2d(), cur = v2d.cur, pad = (frameEnd - frameStart) * 0.05;
-      v2d.cur = { ...cur, xmin: frameStart - pad, xmax: frameEnd + pad };
-    }
-  };
+
 
   let scheduled = 0, headerRefresh = null, lastStatus = null;
   function redraw() {
@@ -366,15 +356,15 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
     main.ctx.fillRect(0, 0, main.width, main.height);
     drawFrameRange(main, v2d, range);
     if (graph) {
-      drawGrid(main, v2d, spaceTheme.grid, { values: true });
+      drawGrid(main, v2d, spaceTheme.grid, { values: true, fps: t.fps });
       drawCurves(main, v2d, area.curves(), { showHandles: !(settings.flag & (1 << 2)), onlySelectedHandles: !!(settings.flag & (1 << 9)) });
     } else {
-      drawGrid(main, v2d, spaceTheme.grid);
+      drawGrid(main, v2d, spaceTheme.grid, { fps: t.fps });
       const { cur } = v2d, rows = channelRows(channels, v2d, metrics).map((row) => ({ ...row, keys: area.keys(row.channel.index, cur.xmin, cur.xmax) }));
       drawKeyRows(main, v2d, rows, metrics, { backdrops: !timeline });
     }
     if (gesture && gesture.region === RGN_TYPE_WINDOW) drawGesture(main, gesture);
-    drawScrubbing(main, v2d, frame, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps });
+    drawScrubbing(main, v2d, frame, metrics.scrubHeight, { seconds: !!(settings.flag & (graph ? 1 << 4 : 1 << 2)), fps: t.fps, fractions: graph });
     if (!timeline) {
       const view = regionCanvas(channelsCanvas, size.channels, size.height), chv = area.v2d(RGN_TYPE_CHANNELS);
       drawChannels(view, chv, channels, area.metrics(RGN_TYPE_CHANNELS), { graph, redraw });

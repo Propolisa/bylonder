@@ -393,6 +393,22 @@ static ChannelList &channel_list()
   return list;
 }
 
+/* What the regions' draw callbacks do first (set_v2d_height in space_action.cc and space_graph.cc): the view's tot
+ * holds the channels, and the view stays in it. The Dope Sheet pads for its markers and the collapsed redo panel. */
+static void channel_regions_tot_set(bAnimContext &ac, ScrArea *area, size_t item_count)
+{
+  for (ARegion &region : area->regionbase) {
+    const bool action = area->spacetype == SPACE_ACTION;
+    if (!(region.regiontype == RGN_TYPE_CHANNELS || (action && region.regiontype == RGN_TYPE_WINDOW))) {
+      continue;
+    }
+    const int height = ANIM_UI_get_channels_total_height(&region.v2d, item_count);
+    const float pad_bottom = action ? (ac.markers->is_empty() ? 0.0f : UI_MARKER_MARGIN_Y) + HEADERY : 0.0f;
+    region.v2d.tot.ymin = -(height + pad_bottom);
+    ui::view2d_curRect_clamp_y(&region.v2d);
+  }
+}
+
 /* The channels the context's area lists (its channel region's filter), refreshed: their count. Read with
  * anim_channel_info until the next call. */
 EXPORT(anim_channels) int anim_channels(bContext *C)
@@ -435,6 +451,7 @@ EXPORT(anim_channels) int anim_channels(bContext *C)
     }
     list.infos.append(info);
   }
+  channel_regions_tot_set(ac, CTX_wm_area(C), list.infos.size());
   return int(list.infos.size());
 }
 
