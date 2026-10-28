@@ -12,10 +12,10 @@ const mtime = (file) => statSync(root + file, { throwIfNoEntry: false })?.mtimeM
 const stale = () => {
   const built = mtime("dist/index.html");
   const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard"], { cwd: root, encoding: "utf8" }).split("\n");
-  return files.some((file) => file && mtime(file) > built);
+  return files.some((file) => file && !/^(tests|tools)\/|\.md$/.test(file) && mtime(file) > built);
 };
 
-// Serves dist/ with vite preview, building it first when any source file is newer. E2E_URL uses a running server instead.
+// Serves dist/ with vite preview, building it first when any app source file is newer. E2E_URL uses a running server instead.
 export async function startServer() {
   if (process.env.E2E_URL) return { url: process.env.E2E_URL, close() {} };
   if (stale()) {

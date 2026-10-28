@@ -1,9 +1,10 @@
 // Visual parity: Blender 5.2.3 and Bylonder in the same UI states (ui-states.json), on Blender's startup scene (the
 // Default Cube example), at 1600 x 950 and UI scale 1. Writes per state blender.png, bylonder.png, a side-by-side
-// and a diff image, and report.json with the mismatch score (share of differing pixels) overall and per Blender editor.
+// and a diff image, and report.json with the mismatch score (share of differing pixels) overall and per Blender editor,
+// and per editor how well Bylonder's area overlaps Blender's (layout, intersection over union).
 // usage: node tools/blender-reference/parity.mjs [--out DIR] [--blender] [STATE ...]
 //   --blender recaptures Blender (otherwise only missing shots); needs Xvfb and ImageMagick. PARITY_DISPLAY picks the
-//   X display (default :81).
+//   X display (default :81), BLENDER_REFERENCE the folder holding Blender (default .blender-reference/).
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { chromium, openApp, startServer } from "../../tests/e2e/app.mjs";
@@ -19,8 +20,9 @@ const size = { width: 1600, height: 950 };
 // Where the mouse rests, as a fraction of the 3D View; ui-shots.py uses the same point.
 const REST = [0.25, 0.75];
 
-const blender = root + ".blender-reference/blender-5.2.3-linux-x64/blender";
-const startFile = root + ".blender-reference/start.blend";
+const cache = process.env.BLENDER_REFERENCE || root + ".blender-reference";
+const blender = cache + "/blender-5.2.3-linux-x64/blender";
+const startFile = cache + "/start.blend";
 const blenderShots = out + "/blender";
 
 async function captureBlender(ids) {
@@ -64,7 +66,8 @@ async function captureBylonder(browser, url, state) {
     // Wait until the views stop rendering, then two more frames for menus and overlays to settle.
     await app.until((b) => b.views.idle);
     await app.page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    return await app.page.screenshot();
+    const areas = await Promise.all((await app.locator(".dock-leaf").all()).map((leaf) => leaf.boundingBox()));
+    return { png: await app.page.screenshot(), areas };
   } finally {
     await app.close();
   }
@@ -113,6 +116,13 @@ async function compare(page, blenderPng, bylonderPng, areas) {
   return { ...result, sideBySide: Buffer.from(result.sideBySide, "base64"), diff: Buffer.from(result.diff, "base64") };
 }
 
+// Intersection over union of two rectangles: how well an editor's area in Bylonder matches Blender's.
+function overlap(a, b) {
+  const w = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x), h = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+  const common = Math.max(0, w) * Math.max(0, h);
+  return common / (a.width * a.height + b.width * b.height - common);
+}
+
 mkdirSync(blenderShots, { recursive: true });
 const missing = states.filter((s) => recapture || !existsSync(`${blenderShots}/${s.id}.png`)).map((s) => s.id);
 if (missing.length) await captureBlender(missing);
@@ -127,15 +137,16 @@ try {
     const dir = `${out}/${state.id}`;
     mkdirSync(dir, { recursive: true });
     const blenderPng = readFileSync(`${blenderShots}/${state.id}.png`);
-    const bylonderPng = await captureBylonder(browser, server.url, state);
+    const { png: bylonderPng, areas: bylonderAreas } = await captureBylonder(browser, server.url, state);
     const { mismatch, editors, sideBySide, diff } = await compare(page, blenderPng, bylonderPng, areas[state.id]);
+    const layout = Object.fromEntries(areas[state.id].map((a) => [a.type, Math.max(...bylonderAreas.map((b) => overlap(a, b)))]));
     writeFileSync(`${dir}/blender.png`, blenderPng);
     writeFileSync(`${dir}/bylonder.png`, bylonderPng);
     writeFileSync(`${dir}/side-by-side.png`, sideBySide);
     writeFileSync(`${dir}/diff.png`, diff);
-    report.push({ ...state, mismatch, editors });
+    report.push({ ...state, mismatch, editors, layout });
     const percent = (n) => (n * 100).toFixed(1) + "%";
-    console.log(`${state.id.padEnd(14)} ${percent(mismatch).padStart(6)}  ${Object.entries(editors).map(([type, n]) => `${type} ${percent(n)}`).join(", ")}`);
+    console.log(`${state.id.padEnd(14)} ${percent(mismatch).padStart(6)}  ${Object.entries(editors).map(([type, n]) => `${type} ${percent(n)}`).join(", ")}\n${"".padEnd(22)}layout ${Object.entries(layout).map(([type, n]) => `${type} ${percent(n)}`).join(", ")}`);
   }
 } finally {
   await browser.close();
