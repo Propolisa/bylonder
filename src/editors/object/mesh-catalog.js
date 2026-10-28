@@ -4,7 +4,8 @@ import reflected from "./builder-schema.json" with { type: "json" };
 import rna from "../../makesrna/rna-operators.json" with { type: "json" };
 import { primitiveOperators, primitive_add } from "../mesh/editmesh-add.js";
 import { mesh_batch_cache_apply } from "../../draw/mesh-batch-cache.js";
-import { mesh_deserialize } from "../../blenkernel/mesh/mesh.js";
+import { mesh_deserialize, createMesh } from "../../blenkernel/mesh/mesh.js";
+import { evaluateCurve } from "../../blenkernel/curve/curve.js";
 
 const n = (value, min = 0.01, max = 100, step = 0.1) => ({ default: value, min, max, step });
 const detail = (value) => n(value, 3, 128, 1);
@@ -78,7 +79,17 @@ const recipeMesh = (recipe) => {
   return primitive_add(recipe.operator, recipe.options);
 };
 
+// A curve or text object's mesh from its Curve data alone; the objects it follows join when the scene evaluates it
+// (editors/curve/curve-objects.js).
+const curveMesh = (recipe) => evaluateCurve(recipe.curve) ?? createMesh({ vert_positions: new Float32Array(0), edges: new Int32Array(0),
+  face_offsets: new Int32Array([0]), corner_verts: new Int32Array(0), corner_edges: new Int32Array(0) });
+
 export function buildMesh(scene, name, recipe) {
+  if (recipe.curve) {
+    const node = new Mesh(name, scene);
+    mesh_batch_cache_apply(curveMesh(recipe), node);
+    return node;
+  }
   if (recipe.mesh || recipe.operator) {
     const node = new Mesh(name, scene);
     mesh_batch_cache_apply(recipeMesh(recipe), node);
@@ -97,7 +108,8 @@ export function createPrimitive(name, operator, options = {}, scene) {
 }
 
 export function rebuildMesh(mesh, recipe) {
-  if (recipe.mesh || recipe.operator) mesh_batch_cache_apply(recipeMesh(recipe), mesh);
+  if (recipe.curve) mesh_batch_cache_apply(curveMesh(recipe), mesh);
+  else if (recipe.mesh || recipe.operator) mesh_batch_cache_apply(recipeMesh(recipe), mesh);
   else {
     const temp = buildMesh(mesh.getScene(), "__previewGeometry", recipe);
     try {

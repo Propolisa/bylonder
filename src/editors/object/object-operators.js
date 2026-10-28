@@ -22,7 +22,7 @@ const ENUMS = {
 const BLENDER_OPERATORS = ['object.transform_apply', 'object.origin_set', 'object.location_clear', 'object.rotation_clear', 'object.scale_clear'];
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 const keyLabel = (keys) => keys?.replace(/\+/g, ' ');
-const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup', 'edit-text', 'creation'];
+const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup', 'creation'];
 
 export function registerObjectOperators(registry, blender) {
   for (const idname of BLENDER_OPERATORS) registerOperator(idname, { poll: () => blender.poll(idname), run: (props) => blender.run(idname, props) });

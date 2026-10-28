@@ -76,6 +76,16 @@ function runOperator(C, idname, props) {
   }
 }
 const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
+// The enum property an operator's invoke offers as a menu (WM_menu_invoke), or null.
+function operatorMenuProperty(idname) {
+  const op = x.operator_new(operatorTypes.get(idname));
+  try {
+    const name = x.operator_menu_property(op);
+    return name ? cString(name) : null;
+  } finally {
+    x.operator_free(op);
+  }
+}
 // An enum property's items as the operator's UI lists them in a context (its item function, as Blender's menus call
 // it): [identifier, name] pairs.
 function operatorEnumItems(C, idname, prop) {
@@ -108,7 +118,8 @@ function extractedMesh(header) {
   const view = (name) => {
     if (buffer !== x.memory.buffer) [buffer, views] = [x.memory.buffer, {}];
     const [Type, pointer, length] = layout[name];
-    return (views[name] ??= new Type(buffer, pointer, length));
+    // A mesh without faces may have no offsets array; its one offset is 0.
+    return (views[name] ??= pointer ? new Type(buffer, pointer, length) : new Type(length));
   };
   const present = Object.keys(layout).filter((name) => layout[name][1]);
   const mesh = meshOfBuffers(counts, present, view);
@@ -416,4 +427,4 @@ let shared = null;
 export const blenderMain = () => (shared ??= new BlenderMain());
 
 // What subsystems with exports of their own (blenkernel/curve) reach the module through.
-export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems };
+export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems, operatorMenuProperty };

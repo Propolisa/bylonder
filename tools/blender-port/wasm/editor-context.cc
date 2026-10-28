@@ -53,6 +53,7 @@
 #include "bmesh.hh"
 #include "mesh_intern.hh"
 #include "object_intern.hh"
+#include "curve_intern.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_prototypes.hh"

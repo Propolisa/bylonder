@@ -57,3 +57,9 @@ Typed values, the Global and Local cycling of repeated axis keys and the header 
 
 ## node.add_node
 Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with search as you type. It adds the Blender nodes Bylonder runs (Math, Mix, Color Balance so far); Babylon's blocks are in a Babylon sub-menu of each category. See `docs/node-editors.md`.
+
+## VIEW3D_MT_curve_add
+Blender's own primitive operators fill the curve, in the module (`ED_curve_add_nurbs_primitive`). Surfaces (Add > Surface) are not offered yet. See `docs/curves-and-text.md`.
+
+## object.text_add
+Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its built-in font, FreeType in the module. Fonts other than the built-in one load from their files' bytes; a font file picker is not offered yet.

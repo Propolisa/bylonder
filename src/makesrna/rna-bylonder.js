@@ -11,6 +11,7 @@ import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
 import { deleted } from '../editors/object/identity.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
+import { curveStructs } from './rna-curve.js';
 
 // Swapping two axes is its own inverse and flips handedness.
 const axes = ([x, y, z]) => [x, z, y];
@@ -42,9 +43,9 @@ function array(get, set, names = 'xyz') {
 }
 
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
-const OBJECT_DATA = { MESH: 'Mesh' };
-const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.text ? 'FONT'
-  : ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices?.() > 0 ? 'MESH' : 'EMPTY');
+const OBJECT_DATA = { MESH: 'Mesh', CURVE: 'Curve', FONT: 'TextCurve' };
+const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.curve?.type
+  ?? (ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices?.() > 0 ? 'MESH' : 'EMPTY'));
 const editing = (ob, r) => !!ob && r.world.editMode?.object === ob;
 const editTotals = (ob, r) => (editing(ob, r) && r.world.editMode.stats) || { verts: [0], edges: [0], faces: [0] };
 
@@ -137,6 +138,7 @@ const STRUCTS = {
   UnitSettings: Object.fromEntries([['system', 'system'], ['scale_length', 'scale'], ['use_separate', 'separate'], ['system_rotation', 'rotation'],
     ['length_unit', 'length']].map(([name, key]) => [name, {
     get: (world) => world.sceneSettings?.state.unitSettings[key], set: (world, value) => world.sceneSettings.set('unitSettings.' + key, value, false) }])),
+  ...curveStructs,
   // A 3D Viewport (space_view3d/view3d.js): its shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',

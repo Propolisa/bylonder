@@ -55,7 +55,17 @@ const SETUP = {
     await app.frame().getByRole("menuitem", { name: "Subdivision Surface" }).click();
     await app.hover(...REST);
   },
+  "curve-edit": (app) => addAndEdit(app, "curve.primitive_bezier_circle_add"),
+  "text-edit": (app) => addAndEdit(app, "object.text_add"),
 };
+// As ui-shots.py: Delete over the view, the Add operator, then Tab.
+async function addAndEdit(app, idname) {
+  await app.hover(...REST);
+  await app.page.keyboard.press("Delete");
+  await app.bylonder((b, op) => b.runOperator(op), idname);
+  await app.hover(...REST);
+  await app.page.keyboard.press("Tab");
+}
 
 async function captureBylonder(browser, url, state) {
   const app = await openApp(browser, url, { size });

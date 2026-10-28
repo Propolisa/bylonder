@@ -4,5 +4,7 @@
   { "id": "file-menu", "title": "Topbar: File menu open" },
   { "id": "add-menu", "title": "Add menu (Shift A) over the 3D View" },
   { "id": "edit-mode", "title": "Edit Mode on the default cube (Tab)" },
-  { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" }
+  { "id": "modifier-tab", "title": "Properties: Modifiers tab with a Subdivision Surface modifier" },
+  { "id": "curve-edit", "title": "Edit Mode on a Bezier circle (the cube deleted, Add Curve Circle, Tab)" },
+  { "id": "text-edit", "title": "Edit Mode on a text object (the cube deleted, Add Text, Tab)" }
 ]

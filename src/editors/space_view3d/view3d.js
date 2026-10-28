@@ -122,20 +122,26 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.menu = (idname) => (blender.menus[idname] ? drawMenu(idname, blender) : null);
   view.menuTitle = (idname) => blender.menus[idname]?.bl_label ?? '';
   const viewMenu = menuButton('View', blenderMenu('VIEW3D_MT_view'), { blender: 'VIEW3D_MT_view' });
-  const select = menuButton('Select', () => (editMode() ? world.editMode.menus.select() : blenderMenu('VIEW3D_MT_select_object')()), { blender: 'VIEW3D_MT_select_object' });
-  const selectMenuIds = { object: 'VIEW3D_MT_select_object', edit: 'VIEW3D_MT_select_edit_mesh' };
+  // The edited object's type: MESH, CURVE or FONT (text), or none in Object Mode.
+  const editKind = () => (editMode() ? world.editMode.kind : null);
+  const selectMenuIds = { null: 'VIEW3D_MT_select_object', MESH: 'VIEW3D_MT_select_edit_mesh', CURVE: 'VIEW3D_MT_select_edit_curve', FONT: 'VIEW3D_MT_select_edit_text' };
+  const select = menuButton('Select', () => (editKind() === 'MESH' ? world.editMode.menus.select() : blenderMenu(selectMenuIds[editKind()])()), { blender: 'VIEW3D_MT_select_object' });
   const meshItem = p => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
   const meshes = () => {
-    const mesh = creator.catalog.filter(p => p.id !== 'text');
+    const mesh = creator.catalog;
     const babylon = mesh.filter(p => p.group === 'babylon');
     return [...mesh.filter(p => !p.group).map(meshItem), ...(babylon.length ? ['-', { label: 'Babylon', icon: 'mesh_data', items: babylon.map(meshItem) }] : [])];
   };
-  const add = menuButton('Add', () => (editMode() ? meshes() : blenderMenu('VIEW3D_MT_add')()), { blender: 'VIEW3D_MT_add' });
+  const add = menuButton('Add', () => (editKind() === 'MESH' ? meshes() : blenderMenu(editKind() === 'CURVE' ? 'VIEW3D_MT_curve_add' : 'VIEW3D_MT_add')()), { blender: 'VIEW3D_MT_add' });
   const object = menuButton('Object', blenderMenu('VIEW3D_MT_object'), { blender: 'VIEW3D_MT_object' });
   const meshMenu = menuButton('Mesh', () => world.editMode.menus.mesh(), { blender: 'VIEW3D_MT_edit_mesh' });
   const vertexMenu = menuButton('Vertex', () => world.editMode.menus.vertex(), { blender: 'VIEW3D_MT_edit_mesh_vertices' });
   const edgeMenu = menuButton('Edge', () => world.editMode.menus.edge(), { blender: 'VIEW3D_MT_edit_mesh_edges' });
   const faceMenu = menuButton('Face', () => world.editMode.menus.face(), { blender: 'VIEW3D_MT_edit_mesh_faces' });
+  // Edit Mode on curves and text: Blender's menus for them (VIEW3D_MT_editor_menus).
+  const curveMenus = [['Curve', 'VIEW3D_MT_edit_curve'], ['Control Points', 'VIEW3D_MT_edit_curve_ctrlpoints'], ['Segments', 'VIEW3D_MT_edit_curve_segments']]
+    .map(([label, idname]) => menuButton(label, blenderMenu(idname), { blender: idname }));
+  const textMenu = menuButton('Text', blenderMenu('VIEW3D_MT_edit_font'), { blender: 'VIEW3D_MT_edit_font' });
   const shadingButtons = [['wire', 'shading_wire', 'Wireframe'], ['solid', 'shading_solid', 'Solid'], ['rendered', 'shading_rendered', 'Rendered']].map(([id, icon, title]) => {
     const b = iconButton(icon, 'Viewport Shading: ' + title, () => view.setShading(id));
     b.dataset.shading = id;
@@ -145,7 +151,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   shading.append(...shadingButtons);
   const overlayButton = iconButton('overlay', 'Show Overlays', () => { state.overlays = !state.overlays; sync(); views.wake(); });
   const spacer = () => Object.assign(document.createElement('span'), { className: 'spacer' });
-  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, meshMenu, vertexMenu, edgeMenu, faceMenu, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
+  header.replaceChildren(mode, selectModes, viewMenu, select, add, object, meshMenu, vertexMenu, edgeMenu, faceMenu, ...curveMenus, textMenu, spacer(), overlayButton, Object.assign(document.createElement('span'), { className: 'bl-sep' }), shading);
 
   // Navigation gizmo and buttons, drawn from this view's camera.
   const drag = (el, fn) => {
@@ -194,11 +200,14 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     const editing = !!editMode();
     mode.querySelector('span:not(.bl-icon)').textContent = editing ? 'Edit Mode' : 'Object Mode';
     mode.querySelector('.bl-icon').style.maskImage = `url(${iconUrl(editing ? 'editmode_hlt' : 'object_datamode')})`;
-    selectModes.hidden = !editing;
+    selectModes.hidden = editKind() !== 'MESH';
     selectModeButtons.forEach((b) => b.setAttribute('aria-pressed', String(!!(world.editMode?.selectmode & b.dataset.selectBit))));
-    add.hidden = object.hidden = editing;
-    meshMenu.hidden = vertexMenu.hidden = edgeMenu.hidden = faceMenu.hidden = !editing;
-    select.dataset.blender = selectMenuIds[editing ? 'edit' : 'object'];
+    object.hidden = editing;
+    add.hidden = editKind() === 'FONT' || editKind() === 'MESH';
+    meshMenu.hidden = vertexMenu.hidden = edgeMenu.hidden = faceMenu.hidden = editKind() !== 'MESH';
+    curveMenus.forEach((menu) => { menu.hidden = editKind() !== 'CURVE'; });
+    textMenu.hidden = editKind() !== 'FONT';
+    select.dataset.blender = selectMenuIds[editKind()];
     name.textContent = state.cameraView ? 'Camera Perspective' : nav.viewName + (editorCamera.mode === 0 ? ' Perspective' : ' Orthographic');
     section.classList.toggle('overlays-off', !state.overlays || state.cameraView);
     section.classList.toggle('camera-view', state.cameraView);

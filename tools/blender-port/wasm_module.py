@@ -102,13 +102,15 @@ def dependencies(build, deps):
 
 def library_flags(entry, tree, deps, spec):
     """What one library entry adds to its sources' arguments (the include directories of the private dependencies it is
-    built from or `uses`, its own `includes` in Blender's tree, and its `defines`), and to their cache key (those
-    dependencies' versions)."""
+    built from or `uses`, its own `includes` in Blender's tree, its `defines` and other `flags`), and to their cache key
+    (those dependencies' versions)."""
     entry = entry if isinstance(entry, dict) else {}
     specs = spec.get('dependencies', {})
     used = [n for n in [entry.get('dependency'), *entry.get('uses', [])] if n and specs[n].get('private')]
-    flags = ([f'-I{os.path.join(deps[n], specs[n].get("include", ""))}' for n in used] + [f'-I{os.path.join(tree, d)}' for d in entry.get('includes', [])]
-             + [f'-D{d}' for d in entry.get('defines', [])])
+    # An include under wasm/ is the module's own (wasm/fstream), the rest are Blender's.
+    flags = ([f'-I{os.path.join(deps[n], specs[n].get("include", ""))}' for n in used]
+             + [f'-I{os.path.join(HERE if d.startswith("wasm/") else tree, d)}' for d in entry.get('includes', [])]
+             + [f'-D{d}' for d in entry.get('defines', [])] + entry.get('flags', []))
     return flags, ''.join(f'{n}@{specs[n]["tag"]}' for n in used)
 
 

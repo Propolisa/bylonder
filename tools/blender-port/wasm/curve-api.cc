@@ -5,8 +5,11 @@
  * offsets (dna-curves.json). Fonts are VFont IDs in the Main, Blender's built-in font (bfont.pfb, embedded as
  * Blender's datatoc embeds it) or a font file's bytes packed into one. */
 #include "BKE_context.hh"
+#include "ED_screen.hh"
 #include "BKE_curve.hh"
 #include "BKE_curve_to_mesh.hh"
+#include "BKE_curveprofile.h"
+#include "DNA_curveprofile_types.h"
 #include "BKE_curves.hh"
 #include "BKE_displist.h"
 #include "BKE_geometry_set.hh"
@@ -17,12 +20,15 @@
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
 #include "BKE_packedFile.hh"
+#include "BLI_implicit_sharing.hh"
+#include "DNA_packedFile_types.h"
 #include "BKE_screen.hh"
 #include "BKE_vfont.hh"
 #include "BKE_vfontdata.hh"
 #include "BLF_api.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
+#include "BLI_path_utils.hh"
 #include "BLI_string.h"
 #include "BLI_string_utf8.h"
 #include "DEG_depsgraph.hh"
@@ -38,6 +44,7 @@
 #include "ED_select_utils.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
+#include "WM_api.hh"
 #include "WM_types.hh"
 
 #include "extraction.hh"
@@ -235,6 +242,20 @@ EXPORT(curve_text_set) void curve_text_set(Object *ob, const char *body, const C
 }
 
 /* Sets the text boxes (x, y, width and height each) and the active one. */
+/* What RNA's bevel_mode setter and update do (rna_Curve_bevel_mode_set, rna_Curve_bevel_resolution_update): the
+ * Profile mode's profile made when there is none, and fitted to the bevel resolution. */
+EXPORT(curve_bevel_profile_update) void curve_bevel_profile_update(Object *ob)
+{
+  Curve &cu = curve_of(ob);
+  if (cu.bevel_mode != CU_BEV_MODE_CURVE_PROFILE) {
+    return;
+  }
+  if (cu.bevel_profile == nullptr) {
+    cu.bevel_profile = BKE_curveprofile_add(PROF_PRESET_LINE);
+  }
+  BKE_curveprofile_init(cu.bevel_profile, cu.bevresol + 1);
+}
+
 EXPORT(curve_text_boxes_set) void curve_text_boxes_set(Object *ob, const float *boxes, int totbox, int actbox)
 {
   Curve &cu = curve_of(ob);
@@ -360,6 +381,13 @@ bool curve_select_pick(bContext *C, int x, int y, int dist_px, int sel_op, bool 
   return ED_curve_editnurb_select_pick(C, mval, dist_px, params);
 }
 
+/* The enum property an operator's invoke offers as a menu (WM_menu_invoke on ot->prop: curve.handle_type_set's
+ * type), or null when its invoke is not a menu. */
+EXPORT(operator_menu_property) const char *operator_menu_property(wmOperator *op)
+{
+  return op->type->invoke == WM_menu_invoke && op->type->prop ? RNA_property_identifier(op->type->prop) : nullptr;
+}
+
 /* Sets a string property (font.text_insert's text). */
 EXPORT(operator_string_set) void operator_string_set(wmOperator *op, const char *name, const char *value) { RNA_string_set(op->ptr, name, value); }
 
@@ -399,7 +427,7 @@ EXPORT(view3d_region_set) void view3d_region_set(View3DRegion *r, int winx, int 
   mul_m4_m4m4(rv3d.persmat, rv3d.winmat, rv3d.viewmat);
   invert_m4_m4(rv3d.persinv, rv3d.persmat);
   rv3d.is_persp = winmat[11] != 0.0f;
-  r->v3d.overlay.handle_display = char(handle_display);
+  r->v3d.overlay.handle_display = eHandleDisplay(handle_display);
 }
 
 /* Makes the region the context's area and region (or none), as Blender's handlers set them around an operator. */
@@ -413,8 +441,90 @@ EXPORT(view3d_region_attach) void view3d_region_attach(bContext *C, View3DRegion
 
 namespace blender {
 
+/* The window has no capabilities (no primary clipboard): Bylonder's text clipboard is the browser's. */
+eWM_CapabilitiesFlag WM_capabilities_flag() { return eWM_CapabilitiesFlag(0); }
+
+/* As screen_ops.cc defines them; screen_ops.cc comes with Blender's screens. */
+bool ED_operator_editsurfcurve(bContext *C)
+{
+  Object *obedit = CTX_data_edit_object(C);
+  if (obedit && ELEM(obedit->type, OB_CURVES_LEGACY, OB_SURF)) {
+    return nullptr != (id_cast<Curve *>(obedit->data))->editnurb;
+  }
+  return false;
+}
+bool ED_operator_editsurfcurve_region_view3d(bContext *C)
+{
+  if (ED_operator_editsurfcurve(C) && CTX_wm_region_view3d(C)) {
+    return true;
+  }
+  CTX_wm_operator_poll_msg_set(C, "Expected a view3d region & editcurve");
+  return false;
+}
+bool ED_operator_editcurve(bContext *C)
+{
+  Object *obedit = CTX_data_edit_object(C);
+  if (obedit && obedit->type == OB_CURVES_LEGACY) {
+    return nullptr != (id_cast<Curve *>(obedit->data))->editnurb;
+  }
+  return false;
+}
+bool ED_operator_editcurve_3d(bContext *C)
+{
+  Object *obedit = CTX_data_edit_object(C);
+  if (obedit && obedit->type == OB_CURVES_LEGACY) {
+    Curve *cu = id_cast<Curve *>(obedit->data);
+    return (cu->flag & CU_3D) && (nullptr != cu->editnurb);
+  }
+  return false;
+}
+bool ED_operator_editsurf(bContext *C)
+{
+  Object *obedit = CTX_data_edit_object(C);
+  if (obedit && obedit->type == OB_SURF) {
+    return nullptr != (id_cast<Curve *>(obedit->data))->editnurb;
+  }
+  return false;
+}
+bool ED_operator_editfont(bContext *C)
+{
+  Object *obedit = CTX_data_edit_object(C);
+  if (obedit && obedit->type == OB_FONT && id_cast<Curve *>(obedit->data)->editfont) {
+    return true;
+  }
+  CTX_wm_operator_poll_msg_set(C, "Expected an active edit-font object");
+  return false;
+}
+
+/* As packedFile.cc defines them; packedFile.cc reads and writes files (std::fstream), which wasi's libc++ lacks and
+ * the module has none of. */
+PackedFile *BKE_packedfile_new_from_memory(const void *mem, int memlen, const ImplicitSharingInfo *sharing_info)
+{
+  if (!sharing_info) {
+    sharing_info = implicit_sharing::info_for_mem_free(const_cast<void *>(mem));
+  }
+  PackedFile *pf = MEM_new<PackedFile>("PackedFile");
+  pf->data = mem;
+  pf->size = memlen;
+  pf->sharing_info = sharing_info;
+  return pf;
+}
+void BKE_packedfile_free(PackedFile *pf)
+{
+  if (pf) {
+    pf->sharing_info->remove_user_and_delete_if_last();
+    MEM_delete(pf);
+  }
+}
+PackedFile *BKE_packedfile_duplicate(const PackedFile *pf_src)
+{
+  PackedFile *pf_dst = MEM_dupalloc(pf_src);
+  pf_dst->sharing_info->add_user();
+  return pf_dst;
+}
+
 /* port-override: the module has no depsgraph to say which curves something follows (the Curve modifier, Follow
  * Path, text on a curve), so every curve has its path evaluated, as Blender does for a curve something follows. */
-int DEG_get_eval_flags_for_id(const Depsgraph * /*graph*/, const ID * /*id*/) { return DAG_EVAL_NEED_CURVE_PATH; }
+uint32_t DEG_get_eval_flags_for_id(const Depsgraph * /*graph*/, const ID * /*id*/) { return DAG_EVAL_NEED_CURVE_PATH; }
 
 }  // namespace blender

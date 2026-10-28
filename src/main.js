@@ -39,11 +39,14 @@ import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequence
 import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
+import { createEditModes } from "./editors/object/edit-modes.js";
+import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
+import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createBlenderObjects } from "./editors/object/object-blender.js";
-import { registerOperators, appendMenu, kw, inArea } from "./windowmanager/wm-operators.js";
+import { registerOperators, runOperator, appendMenu, kw, inArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
@@ -174,7 +177,7 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Handle for debugging and the browser tests, which run against the production build.
-window.__bylonder ={ world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
+window.__bylonder ={ world, renderHost, runOperator, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
@@ -285,7 +288,11 @@ creator = createAddMesh(
   notify,
 );
 commands.setBefore(() => creator.finish());
-world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { ui?.refresh(); views.wake(); } });
+world.curves = createCurveObjects(world);
+const editModeOptions = { world, editor, views, history, notify, changed: () => { ui?.refresh(); views.wake(); } };
+const editCurve = createEditCurve({ ...editModeOptions, curves: world.curves });
+world.editMode = createEditModes(createEditMode(editModeOptions), editCurve);
+registerCurveAddOperators({ editor, history, commands, curves: world.curves, editCurve });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
@@ -467,6 +474,7 @@ function undoRedo(redo) {
   creator.finish();
   editor.finish(false);
   redo ? history.redo() : history.undo();
+  world.curves.refresh();
   editor.reconcile();
   world.editMode.reload();
 }
@@ -516,9 +524,9 @@ const bylonderKeys = createKeymap([
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs: the mode's (Object Mode or Mesh), then the 3D View's and the window's.
-const view3dKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true);
+// Blender's keymaps a 3D View runs: the mode's (Object Mode, Mesh, Curve or Font), then the 3D View's and the window's.
+const view3dKeys = keymapHandler(["Object Mode", "Mesh", "Curve", "Font", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.kind === "MESH", Curve: world.editMode.kind === "CURVE", Font: world.editMode.kind === "FONT" })[name] ?? true);
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu.
 const view3dArea = { menu: (name) => activeView()?.menu(name) && (() => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name))) };
 const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));

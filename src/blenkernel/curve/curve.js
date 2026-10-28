@@ -32,7 +32,7 @@ function splineArrays(splines) {
   const ints = [], floats = [];
   for (const s of splines) {
     const bezier = s.type === 'BEZIER', points = bezier ? s.bezier_points : s.points;
-    ints.push(value(rna.Spline.properties.type.items, s.type), s.flag ?? 0, points.length / (s.point_count_v ?? 1), s.point_count_v ?? 1,
+    ints.push(value(rna.Spline.properties.type.items, s.type), s.flag ?? 0, bezier ? points.length : points.length / Math.max(1, s.point_count_v ?? 1), s.point_count_v ?? (bezier ? 0 : 1),
       s.order_u ?? 4, s.order_v ?? 4, s.resolution_u ?? 12, s.resolution_v ?? 12, s.flagu ?? 0, s.flagv ?? 0, s.material_index ?? 0,
       s.hide ? 1 : 0, s.character_index ?? 0, s.tilt_interpolation ?? 0, s.radius_interpolation ?? 0);
     for (const p of points) {
@@ -145,10 +145,11 @@ const CHARINFO_SIZE = 8;
 
 // A curve or text object in the module's Main, holding its Curve data while Bylonder edits or evaluates it.
 export class CurveObject {
-  constructor(type, name = type === 'FONT' ? 'Text' : 'Curve') {
+  // A new object in the Main, or `ob`, one of the Main's objects of that type (Object Mode's mirror of a node).
+  constructor(type, name = type === 'FONT' ? 'Text' : 'Curve', ob = null) {
     this.main = blenderMain();
     this.type = type;
-    this.ob = this.main.add(type, name);
+    this.ob = ob ?? this.main.add(type, name);
     // The names of the objects its pointers name (follow_curve, bevel_object, taper_object); target() points them.
     this.targets = {};
   }
@@ -176,6 +177,7 @@ export class CurveObject {
   set settings(settings) {
     const view = new DataView(x.memory.buffer), curve = this.#curve;
     for (const [name, v] of Object.entries(settings)) writeSetting(view, curve, name, v);
+    if ('bevel_mode' in settings || 'bevel_resolution' in settings) x.curve_bevel_profile_update(this.ob);
   }
 
   set splines({ splines, active = [0, 0] }) {
@@ -362,6 +364,8 @@ export function setCurvePath(data, path, v) {
   if (!rest.length) {
     if (CURVE_TARGETS.includes(name)) data.targets = { ...data.targets, [name]: v };
     else data.settings = { ...data.settings, [name]: v };
+    // rna_Curve_resolution_u_update_data and _v: every spline takes the curve's resolution.
+    if (name === 'resolution_u' || name === 'resolution_v') data.splines?.forEach((spline) => { spline[name] = v; });
     return;
   }
   const [[field, at], ...more] = rest;

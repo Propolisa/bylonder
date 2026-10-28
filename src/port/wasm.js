@@ -9,6 +9,8 @@ function wasiFor(memory) {
   const write = (text) => (globalThis.process?.stderr ? process.stderr.write(text) : console.warn(text));
   return new Proxy({
     proc_exit: (code) => { throw new Error(`WebAssembly exit ${code}`); },
+    // No preopened directories: EBADF ends wasi-libc's search for them (__wasilibc_populate_preopens).
+    fd_prestat_get: () => 8,
     fd_write(_fd, iovs, iovsLength, nwritten) {
       const view = new DataView(memory().buffer);
       let total = 0;

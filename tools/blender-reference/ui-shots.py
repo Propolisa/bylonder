@@ -63,6 +63,14 @@ def add_subdivision():
     area("PROPERTIES").spaces.active.context = "MODIFIER"
 
 
+# The cube deleted (Delete over the view), then an object added by its operator in the 3D View, then Tab.
+def add_and_edit(module, name, **props):
+    key("DEL", *view3d_point(*REST))
+    with bpy.context.temp_override(window=window(), area=area("VIEW_3D")):
+        getattr(getattr(bpy.ops, module), name)(**props)
+    key("TAB", *view3d_point(*REST))
+
+
 SETUP = {
     "startup": lambda: None,
     "object-menu": lambda: click(*OBJECT_MENU),
@@ -70,6 +78,8 @@ SETUP = {
     "add-menu": lambda: key("A", *view3d_point(0.5, 0.5), shift=True),
     "edit-mode": lambda: key("TAB", *view3d_point(*REST)),
     "modifier-tab": add_subdivision,
+    "curve-edit": lambda: add_and_edit("curve", "primitive_bezier_circle_add"),
+    "text-edit": lambda: add_and_edit("object", "text_add"),
 }
 
 
