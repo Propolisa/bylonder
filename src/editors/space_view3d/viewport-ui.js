@@ -6,9 +6,10 @@ import { createOriginOverlay } from '../../draw/overlay-origin.js';
 
 // Overlays shared by every 3D Viewport (shown per view by view3d.js): the floor grid and axes, the 3D cursor, selected objects' origins
 // and the extras of cameras, lights and empties. Each view's header, gizmo and shading live in view3d.js.
-//   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js)
-export function createViewportOverlays(scene, extras, origins) {
-  const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene), origin = createOriginOverlay(scene, origins);
+//   extras: options of createExtrasOverlay (draw/overlay-extra.js); origins: of createOriginOverlay (overlay-origin.js);
+//   view3dCursor(): the scene's 3D cursor
+export function createViewportOverlays(scene, extras, origins, view3dCursor) {
+  const grid = createGridOverlay(scene), cursor = createCursorOverlay(scene, view3dCursor), origin = createOriginOverlay(scene, origins);
   const extra = createExtrasOverlay(scene, extras), meshes = [...grid.meshes, ...cursor.meshes];
   let shown = true;
   return {
@@ -42,8 +43,10 @@ export function createViewportStatus({ world, editor, views, send }) {
       : [[['mouse_lmb'], 'Select'], [['mouse_mmb'], 'Rotate View'], [['mouse_rmb'], 'Object Context Menu']];
     const fps = views.idle ? 'Idle' : Math.round(world.engine.getFps()) + ' FPS';
     const edit = world.editMode?.stats, count = (n) => n.toLocaleString(), ratio = ([sel, total]) => `${count(sel)}/${count(total)}`;
-    const geometry = edit
+    // stats_object_edit: a curve counts its control points only.
+    const geometry = edit?.edges
       ? `Verts:${ratio(edit.verts)} | Edges:${ratio(edit.edges)} | Faces:${ratio(edit.faces)} | Tris:${count(edit.tris)}`
+      : edit ? `Verts:${ratio(edit.verts)}`
       : `Verts:${count(verts)} | Tris:${count(Math.round(tris))}`;
     const stats = `${collection}${active ? ' | ' + active.name : ''} | ${geometry} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`;
     const viewLayers = cols && { list: cols.viewLayers().map(({ id, name }) => [id, name]), active: cols.layer().id };

@@ -1500,12 +1500,19 @@ class FunctionPort:
             return f'{self.expr(dst, want)}.fill({value})' if value is not None else fix('memset', self.p.text(self.call_node))
         if name == 'memcpy':
             dst, src = args[0], args[1]
-            elem = pointee(strip_parens_casts(dst).type)
+            dst_type = canon(strip_parens_casts(dst).type)
+            elem = pointee(dst_type) or (canon(dst_type.element_type) if dst_type.kind == T.CONSTANTARRAY else None)
             count = [f for f in self.product(args[2]) if strip_parens_casts(f).kind != K.CXX_UNARY_EXPR]
-            n = ' * '.join(self.expr(f) for f in count) or '1'
+            n = ' * '.join(self.expr(f) for f in count)
+            if not n:
+                # A size that is only a sizeof (sizeof(float[3][3])) copies that many bytes' worth of elements.
+                total, size = clangx.evaluate(args[2]), canon(elem).get_size() if elem is not None else -1
+                n = str(total // size) if total and size > 0 and total % size == 0 else '1'
             if elem is not None and canon(elem).kind in TYPED_ARRAYS:
                 return f'{self.expr(dst)}.set({self.expr(src)}.subarray(0, {n}))'
-            return f'{self.expr(dst)}.splice(0, {n}, ...{self.expr(src)}.slice(0, {n}))'
+            # Rows of a matrix are copied, not shared.
+            rows = '.map((row) => row.slice())' if elem is not None and canon(elem).kind == T.CONSTANTARRAY else ''
+            return f'{self.expr(dst)}.splice(0, {n}, ...{self.expr(src)}.slice(0, {n}){rows})'
         if name == 'ELEM':
             a = js(args)
             return '(' + ' || '.join(f'{a[0]} === {x}' for x in a[1:]) + ')'

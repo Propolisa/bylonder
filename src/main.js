@@ -18,7 +18,7 @@ import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
 import { createMouseCapture } from "./windowmanager/mouse-capture";
-import { createEventSystem } from "./windowmanager/wm-event-system.js";
+import { createEventSystem, dragStart } from "./windowmanager/wm-event-system.js";
 import * as BABYLON from "@babylonjs/core";
 import "./style.css";
 import "./theme.css";
@@ -42,13 +42,18 @@ import { mountSequencerEditor, mountFileBrowser } from "./editors/space_sequence
 import { createUI } from "./editors/interface/ui";
 import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
+import { createEditModes } from "./editors/object/edit-modes.js";
+import { createEditCurve, registerCurveAddOperators } from "./editors/curve/editcurve.js";
+import { createCurveObjects } from "./editors/curve/curve-objects.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
 import { createBlenderObjects } from "./editors/object/object-blender.js";
-import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
+import { registerOperators, runOperator, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
+import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
+import { tagRedraw } from "./draw/overlay-tool.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
 import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
@@ -57,6 +62,12 @@ import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
 import { exportScene } from "./io_scene_babylon/export.js";
+import { createTexts } from "./blenkernel/texts.js";
+import { mountTextEditor } from "./editors/space_text/text-editor.js";
+import { registerTextOperators } from "./editors/space_text/text-ops.js";
+import { mountConsole } from "./editors/space_console/console.js";
+import { registerConsoleOperators } from "./editors/space_console/console-ops.js";
+import { mountInfo } from "./editors/space_info/info.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -118,6 +129,8 @@ const input = await new Promise((resolve) => {
   });
   send("ready", {});
 });
+// The workspace's screen, which the topbar's tabs choose.
+viewportDock.setScreen(input.screen);
 // The engine renders into a hidden working canvas; every 3D Viewport is an engine view (src/editors/space_view3d/views.js).
 // User code gets the primary viewport's canvas, for camera.attachControl and input.
 const workCanvas = Object.assign(document.createElement("canvas"), { className: "engine-working-canvas" });
@@ -169,7 +182,8 @@ const overlays = createViewportOverlays(scene, {
   sceneCamera: authored,
   visible: (node) => (world.objects.includes(node) ? visible(node) && (world.collections?.status(node).visible ?? true) : node.isEnabled()),
   aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
-}, { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) });
+}, { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
+() => world.sceneSettings.state.cursor);
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);
 world.workbench = createWorkbench(scene, { wireColor: (mesh) => wireColor(mesh.metadata?.drawOwner ?? mesh) });
 // Views keep rendering while anything moves: playback, modal edits, user render loops and observers, animations,
@@ -198,7 +212,7 @@ const renderHost = createRenderHost({
   name: () => world.sceneSettings.state.name || "render",
 });
 // Handle for debugging and the browser tests, which run against the production build.
-window.__bylonder ={ world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
+window.__bylonder ={ world, renderHost, runOperator, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
@@ -265,6 +279,9 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "suspend") animation.pause();
   if (e.data.type === "resume") views.wake();
   if (e.data.type === "scene-name") world.sceneSettings.renamed(e.data.payload);
+  // The workspace's screen (Scripting or Layout), and a project text file changed in the Code workspace.
+  if (e.data.type === "screen") viewportDock.setScreen(e.data.payload);
+  if (e.data.type === "text") world.texts.load(e.data.payload.name, e.data.payload.content);
 });
 let ui;
 let sceneChanged = () => {};
@@ -286,7 +303,7 @@ history = createHistory(world.objects, () => {
 },beforeCommit:()=>{world.collections.adopt();animation.captureEdits();}});
 animation.setCommit(()=>history.commit());
 const capture = createMouseCapture(notify);
-world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e) });
+world.wm = createEventSystem({ layers: () => keyLayers(), viewAt: (e) => viewAt(e), accepts: (e) => acceptsKey(e), hover: (e) => tools.hover(e) });
 const editor = createEditor(
   world,
   views,
@@ -310,7 +327,11 @@ creator = createAddMesh(
   notify,
 );
 commands.setBefore(() => creator.finish());
-world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { refreshUI(); views.wake(); } });
+world.curves = createCurveObjects(world);
+const editModeOptions = { world, editor, views, history, notify, changed: () => { refreshUI(); tagRedraw(); views.wake(); } };
+const editCurve = createEditCurve({ ...editModeOptions, curves: world.curves });
+world.editMode = createEditModes(createEditMode(editModeOptions), editCurve);
+registerCurveAddOperators({ editor, history, commands, curves: world.curves, editCurve });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
@@ -327,11 +348,13 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit });
+// bpy.data.texts: the project's text files, each edit saved with the project.
+world.texts = createTexts({ files: input.texts, save: (name, content) => send("text", { name, content }) });
+const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit, notify });
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
 // The mode the tool system and Blender's keymaps go by (context.mode).
-const contextMode = () => (world.editMode.active ? "EDIT_MESH" : "OBJECT");
+const contextMode = () => ({ MESH: "EDIT_MESH", CURVE: "EDIT_CURVE", FONT: "EDIT_TEXT" }[world.editMode.kind] ?? "OBJECT");
 // Blender's tool system: the active tool's gizmo shows in Object Mode, and the views redraw their toolbars.
 const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "builtin.scale": "scale", "builtin.transform": "transform" };
 const applyTool = () => {
@@ -341,7 +364,13 @@ const applyTool = () => {
 const contextView = () => contextArea()?.space ?? activeView();
 world.toolsystem = createToolSystem({
   context: () => world.blenderContext(contextView()),
-  changed: () => { applyTool(); viewports().forEach((view) => view.sync()); },
+  changed: () => { applyTool(); tagRedraw(); viewports().forEach((view) => view.sync()); },
+});
+// The tools' operators and the active tool's gizmos in the 3D View under the pointer.
+const tools = createView3DTools({
+  world, editor, views, area: { get space() { return activeView(); }, menu: () => null }, mode: contextMode, commit, notify,
+  toolSettings: () => blenderRNA.pointer("ToolSettings", world),
+  addPreset: (idname, placement) => creator.add(creator.catalog.find((preset) => preset.operator === idname), placement),
 });
 const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify, ids: animation.ids, keying: (run) => animation.keying(run) });
 registerObjectOperators(world.objectActions, blenderObjects);
@@ -384,6 +413,15 @@ const mountAnim = (type, host, id) => mountAnimEditor(host, { header: viewportDo
 const animEditors = Object.keys(ANIM_EDITORS).map((type) => mountAnim(type, document.querySelector(`#${type}-section`), type));
 for (const type of Object.keys(ANIM_EDITORS)) viewportDock.setFactory(type, (host, id) => mountAnim(type, host, id));
 const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();refreshUI();} });
+// The Scripting workspace's editors: Text Editor, Python Console and Info.
+registerTextOperators(world.texts);
+registerConsoleOperators();
+const scriptingEditors = [
+  // A script or console line runs after the Add panel's object is done, as a new operator ends Blender's redo.
+  mountTextEditor(document.querySelector("#text-section"), { header: viewportDock.header("text"), rna: blenderRNA, texts: world.texts, beforeRun: () => creator.finish() }),
+  mountConsole(document.querySelector("#console-section"), { header: viewportDock.header("console"), rna: blenderRNA, beforeRun: () => creator.finish() }),
+  mountInfo(document.querySelector("#info-section"), { header: viewportDock.header("info"), rna: blenderRNA }),
+];
 document.querySelector("#add-mesh").onclick = () => creator.show();
 document.querySelector("#delete-objects").onclick = () => commands.remove();
 document.querySelector("#duplicate-objects").onclick = () =>
@@ -509,13 +547,14 @@ function undoRedo(redo) {
   creator.finish();
   editor.finish(false);
   redo ? history.redo() : history.undo();
+  world.curves.refresh();
   editor.reconcile();
   world.editMode.reload();
 }
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner') && !help.open && !creator.open && !world.contextMenu.isOpen;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
@@ -559,12 +598,14 @@ registerOperators({
       startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode, select: (center, r, m) => selectRegion(event.view ?? activeView(), circleRegion(center, r), m) });
     },
   },
-  // A transform from a key starts at the mouse, from a tool's drag at its press; release_confirm ends it on release.
+  // A transform starts at the mouse (initTransInfo), the 3D cursor's at a drag's press; release_confirm ends it on
+  // release, cursor_transform moves the 3D cursor.
   ...Object.fromEntries([["transform.translate", "move"], ["transform.rotate", "rotate"], ["transform.resize", "scale"]].map(([idname, type]) => [idname, {
-    poll: () => editor.selection.size > 0,
+    poll: (props) => editor.selection.size > 0 || !!props.cursor_transform,
     run: (props, event) => {
       creator.finish();
-      editor.start(type, { point: event?.press, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm });
+      const point = event && (props.cursor_transform ? dragStart(event) : event);
+      editor.start(type, { point, view: event?.view ?? undefined, releaseConfirm: !!props.release_confirm, cursor: !!props.cursor_transform });
     },
   }])),
   // Blender's is Python setting the data path with exec; a path to a property Bylonder does not bind passes through.
@@ -591,11 +632,12 @@ const bylonderKeys = createKeymap([
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode or Mesh), then the
+// Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode, Mesh, Curve or Font), then the
 // 3D View's and the window's. Tool keymaps run with the tool's settings.
 const view3dKeys = keymapHandler(
-  (event) => [...world.toolsystem.keymaps(contextMode(), editor.gizmoState(event)), "Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true,
+  (event) => [...world.toolsystem.keymaps(contextMode(), gizmoState(event)), "Object Mode", "Mesh", "Curve", "Font", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.kind === "MESH", Curve: world.editMode.kind === "CURVE",
+    Font: world.editMode.kind === "FONT" })[name] ?? true,
   (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
 // The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
 const view3dArea = {
@@ -605,8 +647,10 @@ const view3dArea = {
 const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
-// The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's gizmos drag themselves).
-const gizmoKeys = (event) => event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight;
+// The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's transform gizmos drag
+// themselves; the tools' gizmos run their keymaps).
+const gizmoState = (event) => (world.editMode.active || !TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ? tools.gizmoState(event) : editor.gizmoState(event));
+const gizmoKeys = (event) => (event.type === "leftmouse" && event.value === "PRESS" && !!editor.gizmoState(event).highlight) || tools.keymap(event);
 const keyLayers = () => {
   const view = activeView();
   if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
@@ -634,6 +678,8 @@ engine.runRenderLoop(renderScene);
 function dispose() {
   storage.save();
   animEditors.forEach((animEditor) => animEditor.dispose());
+  world.texts.flush();
+  scriptingEditors.forEach((area) => area.dispose());
   engine.onBeginFrameObservable.remove(perFrame);
   for (const view of viewports()) view.dispose();
   views.dispose();
@@ -648,6 +694,7 @@ function dispose() {
   runningJobs.dispose();
   sdk.dispose();
   creator.dispose();
+  tools.dispose();
   world.editMode.dispose();
   world.outliner.dispose();
   world.contextMenu.dispose();

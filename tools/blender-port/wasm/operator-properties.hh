@@ -1,6 +1,7 @@
 /* Operator properties without Blender's RNA runtime (operator-properties.cc). */
 #pragma once
 
+#include <cfloat>
 #include <memory>
 #include <optional>
 #include <string>
@@ -40,6 +41,9 @@ struct PropertyRNA {
   int icon = 0;
   /* What RNA_property_update runs: the struct's update function, ported where the module needs one. */
   void (*update)(bContext *C, PointerRNA *ptr) = nullptr;
+  /* A float's ranges, as RNA_def_property gives them until the definition sets its own. */
+  float hardmin = -FLT_MAX, hardmax = FLT_MAX, softmin = -10000.0f, softmax = 10000.0f, step = 10.0f;
+  int precision = 3;
 };
 
 /* An operator's properties, or (for the RNA_* type pointers code compares and stores) just a named type. */

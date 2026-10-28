@@ -16,16 +16,16 @@ Each entry is a level-2 heading naming a node, followed by optional fields and f
 - **See:** the node that provides the same functionality in Bylonder, as a heading-style path. Shown as a link.
 
 ## CONSOLE > *
-Status: replaced
-Bylonder projects are JavaScript. The browser console and the Code area replace the Python Console.
+Status: partial
+Blender's Python Console in the Scripting workspace: CPython (Pyodide) runs Blender's own `_console_python` with history, Tab completion and `C` and `D`. See `docs/blender-boundary.md` (Scripting).
 
 ## TEXT_EDITOR > *
-Status: replaced
-The Code area (Monaco) edits the project's modules, with its own search, replace and shortcuts.
+Status: partial
+Texts are the project's text files. Run Script runs CPython (Pyodide) over Bylonder's `bpy`. Autocomplete, live edit, Reload and the conflict tools are not there yet; Save downloads the text.
 
 ## INFO > *
-Status: replaced
-Reports appear as toasts and in the browser console.
+Status: partial
+Operator reports, Python operators' reports and script errors. Replay and Box Select are not there yet.
 
 ## TOPBAR_MT_file > wm.save_mainfile
 Status: partial
@@ -64,11 +64,11 @@ Shift A opens Blender's own Add menu (`node_add_menu*.py`, transpiled), with sea
 
 ## DOPESHEET_EDITOR > *
 Status: partial
-The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). The sidebar, markers and the Action, Shape Key, Grease Pencil, Mask and Cache File modes are not shown yet.
+The Timeline and the Dope Sheet run Blender's `space_action` and `editors/animation` code in the module; see `docs/blender-boundary.md` (Animation). Markers are the scene's (Scene.timeline_markers in the module), saved with the animation. The Action, Shape Key, Grease Pencil, Mask and Cache File modes are not shown yet.
 
 ## GRAPH_EDITOR > *
 Status: partial
-Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Drivers mode, F-Curve modifiers and the sidebar are not shown yet.
+Blender's `space_graph` code in the module, with the same window manager as the Dope Sheet. Its sidebar panels (graph_buttons.cc) are ported as their layout calls in `editors/animation/anim-buttons.js`. Drivers mode and the F-Modifier panels are not shown yet.
 ## OUTLINER > *
 Status: partial
 Blender's `space_outliner` code in the module, drawn on a canvas from its own draw calls; see `docs/blender-boundary.md` (Outliner). View Layer display mode only; other display modes, context menus on IDs that are not objects or collections, and scroll bars are not shown yet.
@@ -79,3 +79,30 @@ The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/spac
 ## VIEW3D_HT_header > *
 The transform settings (`draw_xform_template`) draw from Blender's Python. Transform orientation slots are stored but no transform uses them yet.
 
+## 3D View Tool: Measure > *
+Rulers are kept in the scene's annotations (`RulerData3D`) as Blender keeps them, and drawn with Blender's units. Snapping (Ctrl) reaches vertices, edges and faces of the objects drawn; Blender also snaps to edge midpoints and perpendiculars.
+
+## Generic Tool: Annotate > *
+Strokes are smoothed and simplified as `annotate_paint.cc` does and drawn in screen space with the layer's color and thickness. Pressure is the pointer's; the stabilizer and the onion skin are not drawn yet.
+
+## 3D View Tool: Edit Mesh, Loop Cut > *
+Status: partial
+A press cuts at the edge ring under the mouse and slides it. The ring's preview under the pointer (`VIEW3D_GGT_mesh_preselect_edgering`) is not drawn yet.
+
+## 3D View Tool: Edit Mesh, Spin > *
+Status: partial
+Spin runs Blender's operator from the drag; its gizmo (`MESH_GGT_spin`) and the redo gizmo that drags out the angle are not drawn yet, so the angle comes from the Adjust Last Operation panel.
+
+## 3D View Tool: Edit Mesh, Poly Build > *
+Status: missing
+Needs the preselection gizmo (`VIEW3D_GGT_mesh_preselect_elem`), which picks the element its macros act on.
+
+## 3D View Tool: Edit Mesh, Extrude Manifold > *
+Status: partial
+Extrudes and moves as Blender's macro does; the automerge and split of faces the move dissolves into its neighbors is not run yet.
+
+## VIEW3D_MT_curve_add
+Blender's own primitive operators fill the curve, in the module (`ED_curve_add_nurbs_primitive`). Surfaces (Add > Surface) are not offered yet. See `docs/curves-and-text.md`.
+
+## object.text_add
+Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its built-in font, FreeType in the module. Fonts other than the built-in one load from their files' bytes; a font file picker is not offered yet.

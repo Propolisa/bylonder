@@ -73,8 +73,9 @@ export function setOperatorProperties(op, props) {
   for (const [name, value] of Object.entries(props)) {
     const numbers = Float64Array.from([value].flat(), Number);
     const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
+    // A string is an enum item's identifier, or else a string property's value (font.text_insert's text).
     const ok = withString(name, (namePointer) => items !== null
-      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
+      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item) || (typeof value === 'string' && (x.operator_string_set(op, namePointer, item), true)))
       : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
     if (!ok) throw new Error(`no property ${name} = ${value}`);
   }
@@ -93,6 +94,16 @@ function runOperator(C, idname, props) {
 }
 export const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
 export const operatorNames = () => [...operatorTypes.keys()];
+// The enum property an operator's invoke offers as a menu (WM_menu_invoke), or null.
+function operatorMenuProperty(idname) {
+  const op = x.operator_new(operatorTypes.get(idname));
+  try {
+    const name = x.operator_menu_property(op);
+    return name ? cString(name) : null;
+  } finally {
+    x.operator_free(op);
+  }
+}
 // An enum property's items as the operator's UI lists them in a context (its item function, as Blender's menus call
 // it): [identifier, name] pairs.
 function operatorEnumItems(C, idname, prop) {
@@ -101,7 +112,23 @@ function operatorEnumItems(C, idname, prop) {
 }
 
 // wmOperatorStatus flags.
-export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4;
+export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISHED = 4, OPERATOR_PASS_THROUGH = 8;
+
+// Blender's enums by identifier (rna_enum_text): event types (0), event values (1) and property subtypes (2).
+export const enumTable = (which) => new Map(cString(x.rna_enum_text(which)).split('\n').filter(Boolean).map((line) => {
+  const [identifier, value] = line.split('\t');
+  return [identifier, Number(value)];
+}));
+export const EVENT_TYPES = enumTable(0), EVENT_VALUES = enumTable(1);
+// EVT_MODAL_MAP: a modal keymap item's event type.
+const EVT_MODAL_MAP = 0x5022;
+// The event an operator gets (wm_event_set): { type, value } by identifier or number, or { modal } for a modal keymap
+// item; x and y in region pixels, y up; modifier (KM_SHIFT | KM_CTRL | KM_ALT | KM_OSKEY); text.
+function wmEvent(C, { type, value = 'PRESS', modal, x: mx = 0, y: my = 0, modifier = 0, text = '', prevType = type, prevValue = value }) {
+  const code = (table, v) => (typeof v === 'number' ? v : table.get(v) ?? 0);
+  const [t, v] = modal === undefined ? [code(EVENT_TYPES, type), code(EVENT_VALUES, value)] : [EVT_MODAL_MAP, modal];
+  return withString(text, (p) => x.wm_event_set(C, t, v, Math.round(mx), Math.round(my), modifier, p, code(EVENT_TYPES, prevType), code(EVENT_VALUES, prevValue))) >>> 0;
+}
 
 // What changed since the last extraction (ExtractFlag in extraction.hh): topology, which refills everything, positions
 // (with normals and triangles), flags, or the UV map.
@@ -125,7 +152,8 @@ function extractedMesh(header) {
   const view = (name) => {
     if (buffer !== x.memory.buffer) [buffer, views] = [x.memory.buffer, {}];
     const [Type, pointer, length] = layout[name];
-    return (views[name] ??= new Type(buffer, pointer, length));
+    // A mesh without faces may have no offsets array; its one offset is 0.
+    return (views[name] ??= pointer ? new Type(buffer, pointer, length) : new Type(length));
   };
   const present = Object.keys(layout).filter((name) => layout[name][1]);
   const mesh = meshOfBuffers(counts, present, view);
@@ -255,10 +283,36 @@ export class EditMesh {
     withArrays([Float32Array.from(matrix)], ([p]) => x.edit_context_object_matrix_set(this.#context, p));
   }
 
-  // The 3D View's view matrix (column-major, Blender's axes), for what operators do along the view.
-  set view(matrix) {
-    withArrays([Float32Array.from(matrix)], ([p]) => x.edit_context_view_set(this.#context, p));
+  // The 3D View the operators act in: its view and window matrices (column-major, Blender's axes), size in pixels and
+  // projection, as regionView3D (editors/space_view3d/view3d-project.js) gives them.
+  set view({ viewmat, winmat, winx, winy, persp }) {
+    withArrays([Float32Array.from(viewmat), Float32Array.from(winmat)], ([v, w]) => x.edit_context_view_set(this.#context, v, w, winx, winy, persp));
   }
+
+  // The scene's 3D cursor (Blender world), which operators place things at.
+  set cursor(location) { new Float32Array(x.memory.buffer, x.edit_context_cursor(this.#context) >>> 0, 3).set(location); }
+
+  // What the last operator showed in the view's header, or ''.
+  get status() { const p = x.edit_context_status(this.#context); return p ? cString(p) : ''; }
+
+  // Invokes an operator with an event in the view (type and value by Blender's identifiers, x and y in region pixels
+  // with y up, modifier flags): its status, and when it runs modally the operator to give the next events to with
+  // modal(), and its modal keymap's name.
+  invoke(idname, props, event) {
+    const op = newOperator(idname, props);
+    const status = x.operator_invoke(this.#C, op, wmEvent(this.#C, event));
+    const modal = status & OPERATOR_RUNNING_MODAL && x.operator_modal_added() >>> 0;
+    if (!modal) { const report = operatorReport(op); x.operator_free(op); return { status, report }; }
+    return { status, op, keymap: cString(x.operator_modal_keymap(op)) };
+  }
+  // Gives a running operator an event (`modal`: a modal keymap item's value): its status; it is freed once it ends.
+  modal(op, event) {
+    const status = x.operator_modal(this.#C, op, wmEvent(this.#C, event));
+    if (!(status & OPERATOR_RUNNING_MODAL)) x.operator_free(op);
+    return status;
+  }
+  // A modal keymap item's value for a running operator when its keymap lets it through now, else -1.
+  modalItem(op, identifier) { return withString(identifier, (p) => x.operator_modal_item(op, p)); }
 
   get totals() {
     const [totvert, totvertsel, totedge, totedgesel, totface, totfacesel, totloop] = ints(7, (p) => x.bm_totals(this.#bm, p));
@@ -433,6 +487,8 @@ export class BlenderMain {
   get C() { return this.#C; }
   data(ob) { return x.object_data(ob) >>> 0; }
 
+  // The context its operators run in (bContext).
+  get C() { return this.#C; }
   // Collections, by address: the Scene Collection holds the rest. A collection's children and objects are set whole,
   // in order.
   get masterCollection() { return x.main_collection_master(this.#context) >>> 0; }
@@ -467,3 +523,10 @@ export class BlenderMain {
   poll(idname) { return pollOperator(this.#C, idname); }
   enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
 }
+
+// The one Blender world every subsystem's data lives in (the module's Main); a realm makes it once.
+let shared = null;
+export const blenderMain = () => (shared ??= new BlenderMain());
+
+// What subsystems with exports of their own (blenkernel/curve) reach the module through.
+export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems, operatorMenuProperty };

@@ -1,0 +1,47 @@
+// <fstream> for sources whose debug paths write files (delaunay_2d.cc's SVG dumps): wasi's libc++ is built without a
+// filesystem, so its <fstream> declares the streams without defining them. The module has no files, so every stream
+// fails to open, as a file that cannot be opened does. Seen only by the libraries that list wasm/fstream as includes.
+#pragma once
+
+#include <iosfwd>
+#include <istream>
+#include <ostream>
+#include <streambuf>
+#include <string>
+
+_LIBCPP_BEGIN_NAMESPACE_STD
+
+template<class C, class T> class basic_filebuf : public basic_streambuf<C, T> {
+ public:
+  basic_filebuf *open(const char *, ios_base::openmode) { return nullptr; }
+  bool is_open() const { return false; }
+  basic_filebuf *close() { return nullptr; }
+};
+
+template<class C, class T> class basic_ofstream : public basic_ostream<C, T> {
+  basic_filebuf<C, T> buf_;
+
+ public:
+  basic_ofstream() : basic_ostream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
+  explicit basic_ofstream(const char *, ios_base::openmode = ios_base::out) : basic_ofstream() {}
+  explicit basic_ofstream(const string &, ios_base::openmode = ios_base::out) : basic_ofstream() {}
+  void open(const char *, ios_base::openmode = ios_base::out) { this->setstate(ios_base::failbit); }
+  void open(const string &, ios_base::openmode = ios_base::out) { this->setstate(ios_base::failbit); }
+  bool is_open() const { return false; }
+  void close() {}
+};
+
+template<class C, class T> class basic_ifstream : public basic_istream<C, T> {
+  basic_filebuf<C, T> buf_;
+
+ public:
+  basic_ifstream() : basic_istream<C, T>(&buf_) { this->setstate(ios_base::failbit); }
+  explicit basic_ifstream(const char *, ios_base::openmode = ios_base::in) : basic_ifstream() {}
+  explicit basic_ifstream(const string &, ios_base::openmode = ios_base::in) : basic_ifstream() {}
+  void open(const char *, ios_base::openmode = ios_base::in) { this->setstate(ios_base::failbit); }
+  void open(const string &, ios_base::openmode = ios_base::in) { this->setstate(ios_base::failbit); }
+  bool is_open() const { return false; }
+  void close() {}
+};
+
+_LIBCPP_END_NAMESPACE_STD

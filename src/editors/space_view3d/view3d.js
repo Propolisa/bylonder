@@ -11,6 +11,7 @@ import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
 import { rnaProperty } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
+import { createToolOverlay } from '../../draw/overlay-tool.js';
 // Blender's axes as Babylon directions (Babylon's (x, y, z) is Blender's (x, z, y)) and the view each axis's ball
 // aligns to (the opposite view for its negative ball).
 const axes = [
@@ -81,6 +82,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const navButtons = Object.assign(document.createElement('div'), { className: 'nav-buttons' });
   section.append(label, gizmo, navButtons);
 
+  const toolOverlay = createToolOverlay(view);
   const nav = createNavigation({ camera: editorCamera, engine: world.engine, canvas, capture: ctx.capture, enabled: () => !state.cameraView, onSync: () => sync() });
   view.nav = nav;
 
@@ -118,6 +120,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   view.toolbar = toolbar;
   // The header, the tool settings and the sidebar, Blender's. Edit Mode's menus and operators are its own; its Add menu
   // adds Bylonder's primitives.
+  // Mesh Edit Mode's menus and Add menu are Bylonder's; curves and text in Edit Mode draw Blender's.
+  const editMesh = () => editMode() && (world.editMode.kind ?? 'MESH') === 'MESH';
   const meshItem = (p) => ({ label: p.title, icon: p.icon || 'mesh_data', run: () => creator.add(p) });
   const meshes = () => {
     const mesh = creator.catalog.filter((p) => p.id !== 'text'), babylon = mesh.filter((p) => p.group === 'babylon');
@@ -131,8 +135,8 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   const regions = createRegions({
     view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
     ui: headerUI,
-    menu: (idname) => (!editMode() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname)),
-    templates: { template_header_3D_mode: () => (editMode() ? selectModeLayout(world.editMode.selectmode) : null) },
+    menu: (idname) => (!editMesh() ? drawMenu(idname, blender) : idname === 'VIEW3D_MT_mesh_add' ? meshes() : world.editMode.menus.menu(idname)),
+    templates: { template_header_3D_mode: () => (editMesh() ? selectModeLayout(world.editMode.selectmode) : null) },
   });
   header.replaceChildren(regions.header);
   section.append(regions.toolHeader, regions.sidebar);
@@ -215,7 +219,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     world.beforeViewRender({ rendered, compositor: view.wantsCompositor });
   };
   view.afterRender = () => { if (authored) scene.clearColor = authored; authored = null; };
-  view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); };
+  view.tick = () => { if (!state.cameraView && state.overlays) drawGizmo(); toolOverlay.tick(); };
   view.setDetail = text => { if (detail.textContent !== text) detail.textContent = text; };
   view.sync = sync;
   view.dispose = () => {
@@ -227,6 +231,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
     toolbar.dispose();
     regions.dispose();
     for (const el of [label, gizmo, navButtons]) el.remove();
+    toolOverlay.dispose();
     ctx.shadingChanged();
   };
   sync();

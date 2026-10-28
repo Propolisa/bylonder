@@ -1,4 +1,3 @@
-import { createTextEditor } from "../curve/editfont.js";
 import { Pane } from "tweakpane";
 import { meshCatalog, buildMesh, rebuildMesh } from "./mesh-catalog.js";
 import { apply, snapshot } from "../undo/storage.js";
@@ -12,8 +11,7 @@ export function createAddMesh(
   config,
   notify,
 ) {
-  const textEditor = createTextEditor(world, editor, history, commands);
-  const catalog = [...meshCatalog(config), {id:"text",title:"Text"}],
+  const catalog = meshCatalog(config),
     menu = document.querySelector("#add-menu"),
     search = document.querySelector("#add-search"),
     list = document.querySelector("#add-list"),
@@ -24,7 +22,6 @@ export function createAddMesh(
     world.focusViewport?.();
   };
   const finish = (commit = true) => {
-    if (textEditor.pending) textEditor.finish(commit);
     if (!pending) return;
     if (commit) {
       history.commit();
@@ -74,13 +71,14 @@ export function createAddMesh(
     pane.addButton({ title: "Apply" }).on("click", () => finish());
     pane.addButton({ title: "Cancel" }).on("click", () => finish(false));
   };
-  const add = (preset) => {
+  // `options` override the preset's defaults; `location` (Blender world) and `rotation` (a Babylon quaternion) place
+  // the object, as an Add operator's properties do, at the 3D cursor by default.
+  const add = (preset, { options = {}, location = world.sceneSettings?.state.cursor.location, rotation } = {}) => {
     finish();
     close();
-    if (preset.id === "text") { textEditor.show(); return; }
     editor.finish(false);
     const before = snapshot(world.objects);
-    const recipe = recipeOf(preset, Object.fromEntries(Object.entries(preset.schema).map(([key, def]) => [key, def.default])));
+    const recipe = recipeOf(preset, { ...Object.fromEntries(Object.entries(preset.schema).map(([key, def]) => [key, def.default])), ...options });
     const node = buildMesh(
       world.scene,
       commands.unique(preset.title.replace(/\s/g, "")),
@@ -91,6 +89,8 @@ export function createAddMesh(
       wbId: crypto.randomUUID(),
       wbCreation: recipe,
     };
+    if (location) node.position.set(location[0], location[2], location[1]);
+    if (rotation) node.rotation.copyFrom(rotation.toEulerAngles());
     world.objects.push(node);
     editor.selection.replace([node]);
     editor.reconcile();
@@ -117,15 +117,15 @@ export function createAddMesh(
   document.querySelector("#add-close").onclick = close;
   return {
     catalog,
-    add(preset) {
+    add(preset, placement) {
       finish();
-      add(preset);
+      add(preset, placement);
     },
     get pending() {
-      return pending || textEditor.pending;
+      return pending;
     },
     get open() {
-      return menu.open || textEditor.open;
+      return menu.open;
     },
     show() {
       finish();
@@ -136,7 +136,6 @@ export function createAddMesh(
       search.focus();
     },
     finish,
-    editText(node) { finish(); textEditor.show(node); },
     reopen() {
       if (
         lastOperation &&
@@ -156,7 +155,6 @@ export function createAddMesh(
     dispose() {
       finish();
       pane?.dispose();
-      textEditor.dispose();
     },
   };
 }

@@ -23,6 +23,22 @@ function iconImage(name, onload) {
   return image.complete && image.naturalWidth ? image : null;
 }
 
+// An icon in a color, as Blender draws a monochrome icon with a color (icon_draw_ex): the icon's shape filled.
+const tinted = new Map();
+function tintedIcon(name, color, onload) {
+  const key = name + color, image = iconImage(name, onload);
+  if (!image) return null;
+  if (!tinted.has(key)) {
+    const canvas = Object.assign(document.createElement('canvas'), { width: 32, height: 32 }), ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0, 32, 32);
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 32, 32);
+    tinted.set(key, canvas);
+  }
+  return tinted.get(key);
+}
+
 // A region's canvas and its mapping from Blender's region pixels (origin bottom left) to the canvas.
 export function regionCanvas(canvas, width, height) {
   const ratio = globalThis.devicePixelRatio || 1;
@@ -109,6 +125,39 @@ export function drawFrameRange(view, v2d, { start, end, previewStart, previewEnd
   ctx.fillStyle = css(preview ? anim.preview_range : [0, 0, 0], preview ? anim.preview_range[3] : 0.4 * 0.5);
   if (left > 0) ctx.fillRect(0, 0, left, height);
   if (right < width) ctx.fillRect(right, 0, width - right, height);
+}
+
+// The scene's markers along the region's bottom (ED_markers_draw): the strip they sit on, then per marker a dashed
+// line up the region, its icon and its name, those not elevated (selected, or the one the current frame is at) first.
+export const UI_MARKER_MARGIN_Y = 34;
+export function drawMarkers(view, v2d, markers, frame, redraw) {
+  if (!markers.length) return;
+  const { ctx, width, height } = view, scrubbing = theme.regions.scrubbing;
+  ctx.fillStyle = css(scrubbing.back);
+  ctx.fillRect(0, height - UI_MARKER_MARGIN_Y, width, UI_MARKER_MARGIN_Y);
+  const sorted = [...markers].sort((a, b) => a.frame - b.frame);
+  const elevated = (m, i) => m.select || (frame >= m.frame && (i + 1 === sorted.length || frame < sorted[i + 1].frame));
+  const draw = (m, i, raised) => {
+    const x = Math.round(v2d.toRegion(m.frame, 0)[0]) + 0.5, color = css(scrubbing[m.select ? 'time_marker_selected' : 'time_marker']);
+    if (x < -200 || x > width + 200) return;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(x, view.y(22)); ctx.lineTo(x, 0); ctx.stroke();
+    ctx.setLineDash([]);
+    const icon = tintedIcon(m.select ? 'MARKER_HLT' : 'MARKER', color, redraw);
+    if (icon) ctx.drawImage(icon, x - 8, view.y(10) - 16, 16, 16);
+    const xmax = i + 1 < sorted.length ? v2d.toRegion(sorted[i + 1].frame, 0)[0] : width;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x + 12, 0, Math.max(0, xmax - 12 - (x + 12)), height); ctx.clip();
+    ctx.fillStyle = color;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(m.name, x + 12, view.y(15 + (raised ? 6 : 0)));
+    ctx.restore();
+  };
+  sorted.forEach((m, i) => { if (!elevated(m, i)) draw(m, i, false); });
+  sorted.forEach((m, i) => { if (elevated(m, i)) draw(m, i, true); });
 }
 
 // A frame's label, with as many decimals as the step needs (frame_to_string).

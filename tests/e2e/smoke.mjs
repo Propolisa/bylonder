@@ -177,6 +177,30 @@ const checks = {
     await app.until((b) => b.editor.selection.nodes.some((n) => n.name === "Empty"));
   },
 
+  async "Cursor tool places the 3D cursor on the cube's surface"() {
+    await app.locator('[data-tool="builtin.cursor"]').click();
+    await app.click(0.5, 0.45);
+    // On the surface up to the depth margin's few pixels (ED_view3d_autodist takes the nearest depth around the mouse).
+    await app.until((b) => Math.abs(Math.max(...b.world.sceneSettings.state.cursor.location.map(Math.abs)) - 1) < 0.1);
+  },
+
+  async "Inset Faces tool insets the cube from its handle"() {
+    await app.click();
+    await app.page.keyboard.press("Tab");
+    await app.until((b) => b.world.editMode.active);
+    await app.page.keyboard.press("a");
+    await app.locator('[data-tool="builtin.inset_faces"]').click();
+    // Each face on its own, as a closed cube has no region boundary to inset.
+    await app.frame().getByText("Individual", { exact: true }).first().click();
+    // From the edge of the handle (36 pixels around the selection's center) toward the center, which insets more.
+    const [x, y] = await app.point();
+    await app.page.mouse.move(x + 30, y);
+    await app.page.mouse.down();
+    await app.page.mouse.move(x + 2, y, { steps: 10 });
+    await app.page.mouse.up();
+    await app.until((b) => b.world.editMode.mesh.faces_num === 30);
+  },
+
   async "split a 3D Viewport and switch its shading"() {
     // Drag the corner of the area under the 3D Viewport (the viewport is laid over its area) inward.
     const leaf = await app.frame().evaluate(() => {
@@ -195,6 +219,26 @@ const checks = {
     await app.until((b) => b.views.all.filter((v) => v.nav).length === 2);
     await app.locator('.bl-view3d-header [data-value="WIREFRAME"]').nth(1).click();
     assert.deepEqual(await app.bylonder((b) => b.views.all.filter((v) => v.nav).map((v) => v.state.shading).sort()), ["solid", "wire"]);
+  },
+
+  // The Scripting workspace's Python Console runs Blender's console in CPython over Bylonder's bpy, and the Text
+  // Editor runs a script; Info reports the operator.
+  async "Scripting: the console adds a cube, a script moves the object"() {
+    await app.page.click('[data-workspace="scripting"]');
+    const pythonConsole = app.locator(".bl-console"), textEditor = app.locator(".bl-text-editor");
+    await pythonConsole.waitFor();
+    await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console").textContent), null, 180000);
+    const before = await app.bylonder((b) => b.world.objects.length);
+    await pythonConsole.hover();
+    await app.page.keyboard.type("bpy.ops.mesh.primitive_cube_add()");
+    await app.page.keyboard.press("Enter");
+    await app.until((b, n) => b.world.objects.length > n, before);
+    await app.until(() => /bpy\.ops\.mesh\.primitive_cube_add\(/.test(document.querySelector(".bl-info").textContent));
+    await textEditor.hover();
+    await app.page.keyboard.press("Alt+n");
+    await app.page.keyboard.type("import bpy\nbpy.context.object.location.x = 2\n");
+    await app.page.keyboard.press("Alt+p");
+    await app.until((b) => Math.abs(b.editor.selection.nodes.at(-1).position.x - 2) < 1e-6, null, 60000);
   },
 };
 

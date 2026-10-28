@@ -17,7 +17,7 @@ const next = (list, value) => list[(list.indexOf(value) + 1) % list.length];
 
 // `preview(props)` re-runs the bevel from the original mesh; `confirm(props)` records it; `center` is the median point
 // on screen and `pixel_size` the world size of a pixel there, divided by the object's largest scale.
-export function bevel_modal({ props: initial, center, mouse, pixel_size, preview, confirm, cancel, notify, end }) {
+export function bevel_modal({ props: initial, center, mouse, pixel_size, preview, confirm, cancel, notify, end, release_confirm = false }) {
   const props = { offset_type: 'OFFSET', offset: 0, offset_pct: 0, segments: 1, profile: 0.5, affect: 'EDGES', clamp_overlap: false,
     harden_normals: false, mark_seam: false, mark_sharp: false, miter_outer: 'SHARP', miter_inner: 'SHARP', profile_type: 'SUPERELLIPSE',
     vmesh_method: 'ADJ', ...initial };
@@ -58,6 +58,8 @@ export function bevel_modal({ props: initial, center, mouse, pixel_size, preview
       run();
     },
     keymap: createKeymap([
+      // A tool's drag confirms on release (release_confirm).
+      { keys: 'Any LEFTMOUSE RELEASE', poll: () => release_confirm, run: () => finish(true) },
       { blender: 'CONFIRM', keys: ['Any LEFTMOUSE', 'Any RET', 'Any NUMPAD_ENTER'], run: () => finish(true) },
       { blender: 'CANCEL', keys: ['Any RIGHTMOUSE', 'Any ESC'], run: () => finish(false) },
       { blender: 'VALUE_OFFSET', keys: 'Any A', run: () => setMode(props.offset_type === 'PERCENT' ? 'offset_pct' : 'offset') },

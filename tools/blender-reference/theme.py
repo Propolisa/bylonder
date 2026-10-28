@@ -5,7 +5,7 @@
 import bpy, json, sys
 
 out = sys.argv[sys.argv.index("--") + 1]
-EDITORS = ["common", "regions", "graph_editor", "dopesheet_editor", "user_interface"]
+EDITORS = ["common", "regions", "graph_editor", "dopesheet_editor", "view_3d", "user_interface", "text_editor", "console", "info"]
 
 
 def struct(data):

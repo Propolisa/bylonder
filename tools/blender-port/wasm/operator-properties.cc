@@ -2,6 +2,7 @@
  * registration record each property with its default, and the RNA_* getters and setters read the values set on one
  * call of it, or the defaults. Enums keep Blender's own item tables, so a value can be set by its identifier.
  * Modifiers' structs read and write their DNA instead, at the fields their RNA definitions name (rna_dna_fields.inc). */
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <map>
@@ -18,6 +19,7 @@
 #include "RNA_types.hh"
 
 #include "operator-properties.hh"
+#include "UI_resources.hh"
 
 namespace blender {
 
@@ -124,6 +126,10 @@ StructRNA *ID_code_to_RNA_type(short idcode)
       return RNA_Camera;
     case ID_LA:
       return RNA_Light;
+    case ID_CU_LEGACY:
+      return RNA_Curve;
+    case ID_VF:
+      return RNA_VectorFont;
     case ID_GR:
       return RNA_Collection;
     case ID_AC:
@@ -222,7 +228,7 @@ bool RNA_path_resolve_property(const PointerRNA *ptr, const char *path, PointerR
   return true;
 }
 
-const char *RNA_property_ui_name(const PropertyRNA *prop) { return prop->name.empty() ? prop->identifier.c_str() : prop->name.c_str(); }
+const char *RNA_property_ui_name(const PropertyRNA *prop, const PointerRNA * /*ptr*/) { return prop->name.empty() ? prop->identifier.c_str() : prop->name.c_str(); }
 
 /* As rna_access.cc gives the letter of an array item by the property's subtype. */
 char RNA_property_array_item_char(PropertyRNA *prop, int index)
@@ -368,10 +374,19 @@ PropertyRNA *RNA_def_int(StructOrFunctionRNA *cont, const char *identifier, int 
 {
   return define(cont, identifier, PROP_INT, {double(default_value)});
 }
-PropertyRNA *RNA_def_float(StructOrFunctionRNA *cont, const char *identifier, float default_value, float, float, const char *,
-                           const char *, float, float)
+/* As RNA_def_float sets a float's ranges. */
+static PropertyRNA *float_ranges(PropertyRNA *prop, float hardmin, float hardmax, float softmin, float softmax)
 {
-  return define(cont, identifier, PROP_FLOAT, {double(default_value)});
+  if (hardmin != hardmax) {
+    RNA_def_property_range(prop, hardmin, hardmax);
+  }
+  RNA_def_property_ui_range(prop, softmin, softmax, 1, 3);
+  return prop;
+}
+PropertyRNA *RNA_def_float(StructOrFunctionRNA *cont, const char *identifier, float default_value, float hardmin, float hardmax,
+                           const char *, const char *, float softmin, float softmax)
+{
+  return float_ranges(define(cont, identifier, PROP_FLOAT, {double(default_value)}), hardmin, hardmax, softmin, softmax);
 }
 PropertyRNA *RNA_def_float_distance(StructOrFunctionRNA *cont, const char *identifier, float default_value, float hardmin,
                                     float hardmax, const char *ui_name, const char *ui_description, float softmin, float softmax)
@@ -383,10 +398,10 @@ PropertyRNA *RNA_def_float_factor(StructOrFunctionRNA *cont, const char *identif
 {
   return RNA_def_float(cont, identifier, default_value, hardmin, hardmax, ui_name, ui_description, softmin, softmax);
 }
-PropertyRNA *RNA_def_float_vector(StructOrFunctionRNA *cont, const char *identifier, int len, const float *default_value, float, float,
-                                  const char *, const char *, float, float)
+PropertyRNA *RNA_def_float_vector(StructOrFunctionRNA *cont, const char *identifier, int len, const float *default_value, float hardmin,
+                                  float hardmax, const char *, const char *, float softmin, float softmax)
 {
-  return define(cont, identifier, PROP_FLOAT, array(default_value, len));
+  return float_ranges(define(cont, identifier, PROP_FLOAT, array(default_value, len)), hardmin, hardmax, softmin, softmax);
 }
 PropertyRNA *RNA_def_float_translation(StructOrFunctionRNA *cont, const char *identifier, int len, const float *default_value,
                                        float hardmin, float hardmax, const char *ui_name, const char *ui_description, float softmin,
@@ -470,10 +485,22 @@ void RNA_def_property_float_default(PropertyRNA *prop, float value) { prop->defa
 /* What only Blender's UI and file storage use of a property. */
 void RNA_def_enum_funcs(PropertyRNA *prop, EnumPropertyItemFunc itemf) { prop->itemf = itemf; }
 void RNA_def_property_flag(PropertyRNA *prop, PropertyFlag flag) { prop->flag |= flag; }
-void RNA_def_property_range(PropertyRNA *, double, double) {}
+void RNA_def_property_range(PropertyRNA *prop, double min, double max)
+{
+  prop->hardmin = float(min);
+  prop->hardmax = float(max);
+  prop->softmin = std::max(float(min), prop->hardmin);
+  prop->softmax = std::min(float(max), prop->hardmax);
+}
 void RNA_def_property_subtype(PropertyRNA *prop, PropertySubType subtype) { prop->subtype = subtype; }
 void RNA_def_property_translation_context(PropertyRNA *, const char *) {}
-void RNA_def_property_ui_range(PropertyRNA *, double, double, double, int) {}
+void RNA_def_property_ui_range(PropertyRNA *prop, double min, double max, double step, int precision)
+{
+  prop->softmin = float(min);
+  prop->softmax = float(max);
+  prop->step = float(step);
+  prop->precision = precision;
+}
 /* As rna_define.cc defines it. */
 void RNA_def_property_ui_icon(PropertyRNA *prop, int icon, int consecutive)
 {
@@ -585,6 +612,18 @@ void RNA_property_float_set_index(PointerRNA *ptr, PropertyRNA *prop, int index,
 bool RNA_property_boolean_get_default(PointerRNA * /*ptr*/, PropertyRNA *prop) { return prop->defaults[0] != 0.0; }
 int RNA_property_int_get_default(PointerRNA * /*ptr*/, PropertyRNA *prop) { return int(prop->defaults[0]); }
 float RNA_property_float_get_default(PointerRNA * /*ptr*/, PropertyRNA *prop) { return float(prop->defaults[0]); }
+void RNA_property_float_range(PointerRNA * /*ptr*/, PropertyRNA *prop, float *hardmin, float *hardmax)
+{
+  *hardmin = prop->hardmin;
+  *hardmax = prop->hardmax;
+}
+void RNA_property_float_ui_range(PointerRNA * /*ptr*/, PropertyRNA *prop, float *softmin, float *softmax, float *step, float *precision)
+{
+  *softmin = prop->softmin;
+  *softmax = prop->softmax;
+  *step = prop->step;
+  *precision = float(prop->precision);
+}
 int RNA_property_enum_get_default(PointerRNA * /*ptr*/, PropertyRNA *prop) { return int(prop->defaults[0]); }
 void RNA_property_boolean_get_default_array(PointerRNA * /*ptr*/, PropertyRNA *prop, bool *out) { get_defaults(prop, out); }
 void RNA_property_int_get_default_array(PointerRNA * /*ptr*/, PropertyRNA *prop, int *out) { get_defaults(prop, out); }
@@ -689,6 +728,16 @@ void RNA_enum_set(PointerRNA *ptr, const char *name, int value) { RNA_property_e
 /* Structs. */
 
 const char *RNA_struct_identifier(const StructRNA *type) { return type->identifier.c_str(); }
+/* port-override: the module's structs carry no UI data, so the ID types' icons (RNA_def_struct_ui_icon in their
+ * rna_*.cc) are listed here; any other struct has RNA's default. */
+int RNA_struct_ui_icon(const StructRNA *type)
+{
+  static const std::map<std::string, int> icons = {{"Object", ICON_OBJECT_DATA}, {"Scene", ICON_SCENE_DATA}, {"Action", ICON_ACTION},
+                                                   {"Material", ICON_MATERIAL_DATA}, {"World", ICON_WORLD_DATA},
+                                                   {"Light", ICON_LIGHT_DATA}, {"Camera", ICON_CAMERA_DATA}};
+  const auto found = type ? icons.find(type->identifier) : icons.end();
+  return found == icons.end() ? ICON_DOT : found->second;
+}
 bool RNA_struct_is_a(const StructRNA *type, const StructRNA *srna) { return type == srna; }
 PropertyRNA *RNA_struct_name_property(const StructRNA *) { return nullptr; }
 PointerRNA RNA_pointer_create_discrete(ID *id, StructRNA *type, void *data) { return PointerRNA{id, type, data}; }

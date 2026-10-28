@@ -78,10 +78,21 @@ export function parseAnimation(input) {
     return { action: validateAction(input), time: validateTime({ frameStart: start, frameEnd: end, fps, frameCurrent: frame, loop, autoKey, framePreviewStart: start, framePreviewEnd: end }) };
   }
   if (input.version !== 2 && input.version !== 3) throw Error('Invalid animation action');
-  return { action: validateAction(input.action), time: validateTime(input.time) };
+  return { action: validateAction(input.action), time: validateTime(input.time), markers: validateMarkers(input.markers) };
+}
+// The scene's markers (Scene.timeline_markers): a name of up to 63 characters, an integer frame, a selection.
+function validateMarkers(input = []) {
+  if (!Array.isArray(input) || input.length > 10000) throw Error('Invalid markers');
+  return input.map(({ name, frame, select }) => {
+    if (typeof name !== 'string' || name.length > 63 || !Number.isInteger(frame) || Math.abs(frame) > LIMIT) throw Error('Invalid marker');
+    return { name, frame, select: !!select };
+  });
 }
 // Validates any saved payload version and returns it as v3.
-export const normalizeAnimation = input => { const { action, time } = parseAnimation(input); return { version: 3, action, time }; };
+export const normalizeAnimation = input => {
+  const { action, time, markers = [] } = parseAnimation(input);
+  return { version: 3, action, time, ...(markers.length ? { markers } : {}) };
+};
 
 // Legacy aliases on the action (start, end, fps, frame, loop, autoKey) read scene time; kept for user code.
 const legacy = { start: 'frameStart', end: 'frameEnd', fps: 'fps', loop: 'loop', autoKey: 'autoKey' };
@@ -271,13 +282,15 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     serialize() {
       const out = tracks().map((t) => ({ id: t.id, path: t.path, extrapolation: t.fcurve.extrapolation, ...(t.fcurve.flag & FCURVE.MUTED ? { muted: true } : {}),
         ...(strings.has(t.ref) ? { values: [...strings.get(t.ref)] } : {}), keys: keysOf(t) }));
-      return { version: 3, action: clone({ name, tracks: out }), time: time.serialize() };
+      const markers = anim.markers;
+      return { version: 3, action: clone({ name, tracks: out }), time: time.serialize(), ...(markers.length ? { markers } : {}) };
     },
     load(data, { apply = true } = {}) {
       const parsed = parseAnimation(data);
       removeAll();
       name = parsed.action.name;
       parsed.action.tracks.forEach(loadTrack);
+      anim.markers = parsed.markers ?? [];
       curves = null;
       quiet = true; try { time.load(parsed.time); } finally { quiet = false; }
       syncTime();

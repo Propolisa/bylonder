@@ -14,6 +14,7 @@
 #include "DNA_texture_types.h"
 #include "DNA_world_types.h"
 #include "BKE_context.hh"
+#include "BKE_global.hh"
 #include "BKE_wm_runtime.hh"
 #include "DNA_collection_types.h"
 #include "BKE_layer.hh"
@@ -77,6 +78,8 @@ EXPORT(main_new) BlenderMain *main_new()
   BlenderMain *ctx = MEM_new<BlenderMain>(__func__);
   /* As BKE_main_new makes it, without the working color space: the module has no color management. */
   ctx->bmain = MEM_new<Main>(__func__);
+  /* The Main Blender's code finds through G_MAIN (the built-in font, BKE_vfont_builtin_ensure), as loading a file sets it. */
+  G_MAIN = ctx->bmain;
   STRNCPY(ctx->scene.id.name, "SCScene");
   STRNCPY(ctx->view_layer.name, "ViewLayer");
   ctx->view_layer.runtime = MEM_new<ViewLayerRuntime>(__func__);

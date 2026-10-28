@@ -1,8 +1,9 @@
 // The 3D View's Edit Mode menus: Blender's own (space_view3d.py, in Blender's Python tree) drawn
 // with Bylonder's UILayout, holding the operators Bylonder runs. `api` is Edit Mode's:
 //   context(): bpy.context (blenkernel/context.js), edit(): the EditMesh, exec(idname, props): runs an operator as an undo step, keys(idname, props): its shortcut,
-//   move(idname, props, { normal }) and slide(idname, props): an operator and then a move or Edge Slide, as Blender's
-//   macros run them, start(type): a transform, and the modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
+//   macro(idname, props, transform, transformProps, event): an operator and then a transform, as Blender's macros run
+//   them, module(idname, props, event): one of Blender's modal operators, start(type, options): a transform, and the
+//   modal tools extrudeMove, inset, bevel(affect), loopcut, selectBox.
 import { menus as MENUS } from '../../python/bpy_interface.js';
 import { drawMenu, runs } from '../interface/ui-layout.js';
 import { rna } from '../../makesrna/rna.js';
@@ -15,24 +16,42 @@ import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../../bmesh
 // The keymaps an Edit Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Mesh', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 
+// A macro's properties of one of its operators (TRANSFORM_OT_translate in mesh.extrude_context_move's).
+const macroProps = (props, name) => Object.fromEntries(props[name] ?? []);
+// Blender's macros (mesh_ops.cc): an operator, then a transform of its result.
+const MACROS = {
+  'mesh.duplicate_move': ['mesh.duplicate', 'transform.translate'],
+  'mesh.extrude_context_move': ['mesh.extrude_context', 'transform.translate'],
+  'mesh.extrude_region_move': ['mesh.extrude_region', 'transform.translate'],
+  'mesh.extrude_region_shrink_fatten': ['mesh.extrude_region', 'transform.shrink_fatten'],
+  'mesh.extrude_vertices_move': ['mesh.extrude_verts_indiv', 'transform.translate'],
+  'mesh.extrude_edges_move': ['mesh.extrude_edges_indiv', 'transform.translate'],
+  'mesh.extrude_faces_move': ['mesh.extrude_faces_indiv', 'transform.shrink_fatten'],
+  'mesh.extrude_manifold': ['mesh.extrude_region', 'transform.translate'],
+  'mesh.rip_move': ['mesh.rip', 'transform.translate'],
+  'mesh.rip_edge_move': ['mesh.rip_edge', 'transform.translate'],
+  'mesh.offset_edge_loops_slide': ['mesh.offset_edge_loops', 'transform.edge_slide'],
+};
+// The operator RNA struct names a macro's properties are kept under.
+const struct = (idname) => idname.split('.')[0].toUpperCase() + '_OT_' + idname.split('.')[1];
+// Transforms Blender's own code runs in the module's 3D View.
+const MODULE_TRANSFORMS = ['transform.shrink_fatten', 'transform.push_pull', 'transform.tosphere', 'transform.shear', 'transform.vert_slide'];
+
 // What Edit Mode runs itself rather than as an operator's exec, by Blender idname: transforms, Blender's macros and modal
-// tools, run with the operator's properties.
+// tools, run with the operator's properties and the event that ran them (a tool's drag starts where it was pressed).
 export const editMeshActions = (api) => ({
   'transform.translate': () => api.start('move'),
   'transform.rotate': () => api.start('rotate'),
   'transform.resize': () => api.start('scale'),
-  'transform.edge_slide': () => api.start('edge_slide'),
+  'transform.edge_slide': (props = {}, event) => api.start('edge_slide', { point: event, view: event?.view, releaseConfirm: !!props.release_confirm }),
+  ...Object.fromEntries(MODULE_TRANSFORMS.map((idname) => [idname, (props, event) => api.module(idname, props, event)])),
   'view3d.edit_mesh_extrude_move_normal': () => api.extrudeMove(),
   'view3d.select_box': () => api.selectBox(),
-  'mesh.duplicate_move': () => api.move('mesh.duplicate'),
-  'mesh.extrude_vertices_move': () => api.move('mesh.extrude_verts_indiv'),
-  'mesh.extrude_edges_move': () => api.move('mesh.extrude_edges_indiv'),
-  // Stand-in: Blender follows extrude_faces_indiv with Shrink/Fatten, which moves each face along its own normal.
-  'mesh.extrude_faces_move': () => api.move('mesh.extrude_faces_indiv', {}, { normal: true }),
-  'mesh.offset_edge_loops_slide': () => api.slide('mesh.offset_edge_loops'),
-  'mesh.loopcut_slide': () => api.loopcut(),
-  'mesh.bevel': (props) => api.bevel(props.affect ?? 'EDGES'),
-  'mesh.inset': () => api.inset(),
+  ...Object.fromEntries(Object.entries(MACROS).map(([idname, [first, transform]]) => [idname, (props = {}, event) =>
+    api.macro(first, macroProps(props, struct(first)), transform, macroProps(props, struct(transform)), event)])),
+  'mesh.loopcut_slide': (props = {}, event) => api.loopcut(event, macroProps(props, 'TRANSFORM_OT_edge_slide')),
+  'mesh.bevel': (props = {}, event) => api.bevel(props.affect ?? 'EDGES', event, props),
+  'mesh.inset': (props = {}, event) => api.inset(event, props),
 });
 
 export function editMeshMenus(api) {
@@ -105,5 +124,5 @@ export function idleApi(record = () => {}) {
       tool_settings: rna('ToolSettings', { mesh_select_mode: [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE].map((bit) => !!(mode & bit)) }),
     });
   };
-  return api = { context, exec: record, move: record, slide: record, keys: none, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
+  return api = { context, exec: record, macro: record, module: record, keys: none, start: none, extrudeMove: none, inset: none, bevel: none, loopcut: none, selectBox: none };
 }

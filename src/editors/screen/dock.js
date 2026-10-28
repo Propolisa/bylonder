@@ -21,7 +21,9 @@ export function areaSizes([a,b],size,horizontal,top){
 }
 
 // An item with `overlap` draws under its header, as an editor whose header overlaps its main region (region overlap).
-export function mountDock({host, items, tree, defaults, storageKey, bareFocus=false, focus: defaultFocus=null}) {
+// `screens` are further screens ({ name: { tree, defaults, headerless } }, Blender's workspaces' screens) over the same
+// items; `tree` and `defaults` are the first screen's. A screen's `headerless` items hide their header.
+export function mountDock({host, items, tree: firstTree, defaults: firstDefaults, screens={}, storageKey, bareFocus=false, focus: defaultFocus=null}) {
   items=[...items];
   const headers=new Map();
   const header=id=>{if(!headers.has(id))headers.set(id,Object.assign(document.createElement('div'),{className:'dock-header-content'}));return headers.get(id);};
@@ -36,18 +38,23 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   };
   let saved={}, menuElement, hovered=null, frameId, disposed=false;
   try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))saved=value;}catch{}
-  const state=reactive({profile:currentProfile(),layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(tree),area:null,factoryCount:0,width:0,height:0,content:null});
+  const state=reactive({profile:currentProfile(),screen:null,layout:null,remember:saved.remember!==false,focus:null,tree:structuredClone(firstTree),area:null,factoryCount:0,width:0,height:0,content:null});
+  const screenOf=()=>screens[state.screen]??{tree:firstTree,defaults:firstDefaults};
+  const tree=()=>screenOf().tree,defaults=profile=>screenOf().defaults(profile);
+  // Each screen keeps its own layout per profile; the first screen's under the profile's name.
+  const key=()=>state.screen?state.screen+':'+state.profile:state.profile;
   const extras=Array.isArray(saved.extras)?saved.extras.slice(0,20):[];
   for(const extra of extras)if(typeof extra.id==='string'&&extra.id.startsWith('area:')&&items.slice(0,baseCount).some(item=>item.id===extra.type)){
     const element=document.createElement('section'),original=items.find(item=>item.id===extra.type);items.push({...extra,title:original.title,overlap:original.overlap,element});ids.push(extra.id);
   }
   const load=()=>{
     const initial=defaults(state.profile);initial.order=[...initial.order,...ids.slice(baseCount)];initial.hidden=[...initial.hidden,...ids.slice(baseCount)];
-    state.layout=validateLayout(saved[state.profile],initial,ids);
-    state.tree=validAreaTree(saved[state.profile]?.tree,ids.length)?saved[state.profile].tree:structuredClone(tree);
-    if(saved[state.profile]?.sizes)for(const [key,pair] of Object.entries(saved[state.profile].sizes))if(Array.isArray(pair)&&pair.length===2&&pair.every(n=>Number.isFinite(n)&&n>0))state.layout.sizes[key]=pair;
-    if(saved[state.profile]?.horizontal)Object.assign(state.layout.horizontal,saved[state.profile].horizontal);
-    state.focus=!saved[state.profile]?defaultFocus:ids.includes(saved[state.profile].focus)?saved[state.profile].focus:null;
+    const stored=saved[key()];
+    state.layout=validateLayout(stored,initial,ids);
+    state.tree=validAreaTree(stored?.tree,ids.length)?stored.tree:structuredClone(tree());
+    if(stored?.sizes)for(const [split,pair] of Object.entries(stored.sizes))if(Array.isArray(pair)&&pair.length===2&&pair.every(n=>Number.isFinite(n)&&n>0))state.layout.sizes[split]=pair;
+    if(stored?.horizontal)Object.assign(state.layout.horizontal,stored.horizontal);
+    state.focus=!stored?defaultFocus:ids.includes(stored.focus)?stored.focus:null;
   };
   load();
   host.classList.add('dock');
@@ -86,7 +93,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   // Blender keeps each area at least one header high (screen_geom_vertices_scale).
   const minSize=horizontal=>{const header=parseFloat(getComputedStyle(host).getPropertyValue('--bl-header-h'))||26,length=horizontal?state.height:state.width;return length?Math.min(50,100*header/length):8;};
   const persist=()=>{
-    saved[state.profile]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focus,tree:JSON.parse(JSON.stringify(state.tree))};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
+    saved[key()]={...JSON.parse(JSON.stringify(state.layout)),focus:state.focus,tree:JSON.parse(JSON.stringify(state.tree))};saved.remember=state.remember;saved.extras=items.slice(baseCount).map(({id,type})=>({id,type}));
     try{localStorage.setItem(storageKey,JSON.stringify(state.remember?saved:{remember:false}));}catch{}
     position();nextTick(()=>{position();schedule();});
   };
@@ -104,7 +111,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   const closeMenu=()=>menuElement?.close();
   const openMenu=()=>{if(!menuElement.open)menuElement.showModal();};
   const reset=()=>{
-    saved={remember:state.remember};state.layout=structuredClone(defaults(state.profile));state.layout.order.push(...ids.slice(baseCount));state.layout.hidden.push(...ids.slice(baseCount));state.tree=structuredClone(tree);state.focus=defaultFocus;
+    saved={remember:state.remember};state.layout=structuredClone(defaults(state.profile));state.layout.order.push(...ids.slice(baseCount));state.layout.hidden.push(...ids.slice(baseCount));state.tree=structuredClone(tree());state.focus=defaultFocus;
     persist();closeMenu();host.dispatchEvent(new CustomEvent('dock-reset',{bubbles:true}));
   };
   const button=(label,fn,title,attrs={})=>h('button',{type:'button',onClick:fn,title,...attrs},label);
@@ -112,7 +119,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   function renderNode(node,extent=state.content){
     if(typeof node==='number'){
       const id=state.layout.order[node];
-      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap}],onPointerenter:()=>hovered=node,onContextmenu:e=>openArea(e,node)},[
+      return h('div',{class:['dock-leaf',{bare:items.find(item=>item.id===id)?.bare,overlap:items.find(item=>item.id===id)?.overlap,'no-header':screenOf().headerless?.includes(id)}],onPointerenter:()=>hovered=node,onContextmenu:e=>openArea(e,node)},[
         h('div',{class:'dock-heading',onContextmenu:e=>openArea(e,node)},[
           h('button',{type:'button',class:'dock-editor-type',title:'Editor Type · '+(items.find(item=>item.id===id)?.title||''),'aria-label':'Editor Type',onClick:e=>editorMenu(e.currentTarget,node)},[icon((items.find(item=>item.id===(items.find(i=>i.id===id)?.type||id))||{}).icon||'properties')]),
           h('div',{class:'dock-header-host',ref:el=>{const content=header(id);if(el&&content.parentElement!==el)el.replaceChildren(content);}}),
@@ -187,5 +194,7 @@ export function mountDock({host, items, tree, defaults, storageKey, bareFocus=fa
   const unlock=()=>host.classList.remove('dock-resizing');
   root.addEventListener('pointerdown',event=>{if(event.target.closest('.splitpanes__splitter'))host.classList.add('dock-resizing');});
   window.addEventListener('pointerup',unlock);window.addEventListener('pointercancel',unlock);window.addEventListener('blur',unlock);
-  return {show,toggle,reset,openMenu,setFactory,header,get toolbar(){return root.querySelector('.dock-toolbar');},get profile(){return state.profile;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('resize',resize);coarse.removeEventListener('change',resize);window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
+  // Blender's workspace switch: another screen over the same areas.
+  const setScreen=name=>{const next=name in screens?name:null;if(next===state.screen)return;persist();state.screen=next;load();persist();};
+  return {show,toggle,reset,openMenu,setFactory,header,setScreen,get screen(){return state.screen;},get toolbar(){return root.querySelector('.dock-toolbar');},get profile(){return state.profile;},get maximized(){return focus();},maximize(id){state.focus=state.focus===id?null:id;persist();},split(id,horizontal){if(state.factoryCount)split(state.layout.order.indexOf(id),horizontal);},close(id){if(typeof state.tree!=='number')closeArea(state.layout.order.indexOf(id));},dispose(){disposed=true;cancelAnimationFrame(frameId);observer.disconnect();instances.forEach(instance=>instance?.dispose?.());host.removeEventListener('keydown',keyboard,true);app.unmount();window.removeEventListener('resize',resize);coarse.removeEventListener('change',resize);window.removeEventListener('pointerup',unlock);window.removeEventListener('pointercancel',unlock);window.removeEventListener('blur',unlock);}};
 }

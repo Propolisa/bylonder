@@ -10,12 +10,13 @@ import { createBlenderCollections } from '../../blenkernel/scene/collections-ble
 import { dnaSet } from '../../makesrna/dna-struct.js';
 import { objectMesh } from './object-mesh.js';
 import { rebuildMesh } from './mesh-catalog.js';
+import { CurveObject } from '../../blenkernel/curve/curve.js';
 import { nodeId } from './identity.js';
 
-// The object types the module holds; Bylonder's text, curves, lights and cameras go in without their data, which
-// Bylonder keeps.
+// The object types the module holds; lights and cameras go in without their data, which Bylonder keeps.
 const MIRRORED = ['MESH', 'EMPTY', 'FONT', 'CURVE', 'LIGHT', 'CAMERA'];
-const OWN_DATA = ['MESH', 'EMPTY'];
+const CURVE_TYPES = ['FONT', 'CURVE'];
+const OWN_DATA = ['MESH', 'EMPTY', ...CURVE_TYPES];
 const ID_RECALC_GEOMETRY = 1 << 1;
 const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, MEDIAN_POINT: 3, ACTIVE_ELEMENT: 4 };
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -72,6 +73,11 @@ export function createBlenderObjects({ rna, transaction, notify, ids = createBle
   function syncMeshes() {
     for (const [node, entry] of mirrored) {
       const source = node.metadata?.wbCreation ?? node.geometry;
+      if (CURVE_TYPES.includes(entry.type) && selection.has(node) && entry.mesh !== source) {
+        new CurveObject(entry.type, node.name, entry.ob, blender).data = world.curves.data(node);
+        entry.mesh = source;
+        continue;
+      }
       if (entry.type !== 'MESH' || !selection.has(node) || entry.mesh === source) continue;
       blender.setMesh(entry.ob, objectMesh(node));
       entry.mesh = source;
@@ -90,6 +96,10 @@ export function createBlenderObjects({ rna, transaction, notify, ids = createBle
       if (!isIdentity(blender.transform(entry.ob).matrix_parent_inverse)) blender.foldParentInverse(entry.ob);
       const { location, rotation_mode, rotation_euler, rotation_quaternion, scale } = blender.transform(entry.ob), data = rna.pointer('Object', node);
       Object.assign(data, { location, scale }, rotation_mode === 'QUATERNION' ? { rotation_quaternion } : { rotation_euler });
+      if (geometry && CURVE_TYPES.includes(entry.type)) {
+        world.curves.set(node, new CurveObject(entry.type, node.name, entry.ob, blender).data);
+        entry.mesh = node.metadata.wbCreation;
+      }
       if (geometry && entry.type === 'MESH') {
         rebuildMesh(node, { mesh: mesh_serialize(blender.mesh(entry.ob)) });
         entry.mesh = node.metadata.wbCreation;
@@ -99,7 +109,7 @@ export function createBlenderObjects({ rna, transaction, notify, ids = createBle
   }
 
   // Runs an operator's exec as one undo step; returns its status and report. An operator that changed the data of a
-  // text or curve object, which the module does not hold, changes nothing.
+  // light or camera, which the module does not hold, changes nothing.
   function run(idname, props = {}) {
     let result;
     transaction(() => {
@@ -108,7 +118,7 @@ export function createBlenderObjects({ rna, transaction, notify, ids = createBle
       keying(() => { result = blender.run(idname, props); });
       const objects = result.status & OPERATOR_FINISHED ? changed() : [];
       const unheld = objects.find(({ entry, geometry }) => geometry && !OWN_DATA.includes(entry.type));
-      if (unheld) result = { status: 0, report: `Bylonder does not apply this to ${unheld.entry.type === 'FONT' ? 'text' : 'curve'} objects yet` };
+      if (unheld) result = { status: 0, report: `Bylonder does not apply this to ${unheld.entry.type.toLowerCase()} objects yet` };
       else writeBack(objects);
     });
     if (result.report) notify(result.report);

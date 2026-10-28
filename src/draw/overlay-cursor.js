@@ -1,12 +1,13 @@
 // The 3D cursor overlay (overlay_cursor.hh, overlay_shape.cc cursor_circle and cursor_lines): a red and white dashed
 // circle of half a widget unit in screen space and an axis crosshair one widget unit long at the cursor's distance,
-// at the scene cursor's default place, the world origin.
+// along the cursor's axes, at the scene's cursor.
 import { Mesh } from '@babylonjs/core/Meshes/mesh.js';
 import { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 import { Material } from '@babylonjs/core/Materials/material.js';
 import { Constants } from '@babylonjs/core/Engines/constants.js';
 import { view_3d as theme, user_interface, colorBlendShade } from '../editors/interface/userdef-default-theme.js';
 import { drawView, DRAW_VIEW_GLSL } from './draw-view.js';
+import { cursorRotationMatrix } from '../blenkernel/scene/cursor.js';
 
 const WIDGET_UNIT = 20;
 
@@ -18,13 +19,15 @@ uniform vec3 viewRight;
 uniform vec3 viewUp;
 uniform float pixelFac;
 uniform float screenSpace;
+uniform vec3 cursorLocation;
+uniform mat3 cursorRotation;
 ${DRAW_VIEW_GLSL}
 flat varying vec4 vColor;
 void main() {
   vColor = color;
-  float size = ${WIDGET_UNIT}.0 * pixelFac * drw_point_world_to_homogenous(vec3(0.0)).w;
-  vec3 p = screenSpace > 0.5 ? (viewRight * position.x + viewUp * position.y) * size : position * size;
-  gl_Position = drw_point_world_to_homogenous(p);
+  float size = ${WIDGET_UNIT}.0 * pixelFac * drw_point_world_to_homogenous(cursorLocation).w;
+  vec3 p = screenSpace > 0.5 ? (viewRight * position.x + viewUp * position.y) * size : cursorRotation * position * size;
+  gl_Position = drw_point_world_to_homogenous(cursorLocation + p);
 }`;
 const FRAGMENT = `precision highp float;
 flat varying vec4 vColor;
@@ -59,9 +62,10 @@ function cursorLines() {
   return { positions, colors };
 }
 
-export function createCursorOverlay(scene) {
+// `cursor()` is the scene's View3DCursor.
+export function createCursorOverlay(scene, cursor) {
   const material = new ShaderMaterial('__overlayCursor', scene, { vertexSource: VERTEX, fragmentSource: FRAGMENT }, {
-    attributes: ['position', 'color'], uniforms: ['viewProjection', 'viewRight', 'viewUp', 'pixelFac', 'screenSpace'],
+    attributes: ['position', 'color'], uniforms: ['viewProjection', 'viewRight', 'viewUp', 'pixelFac', 'screenSpace', 'cursorLocation', 'cursorRotation'],
   });
   Object.assign(material, { backFaceCulling: false, disableDepthWrite: true, depthFunction: Constants.ALWAYS });
   material.onBindObservable.add((mesh) => {
@@ -70,6 +74,9 @@ export function createCursorOverlay(scene) {
     e.setFloat3('viewUp', v.up[0], v.up[1], v.up[2]);
     e.setFloat('pixelFac', v.pixelFac);
     e.setFloat('screenSpace', mesh.metadata.screenSpace ? 1 : 0);
+    const { location } = cursor();
+    e.setFloat3('cursorLocation', location[0], location[1], location[2]);
+    e.setMatrix3x3('cursorRotation', Float32Array.from(cursorRotationMatrix(cursor()).flat()));
   });
   const part = (name, { positions, colors }, screenSpace) => {
     const mesh = new Mesh(name, scene);

@@ -6,16 +6,24 @@
 // An event is { type, value, shift, ctrl, alt, oskey, x, y, press, view, native } with Blender's event types in
 // lower case ('a', 'leftmouse', 'wheelupmouse', 'left_ctrl') and values PRESS, RELEASE, CLICK, CLICK_DRAG.
 // A press that no handler uses becomes a CLICK on release, or a CLICK_DRAG once the mouse moves past the drag
-// threshold; `press` holds where the button went down.
+// threshold, where the mouse then is; `press` holds where the button went down and a CLICK_DRAG's `direction` which way
+// it left.
 import { keyType } from './input/keymap.js';
 
 // U.drag_threshold_mouse, in pixels.
 export const WM_DRAG_THRESHOLD_MOUSE = 3;
 const BUTTONS = ['leftmouse', 'middlemouse', 'rightmouse', 'button4mouse', 'button5mouse'];
+// WM_event_drag_direction: the eighth of a turn the pointer left its press in (y up), from east counterclockwise.
+const DIRECTIONS = ['EAST', 'NORTH_EAST', 'NORTH', 'NORTH_WEST', 'WEST', 'SOUTH_WEST', 'SOUTH', 'SOUTH_EAST'];
+export const dragDirection = (dx, dy) => DIRECTIONS[(Math.round((4 * Math.atan2(-dy, dx)) / Math.PI) + 8) % 8];
+
+// WM_event_drag_start_xy: the event at a drag's press, for what Blender places at the drag's start.
+export const dragStart = (event) => (event.value === 'CLICK_DRAG' && event.press ? { ...event, x: event.press.x, y: event.press.y } : event);
 
 // `layers()` returns the handlers below the modal ones, top first; `viewAt(event)` the 3D View a pointer event is
-// over (or null); `accepts(event)` filters out keys meant for text fields and other editors.
-export function createEventSystem({ layers, viewAt, accepts = () => true }) {
+// over (or null); `accepts(event)` filters out keys meant for text fields and other editors; `hover(event)` gets the
+// pointer's motion while no modal handler runs (the gizmo map's highlighting).
+export function createEventSystem({ layers, viewAt, accepts = () => true, hover = () => {} }) {
   const modal = [];
   // Every event carries the mouse position, key presses included, as Blender's do.
   let press = null, mouse = { x: 0, y: 0 };
@@ -52,23 +60,27 @@ export function createEventSystem({ layers, viewAt, accepts = () => true }) {
     const view = viewAt(e);
     if (!view && !modal.length) return;
     const type = BUTTONS[e.button];
-    const handled = dispatch(wmEvent(e, type, 'PRESS', { view }));
-    press = { type, x: e.clientX, y: e.clientY, view, native: e, handled, dragged: false };
+    const event = wmEvent(e, type, 'PRESS', { view }), handled = dispatch(event);
+    // An operator that finished and passed the press through (FINISHED | PASS_THROUGH, WM_HANDLER_HANDLED) leaves no
+    // click, but a drag.
+    press = { type, x: e.clientX, y: e.clientY, view, native: e, handled, clicked: handled || !!event.handled, dragged: false };
     if (handled) e.preventDefault();
   };
   const pointermove = (e) => {
     mouse = { x: e.clientX, y: e.clientY };
     for (const handler of [...modal]) handler.mousemove?.(wmEvent(e, 'mousemove', 'NOTHING', { view: viewAt(e) }));
+    if (!modal.length && !press) hover(wmEvent(e, 'mousemove', 'NOTHING', { view: viewAt(e) }));
     if (!press || press.handled || press.dragged) return;
     if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < WM_DRAG_THRESHOLD_MOUSE) return;
     press.dragged = true;
-    dispatch(wmEvent(press.native, press.type, 'CLICK_DRAG', { view: press.view, press, x: press.x, y: press.y }));
+    const direction = dragDirection(e.clientX - press.x, e.clientY - press.y);
+    dispatch(wmEvent(press.native, press.type, 'CLICK_DRAG', { view: press.view, press, x: e.clientX, y: e.clientY, direction }));
   };
   const pointerup = (e) => {
     if (e.pointerType === 'touch') return;
     const type = BUTTONS[e.button], down = press?.type === type ? press : null;
     if (modal.length || down) dispatch(wmEvent(e, type, 'RELEASE', { view: viewAt(e), press: down }));
-    if (down && !down.handled && !down.dragged) dispatch(wmEvent(down.native, type, 'CLICK', { view: down.view, press: down }));
+    if (down && !down.clicked && !down.dragged) dispatch(wmEvent(down.native, type, 'CLICK', { view: down.view, press: down }));
     if (down) press = null;
   };
   const wheel = (e) => {

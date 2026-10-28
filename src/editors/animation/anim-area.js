@@ -2,7 +2,7 @@
 // the SpaceGraph or SpaceAction its space type creates, and that space's regions, in a BlenderMain's context.
 // Operators run in it, in one of its regions, as Blender's handlers run them; drawing reads what it lists.
 import { blenderModule, setOperatorProperties, pollOperator } from '../../bmesh/bmesh-wasm.js';
-import { FCurve, EVENT_TYPES, EVENT_VALUES } from '../../blenkernel/animation/anim-blender.js';
+import { FCurve, Action, EVENT_TYPES, EVENT_VALUES } from '../../blenkernel/animation/anim-blender.js';
 import '../interface/region-draw.js';
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
@@ -11,7 +11,7 @@ const view = () => new DataView(x.memory.buffer);
 // Blender's space and region types (eSpace_Type, eRegion_Type) and View2D view types (V2D_COMMONVIEW_*).
 export const SPACE_GRAPH = 2, SPACE_ACTION = 12;
 export const RGN_TYPE_WINDOW = 0, RGN_TYPE_HEADER = 1, RGN_TYPE_CHANNELS = 2, RGN_TYPE_UI = 4;
-const V2D_COMMONVIEW_CUSTOM = -1, V2D_COMMONVIEW_LIST = 1;
+const V2D_COMMONVIEW_CUSTOM = -1, V2D_COMMONVIEW_LIST = 1, RGN_FLAG_HIDDEN = 1 << 0;
 // Area.ui_type within a SpaceAction (its mode, eAnimEdit_Context).
 export const ACTION_MODES = { DOPESHEET: 0, ACTION: 1, SHAPEKEY: 2, GPENCIL: 3, MASK: 4, CACHEFILE: 5, TIMELINE: 6 };
 // wmEventModifierFlag and wmOperatorStatus.
@@ -20,7 +20,7 @@ export const OPERATOR_RUNNING_MODAL = 1, OPERATOR_CANCELLED = 2, OPERATOR_FINISH
 const OPTYPE_UNDO = 1 << 1;
 const EVT_MODAL_MAP = 0x5022;
 // The popups an invoke can open (operator_popup), by number.
-const POPUPS = [null, 'CONFIRM', 'ENUM_MENU'];
+const POPUPS = [null, 'CONFIRM', 'ENUM_MENU', 'PROPS'];
 // The gestures an invoke can start (operator_gesture), by number.
 const GESTURES = [null, 'BOX', 'CIRCLE', 'LASSO'];
 // eAnimChannel_Settings, as bits of a channel's settings and values.
@@ -51,10 +51,11 @@ export class View2D {
 }
 
 export class AnimArea {
-  constructor(main, spacetype) {
+  // A space made for a sub-type (a SpaceAction's mode), as an area asks for one; -1 for its default.
+  constructor(main, spacetype, subtype = -1) {
     this.main = main;
     this.spacetype = spacetype;
-    this.pointer = x.anim_area_new(main.C, spacetype) >>> 0;
+    this.pointer = x.anim_area_new(main.C, spacetype, subtype) >>> 0;
     this.modal = null;
   }
   dispose() {
@@ -69,6 +70,14 @@ export class AnimArea {
     if (region) x.anim_region_layout(region, left, bottom, width, height, type === RGN_TYPE_CHANNELS ? V2D_COMMONVIEW_LIST : V2D_COMMONVIEW_CUSTOM);
   }
   sync() { x.anim_area_sync(this.pointer); }
+  // Whether a region shows (RGN_FLAG_HIDDEN clear).
+  shown(type) { const region = this.region(type); return !!region && !(x.anim_region_flag(region) & RGN_FLAG_HIDDEN); }
+  show(type, value) {
+    const region = this.region(type), flag = x.anim_region_flag(region);
+    x.anim_region_flag_set(region, value ? flag & ~RGN_FLAG_HIDDEN : flag | RGN_FLAG_HIDDEN);
+  }
+  get cursorValue() { return x.anim_graph_cursor(this.pointer); }
+  set cursorValue(value) { x.anim_graph_cursor_set(this.pointer, value); }
   get subtype() { return x.anim_area_subtype(this.pointer); }
   set subtype(value) { x.anim_area_subtype_set(this.pointer, value); }
   // The header text the running operator shows (ED_area_status_text).
@@ -102,6 +111,18 @@ export class AnimArea {
   poll(idname, regionType = RGN_TYPE_WINDOW) { return this.inContext(regionType, (C) => pollOperator(C, idname)); }
 
   // The channels the area lists, as its channel region draws them; keys() gives each one's key columns.
+  // The active F-Curve the sidebar's panels edit, with the name and icon they show, or null (graph_panel_context).
+  activeFCurve() {
+    return this.inContext(RGN_TYPE_UI, (C) => withArrays([new Uint8Array(256), new Int32Array(1)], ([name, icon]) => {
+      const fcurve = x.anim_active_fcurve(C, name, icon) >>> 0;
+      return fcurve ? { fcurve: new FCurve(fcurve), name: cString(name), icon: cString(x.anim_icon_name(new Int32Array(x.memory.buffer, icon, 1)[0])) } : null;
+    }));
+  }
+  // The context's active Action (context.active_action), or null.
+  activeAction() {
+    const action = this.inContext(RGN_TYPE_UI, (C) => x.anim_active_action(C) >>> 0);
+    return action ? new Action(action) : null;
+  }
   channels() {
     return this.inContext(RGN_TYPE_CHANNELS, (C) => Array.from({ length: x.anim_channels(C) }, (_, index) => {
       const p = x.anim_channel_info(index) >>> 0, dv = view();

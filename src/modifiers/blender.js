@@ -72,6 +72,11 @@ function definition(id) {
 }
 
 export const blenderModifierDefinitions = MESH_ONLY.map(definition);
+// Any Blender modifier type's definition, for stacks Bylonder evaluates itself (curve and text objects).
+export const blenderModifierDefinition = definition;
+// A modifier's pointer properties (CurveModifier.object) at their DNA offsets.
+export const modifierPointers = (id) => Object.fromEntries(Object.entries(dna[rna.types[id].struct].properties)
+  .filter(([, field]) => field.kind === 'pointer').map(([name, { offset }]) => [name, offset]));
 
 // Stack entries ({type, values}) as the module takes them.
 export const moduleModifiers = (modifiers) => modifiers.map(({ type, values }) => {

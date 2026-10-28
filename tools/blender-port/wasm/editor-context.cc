@@ -4,7 +4,9 @@
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_matrix.hh"
+#include "BLI_math_rotation.h"
 #include "BLI_math_vector.h"
+#include "BLI_math_base.h"
 #include "CLG_log.h"
 #include "BLF_api.hh"
 #include "BKE_global.hh"
@@ -34,6 +36,9 @@
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_view3d_types.h"
+#include "DNA_screen_types.h"
+#include "DNA_windowmanager_types.h"
+#include "DNA_workspace_types.h"
 
 #include "BKE_report.hh"
 #include "BKE_screen.hh"
@@ -55,12 +60,14 @@
 #include "bmesh.hh"
 #include "mesh_intern.hh"
 #include "object_intern.hh"
+#include "curve_intern.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "RNA_enum_types.hh"
 #include "RNA_prototypes.hh"
 #include "operator-properties.hh"
 #include "extraction.hh"
+#include "area.hh"
 
 #include <algorithm>
 #include <string>
@@ -86,8 +93,14 @@ struct EditContext {
   Mesh mesh = {};
   /* What evaluating an edit mesh without modifiers gives: a mesh that wraps it (ME_WRAPPER_TYPE_BMESH). */
   Mesh mesh_eval = {};
-  /* The region an operator draws in; without a type, as in Blender's background mode, it draws nothing. Its view
-   * (regiondata) is set once the editor gives one. */
+  /* The 3D View the operators act in once the editor gives its view (edit_context_view_set): its window and screen,
+   * area, space and window region; without a region type, as in Blender's background mode, nothing is drawn. */
+  BylonderArea view_area;
+  wmWindow window = {};
+  WorkSpaceInstanceHook workspace_hook = {};
+  WorkSpaceLayout layout = {};
+  bScreen screen = {};
+  View3D v3d = {};
   ARegion region = {};
   RegionView3D rv3d = {};
   Extraction extraction;
@@ -102,6 +115,8 @@ EXPORT(edit_context_new) EditContext *edit_context_new(BMesh *bm)
   ctx->mesh.runtime->edit_mesh = std::make_shared<BMEditMesh>();
   ctx->mesh.runtime->edit_mesh->bm = bm;
   ctx->mesh.runtime->edit_mesh->selectmode = bm->selectmode;
+  /* As entering Edit Mode does (EDBM_mesh_make), for the operators that ray-cast the edit mesh (the knife). */
+  BKE_editmesh_looptris_calc(ctx->mesh.runtime->edit_mesh.get());
   STRNCPY(ctx->mesh.id.name, "MEMesh");
   ctx->mesh_eval.runtime = MEM_new<bke::MeshRuntime>(__func__);
   ctx->mesh_eval.runtime->wrapper_type = ME_WRAPPER_TYPE_BMESH;
@@ -270,14 +285,58 @@ EXPORT(edit_mesh_eval) const ExtractionHeader *edit_mesh_eval(EditContext *ctx)
   return &ctx->evaluated;
 }
 
-/* port-override: the 3D View's orientation (its view matrix, Blender's axes, column-major) for what operators do along
- * the view (sorting by view axis); the projection stays with Babylon's camera. */
-EXPORT(edit_context_view_set) void edit_context_view_set(EditContext *ctx, const float *viewmat)
+/* port-override: the 3D View the editor shows (ED_view3d_update_viewmat with Babylon's camera as its matrices): its view
+ * and window matrices (Blender's axes, column-major), its size in pixels and whether it is a perspective view. Operators
+ * then act in it as in Blender's window region, projecting the mouse as it does. */
+EXPORT(edit_context_view_set)
+void edit_context_view_set(EditContext *ctx, const float *viewmat, const float *winmat, int winx, int winy, bool is_persp)
 {
-  std::copy_n(viewmat, 16, &ctx->rv3d.viewmat[0][0]);
-  invert_m4_m4(ctx->rv3d.viewinv, ctx->rv3d.viewmat);
-  ctx->region.regiondata = &ctx->rv3d;
+  RegionView3D &rv3d = ctx->rv3d;
+  std::copy_n(viewmat, 16, &rv3d.viewmat[0][0]);
+  std::copy_n(winmat, 16, &rv3d.winmat[0][0]);
+  mul_m4_m4m4(rv3d.persmat, rv3d.winmat, rv3d.viewmat);
+  invert_m4_m4(rv3d.persinv, rv3d.persmat);
+  invert_m4_m4(rv3d.viewinv, rv3d.viewmat);
+  mat4_normalized_to_quat(rv3d.viewquat, rv3d.viewmat);
+  rv3d.is_persp = is_persp;
+  rv3d.persp = is_persp ? RV3D_PERSP : RV3D_ORTHO;
+  rv3d.viewcamtexcofac[0] = rv3d.viewcamtexcofac[1] = 1.0f;
+  const float v1[3] = {rv3d.persmat[0][0], rv3d.persmat[1][0], rv3d.persmat[2][0]};
+  const float v2[3] = {rv3d.persmat[0][1], rv3d.persmat[1][1], rv3d.persmat[2][1]};
+  rv3d.pixsize = (2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)))) / float(std::max(winx, winy));
+  ARegion &region = ctx->region;
+  region.regiondata = &rv3d;
+  region.regiontype = RGN_TYPE_WINDOW;
+  region.winx = short(winx);
+  region.winy = short(winy);
+  BLI_rcti_init(&region.winrct, 0, winx - 1, 0, winy - 1);
+  ScrArea &area = ctx->view_area.area;
+  if (BLI_listbase_is_empty(&area.spacedata)) {
+    ctx->window.scene = &ctx->scene;
+    ctx->window.workspace_hook = &ctx->workspace_hook;
+    ctx->workspace_hook.act_layout = &ctx->layout;
+    ctx->layout.screen = &ctx->screen;
+    BLI_addtail(&ctx->screen.areabase, &area);
+    /* The editor's gizmo map (wm-gizmo-map.js) draws and runs the view's gizmos, so operators set up none. */
+    ctx->v3d.gizmo_flag = V3D_GIZMO_HIDE;
+    area.spacetype = SPACE_VIEW3D;
+    BLI_addtail(&area.spacedata, &ctx->v3d);
+    BLI_addtail(&area.regionbase, &region);
+    BLI_rcti_init(&area.totrct, 0, winx - 1, 0, winy - 1);
+  }
+  CTX_wm_window_set(ctx->C, &ctx->window);
+  CTX_wm_area_set(ctx->C, &area);
+  CTX_wm_region_set(ctx->C, &region);
 }
+
+/* The text the last operator showed in the view's header (ED_area_status_text), or null. */
+EXPORT(edit_context_status) const char *edit_context_status(EditContext *ctx)
+{
+  return ctx->view_area.status.empty() ? nullptr : ctx->view_area.status.c_str();
+}
+
+/* The 3D cursor of the scene the edited object is in (scene.cursor), which operators place things at. */
+EXPORT(edit_context_cursor) float *edit_context_cursor(EditContext *ctx) { return ctx->scene.cursor.location; }
 
 EXPORT(edit_context_object_matrix_set) void edit_context_object_matrix_set(EditContext *ctx, const float *object_to_world)
 {
@@ -334,6 +393,7 @@ static Vector<OperatorDefinition> &operators()
   if (!keymaps) {
     keymaps = true;
     ed::transform::keymap_transform(nullptr);
+    knifetool_modal_keymap(nullptr);
   }
   return table;
 }
@@ -550,22 +610,32 @@ wmEventHandler_Op *WM_event_add_modal_handler(bContext * /*C*/, wmOperator *op)
 
 /* As wm_keymap.cc defines them for modal keymaps, which keep their items' enum here; the items' keys are Blender's
  * keymap data in JS, which matches events to them. */
-wmKeyMap *WM_modalkeymap_ensure(wmKeyConfig * /*keyconf*/, const char *idname, const EnumPropertyItem *items)
+static Vector<std::unique_ptr<wmKeyMap>> &modal_keymaps()
 {
   static Vector<std::unique_ptr<wmKeyMap>> keymaps;
-  for (std::unique_ptr<wmKeyMap> &keymap : keymaps) {
+  return keymaps;
+}
+wmKeyMap *WM_modalkeymap_find(wmKeyConfig * /*keyconf*/, const char *idname)
+{
+  for (std::unique_ptr<wmKeyMap> &keymap : modal_keymaps()) {
     if (STREQ(keymap->idname, idname)) {
       return keymap.get();
     }
   }
-  keymaps.append(std::make_unique<wmKeyMap>());
-  wmKeyMap *keymap = keymaps.last().get();
-  STRNCPY(keymap->idname, idname);
-  keymap->flag = KEYMAP_MODAL;
+  return nullptr;
+}
+wmKeyMap *WM_modalkeymap_ensure(wmKeyConfig *keyconf, const char *idname, const EnumPropertyItem *items)
+{
+  wmKeyMap *keymap = WM_modalkeymap_find(keyconf, idname);
+  if (!keymap) {
+    modal_keymaps().append(std::make_unique<wmKeyMap>());
+    keymap = modal_keymaps().last().get();
+    STRNCPY(keymap->idname, idname);
+    keymap->flag = KEYMAP_MODAL;
+  }
   keymap->modal_items = items;
   return keymap;
 }
-wmKeyMap *WM_modalkeymap_find(wmKeyConfig * /*keyconf*/, const char *idname) { return WM_modalkeymap_ensure(nullptr, idname, nullptr); }
 void WM_modalkeymap_assign(wmKeyMap *km, const char *opname)
 {
   if (wmOperatorType *ot = WM_operatortype_find(opname, true)) {
@@ -642,8 +712,8 @@ void WorkspaceStatus::item_bool(std::string /*text*/, bool /*inverted*/, int /*i
 void WorkspaceStatus::range(std::string /*text*/, int /*icon1*/, int /*icon2*/) {}
 void WorkspaceStatus::opmodal(std::string /*text*/, const wmOperatorType * /*ot*/, int /*propvalue*/, bool /*inverted*/) {}
 
-/* As screen_ops.cc defines them: the editor's context has no window, screen or area, so operators that need one do
- * not run, as in Blender's background mode. */
+/* As screen_ops.cc defines them: until the editor gives its view the context has no window, screen or area, so
+ * operators that need one do not run, as in Blender's background mode. */
 bool ED_operator_screenactive(bContext *C) { return CTX_wm_window(C) && CTX_wm_screen(C); }
 bool ED_operator_regionactive(bContext *C) { return ED_operator_screenactive(C) && CTX_wm_region(C); }
 bool ED_operator_areaactive(bContext *C) { return ED_operator_screenactive(C) && CTX_wm_area(C); }
@@ -786,17 +856,14 @@ void ED_view3d_viewcontext_init_object(ViewContext *vc, Object *obact)
   }
 }
 
-/* Blender's globals, defined as blender.cc, blf.cc and rna_access.cc define them: their types' member defaults are
- * Blender's defaults. */
+/* Blender's globals, defined as blender.cc and rna_access.cc define them: their types' member defaults are Blender's
+ * defaults. (blf.cc, built into the module with Blender's fonts, defines blf_mono_font.) */
 Global G;
 UserDef U;
-int blf_mono_font = -1;
 extern const PointerRNA PointerRNA_NULL = {};
 
 /* Marks the properties after it as advanced in Blender's UI. */
 void WM_operatortype_props_advanced_begin(wmOperatorType * /*ot*/) {}
-/* Gives an operator a modal variant for adjusting it interactively in Blender's UI; its exec is unchanged. */
-void WM_operator_type_modal_from_exec_for_object_edit_coords(wmOperatorType * /*ot*/) {}
 
 /* No window or view to update. */
 void ED_workspace_status_text(bContext * /*C*/, const char * /*str*/) {}

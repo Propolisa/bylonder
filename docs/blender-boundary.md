@@ -58,7 +58,8 @@ no counterpart for; the overlap is kept equal both ways.
    scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
    needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
    after, and what the code changed goes back to Babylon. Edit Mode is the exception Blender itself makes: while a mesh
-   is edited, its BMEditMesh in the module is its only copy, and Babylon gets it back on leaving Edit Mode.
+   is edited, its BMEditMesh in the module owns it, Babylon's mesh is only drawn from it, and Babylon owns it again
+   on leaving Edit Mode.
 6. **Checked.** A test mode compares the overlap of both models after every operator and edit; a difference is a bug.
 
 What this is for:
@@ -77,13 +78,13 @@ Today `editors/object/object-blender.js` mirrors objects per operator (Object Mo
 
 ### Known limits
 
-Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Lights and cameras go in without their data too. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+Text and curve objects go in with their Curve data and come back with it when an operator tags their geometry (`docs/curves-and-text.md`). Lights and cameras go in without their data. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 
 ### Animation
 
-Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel is a custom property of the Scene (`["<id, path>"]`). Keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings, values come out with `evaluate_fcurve`, and Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`).
+Decided 2026-10-28. Animation data is Blender's, in the module's Main: each animated ID has AnimData and a layered Action (`animrig`), whose F-Curves are the truth. Bylonder's channels map onto them (`src/blenkernel/animation/model.js`): an object's position, rotation and scaling (meshes, empties, text, curves, cameras and lights, the Objects Object Mode mirrors) are its Object's `location`, `rotation_euler` and `scale` in Blender's axes; every other channel is a custom property of the Scene (`["<id, path>"]`). Keys go in with `animrig::insert_vert_fcurve` and the Preferences' settings, values come out with `evaluate_fcurve`, and Blender's operators that auto key (Object Mode's) add keys the animation takes (`model.keying`).
 
-The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus), and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
+The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus, operator properties), draws the sidebar's panels with the shared panel renderer (the Graph Editor's from `graph_buttons.cc`, ported in `anim-buttons.js`), and the scene's markers, and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
 
 ### Outliner
 
@@ -144,15 +145,35 @@ Consumers and running:
 
 ## Workspaces
 
-The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.
+The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs.
 
-- The topbar has Blender's eleven default workspace tabs. A tab opens the screen Bylonder has for it: Scripting opens the code workspace (Text Editor, File Browser, Console beside the scene), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, sculpt and paint modes).
+- The topbar has Blender's eleven default workspace tabs. A tab sets the scene window's screen (`dock.setScreen`, one layout per screen and profile over the same areas): Scripting opens startup.blend's Scripting screen (see Scripting), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, sculpt and paint modes). The project's JavaScript workbench (Monaco, files, the browser console) is Window > Toggle Project Code.
 - The Layout screen is startup.blend's: its split positions are read from the file's area vertices (1920 x 1080) and kept as fractions, which Blender scales with the window; areas stay at least one header high. The topbar and status bar are fixed heights in pixels at UI scale, as Blender's global areas.
 - Area geometry is Blender's (`areaSizes` in `editors/screen/dock.js`): a split's edge is a screen vertex at its fraction of the vertex range, rounded from the left or bottom (`screen_geom_vertices_scale`), and areas sit 2 px inside their vertices, 1 px below the topbar (`area_calc_totrct`), so areas are 3 px apart. At 1600 x 950 every area matches Blender's to the pixel.
 - An editor whose header overlaps its main region (the 3D Viewport) is a dock item with `overlap`: its main region spans the area under the header, which takes the theme's translucent header color, so the view's projection is Blender's.
 - The scene opens with the object that an add operator made last (`createPrimitive`) selected and active, as startup.blend's cube is, and a primitive's Mesh has all its elements selected, as `EDBM_op_call_and_selectf` leaves it.
 - The topbar's right region is Blender's: the Scene selector and the View Layer selector (the scene window's view layers, set through `send`).
-- Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Run is the Text Editor header's Run Script (Ctrl Enter, also Render > Run), as Blender runs a script from there. Project actions are File, Edit and Render menu entries.
+- Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Running the project's JavaScript is Render > Run (Ctrl Enter). Project actions are File, Edit and Render menu entries.
+
+## Scripting
+
+Decided 2026-10-28. The Scripting screen is startup.blend's: the 3D Viewport over the Python Console and Info, the Text Editor, the Outliner over the Properties editor (Blender's two Outliners are one), split at its area vertices as Layout is; Info has no header there, as in Blender. The three editors are Blender's spaces in the scene window, where `bpy.context` and RNA live.
+
+- Each draws Blender's header, menus and sidebar panels from the tree (`TEXT_HT_header`, `TEXT_HT_footer`, `TEXT_MT_*`, `TEXT_PT_*`, `CONSOLE_HT_header`, `INFO_HT_header`) through `editors/interface/area-ui.js`, and runs Blender's keymaps (Text Generic, Text, Console, Info, then Screen and Window) inside its area. Text input is the keymaps' `TEXTINPUT` items; repeated keys match only items with `repeat`.
+- Operators are registered by Blender's idnames (`text.*`, `console.*`, `info.*`); `ed.undo` in a Text Editor undoes the text, as `text_undo.cc` does. Their code is JS after Blender's C: texts follow `text.cc` (`blenkernel/texts.js`), highlighting `text_format_py.cc`, the Console's operators `console_ops.cc`, drawing `text_draw.cc` and `textview.cc`. These are stand-ins for building those sources into the module.
+- Texts are the project's text files: `bpy.data.texts` lists them (`index.js` too), a new text is a new file, and every edit is saved with the project, as a .blend holds its texts. All are internal (`filepath` empty): Save needs a file, so it is Save As, which downloads the text; Open reads a local file into a new text.
+- Reports: a finished operator with Blender's REGISTER option (`windowmanager/operator-register.json`, from `tools/blender-reference/operator-register.py`) reports its call as Python, Python operators report through `self.report`, and Run Script reports a failed script's traceback and moves the cursor to its line. Info lists them (`windowmanager/wm-reports.js`). `print` goes to the system console, the browser's, which the project's workbench shows.
+
+### Python
+
+CPython runs scripts and the console: Pyodide, CPython in WebAssembly, from cdn.jsdelivr.net at a pinned version (`python/pyodide.js`), loaded when a Python Console opens or a script first runs, never at startup.
+
+- `python/bridge.py` is the one bridge: a module CPython lacks (`bpy`, `mathutils`, `bpy_extras`, `bl_ui`, ...) imports from the tree's module registry as a JS-backed module, and its values are proxies that forward attribute access, calls, items, iteration and operators to the tree's own objects. `bpy.context`, `bpy.data`, `bpy.ops` and `bpy.types` are therefore the objects the interface uses: `bpy.ops.mesh.primitive_cube_add()` runs Bylonder's operator and `bpy.context.object.location.x = 2` writes through RNA. The bridge translates only conventions: Transcrypt's renamed names (`type` is `py_metatype`), keyword arguments (`__kwargtrans__`), None as null, negative indices and collection keys.
+- The console's language module and its completion run as Blender's own Python in CPython (`_console_python`, `_bl_console_utils`, copied unchanged into `src/python/scripts` by `tools/blender-ui/python_sources.py`), since they need `code.InteractiveConsole` and the console's live namespace. Bylonder registers `console.execute`, `console.autocomplete`, `console.banner` and `console.copy_as_script` to call it, as `bl_operators/console.py` does by the console's language.
+- Writes go through RNA's bindings only (the same mapping the interface writes through), never to Babylon objects from the bridge.
+- `foreach_get` and `foreach_set` copy a collection's property in one typed array each way (into NumPy arrays where the script passes one), never element by element. Large data stays with its one owner: `Mesh.vertices` reads and writes the Babylon mesh's position buffer (`co` in Blender's axes; Babylon's split vertices for now).
+- A script runs as `__main__` in the Text Editor's context and area.
+- Limits: classes defined in CPython cannot subclass `bpy.types` (no `register_class` of a script's operators or panels yet); `mathutils` is the boundary's; JS numbers come back as int or float by value; the Text Editor's own autocomplete and live edit are not there yet.
 
 ## Menus
 
@@ -169,6 +190,17 @@ The toolbar, tool settings, header transform settings and sidebar are Blender's 
 - The header (`VIEW3D_HT_header`, with its visibility, gizmo, overlay and shading popovers), the tool settings and the sidebar draw through the shared layout renderer (see Layouts and panels), from `view3d-regions.js`. In Edit Mode the header's menus are Edit Mode's (`editMeshMenus`), its Add menu adds Bylonder's primitives, and `template_header_3D_mode` is the select mode buttons (`uiTemplateEditModeSelection`), a layout the template records. `object.mode_set` runs Object and Edit Mode; a mesh's other modes show greyed.
 - Transform orientation slots are stored per scene but no transform reads them yet.
 - Select Box, Circle and Lasso share `do_mesh_region_select` (`view3d-select.js`) in Edit Mode; in Object Mode box select tests vertices and circle and lasso the object origin, as Blender does. The gestures are `windowmanager/wm-gesture-*.js` with Blender's modal maps.
+
+## 3D View tools
+
+Decided 2026-10-28. A tool is what Blender's is: its keymap, its gizmo group and its stored settings. Its operators are registered by Blender idname; nothing is wired to a tool by name.
+
+- Gizmo map: `windowmanager/wm-gizmo-map.js` shows the active tool's gizmo group, highlights the part under the pointer and runs the group's handler before the region's keymaps, as `wm_gizmo_map.cc` does. Its state (shown, highlighted) feeds the tool system's keymap order. The groups are ports: `VIEW3D_GGT_ruler`, `VIEW3D_GGT_placement`, `VIEW3D_GGT_tool_generic_handle_free` and `_normal` (a handle runs the tool's own keymap, as `gz->keymap` does) and `VIEW3D_GGT_xform_extrude`. Babylon's gizmos stay the transform gizmos. Gizmos, rulers, annotations and the placement grid draw on one 2D canvas per view (`draw/overlay-tool.js`) in the theme's colors.
+- Object Mode tools: `editors/space_view3d/view3d-tools.js` registers `view3d.cursor3d` (`view3d-cursor.js`, with Blender's surface depth and orientations), `transform.from_gizmo`, `view3d.ruler_add` and `view3d.ruler_remove` (`view3d-gizmo-ruler.js`), `gpencil.annotate` (`editors/gpencil/annotate.js`, all four modes) and `view3d.interactive_add` (`view3d-placement.js`). The cursor is `scene.cursor` (`View3DCursor`), drawn by `draw/overlay-cursor.js`.
+- Annotations are Blender's data model in a document slice (`blenkernel/gpencil/annotations.js`): layers holding frames of strokes. Rulers are strokes of the hidden `RulerData3D` layer, as Blender stores them.
+- Edit Mode tools run Blender's modal operators in the module. The edit context has a 3D View (`edit_context_view_set`: window, screen, area, View3D, window region and a RegionView3D from the Babylon camera), so operators project the mouse as in Blender. `EditMesh.invoke` and `modal` give them events, and Bylonder's window manager matches the operator's modal keymap (`object-edit.js` `moduleOperator`). This runs Shrink/Fatten, Push/Pull, To Sphere, Shear, Vertex Slide, Smooth and Randomize (the generic value modal), Rip, Spin, Knife and Extrude to Cursor. Move, Rotate, Scale, Edge Slide, Inset, Bevel and Loop Cut stay Bylonder's JS ports. The module's own gizmos are off (`V3D_GIZMO_HIDE`): the gizmo map draws the view's.
+- A drag event (CLICK_DRAG) carries the mouse where the drag passed the threshold, as Blender's does; `dragStart(event)` gives the press, for what Blender places at the drag's start (rulers, placement, box gestures, the cursor's transform, gizmo highlighting). An operator returning `FINISHED|PASS_THROUGH` (Set 3D Cursor) handles a press as Blender's `WM_HANDLER_HANDLED` does: no click follows, a drag still can.
+- `tests/tools-wasm.test.js` drags the Edit Mode tools on Blender's startup cube as `tools/blender-reference/tool-fixtures.py` drags them in Blender (real input, Drag: Active Tool) and compares the meshes.
 
 ## Layouts and panels
 
