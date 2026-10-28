@@ -41,7 +41,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -56,16 +56,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -407,7 +407,7 @@ export var SQLiteBackend =  __class__ ('SQLiteBackend', [object], {
 		}) ();
 	});},
 	get store_hash () {return __get__ (this, function (self, filepath, hash_algorithm, hash_info, pre_write_callback) {
-		if (typeof pre_write_callback == 'undefined' || (pre_write_callback != null && pre_write_callback.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pre_write_callback == 'undefined' || (pre_write_callback != null && globalThis.Object.hasOwn (pre_write_callback, "__kwargtrans__"))) {;
 			var pre_write_callback = null;
 		};
 		if (arguments.length) {

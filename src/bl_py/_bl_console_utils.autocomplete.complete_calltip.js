@@ -8,6 +8,8 @@ import * as __module_re__ from './re.js';
 __nest__ (re, '', __module_re__);
 import * as __module_inspect__ from './inspect.js';
 __nest__ (inspect, '', __module_inspect__);
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = '_bl_console_utils.autocomplete.complete_calltip';
 export var DEF_DOC = '{:s}\\s*(\\(.*?\\))';
 export var DEF_SOURCE = 'def\\s+{:s}\\s*(\\(.*?\\)):';
@@ -249,7 +251,7 @@ export var complete = function (line, cursor, namespace) {
 			return __call__ (__accu0__.group, __accu0__, 2);
 		}) ();
 		try {
-			var func = __call__ (eval, null, func_word, namespace);
+			var func = __call__ (_py_eval, null, func_word, namespace, __call__ (_module, null, '_bl_console_utils.autocomplete.complete_calltip'));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -282,6 +284,8 @@ export var complete = function (line, cursor, namespace) {
 };
 
 //# sourceMappingURL=_bl_console_utils.autocomplete.complete_calltip.map
+export {_globals, _import, _lazy, _member, _module, _py_eval, _py_exec};
+
 export function __py_setattr__ (key, value) {
 	switch (key) {
 		case 'DEF_DOC': DEF_DOC = value; break;

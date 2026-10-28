@@ -4,6 +4,7 @@ import * as __self__ from './_bpy.types.js';
 import {blRna, hasStruct} from '../makesrna/rna.js';
 import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = '_bpy.types';
 export var _merged = function () {
 	if (arguments.length) {
@@ -30,7 +31,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -45,16 +46,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -2962,7 +2963,7 @@ export var Context =  __class__ ('Context', [_StructRNA], {
 	__module__: __name__,
 	__slots__: tuple ([]),
 	get path_resolve () {return __get__ (this, function (self, path, coerce) {
-		if (typeof coerce == 'undefined' || (coerce != null && coerce.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof coerce == 'undefined' || (coerce != null && globalThis.Object.hasOwn (coerce, "__kwargtrans__"))) {;
 			var coerce = true;
 		};
 		if (arguments.length) {
@@ -3648,7 +3649,42 @@ export var WindowManager =  __class__ ('WindowManager', [_types.ID], {
 				}) ();
 			}
 		}
-	});}
+	});},
+	get draw_cursor_add () {return function (callback, args, space_type, region_type) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'callback': var callback = __allkwargs0__ [__attrib0__]; break;
+						case 'args': var args = __allkwargs0__ [__attrib0__]; break;
+						case 'space_type': var space_type = __allkwargs0__ [__attrib0__]; break;
+						case 'region_type': var region_type = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return null;
+	};},
+	get draw_cursor_remove () {return function (handle) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'handle': var handle = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		// pass;
+	};}
 });
 export var WorkSpace =  __class__ ('WorkSpace', [_types.ID], {
 	__module__: __name__,
@@ -4330,7 +4366,7 @@ export var Mesh =  __class__ ('Mesh', [_types.ID], {
 	__module__: __name__,
 	__slots__: tuple ([]),
 	get from_pydata () {return __get__ (this, function (self, vertices, edges, faces, shade_flat) {
-		if (typeof shade_flat == 'undefined' || (shade_flat != null && shade_flat.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof shade_flat == 'undefined' || (shade_flat != null && globalThis.Object.hasOwn (shade_flat, "__kwargtrans__"))) {;
 			var shade_flat = true;
 		};
 		if (arguments.length) {
@@ -4771,10 +4807,10 @@ export var Text =  __class__ ('Text', [_types.ID], {
 			var __accu0__ = mod.__dict__;
 			return __call__ (__accu0__.py_update, __accu0__, dict ({'__file__': __call__ (join, null, bpy.data.filepath, py_name)}));
 		}) ();
-		__call__ (exec, null, (function () {
+		__call__ (_py_exec, null, (function () {
 			var __accu0__ = self;
 			return __call__ (__accu0__.as_string, __accu0__);
-		}) (), mod.__dict__);
+		}) (), mod.__dict__, __call__ (_module, null, '_bpy.types'));
 		return mod;
 	});}
 });
@@ -15401,12 +15437,31 @@ export var WORLD_PT_viewport_display =  __class__ ('WORLD_PT_viewport_display', 
 export var WoodTexture =  __class__ ('WoodTexture', [Texture], {
 	__module__: __name__,
 });
+export var __getattr__ = function (py_name) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return (function () {
+		var __accu0__ = __call__ (_member, null, '_bpy', 'registered');
+		return __call__ (__accu0__.py_get, __accu0__, py_name);
+	}) ();
+};
 export var GeometrySet = null;
 export var InlineShaderNodes = null;
 export var bpy_prop_array = null;
 
 //# sourceMappingURL=_bpy.types.map
-export {_globals, _import, _lazy, _member, _module};
+export {_globals, _import, _lazy, _member, _module, _py_eval, _py_exec};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {
@@ -19444,6 +19499,7 @@ export function __py_setattr__ (key, value) {
 		case 'WORLD_PT_custom_props': WORLD_PT_custom_props = value; break;
 		case 'WORLD_PT_viewport_display': WORLD_PT_viewport_display = value; break;
 		case 'WoodTexture': WoodTexture = value; break;
+		case '__getattr__': __getattr__ = value; break;
 		case 'GeometrySet': GeometrySet = value; break;
 		case 'InlineShaderNodes': InlineShaderNodes = value; break;
 		case 'bpy_prop_array': bpy_prop_array = value; break;

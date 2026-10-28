@@ -14,7 +14,7 @@ export var hexdigits = __add__ (digits, 'abcdefABCDEF');
 export var punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
 export var whitespace = ' \t\n\r\x0b\x0c';
 export var _Template_substitute = function (self, mapping) {
-	if (typeof mapping == 'undefined' || (mapping != null && mapping.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof mapping == 'undefined' || (mapping != null && globalThis.Object.hasOwn (mapping, "__kwargtrans__"))) {;
 		var mapping = null;
 	};
 	var kwargs = dict ();

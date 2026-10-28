@@ -169,7 +169,7 @@ export var edges_from_elem = function (ele) {
 	}
 };
 export var elems_depth_search = function (ele_init, depths, other_edges_over_cb, results_init) {
-	if (typeof results_init == 'undefined' || (results_init != null && results_init.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof results_init == 'undefined' || (results_init != null && globalThis.Object.hasOwn (results_init, "__kwargtrans__"))) {;
 		var results_init = null;
 	};
 	if (arguments.length) {

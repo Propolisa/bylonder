@@ -11,3 +11,18 @@ for (const name of ['VIEW3D_MT_object', 'VIEW3D_MT_add', 'TOPBAR_MT_file', 'OUTL
   assert.ok(name in registered, `${name} is registered`);
 assert.equal(registered.VIEW3D_MT_object.bl_label, 'Object');
 console.log(`Blender's Python: ${Object.keys(registered).length} classes registered in ${Math.round(performance.now() - started)} ms`);
+
+// Blender's Python operators run through Bylonder's registry, with their snippets evaluated as Python (wm.py's
+// context operators exec "context.<path> += self.value"), and bpy.ops calls Bylonder's operators.
+const { setContext, module } = await import('../src/python/bpy_interface.js');
+const { runOperator, registerOperator } = await import('../src/windowmanager/wm-operators.js');
+const space = { show_region_ui: false }, scene = { frame_current: 3 };
+setContext({ space_data: space, scene });
+runOperator('wm.context_toggle', { data_path: 'space_data.show_region_ui' });
+assert.equal(space.show_region_ui, true, 'wm.context_toggle toggles the property at its path');
+runOperator('wm.context_set_int', { data_path: 'scene.frame_current', value: 10, relative: true });
+assert.equal(scene.frame_current, 13, 'wm.context_set_int adds to it when relative');
+const ran = [];
+registerOperator('object.select_all', { run: (props) => ran.push(props) });
+assert.deepEqual([...module('bpy').ops.object.select_all({ action: 'TOGGLE', __kwargtrans__: null })], ['FINISHED']);
+assert.deepEqual(ran, [{ action: 'TOGGLE' }], 'bpy.ops runs the operator Bylonder registered');

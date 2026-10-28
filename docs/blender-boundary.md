@@ -1,6 +1,6 @@
 # Blender boundary
 
-How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own code: the UI scripts in `src/bl_ui` (Blender's Python, compiled by Transcrypt), which read `bpy.context` and RNA, and the C++ in `src/bmesh/bmesh.wasm`, which reads a `bContext` and DNA. Decided 2026-10-27.
+How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own code: Blender's Python in `src/bl_py` (all of its scripts, compiled by Transcrypt), which read `bpy.context` and RNA, and the C++ in `src/bmesh/bmesh.wasm`, which reads a `bContext` and DNA. Decided 2026-10-27.
 
 ## Decisions
 
@@ -80,7 +80,7 @@ Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outlin
 
 Every subsystem builds on these, one of each:
 
-- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry). `transpile.py`'s per-class manifest is the interim path until `src/bl_py` replaces `src/bl_ui`.
+- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry).
 - Blender's C: one WebAssembly module (`tools/blender-port`), with one Blender world in it (Main, Scene, ViewLayer, bContext stand-ins) that every subsystem's data (meshes, curves, text, animation) lives in.
 - Data: one RNA layer over Bylonder's data (`src/makesrna/rna-bylonder.js`) and one `bpy.context` (`src/blenkernel/context.js`).
 - Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps. An editor runs its keymaps inside its context area (`inArea(area, ...)`), so operators act on that editor (`contextArea()`) and `wm.call_menu` opens the area's own menu (`area.menu(idname)`); editors never keep operator tables of their own.
@@ -106,12 +106,29 @@ Blender's startup, which registers its classes (2094: every menu, panel, header 
   values Blender's C reports (`bpy.app`, handlers, translation contexts, file extensions) are copied from the
   reference binary. `os` is a read-only file system of Blender's scripts in Blender's layout (`_files`).
 
+Consumers and running:
+
+- `src/python/bpy_interface.js` loads the tree and exports `registered`, `menus`, `panels`, `headers`, `module(name)` and
+  `setContext`. Menus, the Properties editor's panels, the 3D View's regions, the animation editors' headers, the tool system and the
+  keymaps (`presets/keyconfig`) all come from these; the per-class transpile it replaced is gone (2026-10-28).
+- Blender's Python operators register in Bylonder's operator registry by idname unless Bylonder registers its own
+  (which then wins); they run as Blender runs one: an instance with its property defaults and the given values,
+  `poll`, then `execute` (or `invoke` from an event) in `bpy.context`.
+- `bpy.ops` is Blender's `ops.py` over the boundary's `_bpy.ops`, which calls Bylonder's registry; modules with a
+  module-level `__getattr__` (PEP 562) are seen through it by their importers.
+- `eval` and `exec` of a snippet run in the boundary's Python interpreter (`_py_eval`), over the calling function's
+  names and its module's; RNA's C functions on structs (`WindowManager.draw_cursor_add`) are in
+  `tools/blender-ui/rna_functions.py`.
+
 ## Workspaces
 
 The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.
 
 - The topbar has Blender's eleven default workspace tabs. A tab opens the screen Bylonder has for it: Scripting opens the code workspace (Text Editor, File Browser, Console beside the scene), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, sculpt and paint modes).
 - The Layout screen is startup.blend's: its split positions are read from the file's area vertices (1920 x 1080) and kept as fractions, which Blender scales with the window; areas stay at least one header high. The topbar and status bar are fixed heights in pixels at UI scale, as Blender's global areas.
+- Area geometry is Blender's (`areaSizes` in `editors/screen/dock.js`): a split's edge is a screen vertex at its fraction of the vertex range, rounded from the left or bottom (`screen_geom_vertices_scale`), and areas sit 2 px inside their vertices, 1 px below the topbar (`area_calc_totrct`), so areas are 3 px apart. At 1600 x 950 every area matches Blender's to the pixel.
+- An editor whose header overlaps its main region (the 3D Viewport) is a dock item with `overlap`: its main region spans the area under the header, which takes the theme's translucent header color, so the view's projection is Blender's.
+- The scene opens with the object that an add operator made last (`createPrimitive`) selected and active, as startup.blend's cube is, and a primitive's Mesh has all its elements selected, as `EDBM_op_call_and_selectf` leaves it.
 - The topbar's right region is Blender's: the Scene selector and the View Layer selector (the scene window's view layers, set through `send`).
 - Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Run is the Text Editor header's Run Script (Ctrl Enter, also Render > Run), as Blender runs a script from there. Project actions are File, Edit and Render menu entries.
 
@@ -138,6 +155,8 @@ One recorder and one renderer draw every layout from Blender's scripts: panels, 
 - `editors/interface/layout.js`: `UILayout`, Blender's layout API as a recorder. Each call adds a node `{ kind, ...arguments, ...layout settings }`; sub-layouts hold `children`. Unknown `template_*` calls record their name and arguments.
 - `editors/interface/panels.js`: `panelTypes(modules, { space, region })` gives a region's panel types in Blender's registration order (bl_parent_id, bl_order, HIDE_HEADER first); `drawPanels(types, context, { contexts, open })` runs poll, draw_header, draw_header_preset and draw into layouts; `headerLayout(context, draw)` lays out a header row.
 - `editors/interface/layout-view.js`: the Vue renderer. `h(LayoutView, { layout, ui })`, `h(PanelView, { panel, ui })`, `h(RegionView, { panels, ui })`. `ui` is what the widgets need from the editor (undo push, operators, menus, popovers, panel open state, ID lists, animation); the file's header lists it.
+- Header layouts (`headerLayout`, root type HEADER) are of variable size as Blender's: menus are flat pull-downs, properties keep the width `item_rna_size` estimates (scaled by their layouts' `scale_x`), and sub-layouts keep their size; elsewhere sub-layouts in a row share its width.
+- Icons draw 1600 units of their SVG at the icon's size, centered (`blf_glyph_cache_add_svg`); `icon-sizes.json` (from `tools/blender-ui/icons.py`) lists the documents of other sizes, and `iconStyle(name)` in `icon.js` sizes the mask.
 - Widgets follow `interface_layout.cc` and `interface_widgets.cc`: property split at 0.4 with the row hack that puts later items in the value column, the checkbox exception, decorators, array names above their fields, expanded enums in the layout's direction, and Blender's spacing. Numbers are one component, `components/ui/number-field/NumberField.vue`, with Blender's drag behavior.
 - Property metadata (names, ranges, units, enum items) is Blender's RNA: `rna-ui.json` (from `tools/blender-reference/rna-structs.py`) through `rnaProperty(struct, name)`, and `rna-operators.json` for operator properties. `bl_rna` and `rna_type` give `blRna(struct)` on the same data.
 

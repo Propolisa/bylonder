@@ -8,6 +8,8 @@ import * as __module_rlcompleter__ from './rlcompleter.js';
 __nest__ (rlcompleter, '', __module_rlcompleter__);
 import * as __module_re__ from './re.js';
 __nest__ (re, '', __module_re__);
+import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = '_bl_console_utils.autocomplete.complete_namespace';
 export var RE_INCOMPLETE_INDEX = (function () {
 	var __accu0__ = re;
@@ -96,7 +98,7 @@ export var complete_indices = function (word, namespace) {
 	}
 	if (obj === null) {
 		try {
-			var obj = __call__ (eval, null, base, namespace);
+			var obj = __call__ (_py_eval, null, base, namespace, __call__ (_module, null, '_bl_console_utils.autocomplete.complete_namespace'));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -229,7 +231,7 @@ export var complete = function (word, namespace) {
 		var obj = __left0__ [0];
 		var attr = __left0__ [1];
 		try {
-			__setitem__ (namespace, TEMP, __call__ (eval, null, obj, namespace));
+			__setitem__ (namespace, TEMP, __call__ (_py_eval, null, obj, namespace, __call__ (_module, null, '_bl_console_utils.autocomplete.complete_namespace')));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -266,7 +268,7 @@ export var complete = function (word, namespace) {
 	}
 	else if (__eq__ (__call__ (len, null, matches), 1) && __eq__ (__getitem__ (matches, 0), word)) {
 		try {
-			var obj = __call__ (eval, null, word, namespace);
+			var obj = __call__ (_py_eval, null, word, namespace, __call__ (_module, null, '_bl_console_utils.autocomplete.complete_namespace'));
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -328,6 +330,8 @@ export var complete = function (word, namespace) {
 };
 
 //# sourceMappingURL=_bl_console_utils.autocomplete.complete_namespace.map
+export {_globals, _import, _lazy, _member, _module, _py_eval, _py_exec};
+
 export function __py_setattr__ (key, value) {
 	switch (key) {
 		case 'RE_INCOMPLETE_INDEX': RE_INCOMPLETE_INDEX = value; break;

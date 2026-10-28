@@ -15,7 +15,7 @@ export var _module = function (module_id) {
 	}
 	else {
 	}
-	return globalThis.__py_modules[module_id]
+	return globalThis.__py_modules[module_id] && new Proxy(globalThis.__py_modules[module_id], {get: (target, key) => key in target || typeof key !== "string" ? target[key] : globalThis.__py_modules[module_id + "." + key]})
 };
 export var _member = function (module_id, member_id) {
 	if (arguments.length) {
@@ -52,16 +52,16 @@ export var _lazy = function (module_id) {
 	return new Proxy({}, {get: (target, key) => globalThis.__py_modules[module_id][key], has: (target, key) => key in globalThis.__py_modules[module_id], set: (target, key, value) => { globalThis.__py_modules[module_id].__py_setattr__(key, value); return true; }})
 };
 export var _import = function (py_name, globals, locals, fromlist, level) {
-	if (typeof globals == 'undefined' || (globals != null && globals.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof globals == 'undefined' || (globals != null && globalThis.Object.hasOwn (globals, "__kwargtrans__"))) {;
 		var globals = null;
 	};
-	if (typeof locals == 'undefined' || (locals != null && locals.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof locals == 'undefined' || (locals != null && globalThis.Object.hasOwn (locals, "__kwargtrans__"))) {;
 		var locals = null;
 	};
-	if (typeof fromlist == 'undefined' || (fromlist != null && fromlist.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fromlist == 'undefined' || (fromlist != null && globalThis.Object.hasOwn (fromlist, "__kwargtrans__"))) {;
 		var fromlist = tuple ([]);
 	};
-	if (typeof level == 'undefined' || (level != null && level.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof level == 'undefined' || (level != null && globalThis.Object.hasOwn (level, "__kwargtrans__"))) {;
 		var level = 0;
 	};
 	if (arguments.length) {

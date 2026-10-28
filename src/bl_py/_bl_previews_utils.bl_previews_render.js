@@ -36,7 +36,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -51,16 +51,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -213,13 +213,13 @@ export var ids_nolib_with_preview = function (bids) {
 	}) ();
 };
 export var rna_backup_gen = function* (data, include_props, exclude_props, root) {
-	if (typeof include_props == 'undefined' || (include_props != null && include_props.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof include_props == 'undefined' || (include_props != null && globalThis.Object.hasOwn (include_props, "__kwargtrans__"))) {;
 		var include_props = null;
 	};
-	if (typeof exclude_props == 'undefined' || (exclude_props != null && exclude_props.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof exclude_props == 'undefined' || (exclude_props != null && globalThis.Object.hasOwn (exclude_props, "__kwargtrans__"))) {;
 		var exclude_props = null;
 	};
-	if (typeof root == 'undefined' || (root != null && root.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof root == 'undefined' || (root != null && globalThis.Object.hasOwn (root, "__kwargtrans__"))) {;
 		var root = tuple ([]);
 	};
 	if (arguments.length) {
@@ -747,7 +747,7 @@ export var do_previews = function (do_objects, do_collections, do_scenes, do_dat
 		return cos;
 	};
 	var preview_render_do = function (render_context, item_container, item_name, objects, offset_matrix) {
-		if (typeof offset_matrix == 'undefined' || (offset_matrix != null && offset_matrix.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof offset_matrix == 'undefined' || (offset_matrix != null && globalThis.Object.hasOwn (offset_matrix, "__kwargtrans__"))) {;
 			var offset_matrix = null;
 		};
 		if (arguments.length) {

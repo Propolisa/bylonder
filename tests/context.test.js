@@ -12,12 +12,11 @@ import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA, propBinding } from '../src/makesrna/rna-bylonder.js';
 import { createContext } from '../src/blenkernel/context.js';
 import { drawMenu } from '../src/editors/interface/ui-layout.js';
-import { menuUI, menuClasses } from '../src/windowmanager/wm-operators.js';
-import * as spaceView3d from '../src/bl_ui/space_view3d.js';
+import { menuUI } from '../src/windowmanager/wm-operators.js';
+import { menus } from '../src/python/bpy_interface.js';
 import { registerObjectOperators } from '../src/editors/object/object-operators.js';
 import { registerOperator } from '../src/windowmanager/wm-operators.js';
 import { keymapHandler, defaultKeymaps } from '../src/windowmanager/keyconfig.js';
-import * as dataModifier from '../src/bl_ui/properties_data_modifier.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const cube = MeshBuilder.CreateBox('Cube', { size: 2 }, scene), empty = new TransformNode('Empty', scene);
@@ -38,7 +37,7 @@ const r = createRNA(host);
 const context = () => createContext(r, { space: view });
 
 // Stub operators: every one supported and enabled, so every entry and submenu draws.
-const ui = { ...menuUI({ menus: menuClasses(spaceView3d, dataModifier), context, prop: propBinding(host) }), supported: () => true, poll: () => true, run: () => {}, keys: () => undefined };
+const ui = { ...menuUI({ menus, context, prop: propBinding(host) }), supported: () => true, poll: () => true, run: () => {}, keys: () => undefined };
 function drawAll() {
   const ids = new Set();
   const walk = (items, depth) => items.forEach((item) => {
@@ -149,7 +148,7 @@ const registry = {
 };
 registerObjectOperators(registry);
 const keymaps = () => ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
-const objectMenu = drawMenu('VIEW3D_MT_object', menuUI({ menus: menuClasses(spaceView3d), context, prop: propBinding(host), keymaps }));
+const objectMenu = drawMenu('VIEW3D_MT_object', menuUI({ menus, context, prop: propBinding(host), keymaps }));
 const entry = (items, label) => items.find((item) => item.label === label);
 assert.equal(entry(objectMenu, 'Delete').keys, 'X');
 assert.equal(entry(objectMenu, 'Delete Global').enabled(), false, 'use_global is not run: shown, greyed out');

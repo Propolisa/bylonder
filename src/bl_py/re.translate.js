@@ -218,10 +218,10 @@ export var splitIfElse = function (tokens, namedGroups) {
 export var Token =  __class__ ('Token', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, py_name, paras, pure) {
-		if (typeof paras == 'undefined' || (paras != null && paras.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof paras == 'undefined' || (paras != null && globalThis.Object.hasOwn (paras, "__kwargtrans__"))) {;
 			var paras = null;
 		};
-		if (typeof pure == 'undefined' || (pure != null && pure.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pure == 'undefined' || (pure != null && globalThis.Object.hasOwn (pure, "__kwargtrans__"))) {;
 			var pure = false;
 		};
 		if (arguments.length) {

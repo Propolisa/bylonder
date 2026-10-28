@@ -1,4 +1,4 @@
-// The Properties editor drawn from Blender's own panels (src/bl_ui/properties_*.js): every tab of every object type
+// The Properties editor drawn from Blender's own panels (properties_*.py in Blender's Python tree): every tab of every object type
 // Bylonder has draws its panels without errors over a NullEngine scene, each property a panel shows exists in Blender's
 // RNA, and bound properties read and write through.
 import assert from 'node:assert/strict';

@@ -10,6 +10,7 @@ import {Menu, Operator, OperatorFileListElement, Panel, WindowManager} from './_
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = 'bl_operators.presets';
 WindowManager.preset_name = __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Preset Name', description: 'Name for new preset', py_default: __call__ (data_, null, 'New Preset')}));
 export var _call_preset_cb = function (fn, context, filepath) {
@@ -348,7 +349,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 							__iterable0__ = __i__ (__iterable0__);
 							for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 								var rna_path = __getitem__ (__iterable0__, __index0__);
-								__call__ (exec, null, rna_path, namespace_globals, namespace_locals);
+								__call__ (_py_exec, null, rna_path, namespace_locals, __call__ (_module, null, 'bl_operators.presets'));
 								(function () {
 									var __accu0__ = file_preset;
 									return __call__ (__accu0__.write, __accu0__, (function () {
@@ -366,7 +367,7 @@ export var AddPresetBase =  __class__ ('AddPresetBase', [object], {
 						__iterable0__ = __i__ (__iterable0__);
 						for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 							var rna_path = __getitem__ (__iterable0__, __index0__);
-							var value = __call__ (eval, null, rna_path, namespace_globals, namespace_locals);
+							var value = __call__ (_py_eval, null, rna_path, namespace_locals, __call__ (_module, null, 'bl_operators.presets'));
 							__call__ (rna_recursive_attr_expand, null, value, rna_path, 1);
 						}
 						file_preset.__exit__ ();
@@ -1565,7 +1566,7 @@ export var AddPresetGpencilMaterial =  __class__ ('AddPresetGpencilMaterial', [A
 export var classes = tuple ([AddPresetCamera, AddPresetCloth, AddPresetFluid, AddPresetHairDynamics, AddPresetInterfaceTheme, RemovePresetInterfaceTheme, SavePresetInterfaceTheme, AddPresetKeyconfig, RemovePresetKeyconfig, AddPresetNodeColor, AddPresetOperator, AddPresetTextStripStyle, AddPresetRender, AddPresetCameraSafeAreas, AddPresetTextEditor, AddPresetTrackingCamera, AddPresetTrackingSettings, AddPresetTrackingTrackColor, AddPresetGpencilBrush, AddPresetGpencilMaterial, AddPresetEEVEERaytracing, AddPresetColorManagementWhiteBalance, ExecutePreset, WM_MT_operator_presets, WM_PT_operator_presets, WM_OT_operator_presets_cleanup]);
 
 //# sourceMappingURL=bl_operators.presets.map
-export {BoolProperty, CollectionProperty, Menu, Operator, OperatorFileListElement, Panel, PresetPanel, StringProperty, WindowManager, _globals, _import, _lazy, _member, _module, data_, rpt_};
+export {BoolProperty, CollectionProperty, Menu, Operator, OperatorFileListElement, Panel, PresetPanel, StringProperty, WindowManager, _globals, _import, _lazy, _member, _module, _py_eval, _py_exec, data_, rpt_};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {

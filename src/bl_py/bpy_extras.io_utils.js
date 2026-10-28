@@ -140,7 +140,7 @@ export var ImportHelper =  __class__ ('ImportHelper', [object], {
 		return new set (['RUNNING_MODAL']);
 	});},
 	get invoke_popup () {return __get__ (this, function (self, context, confirm_text) {
-		if (typeof confirm_text == 'undefined' || (confirm_text != null && confirm_text.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof confirm_text == 'undefined' || (confirm_text != null && globalThis.Object.hasOwn (confirm_text, "__kwargtrans__"))) {;
 			var confirm_text = '';
 		};
 		if (arguments.length) {
@@ -207,10 +207,10 @@ export var ImportHelper =  __class__ ('ImportHelper', [object], {
 });
 ImportHelper.__annotations__ = dict ({'filepath': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'File Path', description: 'Filepath used for importing the file', maxlen: 1024, subtype: 'FILE_PATH', options: new set (['SKIP_PRESET', 'HIDDEN'])}))});
 export var orientation_helper = function (axis_forward, axis_up) {
-	if (typeof axis_forward == 'undefined' || (axis_forward != null && axis_forward.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof axis_forward == 'undefined' || (axis_forward != null && globalThis.Object.hasOwn (axis_forward, "__kwargtrans__"))) {;
 		var axis_forward = 'Y';
 	};
-	if (typeof axis_up == 'undefined' || (axis_up != null && axis_up.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof axis_up == 'undefined' || (axis_up != null && globalThis.Object.hasOwn (axis_up, "__kwargtrans__"))) {;
 		var axis_up = 'Z';
 	};
 	if (arguments.length) {
@@ -301,16 +301,16 @@ export var _axis_convert_matrix = tuple ([tuple ([tuple ([__neg__ (1.0), 0.0, 0.
 export var _axis_convert_lut = tuple ([new set ([2248, 1232, 736, 2792, 1793, 1297, 281, 2857, 1666, 2186, 154, 674, 2059, 1043, 547, 2603, 1604, 1108, 92, 2668, 1861, 2381, 349, 869]), new set ([2760, 2256, 1248, 744, 1857, 2385, 345, 873, 1794, 2826, 282, 1314, 2571, 2067, 1059, 555, 1668, 2196, 156, 684, 1605, 2637, 93, 1125]), new set ([1224, 720, 2784, 2280, 1665, 657, 153, 2217, 1602, 1098, 90, 2658, 1035, 531, 2595, 2091, 1860, 852, 348, 2412, 1797, 1293, 285, 2853]), new set ([712, 2768, 2272, 1256, 1601, 2641, 89, 1129, 1858, 842, 346, 2402, 523, 2579, 2083, 1067, 1796, 2836, 284, 1324, 1669, 653, 157, 2213]), new set ([1800, 2832, 288, 1320, 2241, 2769, 729, 1257, 2370, 1866, 858, 354, 1611, 2643, 99, 1131, 2052, 2580, 540, 1068, 2181, 1677, 669, 165]), new set ([2824, 272, 1312, 1832, 2369, 337, 857, 1897, 2050, 2570, 538, 1058, 2635, 83, 1123, 1643, 2180, 148, 668, 1708, 2245, 2765, 733, 1253]), new set ([1288, 1808, 2848, 296, 2177, 1681, 665, 169, 2242, 1226, 730, 2786, 1099, 1619, 2659, 107, 2372, 1876, 860, 364, 2053, 1037, 541, 2597]), new set ([264, 1296, 1824, 2856, 2049, 1041, 537, 2601, 2178, 138, 666, 1698, 75, 1107, 1635, 2667, 2244, 1236, 732, 2796, 2373, 333, 861, 1893]), new set ([1864, 848, 352, 2408, 2753, 721, 1241, 2281, 2626, 1610, 1114, 98, 1675, 659, 163, 2219, 2564, 532, 1052, 2092, 2821, 1805, 1309, 293]), new set ([2376, 1872, 864, 360, 2817, 1809, 1305, 297, 2754, 2250, 1242, 738, 2187, 1683, 675, 171, 2628, 1620, 1116, 108, 2565, 2061, 1053, 549]), new set ([840, 336, 2400, 1896, 2625, 81, 1113, 1641, 2562, 522, 1050, 2082, 651, 147, 2211, 1707, 2820, 276, 1308, 1836, 2757, 717, 1245, 2277]), new set ([328, 2384, 1888, 872, 2561, 2065, 1049, 553, 2818, 266, 1306, 1826, 139, 2195, 1699, 683, 2756, 2260, 1244, 748, 2629, 77, 1117, 1637]), new set ([1672, 2192, 160, 680, 1217, 2257, 2777, 745, 1282, 1802, 2842, 290, 1867, 2387, 355, 875, 1028, 2068, 2588, 556, 1093, 1613, 2653, 101]), new set ([2184, 144, 672, 1704, 1281, 273, 2841, 1833, 1026, 2058, 2586, 546, 2379, 339, 867, 1899, 1092, 84, 2652, 1644, 1221, 2253, 2781, 741]), new set ([648, 1680, 2208, 168, 1089, 1617, 2649, 105, 1218, 714, 2778, 2274, 843, 1875, 2403, 363, 1284, 1812, 2844, 300, 1029, 525, 2589, 2085]), new set ([136, 656, 1696, 2216, 1025, 529, 2585, 2089, 1090, 74, 2650, 1634, 331, 851, 1891, 2411, 1220, 724, 2780, 2284, 1285, 269, 2845, 1829]), new set ([1608, 1104, 96, 2664, 705, 1233, 2265, 2793, 642, 1674, 2202, 162, 1803, 1299, 291, 2859, 516, 1044, 2076, 2604, 837, 1869, 2397, 357]), new set ([2632, 1616, 1120, 104, 833, 1873, 2393, 361, 706, 2762, 2266, 1250, 2827, 1811, 1315, 299, 644, 1684, 2204, 172, 517, 2573, 2077, 1061]), new set ([1096, 80, 2656, 1640, 641, 145, 2201, 1705, 514, 1034, 2074, 2594, 1291, 275, 2851, 1835, 836, 340, 2396, 1900, 709, 1229, 2269, 2789]), new set ([72, 2640, 1632, 1128, 513, 2577, 2073, 1065, 834, 330, 2394, 1890, 267, 2835, 1827, 1323, 708, 2772, 2268, 1260, 645, 141, 2205, 1701]), new set ([2056, 2576, 544, 1064, 257, 2833, 1817, 1321, 322, 2378, 1882, 866, 2251, 2771, 739, 1259, 68, 2644, 1628, 1132, 133, 2189, 1693, 677]), new set ([2568, 528, 1056, 2088, 321, 849, 1881, 2409, 66, 2634, 1626, 1122, 2763, 723, 1251, 2283, 132, 660, 1692, 2220, 261, 2829, 1821, 1317]), new set ([1032, 2064, 2592, 552, 129, 2193, 1689, 681, 258, 1290, 1818, 2850, 1227, 2259, 2787, 747, 324, 2388, 1884, 876, 69, 1101, 1629, 2661])]);
 export var _axis_convert_num = dict ({'X': 0, 'Y': 1, 'Z': 2, '-X': 3, '-Y': 4, '-Z': 5});
 export var axis_conversion = function (from_forward, from_up, to_forward, to_up) {
-	if (typeof from_forward == 'undefined' || (from_forward != null && from_forward.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof from_forward == 'undefined' || (from_forward != null && globalThis.Object.hasOwn (from_forward, "__kwargtrans__"))) {;
 		var from_forward = 'Y';
 	};
-	if (typeof from_up == 'undefined' || (from_up != null && from_up.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof from_up == 'undefined' || (from_up != null && globalThis.Object.hasOwn (from_up, "__kwargtrans__"))) {;
 		var from_up = 'Z';
 	};
-	if (typeof to_forward == 'undefined' || (to_forward != null && to_forward.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof to_forward == 'undefined' || (to_forward != null && globalThis.Object.hasOwn (to_forward, "__kwargtrans__"))) {;
 		var to_forward = 'Y';
 	};
-	if (typeof to_up == 'undefined' || (to_up != null && to_up.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof to_up == 'undefined' || (to_up != null && globalThis.Object.hasOwn (to_up, "__kwargtrans__"))) {;
 		var to_up = 'Z';
 	};
 	if (arguments.length) {
@@ -559,16 +559,16 @@ export var poll_file_object_drop = function (context) {
 };
 export var path_reference_mode = __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Path Mode', description: 'Method used to reference paths', py_items: tuple ([tuple (['AUTO', 'Auto', 'Use relative paths with subdirectories only']), tuple (['ABSOLUTE', 'Absolute', 'Always write absolute paths']), tuple (['RELATIVE', 'Relative', 'Write relative paths where possible']), tuple (['MATCH', 'Match', 'Match absolute/relative setting with input path']), tuple (['STRIP', 'Strip', 'Filename only']), tuple (['COPY', 'Copy', 'Copy the file to the destination path (or subdirectory)'])]), translation_context: i18n_contexts.editor_filebrowser, py_default: 'AUTO'}));
 export var path_reference = function (filepath, base_src, base_dst, mode, copy_subdir, copy_set, library) {
-	if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 		var mode = 'AUTO';
 	};
-	if (typeof copy_subdir == 'undefined' || (copy_subdir != null && copy_subdir.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof copy_subdir == 'undefined' || (copy_subdir != null && globalThis.Object.hasOwn (copy_subdir, "__kwargtrans__"))) {;
 		var copy_subdir = '';
 	};
-	if (typeof copy_set == 'undefined' || (copy_set != null && copy_set.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof copy_set == 'undefined' || (copy_set != null && globalThis.Object.hasOwn (copy_set, "__kwargtrans__"))) {;
 		var copy_set = null;
 	};
-	if (typeof library == 'undefined' || (library != null && library.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof library == 'undefined' || (library != null && globalThis.Object.hasOwn (library, "__kwargtrans__"))) {;
 		var library = null;
 	};
 	if (arguments.length) {
@@ -675,7 +675,7 @@ export var path_reference = function (filepath, base_src, base_dst, mode, copy_s
 	}
 };
 export var path_reference_copy = function (copy_set, report) {
-	if (typeof report == 'undefined' || (report != null && report.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof report == 'undefined' || (report != null && globalThis.Object.hasOwn (report, "__kwargtrans__"))) {;
 		var report = print;
 	};
 	if (arguments.length) {
@@ -766,13 +766,13 @@ export var path_reference_copy = function (copy_set, report) {
 	}
 };
 export var unique_name = function (key, py_name, name_dict, name_max, clean_func, sep) {
-	if (typeof name_max == 'undefined' || (name_max != null && name_max.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof name_max == 'undefined' || (name_max != null && globalThis.Object.hasOwn (name_max, "__kwargtrans__"))) {;
 		var name_max = __neg__ (1);
 	};
-	if (typeof clean_func == 'undefined' || (clean_func != null && clean_func.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof clean_func == 'undefined' || (clean_func != null && globalThis.Object.hasOwn (clean_func, "__kwargtrans__"))) {;
 		var clean_func = null;
 	};
-	if (typeof sep == 'undefined' || (sep != null && sep.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof sep == 'undefined' || (sep != null && globalThis.Object.hasOwn (sep, "__kwargtrans__"))) {;
 		var sep = '.';
 	};
 	if (arguments.length) {

@@ -506,10 +506,10 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}) ();
 	});},
 	get addProp () {return __get__ (this, function (self, ks, bone, prop, index, use_groups) {
-		if (typeof index == 'undefined' || (index != null && index.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof index == 'undefined' || (index != null && globalThis.Object.hasOwn (index, "__kwargtrans__"))) {;
 			var index = __neg__ (1);
 		};
-		if (typeof use_groups == 'undefined' || (use_groups != null && use_groups.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof use_groups == 'undefined' || (use_groups != null && globalThis.Object.hasOwn (use_groups, "__kwargtrans__"))) {;
 			var use_groups = true;
 		};
 		if (arguments.length) {

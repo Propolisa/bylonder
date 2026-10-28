@@ -9,8 +9,9 @@ body{height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-
 #appbar{height:var(--bl-topbar-h);min-height:var(--bl-topbar-h);gap:2px;padding:0 4px;background:var(--bl-topbar);border:0;font:var(--bl-font)}
 #appbar .bl-logo{display:inline-flex;align-items:center;padding:0 6px 0 3px;color:var(--bl-text)}#appbar .bl-logo .bl-icon{width:17px;height:17px}
 #topbar-menus{display:flex;gap:0;height:auto;padding:0;background:none;border:0}
-#workspace-tabs{display:flex;align-items:flex-end;align-self:stretch;gap:1px;height:auto;margin:2px 0 0 10px;padding:0 1px;background:var(--bl-tabs);border:0}
-#workspace-tabs button{height:var(--bl-row);margin-bottom:1px;padding:0 9px;border:0;border-radius:var(--bl-radius) var(--bl-radius) 0 0;background:transparent;color:var(--bl-text-dim);font:var(--bl-font)}
+/* template_ID_tabs: each tab its name and a unit wide, after the menus' separator. */
+#workspace-tabs{display:flex;align-items:flex-end;align-self:stretch;gap:0;height:auto;margin:2px 0 0 17px;padding:0 1px;background:var(--bl-tabs);border:0}
+#workspace-tabs button{height:var(--bl-row);margin-bottom:1px;padding:0 calc(var(--bl-row)*.5);border:0;border-radius:var(--bl-radius) var(--bl-radius) 0 0;background:transparent;color:var(--bl-text-dim);font:var(--bl-font)}
 #workspace-tabs button:hover{color:var(--bl-text);background:#ffffff0a}#workspace-tabs button.active{background:var(--bl-header);color:var(--bl-text)}
 .bl-datablock{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 0 0 5px;background:var(--bl-field);border-radius:var(--bl-radius);box-shadow:inset 0 0 0 1px var(--bl-widget-line);color:var(--bl-text)}
 .bl-datablock select{height:20px;max-width:180px;border:0;background:transparent;color:var(--bl-text);font:var(--bl-font);padding:0 4px}

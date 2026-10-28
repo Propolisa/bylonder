@@ -36,7 +36,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -51,16 +51,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -258,7 +258,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 		}
 	});},
 	get ensure_viewer_socket () {return __get__ (this, function (self, node_tree, socket_type, connect_socket) {
-		if (typeof connect_socket == 'undefined' || (connect_socket != null && connect_socket.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof connect_socket == 'undefined' || (connect_socket != null && globalThis.Object.hasOwn (connect_socket, "__kwargtrans__"))) {;
 			var connect_socket = null;
 		};
 		if (arguments.length) {
@@ -362,7 +362,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 		return groupout;
 	};},
 	get search_connected_viewer_sockets () {return __getcm__ (this, function (cls, output_node, r_sockets, index) {
-		if (typeof index == 'undefined' || (index != null && index.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof index == 'undefined' || (index != null && globalThis.Object.hasOwn (index, "__kwargtrans__"))) {;
 			var index = null;
 		};
 		if (arguments.length) {
@@ -602,7 +602,7 @@ export var NODE_OT_connect_to_output =  __class__ ('NODE_OT_connect_to_output', 
 		return __in__ (socket, self.other_viewer_sockets_users);
 	});},
 	get get_output_index () {return __get__ (this, function (self, node, output_node, is_base_node_tree, socket_type, check_type) {
-		if (typeof check_type == 'undefined' || (check_type != null && check_type.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof check_type == 'undefined' || (check_type != null && globalThis.Object.hasOwn (check_type, "__kwargtrans__"))) {;
 			var check_type = false;
 		};
 		if (arguments.length) {

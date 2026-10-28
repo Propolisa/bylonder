@@ -293,6 +293,44 @@ export var islink = function (py_name) {
 	}
 	return false;
 };
+export var _mount = function (directory, names) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'directory': var directory = __allkwargs0__ [__attrib0__]; break;
+					case 'names': var names = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var __iterable0__ = names;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_name = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = _directories;
+			return __call__ (__accu0__.add, __accu0__, __call__ (normpath, null, __call__ (join, null, directory, py_name)));
+		}) ();
+	}
+	var parts = (function () {
+		var __accu0__ = __call__ (normpath, null, directory);
+		return __call__ (__accu0__.py_split, __accu0__, '/');
+	}) ();
+	for (var end = 2; end < __add__ (__call__ (len, null, parts), 1); end++) {
+		(function () {
+			var __accu0__ = _directories;
+			return __call__ (__accu0__.add, __accu0__, (function () {
+				var __accu1__ = '/';
+				return __call__ (__accu1__.join, __accu1__, __getslice__ (parts, null, end, 1));
+			}) ());
+		}) ();
+	}
+};
 
 //# sourceMappingURL=os.path.map
 export {files};
@@ -315,6 +353,7 @@ export function __py_setattr__ (key, value) {
 		case 'isdir': isdir = value; break;
 		case 'exists': exists = value; break;
 		case 'islink': islink = value; break;
+		case '_mount': _mount = value; break;
 		default: throw new Error (`module attribute ${key} cannot be set`);
 	}
 }

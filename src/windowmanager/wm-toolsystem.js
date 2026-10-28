@@ -2,11 +2,9 @@
 // Python sets (space_toolsystem_common.py's activate_by_id, transpiled) through the WorkSpaceTool RNA
 // (makesrna/rna-bylonder.js). The tool's keymap and its fallback keymap run first in the 3D View's window region, with
 // the operator properties the tool stores (its settings in the tool header), and its gizmo group shows.
-import { activate_by_id, activate_by_id_or_cycle, item_from_flat_index, item_from_index_active, ToolSelectPanelHelper } from '../bl_ui/space_toolsystem_common.js';
-import { VIEW3D_PT_tools_active } from '../bl_ui/space_toolsystem_toolbar.js';
+import { module, registered } from '../python/bpy_interface.js';
 import { useContext } from '../editors/interface/layout.js';
 import { registerOperators, kw } from './wm-operators.js';
-import { dict } from '../bl_ui/org.transcrypt.__runtime__.js';
 
 // WM_toolsystem_default_tool for the 3D View's modes Bylonder has.
 const DEFAULT_TOOL = 'builtin.select_box';
@@ -15,6 +13,10 @@ const MODES = ['OBJECT', 'EDIT_MESH'];
 // The gizmo groups with WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP, whose tools drag with the fallback tool off the gizmo.
 const FALLBACK_GIZMOS = new Set(['VIEW3D_GGT_xform_gizmo', 'VIEW3D_GGT_xform_gizmo_context', 'VIEW3D_GGT_xform_extrude', 'MESH_GGT_spin', 'MESH_GGT_spin_redo',
   'VIEW3D_GGT_mesh_preselect_elem', 'VIEW3D_GGT_mesh_preselect_edgering']);
+// Blender's tool system, registered as Blender's startup registers it (ToolSelectPanelHelper.register made the tools'
+// keymaps and group memory).
+const { activate_by_id, activate_by_id_or_cycle, item_from_flat_index, item_from_index_active, ToolSelectPanelHelper } = module('bl_ui.space_toolsystem_common');
+const { VIEW3D_PT_tools_active } = registered;
 const SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
 
 // `changed(ref)` is told when a tool is set up, `context()` gives bpy.context for the 3D View the window manager acts on.
@@ -23,20 +25,6 @@ export function createToolSystem({ changed = () => {}, context }) {
   const key = (space_type, mode) => `${space_type}:${mode}`;
   const blank = (space_type, mode) => ({ space_type, mode, idname: '', idname_fallback: '', index: -1, keymap: '', keymap_fallback: '', gizmo_group: '',
     operator: '', options: new Set(), properties: new Map() });
-  // ToolSelectPanelHelper.register, as Blender runs it when it registers the panel, for the modes Bylonder has (the
-  // others' dynamic tools read paint data it lacks): the groups' memory, and the names of the keymaps tools make from
-  // their label ("3D View Tool: Edit Mesh, Extrude Region"), which Blender's default key configuration holds.
-  const panel = VIEW3D_PT_tools_active;
-  if (!panel._tool_group_active) {
-    panel._tool_group_active = dict({});
-    // Under the names Transcrypt gives get, new and name.
-    const keymap = (name) => ({ py_name: name }), keyconfig = { keymaps: { py_get: keymap, py_new: keymap } };
-    for (const mode of MODES) {
-      for (const item of ToolSelectPanelHelper._tools_flatten_with_dynamic(panel._tools[mode], kw({ context: null }))) {
-        if (typeof item?.keymap?.[0] === 'function') panel._km_action_simple(keyconfig, keyconfig, mode.replace('_', ' ').title(), item.label, item.keymap);
-      }
-    }
-  }
   const python = (fn) => { const ctx = context(); useContext(ctx); return fn(ctx); };
 
   const system = {
@@ -81,7 +69,7 @@ export function createToolSystem({ changed = () => {}, context }) {
       return ref && [ref.keymap, ref.keymap_fallback].includes(keymap) ? { ...ref.properties.get(idname) } : {};
     },
     // The 3D View's tool definitions (Blender's VIEW3D_PT_tools_active).
-    panel,
+    panel: VIEW3D_PT_tools_active,
     // A tool's definition by its idname, in the active mode.
     item: (idname) => python((ctx) => ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tool_get_by_id(ctx, idname)[0]),
     python,

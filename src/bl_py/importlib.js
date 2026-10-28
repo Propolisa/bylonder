@@ -7,7 +7,7 @@ import {_globals, _import, _lazy, _member} from './_modules.js';
 export {_lazy, _member, _import, _module, _globals};
 var __name__ = 'importlib';
 export var import_module = function (py_name, package_) {
-	if (typeof package_ == 'undefined' || (package_ != null && package_.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof package_ == 'undefined' || (package_ != null && globalThis.Object.hasOwn (package_, "__kwargtrans__"))) {;
 		var package_ = null;
 	};
 	if (arguments.length) {

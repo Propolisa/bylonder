@@ -102,7 +102,7 @@ export var node_space_type_poll = function (cls, context, types) {
 	return true;
 };
 export var get_group_output_node = function (tree, output_node_idname) {
-	if (typeof output_node_idname == 'undefined' || (output_node_idname != null && output_node_idname.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof output_node_idname == 'undefined' || (output_node_idname != null && globalThis.Object.hasOwn (output_node_idname, "__kwargtrans__"))) {;
 		var output_node_idname = 'NodeGroupOutput';
 	};
 	if (arguments.length) {

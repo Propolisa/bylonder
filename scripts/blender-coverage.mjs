@@ -11,9 +11,9 @@ const UI_ID = /^[A-Z][A-Z0-9]*_(MT|PT|HT)_\w+$/;
 
 async function files(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
-  // Blender's own scripts (src/bl_ui, src/bl_py) name everything they could show; what Bylonder shows of them counts at
+  // Blender's own scripts (src/bl_py) name everything they could show; what Bylonder shows of them counts at
   // run time.
-  const nested = await Promise.all(entries.filter((e) => e.name !== 'bl_ui' && e.name !== 'bl_py').map((e) => (e.isDirectory() ? files(join(dir, e.name)) : /\.(js|vue)$/.test(e.name) ? [join(dir, e.name)] : [])));
+  const nested = await Promise.all(entries.filter((e) => e.name !== 'bl_py').map((e) => (e.isDirectory() ? files(join(dir, e.name)) : /\.(js|vue)$/.test(e.name) ? [join(dir, e.name)] : [])));
   return nested.flat();
 }
 

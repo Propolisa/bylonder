@@ -180,7 +180,7 @@ r.t.cancel();
 assert.equal(selectedCoords(r.edit), expect((p) => p), 'cancel restores');
 // G G 0.5: Edge Slide takes a typed factor too.
 // Edge Slide is a JS port, sliding a JS BMesh.
-const slid = (fn) => { const b = BM_mesh_bm_from_me(primitive_add('mesh.primitive_cube_add')); for (let v = 0; v < b.v.size; v++) if (b.v.co[v * 3] > 0 && b.v.co[v * 3 + 1] > 0) BM_vert_select_set(b, v, true); BM_mesh_select_mode_flush(b); fn(b); return round(b.v.co) + ''; };
+const slid = (fn) => { const b = BM_mesh_bm_from_me(primitive_add('mesh.primitive_cube_add')); for (let v = 0; v < b.v.size; v++) BM_vert_select_set(b, v, b.v.co[v * 3] > 0 && b.v.co[v * 3 + 1] > 0); BM_mesh_select_mode_flush(b); fn(b); return round(b.v.co) + ''; };
 let header;
 const typedSlide = slid((b) => { const s = beginEdgeSlide(b, identity, top, { x: 0, y: -50 }); type(s, '. 5'); header = s.header; });
 assert.ok([0.5, -0.5].some((value) => slid((b) => edge_slide_exec(b, { value })) === typedSlide), 'G G .5 slides half way');

@@ -10,7 +10,7 @@ export var pathsep = ':';
 export var curdir = '.';
 export var environ = dict ({});
 export var listdir = function (directory) {
-	if (typeof directory == 'undefined' || (directory != null && directory.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof directory == 'undefined' || (directory != null && globalThis.Object.hasOwn (directory, "__kwargtrans__"))) {;
 		var directory = '.';
 	};
 	if (arguments.length) {
@@ -117,7 +117,7 @@ export var DirEntry =  __class__ ('DirEntry', [object], {
 	});}
 });
 export var scandir = function (directory) {
-	if (typeof directory == 'undefined' || (directory != null && directory.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof directory == 'undefined' || (directory != null && globalThis.Object.hasOwn (directory, "__kwargtrans__"))) {;
 		var directory = '.';
 	};
 	if (arguments.length) {
@@ -177,7 +177,7 @@ export var fspath = function (py_name) {
 	return py_name;
 };
 export var getenv = function (key, py_default) {
-	if (typeof py_default == 'undefined' || (py_default != null && py_default.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof py_default == 'undefined' || (py_default != null && globalThis.Object.hasOwn (py_default, "__kwargtrans__"))) {;
 		var py_default = null;
 	};
 	if (arguments.length) {
