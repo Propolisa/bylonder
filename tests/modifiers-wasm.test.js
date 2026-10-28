@@ -140,6 +140,7 @@ const lathe = createModifierSystem({ scene, objects: [vase], animation: createAn
 lathe.add(vase, 'SCREW', { steps: 8 });
 await lathe.settled();
 assert.equal(vase.getTotalIndices(), 8 * 2 * 6, 'Screw makes two quads per step');
+assert.ok(vase.getChildMeshes(true).every((wire) => !wire.isEnabled(false)), 'the profile\'s loose edges do not draw over the result');
 lathe.dispose();
 console.log('Modifiers: Screw turns a profile of edges from code, Shade Smooth clears sharp faces');
 scene.dispose();

@@ -88,10 +88,13 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     };
     return count?then(objectWork(node,visible.slice(0,count))(signal,job),finish):finish(null);
   }
+  // The Mesh's loose edges draw as a line child (mesh_batch_cache_apply); modifiers draw their result instead.
+  const showLooseEdges=(node,show)=>node.getChildMeshes(true).filter(c=>c.metadata?.drawOwner===node).forEach(c=>c.setEnabled(show));
   function draw(node,result,request){
     applying=true;
     try{
-      node.thinInstanceSetBuffer('matrix',null);node.makeGeometryUnique();VertexData.Parse(result.data).applyToMesh(node);
+      showLooseEdges(node,!request.stack.some(m=>m.showViewport));
+      node.thinInstanceSetBuffer('matrix',null);node.makeGeometryUnique();VertexData.Parse(result.data).applyToMesh(node);node.refreshBoundingInfo();
       if(result.matrices.length!==1||!result.matrices[0].isIdentity()){
         const buffer=new Float32Array(result.matrices.length*16);result.matrices.forEach((m,i)=>m.copyToArray(buffer,i*16));node.thinInstanceSetBuffer('matrix',buffer,16,true);node.thinInstanceEnablePicking=true;node.thinInstanceRefreshBoundingInfo(true);
       }
@@ -174,7 +177,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
         if(node.isDisposed()||deleted(node)||!hasMesh(node)||node.metadata?.editing)continue;
         const stack=modifierStack(node),prior=cache.get(node);
         if(!stack.length&&!prior)continue;
-        if(!stack.length&&prior&&!node.metadata.wbModifierBase){node.thinInstanceSetBuffer('matrix',null);VertexData.Parse(prior.base).applyToMesh(node);cache.delete(node);continue;}
+        if(!stack.length&&prior&&!node.metadata.wbModifierBase){showLooseEdges(node,true);node.thinInstanceSetBuffer('matrix',null);VertexData.Parse(prior.base).applyToMesh(node);cache.delete(node);continue;}
         try{
           for(const modifier of stack)registerChannels(node,modifier);
           if(prior&&(node.geometry!==prior.geometry||node.metadata.wbCreation!==prior.creation)&&node.metadata.wbModifierBase===prior.base){node.metadata.wbModifierBase=meshBase(node);cache.delete(node);}
@@ -187,7 +190,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     // Resolves once every object's stack is drawn as it now is, as a render needs it.
     async settled(){for(;;){api.refresh();const pending=[...requested.values()].filter(r=>!r.done).map(r=>r.promise);if(!pending.length)return;await Promise.all(pending);}},
     source:node=>structuredClone(node.metadata?.wbModifierBase||VertexData.ExtractFromMesh(node).serialize()),
-    dispose(){for(const node of requested.keys())jobs?.cancel(node);for(const [node] of cache)if(!node.isDisposed()){node.thinInstanceSetBuffer('matrix',null);if(node.metadata?.wbModifierBase)VertexData.Parse(node.metadata.wbModifierBase).applyToMesh(node);}cache.clear();listeners.clear();}
+    dispose(){for(const node of requested.keys())jobs?.cancel(node);for(const [node] of cache)if(!node.isDisposed()){showLooseEdges(node,true);node.thinInstanceSetBuffer('matrix',null);if(node.metadata?.wbModifierBase)VertexData.Parse(node.metadata.wbModifierBase).applyToMesh(node);}cache.clear();listeners.clear();}
   };
   return api;
 }

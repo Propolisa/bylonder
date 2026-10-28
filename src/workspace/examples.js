@@ -14,6 +14,10 @@ const files = (id) => {
 
 export const examples = [
   { id: "cube", title: "Default Cube" },
+  { id: "still-life", title: "Still Life" },
+  { id: "coast", title: "Dusk Coast" },
+  { id: "orrery", title: "Orrery" },
+  { id: "lumen", title: "Lumen" },
   { id: "materials", title: "Materials & Nodes" },
   { id: "solar", title: "Solar System" },
   { id: "arrays", title: "Array Modifiers" },

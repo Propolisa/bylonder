@@ -98,13 +98,15 @@ async function renderFrame({ frame, width, height, camera, quality: kind = 'prev
 }
 
 // Renders one sample at scene frame t (may be fractional) with a sub-pixel jitter, once modifiers have evaluated for
-// it off the main thread.
+// it off the main thread and everything it draws is ready.
 async function renderSample(t, offset, { start, fps, width, height }) {
   const { world, scene, animation } = built;
   const camera = scene.activeCamera;
   clock.set(frameMs(t, start, fps));
   animation.time.configure({ frameCurrent: t }, { record: false });
   await world.modifiers.settled();
+  // Geometry modifiers just drew may need shaders compiled before it can be drawn.
+  await scene.whenReadyAsync();
   camera.unfreezeProjectionMatrix();
   if (offset[0] || offset[1]) {
     const m = Array.from(camera.getProjectionMatrix(true).m);
