@@ -11,7 +11,7 @@
 #include "WM_api.hh"
 #include "WM_types.hh"
 #include "../windowmanager/wm_event_system.hh"
-#include "operator-properties.hh"
+#include "rna-runtime.hh"
 
 using namespace blender;
 
@@ -60,7 +60,7 @@ wmOperatorStatus WM_operator_name_call_ptr(bContext *C, wmOperatorType *ot, wm::
   if (!ot->exec || !WM_operator_poll(C, ot)) {
     return OPERATOR_CANCELLED;
   }
-  wmOperator *op = operator_create(ot, properties ? properties->data : nullptr);
+  wmOperator *op = operator_create(ot, properties ? static_cast<IDProperty *>(properties->data) : nullptr);
   const wmOperatorStatus status = ot->exec(C, op);
   WM_operator_free(op);
   return status;
@@ -180,7 +180,7 @@ EXPORT(drag_drop) int drag_drop(bContext *C, wmEvent *event)
       event->customdata = &single_lb;
       status = OPERATOR_CANCELLED;
       if (WM_operator_poll(C, drop.ot)) {
-        wmOperator *op = operator_create(drop.ot, drop.ptr->data);
+        wmOperator *op = operator_create(drop.ot, static_cast<IDProperty *>(drop.ptr->data));
         status = drop.ot->invoke ? drop.ot->invoke(C, op, event) : drop.ot->exec(C, op);
         WM_operator_free(op);
       }

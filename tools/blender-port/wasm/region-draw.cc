@@ -31,7 +31,7 @@
 
 #include "BKE_wm_runtime.hh"
 #include "WM_types.hh"
-#include "operator-properties.hh"
+#include "rna-runtime.hh"
 
 using namespace blender;
 

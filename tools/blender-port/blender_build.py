@@ -162,9 +162,10 @@ def glue(host, out, entries, extra):
     tree, spec, includes = module_inputs(host, out)
     directories = list(dict.fromkeys(a for e in entries for a in wasm_command(e, [])[1:] if a.startswith('-I')))
     generated = os.path.join(out, 'generated')
-    args = [*extra, '-std=c++20', f'-I{generated}', f'-I{WASM}', *directories, *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
+    args = [*extra, '-std=c++20', f'-I{generated}', f'-I{WASM}', *directories,
+            *(f'-I{os.path.join(tree, "source/blender", d)}' for d in wasm_module.EDITOR_INCLUDES), *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
     wasm_module.operator_table(tree, out, args + FLAGS, spec)
-    sources = [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc'] if f not in STAND_INS]
+    sources = [os.path.join(WASM, f) for f in [*spec['api'], 'rna-runtime.cc', 'platform.cc'] if f not in STAND_INS]
     entry = lambda src: {'directory': host, 'file': src, 'command': ' '.join(['clang++', *args, '-c', src])}
     objects = os.path.join(out, 'objects')
     with concurrent.futures.ThreadPoolExecutor(int(os.environ.get('JOBS', os.cpu_count()))) as pool:
@@ -238,6 +239,32 @@ def main():
     total = sum(len(d) for d in results.values())
     compiled = sum(1 for d in results.values() for _, o, _ in d if o)
     print(f'{compiled} of {total} sources compile; link exit {result.returncode}; {len(names)} unresolved symbols; report {report}', file=sys.stderr)
+    link_module(host, out, entries, extra, archives)
+
+
+# Bylonder's own path resolution for its custom properties (rna-runtime.cc).
+WRAPPED = ['_ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS_11PropertyRNAE']
+
+
+def link_module(host, out, entries, extra, archives):
+    """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) first, then Blender's libraries,
+    as the module build links them. Where the API still defines what Blender's libraries also define, the API's
+    definition is kept (--allow-multiple-definition), until it is removed for Blender's own."""
+    built = glue(host, out, entries, extra)
+    failed = [(s, e) for s, o, e in built if not o]
+    if failed:
+        sys.exit('\n'.join(f'{os.path.basename(s)} does not build: {first_error(e)}' for s, e in failed))
+    module = os.path.join(out, 'bylonder.wasm')
+    strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
+    link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
+            '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free', '-Wl,--allow-multiple-definition',
+            *(f'-Wl,--wrap={w}' for w in WRAPPED), *(o for _, o, _ in built), *archives, *archives, '-lwasi-emulated-process-clocks',
+            '-Wl,--allow-undefined', '-o', module]
+    result = subprocess.run(link, capture_output=True, text=True)
+    if result.returncode:
+        sys.exit(f'module link failed:\n{result.stderr[-3000:]}')
+    missing = wasm_module.live_imports(module)
+    print(f'{module}: {os.path.getsize(module)} bytes; {len(missing)} imports, which throw when called', file=sys.stderr)
 
 
 if __name__ == '__main__':

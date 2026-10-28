@@ -18,7 +18,7 @@
 #include "WM_api.hh"
 #include "RE_engine.h"
 
-#include "operator-properties.hh"
+#include "rna-runtime.hh"
 
 using namespace blender;
 

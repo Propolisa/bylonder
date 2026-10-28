@@ -45,7 +45,7 @@
 #include "UI_interface_c.hh"
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
-#include "operator-properties.hh"
+#include "rna-runtime.hh"
 #include "area.hh"
 #include "WM_api.hh"
 #include "WM_types.hh"
@@ -1116,13 +1116,6 @@ std::optional<std::string> WM_modalkeymap_operator_items_to_string(wmOperatorTyp
   return std::nullopt;
 }
 
-/* As wm_operators.cc defines them. */
-PointerRNA WM_operator_properties_create_ptr(wmOperatorType *ot) { return {nullptr, ot->srna, operator_values_new()}; }
-void WM_operator_properties_free(PointerRNA *ptr)
-{
-  operator_values_free(ptr->data);
-  ptr->data = nullptr;
-}
 std::string WM_operatortype_name(wmOperatorType *ot, PointerRNA *properties)
 {
   return ot->get_name && properties ? ot->get_name(ot, properties) : std::string(ot->name ? ot->name : "");

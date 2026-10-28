@@ -66,7 +66,7 @@
 #include "RNA_access.hh"
 #include "RNA_enum_types.hh"
 #include "RNA_prototypes.hh"
-#include "operator-properties.hh"
+#include "rna-runtime.hh"
 #include "extraction.hh"
 #include "area.hh"
 
@@ -540,105 +540,51 @@ EXPORT(edit_context_object_matrix_set) void edit_context_object_matrix_set(EditC
   runtime.world_to_object = math::invert(runtime.object_to_world);
 }
 
-/* Operators, each registered by Blender's own registration function when first used. */
-
-struct OperatorDefinition {
-  const char *name;
-  void (*define)(wmOperatorType *);
-  wmOperatorType *type = nullptr;
-};
-
+/* Operators, registered by Blender's own registration functions through the window manager (WM_operatortype_append),
+ * by the index JS finds them at (operator_name). */
 void outliner_operatortypes_ensure();
 void anim_operatortypes();
 namespace blender::ed::transform {
 void keymap_transform(wmKeyConfig *keyconf);
 }
-
-/* Operators registered through WM_operatortype_append (the transform operators), defined as they are appended. */
-static Vector<OperatorDefinition> &appended_operators()
-{
-  static Vector<OperatorDefinition> appended;
-  return appended;
-}
-
-void blender::WM_operatortype_append(void (*opfunc)(wmOperatorType *ot))
-{
-  wmOperatorType *type = MEM_new<wmOperatorType>(__func__);
-  type->srna = operator_properties_new("");
-  opfunc(type);
-  type->srna->identifier = type->idname;
-  appended_operators().append({type->idname, opfunc, type});
-}
-
 namespace blender {
 void gesture_straightline_modal_keymap(wmKeyConfig *keyconf);
 }
 
-static Vector<OperatorDefinition> &operators()
+static Vector<wmOperatorType *> &operators()
 {
-  static Vector<OperatorDefinition> table = [] {
-    Vector<OperatorDefinition> table = {
-#define OPERATOR(define) {#define, define},
+  static Vector<wmOperatorType *> table = [] {
+#define OPERATOR(define) WM_operatortype_append(define);
 #include "operators.inc"
 #undef OPERATOR
-    };
     ed::transform::transform_operatortypes();
     outliner_operatortypes_ensure();
     anim_operatortypes();
-    table.extend(appended_operators());
-    return table;
-  }();
-  static bool keymaps = false;
-  if (!keymaps) {
-    keymaps = true;
     ed::transform::keymap_transform(nullptr);
     knifetool_modal_keymap(nullptr);
     gesture_straightline_modal_keymap(nullptr);
-  }
+    Vector<wmOperatorType *> types;
+    for (wmOperatorType *ot : WM_operatortypes_registered_get()) {
+      types.append(ot);
+    }
+    return types;
+  }();
   return table;
 }
 
-static wmOperatorType *operator_type(int index)
-{
-  OperatorDefinition &def = operators()[index];
-  if (!def.type) {
-    def.type = MEM_new<wmOperatorType>(__func__);
-    def.type->srna = operator_properties_new(def.name);
-    def.define(def.type);
-  }
-  return def.type;
-}
+static wmOperatorType *operator_type(int index) { return operators()[index]; }
 
 EXPORT(operator_count) int operator_count() { return int(operators().size()); }
-/* The name of an operator's registration function (MESH_OT_subdivide), which is its idname. */
-EXPORT(operator_name) const char *operator_name(int index) { return operators()[index].name; }
-
-wmOperator *blender::operator_create(wmOperatorType *ot, const void *values)
-{
-  wmOperator *op = MEM_new<wmOperator>(__func__);
-  op->type = ot;
-  STRNCPY(op->idname, op->type->idname);
-  op->ptr = MEM_new<PointerRNA>(__func__, PointerRNA{nullptr, ot->srna, values ? operator_values_copy(values) : operator_values_new()});
-  op->reports = MEM_new<ReportList>(__func__);
-  BKE_reports_init(op->reports, RPT_STORE);
-  return op;
-}
+/* An operator's idname as Blender's C code has it (MESH_OT_subdivide). */
+EXPORT(operator_name) const char *operator_name(int index) { return operators()[index]->idname; }
 
 EXPORT(operator_new) wmOperator *operator_new(int type) { return operator_create(operator_type(type)); }
+EXPORT(operator_free) void operator_free(wmOperator *op) { operator_destroy(op); }
 
-EXPORT(operator_free) void operator_free(wmOperator *op)
+/* Sets a property: numbers (len of them), or a string or enum identifiers. */
+EXPORT(operator_set) bool operator_set(wmOperator *op, const char *name, const double *numbers, int len, const char *text)
 {
-  operator_values_free(op->ptr->data);
-  MEM_delete(op->ptr);
-  BKE_reports_free(op->reports);
-  MEM_delete(op->reports);
-  MEM_delete(op);
-}
-
-/* Sets a property: numbers (len of them) or an enum item's identifier. */
-EXPORT(operator_set) bool operator_set(wmOperator *op, const char *name, const double *numbers, int len, const char *enum_identifier)
-{
-  return operator_property_set(op->ptr, name, numbers, len, enum_identifier);
+  return operator_property_set(op->ptr, name, numbers, len, text);
 }
 
 /* The values the operator ran with, as JSON (operator_values_json). */
@@ -656,26 +602,29 @@ EXPORT(operator_report) const char *operator_report(wmOperator *op)
   return report ? report->message : nullptr;
 }
 
-/* An enum property's items as the operator's UI lists them in a context (its item function, when it has one), as
- * "identifier\tname" lines; separators and headings are left out. */
+/* An enum property's items as the operator's UI lists them in a context, as "identifier\tname" lines; separators and
+ * headings are left out. */
 EXPORT(operator_enum_items) const char *operator_enum_items(bContext *C, int type, const char *name)
 {
   static std::string text;
-  wmOperatorType *ot = operator_type(type);
-  PointerRNA ptr = {nullptr, ot->srna, operator_values_new()};
-  PropertyRNA *prop = RNA_struct_find_property(&ptr, name);
+  wmOperator *op = operator_create(operator_type(type));
+  PropertyRNA *prop = RNA_struct_find_property(op->ptr, name);
+  const EnumPropertyItem *items = nullptr;
+  int total = 0;
   bool free = false;
-  const EnumPropertyItem *items = prop->itemf ? prop->itemf(C, &ptr, prop, &free) : prop->items;
   text.clear();
-  for (const EnumPropertyItem *item = items; item && item->identifier; item++) {
-    if (item->identifier[0]) {
-      text += std::string(item->identifier) + '\t' + item->name + '\n';
+  if (prop) {
+    RNA_property_enum_items(C, op->ptr, prop, &items, &total, &free);
+  }
+  for (int i = 0; i < total; i++) {
+    if (items[i].identifier[0]) {
+      text += std::string(items[i].identifier) + '\t' + items[i].name + '\n';
     }
   }
   if (free) {
-    MEM_delete(items);
+    MEM_freeN(const_cast<EnumPropertyItem *>(items));
   }
-  operator_values_free(ptr.data);
+  operator_destroy(op);
   return text.c_str();
 }
 

@@ -24,7 +24,7 @@
 #include "WM_types.hh"
 
 #include "../editors/space_outliner/outliner_intern.hh"
-#include "operator-properties.hh"
+#include "rna-runtime.hh"
 
 using namespace blender;
 
@@ -51,28 +51,14 @@ static void ui_ensure()
   (void)done;
 }
 
-/* As rna_layer.cc's rna_LayerCollection_exclude_update: excluding sets the collections inside too, and the active
- * object goes when it left the view layer. */
-static void layer_collection_exclude_update(bContext *C, PointerRNA *ptr)
-{
-  LayerCollection *lc = static_cast<LayerCollection *>(ptr->data);
-  BKE_layer_collection_set_flag(lc, LAYER_COLLECTION_EXCLUDE, (lc->flag & LAYER_COLLECTION_EXCLUDE) != 0);
-  ViewLayer *view_layer = CTX_data_view_layer(C);
-  BKE_view_layer_need_resync_tag(view_layer);
-  BKE_view_layer_synced_ensure(*CTX_data_main(C), CTX_data_scene(C), view_layer);
-  Base *basact = BKE_view_layer_active_base_get(view_layer);
-  if (basact && !BKE_view_layer_base_find(view_layer, basact->object)) {
-    view_layer->basact = nullptr;
-  }
 }
 
 /* The Outliner's operators, registered by Blender's own registration function (called by editor-context's operator
- * table), and the update functions of the properties its buttons set. */
+ * table). */
 void outliner_operatortypes_ensure()
 {
   ed::outliner::outliner_operatortypes();
   ui::ED_operatortypes_view2d();
-  rna_property_update_set(RNA_LayerCollection, "exclude", layer_collection_exclude_update);
 }
 
 static ARegion *main_region(ScrArea *area) { return BKE_area_find_region_type(area, RGN_TYPE_WINDOW); }
