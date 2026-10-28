@@ -110,7 +110,7 @@ class TranscryptFixes(ast.NodeTransformer):
 
     def visit_List(self, node):
         self.generic_visit(node)
-        if not any(isinstance(e, ast.Starred) for e in node.elts):
+        if not isinstance(node.ctx, ast.Load) or not any(isinstance(e, ast.Starred) for e in node.elts):
             return node
         parts, run = [], []
         for element in node.elts:
@@ -128,6 +128,9 @@ class TranscryptFixes(ast.NodeTransformer):
         """f(a=1, **b) as f(**_merged({'a': 1}, b)): Transcrypt compiles the mix wrong, and marks the dict it unpacks,
         which may be shared, as keyword arguments."""
         self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == 'super':
+            # super(Class, self) in Class's methods is super(), the only form Transcrypt compiles.
+            node.args = []
         if isinstance(node.func, ast.Name) and node.func.id == 'zip':
             # zip's strict only checks lengths, and Transcrypt's zip takes it for an iterable.
             node.keywords = [k for k in node.keywords if k.arg != 'strict']
@@ -155,6 +158,10 @@ class TranscryptFixes(ast.NodeTransformer):
             keywords=[]) for value in node.values]
         return ast.Call(func=ast.Attribute(ast.Constant(''), 'join', ast.Load()), args=[ast.List(elts=parts, ctx=ast.Load())], keywords=[])
 
+    def visit_Constant(self, node):
+        """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel object (identity holds within a module)."""
+        return ast.Name('_ellipsis', ast.Load()) if node.value is Ellipsis else node
+
     def visit_comprehension(self, node):
         """Comprehensions loop by index up to len(), which is 0 for iterators (enumerate, zip, generators): the
         iterable as a list."""
@@ -170,6 +177,9 @@ def _merged(*dicts):
     for d in dicts:
         result.update(d)
     return result
+
+
+_ellipsis = object()
 
 
 def _formatted(value, conversion, spec):

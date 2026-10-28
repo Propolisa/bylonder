@@ -478,8 +478,8 @@ const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["ri
 registerOperators({
   "anim.keyframe_insert": { run: () => insertKeys() },
   "anim.keyframe_delete_v3d": { run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
-  "view3d.rotate": { poll: inView, run: (props, event) => event.view.nav.rotate(event) },
-  "view3d.move": { poll: inView, run: (props, event) => event.view.nav.move(event) },
+  "view3d.rotate": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.rotate(event) },
+  "view3d.move": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.move(event) },
   "view3d.zoom": { supports: ({ delta }) => !!delta, poll: () => !!activeView(), run: ({ delta }, event) => (event?.view ?? activeView()).nav.wheelZoom(delta) },
   "ed.undo": { run: () => undoRedo(false) },
   "ed.redo": { run: () => undoRedo(true) },
