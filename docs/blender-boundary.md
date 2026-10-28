@@ -58,7 +58,8 @@ no counterpart for; the overlap is kept equal both ways.
    scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
    needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
    after, and what the code changed goes back to Babylon. Edit Mode is the exception Blender itself makes: while a mesh
-   is edited, its BMEditMesh in the module is its only copy, and Babylon gets it back on leaving Edit Mode.
+   is edited, its BMEditMesh in the module owns it, Babylon's mesh is only drawn from it, and Babylon owns it again
+   on leaving Edit Mode.
 6. **Checked.** A test mode compares the overlap of both models after every operator and edit; a difference is a bug.
 
 What this is for:
