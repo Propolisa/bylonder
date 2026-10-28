@@ -179,6 +179,15 @@ export class UILayout {
   enum_item_icon(data, property, identifier) { return this.context.enumItem?.(data, property, identifier)?.[3] ?? 'NONE'; }
 }
 
+// A registered class's callback as bpy_class_call runs it: an exception is printed and the UI goes on with what was laid out.
+export function pyCall(name, call) {
+  try {
+    return call();
+  } catch (error) {
+    console.error(`Python: ${name}`, error);
+  }
+}
+
 // Whether a layout node is a layout (holds others) rather than an item.
 export const isLayout = (node) => node instanceof UILayout || Array.isArray(node.children);
 

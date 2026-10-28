@@ -26,3 +26,4 @@ const ran = [];
 registerOperator('object.select_all', { run: (props) => ran.push(props) });
 assert.deepEqual([...module('bpy').ops.object.select_all({ action: 'TOGGLE', __kwargtrans__: null })], ['FINISHED']);
 assert.deepEqual(ran, [{ action: 'TOGGLE' }], 'bpy.ops runs the operator Bylonder registered');
+assert.equal(module('bpy').path.display_name('2D_Animation'), '2D Animation', 'bpy.path.display_name, which File > New draws templates with');
