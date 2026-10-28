@@ -149,7 +149,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	else {
 	}
-	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
 export var _rna_path_prop_search_for_context_impl = function* (context, edit_text, unique_attrs) {
 	if (arguments.length) {

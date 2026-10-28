@@ -814,6 +814,11 @@ bool operator_property_set(PointerRNA *ptr, const char *name, const double *numb
     set_values(ptr, prop, std::vector<double>(numbers, numbers + len));
     return true;
   }
+  /* A string property takes the text as it is (a file path). */
+  if (prop->type == PROP_STRING) {
+    RNA_property_string_set_bytes(ptr, prop, enum_identifiers, int(strlen(enum_identifiers)));
+    return true;
+  }
   int value = 0;
   const std::string identifiers = enum_identifiers;
   for (size_t start = 0, end; start <= identifiers.size(); start = end + 1) {

@@ -7,7 +7,8 @@ import { NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { buildMesh } from '../src/editors/object/mesh-catalog.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
-import { createBlenderObjects } from '../src/editors/object/object-blender.js';
+import { createMainSync } from '../src/blenkernel/main-sync.js';
+import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 
 // Object Mode operators run by Blender's own code in the module, against Blender 5.2's result on the same scene
 // (tools/blender-reference/object-fixtures.py).
@@ -67,7 +68,7 @@ for (const file of fs.readdirSync(dir).sort()) {
 assert.deepEqual(failed, [], 'Object operator results that differ from Blender');
 console.log(`Object Mode: ${fs.readdirSync(dir).length} results of ${operators.size} operators (${[...operators].join(', ')}) match Blender 5.2`);
 
-// In the app: Bylonder's objects go in through their RNA and come back, so applying a parent's transform keeps where
+// In the app: Bylonder's objects go in through the scene sync and come back, so applying a parent's transform keeps where
 // its vertices and its child are (a parent scaled unevenly would leave the child sheared, which only Blender's parent
 // inverse holds), and clearing goes through Blender's operator too.
 const scene = new Scene(new NullEngine()), objects = [];
@@ -81,7 +82,12 @@ const box = (name, position, rotation, scaling) => {
 const parent = box('Parent', [1, 2, 3], [0.3, 0.5, 0.7], [2, 2, 2]), child = box('Child', [2, 0, 0], [0, 0.2, 0], [1, 2, 1]);
 child.parent = parent;
 const selection = createSelection(scene, objects);
-const app = createBlenderObjects({ rna: createRNA({ world: { scene, objects }, selection }), transaction: (fn) => fn(), notify: assert.fail });
+const sync = createMainSync({ rna: createRNA({ world: { scene, objects, animation: createAnimationModel() }, selection }) });
+sync.debug = true;
+const app = {
+  poll: (idname) => { sync.flush(); return sync.blender.poll(idname); },
+  run: (idname, props) => sync.run(() => sync.blender.run(idname, props), { meshes: sync.selected() }),
+};
 const worldPositions = (node) => {
   const m = node.computeWorldMatrix(true), p = node.getVerticesData('position');
   return Array.from({ length: p.length / 3 }, (_, i) => Vector3.TransformCoordinates(Vector3.FromArray(p, i * 3), m).asArray()).flat();

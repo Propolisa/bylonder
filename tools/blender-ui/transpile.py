@@ -757,7 +757,9 @@ def _joined(*lists):
 
 
 def _super_classmethod(owner, cls, method):
-    return __pragma__('js', '{}', 'owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]')
+    # super() in a classmethod: the method of the first class after owner, in cls's bases depth first, that has it (a
+    # mixin's super() reaches the classes cls lists after it).
+    return __pragma__('js', '{}', '(() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()')
 '''
 
 
