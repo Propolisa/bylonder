@@ -10,6 +10,8 @@ const BY_PROPS = {
   'object.parent_clear': ({ type = 'CLEAR' }) => type === 'CLEAR' && 'unparent',
   'object.delete': ({ use_global }) => !use_global && 'delete',
 };
+// Operators that ask before running from a key, as their invoke does (object_add.cc).
+const CONFIRM = { 'object.delete': { title: 'Delete selected objects?', button: 'Delete' } };
 // Enum items Blender makes from the context (parent_set_enum_itemf in object_relations.cc); the rest are Blender's
 // static items (rna-operators.json).
 const ENUMS = {
@@ -29,6 +31,7 @@ export function registerObjectOperators(registry) {
       poll: (props) => action(props)?.enabled?.() ?? true,
       keys: (props) => keyLabel(action(props)?.keys[0]),
       enumItems: (prop) => ENUMS[idname]?.[prop],
+      confirm: CONFIRM[idname],
       run: (props) => registry.invoke(action(props).id),
     });
   }

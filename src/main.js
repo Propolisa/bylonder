@@ -45,6 +45,7 @@ import { openMenu } from "./editors/interface/menu.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
+import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
 const viewportDock = mountRuntimeLayout();
@@ -302,6 +303,8 @@ world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
 registerObjectOperators(world.objectActions);
 registerAddOperators(creator);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
+// bpy.context for a 3D Viewport (blenkernel/context.js), for what is drawn from Blender's scripts.
+world.blenderContext = (view) => createContext(blenderRNA, { space: view });
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
@@ -482,8 +485,8 @@ const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["ri
 registerOperators({
   "anim.keyframe_insert": { run: () => insertKeys() },
   "anim.keyframe_delete_v3d": { run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
-  "view3d.rotate": { poll: inView, run: (props, event) => event.view.nav.rotate(event) },
-  "view3d.move": { poll: inView, run: (props, event) => event.view.nav.move(event) },
+  "view3d.rotate": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.rotate(event) },
+  "view3d.move": { poll: (props, event) => inView(event), run: (props, event) => event.view.nav.move(event) },
   "view3d.zoom": { supports: ({ delta }) => !!delta, poll: () => !!activeView(), run: ({ delta }, event) => (event?.view ?? activeView()).nav.wheelZoom(delta) },
   "ed.undo": { run: () => undoRedo(false) },
   "ed.redo": { run: () => undoRedo(true) },
@@ -513,9 +516,9 @@ const bylonderKeys = createKeymap([
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
 ]);
-// Blender's keymaps a 3D View runs, Object Mode's only outside Edit Mode, whose own keymap runs before them.
-const blenderKeys = keymapHandler(["Object Mode", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
-  (name) => name !== "Object Mode" || !world.editMode.active);
+// Blender's keymaps a 3D View runs: the mode's (Object Mode or Mesh), then the 3D View's and the window's.
+const blenderKeys = keymapHandler(["Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true);
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 const keyLayers = () => {
