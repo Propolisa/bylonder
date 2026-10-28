@@ -27,5 +27,6 @@
   { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" },
   { "id": "outline-scale-3", "title": "The cube scaled by 3 (S 3 Enter): its outline as wide as at scale 1 (startup)", "settle": 2.5 },
   { "id": "outline-active-selected", "title": "The cube duplicated 3 along Y (Shift D Y 3 Enter), then the original Shift clicked: one outline active, one selected", "settle": 4 },
-  { "id": "outline-occluded", "title": "The cube duplicated 3 along Y and moved -2 along X (Shift D Y 3 Enter, G X -2 Enter): the selected copy partly behind the original", "settle": 4.5 }
+  { "id": "outline-occluded", "title": "The cube duplicated 3 along Y and moved -2 along X (Shift D Y 3 Enter, G X -2 Enter): the selected copy partly behind the original", "settle": 4.5 },
+  { "id": "xray", "title": "X-ray on (Alt Z) in Solid shading: the cube see-through at the X-ray alpha, its silhouette outlined", "settle": 2.5 }
 ]

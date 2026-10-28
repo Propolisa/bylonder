@@ -248,6 +248,7 @@ SETUP = {
     "outline-scale-3": lambda: keys("S", "THREE", "RET"),
     "outline-active-selected": lambda: later(duplicate(("Y", "THREE")) + 0.5, lambda: shift_click(*view3d_point(0.5, 0.5))),
     "outline-occluded": lambda: duplicate(("Y", "THREE"), ("X", "MINUS", "TWO")),
+    "xray": lambda: later(0.25, lambda: key("Z", *view3d_point(*REST), alt=True)),
 }
 
 

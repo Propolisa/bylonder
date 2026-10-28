@@ -15,19 +15,9 @@ export function createSelection(scene, objects) {
     nodes().filter(
       (n) => !nodes().some((other) => other !== n && n.isDescendantOf(other)),
     );
-  // The meshes the selection outline draws (Instance::object_sync), each with the selected node it outlines for (its
-  // nearest selected ancestor or itself): selected meshes and the meshes under a selected node, outside Edit Mode.
-  function outlined() {
-    const selected = new Set(nodes()), owners = new Map();
-    if (!selected.size) return owners;
-    for (const mesh of objects) {
-      if (!(mesh.getTotalVertices?.() > 0) || mesh.metadata?.editing || deleted(mesh) || mesh.isDisposed()) continue;
-      let owner = mesh;
-      while (owner && !selected.has(owner)) owner = owner.parent;
-      if (owner) owners.set(mesh, owner);
-    }
-    return owners;
-  }
+  // The meshes the selection outline draws (Instance::object_sync): selected objects with geometry, outside Edit Mode.
+  // A selected parent (an empty or a group) outlines nothing of its children, as in Blender.
+  const outlined = () => nodes().filter((n) => n.getTotalVertices?.() > 0 && !n.metadata?.editing);
   function sync() {
     for (const id of ids)
       if (!objects.some((n) => nodeId(n) === id)) ids.delete(id);

@@ -184,7 +184,7 @@ const overlays = createViewportOverlays(scene, {
     aspect: () => { const { width, height } = outputSize(world.renderSettings.state.render); return width / height; },
   },
   origins: { objects: () => world.objects, color: (node) => (editor?.selection.has(node) && !deleted(node) ? wireColor(node) : null) },
-  outlines: { outlined: () => editor?.selection.outlined() ?? new Map(), isActive: (node) => editor.selection.nodes.at(-1) === node, isTransform: () => !!editor?.modal && !editor.modal.cursor },
+  outlines: { outlined: () => editor?.selection.outlined() ?? [], isActive: (node) => editor.selection.nodes.at(-1) === node, isTransform: () => !!editor?.modal && !editor.modal.cursor },
   view3dCursor: () => world.sceneSettings.state.cursor,
 });
 world.pickExtra = (x, y, camera, accept) => overlays.extras.pick(x, y, camera, accept);

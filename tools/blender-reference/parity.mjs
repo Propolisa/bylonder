@@ -159,6 +159,7 @@ const SETUP = {
     await app.hover(...REST);
   },
   "outline-occluded": (app) => duplicate(app, ["y", "3"], ["x", "-", "2"]),
+  xray: (app) => keys(app, "Alt+z"),
 };
 // As ui-shots.py: Edit Mode with everything selected and a tool, the mouse over a scene point (Blender's axes) or resting.
 async function editTool(app, tool, anchor) {

@@ -141,10 +141,8 @@ export function createEditor(world, views, history, changed, notify, capture) {
     const session = options.cursor ? cursorTransform(COMPONENT_TYPES[type], target)
       : world.editMode?.active ? world.editMode.transform(COMPONENT_TYPES[type], target, last, options) : objectTransform(COMPONENT_TYPES[type], target);
     if (!session) return;
-    if (!world.editMode?.active && !options.cursor) {
-      setMode(type);
-      gizmos.attachToNode(null);
-    }
+    // The tool stays as it was; its gizmo hides while the transform runs, as Blender's do.
+    if (!world.editMode?.active && !options.cursor) gizmos.attachToNode(null);
     modal = { view, type, session, point: { ...session.start }, center: session.center, releaseConfirm: !!options.releaseConfirm, cursor: !!options.cursor };
     modal.removeHandler = world.wm?.addModal({ keymap: modalKeymap });
     if (!external) capture.begin(last, update, () => finish(false), view.canvas);
@@ -157,10 +155,6 @@ export function createEditor(world, views, history, changed, notify, capture) {
     if (modal.session.setMode && type !== "edge_slide") {
       modal.type = type;
       modal.session.setMode(COMPONENT_TYPES[type]);
-      if (!world.editMode?.active && !modal.cursor) {
-        setMode(type);
-        gizmos.attachToNode(null);
-      }
       report();
       return;
     }
