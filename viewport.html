@@ -49,28 +49,11 @@
             ><button id="ungroup" title="Ungroup (Ctrl Alt G)">Ungroup</button>
           </div>
         </div>
-        <div id="tree-root" title="Drop here to unparent">
-          <input
-            id="tree-search"
-            placeholder="Search objects"
-            aria-label="Search scene"
-          /><select id="tree-filter" aria-label="Object type">
-            <option value="">All types</option>
-            <option>Mesh</option>
-            <option>Empty</option>
-            <option>Camera</option>
-            <option>Light</option>
-          </select>
-        </div>
         <div class="tree-tools">
-          <span id="tree-count"></span
-          ><button id="tree-expand" title="Expand all">▾</button
-          ><button id="tree-collapse" title="Collapse all">▸</button
-          ><button id="duplicate-objects" title="Duplicate">⧉</button
+          <button id="duplicate-objects" title="Duplicate">⧉</button
           ><button id="delete-objects" title="Delete">×</button>
         </div>
-        <div id="objects" role="tree" aria-label="Scene graph"></div>
-        <div id="tree-info"></div>
+        <div id="outliner" class="bl-outliner"></div>
         <div id="pane"></div>
       </aside>
       <div id="gesture-cursor" hidden aria-hidden="true">+</div>

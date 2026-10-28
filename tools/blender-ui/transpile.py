@@ -79,6 +79,8 @@ def finish(name, script):
             assert text in script, f'{name}: the patch for {reason} no longer applies'
             script = script.replace(text, replacement)
     if name == 'org.transcrypt.__runtime__.js':
+        # Methods are getters; assigning one (a class's draw, as Menu.append wraps it) sets the attribute, as in Python.
+        script = re.sub(r'\b((?:globalThis\.)?Object\.defineProperty \(cls, attrib, )descrip\);', r'\1__settable__ (attrib, descrip));', script)
         # Operator overloading's dunder lookups, for None too (typeof null is 'object').
         script = re.sub(r"typeof (\w+) == 'object' && '(__\w+__)' in \1\b", r"typeof \1 == 'object' && \1 !== null && '\2' in \1", script)
         script += open(os.path.join(HERE, 'runtime.js')).read()

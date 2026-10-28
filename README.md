@@ -118,7 +118,8 @@ Store effects run initially and then coalesce once per animation frame by defaul
 | `source/blender/draw` | `src/draw/` | Mesh to Babylon geometry |
 | `source/blender/makesrna` | `src/makesrna/` | Operator RNA definitions read from Blender |
 | `source/blender/blenlib` | `src/blenlib/` | Math |
-| `source/blender/python` | `src/runtime/` | Running project code: the world builder and the `@workbench/sdk` API |
+| `release/scripts` (Blender's Python) | `src/bl_py/` (generated), `src/python/` | All of Blender's scripts, transpiled whole by `tools/blender-ui/tree.py`; `bpy_interface.js` loads them and gives their menus, panels, headers and operators |
+| `source/blender/python` | `tools/blender-ui/boundary/`, `src/runtime/` | Blender's C modules for Python (`_bpy`, `mathutils`, ...) at the boundary; running project code: the world builder and the `@workbench/sdk` API |
 
 `src/main.js` composes the viewport frame; `src/workspace/` is the browser IDE around it (projects, files, scenes, sharing) and has no Blender counterpart.
 
@@ -164,7 +165,7 @@ Tab enters Edit Mode on the active mesh, with Blender's select modes (1, 2, 3, S
 
 Object actions live in one registry (`src/editors/object/object-actions.js`), shared by keyboard shortcuts and the same context-menu renderer for viewport and outliner. Shift+D duplicates with independent geometry, then starts Move; cancelling Move keeps the duplicate. X/Delete removes selection, F2 renames, A/Alt+A/Ctrl+I selects/deselects/inverts, H/Shift+H/Alt+H controls visibility, / isolates, Alt+G/R/S resets transforms, Ctrl+P parents to the active object, and Alt+P unparents. Native groups remain available.
 
-The outliner supports hierarchy expansion, search/type filters, range/additive selection, visibility, selection locks, drag parenting, drop-to-root unparenting and camera/light inspection. Unsupported object operations are disabled. This is an object-mode subset, not Blender's mesh-editing/modifier/animation stack.
+The Outliner runs Blender's own outliner code (tree building, drawing, selection, restriction toggles, rename, drag and drop) in the WASM module over the shared Blender world.
 
 Stable IDs separate object identity from display names. History and project overrides store primitive recipes or duplicate vertex data plus hierarchy, visibility, locks and deletion tombstones. Deleted authored nodes are disabled rather than disposed so user-code references remain valid. Duplicates share material resources; rig/skeleton independence is not implemented. Turn on Remember scene edits to preserve interactive additions/deletions across Run and reload.
 

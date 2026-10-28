@@ -146,7 +146,11 @@ export class UILayout {
     return item.props;
   }
   operator_enum(...list) { this.#item('operator_enum', list); }
-  operator_menu_enum(...list) { this.#item('operator_menu_enum', list); }
+  operator_menu_enum(...list) {
+    const item = this.#item('operator_menu_enum', list);
+    item.props = operatorProperties();
+    return item.props;
+  }
   menu(...list) { this.#item('menu', list); }
   menu_contents(...list) { this.#item('menu_contents', list); }
   popover(...list) { this.#item('popover', list); }

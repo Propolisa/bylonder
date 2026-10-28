@@ -1,0 +1,7 @@
+/* The Outliner's main region fills the area under its header; Blender's code draws it (region-draw.js). */
+.bl-outliner{position:relative;flex:1;min-height:0;overflow:hidden;background:var(--bl-back)}
+.bl-outliner-region{display:block;width:100%;height:100%;outline:none}
+.bl-outliner-rename{position:absolute;box-sizing:border-box;padding:0 var(--bl-radius)}
+.bl-outliner-header{display:flex;flex:1;min-width:0;align-items:center}
+/* A drag's drop, a unit right of and below the pointer (wm_drag_draw_default). */
+.bl-outliner-drag{translate:var(--bl-row) var(--bl-row)}

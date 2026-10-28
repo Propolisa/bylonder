@@ -80,11 +80,12 @@ const TYPES = { B: 'BOOLEAN', I: 'INT', F: 'FLOAT', S: 'STRING', E: 'ENUM', P: '
 const blRnas = new Map();
 export const hasStruct = (struct) => struct in structs;
 // An enum's items by index and by identifier (enum_items['VERTEX'].icon), separators left out.
-const enumItems = (items = []) => {
-  const list = collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value })));
-  return new Proxy(list, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key]
-    : Array.prototype.find.call(target, (item) => item.identifier === key) ?? target[rnaName(key)]) });
-};
+// A collection whose items are also its keys by identifier (properties['location'], enum_items['VERTEX']), looked up so
+// identifiers that are array names (Bone.length) or numbers do not overwrite the array's own. (A collection's find is
+// Blender's, by name.)
+const byIdentifier = (list) => new Proxy(list, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key]
+  : Array.prototype.find.call(target, (item) => item.identifier === key) ?? target[rnaName(key)]) });
+const enumItems = (items = []) => byIdentifier(collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value }))));
 const propertyNames = (struct) => { const names = new Set(); for (let s = structs[struct]; s; s = structs[s.base]) Object.keys(s.props).forEach((n) => names.add(n)); return names; };
 
 // bpy_struct.bl_rna: a struct's RNA as Blender's scripts read it, its properties (its own and its bases') as
@@ -102,9 +103,8 @@ export function blRna(struct) {
       get fixed_type() { return pointer ? blRna(p.struct) : null; },
     });
   });
-  const list = collection(properties);
-  for (const p of properties) list[p.identifier] = p;
-  const result = python({ identifier: struct, name: structName(struct), description: '', translation_context: '*', get base() { return structs[struct]?.base ? blRna(structs[struct].base) : null; }, properties: python(list) });
+  const list = byIdentifier(collection(properties));
+  const result = python({ identifier: struct, name: structName(struct), description: '', translation_context: '*', get base() { return structs[struct]?.base ? blRna(structs[struct].base) : null; }, properties: list });
   if (ui) blRnas.set(struct, result);
   return result;
 }
