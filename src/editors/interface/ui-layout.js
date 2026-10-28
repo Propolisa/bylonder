@@ -101,7 +101,7 @@ export class UILayout {
   prop(...list) {
     const { data, property, text } = args(list, ['data', 'property', 'text']), binding = this.ui.prop?.(data, property);
     if (!binding) return;
-    this.items.push({ label: text ?? binding.label, blender: property, checked: () => !!binding.get(), enabled: () => this.#enabled(), run: () => binding.set(!binding.get()) });
+    this.items.push({ label: text ?? binding.label, blender: property, keys: binding.keys, checked: () => !!binding.get(), enabled: () => this.#enabled(), run: () => binding.set(!binding.get()) });
   }
 
   separator() { this.items.push('-'); }

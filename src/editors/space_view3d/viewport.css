@@ -52,6 +52,9 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #tree-root{cursor:default}
 
 .bl-select-box{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);background:var(--bl-hover)}
+.bl-select-circle{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);border-radius:50%}
+.bl-select-lasso{position:fixed;inset:0;width:100%;height:100%;z-index:20;pointer-events:none}
+.bl-select-lasso polygon{fill:var(--bl-hover);stroke:var(--bl-text);stroke-dasharray:4 4}
 /* The toolbar region (view3d-toolbar.js) as Blender draws it at its default width (UI_TOOLBAR_WIDTH): tool buttons
    1.7 units tall in aligned columns 0.45 units in from the area's edge, groups 0.3 units apart, wcol_toolbar_item. */
 .bl-toolbar{--u:var(--bl-row);position:absolute;left:0;top:calc(var(--bl-header-h) + var(--u)*.5);z-index:3;display:flex;flex-direction:column;gap:calc(var(--u)*.3);box-sizing:border-box;max-height:calc(100% - var(--bl-header-h) - var(--u)*.5);padding:0 calc(var(--u)*.45);overflow:hidden;user-select:none;-webkit-user-select:none}

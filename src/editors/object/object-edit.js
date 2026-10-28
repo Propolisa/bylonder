@@ -7,7 +7,7 @@ import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
 import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS } from '../../bmesh/bmesh-wasm.js';
 import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDBM_elem_to_index_any } from '../mesh/editmesh-select.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
-import { do_mesh_box_select, SEL_OP_ADD, SEL_OP_SUB, SEL_OP_SET } from '../space_view3d/view3d-select.js';
+import { do_mesh_region_select, boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
 import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, toBlenderView, view3d_pixel_size } from '../transform/transform.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
@@ -253,12 +253,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   }
   const inset = () => em.edit.totals.totfacesel && meshModal('mesh.inset', inset_modal);
   const bevel = (affect) => meshModal('mesh.bevel', bevel_modal, { props: { affect } });
+  // Box, lasso and circle select: the elements in a region of the view, by eSelectOp.
+  const selectRegion = (view, region, mode) => { if (em && do_mesh_region_select(em.edit, em.mesh, viewAdapter(view ?? views.input), region, SEL_OPS[mode] ?? SEL_OPS.SET)) sync({ extract: EXTRACT_FLAGS }); };
   // view3d.select_box: a box gesture, begun at the drag's press or (from B) at the next press.
-  const MODES = { SET: SEL_OP_SET, ADD: SEL_OP_ADD, SUB: SEL_OP_SUB };
   const selectBox = (event, mode, begun = true) => startGestureBox(wm(), {
     begin: begun ? { x: event.x, y: event.y } : null,
     mode,
-    select: (rect, m) => { if (em && do_mesh_box_select(em.edit, em.mesh, viewAdapter(event.view ?? views.input), rect, MODES[m] ?? SEL_OP_SET)) sync({ extract: EXTRACT_FLAGS }); },
+    select: (rect, m) => selectRegion(event.view, boxRegion(rect), m),
   });
   const selectPick = (event, toggle) => { if (EDBM_select_pick(em.edit, em.mesh, viewAdapter(event.view), [event.x, event.y], { toggle })) sync({ extract: EXTRACT_FLAGS }); };
   // mesh.loop_select and mesh.edgering_select pick the nearest edge, whatever the select mode.
@@ -333,6 +334,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       return select_passthrough ? 'PASS_THROUGH' : 'FINISHED';
     },
     selectBox: (event, { mode = 'SET' }) => selectBox(event, mode, /mouse$/.test(event.type)),
+    selectRegion,
     // A modal transform of the selection; Mesh data is rewritten on every move and saved on confirm.
     // `orient: 'NORMAL'` constrains to the selection's normal; `keep` records an undo step even when cancelled, for
     // the operator that ran first (extrude).

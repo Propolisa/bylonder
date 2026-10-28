@@ -5,6 +5,7 @@ import { initTransform } from "../transform/transform.js";
 import { createTransObject } from "../transform/transform-object.js";
 import { createKeymap } from "../../windowmanager/input/keymap.js";
 import { startGestureBox } from "../../windowmanager/wm-gesture-box.js";
+import { boxRegion } from "../space_view3d/view3d-select.js";
 
 // Object-mode editing shared by every 3D Viewport: one selection, one tool mode, one gizmo set (drawn in every
 // view). Picking, projection and modal transforms use the view the gesture happens in (views.input).
@@ -209,10 +210,12 @@ export function createEditor(world, views, history, changed, notify, capture) {
     SET: (was, inside) => inside, ADD: (was, inside) => was || inside, SUB: (was, inside) => was && !inside,
     XOR: (was, inside) => was !== inside, AND: (was, inside) => was && inside,
   };
-  const selectInRect = (view, rect, op) => {
-    const inside = (p) => p.x >= rect.xmin && p.x <= rect.xmax && p.y >= rect.ymin && p.y <= rect.ymax;
+  // Box select counts an object when one of its vertices (or its origin, without any) projects inside; lasso and
+  // circle select test its origin, as do_lasso_select_objects and object_circle_select do.
+  const selectRegion = (view, region, op, vertices = false) => {
+    const inside = (p) => region.point([p.x, p.y]);
     const drawnInside = (node) => {
-      const positions = node.getVerticesData?.("position"), m = node.computeWorldMatrix(true);
+      const positions = vertices && node.getVerticesData?.("position"), m = node.computeWorldMatrix(true);
       if (!positions?.length) return inside(project(node.getAbsolutePosition(), view));
       for (let i = 0; i < positions.length; i += 3) {
         if (inside(project(Vector3.TransformCoordinates(Vector3.FromArray(positions, i), m), view))) return true;
@@ -290,8 +293,9 @@ export function createEditor(world, views, history, changed, notify, capture) {
     gizmoState,
     selectBox(event, { mode: op = "SET" }) {
       const view = event.view ?? views.input, dragged = /mouse$/.test(event.type);
-      startGestureBox(world.wm, { begin: dragged ? { x: event.x, y: event.y } : null, mode: op, select: (rect, m) => selectInRect(view, rect, op === "SET" || op === "ADD" ? m : op) });
+      startGestureBox(world.wm, { begin: dragged ? { x: event.x, y: event.y } : null, mode: op, select: (rect, m) => selectRegion(view, boxRegion(rect), op === "SET" || op === "ADD" ? m : op, true) });
     },
+    selectRegion: (view, region, op) => selectRegion(view ?? views.input, region, op),
     // A view going away ends a transform running in it.
     attach(view) {
       return () => { if (modal?.view === view) finish(false); };

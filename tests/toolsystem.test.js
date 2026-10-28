@@ -10,6 +10,7 @@ import { createContext } from '../src/blenkernel/context.js';
 import { createToolSystem } from '../src/windowmanager/wm-toolsystem.js';
 import { keymapHandler } from '../src/windowmanager/keyconfig.js';
 import { registerOperator, invokeOperator } from '../src/windowmanager/wm-operators.js';
+import { boxRegion, lassoRegion, circleRegion } from '../src/editors/space_view3d/view3d-select.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
 const cube = MeshBuilder.CreateBox('Cube', { size: 2 }, scene);
@@ -88,7 +89,22 @@ set({ name: 'builtin.move' });
 assert.ok(keys(event('CLICK_DRAG')));
 set({ name: 'builtin.select' });
 assert.equal(keys(event('PRESS')), false, 'the Tweak press selects and passes through, so a drag can follow');
-assert.deepEqual(ran, [['box', 'XOR'], ['box', 'ADD'], ['select', true], ['move', true], ['select', true]]);
+// Circle select paints from the press (wait_for_input off) with the tool's radius; lasso begins at a drag.
+registerOperator('view3d.select_circle', { run: (props) => { ran.push(['circle', props.wait_for_input, props.radius ?? 25, props.mode ?? 'SET']); } });
+registerOperator('view3d.select_lasso', { run: (props) => { ran.push(['lasso', props.mode ?? 'SET']); } });
+set({ name: 'builtin.select_circle' });
+context().workspace.tools.from_space_view3d_mode('OBJECT').operator_properties('view3d.select_circle').radius = 40;
+assert.ok(keys(event('PRESS')) && keys(event('PRESS', { ctrl: true })));
+set({ name: 'builtin.select_lasso' });
+assert.ok(keys(event('CLICK_DRAG', { shift: true, ctrl: true })));
+assert.deepEqual(ran, [['box', 'XOR'], ['box', 'ADD'], ['select', true], ['move', true], ['select', true],
+  ['circle', false, 40, 'SET'], ['circle', false, 40, 'SUB'], ['lasso', 'AND']]);
+
+// The regions box, lasso and circle select test points and edges against, in pixels.
+const box = boxRegion({ xmin: 0, xmax: 10, ymin: 0, ymax: 10 }), lasso = lassoRegion([[0, 0], [10, 0], [0, 10]]), circle = circleRegion([0, 0], 5);
+assert.ok(box.point([5, 5]) && !box.point([11, 5]) && box.edge([-5, 5], [15, 5]) && !box.edge([-5, -5], [-1, 20]));
+assert.ok(lasso.point([2, 2]) && !lasso.point([8, 8]) && lasso.edge([-5, 2], [20, 2]));
+assert.ok(circle.point([3, 4]) && !circle.point([4, 4]) && circle.edge([-10, 1], [10, 1]) && !circle.edge([-10, 6], [10, 6]) && !circle.edgesInsideFirst);
 assert.ok(changes.length >= 8);
 
 scene.dispose();

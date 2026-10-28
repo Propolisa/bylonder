@@ -30,6 +30,9 @@ function meta(data, name) {
   return { name: name.split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ') };
 }
 
+// A property's name in Blender's RNA, once loaded.
+export const propertyName = (data, name) => (rnaUI ? meta(data, name).name : null);
+
 const LAYOUT_ARGS = {
   prop: ['data', 'property', 'text', 'text_ctxt', 'translate', 'icon', 'placeholder', 'expand', 'slider', 'toggle', 'icon_only', 'event', 'full_event', 'emboss', 'index', 'icon_value', 'invert_checkbox'],
   prop_enum: ['data', 'property', 'value', 'text', 'text_ctxt', 'translate', 'icon'],

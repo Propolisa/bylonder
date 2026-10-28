@@ -46,6 +46,9 @@ import { createBlenderObjects } from "./editors/object/object-blender.js";
 import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
+import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
+import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
+import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
@@ -124,6 +127,11 @@ const commit = () => history?.commit();
 let views;
 // The 3D Viewports among the engine views (the compositor backdrop is the other kind).
 const viewports = () => views?.all.filter((view) => view.nav) || [];
+// The Properties editor and the 3D Views' regions drawn from Blender's scripts show the data anew.
+function refreshUI() {
+  ui?.refresh();
+  for (const view of viewports()) view.regions?.draw();
+}
 // Modifier evaluations off the main thread, shown with Cancel once they take long, asking before enormous ones.
 const jobs = createJobs({ ask: true });
 const runningJobs = createRunningJobs(document.body.appendChild(document.createElement("div")), jobs);
@@ -251,7 +259,7 @@ history = createHistory(world.objects, () => {
   registerObjects(animation, objects);
   world.modifiers.refresh();
   animation.changed();
-  ui?.refresh();
+  refreshUI();
 }, {capture:()=>({animation:animation.serialize(),stores:sdk.values(),document:documentState.capture(),properties:Object.fromEntries([...animation.channels].filter(([,ch])=>!ch.transform&&ch.available()).map(([ref,ch])=>[ref,ch.get()]))}),restore:data=>{
   registerObjects(animation, objects);
   for(const system of systems)for(const [key,value] of Object.entries(data?.stores?.[system.id]||{}))system.store.set(key,value);
@@ -267,7 +275,7 @@ const editor = createEditor(
   world,
   views,
   history,
-  () => { ui?.refresh(); views.wake(); },
+  () => { refreshUI(); views.wake(); },
   notify,
   capture,
 );
@@ -275,7 +283,7 @@ const activeView = () => views.input;
 // Object actions and menus act on the 3D Viewport under the pointer, as in Blender.
 const nav = { frame: (node) => activeView()?.nav.frame(node) };
 const commands = createObjectCommands(world, editor, history, () =>
-  ui?.refresh(),
+  refreshUI(),
 );
 creator = createAddMesh(
   world,
@@ -286,7 +294,7 @@ creator = createAddMesh(
   notify,
 );
 commands.setBefore(() => creator.finish());
-world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { ui?.refresh(); views.wake(); } });
+world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { refreshUI(); views.wake(); } });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
@@ -303,7 +311,7 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
+const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { refreshUI(); views.wake(); }, undoPush: commit });
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
 // The mode the tool system and Blender's keymaps go by (context.mode).
@@ -352,7 +360,7 @@ const insertKeys = () => {registerObjects(animation, objects);animation.insert(o
 const timelineOptions = id => ({insert:insertKeys,undo:()=>{history.undo();editor.reconcile();},redo:()=>{history.redo();editor.reconcile();},header:viewportDock.header(id),names:ref=>world.objects.find(n=>'object:'+nodeId(n)===ref)?.name});
 const timeline = mountTimeline(document.querySelector('#timeline-section'), animation, timelineOptions('timeline'));
 viewportDock.setFactory('timeline',(host,id)=>mountTimeline(host,animation,timelineOptions(id)));
-const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();ui?.refresh();} });
+const unsubscribeAnimation = animation.subscribe(() => { if (!editor.modal) {editor.selection.sync();refreshUI();} });
 document.querySelector("#add-mesh").onclick = () => creator.show();
 document.querySelector("#delete-objects").onclick = () => commands.remove();
 document.querySelector("#duplicate-objects").onclick = () =>
@@ -491,6 +499,7 @@ const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !docum
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.timeline') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
+const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
 // The Add panel's own keys while a new object waits for its settings.
 const creatorKeys = createKeymap([
   { keys: "ESC", poll: () => creator.pending, run: () => creator.finish(false) },
@@ -520,6 +529,16 @@ registerOperators({
   // Picks and boxes in the mode's own way; tools' keymaps run them with the tool's settings.
   "view3d.select": { poll: (props, event) => inView(event), run: (props, event) => (world.editMode.active ? world.editMode : editor).selectOperator(event, props) },
   "view3d.select_box": { run: (props, event) => (world.editMode.active ? world.editMode : editor).selectBox({ ...event, view: event?.view ?? activeView() }, props) },
+  "view3d.select_lasso": {
+    poll: (props, event) => inView(event),
+    run: ({ mode = "SET" }, event) => { startGestureLasso(world.wm, { begin: event, select: (path) => selectRegion(event.view, lassoRegion(path), mode) }); },
+  },
+  "view3d.select_circle": {
+    poll: (props, event) => !!(event?.view ?? activeView()),
+    run: ({ mode = "SET", radius = 25, wait_for_input = true }, event) => {
+      startGestureCircle(world.wm, { at: event, radius, waitForInput: wait_for_input, mode, select: (center, r, m) => selectRegion(event.view ?? activeView(), circleRegion(center, r), m) });
+    },
+  },
   // A transform from a key starts at the mouse, from a tool's drag at its press; release_confirm ends it on release.
   ...Object.fromEntries([["transform.translate", "move"], ["transform.rotate", "rotate"], ["transform.resize", "scale"]].map(([idname, type]) => [idname, {
     poll: () => editor.selection.size > 0,

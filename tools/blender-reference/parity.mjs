@@ -55,6 +55,8 @@ const SETUP = {
     await app.frame().getByRole("menuitem", { name: "Subdivision Surface" }).click();
     await app.hover(...REST);
   },
+  toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
+  "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
 };
 
 async function captureBylonder(browser, url, state) {

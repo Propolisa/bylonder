@@ -8,6 +8,7 @@ import { propBinding } from '../../makesrna/rna-bylonder.js';
 import * as spaceView3d from '../../bl_ui/space_view3d.js';
 import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
+import { propertyName } from './region-layout.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 
 const axes = [
@@ -31,6 +32,13 @@ const INFO_MT_area = Object.assign(() => ({
     layout.operator('screen.area_close', kw({ text: 'Close Area' }));
   },
 }), { bl_label: 'Area' });
+// A bound property's check item, named as Blender's RNA names it (Toolbar for show_region_toolbar) once loaded.
+const namedBinding = (binding) => (data, name) => {
+  const bound = binding(data, name);
+  return bound && { ...bound, label: propertyName(data, name) ?? bound.label, keys: blenderKeys(KEYMAPS, 'wm.context_toggle', { data_path: dataPath(data, name) }) };
+};
+// A property's path from the context, for the keymap items toggling it (wm.context_toggle's data_path).
+const dataPath = (data, name) => ({ SpaceView3D: 'space_data.', ToolSettings: 'tool_settings.', View3DOverlay: 'space_data.overlay.' })[data.bl_rna?.identifier] + name;
 const theme = new Color4(0.239, 0.239, 0.239, 1);
 
 // One 3D Viewport area: its canvas, editor camera, navigation, header menus, overlays and per-view state
@@ -103,7 +111,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   selectModes.append(...selectModeButtons);
   // Blender's Object Mode menus, from its own scripts over this view's context.
   // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
-  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => world.blenderContext(view), prop: propBinding(ctx.rna.host), keymaps: () => KEYMAPS });
+  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);
