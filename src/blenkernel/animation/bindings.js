@@ -12,7 +12,7 @@ export function registerObjects(animation, objects) {
   for(const node of objects){
     if(node.isDisposed()||deleted(node))continue;
     for(const property of ['position','rotation','scaling'])for(const axis of ['x','y','z'])animation.register({
-      id:'object:'+nodeId(node),path:property+'.'+axis,group:node.name,label:({position:'Location',rotation:'Rotation',scaling:'Scale'})[property]+' '+axis.toUpperCase(),transform:true,
+      id:'object:'+nodeId(node),path:property+'.'+axis,group:node.name,label:({position:'Location',rotation:'Rotation',scaling:'Scale'})[property]+' '+axis.toUpperCase(),transform:true,target:node,property:property+'.'+axis,
       available:()=>!node.isDisposed()&&!deleted(node),
       get:()=>property==='rotation'&&node.rotationQuaternion?node.rotationQuaternion.toEulerAngles()[axis]:node[property][axis],
       set:value=>{if(property==='rotation'&&node.rotationQuaternion){node.rotation.copyFrom(node.rotationQuaternion.toEulerAngles());node.rotationQuaternion=null;}node[property][axis]=value;}
@@ -40,7 +40,7 @@ export function bindProperties(animation,target,{id,title=id,properties}) {
     const get=()=>owner()[key],set=value=>{owner()[key]=value;};
     const def=typeof definition==='object'?definition:{};
     schema[path]={default:get(),...def};
-    if(def.animatable!==false)animation.register({id,path,label:def.label||path,group:title,get,set,available:()=>!target.isDisposed?.(),options:def.options});
+    if(def.animatable!==false)animation.register({id,path,label:def.label||path,group:title,get,set,target,property:path,available:()=>!target.isDisposed?.(),options:def.options});
   }
   return {id,title,schema,target,ref:path=>address(id,path)};
 }

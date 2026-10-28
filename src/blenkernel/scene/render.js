@@ -42,6 +42,7 @@ export function createRenderSettings(world, { commit = () => {}, authored = {} }
     get state() { return state; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     // Cameras of the views in Rendered shading or camera view; render effects attach to these only.
+    get renderedCameras() { return [...cameras]; },
     setRenderedCameras(list) { const next = new Set(list); if (next.size === cameras.size && [...next].every(c => cameras.has(c))) return; cameras = next; render(); },
     set(path, value, finish = true) {
       const { owner, key } = resolve(state, path);

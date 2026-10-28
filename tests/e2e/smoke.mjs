@@ -47,6 +47,25 @@ const checks = {
     assert.ok((await download).suggestedFilename());
   },
 
+  async "File > Export writes the evaluated scene as .babylon and .js"() {
+    await app.bylonder((b) => b.world.modifiers.add(b.world.scene.getMeshByName("Cube"), "SUBSURF", { levels: 2 }));
+    const exported = async (item) => {
+      const download = app.page.waitForEvent("download", { timeout: 60000 });
+      await app.page.click('[data-blender="TOPBAR_MT_file"]');
+      await app.page.getByRole("menuitem", { name: /^Export/ }).first().hover();
+      await app.page.getByRole("menuitem", { name: item }).click();
+      const file = (await download).createReadStream();
+      let text = "";
+      for await (const chunk of await file) text += chunk;
+      return text;
+    };
+    const json = JSON.parse(await exported("Babylon (.babylon)"));
+    assert.deepEqual(json.meshes.map((m) => m.name), ["Cube"]);
+    assert.equal(json.activeCameraID, "Camera");
+    assert.equal(json.geometries.vertexData[0].indices.length, 96 * 2 * 3, "the subdivided cube");
+    assert.match(await exported("JavaScript (.js)"), /export async function createScene\(engine, canvas\)/);
+  },
+
   async "topbar File menu and 3D View Object menu open"() {
     await app.page.click('[data-blender="TOPBAR_MT_file"]');
     await app.page.getByRole("menuitem", { name: /^Open/ }).first().waitFor();

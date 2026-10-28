@@ -142,13 +142,13 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
   };
   const valueAt = (track, frame) => fromCurve(track.ref, track.fcurve.evaluate(frame), track.factor, channels.get(track.ref)?.get());
 
+  const liveTracks = () => tracks().map((track) => ({ track, channel: channels.get(track.ref) }))
+    .filter(({ track, channel }) => channel?.available() && track.fcurve.length && !(track.fcurve.flag & FCURVE.MUTED));
   const changed = () => { curves = null; onChange(api.serialize()); notify(); };
   const evaluate = () => {
     evaluating = true;
     try {
-      for (const track of tracks()) {
-        const channel = channels.get(track.ref);
-        if (!channel?.available() || !track.fcurve.length || track.fcurve.flag & FCURVE.MUTED) continue;
+      for (const { track, channel } of liveTracks()) {
         const value = valueAt(track, time.frame);
         if (typeof value === typeof channel.get()) channel.set(value);
         pose.set(track.ref, channel.get());
@@ -196,11 +196,12 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     get playing() { return time.playing; }, get evaluating() { return evaluating; }, get revision() { return revision; },
     setCommit(fn) { commit = fn; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
-    register({ id, path, label = path, group = id, get, set, available = () => true, transform = false, options }) {
+    // target and property: the Babylon object and property path the channel animates, when it has one (exports).
+    register({ id, path, label = path, group = id, get, set, available = () => true, transform = false, options, target, property }) {
       const ref = address(id, path);
-      if (channels.has(ref)) { Object.assign(channels.get(ref), { label, group, get, set, available, transform, options }); return ref; }
+      if (channels.has(ref)) { Object.assign(channels.get(ref), { label, group, get, set, available, transform, options, target, property }); return ref; }
       if (!scalar(get())) throw Error('Animation channels must be scalar: ' + ref);
-      channels.set(ref, { id, path, label, group, get, set, available, transform, options }); pose.set(ref, clone(get())); notify(); return ref;
+      channels.set(ref, { id, path, label, group, get, set, available, transform, options, target, property }); pose.set(ref, clone(get())); notify(); return ref;
     },
     removeTarget(id) { for (const [ref, ch] of channels) if (ch.id === id) { channels.delete(ref); pose.delete(ref); } notify(); },
     track(ref) { const t = trackFor(ref); return t && { id: t.id, path: t.path, keys: keysOf(t) }; },
@@ -296,13 +297,16 @@ export function createAnimationModel(onChange = () => {}, { time = createSceneTi
     edited() { curves = null; evaluate(); onChange(api.serialize()); },
     syncTime,
     mute(ref) { const t = trackFor(ref); if (t) { t.fcurve.flag ^= FCURVE.MUTED; changed(); evaluate(); commit(); } },
+    // Each animated channel's values, as the channel takes them, at every frame of the scene range from `start`.
+    sample() {
+      const [start, end] = [time.state.frameStart, time.state.frameEnd];
+      return liveTracks().map(({ track, channel }) => ({ channel, start, values: Array.from(track.fcurve.sample(start, 1, end - start + 1), (v) => fromCurve(track.ref, v, track.factor, channel.get())) }));
+    },
     // A Babylon AnimationGroup sampling each F-Curve at every frame of the scene range.
     toAnimationGroup(scene, groupName = name) {
       const fps = time.state.fps, [start, end] = [time.state.frameStart, time.state.frameEnd];
       const group = new AnimationGroup(groupName, scene);
-      for (const track of tracks()) {
-        const channel = channels.get(track.ref);
-        if (!channel?.available() || !track.fcurve.length || track.fcurve.flag & FCURVE.MUTED) continue;
+      for (const { track, channel } of liveTracks()) {
         const numeric = typeof channel.get() === 'number';
         const animation = new Animation(track.ref, 'value', fps, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
         const samples = track.fcurve.sample(start, 1, end - start + 1);

@@ -56,6 +56,7 @@ import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
+import { exportScene } from "./io_scene_babylon/export.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
 let toastTimer;
@@ -249,6 +250,7 @@ window.addEventListener("message", (e) => {
     ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
   }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
+  if (e.data.type === "export") exportScene(world, e.data.payload).catch((error) => notify("Export failed: " + error.message));
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
     const requestId = e.data.payload.requestId;
