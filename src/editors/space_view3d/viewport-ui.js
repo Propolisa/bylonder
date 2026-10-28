@@ -31,12 +31,13 @@ export function createViewportStatus({ world, editor, views, send }) {
   const status = () => {
     const active = editor.selection.nodes.at(-1);
     // Blender shows the active object's collection (or the active collection) before the object name.
-    const cols = world.collections, home = active && world.objects.includes(active) ? cols?.memberships(nodeId(active))[0] : cols?.active;
-    const collection = !cols || !home || home === cols.MASTER ? 'Scene Collection' : cols.byId(home).name;
+    // The 3D View names the active object's collection, the status bar the active collection.
+    const cols = world.collections, name = (id) => (!cols || !id || id === cols.MASTER ? 'Scene Collection' : cols.byId(id).name);
+    const collection = name(cols?.active), home = name(active && world.objects.includes(active) ? cols?.memberships(nodeId(active))[0] : cols?.active);
     const visible = world.objects.filter(n => n.isEnabled() && n.isVisible !== false && !n.isDisposed() && n.getTotalVertices);
     const verts = visible.reduce((s, n) => s + n.getTotalVertices(), 0);
     const tris = visible.reduce((s, n) => s + (n.getTotalIndices() || n.getTotalVertices()) / 3, 0);
-    const detail = `(${Math.round(world.animation.time.frame)}) ${collection}${active ? ' | ' + active.name : ''}`;
+    const detail = `(${Math.round(world.animation.time.frame)}) ${home}${active ? ' | ' + active.name : ''}`;
     for (const view of views.all) view.setDetail?.(detail);
     const hints = editor.modal
       ? [[['mouse_lmb'], 'Confirm'], [['mouse_rmb'], 'Cancel'], [['X', 'Y', 'Z'], 'Axis'], [['Shift'], 'Precision'], [['Ctrl'], 'Snap']]
@@ -47,8 +48,9 @@ export function createViewportStatus({ world, editor, views, send }) {
       ? `Verts:${ratio(edit.verts)} | Edges:${ratio(edit.edges)} | Faces:${ratio(edit.faces)} | Tris:${count(edit.tris)}`
       : `Verts:${count(verts)} | Tris:${count(Math.round(tris))}`;
     const stats = `${collection}${active ? ' | ' + active.name : ''} | ${geometry} | Objects:${editor.selection.size}/${world.objects.filter(n => n.isEnabled(false)).length} | ${fps}`;
-    const next = JSON.stringify([hints, stats]);
-    if (next !== last) { last = next; send('status', { hints, stats }); }
+    const viewLayers = cols && { list: cols.viewLayers().map(({ id, name }) => [id, name]), active: cols.layer().id };
+    const next = JSON.stringify([hints, stats, viewLayers]);
+    if (next !== last) { last = next; send('status', { hints, stats, viewLayers }); }
   };
   return {
     tick() {

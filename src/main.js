@@ -42,7 +42,8 @@ import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerAddOperators } from "./editors/object/add-operators.js";
 import { openMenu } from "./editors/interface/menu.js";
-import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
+import { createBlenderObjects } from "./editors/object/object-blender.js";
+import { registerOperators, appendMenu, kw, inArea, contextArea } from "./windowmanager/wm-operators.js";
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
@@ -221,6 +222,10 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "reset-layout") viewportDock.reset();
   if (e.data.type === "invoke") world.objectActions.invoke(e.data.payload);
   if (e.data.type === "help") help.showModal();
+  if (e.data.type === "view-layer") {
+    const cols = world.collections, { op, id } = e.data.payload;
+    ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
+  }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
@@ -298,8 +303,6 @@ world.objectActions = createObjectActions({
   inspect: () => inspector(),
 });
 world.contextMenu = createObjectContextMenu(world, editor, world.objectActions);
-registerObjectOperators(world.objectActions);
-registerAddOperators(creator);
 const blenderRNA = createRNA({ world, selection: editor.selection, update: () => { ui?.refresh(); views.wake(); }, undoPush: commit });
 // bpy.context for a 3D Viewport (blenkernel/context.js) and one of its regions, for what is drawn from Blender's scripts.
 world.blenderContext = (view, region) => createContext(blenderRNA, { space: view, region });
@@ -310,10 +313,14 @@ const TOOL_GIZMOS = { "builtin.move": "move", "builtin.rotate": "rotate", "built
 const applyTool = () => {
   if (!editor.modal && !world.editMode.active) editor.setMode(TOOL_GIZMOS[world.toolsystem.active("OBJECT").idname] ?? "select");
 };
+// The 3D View operators act on: the context area's (wm-operators.js), else the one under the pointer.
+const contextView = () => contextArea()?.space ?? activeView();
 world.toolsystem = createToolSystem({
-  context: () => world.blenderContext(activeView()),
+  context: () => world.blenderContext(contextView()),
   changed: () => { applyTool(); viewports().forEach((view) => view.sync()); },
 });
+registerObjectOperators(world.objectActions, createBlenderObjects({ rna: blenderRNA, transaction: commands.transaction, notify }));
+registerAddOperators(creator);
 world.dock = viewportDock;
 world.outliner = createOutliner(world, editor, commands);
 const touch = createViewportTouch(world, editor, creator, views);
@@ -525,13 +532,12 @@ registerOperators({
   "wm.context_toggle": {
     run: ({ data_path }) => {
       const path = data_path.split("."), key = path.pop();
-      const owner = path.reduce((data, name) => data?.[name], world.blenderContext(activeView()));
+      const owner = path.reduce((data, name) => data?.[name], world.blenderContext(contextView()));
       if (typeof owner?.[key] !== "boolean" || !Object.getOwnPropertyDescriptor(Object(owner), key)?.set) return "PASS_THROUGH";
       owner[key] = !owner[key];
     },
   },
-  "wm.toolbar": { poll: () => !!activeView(), run: () => activeView().toolbar.popup(editor.pointer) },
-  "wm.call_menu": { supports: ({ name }) => !!activeView()?.menu(name), run: ({ name }) => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name)) },
+  "wm.toolbar": { poll: () => !!contextView(), run: () => contextView().toolbar.popup(editor.pointer) },
   "bylonder.inspector": { keys: () => "Shift Ctrl I", run: inspector },
   "bylonder.shortcuts": { keys: () => "?", run: () => help.showModal() },
 });
@@ -548,10 +554,16 @@ const bylonderKeys = createKeymap([
 ]);
 // Blender's keymaps a 3D View runs: the active tool's and its fallback's, the mode's (Object Mode or Mesh), then the
 // 3D View's and the window's. Tool keymaps run with the tool's settings.
-const blenderKeys = keymapHandler(
+const view3dKeys = keymapHandler(
   (event) => [...world.toolsystem.keymaps(contextMode(), editor.gizmoState(event)), "Object Mode", "Mesh", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
   (name) => ({ "Object Mode": !world.editMode.active, Mesh: world.editMode.active })[name] ?? true,
   (name, idname) => world.toolsystem.keymapProperties(contextMode(), name, idname));
+// The 3D View under the pointer as the context area, with its menus for wm.call_menu and its view (space) for tools.
+const view3dArea = {
+  get space() { return activeView(); },
+  menu: (name) => activeView()?.menu(name) && (() => openMenu(activeView().menu(name), editor.pointer, activeView().menuTitle(name))),
+};
+const blenderKeys = (event) => inArea(view3dArea, () => view3dKeys(event));
 // The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
 // Through the scene camera only Blender's keymaps work.
 // The gizmo map's handler comes first: a press on the tool's gizmo is the gizmo's (Babylon's gizmos drag themselves).

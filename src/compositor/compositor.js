@@ -47,6 +47,13 @@ export function createCompositor(world, { commit = () => {}, notify = console.wa
       if (graph && enabled) build().catch(error => notify('Compositor: ' + error.message));
     },
     get camera() { return camera; },
+    // An edit in the node editor, recorded; rebuilt when it changed the graph's blocks, links or code.
+    async edit(rebuild) {
+      edited = true;
+      if (rebuild && enabled) await build().catch(error => notify('Compositor: ' + error.message));
+      bind();
+      commit();
+    },
     syncCamera() { api.bindCamera(scene.activeCamera); },
     capture: () => ({ enabled, graph: graph && (edited || enabled) ? graph.serialize() : null }),
     async apply(state = {}) {

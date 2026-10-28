@@ -118,15 +118,15 @@ def flags(tree, spec):
 
 def operator_table(tree, build, args, spec):
     """generated/operators.inc: OPERATOR(name) for each operator registration function (`void MESH_OT_x(wmOperatorType *)`)
-    the module's operator headers declare, as Clang parses them, so operators Blender builds out (WITH_FREESTYLE) are not
-    listed."""
+    the module's operator headers declare, or its operator sources define, as Clang parses them, so operators Blender builds
+    out (WITH_FREESTYLE) are not listed."""
     import clang.cindex as ci
     names = []
-    for header in spec.get('operators', []):
-        tu = ci.Index.create().parse(os.path.join(tree, header), args=[a for a in args if a.startswith(('-I', '-D', '-std', '-isystem'))]
+    for path in spec.get('operators', []):
+        tu = ci.Index.create().parse(os.path.join(tree, path), args=[a for a in args if a.startswith(('-I', '-D', '-std', '-isystem'))]
                                      + ['-x', 'c++', '--target=wasm32-wasi'], options=ci.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES)
         names += [c.spelling for c in tu.cursor.walk_preorder() if c.kind == ci.CursorKind.FUNCTION_DECL
-                  and c.location.file and c.location.file.name.endswith(header) and '_OT_' in c.spelling
+                  and c.location.file and c.location.file.name.endswith(path) and '_OT_' in c.spelling
                   and [t.spelling for t in c.type.argument_types()] == ['wmOperatorType *']]
     generated = os.path.join(build, 'generated')
     os.makedirs(generated, exist_ok=True)
@@ -244,13 +244,15 @@ def build(root, name, spec, tag):
     generated, operators = operator_table(tree, out_dir, args, spec)
     archives, members = [], []
     for lib in spec['libraries']:
-        # A library is a directory or a file, or {path, exclude, dependency}: a directory without some of its files, in
-        # Blender's tree or in a dependency's.
-        lib, exclude, base = (lib['path'], set(lib.get('exclude', [])), deps[lib['dependency']] if 'dependency' in lib else tree) \
-            if isinstance(lib, dict) else (lib, set(), tree)
+        # A library is a directory or a file, or {path, exclude, dependency, includes}: a directory without some of its
+        # files, in Blender's tree or in a dependency's, whose sources also see header directories of Blender's tree.
+        spec_lib = lib if isinstance(lib, dict) else {'path': lib}
+        lib, exclude = spec_lib['path'], set(spec_lib.get('exclude', []))
+        base = deps[spec_lib['dependency']] if 'dependency' in spec_lib else tree
         sources = sorted(glob.glob(os.path.join(base, lib, '*.c*'))) if os.path.isdir(os.path.join(base, lib)) else [os.path.join(base, lib)]
         sources = [s for s in sources if os.path.basename(s) not in exclude]
-        objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args, patches)
+        lib_args = args + [f'-I{os.path.join(tree, d)}' for d in spec_lib.get('includes', [])]
+        objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], lib_args, patches)
         built = [o for o in objects.values() if o]
         archive = os.path.join(out_dir, lib.replace('/', '_') + '.a')
         if os.path.exists(archive):
@@ -259,12 +261,14 @@ def build(root, name, spec, tag):
         archives.append(archive)
         members += built
         print(f'{lib}: {len(built)} of {len(objects)} sources build', file=sys.stderr)
-    # The module's own files also see wasm/ and the generated operator table; Blender's sources need neither.
+    # The module's own files also see wasm/, the generated operator table and the operators' editors' headers; Blender's
+    # sources need none of them.
+    own_args = args + [f'-I{generated}', f'-I{WASM}', *(f'-I{os.path.join(tree, os.path.dirname(p))}' for p in spec.get('operators', []))]
     own = compile_all(out_dir, [os.path.join(WASM, f) for f in [*spec['api'], 'platform.cc']] + [rna_prototypes(out_dir, args)],
-                      args + [f'-I{generated}', f'-I{WASM}'], patches + operators + rna_dna_fields(out_dir) + own_headers())
+                      own_args, patches + operators + rna_dna_fields(out_dir) + own_headers())
     failed = [src for src, obj in own.items() if obj is None]
     if failed:
-        result = subprocess.run(['clang++', *args, f'-I{generated}', f'-I{WASM}', '-c', failed[0], '-o', os.devnull], capture_output=True, text=True)
+        result = subprocess.run(['clang++', *own_args, '-c', failed[0], '-o', os.devnull], capture_output=True, text=True)
         sys.exit(f'{os.path.relpath(failed[0], convert.REPO)} does not build:\n{result.stderr}')
     out = os.path.join(convert.REPO, 'src', name)
     # Archives twice: a member one archive pulls in may need members of an archive listed before it.

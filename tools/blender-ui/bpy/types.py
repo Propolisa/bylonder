@@ -54,3 +54,10 @@ class WindowManager:
     @staticmethod
     def draw_cursor_remove(handle):
         pass
+
+
+# Node types by idname (bpy._rna.nodes): their names and enums, which the Add menus read.
+class Node:
+    @classmethod
+    def bl_rna_get_subclass(cls, idname):
+        return _rna.nodes.get(idname)

@@ -36,6 +36,26 @@ export function invokeOperator(idname, props, event) {
   return 'FINISHED';
 }
 
+// The area an event is handled in, Blender's context area: an editor sets it while its keymaps run, so operators act
+// on that editor. An area is { menu(idname): a Blender menu's popup opener, or null when the area has none, ... }.
+let area = null;
+export function inArea(handled, run) {
+  const outer = area;
+  area = handled;
+  try {
+    return run();
+  } finally {
+    area = outer;
+  }
+}
+export const contextArea = () => area;
+
+// wm.call_menu: one of Blender's menus as a popup, from the area that has it.
+registerOperator('wm.call_menu', {
+  supports: ({ name }) => !!area?.menu(name),
+  run: ({ name }, event) => area.menu(name)(event),
+});
+
 const extension = (idname) => extensions.get(idname) ?? extensions.set(idname, { prepend: [], append: [] }).get(idname);
 // Menu.append and Menu.prepend: draw(self, context), drawing into self.layout.
 export const appendMenu = (idname, draw) => extension(idname).append.push(draw);

@@ -36,9 +36,10 @@ export function createRenderEngine(scene) {
   const attached = new Map(); // camera -> { key, effects }
   const usesGeometry = effects => !!(effects.ssao || effects.ssr || effects.motion);
   const ownGeometryBuffer = !scene.geometryBufferRenderer;
-  // The geometry buffer renders once per scene render; only cameras with effects that read it need it filled.
-  const gateGeometryBuffer = scene.onBeforeRenderObservable.add(() => {
-    const buffer = scene.geometryBufferRenderer, effects = attached.get(scene.activeCamera)?.effects;
+  // The geometry buffer renders per camera; only cameras with effects that read it need it filled. A camera observer
+  // leaves the scene's render observers to user code, which keeps the views rendering (main.js).
+  const gateGeometryBuffer = scene.onBeforeCameraRenderObservable.add((camera) => {
+    const buffer = scene.geometryBufferRenderer, effects = attached.get(camera)?.effects;
     if (buffer && ownGeometryBuffer) buffer.renderList = effects && usesGeometry(effects) ? null : [];
   });
   const drop = camera => {
@@ -81,6 +82,6 @@ export function createRenderEngine(scene) {
         if (effects.motion) effects.motion.motionStrength = r.motionBlurShutter * 2;
       }
     },
-    dispose() { scene.onBeforeRenderObservable.remove(gateGeometryBuffer); for (const camera of [...attached.keys()]) drop(camera); },
+    dispose() { scene.onBeforeCameraRenderObservable.remove(gateGeometryBuffer); for (const camera of [...attached.keys()]) drop(camera); },
   };
 }

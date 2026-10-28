@@ -26,7 +26,38 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = ['...'];
+export var _ellipsis = Symbol ("Ellipsis")
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -789,7 +820,7 @@ export var _template_items_uv_select_mode = function (params) {
 					return __call__ (__accu1__.append, __accu1__, tuple (['uv.select_mode', dict ({'type': __getitem__ (NUMBERS_1, i), 'value': 'PRESS'}), dict ({'properties': [tuple (['type', e])]})]));
 				}) ();
 			}
-			return py_iter (__accu0__);
+			return __accu0__;
 		}) (), [tuple (['wm.context_toggle', dict ({'type': 'FOUR', 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'tool_settings.use_uv_select_island'])]})])]);
 	}
 };
@@ -971,7 +1002,7 @@ export var km_window = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['screen.space_type_set_or_cycle', dict ({'type': k, 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['space_type', t])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [__call__ (op_panel, null, 'USERPREF_PT_ndof_settings', dict ({'type': 'NDOF_BUTTON_MENU', 'value': 'PRESS'})), tuple (['wm.context_scale_float', dict ({'type': 'NDOF_BUTTON_PLUS', 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'preferences.inputs.ndof_translation_sensitivity']), tuple (['value', 1.1])]})]), tuple (['wm.context_scale_float', dict ({'type': 'NDOF_BUTTON_MINUS', 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'preferences.inputs.ndof_translation_sensitivity']), tuple (['value', __truediv__ (1.0, 1.1)])]})]), tuple (['wm.context_scale_float', dict ({'type': 'NDOF_BUTTON_PLUS', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['data_path', 'preferences.inputs.ndof_translation_sensitivity']), tuple (['value', 1.5])]})]), tuple (['wm.context_scale_float', dict ({'type': 'NDOF_BUTTON_MINUS', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['data_path', 'preferences.inputs.ndof_translation_sensitivity']), tuple (['value', __truediv__ (2.0, 3.0)])]})]), tuple (['info.reports_display_update', dict ({'type': 'TIMER_REPORT', 'value': 'ANY', 'any': true}), null])]));
 	}) ();
 	if (!(params.legacy)) {
@@ -1520,7 +1551,7 @@ export var km_view3d = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['view3d.zoom', __call__ (_merged, null, dict ({'type': key, 'value': 'PRESS'}), mods), dict ({'properties': [tuple (['delta', delta])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), (function () {
 			var __accu1__ = [];
 			var __iterable0__ = tuple ([tuple (['NUMPAD_PLUS', 1, dict ({})]), tuple (['NUMPAD_MINUS', __neg__ (1), dict ({})]), tuple (['EQUAL', 1, dict ({'ctrl': true})]), tuple (['MINUS', __neg__ (1), dict ({'ctrl': true})])]);
@@ -1534,7 +1565,7 @@ export var km_view3d = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['view3d.dolly', __call__ (_merged, null, dict ({'type': key, 'value': 'PRESS', 'shift': true, 'repeat': true}), mods), dict ({'properties': [tuple (['delta', delta])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [tuple (['view3d.view_center_camera', dict ({'type': 'HOME', 'value': 'PRESS'}), null]), tuple (['view3d.view_center_lock', dict ({'type': 'HOME', 'value': 'PRESS'}), null]), tuple (['view3d.view_all', dict ({'type': 'HOME', 'value': 'PRESS'}), dict ({'properties': [tuple (['center', false])]})]), tuple (['view3d.view_all', dict ({'type': 'HOME', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['use_all_regions', true]), tuple (['center', false])]})]), tuple (['view3d.view_all', dict ({'type': 'C', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['center', true])]})]), __call__ (op_menu_pie, null, (__eq__ (params.v3d_tilde_action, 'VIEW') ? 'VIEW3D_MT_view_pie' : 'VIEW3D_MT_transform_gizmo_pie'), dict ({'type': 'ACCENT_GRAVE', 'value': params.pie_value}))], (!(params.use_pie_click_drag) ? tuple ([]) : tuple ([tuple (['view3d.navigate', dict ({'type': 'ACCENT_GRAVE', 'value': 'CLICK'}), null])])), [tuple (['view3d.navigate', dict ({'type': 'ACCENT_GRAVE', 'value': 'PRESS', 'shift': true}), null]), tuple (['view3d.view_camera', dict ({'type': 'NUMPAD_0', 'value': 'PRESS'}), null])], (function () {
 			var __accu1__ = [];
 			var __iterable0__ = tuple ([tuple ([dict ({}), dict ({}), tuple ([tuple (['NUMPAD_1', 'FRONT']), tuple (['NUMPAD_3', 'RIGHT']), tuple (['NUMPAD_7', 'TOP'])])]), tuple ([dict ({}), dict ({'ctrl': true}), tuple ([tuple (['NUMPAD_1', 'BACK']), tuple (['NUMPAD_3', 'LEFT']), tuple (['NUMPAD_7', 'BOTTOM'])])])]);
@@ -1554,7 +1585,7 @@ export var km_view3d = function (params) {
 					}) ();
 				}
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [tuple (['view3d.view_orbit', dict ({'type': 'NUMPAD_2', 'value': 'PRESS', 'repeat': true}), dict ({'properties': [tuple (['type', 'ORBITDOWN'])]})]), tuple (['view3d.view_orbit', dict ({'type': 'NUMPAD_4', 'value': 'PRESS', 'repeat': true}), dict ({'properties': [tuple (['type', 'ORBITLEFT'])]})]), tuple (['view3d.view_persportho', dict ({'type': 'NUMPAD_5', 'value': 'PRESS'}), null]), tuple (['view3d.view_orbit', dict ({'type': 'NUMPAD_6', 'value': 'PRESS', 'repeat': true}), dict ({'properties': [tuple (['type', 'ORBITRIGHT'])]})]), tuple (['view3d.view_orbit', dict ({'type': 'NUMPAD_8', 'value': 'PRESS', 'repeat': true}), dict ({'properties': [tuple (['type', 'ORBITUP'])]})])], (function () {
 			var __accu1__ = [];
 			var __iterable0__ = tuple ([tuple (['NUMPAD_2', 'PANDOWN']), tuple (['NUMPAD_4', 'PANLEFT']), tuple (['NUMPAD_6', 'PANRIGHT']), tuple (['NUMPAD_8', 'PANUP'])]);
@@ -1567,7 +1598,7 @@ export var km_view3d = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['view3d.view_pan', dict ({'type': numpad_key, 'value': 'PRESS', 'ctrl': true, 'repeat': true}), dict ({'properties': [tuple (['type', pan_type])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [tuple (['view3d.view_roll', dict ({'type': 'NUMPAD_4', 'value': 'PRESS', 'shift': true, 'repeat': true}), dict ({'properties': [tuple (['type', 'LEFT'])]})]), tuple (['view3d.view_roll', dict ({'type': 'NUMPAD_6', 'value': 'PRESS', 'shift': true, 'repeat': true}), dict ({'properties': [tuple (['type', 'RIGHT'])]})]), tuple (['view3d.view_orbit', dict ({'type': 'NUMPAD_9', 'value': 'PRESS'}), dict ({'properties': [tuple (['angle', pi]), tuple (['type', 'ORBITRIGHT'])]})])], (function () {
 			var __accu1__ = [];
 			var __iterable0__ = tuple ([tuple ([dict ({}), tuple ([tuple (['NUMPAD_1', 'FRONT']), tuple (['NUMPAD_3', 'RIGHT']), tuple (['NUMPAD_7', 'TOP'])])]), tuple ([dict ({'ctrl': true}), tuple ([tuple (['NUMPAD_1', 'BACK']), tuple (['NUMPAD_3', 'LEFT']), tuple (['NUMPAD_7', 'BOTTOM'])])])]);
@@ -1586,7 +1617,7 @@ export var km_view3d = function (params) {
 					}) ();
 				}
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), __add__ ((function () {
 			var __accu1__ = [];
 			var __iterable0__ = tuple ([tuple (['NORTH', 'TOP']), tuple (['SOUTH', 'BOTTOM']), tuple (['EAST', 'RIGHT']), tuple (['WEST', 'LEFT'])]);
@@ -1623,7 +1654,7 @@ export var km_view3d = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['view3d.view_axis', dict ({'type': __add__ ('NDOF_BUTTON_', axis_type), 'value': 'PRESS'}), dict ({'properties': [tuple (['type', axis_type])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), (function () {
 			var __accu1__ = [];
 			var __iterable0__ = tuple (['FRONT', 'RIGHT', 'TOP']);
@@ -1634,7 +1665,7 @@ export var km_view3d = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['view3d.view_axis', dict ({'type': __add__ ('NDOF_BUTTON_', axis_type), 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['type', axis_type]), tuple (['align_active', true])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), __call__ (_template_view3d_select, null, __kwargtrans__ ({py_metatype: params.select_mouse, value: params.select_mouse_value_fallback, legacy: params.legacy, select_passthrough: params.use_tweak_select_passthrough})), [__call__ (op_tool_optional, null, tuple (['view3d.select_box', dict ({'type': 'B', 'value': 'PRESS'}), null]), tuple ([op_tool, 'builtin.select_box']), params), tuple (['view3d.select_lasso', dict ({'type': params.action_mouse, 'value': 'CLICK_DRAG', 'ctrl': true}), dict ({'properties': [tuple (['mode', 'ADD'])]})]), tuple (['view3d.select_lasso', dict ({'type': params.action_mouse, 'value': 'CLICK_DRAG', 'shift': true, 'ctrl': true}), dict ({'properties': [tuple (['mode', 'SUB'])]})]), __call__ (op_tool_optional, null, tuple (['view3d.select_circle', dict ({'type': 'C', 'value': 'PRESS'}), null]), tuple ([op_tool, 'builtin.select_circle']), params), tuple (['view3d.clip_border', dict ({'type': 'B', 'value': 'PRESS', 'alt': true}), null]), tuple (['view3d.zoom_border', dict ({'type': 'B', 'value': 'PRESS', 'shift': true}), null]), tuple (['view3d.render_border', dict ({'type': 'B', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['view3d.clear_render_border', dict ({'type': 'B', 'value': 'PRESS', 'ctrl': true, 'alt': true}), null]), tuple (['view3d.camera_to_view', dict ({'type': 'NUMPAD_0', 'value': 'PRESS', 'ctrl': true, 'alt': true}), null]), tuple (['view3d.object_as_camera', dict ({'type': 'NUMPAD_0', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['view3d.copybuffer', dict ({'type': 'C', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['view3d.pastebuffer', dict ({'type': 'V', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['wm.context_toggle', dict ({'type': 'TAB', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['data_path', 'tool_settings.use_snap'])]})]), __call__ (op_panel, null, 'VIEW3D_PT_snapping', dict ({'type': 'TAB', 'value': 'PRESS', 'shift': true, 'ctrl': true}), [tuple (['keep_open', true])]), (!(params.legacy) ? __call__ (op_menu_pie, null, 'VIEW3D_MT_snap_pie', dict ({'type': 'S', 'value': 'PRESS', 'shift': true})) : __call__ (op_menu, null, 'VIEW3D_MT_snap', dict ({'type': 'S', 'value': 'PRESS', 'shift': true})))]));
 	}) ();
 	if (!(params.legacy)) {
@@ -1664,7 +1695,7 @@ export var km_view3d = function (params) {
 						}) ();
 					}
 				}
-				return py_iter (__accu1__);
+				return __accu1__;
 			}) (), (function () {
 				var __accu1__ = [];
 				var __iterable0__ = tuple ([tuple ([dict ({'ctrl': true}), tuple ([tuple (['WHEELUPMOUSE', 'ORBITLEFT']), tuple (['WHEELDOWNMOUSE', 'ORBITRIGHT'])])]), tuple ([dict ({'shift': true}), tuple ([tuple (['WHEELUPMOUSE', 'ORBITUP']), tuple (['WHEELDOWNMOUSE', 'ORBITDOWN'])])])]);
@@ -1683,7 +1714,7 @@ export var km_view3d = function (params) {
 						}) ();
 					}
 				}
-				return py_iter (__accu1__);
+				return __accu1__;
 			}) (), (function () {
 				var __accu1__ = [];
 				var __iterable0__ = tuple ([tuple (['WHEELUPMOUSE', 'LEFT']), tuple (['WHEELDOWNMOUSE', 'RIGHT'])]);
@@ -1696,7 +1727,7 @@ export var km_view3d = function (params) {
 						return __call__ (__accu2__.append, __accu2__, tuple (['view3d.view_roll', dict ({'type': wheel_key, 'value': 'PRESS', 'shift': true, 'ctrl': true}), dict ({'properties': [tuple (['type', roll_type])]})]));
 					}) ();
 				}
-				return py_iter (__accu1__);
+				return __accu1__;
 			}) (), [tuple (['transform.create_orientation', dict ({'type': 'SPACE', 'value': 'PRESS', 'ctrl': true, 'alt': true}), dict ({'properties': [tuple (['use', true])]})]), tuple (['transform.translate', dict ({'type': 'T', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['texture_space', true])]})]), tuple (['transform.resize', dict ({'type': 'T', 'value': 'PRESS', 'shift': true, 'alt': true}), dict ({'properties': [tuple (['texture_space', true])]})]), tuple (['wm.context_set_enum', dict ({'type': 'COMMA', 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'tool_settings.transform_pivot_point']), tuple (['value', 'BOUNDING_BOX_CENTER'])]})]), tuple (['wm.context_set_enum', dict ({'type': 'COMMA', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['data_path', 'tool_settings.transform_pivot_point']), tuple (['value', 'MEDIAN_POINT'])]})]), tuple (['wm.context_toggle', dict ({'type': 'COMMA', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['data_path', 'tool_settings.use_transform_pivot_point_align'])]})]), tuple (['wm.context_toggle', dict ({'type': 'SPACE', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['data_path', 'space_data.show_gizmo_context'])]})]), tuple (['wm.context_set_enum', dict ({'type': 'PERIOD', 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'tool_settings.transform_pivot_point']), tuple (['value', 'CURSOR'])]})]), tuple (['wm.context_set_enum', dict ({'type': 'PERIOD', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['data_path', 'tool_settings.transform_pivot_point']), tuple (['value', 'INDIVIDUAL_ORIGINS'])]})]), tuple (['wm.context_set_enum', dict ({'type': 'PERIOD', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['data_path', 'tool_settings.transform_pivot_point']), tuple (['value', 'ACTIVE_ELEMENT'])]})]), tuple (['wm.context_toggle_enum', dict ({'type': 'Z', 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'space_data.shading.type']), tuple (['value_1', 'WIREFRAME']), tuple (['value_2', 'SOLID'])]})]), tuple (['wm.context_toggle_enum', dict ({'type': 'Z', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['data_path', 'space_data.shading.type']), tuple (['value_1', 'RENDERED']), tuple (['value_2', 'SOLID'])]})]), tuple (['wm.context_toggle_enum', dict ({'type': 'Z', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['data_path', 'space_data.shading.type']), tuple (['value_1', 'MATERIAL']), tuple (['value_2', 'SOLID'])]})])]));
 		}) ();
 	}
@@ -1847,7 +1878,7 @@ export var km_image = function (params) {
 					}) ();
 				}
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [tuple (['image.change_frame', dict ({'type': 'LEFTMOUSE', 'value': 'PRESS'}), null]), tuple (['image.sample', dict ({'type': params.action_mouse, 'value': 'PRESS'}), null]), tuple (['image.curves_point_set', dict ({'type': params.action_mouse, 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['point', 'BLACK_POINT'])]})]), tuple (['image.curves_point_set', dict ({'type': params.action_mouse, 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['point', 'WHITE_POINT'])]})]), tuple (['object.mode_set', dict ({'type': 'TAB', 'value': 'PRESS'}), dict ({'properties': [tuple (['mode', 'EDIT']), tuple (['toggle', true])]})])], (function () {
 			var __accu1__ = [];
 			var __iterable0__ = __call__ (list, null, __call__ (range, null, 9));
@@ -1858,7 +1889,7 @@ export var km_image = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['wm.context_set_int', dict ({'type': __getitem__ (NUMBERS_1, i), 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'space_data.image.render_slots.active_index']), tuple (['value', i])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [tuple (['image.render_border', dict ({'type': 'B', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['image.clear_render_border', dict ({'type': 'B', 'value': 'PRESS', 'ctrl': true, 'alt': true}), null]), tuple (['wm.context_toggle', dict ({'type': 'ACCENT_GRAVE', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['data_path', 'space_data.show_gizmo'])]})]), tuple (['wm.context_toggle', dict ({'type': 'Z', 'value': 'PRESS', 'alt': true, 'shift': true}), dict ({'properties': [tuple (['data_path', 'space_data.overlay.show_overlays'])]})])], __call__ (_template_items_context_menu, null, 'IMAGE_MT_mask_context_menu', params.context_menu_event)));
 	}) ();
 	if (!(params.legacy)) {
@@ -1953,7 +1984,7 @@ export var km_node_editor = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['node.viewer_shortcut_get', dict ({'type': __getitem__ (NUMBERS_0, i), 'value': 'PRESS'}), dict ({'properties': [tuple (['viewer_index', i])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), (function () {
 			var __accu1__ = [];
 			var __iterable0__ = __call__ (list, null, __call__ (range, null, 1, 10));
@@ -1964,7 +1995,7 @@ export var km_node_editor = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['node.viewer_shortcut_set', dict ({'type': __getitem__ (NUMBERS_0, i), 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['viewer_index', i])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) ()));
 	}) ();
 	return keymap;
@@ -2324,7 +2355,7 @@ export var km_sequencer = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['sequencer.split_multicam', dict ({'type': __getitem__ (NUMBERS_1, i), 'value': 'PRESS'}), dict ({'properties': [tuple (['camera', __add__ (i, 1)])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [__call__ (op_menu, null, 'SEQUENCER_MT_add', dict ({'type': 'A', 'value': 'PRESS', 'shift': true})), __call__ (op_menu, null, 'SEQUENCER_MT_change', dict ({'type': 'C', 'value': 'PRESS', 'shift': true})), __call__ (op_menu_pie, null, 'SEQUENCER_MT_view_pie', dict ({'type': 'ACCENT_GRAVE', 'value': 'PRESS'})), tuple (['sequencer.slip', dict ({'type': 'S', 'value': 'PRESS'}), dict ({'properties': [tuple (['use_cursor_position', false])]})]), tuple (['wm.context_set_int', dict ({'type': 'O', 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'sequencer_scene.sequence_editor.overlay_frame']), tuple (['value', 0])]})]), tuple (['transform.seq_slide', dict ({'type': 'G', 'value': 'PRESS'}), dict ({'properties': [tuple (['view2d_edge_pan', true])]})]), tuple (['transform.seq_slide', dict ({'type': params.select_mouse, 'value': 'CLICK_DRAG'}), dict ({'properties': [tuple (['view2d_edge_pan', true]), tuple (['use_restore_handle_selection', true])]})]), tuple (['transform.seq_slide', dict ({'type': params.select_mouse, 'value': 'CLICK_DRAG', 'alt': true}), dict ({'properties': [tuple (['view2d_edge_pan', true]), tuple (['use_restore_handle_selection', true])]})]), tuple (['transform.seq_slide', dict ({'type': params.select_mouse, 'value': 'CLICK_DRAG', 'ctrl': true}), dict ({'properties': [tuple (['view2d_edge_pan', true]), tuple (['use_restore_handle_selection', true])]})]), tuple (['transform.transform', dict ({'type': 'E', 'value': 'PRESS'}), dict ({'properties': [tuple (['mode', 'TIME_EXTEND'])]})]), tuple (['marker.add', dict ({'type': 'M', 'value': 'PRESS'}), null]), tuple (['wm.context_toggle', dict ({'type': 'Z', 'value': 'PRESS', 'alt': true, 'shift': true}), dict ({'properties': [tuple (['data_path', 'space_data.show_overlays'])]})])], __call__ (_template_items_context_menu, null, 'SEQUENCER_MT_context_menu', params.context_menu_event), [__call__ (op_menu, null, 'SEQUENCER_MT_retiming', dict ({'type': 'I', 'value': 'PRESS'})), tuple (['sequencer.retiming_segment_speed_set', dict ({'type': 'R', 'value': 'PRESS'}), null]), tuple (['sequencer.retiming_show', dict ({'type': 'R', 'value': 'PRESS', 'ctrl': true}), null])]));
 	}) ();
 	return keymap;
@@ -2407,7 +2438,7 @@ export var km_sequencer_preview = function (params) {
 					}) ();
 				}
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [__call__ (op_menu_pie, null, 'SEQUENCER_MT_preview_view_pie', dict ({'type': 'ACCENT_GRAVE', 'value': 'PRESS'}))], __call__ (_template_items_transform_actions, null, params, __kwargtrans__ ({use_mirror: true})), [tuple (['transform.translate', dict ({'type': 'PERIOD', 'ctrl': true, 'value': 'PRESS'}), dict ({'properties': [tuple (['translate_origin', true])]})]), tuple (['sequencer.strip_transform_clear', dict ({'type': 'G', 'alt': true, 'value': 'PRESS'}), dict ({'properties': [tuple (['property', 'POSITION'])]})]), tuple (['sequencer.strip_transform_clear', dict ({'type': 'S', 'alt': true, 'value': 'PRESS'}), dict ({'properties': [tuple (['property', 'SCALE'])]})]), tuple (['sequencer.strip_transform_clear', dict ({'type': 'R', 'alt': true, 'value': 'PRESS'}), dict ({'properties': [tuple (['property', 'ROTATION'])]})]), tuple (['sequencer.preview_duplicate_move', dict ({'type': 'D', 'value': 'PRESS', 'shift': true}), null]), tuple (['sequencer.preview_duplicate_move_linked', dict ({'type': 'D', 'value': 'PRESS', 'alt': true}), null]), tuple (['sequencer.mute', dict ({'type': 'H', 'value': 'PRESS'}), dict ({'properties': [tuple (['unselected', false])]})]), tuple (['sequencer.mute', dict ({'type': 'H', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['unselected', true])]})]), tuple (['sequencer.unmute', dict ({'type': 'H', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['unselected', false])]})]), tuple (['sequencer.delete', dict ({'type': 'X', 'value': 'PRESS'}), null]), tuple (['sequencer.delete', dict ({'type': 'DEL', 'value': 'PRESS'}), null]), tuple (['sequencer.select_lasso', dict ({'type': params.action_mouse, 'value': 'CLICK_DRAG', 'ctrl': true}), dict ({'properties': [tuple (['mode', 'ADD'])]})]), tuple (['sequencer.select_lasso', dict ({'type': params.action_mouse, 'value': 'CLICK_DRAG', 'shift': true, 'ctrl': true}), dict ({'properties': [tuple (['mode', 'SUB'])]})]), tuple (['sequencer.copy', dict ({'type': 'C', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['sequencer.paste', dict ({'type': 'V', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['sequencer.paste', dict ({'type': 'V', 'value': 'PRESS', 'ctrl': true, 'shift': true}), dict ({'properties': [tuple (['keep_offset', true])]})]), tuple (['anim.keying_set_active_set', dict ({'type': 'K', 'value': 'PRESS', 'shift': true}), null]), tuple (['anim.keyframe_insert_menu', dict ({'type': 'K', 'value': 'PRESS'}), dict ({'properties': [tuple (['always_prompt', true])]})]), tuple (['anim.keyframe_delete_vse', dict ({'type': 'I', 'value': 'PRESS', 'alt': true}), null])], __call__ (_template_items_context_menu, null, 'SEQUENCER_MT_preview_context_menu', params.context_menu_event)));
 	}) ();
 	if (params.use_pie_click_drag) {
@@ -2545,7 +2576,7 @@ export var km_clip_editor = function (params) {
 					}) ();
 				}
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [tuple (['clip.view_all', dict ({'type': 'HOME', 'value': 'PRESS'}), null]), tuple (['clip.view_all', dict ({'type': 'F', 'value': 'PRESS'}), dict ({'properties': [tuple (['fit_view', true])]})]), tuple (['clip.view_selected', dict ({'type': 'NUMPAD_PERIOD', 'value': 'PRESS'}), null]), tuple (['clip.view_selected', dict ({'type': 'BUTTON4MOUSE', 'value': 'PRESS'}), null]), tuple (['clip.view_all', dict ({'type': 'NDOF_BUTTON_FIT', 'value': 'PRESS'}), null]), tuple (['clip.view_ndof', dict ({'type': 'NDOF_MOTION', 'value': 'ANY'}), null]), tuple (['clip.frame_jump', dict ({'type': 'LEFT_ARROW', 'value': 'PRESS', 'shift': true, 'ctrl': true, 'repeat': true}), dict ({'properties': [tuple (['position', 'PATHSTART'])]})]), tuple (['clip.frame_jump', dict ({'type': 'RIGHT_ARROW', 'value': 'PRESS', 'shift': true, 'ctrl': true, 'repeat': true}), dict ({'properties': [tuple (['position', 'PATHEND'])]})]), tuple (['clip.frame_jump', dict ({'type': 'LEFT_ARROW', 'value': 'PRESS', 'shift': true, 'alt': true, 'repeat': true}), dict ({'properties': [tuple (['position', 'FAILEDPREV'])]})]), tuple (['clip.frame_jump', dict ({'type': 'RIGHT_ARROW', 'value': 'PRESS', 'shift': true, 'alt': true, 'repeat': true}), dict ({'properties': [tuple (['position', 'PATHSTART'])]})]), tuple (['clip.change_frame', dict ({'type': 'LEFTMOUSE', 'value': 'PRESS'}), null]), tuple (['clip.select', dict ({'type': params.select_mouse, 'value': 'PRESS'}), dict ({'properties': [tuple (['deselect_all', !(params.legacy)])]})]), tuple (['clip.select', dict ({'type': params.select_mouse, 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['extend', true])]})])], __call__ (_template_items_select_actions, null, params, 'clip.select_all'), [tuple (['clip.select_box', dict ({'type': 'B', 'value': 'PRESS'}), null]), tuple (['clip.select_circle', dict ({'type': 'C', 'value': 'PRESS'}), null]), __call__ (op_menu, null, 'CLIP_MT_select_grouped', dict ({'type': 'G', 'value': 'PRESS', 'shift': true})), tuple (['clip.select_lasso', dict ({'type': params.action_mouse, 'value': 'CLICK_DRAG', 'ctrl': true, 'alt': true}), dict ({'properties': [tuple (['mode', 'ADD'])]})]), tuple (['clip.select_lasso', dict ({'type': params.action_mouse, 'value': 'CLICK_DRAG', 'shift': true, 'ctrl': true, 'alt': true}), dict ({'properties': [tuple (['mode', 'SUB'])]})]), tuple (['clip.add_marker_slide', dict ({'type': 'LEFTMOUSE', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['clip.delete_marker', dict ({'type': 'X', 'value': 'PRESS', 'shift': true}), null]), tuple (['clip.delete_marker', dict ({'type': 'DEL', 'value': 'PRESS', 'shift': true}), null]), tuple (['clip.slide_marker', dict ({'type': 'LEFTMOUSE', 'value': 'PRESS'}), null]), tuple (['clip.disable_markers', dict ({'type': 'D', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['action', 'TOGGLE'])]})]), tuple (['clip.delete_track', dict ({'type': 'X', 'value': 'PRESS'}), null]), tuple (['clip.delete_track', dict ({'type': 'DEL', 'value': 'PRESS'}), null]), tuple (['clip.lock_tracks', dict ({'type': 'L', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['action', 'LOCK'])]})]), tuple (['clip.lock_tracks', dict ({'type': 'L', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['action', 'UNLOCK'])]})])], __call__ (_template_items_hide_reveal_actions, null, 'clip.hide_tracks', 'clip.hide_tracks_clear'), [tuple (['clip.slide_plane_marker', dict ({'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG'}), null]), tuple (['clip.keyframe_insert', dict ({'type': 'I', 'value': 'PRESS'}), null]), tuple (['clip.keyframe_delete', dict ({'type': 'I', 'value': 'PRESS', 'alt': true}), null]), tuple (['clip.join_tracks', dict ({'type': 'J', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['clip.lock_selection_toggle', dict ({'type': 'L', 'value': 'PRESS'}), null]), tuple (['wm.context_toggle', dict ({'type': 'D', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['data_path', 'space_data.show_disabled'])]})]), tuple (['wm.context_toggle', dict ({'type': 'S', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['data_path', 'space_data.show_marker_search'])]})]), tuple (['wm.context_toggle', dict ({'type': 'H', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['data_path', 'space_data.use_mute_footage'])]})]), tuple (['transform.translate', dict ({'type': 'G', 'value': 'PRESS'}), null]), tuple (['transform.translate', dict ({'type': params.select_mouse, 'value': 'CLICK_DRAG'}), null]), tuple (['transform.resize', dict ({'type': 'S', 'value': 'PRESS'}), null]), tuple (['transform.rotate', dict ({'type': 'R', 'value': 'PRESS'}), null]), tuple (['clip.clear_track_path', dict ({'type': 'T', 'value': 'PRESS', 'alt': true}), dict ({'properties': [tuple (['action', 'REMAINED']), tuple (['clear_active', false])]})]), tuple (['clip.clear_track_path', dict ({'type': 'T', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['action', 'UPTO']), tuple (['clear_active', false])]})]), tuple (['clip.clear_track_path', dict ({'type': 'T', 'value': 'PRESS', 'shift': true, 'alt': true}), dict ({'properties': [tuple (['action', 'ALL']), tuple (['clear_active', false])]})]), tuple (['clip.cursor_set', params.cursor_set_event, null]), tuple (['clip.copy_tracks', dict ({'type': 'C', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['clip.paste_tracks', dict ({'type': 'V', 'value': 'PRESS', 'ctrl': true}), null]), tuple (['wm.context_toggle', dict ({'type': 'Z', 'value': 'PRESS', 'alt': true, 'shift': true}), dict ({'properties': [tuple (['data_path', 'space_data.overlay.show_overlays'])]})])], __call__ (_template_items_context_menu, null, 'CLIP_MT_tracking_context_menu', params.context_menu_event)));
 	}) ();
 	if (!(params.legacy)) {
@@ -3848,7 +3879,7 @@ export var km_edit_particle = function (params) {
 					return __call__ (__accu2__.append, __accu2__, tuple (['wm.context_set_enum', dict ({'type': __getitem__ (NUMBERS_1, i), 'value': 'PRESS'}), dict ({'properties': [tuple (['data_path', 'tool_settings.particle_edit.select_mode']), tuple (['value', value])]})]));
 				}) ();
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), __call__ (_template_items_proportional_editing, null, params, __kwargtrans__ ({connected: false, toggle_data_path: 'tool_settings.use_proportional_edit'})), __call__ (_template_items_context_menu, null, 'VIEW3D_MT_particle_context_menu', params.context_menu_event), __call__ (_template_items_transform_actions, null, params)));
 	}) ();
 	return keymap;
@@ -4488,7 +4519,7 @@ export var km_sculpt_expand_modal = function (_params) {
 					}) ();
 				}
 			}
-			return py_iter (__accu1__);
+			return __accu1__;
 		}) (), [tuple (['SNAP_TOGGLE', dict ({'type': 'LEFT_CTRL', 'value': 'ANY'}), null]), tuple (['SNAP_TOGGLE', dict ({'type': 'RIGHT_CTRL', 'value': 'ANY'}), null]), tuple (['LOOP_COUNT_INCREASE', dict ({'type': 'W', 'value': 'PRESS', 'any': true, 'repeat': true}), null]), tuple (['LOOP_COUNT_DECREASE', dict ({'type': 'Q', 'value': 'PRESS', 'any': true, 'repeat': true}), null]), tuple (['BRUSH_GRADIENT_TOGGLE', dict ({'type': 'B', 'value': 'PRESS', 'any': true}), null]), tuple (['TEXTURE_DISTORTION_INCREASE', dict ({'type': 'Y', 'value': 'PRESS'}), null]), tuple (['TEXTURE_DISTORTION_DECREASE', dict ({'type': 'T', 'value': 'PRESS'}), null])]));
 	}) ();
 	return keymap;
@@ -7112,7 +7143,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_uv_select, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7123,7 +7154,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_uv_select_box, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7134,7 +7165,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_uv_select_circle, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7145,7 +7176,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_uv_select_lasso, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), [__call__ (km_image_editor_tool_uv_rip_region, null, params), __call__ (km_image_editor_tool_uv_grab, null, params), __call__ (km_image_editor_tool_uv_relax, null, params), __call__ (km_image_editor_tool_uv_pinch, null, params), __call__ (km_image_editor_tool_uv_move, null, params), __call__ (km_image_editor_tool_uv_rotate, null, params), __call__ (km_image_editor_tool_uv_scale, null, params), __call__ (km_image_editor_tool_mask_cursor, null, params)], (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7156,7 +7187,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_mask_select, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7167,7 +7198,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_mask_select_box, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7178,7 +7209,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_mask_select_circle, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7189,7 +7220,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_image_editor_tool_mask_select_lasso, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), [__call__ (km_image_editor_tool_mask_move, null, params), __call__ (km_image_editor_tool_mask_rotate, null, params), __call__ (km_image_editor_tool_mask_scale, null, params), __call__ (km_image_editor_tool_mask_transform, null, params), __call__ (km_image_editor_tool_mask_primitive_circle, null, params), __call__ (km_image_editor_tool_mask_primitive_square, null, params)], (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7200,7 +7231,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_node_editor_tool_select, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7211,7 +7242,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_node_editor_tool_select_box, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7222,7 +7253,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_node_editor_tool_select_lasso, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7233,7 +7264,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_node_editor_tool_select_circle, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), [__call__ (km_node_editor_tool_links_cut, null, params), __call__ (km_node_editor_tool_links_mute, null, params), __call__ (km_node_editor_tool_add_reroute, null, params), __call__ (km_3d_view_tool_cursor, null, params), __call__ (km_3d_view_tool_text_select, null, params)], (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7244,7 +7275,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_3d_view_tool_select, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7255,7 +7286,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_3d_view_tool_select_box, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7266,7 +7297,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_3d_view_tool_select_circle, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7277,7 +7308,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_3d_view_tool_select_lasso, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), [__call__ (km_3d_view_tool_transform, null, params), __call__ (km_3d_view_tool_move, null, params), __call__ (km_3d_view_tool_rotate, null, params), __call__ (km_3d_view_tool_scale, null, params), __call__ (km_3d_view_tool_shear, null, params), __call__ (km_3d_view_tool_bend, null, params), __call__ (km_3d_view_tool_measure, null, params), __call__ (km_3d_view_tool_interactive_add, null, params), __call__ (km_3d_view_tool_pose_breakdowner, null, params), __call__ (km_3d_view_tool_pose_push, null, params), __call__ (km_3d_view_tool_pose_relax, null, params), __call__ (km_3d_view_tool_edit_armature_roll, null, params), __call__ (km_3d_view_tool_edit_armature_bone_size, null, params), __call__ (km_3d_view_tool_edit_armature_bone_envelope, null, params), __call__ (km_3d_view_tool_edit_armature_extrude, null, params), __call__ (km_3d_view_tool_edit_armature_extrude_to_cursor, null, params), __call__ (km_3d_view_tool_edit_mesh_extrude_region, null, params), __call__ (km_3d_view_tool_edit_mesh_extrude_manifold, null, params), __call__ (km_3d_view_tool_edit_mesh_extrude_along_normals, null, params), __call__ (km_3d_view_tool_edit_mesh_extrude_individual, null, params), __call__ (km_3d_view_tool_edit_mesh_extrude_to_cursor, null, params), __call__ (km_3d_view_tool_edit_mesh_inset_faces, null, params), __call__ (km_3d_view_tool_edit_mesh_bevel, null, params), __call__ (km_3d_view_tool_edit_mesh_loop_cut, null, params), __call__ (km_3d_view_tool_edit_mesh_offset_edge_loop_cut, null, params), __call__ (km_3d_view_tool_edit_mesh_knife, null, params), __call__ (km_3d_view_tool_edit_mesh_bisect, null, params), __call__ (km_3d_view_tool_edit_mesh_poly_build, null, params), __call__ (km_3d_view_tool_edit_mesh_spin, null, params), __call__ (km_3d_view_tool_edit_mesh_spin_duplicate, null, params), __call__ (km_3d_view_tool_edit_mesh_smooth, null, params), __call__ (km_3d_view_tool_edit_mesh_randomize, null, params), __call__ (km_3d_view_tool_edit_mesh_edge_slide, null, params), __call__ (km_3d_view_tool_edit_mesh_vertex_slide, null, params), __call__ (km_3d_view_tool_edit_mesh_shrink_fatten, null, params), __call__ (km_3d_view_tool_edit_mesh_push_pull, null, params), __call__ (km_3d_view_tool_edit_mesh_to_sphere, null, params), __call__ (km_3d_view_tool_edit_mesh_rip_region, null, params), __call__ (km_3d_view_tool_edit_mesh_rip_edge, null, params), __call__ (km_3d_view_tool_edit_curve_draw, null, params), __call__ (km_3d_view_tool_edit_curve_pen, null, params), __call__ (km_3d_view_tool_edit_curve_radius, null, params), __call__ (km_3d_view_tool_edit_curve_tilt, null, params), __call__ (km_3d_view_tool_edit_curve_randomize, null, params), __call__ (km_3d_view_tool_edit_curve_extrude, null, params), __call__ (km_3d_view_tool_edit_curve_extrude_to_cursor, null, params), __call__ (km_3d_view_tool_edit_curves_draw, null, params), __call__ (km_3d_view_tool_edit_curves_pen, null, params), __call__ (km_3d_view_tool_sculpt_box_mask, null, params), __call__ (km_3d_view_tool_sculpt_lasso_mask, null, params), __call__ (km_3d_view_tool_sculpt_line_mask, null, params), __call__ (km_3d_view_tool_sculpt_polyline_mask, null, params), __call__ (km_3d_view_tool_sculpt_box_hide, null, params), __call__ (km_3d_view_tool_sculpt_lasso_hide, null, params), __call__ (km_3d_view_tool_sculpt_line_hide, null, params), __call__ (km_3d_view_tool_sculpt_polyline_hide, null, params), __call__ (km_3d_view_tool_sculpt_box_face_set, null, params), __call__ (km_3d_view_tool_sculpt_lasso_face_set, null, params), __call__ (km_3d_view_tool_sculpt_line_face_set, null, params), __call__ (km_3d_view_tool_sculpt_polyline_face_set, null, params), __call__ (km_3d_view_tool_sculpt_box_trim, null, params), __call__ (km_3d_view_tool_sculpt_lasso_trim, null, params), __call__ (km_3d_view_tool_sculpt_line_trim, null, params), __call__ (km_3d_view_tool_sculpt_polyline_trim, null, params), __call__ (km_3d_view_tool_sculpt_line_project, null, params), __call__ (km_3d_view_tool_sculpt_mesh_filter, null, params), __call__ (km_3d_view_tool_sculpt_cloth_filter, null, params), __call__ (km_3d_view_tool_sculpt_color_filter, null, params), __call__ (km_3d_view_tool_sculpt_mask_by_color, null, params), __call__ (km_3d_view_tool_sculpt_face_set_edit, null, params), __call__ (km_3d_view_tool_paint_weight_sample_weight, null, params), __call__ (km_3d_view_tool_paint_weight_sample_vertex_group, null, params), __call__ (km_3d_view_tool_paint_weight_gradient, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_primitive_line, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_primitive_polyline, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_primitive_box, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_primitive_circle, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_primitive_arc, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_primitive_curve, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_trim, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_interpolate, null, params), __call__ (km_3d_view_tool_paint_grease_pencil_eyedropper, null, params), __call__ (km_3d_view_tool_edit_grease_pencil_texture_gradient, null, params), __call__ (km_3d_view_tool_edit_grease_pencil_pen, null, params), __call__ (km_3d_view_tool_edit_grease_pencil_interpolate, null, params)], (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7288,7 +7319,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_sequencer_tool_generic_select_box, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7299,7 +7330,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_sequencer_preview_tool_generic_select, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7310,7 +7341,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_sequencer_preview_tool_generic_select_box, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7321,7 +7352,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_sequencer_tool_generic_select_lasso, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7332,7 +7363,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_sequencer_preview_tool_generic_select_lasso, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7343,7 +7374,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_sequencer_preview_tool_generic_select_circle, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), (function () {
 		var __accu0__ = [];
 		var __iterable0__ = tuple ([false, true]);
@@ -7354,7 +7385,7 @@ export var generate_keymaps = function (params) {
 				return __call__ (__accu1__.append, __accu1__, __call__ (km_sequencer_tool_generic_select_circle, null, params, __kwargtrans__ ({fallback: fallback})));
 			}) ();
 		}
-		return py_iter (__accu0__);
+		return __accu0__;
 	}) (), [__call__ (km_sequencer_tool_blade, null, params), __call__ (km_sequencer_tool_slip, null, params), __call__ (km_sequencer_preview_tool_generic_cursor, null, params), __call__ (km_sequencer_preview_tool_sample, null, params), __call__ (km_sequencer_preview_tool_move, null, params), __call__ (km_sequencer_preview_tool_rotate, null, params), __call__ (km_sequencer_preview_tool_scale, null, params)]);
 };
 
