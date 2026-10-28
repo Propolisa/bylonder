@@ -51,7 +51,7 @@ export function createSelection(scene, objects) {
     } else if (selected.length) {
       for (const n of selected) {
         n.computeWorldMatrix(true);
-        pivot.position.addInPlace(n.getAbsolutePosition?.() ?? n.globalPosition ?? n.position);
+        pivot.position.addInPlace(n.getAbsolutePosition());
       }
       pivot.position.scaleInPlace(1 / selected.length);
     }

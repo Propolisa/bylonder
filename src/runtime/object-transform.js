@@ -16,7 +16,10 @@ function rotationTo(direction) {
 }
 
 export function asObject(node) {
+  // A hemispheric light has a direction and no position.
+  node.position ??= Vector3.Zero();
   node.scaling ??= new Vector3(1, 1, 1);
+  node.getAbsolutePosition ??= () => node.globalPosition ?? node.position;
   if (!node.rotation) {
     node.rotation = node.direction ? rotationTo(node.direction) : new Vector3();
     node.rotationQuaternion = null;
