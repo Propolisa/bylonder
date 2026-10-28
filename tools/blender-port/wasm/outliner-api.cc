@@ -51,8 +51,6 @@ static void ui_ensure()
   (void)done;
 }
 
-}
-
 /* The Outliner's operators, registered by Blender's own registration function (called by editor-context's operator
  * table). */
 void outliner_operatortypes_ensure()

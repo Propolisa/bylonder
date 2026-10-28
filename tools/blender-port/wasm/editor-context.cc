@@ -622,7 +622,7 @@ EXPORT(operator_enum_items) const char *operator_enum_items(bContext *C, int typ
     }
   }
   if (free) {
-    MEM_freeN(const_cast<EnumPropertyItem *>(items));
+    MEM_delete_void(const_cast<EnumPropertyItem *>(items));
   }
   operator_destroy(op);
   return text.c_str();
@@ -762,7 +762,7 @@ wmOperatorType *WM_operatortype_find(const char *idname, bool /*quiet*/)
     std::transform(name.begin(), name.begin() + (dot - idname), name.begin(), ::toupper);
   }
   for (int i = 0; i < operator_count(); i++) {
-    if (name == operators()[i].name) {
+    if (name == operators()[i]->idname) {
       return operator_type(i);
     }
   }
