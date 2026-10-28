@@ -12,13 +12,13 @@
 .dock-header-host{flex:1;min-width:0;height:100%;display:flex}
 .dock-header-content{flex:1;min-width:0;display:flex;align-items:center;gap:2px;overflow:hidden}
 .dock-header-content>.spacer{flex:1}
-.dock-header-content .bl-sep{width:8px;flex-shrink:0}
 .dock-corner{position:absolute;right:0;top:0;width:12px;height:12px;cursor:crosshair;touch-action:none;background:linear-gradient(225deg,#ffffff18 0 30%,transparent 30%)}
 .dock-corner:hover{background:linear-gradient(225deg,#ffffff50 0 40%,transparent 40%)}
 .dock-slot{flex:1;min-height:0;min-width:0;pointer-events:none}
 .dock-content{position:absolute;z-index:2;overflow:hidden;min-width:0;min-height:0;background:var(--bl-region);border-radius:0 0 var(--bl-radius) var(--bl-radius)}
 .dock-overlap{box-sizing:border-box;padding-top:var(--bl-header-h);border-radius:var(--bl-radius)}
-.dock-leaf.overlap>.dock-heading{z-index:3;background:var(--bl-view3d-header)}
+/* An overlapping header's buttons sit a pixel higher (measured on Blender 5.2.3). */
+.dock-leaf.overlap>.dock-heading{z-index:3;padding-bottom:2px;background:var(--bl-view3d-header)}
 .dock-content>*{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;position:relative!important;inset:auto!important}
 .dock .splitpanes__pane{background:transparent;transition:none!important;overflow:hidden}
 .dock .splitpanes__splitter{background:var(--bl-gap);position:relative;z-index:8;touch-action:none}

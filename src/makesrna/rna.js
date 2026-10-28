@@ -83,7 +83,7 @@ export const hasStruct = (struct) => struct in structs;
 const enumItems = (items = []) => {
   const list = collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value })));
   return new Proxy(list, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key]
-    : target.find((item) => item.identifier === key) ?? target[rnaName(key)]) });
+    : Array.prototype.find.call(target, (item) => item.identifier === key) ?? target[rnaName(key)]) });
 };
 const propertyNames = (struct) => { const names = new Set(); for (let s = structs[struct]; s; s = structs[s.base]) Object.keys(s.props).forEach((n) => names.add(n)); return names; };
 

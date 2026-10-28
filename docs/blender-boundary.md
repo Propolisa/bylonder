@@ -131,7 +131,7 @@ The toolbar, tool settings, header transform settings and sidebar are Blender's 
 - Tool icons are Blender's `.dat` triangle files, converted to SVG by `tools/blender-ui/tool_icons.py`.
 - The toolbar (`editors/space_view3d/view3d-toolbar.js`) records `draw_cls`'s layout calls and draws Blender's one icon column: groups open their flyout on a 0.2 s hold or a drag, the region snaps to Blender's widths.
 - The Transform panel is C (`view3d_buttons.cc`). It is ported as the layout calls it makes (`view3d-buttons.js`), not built to WASM: it only reads and writes RNA, so the layout calls are the whole of it.
-- The tool settings, the header's transform settings and the sidebar draw through the shared layout renderer (see Layouts and panels), with their popovers.
+- The header (`VIEW3D_HT_header`, with its visibility, gizmo, overlay and shading popovers), the tool settings and the sidebar draw through the shared layout renderer (see Layouts and panels), from `view3d-regions.js`. In Edit Mode the header's menus are Edit Mode's (`editMeshMenus`), its Add menu adds Bylonder's primitives, and `template_header_3D_mode` is the select mode buttons (`uiTemplateEditModeSelection`), a layout the template records. `object.mode_set` runs Object and Edit Mode; a mesh's other modes show greyed.
 - Transform orientation slots are stored per scene but no transform reads them yet.
 - Select Box, Circle and Lasso share `do_mesh_region_select` (`view3d-select.js`) in Edit Mode; in Object Mode box select tests vertices and circle and lasso the object origin, as Blender does. The gestures are `windowmanager/wm-gesture-*.js` with Blender's modal maps.
 

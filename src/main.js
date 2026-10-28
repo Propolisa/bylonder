@@ -537,6 +537,7 @@ registerOperators({
   "render.render": { run: ({ animation: all }) => (all ? renderHost.renderAnimation : renderHost.renderImage)() },
   "render.view_show": { run: () => renderHost.viewRender() },
   "view3d.view_camera": { run: () => activeView()?.toggleCameraView() },
+  "view3d.toggle_xray": { poll: () => !!activeView(), run: () => { const view = activeView(); view.state.xray = !view.state.xray; view.sync(); } },
   "view3d.view_persportho": { run: () => activeView()?.nav.toggle() },
   "view3d.view_axis": { supports: ({ type, align_active }) => !!AXIS_VIEWS[type] && !align_active, run: ({ type }) => activeView()?.nav.view(...AXIS_VIEWS[type]) },
   "view3d.view_selected": { supports: ({ use_all_regions }) => !use_all_regions, poll: () => editor.selection.size > 0, run: () => nav.frame(editor.selected) },

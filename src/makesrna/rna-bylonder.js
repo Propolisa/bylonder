@@ -470,10 +470,12 @@ const STRUCTS = {
   // A 3D Viewport (space_view3d/view3d.js): its regions, shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',
-    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header'].map((name) => [name,
+    ...Object.fromEntries(['show_region_toolbar', 'show_region_ui', 'show_region_tool_header', 'show_region_header', 'show_gizmo'].map((name) => [name,
       { get: (view) => view.state[name], set: (view, value) => setViewState(view, name, !!value) }])),
     shading: (view, r) => r.pointer('View3DShading', view),
     overlay: (view, r) => r.pointer('View3DOverlay', view),
+    // rna_SpaceView3D_icon_from_show_object_viewport_get, by name: every object type visible and selectable.
+    icon_from_show_object_viewport: () => 'VIS_SEL_11',
     region_3d: (view, r) => r.pointer('RegionView3D', view),
   },
   View3DShading: {

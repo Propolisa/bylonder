@@ -15,6 +15,11 @@
 .bl-root{gap:calc(var(--bl-row)*.25)}
 .bl-menu-button:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
 .bl-menu-button::after{content:'';position:absolute;right:calc(var(--bl-row)*.12);top:calc(50% - var(--bl-row)*.12);width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);background:currentColor;mask:var(--bl-chevron) center/contain no-repeat;background:var(--bl-wcol-menu-item)}
+/* ui_item_menu in a header: a popover's arrow alone is a unit wide, with an icon 1.6 units; a narrow button centers its
+   arrow 0.52 of its height in. */
+.bl-arrow-only{flex:0 0 var(--bl-row)!important;width:var(--bl-row);padding:0}
+.bl-arrow-only::after{right:auto;left:calc(var(--bl-row)*.32)}
+.bl-header .bl-menu-icon{flex:0 0 calc(var(--bl-row)*1.6)!important;width:calc(var(--bl-row)*1.6)}
 .bl-browse::after{right:calc(var(--bl-row)*.15);width:calc(var(--bl-row)*.3);height:calc(var(--bl-row)*.2)}
 .bl-text{background:var(--bl-wcol-text)}
 .bl-text:focus-within{background:var(--bl-wcol-text-sel);box-shadow:inset 0 0 0 1px var(--bl-select)}
@@ -85,6 +90,8 @@
 /* Icons in their theme color (UI_icons.hh, src/editors/interface/icon-themes.json). */
 .bl-icon-scene{color:var(--bl-icon-scene)}.bl-icon-collection{color:var(--bl-icon-collection)}.bl-icon-object{color:var(--bl-icon-object)}
 .bl-icon-object_data{color:var(--bl-icon-object-data)}.bl-icon-modifier{color:var(--bl-icon-modifier)}.bl-icon-shading{color:var(--bl-icon-shading)}.bl-icon-folder{color:var(--bl-icon-folder)}
+/* A data-block's own icon (ui_id_icon_get) is not a theme icon. */
+.bl-icon.bl-icon-id{color:inherit}
 .bl-node-link{background:var(--bl-wcol-menu)}
 .bl-properties-header>.bl-row{flex:1}
 /* A popover's block (UI_block_theme_style POPUP): the menu's back, its panels' layouts inside. */

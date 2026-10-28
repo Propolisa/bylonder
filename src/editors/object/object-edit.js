@@ -2,6 +2,7 @@
 // Blender's edit mesh (an EditMesh, in WebAssembly) is the truth: every change extracts its Mesh arrays, for drawing
 // and picking, and an undo step stores them as Mesh data.
 import { Matrix, Ray, Vector3 } from '@babylonjs/core';
+import rnaOperators from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { BM_VERT, BM_EDGE, BM_FACE } from '../../bmesh/intern/bmesh-class.js';
 import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
 import { EditMesh, EXTRACT_ALL, EXTRACT_TOPOLOGY, EXTRACT_POSITIONS, EXTRACT_FLAGS } from '../../bmesh/bmesh-wasm.js';
@@ -28,6 +29,8 @@ import { editMeshMenus, editMeshActions } from '../space_view3d/view3d-menus-edi
 import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
 
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
+
+const MESH_MODES = ['OBJECT', 'EDIT', 'SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT'];
 
 export function createEditMode({ world, editor, views, history, notify, changed }) {
   const { scene } = world;
@@ -294,6 +297,13 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     'mesh.select_linked_pick': pick((event, { deselect }) => linkedPick(event, deselect)),
     'mesh.loop_select': pick((event, props) => loopPick(event, 'mesh.loop_select', props)),
     'mesh.edgering_select': pick((event, props) => loopPick(event, 'mesh.edgering_select', props)),
+    // Object and Edit Mode; a mesh's other modes (object_mode_set_itemf) show greyed.
+    'object.mode_set': {
+      supports: ({ mode }) => mode === 'OBJECT' || mode === 'EDIT',
+      poll: ({ mode }) => mode === 'OBJECT' || !!em || editable(activeObject()),
+      run: ({ mode }) => (mode === 'EDIT' ? em || enter() : em && exit()),
+      enumItems: (prop) => (prop === 'mode' ? rnaOperators['object.mode_set'].properties.mode.items.filter(([id]) => MESH_MODES.includes(id)) : []),
+    },
   });
   const viewKeymap = createKeymap([
     { blender: 'VIEW3D_MT_edit_mesh_context_menu', keys: 'RIGHTMOUSE', poll: inView, run: (event) => openMenu(menus.context(), { x: event.x, y: event.y }, '') },

@@ -7,9 +7,10 @@
 .bl-tool-header .bl-label{padding:0 calc(var(--bl-row)*.2);border-radius:calc(var(--bl-row)*.2);background:color-mix(in srgb,var(--bl-region) 80%,transparent)}
 .viewport-area:not(.tool-header-shown) .bl-toolbar{top:calc(var(--bl-row)*.5)}
 .viewport-area:not(.tool-header-shown) .bl-sidebar{top:0}
-.bl-header-xform{display:flex;align-items:center}
-/* Header items keep their own widths (ED_region_header_layout), as the main header's do. */
-.bl-tool-header .bl-widget,.bl-header-xform .bl-widget{flex:none}
+.bl-view3d-header{display:flex;flex:1;min-width:0;align-items:center}
+.bl-view3d-header>.bl-row{flex:1}
+/* Header items keep their own widths (ED_region_header_layout). */
+.bl-tool-header .bl-widget,.bl-view3d-header .bl-widget{flex:none}
 
 /* The sidebar (RGN_TYPE_UI): panels, and the category tabs on its right edge. */
 .bl-sidebar{position:absolute;top:var(--bl-header-h);right:0;bottom:0;z-index:4;display:flex;width:calc(var(--bl-row)*13.5);box-sizing:border-box;pointer-events:none;color:var(--bl-text);font:var(--bl-widget-font)}
