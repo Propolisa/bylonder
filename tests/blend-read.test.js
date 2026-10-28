@@ -27,6 +27,7 @@ import { mesh_serialize } from '../src/blenkernel/mesh/mesh.js';
 import { primitive_add } from '../src/editors/mesh/editmesh-add.js';
 import { asObject } from '../src/runtime/object-transform.js';
 import { objectMesh } from '../src/editors/object/object-mesh.js';
+import { createCurveObjects } from '../src/editors/curve/curve-objects.js';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const close = (a, b, tolerance = 1e-4) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < tolerance);
@@ -46,6 +47,7 @@ async function makeWorld(build) {
   world.materials = createMaterialLibrary(world);
   world.worlds = createWorlds(world);
   world.modifiers = createModifierSystem(world, { notify: (message) => { throw Error(message); } });
+  world.curves = createCurveObjects(world);
   registerObjects(animation, objects);
   world.collections.adopt();
   const selection = createSelection(scene, objects);
@@ -129,6 +131,7 @@ else {
       assert(node.computeWorldMatrix(true) && matrix(node).every(Number.isFinite));
       if (ob.data?.type === 'Mesh') assert.equal(objectMesh(node).faces_num, ob.data.faces, `${name}'s faces`);
       if (ob.type === 'MESH') assert.deepEqual(modifierStack(node).map((m) => m.type), ob.modifiers.map((m) => m.type), `${name}'s modifiers`);
+      if (ob.type === 'FONT') assert.equal(node.metadata.wbCreation.curve.text?.body, ob.data.body, `${name}'s text`);
       if (ob.type === 'LIGHT') assert(Math.abs(r.data.energy - ob.data.energy) < 1e-3, `${name}'s energy ${r.data.energy}`);
     }
     const red = user.world.objects.find((n) => n.name === 'Cube').material;

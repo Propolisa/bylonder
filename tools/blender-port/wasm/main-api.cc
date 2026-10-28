@@ -12,6 +12,8 @@
 #include "BKE_report.hh"
 #include "BKE_sound.hh"
 #include "NOD_socket.hh"
+#include "BKE_blendfile.hh"
+#include "RE_pipeline.h"
 #include "BLO_readfile.hh"
 #include "BKE_material.hh"
 #include "BKE_world.h"
@@ -564,92 +566,38 @@ EXPORT(id_property_string) const char *id_property_string(const ID *id, const ch
   return prop ? IDP_string_get(prop) : nullptr;
 }
 
-/* The settings of a read file's scene that Main's one scene takes: Bylonder's scene settings, which the scene sync maps. */
-static void scene_settings_take(Scene *scene, const Scene *from)
-{
-  RenderData &r = scene->r;
-  const RenderData &f = from->r;
-  r.sfra = f.sfra;
-  r.efra = f.efra;
-  r.cfra = f.cfra;
-  r.subframe = f.subframe;
-  if (f.pefra > f.psfra) {
-    r.psfra = f.psfra;
-    r.pefra = f.pefra;
-  }
-  r.frs_sec = f.frs_sec;
-  r.frs_sec_base = f.frs_sec_base;
-  r.xsch = f.xsch;
-  r.ysch = f.ysch;
-  r.size = f.size;
-  r.mode = f.mode;
-  r.motion_blur_shutter = f.motion_blur_shutter;
-  STRNCPY(r.engine, f.engine);
-  scene->unit = from->unit;
-  scene->physics_settings = from->physics_settings;
-  scene->display_settings = from->display_settings;
-  STRNCPY(scene->view_settings.view_transform, from->view_settings.view_transform);
-  STRNCPY(scene->view_settings.look, from->view_settings.look);
-  scene->view_settings.exposure = from->view_settings.exposure;
-  scene->view_settings.gamma = from->view_settings.gamma;
-  scene->camera = from->camera;
-  if (scene->world != from->world) {
-    id_us_min(id_cast<ID *>(scene->world));
-    scene->world = from->world;
-    id_us_plus(id_cast<ID *>(scene->world));
-  }
-}
-
-/* A .blend's data read into Main, as File > Append brings it (BLO_read_from_memory, BKE_main_merge): its scene's objects
- * and collections join the Scene Collection and its settings become the scene's; its scenes, screens, workspaces and
- * window manager are left out (Bylonder's are its own). Returns the warnings Blender reported, one per line, or null when
- * the file could not be read. */
-EXPORT(main_read) const char *main_read(BlenderMain *ctx, const void *data, int size)
+/* A .blend opened as Blender's File > Open does without its UI (wm_file_read_post with G_FILE_NO_UI): read
+ * (BLO_read_from_memory) and set up as the Main (BKE_blendfile_read_setup_readfile), whose scene and view layer become
+ * the context's. Returns the warnings Blender reported, one per line, or null when the file could not be read. */
+EXPORT(main_open) const char *main_open(BlenderMain *ctx, const void *data, int size)
 {
   static std::string warnings;
   warnings.clear();
   ReportList reports;
   BKE_reports_init(&reports, RPT_STORE);
+  BlendFileReadReport read_report = {};
+  read_report.reports = &reports;
   BlendFileData *bfd = BLO_read_from_memory(data, size, BLO_READ_SKIP_USERDEF, &reports);
-  auto collect = [&]() {
-    for (const Report &report : reports.list.items_mutable()) {
-      if (report.type >= RPT_WARNING) {
-        warnings += std::string(report.message) + "\n";
-      }
-    }
-    BKE_reports_free(&reports);
-  };
-  if (bfd == nullptr) {
-    collect();
-    return nullptr;
+  if (bfd) {
+    BlendFileReadParams params = {};
+    params.skip_flags = BLO_READ_SKIP_USERDEF;
+    G.fileflags |= G_FILE_NO_UI;
+    /* The Main the file replaces, which setting it up frees. */
+    G_MAIN = ctx->bmain;
+    BKE_blendfile_read_setup_readfile(ctx->C, bfd, &params, nullptr, &read_report, false, nullptr);
+    ctx->bmain = G_MAIN;
+    ctx->scene = CTX_data_scene(ctx->C);
+    ctx->view_layer = BKE_view_layer_default_view(ctx->scene);
+    ctx->window.scene = ctx->scene;
+    collections_synced(ctx);
   }
-  Main *src = bfd->main;
-  bfd->main = nullptr;
-  Scene *from = bfd->curscene ? bfd->curscene : static_cast<Scene *>(src->scenes.first);
-  if (from) {
-    scene_settings_take(ctx->scene, from);
-    Collection *master = ctx->scene->master_collection;
-    for (CollectionChild &child : from->master_collection->children.items_mutable()) {
-      BKE_collection_child_add(ctx->bmain, master, child.collection);
-    }
-    for (CollectionObject &cob : from->master_collection->gobject.items_mutable()) {
-      BKE_collection_object_add(ctx->bmain, master, cob.ob);
+  for (const Report &report : reports.list.items_mutable()) {
+    if (report.type >= RPT_WARNING) {
+      warnings += std::string(report.message) + "\n";
     }
   }
-  Set<ID *> moved;
-  ID *id;
-  FOREACH_MAIN_ID_BEGIN (src, id) {
-    if (!ELEM(GS(id->name), ID_SCE, ID_WM, ID_SCR, ID_WS, ID_LI)) {
-      moved.add(id);
-    }
-  }
-  FOREACH_MAIN_ID_END;
-  MainMergeReport merged;
-  BKE_main_merge(ctx->bmain, &moved, &src, merged);
-  BLO_blendfiledata_free(bfd);
-  collections_synced(ctx);
-  collect();
-  return warnings.c_str();
+  BKE_reports_free(&reports);
+  return bfd ? warnings.c_str() : nullptr;
 }
 
 /* What saving a .blend reads from the Preferences: no thumbnail (the module has no GPU) and no backups. */
@@ -851,6 +799,22 @@ SequencerToolSettings *seq::tool_settings_init()
   tool_settings->overlap_mode = SEQ_OVERLAP_SHUFFLE;
   tool_settings->pivot_point = V3D_AROUND_LOCAL_ORIGINS;
   return tool_settings;
+}
+
+/* port-override: the module renders nothing and has no OpenColorIO, so opening a file frees no render results and
+ * checks no color configuration. */
+void RE_FreeAllRenderResults() {}
+void RE_FreeInteractiveCompositorRenders() {}
+void RE_FreeAllPersistentData() {}
+void IMB_colormanagement_working_space_check(Main * /*bmain*/, bool /*for_undo*/, bool /*have_editable_assets*/) {}
+void IMB_colormanagement_check_file_config(Main * /*bmain*/) {}
+
+/* As blender.cc defines it, for a file opened: the old Main is freed (BKE_blender_globals_clear). */
+void BKE_blender_globals_main_replace(Main *bmain)
+{
+  BKE_main_free(G_MAIN);
+  bmain->is_global_main = true;
+  G_MAIN = bmain;
 }
 
 /* As blender.cc defines it, for versioning that runs code on the Main it reads as the global one. */

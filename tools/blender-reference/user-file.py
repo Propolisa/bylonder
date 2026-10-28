@@ -1,6 +1,6 @@
 # Saves a typical user's .blend from Blender's startup scene: the Default Cube with a Bevel and a Subdivision Surface
 # modifier and a red Principled material, a second object in a collection of its own with an Array modifier, a sun,
-# the camera moved, and location keys on the cube.
+# a text object, the camera moved, and location keys on the cube.
 # usage: blender -b --factory-startup --python tools/blender-reference/user-file.py -- OUT.blend
 import bpy, sys
 
@@ -31,6 +31,8 @@ array.relative_offset_displace = (0, 1.5, 0)
 
 bpy.ops.object.light_add(type="SUN", location=(0, 0, 6))
 bpy.context.object.data.energy = 3
+bpy.ops.object.text_add(location=(-3, 0, 0))
+bpy.context.object.data.body = "Hello"
 bpy.data.objects["Camera"].location = (8, -7, 5)
 
 cube.location = (0, 0, 0)

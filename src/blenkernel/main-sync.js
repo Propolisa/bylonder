@@ -17,7 +17,7 @@ import { dnaGet, dnaSet, dnaProperty, dnaIsText } from '../makesrna/dna-struct.j
 import { syncBindings } from '../makesrna/rna-bylonder.js';
 import { INFO } from '../makesrna/rna.js';
 import { modifierStack } from '../modifiers/stack.js';
-import { moduleModifiers, blenderModifierDefinitions } from '../modifiers/blender.js';
+import { moduleModifiers, blenderModifierDefinitions, asBlenderModifier } from '../modifiers/blender.js';
 import { mesh_serialize } from './mesh/mesh.js';
 import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
@@ -26,11 +26,14 @@ import { watchObject } from './main-sync-hooks.js';
 import { CurveObject } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
 import { buildMesh } from '../editors/object/mesh-catalog.js';
+import { blenderTransform } from '../editors/curve/curve-objects.js';
+import { evaluateCurve } from './curve/curve.js';
+import { mesh_batch_cache_apply } from '../draw/mesh-batch-cache.js';
 import { asObject } from '../runtime/object-transform.js';
 import { addModifier } from '../modifiers/stack.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
-import { Color3, DirectionalLight, FreeCamera, Material, MultiMaterial, PBRMaterial, PointLight, SpotLight, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { Color3, DirectionalLight, FreeCamera, Material, Mesh, MultiMaterial, PBRMaterial, PointLight, SpotLight, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 
 // ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
 const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d;
@@ -61,6 +64,10 @@ const plain = (value) => (value && typeof value === 'object' ? Array.from(value)
 const close = (a, b) => Math.abs(a - b) <= 1e-5 * Math.max(1, Math.abs(a), Math.abs(b));
 export const same = (a, b) => (Array.isArray(a) ? Array.isArray(b) && a.length === b.length && a.every((v, i) => same(v, b[i]))
   : typeof a === 'number' && typeof b === 'number' ? close(a, b) : a === b);
+// Whether `main` holds every value `babylon` has (nested records, Main's floats being 32-bit).
+const holdsAll = (main, babylon) => (babylon && typeof babylon === 'object' && !Array.isArray(babylon)
+  ? !!main && typeof main === 'object' && Object.keys(babylon).every((key) => holdsAll(main[key], babylon[key]))
+  : Array.isArray(babylon) ? Array.isArray(main) && main.length === babylon.length && babylon.every((v, i) => holdsAll(main[i], v)) : same(plain(babylon), plain(main)));
 // A name as Blender keeps it, unique among its IDs: "Cube" may be "Cube.001".
 const sameName = (babylon, main) => main === babylon || main.replace(/\.\d{3}$/, '') === babylon.slice(0, 63);
 // A value DNA can hold: an enum's identifier must be one of its items.
@@ -186,9 +193,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         if (nodeOf(ob)) continue;
         const type = dnaGet('Object', ob, 'type'), name = blender.name(ob), data = blender.data(ob);
         const lightType = type === 'LIGHT' ? dnaGet('Light', data, 'type') : null;
-        if (!MAKERS[type] && type !== 'MESH') { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
+        if (!MAKERS[type] && type !== 'MESH' && !CURVE_TYPES.includes(type)) { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
         if (lightType === 'AREA') warnings.push(`"${name}": an Area light opens as a point light`);
-        const node = type === 'MESH' ? adoptMesh(scene, name, ob) : MAKERS[type](scene, name, lightType);
+        const node = type === 'MESH' ? adoptMesh(scene, name, ob) : CURVE_TYPES.includes(type) ? adoptCurve(scene, name, ob, type) : MAKERS[type](scene, name, lightType);
         node.metadata = { ...node.metadata, editable: true, wbId: blender.property(ob, PROPERTIES.id) ?? name };
         made.push(adoptEntry(node, ob, type));
       }
@@ -203,6 +210,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         pull(entry, node);
         if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
         if (entry.type === 'MESH') adoptModifiers(entry, warnings);
+        else if (blender.modifiers(ob).length) warnings.push(`"${node.name}": the modifiers of curve and text objects are not opened`);
+        if (CURVE_TYPES.includes(entry.type)) drawCurve(node);
         if (blender.materials(ob).length > 1) warnings.push(`"${node.name}": its faces show its first material`);
         for (const path of new Set(fcurvePaths(ob))) if (!['location', 'rotation_euler', 'scale'].includes(path)) warnings.push(`"${node.name}": its ${path} keys are not opened`);
         if (blender.camera === ob) scene.activeCamera = node;
@@ -233,6 +242,17 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     blender.clearMesh(ob);
     return node;
   }
+  // A read curve or text object: its Curve data held by its Babylon object too, as Bylonder's curves are.
+  function adoptCurve(scene, name, ob, type) {
+    const node = new Mesh(name, scene);
+    node.metadata = { wbCreation: { curve: new CurveObject(type, name, ob, blender).data } };
+    return node;
+  }
+  const drawCurve = (node) => {
+    const data = node.metadata.wbCreation.curve;
+    const mesh = evaluateCurve(data, { transform: blenderTransform(node), modifiers: data.modifiers ?? [], targets: {} });
+    if (mesh) mesh_batch_cache_apply(mesh, node);
+  };
   // A read object's modifiers, as Bylonder's stack holds Blender's; the types Bylonder does not have are left out.
   function adoptModifiers(entry, warnings) {
     const view = () => new DataView(blenderModule.exports.memory.buffer);
@@ -375,11 +395,20 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     push(entry, node);
     if (entry.data.ptr && entry.data.struct) push(entry.data, node);
     pushModifiers(entry);
+    pushCurve(entry);
+  }
+  // A curve or text object's Curve data, live in Main as in Babylon (the edit data in Edit Mode).
+  function pushCurve(entry) {
+    if (!CURVE_TYPES.includes(entry.type) || !world.curves) return;
+    const data = world.curves.data(entry.node), signature = JSON.stringify(data);
+    if (signature === entry.curve) return;
+    entry.curve = signature;
+    curveObject(entry).data = data;
   }
   // A mesh object's modifier stack as Blender holds it: the stack's Blender modifiers with their settings.
   function pushModifiers(entry) {
     if (entry.type !== 'MESH') return;
-    const stack = modifierStack(entry.node).filter((m) => blenderModifierDefinitions.some((d) => d.id === m.type));
+    const stack = modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
     const signature = JSON.stringify(stack.map(({ type, values, showViewport, showRender }) => [type, values, showViewport, showRender]));
     if (signature === entry.modifiers) return;
     entry.modifiers = signature;
@@ -546,24 +575,19 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (api.debug) assertEqual('flush');
   }
 
-  // Fills objects' geometry from Babylon for code that needs it: a Mesh, or a curve's or text's Curve data (the edit
-  // data in Edit Mode).
+  // Fills meshes' geometry, the one large buffer Main holds only while Blender's code needs it, from Babylon's (the
+  // edit mesh's in Edit Mode), and releases it after.
   const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
   function fill(nodes) {
     for (const node of nodes) {
       const entry = objects.get(node);
-      if (!entry || filled.has(entry)) continue;
-      if (entry.type === 'MESH') blender.setMesh(entry.ob, world.editMode?.meshOf?.(node) ?? objectMesh(node));
-      else if (CURVE_TYPES.includes(entry.type) && world.curves) curveObject(entry).data = world.curves.data(node);
-      else continue;
+      if (!entry || filled.has(entry) || entry.type !== 'MESH') continue;
+      blender.setMesh(entry.ob, world.editMode?.meshOf?.(node) ?? objectMesh(node));
       filled.add(entry);
     }
   }
   function release() {
-    for (const entry of filled) {
-      if (entry.type === 'MESH') blender.clearMesh(entry.ob);
-      else curveObject(entry).splines = { splines: [] };
-    }
+    for (const entry of filled) blender.clearMesh(entry.ob);
     filled.clear();
   }
 
@@ -593,9 +617,12 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         const base = blender.base(ob), data = rna.pointer('Object', node);
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
-        if ((tags.object | tags.data) & ID_RECALC_GEOMETRY && filled.has(entry)) {
-          if (entry.type === 'MESH') rebuildMesh(node, { mesh: mesh_serialize(blender.mesh(ob)) });
-          else world.curves.set(node, curveObject(entry).data);
+        if ((tags.object | tags.data) & ID_RECALC_GEOMETRY) {
+          if (filled.has(entry)) rebuildMesh(node, { mesh: mesh_serialize(blender.mesh(ob)) });
+          else if (CURVE_TYPES.includes(entry.type) && world.curves) {
+            world.curves.set(node, curveObject(entry).data);
+            entry.curve = JSON.stringify(world.curves.data(node));
+          }
         }
       }
       const { nodes: added } = adopt();
@@ -653,6 +680,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       const base = blender.base(entry.ob);
       if (base && base.selected !== selection.has(node)) diffs.push(`${label}: selected ${selection.has(node)}, Main ${base.selected}`);
       if (base && base.active !== (node === active) && base.selected) diffs.push(`${label}: active differs`);
+      if (CURVE_TYPES.includes(entry.type) && world.curves && !holdsAll(curveObject(entry).data, world.curves.data(node))) diffs.push(`${label}: curve data differs`);
       if (filled.has(entry)) {
         const mesh = blender.mesh(entry.ob), own = objectMesh(node);
         if (!same(Array.from(mesh.vert_positions), Array.from(own.vert_positions)) || !same(Array.from(mesh.corner_verts), Array.from(own.corner_verts)))

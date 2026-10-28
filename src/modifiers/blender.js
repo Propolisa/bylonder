@@ -63,6 +63,23 @@ export const blenderModifierDefinition = definition;
 export const modifierPointers = (id) => Object.fromEntries(Object.entries(dna[rna.types[id].struct].properties)
   .filter(([, field]) => field.kind === 'pointer').map(([name, { offset }]) => [name, offset]));
 
+// A stack entry as one of Blender's modifiers: Blender's own as it is, Bylonder's Geometry Nodes Array as Blender's
+// Array where its settings are the Array modifier's (a line of copies, without rotation, scale or randomness); null
+// when Blender has none like it.
+export function asBlenderModifier(modifier) {
+  if (blenderModifierDefinitions.some((d) => d.id === modifier.type)) return modifier;
+  const v = modifier.values;
+  const line = modifier.type === 'GN_ARRAY' && v.shape === 'Line' && v.countMethod === 'Count' && !v.randomize &&
+    ['x', 'y', 'z'].every((axis) => v[`rotation.${axis}`] === 0 && v[`scale.${axis}`] === 1);
+  if (!line) return null;
+  const relative = v.offsetMethod === 'Relative', step = v.offsetMethod === 'Endpoint' ? 1 / Math.max(1, v.count - 1) : 1;
+  const offset = relative ? 'offset' : 'translation', key = relative ? 'relative_offset_displace' : 'constant_offset_displace';
+  // Babylon's (x, y, z) is Blender's (x, z, y).
+  const values = { count: v.count, use_relative_offset: relative, use_constant_offset: !relative, use_merge_vertices: v.merge, merge_threshold: v.mergeDistance,
+    ...Object.fromEntries(['x', 'z', 'y'].map((axis, i) => [`${key}[${i}]`, v[`${offset}.${axis}`] * (relative ? 1 : step)])) };
+  return { ...modifier, type: 'ARRAY', values };
+}
+
 // Stack entries ({type, values}) as the module takes them.
 export const moduleModifiers = (modifiers) => modifiers.map(({ type, values }) => {
   const { mesh: { type: value, write } } = blenderModifierDefinitions.find((d) => d.id === type);

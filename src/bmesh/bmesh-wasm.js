@@ -528,11 +528,12 @@ export class BlenderMain {
     if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
     return bytes;
   }
-  // A .blend's data read into Main (main_read): returns Blender's warnings, or throws when the file cannot be read.
+  // A .blend opened as the Main, as Blender opens one (main_open): returns its warnings; throws when it cannot be read.
   readBlend(bytes) {
-    const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_read(this.#context, p, bytes.length)) >>> 0;
+    const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_open(this.#context, p, bytes.length)) >>> 0;
     if (!report) throw new Error('Not a .blend file Blender can read');
-    return cString(report).split('\n').filter(Boolean);
+    // A file without a screen is opened without its UI, which Bylonder never opens.
+    return cString(report).split('\n').filter((line) => line && line !== 'Library file, loading empty scene');
   }
 
   // Main's IDs of a type (ID_GR, ID_OB...).

@@ -603,33 +603,6 @@ bool ED_operator_editfont(bContext *C)
   return false;
 }
 
-/* As packedFile.cc defines them; packedFile.cc reads and writes files (std::fstream), which wasi's libc++ lacks and
- * the module has none of. */
-PackedFile *BKE_packedfile_new_from_memory(const void *mem, int memlen, const ImplicitSharingInfo *sharing_info)
-{
-  if (!sharing_info) {
-    sharing_info = implicit_sharing::info_for_mem_free(const_cast<void *>(mem));
-  }
-  PackedFile *pf = MEM_new<PackedFile>("PackedFile");
-  pf->data = mem;
-  pf->size = memlen;
-  pf->sharing_info = sharing_info;
-  return pf;
-}
-void BKE_packedfile_free(PackedFile *pf)
-{
-  if (pf) {
-    pf->sharing_info->remove_user_and_delete_if_last();
-    MEM_delete(pf);
-  }
-}
-PackedFile *BKE_packedfile_duplicate(const PackedFile *pf_src)
-{
-  PackedFile *pf_dst = MEM_dupalloc(pf_src);
-  pf_dst->sharing_info->add_user();
-  return pf_dst;
-}
-
 /* port-override: the module has no depsgraph to say which curves something follows (the Curve modifier, Follow
  * Path, text on a curve), so every curve has its path evaluated, as Blender does for a curve something follows. */
 uint32_t DEG_get_eval_flags_for_id(const Depsgraph * /*graph*/, const ID * /*id*/) { return DAG_EVAL_NEED_CURVE_PATH; }
