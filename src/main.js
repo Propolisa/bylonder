@@ -355,6 +355,9 @@ world.collections.subscribe(() => {
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
 ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || [], blenderRNA);
+// Blender's add operators leave the object they add selected and active alone, so a scene opens that way (startup.blend's cube).
+const added = world.objects.findLast((n) => n.metadata?.wbCreation?.operator);
+if (added) { editor.selection.replace([added]); editor.reconcile(); }
 const nodeSection = document.querySelector("#nodes-section");
 let shadingReady = false;
 const backdrop = createCompositorBackdrop({

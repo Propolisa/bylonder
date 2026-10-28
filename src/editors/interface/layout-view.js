@@ -16,7 +16,7 @@
 import { defineComponent, h, ref, Teleport, onBeforeUnmount } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
-import { iconUrl, toolIconUrl } from './icon.js';
+import { iconStyle, toolIconUrl } from './icon.js';
 import { rnaProperty, INFO } from '../../makesrna/rna.js';
 import { operatorValues, isLayout } from './layout.js';
 import { formatLength, formatAngle, parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
@@ -25,14 +25,16 @@ import themes from './icon-themes.json' with { type: 'json' };
 
 // An icon in its theme color, as Blender draws its monochrome icons.
 export const icon = (name, className = '') => (name && name !== 'NONE'
-  ? h('span', { class: ['bl-icon', themes[name] && 'bl-icon-' + themes[name], className], style: { maskImage: `url(${iconUrl(name.toLowerCase())})` }, 'aria-hidden': 'true' }) : null);
+  ? h('span', { class: ['bl-icon', themes[name] && 'bl-icon-' + themes[name], className], style: iconStyle(name), 'aria-hidden': 'true' }) : null);
 
 // ---- Values as Blender shows and parses them (ui_but_string_get, ui_but_string_eval_number).
 const SUFFIX = { CAMERA: ' mm', POWER: ' W', COLOR_TEMPERATURE: ' K', MASS: ' kg', TIME_ABSOLUTE: ' s', VELOCITY: ' m/s', ACCELERATION: ' m/s²', TEMPERATURE: ' K',
   WAVELENGTH: ' nm', FREQUENCY: ' Hz', AREA: ' m²', VOLUME: ' m³' };
 const trimmed = (value, precision = 3) => String(Number(value.toFixed(Math.min(6, precision))));
+const PIXEL = new Set(['PIXEL', 'PIXEL_DIAMETER']);
 export function displayValue(meta, value) {
-  if (meta.type === 'I') return meta.subtype === 'PERCENTAGE' ? `${value}%` : String(value);
+  if (meta.type === 'I') return meta.subtype === 'PERCENTAGE' ? `${value}%` : PIXEL.has(meta.subtype) ? `${value} px` : String(value);
+  if (PIXEL.has(meta.subtype)) return value.toFixed(Math.min(6, meta.precision ?? 3)) + ' px';
   if (meta.unit === 'LENGTH') return formatLength(value);
   if (meta.unit === 'ROTATION') return formatAngle(value);
   if (SUFFIX[meta.unit]) return trimmed(value, meta.precision) + SUFFIX[meta.unit];
@@ -40,7 +42,7 @@ export function displayValue(meta, value) {
   return value.toFixed(Math.min(6, meta.precision ?? 3));
 }
 const unitOf = (meta) => (meta.unit === 'LENGTH' ? 'length' : meta.unit === 'ROTATION' ? 'angle' : null);
-const parseValue = (meta) => (text) => parseUnit(String(text).replace(/\s*(mm|W|kg|s|K|nm|Hz|%)\s*$/, ''), unitOf(meta));
+const parseValue = (meta) => (text) => parseUnit(String(text).replace(/\s*(mm|W|kg|s|K|nm|Hz|px|%)\s*$/, ''), unitOf(meta));
 const editValue = (meta) => (value) => (unitOf(meta) ? unitText(value, unitOf(meta)) : meta.type === 'I' ? String(value) : String(Number(value.toFixed(6))));
 
 // RNA_property_array_item_char: the letter of an array element.
@@ -49,6 +51,38 @@ function itemChar(meta, i) {
   if (['COLOR', 'COLOR_GAMMA'].includes(meta.subtype)) return 'RGBA'[i];
   if (['TRANSLATION', 'DIRECTION', 'XYZ', 'XYZ_LENGTH', 'EULER', 'VELOCITY', 'ACCELERATION', 'COORDINATES'].includes(meta.subtype)) return 'XYZW'[i];
   return '';
+}
+
+// ---- Sizes as Blender estimates them in a layout of variable size (a header), where items keep their estimate
+// (interface_layout.cc: text_icon_width_ex, item_rna_size, item_scale).
+const PAD_DEFAULT = { text: 1.5, icon: 0.25 }, PAD_COMPACT = { text: 1.25, icon: 0.35 };
+let measure = null;
+const rootStyle = () => getComputedStyle(document.documentElement);
+const unitPx = () => parseFloat(rootStyle().getPropertyValue('--bl-row')) || 20;
+function textWidth(text) {
+  measure ??= document.createElement('canvas').getContext('2d');
+  measure.font = `${unitPx() * 0.55}px ${rootStyle().getPropertyValue('--bl-font-family')}`;
+  return Math.round(measure.measureText(text).width);
+}
+function textIconWidth(text, icon, unit, pad = PAD_DEFAULT) {
+  if (!text) return unit;
+  return textWidth(text) + Math.ceil(unit * (pad.text + (icon ? pad.icon : 0)));
+}
+// item_rna_size: a property's width in a header, in pixels, before its layouts' scale.
+function headerPropWidth(node, prop, unit) {
+  const { meta } = prop, iconOnly = !!node.icon_only;
+  let name = node.text ?? meta.name, icon = [node.icon, meta.icon].find((i) => i && i !== 'NONE') ?? null, width = 0, checkboxOnly = false;
+  if (!name && !iconOnly) {
+    if (meta.type === 'S' || meta.type === 'P') name = 'non-empty text';
+    else if (meta.type === 'B') { checkboxOnly = !icon; icon = 'DOT'; }
+    else if (meta.type === 'E') width = Math.max(0, ...prop.items().filter(Boolean).map((item) => textIconWidth(item[1], item[3] !== 'NONE' && item[3], unit, PAD_COMPACT)));
+  }
+  if (!width) width = meta.type === 'E' && iconOnly ? unit : textIconWidth(iconOnly ? '' : name, icon, unit, PAD_DEFAULT);
+  if (meta.type === 'B' && name && !iconOnly) width += unit / 5;
+  else if (checkboxOnly) width -= unit / 4;
+  else if (meta.type === 'E' && !iconOnly) width += unit / 4;
+  else if (meta.type === 'I' || meta.type === 'F') width += unitPx() * 3;
+  return width;
 }
 
 // ---- Widgets. A widget's class carries its Blender widget type; aligned layouts square the corners where widgets meet.
@@ -88,6 +122,11 @@ const menuButton = ({ text, iconName, items, disabled, inactive, title, iconOnly
   class: [W, 'bl-menu-button flex h-unit min-w-0 flex-1 items-center gap-1 rounded-md pl-1.5 pr-5 text-xs', inactive && 'opacity-50', iconOnly && 'pr-4'],
   onClick,
 }, [icon(iconName), text && !iconOnly ? h('span', { class: 'min-w-0 flex-1 truncate text-left' }, text) : null]);
+
+// A menu in a header (ui_item_menu in a header layout): a pull-down, flat until hovered, without a drop-down arrow.
+const pulldown = ({ text, iconName, items, disabled, menu }) => h('button', {
+  type: 'button', disabled, 'aria-label': text, 'aria-haspopup': 'menu', 'data-blender': menu, class: 'bl-pulldown bl-fit', onClick: (e) => openMenu(items, e.currentTarget),
+}, [icon(iconName), text ? h('span', text) : null]);
 
 // A popover (UI_popover_panel): a menu button that opens its panels below it, each drawn as in a region, under its
 // label when there are several; a press outside closes it.
@@ -196,7 +235,8 @@ function widget(prop, node, { text, index = -1, disabled, inactive, ui }) {
         disabled, inactive, title: meta.description, iconOnly: node.icon_only });
     }
     case 'S':
-      return textField({ value: value ?? '', iconName, disabled, inactive, title: meta.description || meta.name, placeholder: node.placeholder,
+      // button_placeholder_get: a search field says Search.
+      return textField({ value: value ?? '', iconName, disabled, inactive, title: meta.description || meta.name, placeholder: node.placeholder ?? (iconName === 'VIEWZOOM' ? 'Search' : undefined),
         onChange: (v) => prop.set(v) });
     case 'P': {
       const candidates = () => [{ heading: meta.name }, ...ui.ids(meta.struct).map((id) => ({ label: id.name, checked: () => prop.get() === id, run: () => prop.set(id) }))];
@@ -389,6 +429,7 @@ function item(node, env) {
     case 'operator': return operatorButton(node, env);
     case 'operator_menu_enum': case 'menu': case 'prop_with_menu': {
       const items = node.kind === 'menu' ? () => env.ui.drawMenu?.(node.menu) ?? [] : () => [];
+      if (node.kind === 'menu' && env.header) return pulldown({ text: node.text ?? env.ui.menuLabel?.(node.menu) ?? '', iconName: node.icon, items, disabled: !env.enabled, menu: node.menu });
       return menuButton({ text: node.text ?? (node.kind === 'menu' ? env.ui.menuLabel?.(node.menu) : null) ?? '', iconName: node.icon, items, disabled: !env.enabled });
     }
     case 'popover': return popover([node.panel], node, env);
@@ -427,7 +468,7 @@ function layoutClass(node) {
 
 // A layout's children: with its heading for the first property, its active and enabled state for all it holds.
 function layout(node, env) {
-  const inner = { ...env, horizontal: node.kind === 'row' || node.kind === 'split', active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
+  const inner = { ...env, header: env.header || node.root_type === 'HEADER', scaleX: (env.scaleX ?? 1) * (node.scale_x || 1), unitScale: node.scale_x || 1, horizontal: node.kind === 'row' || node.kind === 'split', active: env.active && node.active !== false, enabled: env.enabled && node.enabled !== false,
     heading: node.heading ? { text: node.heading } : env.heading };
   if (node.kind === 'panel') return layoutPanel(node, inner);
   const children = [];
@@ -436,6 +477,7 @@ function layout(node, env) {
     const env = slot ? { ...inner, noSplit: true } : inner;
     const drawn = isLayout(child) ? layout(child, env) : item(child, env);
     if (!drawn) continue;
+    if (env.header && child.kind === 'prop' && !child.expand) fixWidth(drawn, child, env);
     (slot ?? children).push(drawn);
     if (node.kind === 'row' && drawn.valueSlot) slot = drawn.valueSlot;
   }
@@ -449,7 +491,15 @@ function layout(node, env) {
   if (node.ui_units_x) style.width = `calc(var(--bl-row) * ${node.ui_units_x})`;
   // A layout of icon buttons only keeps their size in a row, as their estimated widths would.
   const fit = children.length && children.every((child) => JSON.stringify(child.props?.class ?? '').includes('bl-icon-only'));
-  return h('div', { class: [layoutClass(node), EMBOSS_NONE.has(node.emboss) && 'bl-emboss-none', node.alert && 'bl-alert', fit && 'bl-fit bl-icon-only-group'], style }, children);
+  return h('div', { class: [layoutClass(node), node.root_type === 'HEADER' && 'bl-header', EMBOSS_NONE.has(node.emboss) && 'bl-emboss-none', node.alert && 'bl-alert', fit && 'bl-fit bl-icon-only-group'], style }, children);
+}
+
+// A property in a header keeps the width Blender estimates for it, scaled by its layouts (item_scale).
+function fixWidth(drawn, node, env) {
+  const prop = resolve(node, env.ui);
+  if (!prop || (prop.meta.array && (node.index ?? -1) < 0)) return;
+  const width = Math.trunc(headerPropWidth(node, prop, Math.trunc(unitPx() * env.unitScale)) * env.scaleX);
+  drawn.props = { ...drawn.props, style: { ...drawn.props?.style, flex: `0 0 ${width}px`, width: `${width}px` } };
 }
 
 // A layout panel (UILayout.panel): a header with a disclosure triangle, then the body when open.

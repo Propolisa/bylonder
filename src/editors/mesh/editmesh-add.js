@@ -10,7 +10,8 @@ import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { EditMesh, meshFromFaces } from '../../bmesh/bmesh-wasm.js';
 import { add_torus, add_uvs } from '../../bl_ui/add_mesh_torus.js';
 import { createMesh } from '../../blenkernel/mesh/mesh.js';
-import { SCE_SELECT_VERTEX } from '../../bmesh/intern/bmesh-marking.js';
+import { SCE_SELECT_VERTEX, BM_mesh_elem_hflag_enable_all, BM_mesh_select_mode_flush_ex } from '../../bmesh/intern/bmesh-marking.js';
+import { BM_VERT, BM_ELEM_SELECT } from '../../bmesh/intern/bmesh-class.js';
 
 const FILL = { NOTHING: 0, NGON: 1, TRIFAN: 2 };
 
@@ -18,6 +19,9 @@ function make_prim(exec, args, calc_uvs) {
   const bm = BM_mesh_create();
   if (calc_uvs) BM_data_layer_add_named(bm, bm.ldata, CD_PROP_FLOAT2, 'UVMap');
   bmo_call(bm, exec, { ...args, calc_uvs });
+  // EDBM_op_call_and_selectf selects "verts.out" (the whole new mesh) and make_prim_finish flushes it.
+  BM_mesh_elem_hflag_enable_all(bm, BM_VERT, BM_ELEM_SELECT);
+  BM_mesh_select_mode_flush_ex(bm, SCE_SELECT_VERTEX);
   return BM_mesh_bm_to_me(bm);
 }
 

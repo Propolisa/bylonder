@@ -67,7 +67,7 @@ export const idname = (type) => type.bl_idname || type.__name__;
 // A header's layout (or a draw function's, as draw_xform_template), laid out as a header region lays it: in a row.
 export function headerLayout(context, draw) {
   useContext(context);
-  const layout = new UILayout('row');
+  const layout = new UILayout('row', null, { root_type: 'HEADER' });
   draw(layout);
   return layout;
 }

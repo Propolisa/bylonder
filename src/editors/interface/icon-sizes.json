@@ -1,0 +1,1366 @@
+{
+"action": [
+1800,
+1600
+],
+"action_slot": [
+1800,
+1600
+],
+"add": [
+1100,
+1100
+],
+"align_center": [
+1600,
+1500
+],
+"align_flush": [
+1600,
+1500
+],
+"align_justify": [
+1600,
+1500
+],
+"align_left": [
+1600,
+1500
+],
+"align_right": [
+1600,
+1500
+],
+"anchor_bottom": [
+1600,
+1500
+],
+"anchor_center": [
+1600,
+1200
+],
+"anchor_left": [
+1600,
+1200
+],
+"anchor_right": [
+1600,
+1200
+],
+"anchor_top": [
+1600,
+1500
+],
+"arrow_leftright": [
+1600,
+900
+],
+"auto": [
+1800,
+1200
+],
+"axis_front": [
+1600,
+1500
+],
+"axis_side": [
+1600,
+1500
+],
+"axis_top": [
+1500,
+1600
+],
+"back": [
+1400,
+900
+],
+"blank1": [
+200,
+200
+],
+"blender": [
+1800,
+1500
+],
+"blender_logo_large": [
+5236,
+1600
+],
+"bold": [
+1100,
+1400
+],
+"bookmarks": [
+1100,
+1600
+],
+"brush_data": [
+1600,
+1700
+],
+"camera_data": [
+1700,
+1700
+],
+"center_only": [
+1600,
+1500
+],
+"char_notdef": [
+1250,
+1700
+],
+"char_replacement": [
+1400,
+1600
+],
+"checkbox_dehlt": [
+1200,
+1200
+],
+"checkbox_hlt": [
+1200,
+1200
+],
+"checkmark": [
+1200,
+900
+],
+"collapsemenu": [
+1400,
+1100
+],
+"collection_color_01": [
+1700,
+1600
+],
+"collection_color_02": [
+1700,
+1600
+],
+"collection_color_03": [
+1700,
+1600
+],
+"collection_color_04": [
+1700,
+1600
+],
+"collection_color_05": [
+1700,
+1600
+],
+"collection_color_06": [
+1700,
+1600
+],
+"collection_color_07": [
+1700,
+1600
+],
+"collection_color_08": [
+1700,
+1600
+],
+"color_blue": [
+1200,
+1400
+],
+"color_green": [
+1200,
+1400
+],
+"color_red": [
+1100,
+1400
+],
+"con_action": [
+1600,
+1700
+],
+"con_camerasolver": [
+1600,
+1500
+],
+"con_followpath": [
+1600,
+1700
+],
+"con_geometryattribute": [
+1500,
+1500
+],
+"con_kinematic": [
+1500,
+1600
+],
+"con_objectsolver": [
+1500,
+1500
+],
+"con_pivot": [
+1400,
+1600
+],
+"con_shrinkwrap": [
+1500,
+1500
+],
+"con_sizelike": [
+1500,
+1500
+],
+"copy_id": [
+1600,
+1500
+],
+"curve_bezcircle": [
+1600,
+1500
+],
+"curve_bezcurve": [
+1600,
+1500
+],
+"decorate": [
+600,
+600
+],
+"decorate_animate": [
+1300,
+1300
+],
+"decorate_driver": [
+1400,
+1400
+],
+"decorate_keyframe": [
+1300,
+1300
+],
+"decorate_library_override": [
+1500,
+1500
+],
+"decorate_linked": [
+1500,
+1500
+],
+"decorate_locked": [
+1100,
+1500
+],
+"decorate_override": [
+1400,
+1300
+],
+"decorate_unlocked": [
+1100,
+1500
+],
+"desktop": [
+1600,
+1500
+],
+"disclosure_tri_down": [
+700,
+800
+],
+"disclosure_tri_right": [
+800,
+700
+],
+"disk_drive": [
+1400,
+1600
+],
+"disk_drive_large": [
+1400,
+1600
+],
+"dot": [
+600,
+600
+],
+"downarrow_hlt": [
+1100,
+700
+],
+"driver_rotational_difference": [
+1500,
+1500
+],
+"edge_bevel": [
+1500,
+1600
+],
+"edge_crease": [
+1500,
+1600
+],
+"edge_seam": [
+1500,
+1600
+],
+"edge_sharp": [
+1500,
+1600
+],
+"edgesel": [
+1500,
+1600
+],
+"empty_single_arrow": [
+900,
+1600
+],
+"export": [
+1500,
+1500
+],
+"external_drive_large": [
+1500,
+1600
+],
+"fake_user_off": [
+1500,
+1600
+],
+"fake_user_on": [
+1500,
+1600
+],
+"ff": [
+1200,
+1200
+],
+"file": [
+1400,
+1600
+],
+"file_3d": [
+1500,
+1600
+],
+"file_alias": [
+1300,
+1600
+],
+"file_blank": [
+1400,
+1600
+],
+"file_folder": [
+1600,
+1500
+],
+"file_folder_large": [
+1600,
+1300
+],
+"file_font": [
+1400,
+1600
+],
+"file_hidden": [
+1400,
+1600
+],
+"file_large": [
+1250,
+1600
+],
+"file_parent": [
+1300,
+1400
+],
+"file_parent_large": [
+1600,
+1250
+],
+"file_refresh": [
+1500,
+1500
+],
+"file_volume": [
+1500,
+1600
+],
+"filebrowser": [
+1600,
+1500
+],
+"folder_redirect": [
+1600,
+1400
+],
+"font_data": [
+1500,
+1600
+],
+"forward": [
+1400,
+900
+],
+"frame_next": [
+1300,
+1000
+],
+"frame_prev": [
+1300,
+1000
+],
+"ghost_disabled": [
+1400,
+1600
+],
+"ghost_enabled": [
+1400,
+1600
+],
+"gp_caps_flat": [
+1200,
+1600
+],
+"grid": [
+1600,
+1200
+],
+"grip": [
+1200,
+600
+],
+"grip_corner_bottom_right": [
+900,
+900
+],
+"grip_v": [
+600,
+1200
+],
+"group": [
+1600,
+1500
+],
+"handle_aligned": [
+1700,
+1600
+],
+"handle_auto": [
+1500,
+1500
+],
+"handle_autoclamped": [
+1500,
+1600
+],
+"handle_free": [
+1700,
+1600
+],
+"handle_vector": [
+1500,
+1600
+],
+"help": [
+1400,
+1600
+],
+"hide_off": [
+1500,
+1100
+],
+"hide_on": [
+1500,
+1100
+],
+"holdout_off": [
+1200,
+1200
+],
+"holdout_on": [
+1600,
+1200
+],
+"hook": [
+1100,
+1600
+],
+"import": [
+1500,
+1500
+],
+"indirect_only_off": [
+1400,
+1300
+],
+"indirect_only_on": [
+1500,
+1500
+],
+"info": [
+1600,
+1700
+],
+"inversesquarecurve": [
+1400,
+1400
+],
+"ipo_back": [
+1600,
+1400
+],
+"ipo_bounce": [
+1600,
+1400
+],
+"ipo_circ": [
+1600,
+1400
+],
+"ipo_constant": [
+1600,
+1400
+],
+"ipo_cubic": [
+1600,
+1500
+],
+"ipo_ease_in": [
+1600,
+1400
+],
+"ipo_ease_in_out": [
+1600,
+1400
+],
+"ipo_ease_out": [
+1600,
+1400
+],
+"ipo_elastic": [
+1600,
+1400
+],
+"ipo_expo": [
+1600,
+1400
+],
+"ipo_linear": [
+1600,
+1400
+],
+"ipo_quad": [
+1600,
+1500
+],
+"ipo_quart": [
+1600,
+1500
+],
+"ipo_quint": [
+1600,
+1500
+],
+"ipo_sine": [
+1600,
+1500
+],
+"italic": [
+1200,
+1400
+],
+"key_backspace": [
+2600,
+1800
+],
+"key_backspace_filled": [
+2600,
+1800
+],
+"key_command": [
+1800,
+1800
+],
+"key_command_filled": [
+1800,
+1800
+],
+"key_control": [
+1800,
+1800
+],
+"key_control_filled": [
+1800,
+1800
+],
+"key_empty1": [
+1800,
+1800
+],
+"key_empty1_filled": [
+1800,
+1800
+],
+"key_empty2": [
+2600,
+1800
+],
+"key_empty2_filled": [
+2600,
+1800
+],
+"key_empty3": [
+3400,
+1800
+],
+"key_empty3_filled": [
+3400,
+1800
+],
+"key_menu": [
+1800,
+1800
+],
+"key_menu_filled": [
+1800,
+1800
+],
+"key_option": [
+1800,
+1800
+],
+"key_option_filled": [
+1800,
+1800
+],
+"key_return": [
+1800,
+1800
+],
+"key_return_filled": [
+1800,
+1800
+],
+"key_ring": [
+1800,
+1800
+],
+"key_ring_filled": [
+1800,
+1800
+],
+"key_shift": [
+1800,
+1800
+],
+"key_shift_filled": [
+1800,
+1800
+],
+"key_tab": [
+1800,
+1800
+],
+"key_tab_filled": [
+1800,
+1800
+],
+"key_windows": [
+1800,
+1800
+],
+"key_windows_filled": [
+1800,
+1800
+],
+"keyframe": [
+1100,
+1100
+],
+"keyframe_hlt": [
+1100,
+1100
+],
+"layer_active": [
+800,
+800
+],
+"layer_used": [
+800,
+800
+],
+"light": [
+1400,
+1700
+],
+"light_data": [
+1400,
+1700
+],
+"light_point": [
+1500,
+1700
+],
+"lightprobe_plane": [
+1700,
+1700
+],
+"lightprobe_sphere": [
+1500,
+1500
+],
+"lightprobe_volume": [
+1500,
+1500
+],
+"lincurve": [
+1600,
+1200
+],
+"linenumbers_off": [
+1400,
+1600
+],
+"locked": [
+1100,
+1500
+],
+"longdisplay": [
+1600,
+1500
+],
+"loop_back": [
+1400,
+1500
+],
+"loop_forwards": [
+1400,
+1500
+],
+"marker": [
+1100,
+900
+],
+"marker_hlt": [
+1100,
+900
+],
+"matfluid": [
+1200,
+1600
+],
+"menu_panel": [
+1600,
+1400
+],
+"mesh_cylinder": [
+1400,
+1600
+],
+"mesh_monkey": [
+1800,
+1600
+],
+"mesh_torus": [
+1800,
+1400
+],
+"mod_curve_to_tube": [
+1700,
+1700
+],
+"mod_displace": [
+1400,
+1600
+],
+"mod_fluidsim": [
+1200,
+1600
+],
+"mod_hue_saturation": [
+1600,
+1500
+],
+"mod_mirror": [
+1700,
+1600
+],
+"mod_noise": [
+1500,
+1500
+],
+"mod_ocean": [
+1600,
+1500
+],
+"mod_outline": [
+1700,
+1700
+],
+"mod_shrinkwrap": [
+1700,
+1600
+],
+"mod_simpledeform": [
+1300,
+1600
+],
+"modifier_off": [
+1400,
+1400
+],
+"modifier_on": [
+1400,
+1400
+],
+"monkey": [
+1800,
+1600
+],
+"mouse_lmb": [
+1800,
+1800
+],
+"mouse_lmb_2x": [
+1800,
+1800
+],
+"mouse_lmb_drag": [
+1800,
+1800
+],
+"mouse_mmb": [
+1800,
+1800
+],
+"mouse_mmb_drag": [
+1800,
+1800
+],
+"mouse_mmb_scroll": [
+1800,
+1800
+],
+"mouse_move": [
+1800,
+1800
+],
+"mouse_rmb": [
+1800,
+1800
+],
+"mouse_rmb_drag": [
+1800,
+1800
+],
+"mute_ipo_off": [
+900,
+1400
+],
+"mute_ipo_on": [
+1400,
+1400
+],
+"network_drive": [
+1600,
+1700
+],
+"network_drive_large": [
+1500,
+1600
+],
+"newfolder": [
+1700,
+1600
+],
+"next_keyframe": [
+1700,
+1100
+],
+"nocurve": [
+1600,
+700
+],
+"node_side": [
+1300,
+1600
+],
+"node_top": [
+1600,
+1200
+],
+"none": [
+200,
+200
+],
+"onionskin_off": [
+1600,
+1400
+],
+"onionskin_on": [
+1600,
+1400
+],
+"options": [
+1600,
+1500
+],
+"orientation_gimbal": [
+1500,
+1500
+],
+"outliner_collection": [
+1700,
+1600
+],
+"outliner_data_camera": [
+1700,
+1700
+],
+"outliner_data_font": [
+1500,
+1600
+],
+"outliner_data_light": [
+1400,
+1700
+],
+"outliner_ob_camera": [
+1700,
+1700
+],
+"outliner_ob_font": [
+1500,
+1600
+],
+"outliner_ob_group_instance": [
+1600,
+1500
+],
+"outliner_ob_lattice": [
+1600,
+1500
+],
+"outliner_ob_light": [
+1400,
+1700
+],
+"panel_close": [
+1000,
+1000
+],
+"pause": [
+1000,
+1400
+],
+"play": [
+1300,
+1400
+],
+"play_reverse": [
+1300,
+1400
+],
+"play_sound": [
+1600,
+1400
+],
+"playhead_snap_off": [
+1800,
+1800
+],
+"playhead_snap_on": [
+1800,
+1800
+],
+"plus": [
+1300,
+1300
+],
+"pmarker": [
+1100,
+1600
+],
+"pmarker_act": [
+1100,
+1600
+],
+"pmarker_sel": [
+1100,
+1600
+],
+"preset": [
+1600,
+1500
+],
+"prev_keyframe": [
+1700,
+1100
+],
+"preview_range": [
+1500,
+1600
+],
+"project": [
+1600,
+1500
+],
+"quit": [
+1500,
+1600
+],
+"radiobut_off": [
+1200,
+1200
+],
+"radiobut_on": [
+1200,
+1200
+],
+"rec": [
+1000,
+1000
+],
+"record_off": [
+1200,
+1200
+],
+"record_on": [
+1200,
+1200
+],
+"remove": [
+1100,
+1100
+],
+"render_animation": [
+1700,
+1700
+],
+"render_still": [
+1600,
+1700
+],
+"restrict_color_off": [
+1300,
+1300
+],
+"restrict_color_on": [
+1300,
+1300
+],
+"restrict_render_off": [
+1500,
+1300
+],
+"restrict_render_on": [
+1500,
+1300
+],
+"restrict_select_off": [
+1300,
+1400
+],
+"restrict_select_on": [
+1300,
+1400
+],
+"restrict_view_off": [
+1500,
+1400
+],
+"restrict_view_on": [
+1500,
+1400
+],
+"rew": [
+1200,
+1200
+],
+"rightarrow": [
+700,
+1100
+],
+"rightarrow_thin": [
+700,
+1100
+],
+"rigid_body": [
+1600,
+1400
+],
+"rigid_body_constraint": [
+1500,
+1600
+],
+"rna": [
+1400,
+1600
+],
+"rndcurve": [
+1600,
+1400
+],
+"rootcurve": [
+1600,
+1200
+],
+"scene": [
+1600,
+1500
+],
+"seq_chroma_scope": [
+1500,
+1600
+],
+"seq_strip_duplicate": [
+1600,
+1200
+],
+"sequence": [
+1500,
+1700
+],
+"settings": [
+1600,
+1800
+],
+"sharpcurve": [
+1500,
+1200
+],
+"shortdisplay": [
+1600,
+1500
+],
+"small_caps": [
+1600,
+1400
+],
+"smoothcurve": [
+1600,
+1400
+],
+"snap_edge": [
+1400,
+1400
+],
+"snap_face": [
+1400,
+1400
+],
+"snap_face_center": [
+1400,
+1400
+],
+"snap_face_nearest": [
+1600,
+1800
+],
+"snap_increment": [
+1600,
+1500
+],
+"snap_vertex": [
+1400,
+1400
+],
+"solo_off": [
+1400,
+1300
+],
+"solo_on": [
+1400,
+1300
+],
+"sort_asc": [
+900,
+1400
+],
+"sort_desc": [
+900,
+1400
+],
+"sortalpha": [
+1600,
+1400
+],
+"sortbyext": [
+1600,
+1400
+],
+"sortsize": [
+1600,
+1500
+],
+"sorttime": [
+1300,
+1600
+],
+"spherecurve": [
+1600,
+1100
+],
+"spreadsheet": [
+1800,
+1600
+],
+"sticky_uvs_disable": [
+1400,
+1500
+],
+"syntax_off": [
+1600,
+1400
+],
+"text": [
+1400,
+1600
+],
+"three_dots": [
+500,
+1300
+],
+"tracker": [
+1700,
+1700
+],
+"tracking_backwards": [
+1600,
+1400
+],
+"tracking_backwards_single": [
+1600,
+900
+],
+"tracking_forwards": [
+1600,
+1400
+],
+"tracking_forwards_single": [
+1600,
+900
+],
+"tracking_refine_backwards": [
+1500,
+1600
+],
+"tracking_refine_forwards": [
+1500,
+1600
+],
+"trash": [
+1400,
+1500
+],
+"tria_down": [
+1000,
+800
+],
+"tria_down_bar": [
+1000,
+1100
+],
+"tria_left": [
+800,
+1000
+],
+"tria_left_bar": [
+1100,
+1000
+],
+"tria_right": [
+800,
+1000
+],
+"tria_right_bar": [
+1100,
+1000
+],
+"tria_up": [
+1000,
+800
+],
+"tria_up_bar": [
+1000,
+1100
+],
+"uglypackage": [
+1600,
+1200
+],
+"underline": [
+1400,
+1400
+],
+"unlocked": [
+1100,
+1500
+],
+"url": [
+1700,
+1700
+],
+"usb_drive": [
+1600,
+1100
+],
+"usb_drive_large": [
+1600,
+1000
+],
+"uv_edgesel": [
+1500,
+1600
+],
+"vertex_crease": [
+1600,
+1500
+],
+"vertexsel": [
+1600,
+1500
+],
+"view_camera": [
+1800,
+1800
+],
+"view_camera_unselected": [
+1800,
+1800
+],
+"view_locked": [
+1400,
+1800
+],
+"view_ortho": [
+1800,
+1800
+],
+"view_pan": [
+1800,
+1800
+],
+"view_perspective": [
+1800,
+1500
+],
+"view_unlocked": [
+1400,
+1800
+],
+"view_zoom": [
+1800,
+1800
+],
+"warning_large": [
+1745,
+1600
+],
+"x": [
+1000,
+1000
+]
+}
