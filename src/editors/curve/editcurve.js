@@ -3,7 +3,7 @@
 // every change to be drawn and kept as an undo step. Operators run by their exec, registered by Blender idname for
 // Blender's Curve and Font keymaps and menus; transforms run Blender's transform operator for each step from the edit
 // data as it was (transform_convert_curve.cc); picking is Blender's (ED_curve_editnurb_select_pick) in the 3D View's
-// region.
+// region, the only operator that runs with one.
 import { Vector3 } from '@babylonjs/core';
 import rna from '../../makesrna/rna-operators.json' with { type: 'json' };
 import { hasOperator, OPERATOR_FINISHED, moduleAccess } from '../../bmesh/bmesh-wasm.js';
@@ -67,9 +67,10 @@ export function createEditCurve({ world, editor, views, history, notify, changed
   // Draws the edit data and keeps it as the node's data; an operator's change is an undo step.
   function sync({ commit = true } = {}) {
     const { node, object } = ed;
+    // Evaluating lays the text out, which places the cursor and selection the overlay draws.
+    mesh_batch_cache_apply(object.evaluate() ?? EMPTY(), node);
     const data = object.data;
     node.metadata = { ...node.metadata, wbCreation: { curve: data } };
-    mesh_batch_cache_apply(object.evaluate() ?? EMPTY(), node);
     if (ed.text) ed.text.update(data.text);
     else ed.overlay.update(data);
     if (commit) history.commit();
@@ -113,10 +114,10 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     world.onModeChange?.();
   }
 
-  // Runs an operator's exec as one undo step, with the 3D View's region in the context.
+  // Runs an operator's exec as one undo step. Its context has no 3D View, as in Blender's background mode: operators
+  // run by their exec take what they act on from their properties.
   function exec(idname, props = {}) {
-    placeRegion();
-    const { status, report } = ed.object.runInRegion(region, idname, props);
+    const { status, report } = ed.object.run(idname, props);
     if (report) notify(report);
     if (status & OPERATOR_FINISHED) sync();
     return status;
@@ -164,8 +165,7 @@ export function createEditCurve({ world, editor, views, history, notify, changed
     const center = median();
     if (!center) return null;
     ed.object.snapshot();
-    placeRegion(view.canvas && views.input);
-    const step = (idname, props) => { ed.object.restore(); ed.object.runInRegion(region, idname, props); sync({ commit: false }); };
+    const step = (idname, props) => { ed.object.restore(); ed.object.run(idname, props); sync({ commit: false }); };
     const data = {
       center,
       local: worldAxes(ed.node.computeWorldMatrix(true)),
@@ -198,11 +198,12 @@ export function createEditCurve({ world, editor, views, history, notify, changed
   // An operator whose invoke is a menu of its enum (WM_menu_invoke: V for handle types) opens it when a key runs it
   // without that property.
   const invoke = (idname) => {
-    const menu = moduleAccess.operatorMenuProperty(idname);
+    let menu;
     return (props, event) => {
+      menu ??= event ? moduleAccess.operatorMenuProperty(idname) : null;
       if (!menu || props[menu] !== undefined || !event) return exec(idname, props);
       const items = ed.object.enumItems(idname, menu);
-      openMenu(items.map(([id, label]) => ({ label, run: () => exec(idname, { ...props, [menu]: id }) })), { x: event.x, y: event.y }, rna[idname].name);
+      openMenu(items.map(([id, label]) => ({ label, run: () => exec(idname, { ...props, [menu]: id }) })), editor.pointer, rna[idname].name);
     };
   };
   for (const idname of Object.keys(rna).filter((id) => /^(curve|font)\./.test(id) && !id.startsWith('curve.primitive_') && hasOperator(id))) {
@@ -271,7 +272,7 @@ export function createEditCurve({ world, editor, views, history, notify, changed
 // object. A new curve is a 3D curve with a path: curvesurf_prim_add sets both when `type & CU_PRIM_PATH`, which every
 // primitive's type passes (CU_PRIM_PATH is 0x700).
 const PRIMITIVES = {
-  'curve.primitive_bezier_curve_add': 'BezierCurve', 'curve.primitive_bezier_circle_add': 'BezierCircle', 'curve.primitive_nurbs_curve_add': 'NurbsCurve',
+  'curve.primitive_bezier_curve_add': 'BézierCurve', 'curve.primitive_bezier_circle_add': 'BézierCircle', 'curve.primitive_nurbs_curve_add': 'NurbsCurve',
   'curve.primitive_nurbs_circle_add': 'NurbsCircle', 'curve.primitive_nurbs_path_add': 'NurbsPath',
 };
 const NEW_OBJECT = { use_path: true, dimensions: '3D' };

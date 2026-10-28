@@ -279,6 +279,12 @@ PropertyRNA *RNA_def_string(StructOrFunctionRNA *cont, const char *identifier, c
 {
   return define(cont, identifier, PROP_STRING, {});
 }
+/* A collection of runtime structs (curve.draw's stroke), which operators run by their exec leave empty. */
+PropertyRNA *RNA_def_collection_runtime(StructOrFunctionRNA *cont, const char *identifier, StructRNA * /*type*/, const char *,
+                                        const char *)
+{
+  return define(cont, identifier, PROP_COLLECTION, {});
+}
 void RNA_def_property_array(PropertyRNA *prop, int length)
 {
   prop->length = length;

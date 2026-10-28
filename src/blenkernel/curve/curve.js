@@ -292,16 +292,6 @@ export class CurveObject {
     }
   }
 
-  // An operator run with a 3D View region in the context (transform's projection, picking).
-  runInRegion(region, idname, props) {
-    x.view3d_region_attach(this.main.C, region.address);
-    try {
-      return this.run(idname, props);
-    } finally {
-      x.view3d_region_attach(this.main.C, 0);
-    }
-  }
-
   // A transform's steps start again from the edit data as it was when it began.
   snapshot() { x.curve_edit_snapshot(this.ob); }
   restore() { x.curve_edit_restore(this.ob); }

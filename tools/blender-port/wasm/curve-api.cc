@@ -42,6 +42,7 @@
 #include "DNA_view3d_types.h"
 #include "ED_curve.hh"
 #include "ED_select_utils.hh"
+#include "ED_view3d.hh"
 #include "MEM_guardedalloc.h"
 #include "RNA_access.hh"
 #include "WM_api.hh"
@@ -443,6 +444,25 @@ namespace blender {
 
 /* The window has no capabilities (no primary clipboard): Bylonder's text clipboard is the browser's. */
 eWM_CapabilitiesFlag WM_capabilities_flag() { return eWM_CapabilitiesFlag(0); }
+
+/* As space_view3d.cc defines it; space_view3d.cc is the 3D View editor, whose drawing stays Bylonder's. */
+void ED_view3d_init_mats_rv3d(const Object *ob, RegionView3D *rv3d)
+{
+  mul_m4_m4m4(rv3d->viewmatob, rv3d->viewmat, ob->object_to_world().ptr());
+  mul_m4_m4m4(rv3d->persmatob, rv3d->persmat, ob->object_to_world().ptr());
+  ED_view3d_clipping_local(rv3d, ob->object_to_world().ptr());
+}
+
+/* port-override: the region the module picks in has no clipping region (RV3D_CLIPPING, Alt B), so there is no local
+ * clipping to compute (view3d_edit.cc). */
+void ED_view3d_clipping_local(RegionView3D *rv3d, const float /*mat*/[4][4]) { BLI_assert(!(rv3d->rflag & RV3D_CLIPPING)); }
+
+/* As screen_ops.cc answers it with no screen playing: the module's window plays no animation (Bylonder's timeline
+ * does, outside it). */
+bScreen *ED_screen_animation_playing(const wmWindowManager * /*wm*/) { return nullptr; }
+
+/* port-override: picking projects on the CPU (view3d_project.cc), so it needs no GPU context. */
+void view3d_operator_needs_gpu(const bContext * /*C*/) {}
 
 /* As screen_ops.cc defines them; screen_ops.cc comes with Blender's screens. */
 bool ED_operator_editsurfcurve(bContext *C)

@@ -63,12 +63,15 @@ def add_subdivision():
     area("PROPERTIES").spaces.active.context = "MODIFIER"
 
 
-# The cube deleted (Delete over the view), then an object added by its operator in the 3D View, then Tab.
+# The cube deleted, then an object added by its operator in the 3D View, then Edit Mode, as Delete, the Add menu and
+# Tab do in parity.mjs.
 def add_and_edit(module, name, **props):
-    key("DEL", *view3d_point(*REST))
-    with bpy.context.temp_override(window=window(), area=area("VIEW_3D")):
+    bpy.data.objects.remove(bpy.data.objects["Cube"])
+    view = area("VIEW_3D")
+    region = next(r for r in view.regions if r.type == "WINDOW")
+    with bpy.context.temp_override(window=window(), area=view, region=region):
         getattr(getattr(bpy.ops, module), name)(**props)
-    key("TAB", *view3d_point(*REST))
+        bpy.ops.object.mode_set(mode="EDIT")
 
 
 SETUP = {
