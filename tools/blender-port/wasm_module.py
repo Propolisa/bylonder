@@ -334,6 +334,16 @@ def own_headers():
     return hashlib.sha1(b''.join(open(p, 'rb').read() for p in paths if os.path.isfile(p))).hexdigest()
 
 
+def library_sources(entry, tree, deps):
+    """The sources of a library entry ({path, exclude, sources, dependency}), in Blender's tree or a dependency's."""
+    base = deps[entry['dependency']] if 'dependency' in entry else tree
+    path = os.path.join(base, entry['path'])
+    if 'sources' in entry:
+        return [os.path.join(path, f) for f in entry['sources']]
+    sources = sorted(glob.glob(os.path.join(path, '*.c*'))) if os.path.isdir(path) else [path]
+    return [s for s in sources if os.path.basename(s) not in set(entry.get('exclude', [])) and not s.endswith('_test.cc')]
+
+
 def compiler(src, args):
     """Clang for a source: a C source (FreeType's, curve_fit_nd's) as C, the rest as C++20."""
     if src.endswith('.c'):
@@ -472,14 +482,9 @@ def build(root, name, spec, tag):
         # directory without some of its files, or some files of it, in Blender's tree or in a dependency's, whose sources
         # also see header directories (library_flags).
         spec_lib = entry if isinstance(entry, dict) else {'path': entry}
-        lib, exclude = spec_lib['path'], set(spec_lib.get('exclude', []))
-        base = deps[spec_lib['dependency']] if 'dependency' in spec_lib else tree
-        sources = sorted(glob.glob(os.path.join(base, lib, '*.c*'))) if os.path.isdir(os.path.join(base, lib)) else [os.path.join(base, lib)]
-        sources = [s for s in sources if os.path.basename(s) not in exclude]
-        if 'sources' in spec_lib:
-            sources = [os.path.join(base, lib, f) for f in spec_lib['sources']]
+        lib = spec_lib['path']
         extra, key = library_flags(spec_lib, tree, deps, spec)
-        objects = compile_all(out_dir, [s for s in sources if not s.endswith('_test.cc')], args + extra, patches + key)
+        objects = compile_all(out_dir, library_sources(spec_lib, tree, deps), args + extra, patches + key)
         built = [o for o in objects.values() if o]
         # Archives are per module: modules sharing the build (and objects) may be linked at the same time.
         archive = os.path.join(out_dir, 'archives', name.replace('/', '_'), lib.replace('/', '_') + '.a')

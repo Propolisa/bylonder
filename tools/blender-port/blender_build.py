@@ -19,14 +19,15 @@ import sys
 import zlib
 
 import wasm_module
+import wasm_weaken
 from wasm_module import WASM, demangle
 
 # CMake targets on the far side of the seams, and Blender's generators and tests, matched against target names.
-SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace|bf_imbuf_movie'
+SEAMS = re.compile(r'^(bf_intern_ghost|bf_gpu|bf_draw|bf_python|bf_intern_cycles|cycles_|bf_intern_audaspace|audaspace|bf_imbuf_movie|bf_imbuf_openexr'
                    r'|bf_intern_libmv|extern_glog|extern_ceres|bf_intern_mantaflow|bf_blendthumb|blender$|makesdna|makesrna|datatoc'
                    r'|msgfmt|.*_test|.*_tests|gtest|bf_intern_wayland|bf_intern_sky_gpu|.*_cpp_shaders_.*|shader_tool)')
 # Host flags that have no meaning for wasm32 or name host paths.
-DROP = re.compile(r'^(-DFMT_SHARED|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
+DROP = re.compile(r'^(-DFMT_SHARED|-DWITH_TBB$|-DWITH_TBB=|-DEIGEN_HAS_TBB|-DWITH_OPENVDB_BLOSC|-DHAVE_EXECINFO_H|-DHAVE_MALLOC_STATS_H|-I/usr/|-isystem/usr/|-march=|-mtune=|-msse|-mavx|-mfpmath|-m64|-fPIC|-fopenmp|-pthread|-O\d|-g\d?$|-W|-pedantic|-fno-strict-overflow'
                   r'|-fmacro-prefix-map|-ffile-prefix-map|-fdiagnostics|-fcolor-diagnostics|-ffp-contract|-fno-trapping-math)')
 FLAGS = ['--target=wasm32-wasi', '-O2', '-DNDEBUG', '-DFMT_HEADER_ONLY', '-fignore-exceptions', '-D_WASI_EMULATED_PROCESS_CLOCKS',
          '-Wno-everything', '-isystem', os.path.join(WASM, 'include'), '-I' + os.path.join(WASM, 'fstream'), '-I' + os.path.join(WASM, 'storage'),
@@ -41,6 +42,26 @@ def module_inputs(host, out):
     spec = json.load(open(os.path.join(os.path.dirname(__file__), 'manifest.json')))['modules']['bmesh/bmesh.wasm']
     _, includes, _ = wasm_module.dependencies(out, spec['dependencies'])
     return os.path.realpath(os.path.join(host, '..', 'blender')), spec, includes
+
+
+def dependency_archives(host, out):
+    """The libraries Blender links from outside its tree that the module builds from source (FreeType, OpenSubdiv,
+    OpenVDB, zstd: the manifest's `dependency` libraries), as the module build compiles them."""
+    tree, spec, _ = module_inputs(host, out)
+    deps, includes, versions = wasm_module.dependencies(out, spec['dependencies'])
+    ar = shutil.which('llvm-ar') or shutil.which('llvm-ar-18')
+    archives = []
+    for entry in (e for e in spec['libraries'] if isinstance(e, dict) and 'dependency' in e):
+        extra, key = wasm_module.library_flags(entry, tree, deps, spec)
+        built = [o for o in wasm_module.compile_all(out, wasm_module.library_sources(entry, tree, deps),
+                                                    includes + wasm_module.flags(tree, spec) + extra, versions + key).values() if o]
+        archive = os.path.join(out, 'archives', f'{entry["dependency"]}_{entry["path"].replace("/", "_")}.a')
+        if os.path.exists(archive):
+            os.remove(archive)
+        subprocess.run([ar, 'rcs', archive, *built], check=True)
+        archives.append(archive)
+        print(f'{entry["dependency"]}/{entry["path"]}: {len(built)} sources', file=sys.stderr)
+    return archives
 
 
 def target_of(output):
@@ -231,6 +252,7 @@ def main():
                 os.remove(archive)
             subprocess.run([ar, 'rcs', archive, *built], check=True)
             archives.append(archive)
+    archives += dependency_archives(host, out)
     # Everything linked as one reactor with every symbol kept, so each library's unresolved symbols show.
     link = ['clang++', '--target=wasm32-wasi', '-mexec-model=reactor', '-Wl,--whole-archive', *archives, '-Wl,--no-whole-archive',
             '-lwasi-emulated-process-clocks', '-Wl,--error-limit=0', '-Wl,--warn-unresolved-symbols', '-Wl,--allow-undefined',
@@ -263,11 +285,15 @@ def main():
 WRAPPED = ['_ZN7blender25RNA_path_resolve_propertyEPKNS_10PointerRNAEPKcPS0_PPNS_11PropertyRNAE']
 
 
+# Libraries whose Blender definitions the API's seam implementations replace (window manager, UI layout and drawing,
+# fonts); everywhere else Blender's definition wins over the API's stand-in.
+SEAM_LIBRARIES = {'bf_blenfont', 'bf_editor_interface', 'bf_editor_screen', 'bf_windowmanager'}
+
+
 def link_module(host, out, entries, extra, archives):
-    """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) first, then Blender's libraries.
-    An archive member that defines what the API defines is left out, as the API replaces it: the API's seam
-    implementations (region-draw.cc's BLF recording) and its stand-ins, which go for Blender's own. The members left out
-    are listed (wasm-build/replaced.json); each one the API stops replacing comes back."""
+    """The module the app loads (src/bmesh/bmesh.wasm's exports): Bylonder's API (glue) with Blender's libraries.
+    Where both define a symbol, the loser's definition is made weak (wasm_weaken.py): the API wins in SEAM_LIBRARIES,
+    Blender everywhere else. Each one is listed (wasm-build/replaced.json), so the API's stand-ins can go one by one."""
     built = glue(host, out, entries, extra)
     failed = [(s, e) for s, o, e in built if not o]
     if failed:
@@ -277,34 +303,57 @@ def link_module(host, out, entries, extra, archives):
     linked = os.path.join(out, 'module-archives')
     shutil.rmtree(linked, ignore_errors=True)
     os.makedirs(linked)
+    api = [shutil.copy(o, os.path.join(linked, f'api-{i}-{os.path.basename(o)}')) for i, (_, o, _) in enumerate(built)]
     copies = [shutil.copy(a, linked) for a in archives]
     strip = [] if os.environ.get('WASM_NAMES') else ['-Wl,--strip-all']
-    replaced = {}
+    replaced = {'blender': {}, 'api': {}}
     while True:
         link = ['clang++', '--target=wasm32-wasi', '-O2', '-mexec-model=reactor', '-Wl,--gc-sections', *strip, '-Wl,--error-limit=0',
                 '-Wl,-z,stack-size=8388608', '-Wl,--stack-first', '-Wl,--export=malloc', '-Wl,--export=free',
-                *(f'-Wl,--wrap={w}' for w in WRAPPED), *(o for _, o, _ in built), *copies, *copies, '-lwasi-emulated-process-clocks',
+                *(f'-Wl,--wrap={w}' for w in WRAPPED), *api, *copies, *copies, '-lwasi-emulated-process-clocks',
                 '-Wl,--allow-undefined', '-o', module]
         result = subprocess.run(link, capture_output=True, text=True)
-        # wasm-ld: "duplicate symbol: S" then ">>> defined in A" and ">>> defined in lib.a(member.o)".
-        members, lines = {}, result.stderr.splitlines()
-        for i, line in enumerate(lines):
-            if 'duplicate symbol: ' in line:
-                for where in lines[i + 1:i + 3]:
-                    match = re.search(r'defined in (\S+\.a)\((\S+)\)', where)
-                    if match:
-                        members.setdefault((match.group(1), match.group(2)), []).append(line.split('duplicate symbol: ')[-1])
-        if not members:
+        losers = duplicate_losers(result.stderr)
+        if not losers:
             break
-        for (archive, member), symbols in members.items():
-            subprocess.run([ar, 'd', archive, member], check=True)
-            replaced[f'{os.path.basename(archive)}({member})'] = demangle(symbols)
-    json.dump(dict(sorted(replaced.items())), open(os.path.join(out, 'replaced.json'), 'w'), indent=1)
+        changed = False
+        for (path, member), names in losers.items():
+            done = wasm_weaken.weaken_member(ar, path, member, names) if member else wasm_weaken.weaken_object(path, names)
+            changed |= bool(done)
+            side, where = ('blender', f'{os.path.basename(path)}({member})') if member else ('api', os.path.basename(path))
+            replaced[side].setdefault(where, []).extend(demangle(sorted(done)))
+        if not changed:
+            sys.exit(f'module link: duplicates left that no definition can yield:\n{result.stderr[-3000:]}')
+    json.dump({side: dict(sorted(v.items())) for side, v in replaced.items()}, open(os.path.join(out, 'replaced.json'), 'w'), indent=1)
     if result.returncode:
         sys.exit(f'module link failed:\n{result.stderr[-3000:]}')
     missing = wasm_module.live_imports(module)
-    print(f'{module}: {os.path.getsize(module)} bytes; {len(replaced)} Blender objects the API replaces (replaced.json); '
-          f'{len(missing)} imports, which throw when called', file=sys.stderr)
+    print(f'{module}: {os.path.getsize(module)} bytes; API wins {sum(map(len, replaced["blender"].values()))} symbols, '
+          f'Blender {sum(map(len, replaced["api"].values()))} (replaced.json); {len(missing)} imports, which throw when called',
+          file=sys.stderr)
+
+
+def duplicate_losers(stderr):
+    """{(file, archive member or None): symbols} whose definitions should yield, from wasm-ld's "duplicate symbol: S"
+    lines, each followed by ">>> defined in" both places."""
+    losers, lines = {}, stderr.splitlines()
+    for i, line in enumerate(lines):
+        if 'duplicate symbol: ' not in line:
+            continue
+        places = [re.match(r'>>> defined in (\S+?)(?:\((\S+)\))?$', where.strip()) for where in lines[i + 1:i + 3]]
+        places = [(m.group(1), m.group(2)) for m in places if m]
+        if len(places) != 2:
+            continue
+        members = [p for p in places if p[1]]
+        objects = [p for p in places if not p[1]]
+        if objects and members:
+            library = os.path.basename(members[0][0]).removesuffix('.a')
+            loser = members[0] if library in SEAM_LIBRARIES else objects[0]
+        else:
+            loser = places[1]
+        losers.setdefault(loser, set()).add(line.split('duplicate symbol: ')[-1].strip())
+    return losers
+
 
 if __name__ == '__main__':
     main()

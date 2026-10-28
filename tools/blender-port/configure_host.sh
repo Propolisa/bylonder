@@ -12,7 +12,7 @@ LFS=https://projects.blender.org/blender/blender.git/info/lfs
 # names an OpenCV include directory it does not install.
 SUDO=$([ "$(id -u)" = 0 ] || echo sudo)
 $SUDO apt-get install -y -q libjpeg-dev libpng-dev libfreetype-dev libepoxy-dev libtbb-dev libzstd-dev libbrotli-dev libfmt-dev \
-  libeigen3-dev libopenexr-dev libopenimageio-dev openimageio-tools libopencolorio-dev >/dev/null
+  libeigen3-dev libopenexr-dev libopenimageio-dev openimageio-tools libopencolorio-dev libosd-dev libopenvdb-dev >/dev/null
 $SUDO mkdir -p /usr/lib/x86_64-linux-gnu/cmake/OpenColorIO /usr/include/opencv4
 $SUDO cp -n /usr/share/cmake/OpenColorIO*.cmake /usr/lib/x86_64-linux-gnu/cmake/OpenColorIO/ 2>/dev/null || true
 
@@ -25,11 +25,15 @@ if [ ! -d "$DIR/blender/.git" ]; then
 fi
 
 OFF="PYTHON CYCLES OPENGL_BACKEND VULKAN_BACKEND METAL_BACKEND GHOST_X11 GHOST_WAYLAND GHOST_SDL AUDASPACE CODEC_FFMPEG CODEC_SNDFILE
-OPENAL JACK PULSEAUDIO SDL OPENIMAGEIO OPENCOLORIO OPENEXR IMAGE_OPENJPEG IMAGE_WEBP OPENVDB OPENSUBDIV BULLET MOD_FLUID MOD_OCEANSIM
-FFTW3 ALEMBIC USD HYDRA MATERIALX OPENIMAGEDENOISE TBB GMP MANIFOLD QUADRIFLOW POTRACE HARU LIBMV XR_OPENXR INPUT_NDOF INTERNATIONAL
+OPENAL JACK PULSEAUDIO SDL OPENIMAGEIO OPENCOLORIO OPENEXR IMAGE_OPENJPEG IMAGE_WEBP MOD_FLUID MOD_OCEANSIM
+FFTW3 ALEMBIC USD HYDRA MATERIALX OPENIMAGEDENOISE GMP MANIFOLD QUADRIFLOW POTRACE HARU LIBMV XR_OPENXR INPUT_NDOF INTERNATIONAL
 HARFBUZZ FRIBIDI DRACO MESHOPTIMIZER TESTS GTESTS IO_FBX NANOVDB CPU_CHECK MEM_JEMALLOC BLENDER_THUMBNAILER LIBS_PRECOMPILED STRICT_BUILD_OPTIONS"
 args=()
+# What the shipped module builds with (manifest defines); TBB only so that CMake keeps OpenVDB, as blender_build.py drops
+# WITH_TBB and the module's serial tbb headers stand in.
+ON="BULLET OPENSUBDIV OPENVDB TBB MOD_REMESH"
 for o in $OFF; do args+=("-DWITH_$o=OFF"); done
+for o in $ON; do args+=("-DWITH_$o=ON"); done
 mkdir -p "$DIR/build-host"
 cmake -S "$DIR/blender" -B "$DIR/build-host" -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DWITH_HEADLESS=ON -DWITH_COMPOSITOR_CPU=ON -DWITH_IO_WAVEFRONT_OBJ=ON \
