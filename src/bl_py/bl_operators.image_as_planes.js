@@ -119,13 +119,13 @@ export var find_image_sequences = function* (files) {
 	}
 	};
 export var load_images = function* (filenames, directory, force_reload, frame_start, find_sequences) {
-	if (typeof force_reload == 'undefined' || (force_reload != null && force_reload.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof force_reload == 'undefined' || (force_reload != null && globalThis.Object.hasOwn (force_reload, "__kwargtrans__"))) {;
 		var force_reload = false;
 	};
-	if (typeof frame_start == 'undefined' || (frame_start != null && frame_start.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof frame_start == 'undefined' || (frame_start != null && globalThis.Object.hasOwn (frame_start, "__kwargtrans__"))) {;
 		var frame_start = 1;
 	};
-	if (typeof find_sequences == 'undefined' || (find_sequences != null && find_sequences.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof find_sequences == 'undefined' || (find_sequences != null && globalThis.Object.hasOwn (find_sequences, "__kwargtrans__"))) {;
 		var find_sequences = false;
 	};
 	if (arguments.length) {
@@ -306,7 +306,7 @@ export var compute_camera_size = function (context, center, fill_mode, aspect) {
 	return frame_size;
 };
 export var center_in_camera = function (camera, ob, axis) {
-	if (typeof axis == 'undefined' || (axis != null && axis.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof axis == 'undefined' || (axis != null && globalThis.Object.hasOwn (axis, "__kwargtrans__"))) {;
 		var axis = tuple ([1, 1]);
 	};
 	if (arguments.length) {

@@ -623,10 +623,10 @@ export var ShapeTransfer =  __class__ ('ShapeTransfer', [Operator], {
 	bl_label: 'Transfer Shape Key',
 	bl_options: new set (['REGISTER', 'UNDO']),
 	get _main () {return __get__ (this, function (self, ob_act, objects, mode, use_clamp) {
-		if (typeof mode == 'undefined' || (mode != null && mode.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof mode == 'undefined' || (mode != null && globalThis.Object.hasOwn (mode, "__kwargtrans__"))) {;
 			var mode = 'OFFSET';
 		};
-		if (typeof use_clamp == 'undefined' || (use_clamp != null && use_clamp.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof use_clamp == 'undefined' || (use_clamp != null && globalThis.Object.hasOwn (use_clamp, "__kwargtrans__"))) {;
 			var use_clamp = false;
 		};
 		if (arguments.length) {

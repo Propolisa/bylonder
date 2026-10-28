@@ -117,7 +117,7 @@ export var draw_circle_2d = function (position, color, radius) {
 	}
 };
 export var draw_texture_2d = function (texture, position, width, height, is_scene_linear_with_rec709_srgb_target) {
-	if (typeof is_scene_linear_with_rec709_srgb_target == 'undefined' || (is_scene_linear_with_rec709_srgb_target != null && is_scene_linear_with_rec709_srgb_target.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof is_scene_linear_with_rec709_srgb_target == 'undefined' || (is_scene_linear_with_rec709_srgb_target != null && globalThis.Object.hasOwn (is_scene_linear_with_rec709_srgb_target, "__kwargtrans__"))) {;
 		var is_scene_linear_with_rec709_srgb_target = false;
 	};
 	if (arguments.length) {

@@ -83,7 +83,7 @@ export var DiskFileHashBackend =  __class__ ('DiskFileHashBackend', [Protocol], 
 		}
 	});},
 	get store_hash () {return __get__ (this, function (self, filepath, hash_algorithm, hash_info, pre_write_callback) {
-		if (typeof pre_write_callback == 'undefined' || (pre_write_callback != null && pre_write_callback.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pre_write_callback == 'undefined' || (pre_write_callback != null && globalThis.Object.hasOwn (pre_write_callback, "__kwargtrans__"))) {;
 			var pre_write_callback = null;
 		};
 		if (arguments.length) {

@@ -7,7 +7,7 @@ export var MotionPathButtonsPanel =  __class__ ('MotionPathButtonsPanel', [objec
 	bl_region_type: 'WINDOW',
 	bl_label: 'Motion Paths',
 	get draw_settings () {return __get__ (this, function (self, _context, avs, mpath, bones) {
-		if (typeof bones == 'undefined' || (bones != null && bones.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof bones == 'undefined' || (bones != null && globalThis.Object.hasOwn (bones, "__kwargtrans__"))) {;
 			var bones = false;
 		};
 		if (arguments.length) {
@@ -84,7 +84,7 @@ export var MotionPathButtonsPanel_display =  __class__ ('MotionPathButtonsPanel_
 	bl_region_type: 'WINDOW',
 	bl_label: 'Display',
 	get draw_settings () {return __get__ (this, function (self, _context, avs, mpath, bones) {
-		if (typeof bones == 'undefined' || (bones != null && bones.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof bones == 'undefined' || (bones != null && globalThis.Object.hasOwn (bones, "__kwargtrans__"))) {;
 			var bones = false;
 		};
 		if (arguments.length) {

@@ -67,7 +67,7 @@ export var _indented_layout = function (layout, level) {
 	return col;
 };
 export var draw_entry = function (display_keymaps, entry, col, level) {
-	if (typeof level == 'undefined' || (level != null && level.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof level == 'undefined' || (level != null && globalThis.Object.hasOwn (level, "__kwargtrans__"))) {;
 		var level = 0;
 	};
 	if (arguments.length) {

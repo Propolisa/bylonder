@@ -10,6 +10,7 @@ import {FileHandler, Operator, PropertyGroup} from './_bpy.types.js';
 import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
+import {_py_eval, _py_exec} from './_py_eval.js';
 var __name__ = 'bl_operators.node';
 export var _merged = function () {
 	if (arguments.length) {
@@ -36,7 +37,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -51,16 +52,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -397,7 +398,7 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 				var setting = __getitem__ (__iterable0__, __index0__);
 				if (__eq__ (setting.py_name, 'node_tree')) {
-					var node_group = __call__ (eval, null, setting.value);
+					var node_group = __call__ (_py_eval, null, setting.value, dict ({'cls': cls, '_context': _context, 'properties': properties, 'bl_rna': bl_rna, 'node_group': node_group, 'nodetype': nodetype, 'setting': setting}), __call__ (_module, null, 'bl_operators.node'));
 					if (node_group.description) {
 						return node_group.description;
 					}
@@ -499,7 +500,7 @@ export var NodeOperator =  __class__ ('NodeOperator', [object], {
 		__iterable0__ = __i__ (__iterable0__);
 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
 			var setting = __getitem__ (__iterable0__, __index0__);
-			var value = __call__ (eval, null, setting.value);
+			var value = __call__ (_py_eval, null, setting.value, dict ({'self': self, 'node': node, 'node_attr_name': node_attr_name, 'node_data': node_data, 'node_data_path': node_data_path, 'setting': setting, 'value': value}), __call__ (_module, null, 'bl_operators.node'));
 			var node_data = node;
 			var node_attr_name = setting.py_name;
 			if (__in__ ('.', node_attr_name)) {
@@ -3268,7 +3269,7 @@ export var NODE_FH_image_node =  __class__ ('NODE_FH_image_node', [FileHandler],
 export var classes = tuple ([NodeSetting, NODE_FH_image_node, NODE_OT_add_node, NODE_OT_swap_node, NODE_OT_add_empty_group, NODE_OT_swap_empty_group, NODE_OT_add_zone, NODE_OT_swap_zone, NODE_OT_add_simulation_zone, NODE_OT_add_repeat_zone, NODE_OT_add_foreach_geometry_element_zone, NODE_OT_add_closure_zone, NODE_OT_add_typed_bundle, NODE_OT_swap_typed_bundle, NODE_OT_collapse_hide_unused_toggle, NODE_OT_interface_item_new, NODE_OT_interface_item_new_panel_toggle, NODE_OT_interface_item_duplicate, NODE_OT_interface_item_remove, NODE_OT_interface_item_make_panel_toggle, NODE_OT_interface_item_unlink_panel_toggle, NODE_OT_tree_path_parent, NODE_OT_viewer_shortcut_get, NODE_OT_viewer_shortcut_set]);
 
 //# sourceMappingURL=bl_operators.node.map
-export {BoolProperty, CollectionProperty, EnumProperty, FileHandler, FloatVectorProperty, IntProperty, Operator, PropertyGroup, StringProperty, Vector, _globals, _import, _lazy, _member, _module, data_, n_, rpt_, tip_};
+export {BoolProperty, CollectionProperty, EnumProperty, FileHandler, FloatVectorProperty, IntProperty, Operator, PropertyGroup, StringProperty, Vector, _globals, _import, _lazy, _member, _module, _py_eval, _py_exec, data_, n_, rpt_, tip_};
 
 export function __py_setattr__ (key, value) {
 	switch (key) {

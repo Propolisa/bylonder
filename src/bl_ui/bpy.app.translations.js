@@ -4,7 +4,7 @@ var __name__ = 'bpy.app.translations';
 export var locale = '';
 export var locales = tuple ([]);
 export var pgettext = function (text, context) {
-	if (typeof context == 'undefined' || (context != null && context.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof context == 'undefined' || (context != null && globalThis.Object.hasOwn (context, "__kwargtrans__"))) {;
 		var context = null;
 	};
 	if (arguments.length) {

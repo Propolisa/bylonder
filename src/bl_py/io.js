@@ -6,7 +6,7 @@ var __name__ = 'io';
 export var StringIO =  __class__ ('StringIO', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, initial) {
-		if (typeof initial == 'undefined' || (initial != null && initial.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof initial == 'undefined' || (initial != null && globalThis.Object.hasOwn (initial, "__kwargtrans__"))) {;
 			var initial = '';
 		};
 		if (arguments.length) {

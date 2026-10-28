@@ -10,10 +10,10 @@ var __name__ = 'nodeitems_builtins';
 export var SortedNodeCategory =  __class__ ('SortedNodeCategory', [NodeCategory], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, identifier, py_name, description, py_items) {
-		if (typeof description == 'undefined' || (description != null && description.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof description == 'undefined' || (description != null && globalThis.Object.hasOwn (description, "__kwargtrans__"))) {;
 			var description = '';
 		};
-		if (typeof py_items == 'undefined' || (py_items != null && py_items.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_items == 'undefined' || (py_items != null && globalThis.Object.hasOwn (py_items, "__kwargtrans__"))) {;
 			var py_items = null;
 		};
 		if (arguments.length) {

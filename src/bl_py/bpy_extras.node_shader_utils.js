@@ -30,7 +30,7 @@ export var _merged = function () {
 	}
 	return result;
 };
-export var _ellipsis = Symbol ("Ellipsis")
+export var _ellipsis = Symbol.for ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -45,16 +45,16 @@ export var _new_object = function () {
 	return {}
 };
 export var _property = function (fget, fset, fdel, doc) {
-	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fget == 'undefined' || (fget != null && globalThis.Object.hasOwn (fget, "__kwargtrans__"))) {;
 		var fget = null;
 	};
-	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fset == 'undefined' || (fset != null && globalThis.Object.hasOwn (fset, "__kwargtrans__"))) {;
 		var fset = null;
 	};
-	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof fdel == 'undefined' || (fdel != null && globalThis.Object.hasOwn (fdel, "__kwargtrans__"))) {;
 		var fdel = null;
 	};
-	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof doc == 'undefined' || (doc != null && globalThis.Object.hasOwn (doc, "__kwargtrans__"))) {;
 		var doc = null;
 	};
 	if (arguments.length) {
@@ -276,7 +276,7 @@ export var node_input_value_set = function (node, input, value) {
 	__getitem__ (node.inputs, input).default_value = value;
 };
 export var node_input_value_get = function (node, input, default_value) {
-	if (typeof default_value == 'undefined' || (default_value != null && default_value.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof default_value == 'undefined' || (default_value != null && globalThis.Object.hasOwn (default_value, "__kwargtrans__"))) {;
 		var default_value = null;
 	};
 	if (arguments.length) {
@@ -355,10 +355,10 @@ export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 	_col_size: 300,
 	_row_size: 300,
 	get _grid_to_location () {return __get__ (this, function (self, x, y, dst_node, ref_node) {
-		if (typeof dst_node == 'undefined' || (dst_node != null && dst_node.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof dst_node == 'undefined' || (dst_node != null && globalThis.Object.hasOwn (dst_node, "__kwargtrans__"))) {;
 			var dst_node = null;
 		};
-		if (typeof ref_node == 'undefined' || (ref_node != null && ref_node.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof ref_node == 'undefined' || (ref_node != null && globalThis.Object.hasOwn (ref_node, "__kwargtrans__"))) {;
 			var ref_node = null;
 		};
 		if (arguments.length) {
@@ -411,7 +411,7 @@ export var ShaderWrapper =  __class__ ('ShaderWrapper', [object], {
 		return loc;
 	});},
 	get __init__ () {return __get__ (this, function (self, material, is_readonly) {
-		if (typeof is_readonly == 'undefined' || (is_readonly != null && is_readonly.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof is_readonly == 'undefined' || (is_readonly != null && globalThis.Object.hasOwn (is_readonly, "__kwargtrans__"))) {;
 			var is_readonly = true;
 		};
 		if (arguments.length) {
@@ -1168,7 +1168,7 @@ export var PrincipledBSDFWrapper =  __class__ ('PrincipledBSDFWrapper', [ShaderW
 	__slots__: __call__ (_joined, null, ['is_readonly', 'material'], _PrincipledBSDFWrapper_NODES_LIST),
 	NODES_LIST: __add__ (ShaderWrapper.NODES_LIST, _PrincipledBSDFWrapper_NODES_LIST),
 	get __init__ () {return __get__ (this, function (self, material, is_readonly) {
-		if (typeof is_readonly == 'undefined' || (is_readonly != null && is_readonly.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof is_readonly == 'undefined' || (is_readonly != null && globalThis.Object.hasOwn (is_readonly, "__kwargtrans__"))) {;
 			var is_readonly = true;
 		};
 		if (arguments.length) {
@@ -1779,16 +1779,16 @@ export var ShaderImageTextureWrapper =  __class__ ('ShaderImageTextureWrapper', 
 		return instance;
 	});},
 	get __init__ () {return __get__ (this, function (self, owner_shader, node_dst, socket_dst, grid_row_diff, use_alpha, colorspace_is_data, colorspace_name) {
-		if (typeof grid_row_diff == 'undefined' || (grid_row_diff != null && grid_row_diff.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof grid_row_diff == 'undefined' || (grid_row_diff != null && globalThis.Object.hasOwn (grid_row_diff, "__kwargtrans__"))) {;
 			var grid_row_diff = 0;
 		};
-		if (typeof use_alpha == 'undefined' || (use_alpha != null && use_alpha.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof use_alpha == 'undefined' || (use_alpha != null && globalThis.Object.hasOwn (use_alpha, "__kwargtrans__"))) {;
 			var use_alpha = false;
 		};
-		if (typeof colorspace_is_data == 'undefined' || (colorspace_is_data != null && colorspace_is_data.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof colorspace_is_data == 'undefined' || (colorspace_is_data != null && globalThis.Object.hasOwn (colorspace_is_data, "__kwargtrans__"))) {;
 			var colorspace_is_data = _ellipsis;
 		};
-		if (typeof colorspace_name == 'undefined' || (colorspace_name != null && colorspace_name.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof colorspace_name == 'undefined' || (colorspace_name != null && globalThis.Object.hasOwn (colorspace_name, "__kwargtrans__"))) {;
 			var colorspace_name = _ellipsis;
 		};
 		if (arguments.length) {

@@ -93,6 +93,20 @@ Blender's startup, which registers its classes (2094: every menu, panel, header 
   values Blender's C reports (`bpy.app`, handlers, translation contexts, file extensions) are copied from the
   reference binary. `os` is a read-only file system of Blender's scripts in Blender's layout (`_files`).
 
+Consumers and running:
+
+- `src/python/bpy_interface.js` loads the tree and exports `registered`, `menus`, `panels`, `headers`, `module(name)` and
+  `setContext`. Menus, the Properties editor's panels, the 3D View's regions and the tool system draw from these;
+  `src/bl_ui` (transpile.py's per-class manifest) is being retired and takes no new entries.
+- Blender's Python operators register in Bylonder's operator registry by idname unless Bylonder registers its own
+  (which then wins); they run as Blender runs one: an instance with its property defaults and the given values,
+  `poll`, then `execute` (or `invoke` from an event) in `bpy.context`.
+- `bpy.ops` is Blender's `ops.py` over the boundary's `_bpy.ops`, which calls Bylonder's registry; modules with a
+  module-level `__getattr__` (PEP 562) are seen through it by their importers.
+- `eval` and `exec` of a snippet run in the boundary's Python interpreter (`_py_eval`), over the calling function's
+  names and its module's; RNA's C functions on structs (`WindowManager.draw_cursor_add`) are in
+  `tools/blender-ui/rna_functions.py`.
+
 ## Workspaces
 
 The app opens in the Layout workspace: the window is Blender's (topbar, editors, status bar). Scripting is a workspace like Blender's, reached from the topbar's workspace tabs; its Text Editor, File Browser and Console are to become Blender areas rather than an outer workbench.

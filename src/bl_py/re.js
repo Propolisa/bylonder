@@ -31,13 +31,13 @@ export var JSSTRICT = J;
 export var error =  __class__ ('error', [Exception], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, msg, error, pattern, flags, pos) {
-		if (typeof pattern == 'undefined' || (pattern != null && pattern.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pattern == 'undefined' || (pattern != null && globalThis.Object.hasOwn (pattern, "__kwargtrans__"))) {;
 			var pattern = null;
 		};
-		if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 			var flags = 0;
 		};
-		if (typeof pos == 'undefined' || (pos != null && pos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pos == 'undefined' || (pos != null && globalThis.Object.hasOwn (pos, "__kwargtrans__"))) {;
 			var pos = null;
 		};
 		if (arguments.length) {
@@ -86,7 +86,7 @@ export var ReIndexError =  __class__ ('ReIndexError', [IndexError], {
 export var Match =  __class__ ('Match', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, mObj, string, pos, endpos, rObj, namedGroups) {
-		if (typeof namedGroups == 'undefined' || (namedGroups != null && namedGroups.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof namedGroups == 'undefined' || (namedGroups != null && globalThis.Object.hasOwn (namedGroups, "__kwargtrans__"))) {;
 			var namedGroups = null;
 		};
 		if (arguments.length) {
@@ -435,7 +435,7 @@ export var Match =  __class__ ('Match', [object], {
 		}
 	});},
 	get groups () {return __get__ (this, function (self, py_default) {
-		if (typeof py_default == 'undefined' || (py_default != null && py_default.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_default == 'undefined' || (py_default != null && globalThis.Object.hasOwn (py_default, "__kwargtrans__"))) {;
 			var py_default = null;
 		};
 		if (arguments.length) {
@@ -467,7 +467,7 @@ export var Match =  __class__ ('Match', [object], {
 		}
 	});},
 	get groupdict () {return __get__ (this, function (self, py_default) {
-		if (typeof py_default == 'undefined' || (py_default != null && py_default.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof py_default == 'undefined' || (py_default != null && globalThis.Object.hasOwn (py_default, "__kwargtrans__"))) {;
 			var py_default = null;
 		};
 		if (arguments.length) {
@@ -499,7 +499,7 @@ export var Match =  __class__ ('Match', [object], {
 		}
 	});},
 	get start () {return __get__ (this, function (self, group) {
-		if (typeof group == 'undefined' || (group != null && group.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof group == 'undefined' || (group != null && globalThis.Object.hasOwn (group, "__kwargtrans__"))) {;
 			var group = 0;
 		};
 		if (arguments.length) {
@@ -560,7 +560,7 @@ export var Match =  __class__ ('Match', [object], {
 		}
 	});},
 	get end () {return __get__ (this, function (self, group) {
-		if (typeof group == 'undefined' || (group != null && group.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof group == 'undefined' || (group != null && globalThis.Object.hasOwn (group, "__kwargtrans__"))) {;
 			var group = 0;
 		};
 		if (arguments.length) {
@@ -621,7 +621,7 @@ export var Match =  __class__ ('Match', [object], {
 		}
 	});},
 	get span () {return __get__ (this, function (self, group) {
-		if (typeof group == 'undefined' || (group != null && group.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof group == 'undefined' || (group != null && globalThis.Object.hasOwn (group, "__kwargtrans__"))) {;
 			var group = 0;
 		};
 		if (arguments.length) {
@@ -827,7 +827,7 @@ export var Regex =  __class__ ('Regex', [object], {
 		throw __except0__;
 	});},
 	get _compileWrapper () {return __get__ (this, function (self, pattern, flags) {
-		if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 			var flags = 0;
 		};
 		if (arguments.length) {
@@ -935,10 +935,10 @@ export var Regex =  __class__ ('Regex', [object], {
 		return self._groups > 0;
 	});},
 	get search () {return __get__ (this, function (self, string, pos, endpos) {
-		if (typeof pos == 'undefined' || (pos != null && pos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pos == 'undefined' || (pos != null && globalThis.Object.hasOwn (pos, "__kwargtrans__"))) {;
 			var pos = 0;
 		};
-		if (typeof endpos == 'undefined' || (endpos != null && endpos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof endpos == 'undefined' || (endpos != null && globalThis.Object.hasOwn (endpos, "__kwargtrans__"))) {;
 			var endpos = null;
 		};
 		if (arguments.length) {
@@ -975,10 +975,10 @@ export var Regex =  __class__ ('Regex', [object], {
 		}
 	});},
 	get match () {return __get__ (this, function (self, string, pos, endpos) {
-		if (typeof pos == 'undefined' || (pos != null && pos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pos == 'undefined' || (pos != null && globalThis.Object.hasOwn (pos, "__kwargtrans__"))) {;
 			var pos = 0;
 		};
-		if (typeof endpos == 'undefined' || (endpos != null && endpos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof endpos == 'undefined' || (endpos != null && globalThis.Object.hasOwn (endpos, "__kwargtrans__"))) {;
 			var endpos = null;
 		};
 		if (arguments.length) {
@@ -1019,10 +1019,10 @@ export var Regex =  __class__ ('Regex', [object], {
 		}
 	});},
 	get fullmatch () {return __get__ (this, function (self, string, pos, endpos) {
-		if (typeof pos == 'undefined' || (pos != null && pos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pos == 'undefined' || (pos != null && globalThis.Object.hasOwn (pos, "__kwargtrans__"))) {;
 			var pos = 0;
 		};
-		if (typeof endpos == 'undefined' || (endpos != null && endpos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof endpos == 'undefined' || (endpos != null && globalThis.Object.hasOwn (endpos, "__kwargtrans__"))) {;
 			var endpos = null;
 		};
 		if (arguments.length) {
@@ -1063,7 +1063,7 @@ export var Regex =  __class__ ('Regex', [object], {
 		}
 	});},
 	get py_split () {return __get__ (this, function (self, string, maxsplit) {
-		if (typeof maxsplit == 'undefined' || (maxsplit != null && maxsplit.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof maxsplit == 'undefined' || (maxsplit != null && globalThis.Object.hasOwn (maxsplit, "__kwargtrans__"))) {;
 			var maxsplit = 0;
 		};
 		if (arguments.length) {
@@ -1133,10 +1133,10 @@ export var Regex =  __class__ ('Regex', [object], {
 		}
 	});},
 	get _findAllMatches () {return __get__ (this, function (self, string, pos, endpos) {
-		if (typeof pos == 'undefined' || (pos != null && pos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pos == 'undefined' || (pos != null && globalThis.Object.hasOwn (pos, "__kwargtrans__"))) {;
 			var pos = 0;
 		};
-		if (typeof endpos == 'undefined' || (endpos != null && endpos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof endpos == 'undefined' || (endpos != null && globalThis.Object.hasOwn (endpos, "__kwargtrans__"))) {;
 			var endpos = null;
 		};
 		if (arguments.length) {
@@ -1174,10 +1174,10 @@ export var Regex =  __class__ ('Regex', [object], {
 		return ret;
 	});},
 	get findall () {return __get__ (this, function (self, string, pos, endpos) {
-		if (typeof pos == 'undefined' || (pos != null && pos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof pos == 'undefined' || (pos != null && globalThis.Object.hasOwn (pos, "__kwargtrans__"))) {;
 			var pos = 0;
 		};
-		if (typeof endpos == 'undefined' || (endpos != null && endpos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof endpos == 'undefined' || (endpos != null && globalThis.Object.hasOwn (endpos, "__kwargtrans__"))) {;
 			var endpos = null;
 		};
 		if (arguments.length) {
@@ -1225,7 +1225,7 @@ export var Regex =  __class__ ('Regex', [object], {
 		return ret;
 	});},
 	get finditer () {return __get__ (this, function (self, string, pos, endpos) {
-		if (typeof endpos == 'undefined' || (endpos != null && endpos.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof endpos == 'undefined' || (endpos != null && globalThis.Object.hasOwn (endpos, "__kwargtrans__"))) {;
 			var endpos = null;
 		};
 		if (arguments.length) {
@@ -1264,7 +1264,7 @@ export var Regex =  __class__ ('Regex', [object], {
 		return py_iter (ret);
 	});},
 	get sub () {return __get__ (this, function (self, repl, string, count) {
-		if (typeof count == 'undefined' || (count != null && count.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof count == 'undefined' || (count != null && globalThis.Object.hasOwn (count, "__kwargtrans__"))) {;
 			var count = 0;
 		};
 		if (arguments.length) {
@@ -1289,7 +1289,7 @@ export var Regex =  __class__ ('Regex', [object], {
 		return ret;
 	});},
 	get subn () {return __get__ (this, function (self, repl, string, count) {
-		if (typeof count == 'undefined' || (count != null && count.hasOwnProperty ("__kwargtrans__"))) {;
+		if (typeof count == 'undefined' || (count != null && globalThis.Object.hasOwn (count, "__kwargtrans__"))) {;
 			var count = 0;
 		};
 		if (arguments.length) {
@@ -1395,7 +1395,7 @@ export var PyRegExp =  __class__ ('PyRegExp', [Regex], {
 	});}
 });
 export var compile = function (pattern, flags) {
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1421,7 +1421,7 @@ export var compile = function (pattern, flags) {
 	return p;
 };
 export var search = function (pattern, string, flags) {
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1443,7 +1443,7 @@ export var search = function (pattern, string, flags) {
 	return p.search (string);
 };
 export var match = function (pattern, string, flags) {
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1465,7 +1465,7 @@ export var match = function (pattern, string, flags) {
 	return p.match (string);
 };
 export var fullmatch = function (pattern, string, flags) {
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1487,10 +1487,10 @@ export var fullmatch = function (pattern, string, flags) {
 	return p.fullmatch (string);
 };
 export var py_split = function (pattern, string, maxsplit, flags) {
-	if (typeof maxsplit == 'undefined' || (maxsplit != null && maxsplit.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof maxsplit == 'undefined' || (maxsplit != null && globalThis.Object.hasOwn (maxsplit, "__kwargtrans__"))) {;
 		var maxsplit = 0;
 	};
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1513,7 +1513,7 @@ export var py_split = function (pattern, string, maxsplit, flags) {
 	return p.py_split (string, maxsplit);
 };
 export var findall = function (pattern, string, flags) {
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1535,7 +1535,7 @@ export var findall = function (pattern, string, flags) {
 	return p.findall (string);
 };
 export var finditer = function (pattern, string, flags) {
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1557,10 +1557,10 @@ export var finditer = function (pattern, string, flags) {
 	return p.finditer (string);
 };
 export var sub = function (pattern, repl, string, count, flags) {
-	if (typeof count == 'undefined' || (count != null && count.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof count == 'undefined' || (count != null && globalThis.Object.hasOwn (count, "__kwargtrans__"))) {;
 		var count = 0;
 	};
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
@@ -1584,10 +1584,10 @@ export var sub = function (pattern, repl, string, count, flags) {
 	return p.sub (repl, string, count);
 };
 export var subn = function (pattern, repl, string, count, flags) {
-	if (typeof count == 'undefined' || (count != null && count.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof count == 'undefined' || (count != null && globalThis.Object.hasOwn (count, "__kwargtrans__"))) {;
 		var count = 0;
 	};
-	if (typeof flags == 'undefined' || (flags != null && flags.hasOwnProperty ("__kwargtrans__"))) {;
+	if (typeof flags == 'undefined' || (flags != null && globalThis.Object.hasOwn (flags, "__kwargtrans__"))) {;
 		var flags = 0;
 	};
 	if (arguments.length) {
