@@ -201,6 +201,8 @@ const checks = {
     await app.page.mouse.click(...cube);
     await app.until((b) => b.editor.selection.nodes.map((n) => n.name).join() === "Cube");
     const before = await app.bylonder((b) => b.world.collections.state.scene.objects.length);
+    // A press soon after the click would be a double click (U.dbl_click_time), which renames instead of dragging.
+    await app.page.waitForTimeout(400);
     await app.page.mouse.move(...cube);
     await app.page.mouse.down();
     await app.page.mouse.move(...(await row("Scene Collection")), { steps: 8 });
