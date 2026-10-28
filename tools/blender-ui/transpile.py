@@ -144,8 +144,11 @@ class TranscryptFixes(ast.NodeTransformer):
             node.func._called = True
         self.generic_visit(node)
         if isinstance(node.func, ast.Name) and node.func.id == 'super':
-            # super(Class, self) in Class's methods is super(), the only form Transcrypt compiles.
+            # super(Class, self) in Class's methods is super(), the only form Transcrypt compiles, and only to reach a
+            # method: the super object itself has no JS equivalent.
             node.args = []
+            if not getattr(node, '_method', False):
+                return ast.Constant(None)
         if isinstance(node.func, ast.Name) and node.func.id == 'property' and self.scopes and self.scopes[-1] != 'class':
             # Transcrypt compiles property() only in a class body; elsewhere it is the runtime's property, by
             # another name.
@@ -331,8 +334,19 @@ class TranscryptFixes(ast.NodeTransformer):
         raise NotImplementedError(f'match pattern {ast.dump(pattern)[:80]}')
 
     def visit_Constant(self, node):
-        """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel object (identity holds within a module)."""
-        return ast.Name('_ellipsis', ast.Load()) if node.value is Ellipsis else node
+        """The Ellipsis literal (...), which Transcrypt lacks, as a sentinel object (identity holds within a module), and
+        bytes literals, which it escapes wrong, as bytes of their values."""
+        if node.value is Ellipsis:
+            return ast.Name('_ellipsis', ast.Load())
+        if isinstance(node.value, bytes):
+            return ast.Call(ast.Name('bytes', ast.Load()), [ast.List([ast.Constant(b) for b in node.value], ast.Load())], [])
+        return node
+
+    def visit_Attribute(self, node):
+        if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'super':
+            node.value._method = True
+        self.generic_visit(node)
+        return node
 
     def visit_GeneratorExp(self, node):
         """A generator expression, which Transcrypt makes an iterator that tuple() and list() read as empty, as a list."""

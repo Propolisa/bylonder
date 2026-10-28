@@ -30,11 +30,32 @@ How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own
 
 ## The WASM side
 
-`tools/blender-port/wasm/editor-context.cc` builds its own small context around the edit BMesh: a Scene with ToolSettings and one ViewLayer, one Object in Edit Mode with its Mesh, found through the context store. `operator-properties.cc` gives operators and modifier DNA structs RNA by identifier. It should mirror the JS RNA, not hold Bylonder state of its own:
+The module (`src/bmesh/bmesh.wasm`) runs Blender's C++ in two worlds. Both answer the context as Blender does, run operators by their own exec (`operator_exec` on a `bContext`) and take their properties through `operator-properties.cc`, which gives operators and DNA structs RNA by identifier.
 
-- What it reads from Bylonder are the same properties under the same names, set from the JS structs before an operator runs: `ToolSettings.mesh_select_mode` (`edit_context_selectmode_set`), the object's matrix in Blender's axes (`edit_context_object_matrix_set`, from `location`, `rotation_euler` and `scale`), and a modifier's settings by RNA identifier (as now).
-- Next to mirror, as Bylonder gains them: `scene.unit_settings` (operators and `ED_scene_grid_scale` read `scene->unit`), proportional editing and snapping in ToolSettings, `frame_current` for operators that read time, and the 3D Viewport's `RegionView3D` for view-dependent operators.
-- One list of RNA paths then names everything that crosses, so a value Blender's C++ reads is the value Blender's scripts show.
+- **Edit Mode** (`editor-context.cc`, JS `EditMesh`): a Scene with one Object in Edit Mode, whose edit mesh (BMesh) lives in the module and is the truth while editing.
+- **Blender's data** (`main-api.cc`, JS `BlenderMain`): a `Main` holding objects and their data, one Scene with ToolSettings and one ViewLayer whose Bases hold the selection and the active object, and a window whose screen answers context members through Blender's own `screen_context.cc` (`selected_editable_objects`, `active_object`, ...). Blender's `layer.cc` runs on these Bases. The depsgraph is a stand-in: each ID is its own evaluated copy, `main_evaluate` computes world matrices parents first (`BKE_object_where_is_calc`), and `DEG_id_tag_update` leaves its tags on the ID (`recalc`).
+
+### Who owns what
+
+Bylonder's Babylon scene owns all data; the module holds a mirror for as long as an operator needs it. Decided 2026-10-28.
+
+1. **In, through RNA.** Before an operator polls or runs, each object goes in with the values its RNA struct gives (`rna-bylonder.js`), so a value Blender's C++ reads is the value Blender's scripts show: `location`, `rotation_mode`, `rotation_euler`, `rotation_quaternion`, `scale`, `mode`, its parent, and its base (collection visibility, `hide_get`, `hide_select`, `select_get`, active). Scene values come the same way (`scene.cursor.location`, `tool_settings.transform_pivot_point`). Axes are Blender's: Babylon's (x, y, z) is Blender's (x, z, y).
+2. **Object data.** `main_object_add(type, name)` makes an object with new data of its type as `BKE_object_add` does (`BKE_object_obdata_add_from_type`): a Mesh, Curve (text and curves), Light, Camera, or none for an empty. A subsystem then fills that data from Bylonder's: meshes do it with `object_mesh_set` and `object_mesh_attribute_add`, sent again only when the object's Mesh changed (`wbCreation`) and only for selected objects. Data a subsystem does not fill yet stays Blender's default.
+3. **Out, by tags.** After an operator, what it tagged comes back: `ID_RECALC_TRANSFORM` as the object's transform through RNA, `ID_RECALC_GEOMETRY` as its data (a Mesh becomes the object's Mesh data). An operator that changed data Bylonder does not take back yet changes nothing and says so.
+4. **No parent inverse.** Bylonder's objects have none, so one an operator sets folds into the object's own transform, keeping its world matrix (`object_parent_inverse_fold`). A child left sheared by a parent's uneven scale cannot be held that way; Blender holds it in `matrix_parent_inverse`.
+5. **One undo step** per operator, around the write back (`commands.transaction`).
+
+`editors/object/object-blender.js` does this for Object Mode; `editors/object/object-operators.js` registers the operators it runs.
+
+### Adding a subsystem
+
+- Its Blender sources go in the module's `libraries` (`tools/blender-port/manifest.json`); operators defined in a source listed under `operators` are registered by their own functions. A source that needs header directories of its own lists them as the library's `includes`, so the rest of the build stays cached.
+- Its IDs go in the same Main: data of its own (an Action, a node tree) with `BKE_*_add(main_bmain(), name)` in an export of its API file, object data through `object_data(ob)`. `ID_code_to_RNA_type` in `operator-properties.cc` names the module's ID types for context pointers; add the new type there.
+- Its values cross through the same RNA names: read them from the JS structs before an operator, write them back from what it tagged. Data that has no RNA binding yet gets one in `rna-bylonder.js` first.
+
+### Known limits
+
+Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Blender's auto keying stays off in the module, which has no animation data yet. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 
 ## Shared foundations
 

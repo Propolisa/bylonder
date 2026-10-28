@@ -97,16 +97,6 @@ export function createObjectCommands(world, editor, history, refresh) {
         if ("isPickable" in node) node.isPickable = !node.metadata.wbLocked;
       });
     },
-    reset(property) {
-      transaction(() => {
-        for (const node of roots()) {
-          if (property === "rotation") {
-            node.rotationQuaternion = null;
-            node.rotation.setAll(0);
-          } else node[property].setAll(property === "scaling" ? 1 : 0);
-        }
-      });
-    },
     parent(parent) {
       transaction(() => {
         for (const node of roots())
