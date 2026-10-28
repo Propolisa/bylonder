@@ -12,6 +12,7 @@
 
 import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js';
 import { pyArgs as args } from '../../makesrna/rna.js';
+import { setContext } from '../../python/bpy_interface.js';
 
 // OperatorProperties: what a script sets on an operator button; a macro's operators (props.MESH_OT_rip) have their own.
 const MACRO_PART = /_OT_/;
@@ -187,4 +188,5 @@ export function useContext(context) {
   for (const key of Object.keys(context)) contextKeys.add(key);
   Object.assign(bpyContext, context);
   if (context.blend_data) Object.assign(bpyData, context.blend_data);
+  setContext(context);
 }

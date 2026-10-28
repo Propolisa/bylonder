@@ -60,7 +60,7 @@ export function panelTypes(modules, { space, region = 'WINDOW' }) {
 }
 
 // A bpy.types.Panel subclass, or an add-on's panel (a plain object with a draw).
-const isPanel = (cls) => (cls.__bases__ ? cls === Panel || cls.__bases__.some(isPanel) : !!cls.draw);
+const isPanel = (cls) => (cls.__bases__ ? cls === Panel || cls.__name__ === 'Panel' || cls.__bases__.some(isPanel) : !!cls.draw);
 
 export const idname = (type) => type.bl_idname || type.__name__;
 

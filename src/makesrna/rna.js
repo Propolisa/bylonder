@@ -7,6 +7,10 @@ import structs from './rna-structs.json' with { type: 'json' };
 import operators from './rna-operators.json' with { type: 'json' };
 import * as bpyTypes from '../bl_ui/bpy.types.js';
 
+// A struct's class in bpy.types (type(context.curve) is TextCurve): Blender's Python tree's once it has loaded
+// (python/bpy_interface.js, by its module registry: it imports this module), else the interim src/bl_ui's.
+const structClass = (struct) => globalThis.__py_modules?.['_bpy.types']?.[struct] ?? bpyTypes[struct];
+
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));
 
@@ -78,8 +82,8 @@ export const hasStruct = (struct) => struct in structs;
 // An enum's items by index and by identifier (enum_items['VERTEX'].icon), separators left out.
 const enumItems = (items = []) => {
   const list = collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value })));
-  for (const item of list) list[item.identifier] = item;
-  return python(list);
+  return new Proxy(list, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key]
+    : target.find((item) => item.identifier === key) ?? target[rnaName(key)]) });
 };
 const propertyNames = (struct) => { const names = new Set(); for (let s = structs[struct]; s; s = structs[s.base]) Object.keys(s.props).forEach((n) => names.add(n)); return names; };
 
@@ -130,7 +134,7 @@ export function rna(struct, data = {}, { items = {}, channels = {}, owner = null
       // A struct is true in Python, whatever it holds (Transcrypt's truth test counts an object's keys).
       if (key === '__bool__') return () => true;
       // type(data) in the scripts (`type(context.curve) is TextCurve`): the struct's bpy.types class.
-      if (key === '__class__') return bpyTypes[struct] ?? Object;
+      if (key === '__class__') return structClass(struct) ?? Object;
       if (typeof key !== 'string') return target[key];
       const name = rnaName(key);
       if (name in target) return target[name];
@@ -152,6 +156,6 @@ export function rna(struct, data = {}, { items = {}, channels = {}, owner = null
       return defaults.get(name);
     },
     set: (target, key, value) => Reflect.set(target, typeof key === 'string' ? rnaName(key) : key, value),
-    has: (target, key) => typeof key === 'string' && (key === '__class__' ? !!bpyTypes[struct] : rnaName(key) in target || !!property(struct, rnaName(key))),
+    has: (target, key) => typeof key === 'string' && (key === '__class__' ? !!structClass(struct) : rnaName(key) in target || !!property(struct, rnaName(key))),
   });
 }

@@ -13,13 +13,14 @@ import { createModifierSystem } from '../src/modifiers/stack.js';
 import { createSelection } from '../src/editors/object/selection.js';
 import { createRNA } from '../src/makesrna/rna-bylonder.js';
 import { loadRNAUI, rnaProperty, INFO } from '../src/makesrna/rna.js';
-import { MODULES, panelTypes, drawPanels } from '../src/editors/interface/panels.js';
+import { panelTypes, drawPanels } from '../src/editors/interface/panels.js';
 import { isLayout } from '../src/editors/interface/layout.js';
 import { propertiesContext, propertiesTabs, TAB_CONTEXTS } from '../src/editors/space_buttons/buttons-context.js';
 import { asObject } from '../src/runtime/object-transform.js';
 
 await loadRNAUI();
-const modules = await Promise.all(MODULES.map((name) => import(`../src/bl_ui/${name}.js`).catch(() => null)));
+const { panels, menus, headers } = await import('../src/python/bpy_interface.js');
+const modules = [{ classes: [...Object.values(panels), ...Object.values(menus), ...Object.values(headers)] }];
 const types = panelTypes(modules, { space: 'PROPERTIES' });
 
 const engine = new NullEngine(), scene = new Scene(engine);
