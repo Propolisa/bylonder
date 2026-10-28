@@ -96,6 +96,17 @@ def click_tool():
                                 first_interval=0.1 + 0.3 * i)
 
 
+# The cube deleted, then an object added by its operator in the 3D View, then Edit Mode, as Delete, the Add menu and
+# Tab do in parity.mjs.
+def add_and_edit(module, name, **props):
+    bpy.data.objects.remove(bpy.data.objects["Cube"])
+    view = area("VIEW_3D")
+    region = next(r for r in view.regions if r.type == "WINDOW")
+    with bpy.context.temp_override(window=window(), area=view, region=region):
+        getattr(getattr(bpy.ops, module), name)(**props)
+        bpy.ops.object.mode_set(mode="EDIT")
+
+
 SETUP = {
     "startup": lambda: None,
     "object-menu": lambda: click(*OBJECT_MENU),
@@ -110,6 +121,9 @@ SETUP = {
     "camera-data": properties_tab("Camera", "DATA"),
     "toolbar": click_tool,
     "sidebar-item": lambda: key("N", *view3d_point(*REST)),
+    "curve-edit": lambda: add_and_edit("curve", "primitive_bezier_circle_add"),
+    "text-edit": lambda: add_and_edit("object", "text_add"),
+    "scripting": lambda: setattr(window(), "workspace", bpy.data.workspaces["Scripting"]),
     "outliner-expanded": lambda: key("A", *outliner_point(0.5, 0.5), shift=True),
 }
 

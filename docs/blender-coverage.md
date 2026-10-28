@@ -16,16 +16,16 @@ Each entry is a level-2 heading naming a node, followed by optional fields and f
 - **See:** the node that provides the same functionality in Bylonder, as a heading-style path. Shown as a link.
 
 ## CONSOLE > *
-Status: replaced
-Bylonder projects are JavaScript. The browser console and the Code area replace the Python Console.
+Status: partial
+Blender's Python Console in the Scripting workspace: CPython (Pyodide) runs Blender's own `_console_python` with history, Tab completion and `C` and `D`. See `docs/blender-boundary.md` (Scripting).
 
 ## TEXT_EDITOR > *
-Status: replaced
-The Code area (Monaco) edits the project's modules, with its own search, replace and shortcuts.
+Status: partial
+Texts are the project's text files. Run Script runs CPython (Pyodide) over Bylonder's `bpy`. Autocomplete, live edit, Reload and the conflict tools are not there yet; Save downloads the text.
 
 ## INFO > *
-Status: replaced
-Reports appear as toasts and in the browser console.
+Status: partial
+Operator reports, Python operators' reports and script errors. Replay and Box Select are not there yet.
 
 ## TOPBAR_MT_file > wm.save_mainfile
 Status: partial
@@ -79,3 +79,8 @@ The C panel (`view3d_buttons.cc`) is ported as its layout calls in `editors/spac
 ## VIEW3D_HT_header > *
 The transform settings (`draw_xform_template`) draw from Blender's Python. Transform orientation slots are stored but no transform uses them yet.
 
+## VIEW3D_MT_curve_add
+Blender's own primitive operators fill the curve, in the module (`ED_curve_add_nurbs_primitive`). Surfaces (Add > Surface) are not offered yet. See `docs/curves-and-text.md`.
+
+## object.text_add
+Text objects are Blender's: its text layout (`BKE_vfont_to_curve`) with its built-in font, FreeType in the module. Fonts other than the built-in one load from their files' bytes; a font file picker is not offered yet.

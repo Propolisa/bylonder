@@ -2,6 +2,8 @@
 // and started as Blender starts them, which registers their classes. Bylonder draws and runs those classes by name.
 import { loadRNAUI } from '../makesrna/rna.js';
 import { invokeOperator, runOperator, pollOperator, hasOperator, registerOperator } from '../windowmanager/wm-operators.js';
+import { report } from '../windowmanager/wm-reports.js';
+import { set } from '../bl_py/org.transcrypt.__runtime__.js';
 
 
 // Blender's scripts read RNA's enums as they load. Vite serves JSON as a module, without Node's import attribute.
@@ -16,7 +18,7 @@ globalThis.__bylonder_operators__ = {
   call(idname, props, context) {
     if (!pollOperator(idname, props)) throw Error(`${idname}.poll() failed, context is incorrect`);
     const result = context.startsWith('INVOKE') ? invokeOperator(idname, props, null) : runOperator(idname, props);
-    return [typeof result === 'string' ? result : 'FINISHED'];
+    return set([typeof result === 'string' ? result : 'FINISHED']);
   },
 };
 
@@ -39,7 +41,7 @@ function operatorInstance(cls, props) {
   for (const [name, property] of Object.entries(cls.__annotations__ ?? {})) for (const key of pythonNames(name)) operator[key] = property.keywords?.default ?? null;
   for (const [name, value] of Object.entries(props)) for (const key of pythonNames(name)) operator[key] = value;
   operator.properties = operator;
-  operator.report = (type, message) => console.warn(`${cls.bl_idname}: ${message}`);
+  operator.report = (types, message) => report([...types][0] ?? 'INFO', message);
   return operator;
 }
 for (const [idname, cls] of Object.entries(registered)) {

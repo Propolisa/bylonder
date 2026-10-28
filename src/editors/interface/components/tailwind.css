@@ -7,6 +7,9 @@
 @source "../../space_node/";
 @source "../layout-view.js";
 @source "../../space_buttons/";
+@source "../../space_text/";
+@source "../../space_console/";
+@source "../../space_info/";
 @source "../../../workspace/changelog/";
 
 /* shadcn-vue's semantic tokens, defined by Bylonder's theme tokens (src/theme.css). */

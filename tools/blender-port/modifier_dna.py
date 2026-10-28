@@ -5,6 +5,8 @@ names, as Clang parses the RNA definition files for the module's wasm32 target.
 - src/makesrna/dna-outliner.json: the structs the Outliner draws buttons for and JS binds (Object, ObjectBase,
   Collection, LayerCollection, SpaceOutliner), with each property's type, icon and enum items, which the module's RNA
   takes too (rna_dna_fields in wasm_module.py).
+- src/makesrna/dna-curves.json: a Curve and its Nurb, BezTriple, BPoint, CharInfo and TextBox (rna_curve.cc); with
+  rna-curves.json (tools/blender-reference/curves.py) it lets JS read and write curve and text data in the module.
 - src/makesrna/dna-data.json: the data the scene sync writes into Main by RNA name (main-sync.js): lights, cameras,
   materials, worlds and the scene's settings.
 
@@ -31,6 +33,7 @@ OUTPUTS = {
     'dna-outliner.json': {'files': ['rna_object.cc', 'rna_layer.cc', 'rna_collection.cc', 'rna_space.cc'],
                           'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
                           'structs': ['Object', 'ObjectBase', 'Collection', 'LayerCollection', 'SpaceOutliner'], 'detail': True},
+    'dna-curves.json': {'files': ['rna_curve.cc'], 'functions': lambda name: name == 'RNA_def_curve', 'structs': None, 'detail': True},
     'dna-data.json': {'files': ['rna_light.cc', 'rna_camera.cc', 'rna_material.cc', 'rna_world.cc', 'rna_scene.cc'],
                       'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
                       'structs': ['Light', 'PointLight', 'SpotLight', 'SunLight', 'AreaLight', 'Camera', 'Material', 'World', 'Scene',

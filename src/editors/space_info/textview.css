@@ -1,0 +1,5 @@
+/* textview.cc's layout: items from the bottom, wrapped at whole characters of the monospace font. */
+.bl-textview{display:flex;flex-direction:column-reverse;height:100%;overflow-x:hidden;overflow-y:auto;font-family:var(--bl-font-mono);font-size:var(--font-size);line-height:var(--lh);user-select:none}
+.bl-textview-item{position:relative;flex-shrink:0}
+.bl-textview-text{min-height:var(--lh);white-space:pre-wrap;word-break:break-all;letter-spacing:var(--letter-spacing)}
+.bl-textview-icon{position:absolute;display:flex;padding:calc(var(--bl-row)*.1);border-radius:var(--bl-radius)}

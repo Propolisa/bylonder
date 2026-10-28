@@ -15,6 +15,7 @@
 import { createBlenderIDs } from './blender-ids.js';
 import { dnaGet, dnaSet, dnaProperty } from '../makesrna/dna-struct.js';
 import { syncBindings } from '../makesrna/rna-bylonder.js';
+import { INFO } from '../makesrna/rna.js';
 import { modifierStack } from '../modifiers/stack.js';
 import { moduleModifiers, blenderModifierDefinitions } from '../modifiers/blender.js';
 import { mesh_serialize } from './mesh/mesh.js';
@@ -22,11 +23,12 @@ import { objectMesh } from '../editors/object/object-mesh.js';
 import { rebuildMesh } from '../editors/object/mesh-catalog.js';
 import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
+import { CurveObject } from './curve/curve.js';
 
 // ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
 const ID_OB = 0x424f, ID_GR = 0x5247;
 const ID_RECALC_GEOMETRY = 1 << 1;
-const OWN_DATA = ['MESH', 'EMPTY', 'LIGHT', 'CAMERA'];
+const CURVE_TYPES = ['CURVE', 'FONT'];
 const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, MEDIAN_POINT: 3, ACTIVE_ELEMENT: 4 };
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
@@ -58,7 +60,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const filled = new Set();
 
   const objectType = (node) => rna.pointer('Object', node).type;
-  const dataStruct = (node) => rna.pointer('Object', node).data?.bl_rna?.identifier ?? null;
+  const dataStruct = (node) => rna.pointer('Object', node).data?.[INFO].struct ?? null;
   const live = () => rna.objects();
   const entryOf = (node) => objects.get(node);
   const nodeOf = (ob) => [...objects.values()].find((entry) => entry.ob === ob)?.node ?? null;
@@ -280,17 +282,24 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (api.debug && all) assertEqual('flush');
   }
 
-  // Fills mesh objects' Meshes from Babylon for code that needs their geometry.
+  // Fills objects' geometry from Babylon for code that needs it: a Mesh, or a curve's or text's Curve data (the edit
+  // data in Edit Mode).
+  const curveObject = (entry) => new CurveObject(entry.type, entry.node.name, entry.ob, blender);
   function fill(nodes) {
     for (const node of nodes) {
       const entry = objects.get(node);
-      if (entry?.type !== 'MESH' || filled.has(entry)) continue;
-      blender.setMesh(entry.ob, objectMesh(node));
+      if (!entry || filled.has(entry)) continue;
+      if (entry.type === 'MESH') blender.setMesh(entry.ob, world.editMode?.meshOf?.(node) ?? objectMesh(node));
+      else if (CURVE_TYPES.includes(entry.type) && world.curves) curveObject(entry).data = world.curves.data(node);
+      else continue;
       filled.add(entry);
     }
   }
   function release() {
-    for (const entry of filled) blender.clearMesh(entry.ob);
+    for (const entry of filled) {
+      if (entry.type === 'MESH') blender.clearMesh(entry.ob);
+      else curveObject(entry).splines = { splines: [] };
+    }
     filled.clear();
   }
 
@@ -320,7 +329,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
         if (base?.selected) (base.active ? active : chosen).push(node);
         if (base && data.hide_get() !== base.hidden) node.setEnabled(!base.hidden);
         if ((tags.object | tags.data) & ID_RECALC_GEOMETRY && filled.has(entry)) {
-          rebuildMesh(node, { mesh: mesh_serialize(blender.mesh(ob)) });
+          if (entry.type === 'MESH') rebuildMesh(node, { mesh: mesh_serialize(blender.mesh(ob)) });
+          else world.curves.set(node, curveObject(entry).data);
         }
       }
       selection.replace([...chosen, ...active]);
@@ -454,8 +464,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       fill(nodes);
       try { return fn(); } finally { release(); }
     },
-    // Whether the module holds an object's data (Bylonder's text and curves are its own until the curves land in Main).
-    holdsData: (node) => OWN_DATA.includes(objects.get(node)?.type),
+    // Whether Blender's code may change an object's data: its geometry is filled for it (lights and cameras are
+    // Bylonder's objects of their own kind).
+    holdsData: (node) => ['MESH', 'EMPTY', ...CURVE_TYPES].includes(objects.get(node)?.type),
     // The selected objects, whose geometry operators on the selection are given.
     selected: () => selection.nodes.filter((node) => objects.has(node)),
     objectOf: (node) => objects.get(node)?.ob ?? null,

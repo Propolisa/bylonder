@@ -12,5 +12,8 @@
   { "id": "camera-data", "title": "Properties: Camera data tab of the camera" },
   { "id": "toolbar", "title": "3D View toolbar: the Move tool chosen, with its tool settings and gizmo" },
   { "id": "sidebar-item", "title": "3D View sidebar (N): the Item tab", "settle": 4 },
+  { "id": "curve-edit", "title": "Edit Mode on a Bezier circle (the cube deleted, Add Curve Circle, Tab)" },
+  { "id": "text-edit", "title": "Edit Mode on a text object (the cube deleted, Add Text, Tab)" },
+  { "id": "scripting", "title": "Scripting workspace: Text Editor, Python Console with its banner, Info", "settle": 3 },
   { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" }
 ]

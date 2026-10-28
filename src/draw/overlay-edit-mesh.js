@@ -27,7 +27,7 @@ void main() {
 }`,
 };
 
-function overlayMaterial(scene, name, { fillMode, pointSize = 1, depthUnits, slopeScale = 1, round = 0, alpha = false }) {
+export function overlayMaterial(scene, name, { fillMode, pointSize = 1, depthUnits, slopeScale = 1, round = 0, alpha = false }) {
   const material = new ShaderMaterial(name, scene, { vertexSource: SHADER.vertex, fragmentSource: SHADER.fragment }, {
     attributes: ['position', 'color'], uniforms: ['worldViewProjection', 'pointSize', 'depthUnits', 'slopeScale', 'roundPoint'], needAlphaBlending: alpha,
   });

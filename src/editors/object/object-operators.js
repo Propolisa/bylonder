@@ -23,7 +23,7 @@ const BLENDER_OPERATORS = ['object.transform_apply', 'object.origin_set', 'objec
 const isOperator = (id) => /^[a-z0-9_]+\.[a-z0-9_]+$/.test(id);
 
 // Runs an operator's exec as one undo step, with the selected objects' geometry given to it; returns its status and
-// report. An operator that changed the data of a text or curve object, which Bylonder keeps itself, changes nothing.
+// report. An operator that changed the data of a light or camera, which Bylonder keeps itself, changes nothing.
 function runBlenderOperator(sync, idname, props, { transaction, notify, keying }) {
   let result;
   transaction(() => sync.run(() => {
@@ -31,14 +31,14 @@ function runBlenderOperator(sync, idname, props, { transaction, notify, keying }
     const unheld = sync.geometryTagged().find(({ node }) => !sync.holdsData(node));
     if (unheld) {
       sync.revert();
-      result = { status: 0, report: `Bylonder does not apply this to ${unheld.type === 'FONT' ? 'text' : 'curve'} objects yet` };
+      result = { status: 0, report: `Bylonder does not apply this to ${unheld.type.toLowerCase()} objects yet` };
     }
   }, { meshes: sync.selected() }));
   if (result.report) notify(result.report);
   return result;
 }
 const keyLabel = (keys) => keys?.replace(/\+/g, ' ');
-const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup', 'edit-text', 'creation'];
+const OBJECT_MENU_EXTRAS = ['rename', 'group', 'ungroup', 'creation'];
 
 //   sync: the scene's (createMainSync); transaction(fn): an undo step around a change; notify(text): a report;
 //   keying(run): runs an operator that may insert keys (auto keying), for the animation to take them.

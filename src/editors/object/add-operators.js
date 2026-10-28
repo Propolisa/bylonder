@@ -2,12 +2,10 @@
 // its Shift A add them; Babylon's own primitives join Blender's Mesh menu as an add-on's would.
 import { registerOperator, appendMenu, kw } from '../../windowmanager/wm-operators.js';
 
-const BLENDER = { text: 'object.text_add' };
-
 export function registerAddOperators(creator) {
   const babylon = creator.catalog.filter((preset) => preset.group === 'babylon');
   for (const preset of creator.catalog) {
-    const idname = preset.operator ?? BLENDER[preset.id] ?? `bylonder.${preset.id}_add`;
+    const idname = preset.operator ?? `bylonder.${preset.id}_add`;
     registerOperator(idname, { run: () => creator.add(preset) });
   }
   appendMenu('VIEW3D_MT_mesh_add', ({ layout }) => {

@@ -73,8 +73,9 @@ export function setOperatorProperties(op, props) {
   for (const [name, value] of Object.entries(props)) {
     const numbers = Float64Array.from([value].flat(), Number);
     const items = typeof value === 'string' ? value : Array.isArray(value) && value.every((v) => typeof v === 'string') ? value.join(',') : null;
+    // A string is an enum item's identifier, or else a string property's value (font.text_insert's text).
     const ok = withString(name, (namePointer) => items !== null
-      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item))
+      ? withString(items, (item) => x.operator_set(op, namePointer, 0, 0, item) || (typeof value === 'string' && (x.operator_string_set(op, namePointer, item), true)))
       : withArrays([numbers], ([p]) => x.operator_set(op, namePointer, p, numbers.length, 0)));
     if (!ok) throw new Error(`no property ${name} = ${value}`);
   }
@@ -93,6 +94,16 @@ function runOperator(C, idname, props) {
 }
 export const pollOperator = (C, idname) => !!x.operator_poll(C, operatorTypes.get(idname));
 export const operatorNames = () => [...operatorTypes.keys()];
+// The enum property an operator's invoke offers as a menu (WM_menu_invoke), or null.
+function operatorMenuProperty(idname) {
+  const op = x.operator_new(operatorTypes.get(idname));
+  try {
+    const name = x.operator_menu_property(op);
+    return name ? cString(name) : null;
+  } finally {
+    x.operator_free(op);
+  }
+}
 // An enum property's items as the operator's UI lists them in a context (its item function, as Blender's menus call
 // it): [identifier, name] pairs.
 function operatorEnumItems(C, idname, prop) {
@@ -125,7 +136,8 @@ function extractedMesh(header) {
   const view = (name) => {
     if (buffer !== x.memory.buffer) [buffer, views] = [x.memory.buffer, {}];
     const [Type, pointer, length] = layout[name];
-    return (views[name] ??= new Type(buffer, pointer, length));
+    // A mesh without faces may have no offsets array; its one offset is 0.
+    return (views[name] ??= pointer ? new Type(buffer, pointer, length) : new Type(length));
   };
   const present = Object.keys(layout).filter((name) => layout[name][1]);
   const mesh = meshOfBuffers(counts, present, view);
@@ -461,6 +473,8 @@ export class BlenderMain {
   get C() { return this.#C; }
   data(ob) { return x.object_data(ob) >>> 0; }
 
+  // The context its operators run in (bContext).
+  get C() { return this.#C; }
   // Collections, by address: the Scene Collection holds the rest. A collection's children and objects are set whole,
   // in order.
   get masterCollection() { return x.main_collection_master(this.#context) >>> 0; }
@@ -495,3 +509,10 @@ export class BlenderMain {
   poll(idname) { return pollOperator(this.#C, idname); }
   enumItems(idname, prop) { return operatorEnumItems(this.#C, idname, prop); }
 }
+
+// The one Blender world every subsystem's data lives in (the module's Main); a realm makes it once.
+let shared = null;
+export const blenderMain = () => (shared ??= new BlenderMain());
+
+// What subsystems with exports of their own (blenkernel/curve) reach the module through.
+export const moduleAccess = { x, withArrays, withString, cString, extractedMesh, ownedMesh, runOperator, pollOperator, operatorEnumItems, operatorMenuProperty };

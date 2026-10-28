@@ -145,6 +145,7 @@ function syncModels() {
       model.onDidChangeContent(() => {
         if (suppress || !project.files[path]) return;
         project.files[path].content = model.getValue();
+        frame?.contentWindow.postMessage({ channel, type: "text", payload: { name: path, content: project.files[path].content } }, location.origin);
         markDirty();
       });
       models.set(path, model);
@@ -490,9 +491,10 @@ window.addEventListener("message", (e) => {
   if (type === "rename-scene") renameSceneTo(activeSceneId(project), payload);
   if (type === "ready")
     frame.contentWindow.postMessage(
-      { channel, type: "init", payload: runData },
+      { channel, type: "init", payload: { ...runData, screen: topbar.screen() } },
       location.origin,
     );
+  if (type === "text") textChanged(payload);
   if (type === "running") { $("run-status").textContent = "Running"; frame.contentWindow.postMessage({channel,type:"render-settings",payload:renderSettings()},location.origin); }
   if (type === "run-error") {
     $("run-status").textContent = "Run failed";
@@ -507,6 +509,20 @@ window.addEventListener("message", (e) => {
   if (type === "remember") setRemember(payload, false);
   if (type === "status") topbar.status(payload);
 });
+// A text the scene's Text Editor changed, created (content) or deleted (null): the project file follows.
+function textChanged({ name, content }) {
+  if (content === null) {
+    if (name === "index.js") return;
+    delete project.files[name];
+    tabs = tabs.filter((path) => path !== name);
+    if (active === name) openFile("index.js");
+  } else if (project.files[name]?.content === content) return;
+  else project.files[name] = textFile(content);
+  syncModels();
+  renderTabs();
+  renderTree();
+  markDirty(false);
+}
 function setRemember(enabled, notifyFrame = true) {
   project.settings.remember = enabled;
   $("remember").checked = enabled;

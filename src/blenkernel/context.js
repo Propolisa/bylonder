@@ -6,7 +6,8 @@
 import { rna, collection } from '../makesrna/rna.js';
 
 const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER: 'SpaceOutliner', DOPESHEET_EDITOR: 'SpaceDopeSheetEditor', GRAPH_EDITOR: 'SpaceGraphEditor',
-  NODE_EDITOR: 'SpaceNodeEditor', SEQUENCE_EDITOR: 'SpaceSequenceEditor', TEXT_EDITOR: 'SpaceTextEditor', FILE_BROWSER: 'SpaceFileBrowser', TOPBAR: 'Space' };
+  NODE_EDITOR: 'SpaceNodeEditor', SEQUENCE_EDITOR: 'SpaceSequenceEditor', TEXT_EDITOR: 'SpaceTextEditor', FILE_BROWSER: 'SpaceFileBrowser', TOPBAR: 'Space',
+  CONSOLE: 'SpaceConsole', INFO: 'SpaceInfo' };
 const REGION_DATA = { VIEW_3D: 'RegionView3D' };
 // CTX_data_mode_enum for an object in Edit Mode, by its type.
 const EDIT_MODES = { MESH: 'EDIT_MESH', CURVE: 'EDIT_CURVE', FONT: 'EDIT_TEXT' };
@@ -19,7 +20,7 @@ export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region
   // A region given as its type, or as { type, width, height } where its size matters (the toolbar's layout).
   const { type: region_type = regionType, ...size } = typeof regionType === 'string' ? {} : regionType;
   const region_data = REGION_DATA[type] && region_type === 'WINDOW' ? space_data.region_3d ?? null : null;
-  const area = rna('Area', { type, ui_type: uiType, show_menus: true, spaces: collection([space_data]) });
+  const area = rna('Area', { type, ui_type: uiType, show_menus: true, spaces: collection([space_data]), tag_redraw: () => host.update?.('Area', 'tag_redraw', space) });
   const region = rna('Region', { type: region_type, ...size, view2d: rna('View2D', { region_to_view: (x, y) => [x, y] }) });
   const screen = rna('Screen', { areas: collection([area]) });
   const window = rna('Window', { scene, view_layer, screen });
@@ -31,12 +32,14 @@ export function createContext(r, { area: type = 'VIEW_3D', uiType = type, region
   const editable = (list) => list.filter((ob) => !ob.metadata?.wbLocked);
   const inMode = () => (editObject() ? [object(editObject())] : []);
   const data = {
-    window, screen, area, region, space_data, region_data, scene, view_layer,
+    window, screen, area, region, space_data, region_data, scene, view_layer, window_manager: r.pointer('WindowManager', world),
     get engine() { return scene.render.engine; },
     workspace: r.pointer('WorkSpace', world),
     tool_settings: scene.tool_settings,
     preferences: rna('Preferences', { system: rna('PreferencesSystem', { ui_scale: 1 }), ...host.preferences }),
-    blend_data: rna('BlendData', { scenes: collection([scene]), objects: scene.objects }),
+    blend_data: rna('BlendData', { scenes: collection([scene]), objects: scene.objects, get texts() { return r.texts(); } }),
+    // The Text Editor's text (CTX_data_edit_text).
+    get edit_text() { return space_data.text ?? null; },
     get mode() { const ob = editObject(); return ob ? EDIT_MODES[object(ob).type] ?? 'OBJECT' : 'OBJECT'; },
     get object() { return object(activeObject()); },
     get active_object() { return object(activeObject()); },
