@@ -79,9 +79,11 @@ def compile_one(objects, entry, extra):
     if not os.path.exists(source):
         return source, None, 'generated source missing'
     # Keyed without where the checkout and the work directory are, so objects compiled elsewhere (CI) are found here.
-    stable = ' '.join(command).replace(REPO, '$REPO')
+    # The work directory first: CI's is inside the checkout.
+    stable = ' '.join(command)
     for work, token in WORK.items():
         stable = stable.replace(work, token)
+    stable = stable.replace(REPO, '$REPO')
     digest = hashlib.sha1((stable + open(source, 'rb').read().hex()).encode()).hexdigest()[:16]
     obj = os.path.join(objects, f'{os.path.basename(source)}.{digest}.o')
     if os.path.exists(obj):
