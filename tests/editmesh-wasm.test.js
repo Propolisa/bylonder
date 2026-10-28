@@ -68,6 +68,7 @@ function differences(fixture) {
     if (move) translateSelected(edit, move);
   } catch (error) {
     edit.free();
+    if (process.env.STACK) console.error(error.stack);
     return [error.message.split('\n')[0]];
   }
   const mesh = edit.toMesh();

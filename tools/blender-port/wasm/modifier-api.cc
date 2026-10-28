@@ -92,6 +92,10 @@ void types_ensure()
   (void)types;
 }
 
+/* Blender's initialization, which the host runs once after the module's own (_initialize), as Blender's main does
+ * before anything else. */
+EXPORT(blender_init) void blender_init_export() { types_ensure(); }
+
 struct ModifierObject {
   Scene scene = {};
   Object object = {};
