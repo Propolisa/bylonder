@@ -29,7 +29,8 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		return __t__ (obgetattr (context, 'object', null) !== null) && ob.mode == cls.mode;
+		var ob = getattr (context, 'object', null);
+		return __t__ (ob !== null) && ob.mode == cls.mode;
 	});},
 	get has_tool_with_brush_type () {return __getcm__ (this, function (cls, context, brush_type) {
 		if (arguments.length) {
@@ -589,11 +590,12 @@ export var ColorPalettePanel =  __class__ ('ColorPalettePanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (__t__ (!__t__ ((__super__ (ColorPalettePanel, 'poll') (self, context))))) {
+		if (__t__ (!__t__ ((_super_classmethod (ColorPalettePanel, cls, 'poll') (context))))) {
 			return false;
 		}
 		var settings = cls.paint_settings (context);
-		if (__t__ (brushsettings.brush === null)) {
+		var brush = settings.brush;
+		if (__t__ (brush === null)) {
 			return false;
 		}
 		if (__t__ (__t__ (context.space_data.py_metatype == 'IMAGE_EDITOR') || context.image_paint_object)) {
@@ -652,7 +654,7 @@ export var ClonePanel =  __class__ ('ClonePanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (__t__ (!__t__ ((__super__ (ClonePanel, 'poll') (self, context))))) {
+		if (__t__ (!__t__ ((_super_classmethod (ClonePanel, cls, 'poll') (context))))) {
 			return false;
 		}
 		var settings = cls.paint_settings (context);
@@ -881,7 +883,7 @@ export var SmoothStrokePanel =  __class__ ('SmoothStrokePanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (__t__ (!__t__ ((__super__ (SmoothStrokePanel, 'poll') (self, context))))) {
+		if (__t__ (!__t__ ((_super_classmethod (SmoothStrokePanel, cls, 'poll') (context))))) {
 			return false;
 		}
 		var settings = cls.paint_settings (context);
@@ -956,7 +958,7 @@ export var FalloffPanel =  __class__ ('FalloffPanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (__t__ (!__t__ ((__super__ (FalloffPanel, 'poll') (self, context))))) {
+		if (__t__ (!__t__ ((_super_classmethod (FalloffPanel, cls, 'poll') (context))))) {
 			return false;
 		}
 		var settings = cls.paint_settings (context);
@@ -2283,5 +2285,85 @@ export var brush_basic_grease_pencil_vertex_settings = function (layout, context
 	}
 };
 export var classes = tuple ([VIEW3D_MT_tools_projectpaint_clone]);
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	for (var d of dicts) {
+		result.py_update (d);
+	}
+	return result;
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__t__ (conversion == 'r')) {
+		var value = repr (value);
+	}
+	else if (__t__ (conversion == 's')) {
+		var value = str (value);
+	}
+	return (__t__ (spec) ? (('{:' + spec) + '}').format (value) : str (value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	for (var py_items of lists) {
+		result.extend (list (py_items));
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 
 //# sourceMappingURL=properties_paint_common.map

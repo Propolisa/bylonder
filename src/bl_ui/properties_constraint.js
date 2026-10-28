@@ -168,7 +168,8 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			if (__t__ (__t__ (con.target_space == 'CUSTOM') || con.owner_space == 'CUSTOM')) {
 				var col = layout.column ();
 				col.prop (con, 'space_object');
-				if (__t__ (space_objectcon.space_object)) {
+				var space_object = con.space_object;
+				if (__t__ (space_object)) {
 					var _subject = space_object.py_metatype;
 					if (__t__ (_subject == 'ARMATURE')) {
 						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
@@ -957,7 +958,8 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 			if (__t__ (con.project_axis_space == 'CUSTOM')) {
 				var col = layout.column ();
 				col.prop (con, 'space_object');
-				if (__t__ (space_objectcon.space_object)) {
+				var space_object = con.space_object;
+				if (__t__ (space_object)) {
 					var _subject = space_object.py_metatype;
 					if (__t__ (_subject == 'ARMATURE')) {
 						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
@@ -3318,6 +3320,24 @@ export var _joined = function () {
 		result.extend (list (py_items));
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 
 //# sourceMappingURL=properties_constraint.map

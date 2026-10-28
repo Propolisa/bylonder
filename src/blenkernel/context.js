@@ -1,7 +1,8 @@
 // bpy.context for one editor (BKE_context.hh, with the members screen_context.cc and space_view3d.cc give): the
 // window, screen, area and region it is drawn in, and the scene's data through Bylonder's RNA (makesrna/rna-bylonder.js).
 //   r: createRNA(host), area: the editor's Blender type, region: the region's, space: the editor's own data (a 3D
-//   Viewport's view, editors/space_view3d/view3d.js), or none for Blender's defaults.
+//   Viewport's view, editors/space_view3d/view3d.js), or none for Blender's defaults, members: the editor's own
+//   members (the Properties editor's, space_buttons/buttons-context.js) as getters over the context.
 import { rna, collection } from '../makesrna/rna.js';
 
 const SPACES = { VIEW_3D: 'SpaceView3D', PROPERTIES: 'SpaceProperties', OUTLINER: 'SpaceOutliner', DOPESHEET_EDITOR: 'SpaceDopeSheetEditor',
@@ -10,10 +11,10 @@ const REGION_DATA = { VIEW_3D: 'RegionView3D' };
 // CTX_data_mode_enum for an object in Edit Mode, by its type.
 const EDIT_MODES = { MESH: 'EDIT_MESH', CURVE: 'EDIT_CURVE', FONT: 'EDIT_TEXT' };
 
-export function createContext(r, { area: type = 'VIEW_3D', region: regionType = 'WINDOW', space = null } = {}) {
+export function createContext(r, { area: type = 'VIEW_3D', region: regionType = 'WINDOW', space = null, members } = {}) {
   const { world, host } = r;
   const object = (ob) => r.pointer('Object', ob);
-  const scene = r.pointer('Scene', world), view_layer = rna('ViewLayer', { name: 'ViewLayer' });
+  const scene = r.pointer('Scene', world), view_layer = world.collections ? r.pointer('ViewLayer', world.collections.layer()) : rna('ViewLayer', { name: 'ViewLayer' });
   const space_data = space ? r.pointer(SPACES[type], space) : rna(SPACES[type] ?? 'Space');
   const region_data = REGION_DATA[type] && regionType === 'WINDOW' ? space_data.region_3d ?? null : null;
   const area = rna('Area', { type, ui_type: type, show_menus: true, spaces: collection([space_data]) });
@@ -27,8 +28,9 @@ export function createContext(r, { area: type = 'VIEW_3D', region: regionType = 
   const visible = () => r.objects().filter((ob) => ob.isEnabled() && ob.isVisible !== false);
   const editable = (list) => list.filter((ob) => !ob.metadata?.wbLocked);
   const inMode = () => (editObject() ? [object(editObject())] : []);
-  return rna('Context', {
+  const data = {
     window, screen, area, region, space_data, region_data, scene, view_layer,
+    get engine() { return scene.render.engine; },
     tool_settings: scene.tool_settings,
     preferences: rna('Preferences', host.preferences ?? {}),
     blend_data: rna('BlendData', { scenes: collection([scene]), objects: scene.objects }),
@@ -43,5 +45,7 @@ export function createContext(r, { area: type = 'VIEW_3D', region: regionType = 
     get editable_objects() { return editable(visible()).map(object); },
     get objects_in_mode() { return inMode(); },
     get objects_in_mode_unique_data() { return inMode(); },
-  });
+  };
+  if (members) Object.defineProperties(data, Object.getOwnPropertyDescriptors(members(data)));
+  return rna('Context', data);
 }

@@ -308,7 +308,7 @@ world.collections.subscribe(() => {
 });
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
-ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || []);
+ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || [], blenderRNA);
 const nodeSection = document.querySelector("#nodes-section");
 let shadingReady = false;
 const backdrop = createCompositorBackdrop({

@@ -216,6 +216,47 @@ def defined_name(node):
 
 class TranscryptFixes(ast.NodeTransformer):
     """Python Transcrypt compiles wrong, rewritten to what it compiles right, with the helpers HELPERS defines."""
+    classes = []
+
+    def visit_ClassDef(self, node):
+        self.classes.append(node.name)
+        self.generic_visit(node)
+        self.classes.pop()
+        return node
+
+    def visit_FunctionDef(self, node):
+        """super().f(...) in a classmethod, which Transcrypt calls with an undefined self, as the base's f bound to cls."""
+        self.generic_visit(node)
+        if self.classes and any(isinstance(d, ast.Name) and d.id == 'classmethod' for d in node.decorator_list) and node.args.args:
+            cls = node.args.args[0].arg
+            for call in ast.walk(node):
+                if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Call) \
+                        and isinstance(call.func.value.func, ast.Name) and call.func.value.func.id == 'super':
+                    call.func = ast.Call(ast.Name('_super_classmethod', ast.Load()),
+                                         [ast.Name(self.classes[-1], ast.Load()), ast.Name(cls, ast.Load()), ast.Constant(call.func.attr)], [])
+        return node
+
+    def hoist_named(self, node, field):
+        """x := y in an if or return, which Transcrypt compiles wrong, as an assignment before it."""
+        assignments = []
+        class Named(ast.NodeTransformer):
+            def visit_NamedExpr(self, named):
+                self.generic_visit(named)
+                assignments.append(ast.Assign([ast.Name(named.target.id, ast.Store())], named.value))
+                return ast.Name(named.target.id, ast.Load())
+            def visit_Lambda(self, other):
+                return other
+            visit_ListComp = visit_SetComp = visit_DictComp = visit_GeneratorExp = visit_Lambda
+        setattr(node, field, Named().visit(getattr(node, field)))
+        return assignments + [node] if assignments else node
+
+    def visit_If(self, node):
+        self.generic_visit(node)
+        return self.hoist_named(node, 'test')
+
+    def visit_Return(self, node):
+        self.generic_visit(node)
+        return self.hoist_named(node, 'value') if node.value else node
     def visit_Dict(self, node):
         self.generic_visit(node)
         if None not in node.keys:
@@ -329,6 +370,10 @@ def _joined(*lists):
     for items in lists:
         result.extend(list(items))
     return result
+
+
+def _super_classmethod(owner, cls, method):
+    return __pragma__('js', '{}', 'owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]')
 '''
 
 

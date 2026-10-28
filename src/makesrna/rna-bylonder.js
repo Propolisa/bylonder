@@ -5,11 +5,14 @@
 // pushed by the UI that made the edit (host.undoPush), as Blender's buttons push them, never by RNA.
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
-import { Camera, Light, Quaternion } from '@babylonjs/core';
-import { rna, collection } from './rna.js';
+import { Camera, Light, PointLight, SpotLight, Quaternion } from '@babylonjs/core';
+import { rna, collection, baseOf, INFO } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
-import { deleted } from '../editors/object/identity.js';
+import { deleted, nodeId } from '../editors/object/identity.js';
+import { address } from '../blenkernel/animation/model.js';
+import { viewTransforms, looks } from '../blenkernel/scene/render-babylon.js';
+import { fileFormats, containers, videoCodecs, qualities } from '../render/formats.js';
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 
 // Swapping two axes is its own inverse and flips handedness.
@@ -42,7 +45,9 @@ function array(get, set, names = 'xyz') {
 }
 
 const SELECT_BITS = [SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE];
-const OBJECT_DATA = { MESH: 'Mesh' };
+const lightType = (light) => (light instanceof SpotLight ? 'SPOT' : light instanceof PointLight ? 'POINT' : light.getClassName() === 'RectAreaLight' ? 'AREA' : 'SUN');
+const LIGHT_STRUCTS = { POINT: 'PointLight', SPOT: 'SpotLight', SUN: 'SunLight', AREA: 'AreaLight' };
+const OBJECT_DATA = { MESH: () => 'Mesh', LIGHT: (ob) => LIGHT_STRUCTS[lightType(ob)], CAMERA: () => 'Camera' };
 const objectType = (ob) => (ob instanceof Camera ? 'CAMERA' : ob instanceof Light ? 'LIGHT' : ob.metadata?.wbCreation?.text ? 'FONT'
   : ob.metadata?.wbCurve ? 'CURVE' : ob.getTotalVertices?.() > 0 ? 'MESH' : 'EMPTY');
 const editing = (ob, r) => !!ob && r.world.editMode?.object === ob;
@@ -63,21 +68,61 @@ function modifierValues({ node, modifier }) {
         (owner, values, r) => values.forEach((value, i) => set(`${name}[${i}]`, value, r)))]));
 }
 
+// An object transform's animation channels, by Blender's axis (Blender's X, Y, Z are Babylon's x, z, y).
+const objectChannel = (property) => (ob, index) => address('object:' + nodeId(ob), property + '.' + 'xzy'[index]);
+// Bylonder's transform locks (metadata.wbTransformLocks, by Babylon path) as Blender's lock_location and the like.
+const transformLocks = (property) => array((ob) => [...'xzy'].map((axis) => !!ob.metadata?.wbTransformLocks?.[property + '.' + axis]), (ob, value) => {
+  ob.metadata = { ...ob.metadata, wbTransformLocks: { ...ob.metadata?.wbTransformLocks, ...Object.fromEntries(value.map((locked, i) => [property + '.' + 'xzy'[i], !!locked])) } };
+});
+// A light's power in Blender's units from Babylon's intensity: watts for point, spot and area lights (1000 W, Blender's
+// default point light, as intensity 1) and irradiance in W/m² for the sun.
+const watts = (light) => (lightType(light) === 'SUN' ? 1 : 1000);
+// A camera's sensor along the fitted axis: Babylon fixes the horizontal or the vertical field of view.
+const horizontal = (camera) => camera.fovMode === Camera.FOVMODE_HORIZONTAL_FIXED;
+const sensor = (camera) => (horizontal(camera) ? 36 : 24);
+const settable = (key) => ({ get: (owner) => owner[key], set: (owner, value) => { owner[key] = value; } });
+// Enum items for Bylonder's own choices, as RNA's [identifier, name, description, icon].
+const choices = (table, label = (entry) => entry.label) => () => Object.entries(table).map(([id, entry]) => [id, label(entry), '', 'NONE']);
+// A slice's setting by path, written without a commit (the UI that made the edit pushes the undo step).
+const sliceValue = (slice, path) => ({ get: (world) => world[slice] && path.split('.').reduce((o, k) => o?.[k], world[slice].state),
+  set: (world, value) => world[slice].set(path, value, false) });
+
+// Blender's shader nodes over Bylonder's world and materials, for the panels that draw a node tree's inputs
+// (template_node_view): a node is [name, Blender's node type, inputs], an input [name, socket type, value or a linked node].
+// A value is { get, set } on the data; host.update is the notifier, as for bound properties.
+function shaderNode(r, [name, type, inputs]) {
+  return rna(type, { name, label: '', bl_idname: type, inputs: collection(inputs.map(([input, socket, value]) => {
+    const linked = Array.isArray(value) ? shaderNode(r, value) : null;
+    const data = { name: input, identifier: input, enabled: true, hide_value: false, is_linked: !!linked,
+      links: collection(linked ? [rna('NodeLink', { from_node: linked, from_socket: null, is_valid: true })] : []) };
+    if (value && !linked) Object.defineProperty(data, 'default_value', { enumerable: true, get: value.get, set: (v) => { value.set(v); r.host.update?.(socket, 'default_value', data); } });
+    return rna(socket, data);
+  })), outputs: collection() });
+}
+const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => shaderNode(r, output) });
+const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
+const worldValue = (r, entry, path) => ({ get: () => path.split('.').reduce((o, k) => o[k], entry), set: (value) => r.world.worlds.set(entry, path, value, false) });
+
 const STRUCTS = {
   Object: {
     name: { get: (ob) => ob.name, set: (ob, name) => { ob.name = name; } },
     type: objectType,
     mode: (ob, r) => (editing(ob, r) ? 'EDIT' : 'OBJECT'),
-    data: (ob, r) => r.pointer(OBJECT_DATA[objectType(ob)], ob),
-    location: array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))),
+    data: (ob, r) => r.pointer(OBJECT_DATA[objectType(ob)]?.(ob), ob),
+    location: { ...array((ob) => axes(ob.position.asArray()), (ob, value) => ob.position.copyFromFloats(...axes(value))), channel: objectChannel('position') },
     rotation_mode: (ob) => (ob.rotationQuaternion ? 'QUATERNION' : 'YXZ'),
-    rotation_euler: array((ob) => eulerFromBabylon(babylonEuler(ob)), (ob, value) => {
+    rotation_euler: { ...array((ob) => eulerFromBabylon(babylonEuler(ob)), (ob, value) => {
       const { x, y, z } = eulerToBabylon(value);
       setRotation(ob, Quaternion.FromEulerAngles(x, y, z));
-    }),
+    }), channel: objectChannel('rotation') },
     rotation_quaternion: array((ob) => { const q = babylonQuaternion(ob); return [q.w, -q.x, -q.z, -q.y]; },
       (ob, [w, x, y, z]) => setRotation(ob, new Quaternion(-x, -z, -y, w)), 'wxyz'),
-    scale: array((ob) => axes(ob.scaling.asArray()), (ob, value) => ob.scaling.copyFromFloats(...axes(value))),
+    scale: { ...array((ob) => axes(ob.scaling.asArray()), (ob, value) => ob.scaling.copyFromFloats(...axes(value))), channel: objectChannel('scaling') },
+    lock_location: transformLocks('position'),
+    lock_rotation: transformLocks('rotation'),
+    lock_scale: transformLocks('scaling'),
+    users_collection: (ob, r) => collection((r.world.collections?.memberships?.(nodeId(ob)) ?? []).map((id) => r.pointer('Collection', r.world.collections.byId(id)))),
+    active_material_index: { get: (ob, r) => r.world.materials?.active(ob) ?? 0, set: (ob, index, r) => r.world.materials.setActive(ob, index) },
     parent: (ob, r) => (r.world.objects.includes(ob.parent) ? r.pointer('Object', ob.parent) : null),
     children: (ob, r) => collection(r.objects().filter((child) => child.parent === ob).map((child) => r.pointer('Object', child))),
     modifiers: (ob, r) => collection(modifierStack(ob).map((modifier) => r.pointer(modifierStruct(modifier), { node: ob, modifier }, modifier))),
@@ -118,6 +163,12 @@ const STRUCTS = {
     use_gravity: { get: (world) => world.sceneSettings?.state.useGravity ?? true, set: (world, value) => world.sceneSettings.set('useGravity', value, false) },
     gravity: array((world) => axes(world.scene.gravity.asArray()), (world, value) => world.sceneSettings.set('gravity', axes(value), false)),
     render: (world, r) => r.pointer('RenderSettings', world),
+    world: { get: (world, r) => r.pointer('World', world.worlds?.active()), set: (world, value) => world.worlds.link(value?.[INFO].owner ?? null) },
+    eevee: (world, r) => r.pointer('SceneEEVEE', world),
+    view_settings: (world, r) => r.pointer('ColorManagedViewSettings', world),
+    display_settings: (world, r) => r.pointer('ColorManagedDisplaySettings', world),
+    collection: (world, r) => world.collections && r.pointer('Collection', world.collections.byId('scene')),
+    view_layers: (world, r) => collection((world.collections?.viewLayers() ?? []).map((layer) => r.pointer('ViewLayer', layer))),
     unit_settings: (world, r) => r.pointer('UnitSettings', world),
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
   },
@@ -133,10 +184,106 @@ const STRUCTS = {
     ...Object.fromEntries([['resolution_x', 'resolutionX'], ['resolution_y', 'resolutionY'], ['resolution_percentage', 'resolutionPercentage'],
       ['use_motion_blur', 'useMotionBlur'], ['motion_blur_shutter', 'motionBlurShutter'], ['use_sequencer', 'useSequencer']].map(([name, key]) => [name, {
       get: (world) => world.renderSettings?.state.render[key], set: (world, value) => world.renderSettings.set('render.' + key, value, false) }])),
+    image_settings: (world, r) => r.pointer('ImageFormatSettings', world),
+    ffmpeg: (world, r) => r.pointer('FFmpegSettings', world),
   },
   UnitSettings: Object.fromEntries([['system', 'system'], ['scale_length', 'scale'], ['use_separate', 'separate'], ['system_rotation', 'rotation'],
     ['length_unit', 'length']].map(([name, key]) => [name, {
     get: (world) => world.sceneSettings?.state.unitSettings[key], set: (world, value) => world.sceneSettings.set('unitSettings.' + key, value, false) }])),
+  Light: {
+    name: settable('name'),
+    type: lightType,
+    color: array((light) => light.diffuse.asArray(), (light, value) => light.diffuse.copyFromFloats(...value), 'rgb'),
+    energy: { get: (light) => light.intensity * watts(light), set: (light, value) => { light.intensity = value / watts(light); } },
+    shadow_soft_size: settable('radius'),
+    use_shadow: settable('shadowEnabled'),
+    spot_size: settable('angle'),
+    spot_blend: { get: (light) => (light.angle ? 1 - light.innerAngle / light.angle : 0), set: (light, value) => { light.innerAngle = (1 - value) * light.angle; } },
+  },
+  Camera: {
+    name: settable('name'),
+    type: { get: (camera) => (camera.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'), set: (camera, type) => { camera.mode = type === 'ORTHO' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA; } },
+    // A horizontally fixed field of view is Blender's Auto fit for landscape output.
+    sensor_fit: { get: (camera) => (horizontal(camera) ? 'AUTO' : 'VERTICAL'), set: (camera, fit) => {
+      const lens = sensor(camera) / 2 / Math.tan(camera.fov / 2);
+      camera.fovMode = fit === 'VERTICAL' ? Camera.FOVMODE_VERTICAL_FIXED : Camera.FOVMODE_HORIZONTAL_FIXED;
+      camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens);
+    } },
+    lens: { get: (camera) => sensor(camera) / 2 / Math.tan(camera.fov / 2), set: (camera, lens) => { camera.fov = 2 * Math.atan(sensor(camera) / 2 / lens); } },
+    angle: settable('fov'),
+    clip_start: settable('minZ'),
+    clip_end: settable('maxZ'),
+  },
+  // A world datablock of the worlds slice (blenkernel/scene/world.js): its Background and volume as Blender's nodes.
+  World: (entry) => ({
+    name: { get: () => entry.name, set: (owner, name, r) => r.world.worlds.rename(entry, name) },
+    color: array(() => entry.background.color, (owner, value, r) => r.world.worlds.set(entry, 'background.color', value, false), 'rgb'),
+    use_nodes: () => true,
+    node_tree: (owner, r) => nodeTree(r, ['World Output', 'ShaderNodeOutputWorld', [
+      ['Surface', 'NodeSocketShader', ['Background', 'ShaderNodeBackground', [
+        ['Color', 'NodeSocketColor', rgba(() => entry.background.color, (value) => r.world.worlds.set(entry, 'background.color', value, false))],
+        ['Strength', 'NodeSocketFloat', worldValue(r, entry, 'background.strength')]]]],
+      ['Volume', 'NodeSocketShader', entry.volume.type === 'NONE' ? null : ['Volume Scatter', 'ShaderNodeVolumeScatter', [
+        ['Color', 'NodeSocketColor', rgba(() => entry.volume.color, (value) => r.world.worlds.set(entry, 'volume.color', value, false))],
+        ['Density', 'NodeSocketFloat', worldValue(r, entry, 'volume.density')]]]]]]),
+  }),
+  // A collection of the collections slice (blenkernel/scene/collections.js).
+  Collection: (entry) => ({
+    name: { get: () => entry.name ?? 'Scene Collection', set: (owner, name, r) => r.world.collections.rename(entry.id, name) },
+    hide_select: { get: () => !!entry.hideSelect, set: (owner, value, r) => r.world.collections.set(entry.id, { hideSelect: !!value }) },
+    hide_viewport: { get: () => !!entry.hideViewport, set: (owner, value, r) => r.world.collections.set(entry.id, { hideViewport: !!value }) },
+    children: (owner, r) => collection(entry.children.map((id) => r.pointer('Collection', r.world.collections.byId(id)))),
+  }),
+  ViewLayer: (layer) => ({
+    name: { get: () => layer.name, set: (owner, name, r) => r.world.collections.renameViewLayer(layer.id, name) },
+    use: () => true,
+    active_layer_collection: (owner, r) => r.pointer('LayerCollection', r.world.collections.byId(layer.active)),
+  }),
+  LayerCollection: (entry) => ({
+    name: () => entry.name ?? 'Scene Collection',
+    collection: (owner, r) => r.pointer('Collection', entry),
+  }),
+  SceneEEVEE: {
+    taa_samples: sliceValue('renderSettings', 'eevee.taaSamples'),
+    taa_render_samples: sliceValue('renderSettings', 'eevee.taaRenderSamples'),
+    use_raytracing: sliceValue('renderSettings', 'eevee.useRaytracing'),
+    ray_tracing_method: sliceValue('renderSettings', 'eevee.rayTracingMethod'),
+    fast_gi_method: sliceValue('renderSettings', 'eevee.fastGiMethod'),
+    fast_gi_distance: sliceValue('renderSettings', 'eevee.fastGiDistance'),
+    ray_tracing_options: (world, r) => r.pointer('RaytraceEEVEE', world),
+  },
+  RaytraceEEVEE: {
+    screen_trace_quality: sliceValue('renderSettings', 'eevee.screenTraceQuality'),
+    screen_trace_thickness: sliceValue('renderSettings', 'eevee.screenTraceThickness'),
+  },
+  ColorManagedViewSettings: {
+    view_transform: { ...sliceValue('renderSettings', 'viewSettings.viewTransform'), items: choices(viewTransforms) },
+    look: { ...sliceValue('renderSettings', 'viewSettings.look'), items: choices(looks, ([label]) => label) },
+    exposure: sliceValue('renderSettings', 'viewSettings.exposure'),
+  },
+  ColorManagedDisplaySettings: {
+    display_device: { get: () => 'sRGB', items: () => [['sRGB', 'sRGB', '', 'NONE']] },
+  },
+  ImageFormatSettings: {
+    file_format: { ...sliceValue('renderSettings', 'render.imageSettings.fileFormat'), items: choices(fileFormats) },
+    quality: sliceValue('renderSettings', 'render.imageSettings.quality'),
+  },
+  FFmpegSettings: {
+    format: { ...sliceValue('renderSettings', 'render.ffmpeg.format'), items: choices(containers) },
+    codec: { ...sliceValue('renderSettings', 'render.ffmpeg.codec'), items: (world) => choices(videoCodecs)().filter(([id]) => containers[world.renderSettings.state.render.ffmpeg.format]?.codecs.includes(id)) },
+    constant_rate_factor: { ...sliceValue('renderSettings', 'render.ffmpeg.constantRateFactor'), items: choices(qualities) },
+    gopsize: sliceValue('renderSettings', 'render.ffmpeg.gopsize'),
+  },
+  // The Properties editor (space_buttons/editor.js): its tab, pinned data and search.
+  SpaceProperties: {
+    type: () => 'PROPERTIES',
+    context: { get: (space) => space.context, set: (space, context) => { space.context = context; }, items: (space) => space.tabs() },
+    use_pin_id: { get: (space) => !!space.pin, set: (space, value) => space.setPin(value) },
+    pin_id: (space) => space.pinned?.() ?? null,
+    search_filter: settable('search'),
+    ...Object.fromEntries(['tool', 'render', 'output', 'view_layer', 'scene', 'world', 'collection', 'object', 'modifiers', 'effects', 'particles',
+      'physics', 'constraints', 'data', 'bone', 'bone_constraints', 'material', 'texture', 'strip', 'strip_modifier'].map((tab) => ['show_properties_' + tab, () => true])),
+  },
   // A 3D Viewport (space_view3d/view3d.js): its shading, overlays and view.
   SpaceView3D: {
     type: () => 'VIEW_3D',
@@ -177,18 +324,23 @@ export function createRNA(host) {
       return structs.get(struct);
     },
   };
+  // A struct's bindings are its own table or its nearest base's (PointLight binds as Light).
   function bind(struct, owner) {
-    const bindings = STRUCTS[struct] ?? STRUCTS[struct.endsWith('Modifier') ? 'Modifier' : null] ?? {};
-    const table = typeof bindings === 'function' ? bindings(owner) : bindings, data = {};
+    let base = struct;
+    while (base && !STRUCTS[base]) base = baseOf(base);
+    const bindings = STRUCTS[base] ?? {};
+    const table = typeof bindings === 'function' ? bindings(owner) : bindings, data = {}, items = {}, channels = {};
     for (const [name, binding] of Object.entries(table)) {
-      const { get, set } = typeof binding === 'function' ? { get: binding } : binding;
+      const { get, set, items: enumItems, channel } = typeof binding === 'function' ? { get: binding } : binding;
       Object.defineProperty(data, name, {
         enumerable: true,
         get: () => get(owner, r),
         set: set && ((value) => { set(owner, value, r); host.update?.(struct, name, owner); }),
       });
+      if (enumItems) items[name] = () => enumItems(owner, r);
+      if (channel) channels[name] = (index) => channel(owner, index);
     }
-    return rna(struct, data);
+    return rna(struct, data, { items, channels, owner });
   }
   return r;
 }

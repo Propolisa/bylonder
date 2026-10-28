@@ -665,7 +665,8 @@ export var DATA_PT_mesh_animation =  __class__ ('DATA_PT_mesh_animation', [MeshB
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: 'Mesh'}));
 		self.draw_action_and_slot_selector (context, col, mesh);
-		if (__t__ (shape_keysmesh.shape_keys)) {
+		var shape_keys = mesh.shape_keys;
+		if (__t__ (shape_keys)) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shape Keys'}));
 			self.draw_action_and_slot_selector (context, col, shape_keys);
@@ -1038,6 +1039,24 @@ export var _joined = function () {
 		result.extend (list (py_items));
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 
 //# sourceMappingURL=properties_data_mesh.map

@@ -355,5 +355,23 @@ export var _joined = function () {
 	}
 	return result;
 };
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 
 //# sourceMappingURL=properties_data_curves.map

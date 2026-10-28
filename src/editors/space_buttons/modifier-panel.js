@@ -1,42 +1,92 @@
-// A Blender modifier's panel as Blender lays it out: the tree its panel_draw records in the module (modifierPanel),
-// drawn with Bylonder's rows and panels. Inactive layouts are greyed and disabled ones locked, as Blender draws them.
+// The modifier stack (uiTemplateModifiers and modifier_panel_header in MOD_ui_common.cc): one panel per modifier, its
+// header Blender's (icon, name, display toggles, extra operations, remove) and its body the layout the modifier's own
+// panel_draw records in the module (tools/blender-port/wasm/panel-layout.cc), read as a layout tree and drawn by the
+// shared renderer like Blender's Python panels. Bylonder's own modifiers (Array (Nodes), Geometry Nodes) draw their
+// inputs as Bylonder's add-on rows.
 import { h } from 'vue';
+import { LayoutView, icon } from '../interface/layout-view.js';
+import { UILayout } from '../interface/layout.js';
 import { modifierPanel } from '../../modifiers/blender.js';
+import { modifierStack } from '../../modifiers/stack.js';
+import { openMenu } from '../interface/menu.js';
+import { kw } from '../../windowmanager/wm-operators.js';
+import { nodeModifierRows } from './addon-panels.js';
 
-const NO_TEXT = undefined;
+// eUI_Item_Flag bits a recorded prop carries (UI_interface_layout.hh).
+const FLAG = { expand: 1 << 1, slider: 1 << 2, toggle: 1 << 3, icon_only: 1 << 5, invert_checkbox: 1 << 12 };
+const LAYOUTS = new Set(['column', 'row', 'box', 'split', 'header', 'body']);
 
-export function blenderModifierContent({ id, modifier, definition, field, panel }) {
-  const prop = (node, disabled) => {
-    const paths = definition.schema[node.prop] ? [node.prop]
-      : Object.keys(definition.schema).filter((path) => path.startsWith(node.prop + '[') && (node.index < 0 || path === `${node.prop}[${node.index}]`));
-    return paths.map((path, i) => field(path, {
-      ...(node.text !== NO_TEXT && i === 0 && { label: node.text || definition.schema[path].label }),
-      ...(disabled && { disabled: () => true }),
+// A recorded C++ layout node (panel-layout.cc's JSON) as a layout node of layout.js: its owner's struct as data.
+export function layoutTree(node, data, id) {
+  const children = () => node.children.map((child) => layoutTree(child, data, id)).filter(Boolean);
+  const settings = { active: node.active !== false, enabled: node.enabled !== false, alert: !!node.alert, align: !!node.align,
+    use_property_split: !!node.split, use_property_decorate: node.decorate !== false, heading: node.heading };
+  if (LAYOUTS.has(node.kind)) return { ...settings, kind: node.kind === 'header' || node.kind === 'body' ? 'column' : node.kind, children: children() };
+  const owner = data(node.owner), text = node.text;
+  switch (node.kind) {
+    case 'prop': case 'search':
+      return { kind: 'prop', data: owner, property: node.prop, text, index: node.index, split: !!node.split, decorate: node.decorate !== false,
+        ...Object.fromEntries(Object.entries(FLAG).map(([key, bit]) => [key, !!(node.flag & bit)])) };
+    case 'label': return { kind: 'label', text };
+    case 'separator': return { kind: 'separator' };
+    case 'operator': return { kind: 'operator', operator: node.prop, text: text || undefined, props: {} };
+    case 'template': return { kind: 'template', name: text, data: owner, property: node.prop };
+    case 'panel': {
+      // A sub-panel: registered (with its label) or a layout panel (panel_prop, its header drawn into).
+      const [header, ...rest] = node.children[0]?.kind === 'header' ? node.children : [null, ...node.children];
+      const headerLayout = header ? layoutTree(header, data, id) : { kind: 'column', children: [{ kind: 'label', text }] };
+      if (text && header) headerLayout.children.push({ kind: 'label', text });
+      return { kind: 'panel', idname: `${id}:${node.prop}`, default_closed: true,
+        children: [headerLayout, { kind: 'column', use_property_split: false, children: rest.map((child) => layoutTree(child, data, id)).filter(Boolean) }] };
+    }
+    default: return null;
+  }
+}
+
+// The modifier header's layout (modifier_panel_header): the type's icon, name, toggles, extra operations and remove.
+function headerLayout(ob, modifier) {
+  const layout = new UILayout(), row = layout.row(kw({ align: true }));
+  row.prop(modifier, 'name', kw({ text: '' }));
+  const toggles = layout.row(kw({ align: true }));
+  for (const [property, iconName] of [['show_viewport', 'RESTRICT_VIEW_OFF'], ['show_render', 'RESTRICT_RENDER_OFF']]) toggles.prop(modifier, property, kw({ text: '', icon: iconName }));
+  return layout;
+}
+
+export function modifierTemplates({ world, editor, rna, history }) {
+  return (node, env) => {
+    const ob = editor.selection.nodes.at(-1);
+    if (!ob?.getTotalVertices?.()) return null;
+    const stack = modifierStack(ob), structs = rna.pointer('Object', ob).modifiers;
+    return h('div', { class: 'flex flex-col gap-[calc(var(--bl-row)*.2)]' }, stack.map((modifier, index) => {
+      const struct = structs[index], id = 'modifier:' + modifier.id, open = env.ui.isOpen(id, false);
+      const definition = world.modifiers.definitions.get(modifier.type);
+      const operations = () => [
+        ['Apply', 'CHECKMARK', () => world.modifiers.apply(ob, modifier.id)],
+        ['Duplicate', 'DUPLICATE', () => world.modifiers.duplicate(ob, modifier.id)],
+        ['Copy to Selected', 'COPYDOWN', () => world.modifiers.copyToSelected(ob, modifier.id, editor.selection.nodes)],
+        '-',
+        ['Move to First', 'TRIA_UP', () => world.modifiers.move(ob, modifier.id, 0)],
+        ['Move to Last', 'TRIA_DOWN', () => world.modifiers.move(ob, modifier.id, stack.length - 1)],
+      ].map((entry) => (entry === '-' ? '-' : { label: entry[0], icon: entry[1], run: () => { try { entry[2]()?.catch?.((error) => env.ui.report(error)); } catch (error) { env.ui.report(error); } } }));
+      const data = (owner) => (owner === 'Object' ? rna.pointer('Object', ob) : struct);
+      const body = () => {
+        if (!definition?.mesh) return nodeModifierRows({ world, ob, modifier, definition, history });
+        const [root] = modifierPanel(modifier).children;
+        return root ? h(LayoutView, { layout: { kind: 'column', children: root.children.map((child) => layoutTree(child, data, id)).filter(Boolean) }, ui: env.ui }) : null;
+      };
+      return h('section', { key: modifier.id, class: ['bl-panel bl-panel-root', open && 'is-open'], 'data-blender': modifier.type }, [
+        h('header', { class: 'bl-panel-header flex items-center', onClick: (e) => { if (!e.target.closest('input,button,label')) env.ui.toggle(id, e, false); } }, [
+          icon(open ? 'DISCLOSURE_TRI_DOWN' : 'DISCLOSURE_TRI_RIGHT', 'bl-disclosure'),
+          icon(definition?.icon ?? 'MODIFIER', 'bl-modifier-icon'),
+          h('div', { class: 'flex min-w-0 flex-1' }, h(LayoutView, { layout: headerLayout(ob, struct), ui: env.ui })),
+          h('button', { type: 'button', class: 'bl-widget bl-flat flex h-unit w-unit items-center justify-center', title: 'Extra Operations', 'aria-label': 'Extra Operations',
+            onClick: (e) => openMenu(operations, e.currentTarget) }, icon('DOWNARROW_HLT')),
+          h('button', { type: 'button', class: 'bl-widget bl-flat flex h-unit w-unit items-center justify-center', title: 'Remove Modifier', 'aria-label': 'Remove Modifier',
+            onClick: () => world.modifiers.remove(ob, modifier.id) }, icon('X')),
+          icon('GRIP', 'bl-grip'),
+        ]),
+        open ? h('div', { class: 'bl-panel-body' }, body()) : null,
+      ]);
     }));
   };
-  const draw = (node, disabled = false) => {
-    disabled ||= node.enabled === false;
-    const children = () => node.children.flatMap((child) => draw(child, disabled));
-    switch (node.kind) {
-      case 'prop': return prop(node, disabled);
-      case 'label': return node.text ? [h('div', { class: 'bl-label' }, node.text)] : [];
-      case 'separator': return [h('div', { class: 'bl-separator' })];
-      case 'panel': return [subpanel(node, disabled)];
-      case 'column': case 'row': case 'box': case 'split': case 'body':
-        return [h('div', { class: [`bl-layout bl-layout-${node.kind}`, { 'bl-inactive': node.active === false }] }, [
-          ...(node.heading ? [h('div', { class: 'bl-label' }, node.heading)] : []), ...children()])];
-      default: return []; // Operators, searches and menus that need other data blocks come later.
-    }
-  };
-  // A sub-panel: its header's checkbox (if any) beside the title, its body and its own sub-panels inside.
-  const subpanel = (node, disabled) => {
-    const header = node.children.find((c) => c.kind === 'header'), check = header?.children.find((c) => c.kind === 'prop');
-    // A header that is a checkbox titles its panel with the property's name, as Blender draws it.
-    const title = node.text || header?.children.find((c) => c.kind === 'label')?.text || (check && definition.schema[check.prop]?.label) || '';
-    const actions = check && definition.schema[check.prop] ? () => [field(check.prop, { label: '', disabled: disabled ? () => true : undefined })] : undefined;
-    return panel(`${id}.${node.prop}`, title, () => node.children.filter((c) => c !== header).flatMap((c) => draw(c, disabled)),
-      { subpanel: true, actions, defaultClosed: true });
-  };
-  const [root] = modifierPanel(modifier).children;
-  return root ? root.children.flatMap((node) => draw(node)) : [];
 }

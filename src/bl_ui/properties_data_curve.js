@@ -372,7 +372,8 @@ export var DATA_PT_curve_animation =  __class__ ('DATA_PT_curve_animation', [Cur
 		var col = layout.column (__kwargtrans__ ({align: true}));
 		col.label (__kwargtrans__ ({text: curve.bl_rna.py_name}));
 		self.draw_action_and_slot_selector (context, col, curve);
-		if (__t__ (shape_keyscurve.shape_keys)) {
+		var shape_keys = curve.shape_keys;
+		if (__t__ (shape_keys)) {
 			var col = layout.column (__kwargtrans__ ({align: true}));
 			col.label (__kwargtrans__ ({text: 'Shape Keys'}));
 			self.draw_action_and_slot_selector (context, col, shape_keys);
@@ -692,5 +693,85 @@ export var DATA_PT_custom_props_curve =  __class__ ('DATA_PT_custom_props_curve'
 	_property_type: bpy.types.Curve
 });
 export var classes = tuple ([DATA_PT_context_curve, DATA_PT_shape_curve, DATA_PT_curve_texture_space, DATA_PT_geometry_curve, DATA_PT_geometry_curve_bevel, DATA_PT_geometry_curve_start_end, DATA_PT_pathanim, DATA_PT_font, DATA_PT_font_transform, DATA_PT_paragraph, DATA_PT_paragraph_alignment, DATA_PT_paragraph_spacing, DATA_PT_text_boxes, DATA_PT_curve_animation, DATA_PT_custom_props_curve]);
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	for (var d of dicts) {
+		result.py_update (d);
+	}
+	return result;
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__t__ (conversion == 'r')) {
+		var value = repr (value);
+	}
+	else if (__t__ (conversion == 's')) {
+		var value = str (value);
+	}
+	return (__t__ (spec) ? (('{:' + spec) + '}').format (value) : str (value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	for (var py_items of lists) {
+		result.extend (list (py_items));
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 
 //# sourceMappingURL=properties_data_curve.map
