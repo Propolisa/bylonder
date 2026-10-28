@@ -8,6 +8,11 @@
 #include "BKE_collection.hh"
 #include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
+#include "AS_asset_library.hh"
+#include "BKE_report.hh"
+#include "BKE_sound.hh"
+#include "NOD_socket.hh"
+#include "BLO_readfile.hh"
 #include "BKE_material.hh"
 #include "BKE_world.h"
 #include "BKE_node.hh"
@@ -34,6 +39,7 @@
 #include "BLI_filereader.h"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
 #include "BLI_set.hh"
 #include "BLI_string.h"
 #include "DEG_depsgraph_query.hh"
@@ -53,6 +59,7 @@
 #include "IMB_colormanagement.hh"
 #include "MEM_guardedalloc.h"
 #include "NOD_defaults.hh"
+#include "SEQ_iterator.hh"
 #include "SEQ_sequencer.hh"
 #include "WM_api.hh"
 
@@ -153,6 +160,22 @@ EXPORT(main_object_add) Object *main_object_add(BlenderMain *ctx, int type, cons
 
 /* An object's data (Mesh, Curve, Light, Camera...), or null for an empty. */
 EXPORT(object_data) ID *object_data(Object *ob) { return ob->data; }
+
+/* Changes an object's rotation mode (eRotationModes) keeping its rotation, as Blender's Rotation Mode does
+ * (BKE_rotMode_change_values). */
+EXPORT(object_rotation_mode_set) void object_rotation_mode_set(Object *ob, int mode)
+{
+  float mat[3][3];
+  BKE_object_rot_to_mat3(ob, mat, false);
+  normalize_m3(mat);
+  if (mode > 0) {
+    mat3_normalized_to_compatible_eulO(ob->rot, ob->rot, mode, mat);
+  }
+  else {
+    mat3_normalized_to_quat(ob->quat, mat);
+  }
+  ob->rotmode = mode;
+}
 
 /* Removes an object and its data from its collections and Main; no other object may have it as parent. */
 EXPORT(main_object_remove) void main_object_remove(BlenderMain *ctx, Object *ob)
@@ -541,6 +564,94 @@ EXPORT(id_property_string) const char *id_property_string(const ID *id, const ch
   return prop ? IDP_string_get(prop) : nullptr;
 }
 
+/* The settings of a read file's scene that Main's one scene takes: Bylonder's scene settings, which the scene sync maps. */
+static void scene_settings_take(Scene *scene, const Scene *from)
+{
+  RenderData &r = scene->r;
+  const RenderData &f = from->r;
+  r.sfra = f.sfra;
+  r.efra = f.efra;
+  r.cfra = f.cfra;
+  r.subframe = f.subframe;
+  if (f.pefra > f.psfra) {
+    r.psfra = f.psfra;
+    r.pefra = f.pefra;
+  }
+  r.frs_sec = f.frs_sec;
+  r.frs_sec_base = f.frs_sec_base;
+  r.xsch = f.xsch;
+  r.ysch = f.ysch;
+  r.size = f.size;
+  r.mode = f.mode;
+  r.motion_blur_shutter = f.motion_blur_shutter;
+  STRNCPY(r.engine, f.engine);
+  scene->unit = from->unit;
+  scene->physics_settings = from->physics_settings;
+  scene->display_settings = from->display_settings;
+  STRNCPY(scene->view_settings.view_transform, from->view_settings.view_transform);
+  STRNCPY(scene->view_settings.look, from->view_settings.look);
+  scene->view_settings.exposure = from->view_settings.exposure;
+  scene->view_settings.gamma = from->view_settings.gamma;
+  scene->camera = from->camera;
+  if (scene->world != from->world) {
+    id_us_min(id_cast<ID *>(scene->world));
+    scene->world = from->world;
+    id_us_plus(id_cast<ID *>(scene->world));
+  }
+}
+
+/* A .blend's data read into Main, as File > Append brings it (BLO_read_from_memory, BKE_main_merge): its scene's objects
+ * and collections join the Scene Collection and its settings become the scene's; its scenes, screens, workspaces and
+ * window manager are left out (Bylonder's are its own). Returns the warnings Blender reported, one per line, or null when
+ * the file could not be read. */
+EXPORT(main_read) const char *main_read(BlenderMain *ctx, const void *data, int size)
+{
+  static std::string warnings;
+  warnings.clear();
+  ReportList reports;
+  BKE_reports_init(&reports, RPT_STORE);
+  BlendFileData *bfd = BLO_read_from_memory(data, size, BLO_READ_SKIP_USERDEF, &reports);
+  auto collect = [&]() {
+    for (const Report &report : reports.list.items_mutable()) {
+      if (report.type >= RPT_WARNING) {
+        warnings += std::string(report.message) + "\n";
+      }
+    }
+    BKE_reports_free(&reports);
+  };
+  if (bfd == nullptr) {
+    collect();
+    return nullptr;
+  }
+  Main *src = bfd->main;
+  bfd->main = nullptr;
+  Scene *from = bfd->curscene ? bfd->curscene : static_cast<Scene *>(src->scenes.first);
+  if (from) {
+    scene_settings_take(ctx->scene, from);
+    Collection *master = ctx->scene->master_collection;
+    for (CollectionChild &child : from->master_collection->children.items_mutable()) {
+      BKE_collection_child_add(ctx->bmain, master, child.collection);
+    }
+    for (CollectionObject &cob : from->master_collection->gobject.items_mutable()) {
+      BKE_collection_object_add(ctx->bmain, master, cob.ob);
+    }
+  }
+  Set<ID *> moved;
+  ID *id;
+  FOREACH_MAIN_ID_BEGIN (src, id) {
+    if (!ELEM(GS(id->name), ID_SCE, ID_WM, ID_SCR, ID_WS, ID_LI)) {
+      moved.add(id);
+    }
+  }
+  FOREACH_MAIN_ID_END;
+  MainMergeReport merged;
+  BKE_main_merge(ctx->bmain, &moved, &src, merged);
+  BLO_blendfiledata_free(bfd);
+  collections_synced(ctx);
+  collect();
+  return warnings.c_str();
+}
+
 /* What saving a .blend reads from the Preferences: no thumbnail (the module has no GPU) and no backups. */
 EXPORT(main_save_preferences) void main_save_preferences()
 {
@@ -741,6 +852,41 @@ SequencerToolSettings *seq::tool_settings_init()
   tool_settings->pivot_point = V3D_AROUND_LOCAL_ORIGINS;
   return tool_settings;
 }
+
+/* As blender.cc defines it, for versioning that runs code on the Main it reads as the global one. */
+Main *BKE_blender_globals_main_swap(Main *new_gmain)
+{
+  Main *old_gmain = G_MAIN;
+  new_gmain->is_global_main = true;
+  G_MAIN = new_gmain;
+  old_gmain->is_global_main = false;
+  return old_gmain;
+}
+
+/* port-override: the module has no OpenColorIO, so a read file's colors stay in their working space (Blender's default,
+ * linear Rec.709, which Bylonder's colors are in). */
+void IMB_colormanagement_working_space_init_default(Main * /*bmain*/) {}
+void IMB_colormanagement_working_space_convert(Main * /*bmain*/, const Main * /*reference_bmain*/) {}
+
+/* port-override: the module has no asset libraries, whose import method a read file is checked against. */
+void AS_asset_library_import_method_ensure_valid(Main & /*bmain*/) {}
+
+/* port-override: the module has no node types (nodes module), so it leaves a read file's nodes as the file has them
+ * (node.cc would mark every one it does not know undefined) for the next file Blender reads to know them. */
+void bke::node_tree_update_all_new(Main & /*main*/) {}
+
+/* port-override: the module has no node types (nodes module), so a read node tree keeps the sockets the file has;
+ * the scene sync reads the inputs it maps. */
+void node_verify_sockets(Main * /*bmain*/, bNodeTree * /*ntree*/, bNode * /*node*/, bool /*do_id_user*/) {}
+
+/* port-override: a read file's scenes are freed without the sequencer, sound or depsgraphs the module does not have;
+ * Bylonder's scene keeps neither strips nor sounds. */
+void seq::editing_free(Scene * /*scene*/, bool /*do_id_user*/) {}
+void seq::tool_settings_free(SequencerToolSettings *tool_settings) { MEM_delete(tool_settings); }
+void BKE_sound_destroy_scene(Scene * /*scene*/) {}
+/* port-override: a read scene's strips are left out (their data is the sequencer's to read), as Bylonder has none. */
+void seq::blend_read(BlendDataReader * /*reader*/, ListBaseT<Strip> *seqbase) { BLI_listbase_clear(seqbase); }
+void seq::foreach_strip(ListBaseT<Strip> * /*seqbase*/, ForEachFunc /*callback*/, void * /*user_data*/) {}
 
 /* port-override: the module's IDs are never assets, so none has an asset type's pre-save step (asset_mark_clear.cc). */
 namespace ed::asset {

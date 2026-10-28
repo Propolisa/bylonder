@@ -25,9 +25,15 @@ import { nodeId, deleted } from '../editors/object/identity.js';
 import { watchObject } from './main-sync-hooks.js';
 import { CurveObject } from './curve/curve.js';
 import { viewTransforms, looks } from './scene/render-babylon.js';
+import { buildMesh } from '../editors/object/mesh-catalog.js';
+import { asObject } from '../runtime/object-transform.js';
+import { addModifier } from '../modifiers/stack.js';
+import { BlenderAnimation } from './animation/anim-blender.js';
+import { blenderModule } from '../bmesh/bmesh-wasm.js';
+import { Color3, DirectionalLight, FreeCamera, Material, MultiMaterial, PBRMaterial, PointLight, SpotLight, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 
 // ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
-const ID_OB = 0x424f, ID_GR = 0x5247;
+const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d;
 const ID_RECALC_GEOMETRY = 1 << 1;
 const CURVE_TYPES = ['CURVE', 'FONT'];
 const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, MEDIAN_POINT: 3, ACTIVE_ELEMENT: 4 };
@@ -37,6 +43,18 @@ const FLAGS = { hideSelect: 'hide_select', hideViewport: 'hide_viewport', hideRe
 // Custom properties in Main for what only Babylon has: an object's identity in Bylonder, a material's kind and graph.
 export const PROPERTIES = { id: 'bylonder_id', material: 'bylonder_material', graph: 'bylonder_node_material' };
 const LAYER_FLAGS = { exclude: 'exclude', hideViewport: 'hide_viewport' };
+// eRotationModes, and ModifierMode's viewport and render bits.
+const ROTATION_MODES = { QUATERNION: 0, XYZ: 1, XZY: 2, YXZ: 3, YZX: 4, ZXY: 5, ZYX: 6, AXIS_ANGLE: -1 };
+const MODIFIER_REALTIME = 1, MODIFIER_RENDER = 2;
+// The Babylon objects a read Object becomes, by its type and its data's; a light of a type Babylon has no light for
+// becomes the nearest, with a warning.
+const LIGHTS = { POINT: PointLight, SUN: DirectionalLight, SPOT: SpotLight, AREA: PointLight };
+const MAKERS = {
+  EMPTY: (scene, name) => new TransformNode(name, scene),
+  CAMERA: (scene, name) => asObject(new FreeCamera(name, Vector3.Zero(), scene)),
+  LIGHT: (scene, name, type) => asObject(type === 'SPOT' ? new SpotLight(name, Vector3.Zero(), new Vector3(0, 0, 1), Math.PI / 4, 1, scene)
+    : type === 'SUN' ? new DirectionalLight(name, new Vector3(0, 0, 1), scene) : new PointLight(name, Vector3.Zero(), scene)),
+};
 
 // A value as both models compare it: arrays plain, Main's floats being 32-bit.
 const plain = (value) => (value && typeof value === 'object' ? Array.from(value) : value);
@@ -101,6 +119,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   // The objects hooks saw change since the last flush.
   const dirty = new Set();
   const filled = new Set();
+  const animationData = new BlenderAnimation(blender);
 
   const objectType = (node) => rna.pointer('Object', node).type;
   const dataStruct = (node) => rna.pointer('Object', node).data?.[INFO].struct ?? null;
@@ -120,12 +139,23 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       apply: (node, parent) => node.setParent(nodeOf(parent)),
     },
     material_slots: {
-      applies: (entry) => entry.type === 'MESH' && !!world.materials,
-      babylon: (node) => world.materials.slots(node).map((material) => (material ? materials.get(material)?.ma ?? 0 : 0)),
+      applies: (entry) => entry.type === 'MESH',
+      babylon: (node) => slotsOf(node).map((material) => (material ? materials.get(material)?.ma ?? 0 : 0)),
       main: (ob) => blender.materials(ob),
       set: (ob, slots) => blender.setMaterials(ob, slots),
+      apply: (node, slots) => setSlots(node, slots.map(materialFor)),
     },
   };
+  const slotsOf = (node) => world.materials?.slots(node) ?? (node.material instanceof MultiMaterial ? node.material.subMaterials : node.material ? [node.material] : []);
+  const materialFor = (ma) => [...materials].find(([, record]) => record.ma === ma)?.[0] ?? null;
+  function setSlots(node, list) {
+    if (world.materials) list.forEach((material, index) => world.materials.assign(node, index, material));
+    else if (list.length > 1) {
+      const multi = new MultiMaterial('__slots ' + nodeId(node), node.getScene());
+      multi.subMaterials = list;
+      node.material = multi;
+    } else node.material = list[0] ?? null;
+  }
   const exact = (a, b) => JSON.stringify(plain(a)) === JSON.stringify(plain(b));
   const relations = (entry) => Object.entries(RELATIONS).filter(([, relation]) => relation.applies?.(entry) ?? true);
   function pushRelations(entry) {
@@ -138,6 +168,131 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     for (const [, relation] of relations(entry)) {
       const value = relation.main(entry.ob);
       if (relation.apply && !exact(value, relation.babylon(entry.node))) relation.apply(entry.node, value);
+    }
+  }
+
+  // Main into Babylon for what Main holds and the sync does not (a read file's IDs, or objects Blender's code added):
+  // each made in Babylon of its kind and given Main's values through the mapping (pull, with nothing synced yet), its
+  // relations (RELATIONS), modifiers and animation. Geometry goes to Babylon once and Main's Mesh is released.
+  // Returns what Bylonder cannot show, as warnings, which Blender's Info shows.
+  const fcurvePaths = (id) => animationData.fcurves(id).map((fcurve) => fcurve.rna_path);
+  function adopt(scene = world.scene) {
+    const warnings = [], was = applying;
+    applying = true;
+    try {
+      for (const ma of blender.ids(ID_MA)) if (!materialFor(ma)) adoptMaterial(ma, scene, warnings);
+      const made = [];
+      for (const ob of blender.ids(ID_OB)) {
+        if (nodeOf(ob)) continue;
+        const type = dnaGet('Object', ob, 'type'), name = blender.name(ob), data = blender.data(ob);
+        const lightType = type === 'LIGHT' ? dnaGet('Light', data, 'type') : null;
+        if (!MAKERS[type] && type !== 'MESH') { warnings.push(`"${name}": ${type.toLowerCase()} objects are not opened`); continue; }
+        if (lightType === 'AREA') warnings.push(`"${name}": an Area light opens as a point light`);
+        const node = type === 'MESH' ? adoptMesh(scene, name, ob) : MAKERS[type](scene, name, lightType);
+        node.metadata = { ...node.metadata, editable: true, wbId: blender.property(ob, PROPERTIES.id) ?? name };
+        made.push(adoptEntry(node, ob, type));
+      }
+      for (const entry of made) pullRelations(entry);
+      for (const entry of made) {
+        const { node, ob } = entry, wanted = rna.pointer('Object', node).rotation_mode;
+        if (!isIdentity(blender.transform(ob).matrix_parent_inverse)) blender.foldParentInverse(ob);
+        if (dnaGet('Object', ob, 'rotation_mode') !== wanted) {
+          if (fcurvePaths(ob).includes('rotation_euler')) warnings.push(`"${node.name}": its rotation keys are in another rotation order than Bylonder's`);
+          blender.setRotationMode(ob, ROTATION_MODES[wanted]);
+        }
+        pull(entry, node);
+        if (entry.data.ptr && entry.data.struct) pull(entry.data, node);
+        if (entry.type === 'MESH') adoptModifiers(entry, warnings);
+        if (blender.materials(ob).length > 1) warnings.push(`"${node.name}": its faces show its first material`);
+        for (const path of new Set(fcurvePaths(ob))) if (!['location', 'rotation_euler', 'scale'].includes(path)) warnings.push(`"${node.name}": its ${path} keys are not opened`);
+        if (blender.camera === ob) scene.activeCamera = node;
+      }
+      const wo = blender.world;
+      if (wo && !ids.adopted.has('world')) adoptWorld(wo, scene, warnings);
+      return { nodes: made.map(({ node }) => node), warnings };
+    } finally {
+      applying = was;
+    }
+  }
+  // An object's entry, as syncObjects makes one, for an Object Main already holds.
+  function adoptEntry(node, ob, type) {
+    const entry = { struct: 'Object', ptr: ob, node, key: key(node), type, ob, shadow: new Map(), babylonName: node.name, name: blender.name(ob) };
+    entry.data = { struct: dataStruct(node), ptr: blender.data(ob), shadow: new Map() };
+    // The data's type is the Babylon object's own (a light's class).
+    if (entry.data.struct === 'Light') entry.data.shadow.set('type', dnaGet('Light', entry.data.ptr, 'type'));
+    ids.adopt(entry.key, ob, type);
+    entry.unwatch = () => {};
+    objects.set(node, entry);
+    return entry;
+  }
+  // A read Mesh's geometry goes to Babylon, which owns it from then on.
+  function adoptMesh(scene, name, ob) {
+    blender.readAttributes(ob);
+    const creation = { mesh: mesh_serialize(blender.mesh(ob)) }, node = buildMesh(scene, name, creation);
+    node.metadata = { ...node.metadata, wbCreation: creation };
+    blender.clearMesh(ob);
+    return node;
+  }
+  // A read object's modifiers, as Bylonder's stack holds Blender's; the types Bylonder does not have are left out.
+  function adoptModifiers(entry, warnings) {
+    const view = () => new DataView(blenderModule.exports.memory.buffer);
+    for (const { type, name, mode, md } of blender.modifiers(entry.ob)) {
+      const definition = blenderModifierDefinitions.find((d) => d.mesh.type === type);
+      if (!definition) { warnings.push(`"${entry.node.name}": its modifier "${name}" is not opened`); continue; }
+      const modifier = addModifier(entry.node, definition.id, definition.mesh.read(view(), md));
+      Object.assign(modifier, { name, showViewport: !!(mode & MODIFIER_REALTIME), showRender: !!(mode & MODIFIER_RENDER) });
+    }
+  }
+  // A read Material: Bylonder's kind of it (its custom properties tell a Standard or Node material, which a file
+  // Bylonder wrote keeps), its values and its Principled BSDF inputs.
+  function adoptMaterial(ma, scene, warnings) {
+    const name = blender.name(ma), kind = blender.property(ma, PROPERTIES.material), graph = blender.property(ma, PROPERTIES.graph);
+    const material = graph ? Material.Parse(JSON.parse(graph), scene, '') : kind === 'standard' ? new StandardMaterial(name, scene)
+      : Object.assign(new PBRMaterial(name, scene), { metallic: 0, roughness: 0.5, albedoColor: new Color3(0.8, 0.8, 0.8) });
+    material.name = name;
+    material.metadata = { ...material.metadata, wbId: name };
+    const record = { struct: 'Material', ma, ptr: ma, shadow: new Map(), kept: true };
+    materials.set(material, record);
+    ids.adopted.set(material, ma);
+    pull(record, material);
+    if (!graph) pullTree(ma, rna.pointer('Material', material), name, warnings);
+  }
+  // A read World: the scene's background color, which Bylonder's authored world reads.
+  function adoptWorld(wo, scene, warnings) {
+    const background = blender.nodeTree(wo).nodes.find((node) => node.idname === 'ShaderNodeBackground');
+    const color = background?.inputs.Color ?? dnaGet('World', wo, 'color');
+    if (color) scene.clearColor.set(color[0], color[1], color[2], 1);
+    if (background && background.inputs.Strength !== 1) warnings.push(`World "${blender.name(wo)}": its strength opens as 1`);
+    ids.adopted.set('world', wo);
+  }
+  // An ID's node tree inputs that Bylonder's RNA of it binds, from Main's nodes of the same types.
+  function pullTree(id, data, label, warnings) {
+    const held = blender.nodeTree(id).nodes, mapped = new Set(['ShaderNodeOutputMaterial', 'ShaderNodeOutputWorld']);
+    const visit = (node) => {
+      mapped.add(node[INFO].struct);
+      const from = held.find((h) => h.idname === node[INFO].struct);
+      for (const input of node.inputs) {
+        if (input.is_linked) { visit(input.links[0].from_node); continue; }
+        const value = from?.inputs[input.identifier];
+        if (value !== undefined && input[INFO].bound.has('default_value')) input.default_value = value;
+      }
+    };
+    visit(data.node_tree.get_output_node());
+    const unmapped = [...new Set(held.map((h) => h.idname).filter((idname) => !mapped.has(idname)))];
+    if (unmapped.length) warnings.push(`Material "${label}": its ${unmapped.join(', ')} nodes are not opened`);
+  }
+  // A read file's scene, once the slices it sets exist: its settings, world and collections.
+  function adoptScene() {
+    applying = true;
+    try {
+      // Twice: a value the slice refuses before another is set (a frame range's start after its old end) is set after.
+      for (const record of [...sceneRecords(), ...sceneRecords()]) {
+        record.shadow.clear();
+        try { pull(record, world); } catch { /* set on the second pass */ }
+      }
+      readCollections((pointer) => 'collection:' + blender.name(pointer));
+    } finally {
+      applying = false;
     }
   }
 
@@ -252,7 +407,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     const all = new Set(world.materials?.all() ?? []);
     for (const [material, record] of materials) if (!all.has(material)) { blender.removeID(record.ma); materials.delete(material); }
     for (const material of all) {
-      if (!materials.has(material)) materials.set(material, { struct: 'Material', ma: blender.addMaterial(material.name), shadow: new Map() });
+      if (!materials.has(material)) materials.set(material, { struct: 'Material', ma: ids.adopted.get(material) ?? blender.addMaterial(material.name), shadow: new Map() });
       const record = materials.get(material);
       record.ptr = record.ma;
       if (blender.name(record.ma) !== material.name && record.babylonName !== material.name) { blender.rename(record.ma, material.name); record.babylonName = material.name; }
@@ -277,10 +432,10 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     record.tree = signature;
   }
   function pushWorlds() {
-    const all = world.worlds?.all() ?? [], ids = new Set(all.map((entry) => entry.id));
-    for (const [id, record] of worlds) if (!ids.has(id)) { blender.removeID(record.wo); worlds.delete(id); }
+    const all = world.worlds?.all() ?? [], kept = new Set(all.map((entry) => entry.id));
+    for (const [id, record] of worlds) if (!kept.has(id)) { blender.removeID(record.wo); worlds.delete(id); }
     for (const entry of all) {
-      if (!worlds.has(entry.id)) worlds.set(entry.id, { struct: 'World', wo: blender.addWorld(entry.name), shadow: new Map() });
+      if (!worlds.has(entry.id)) worlds.set(entry.id, { struct: 'World', wo: ids.adopted.get(entry.id) ?? blender.addWorld(entry.name), shadow: new Map() });
       const record = worlds.get(entry.id);
       record.ptr = record.wo;
       if (record.babylonName !== entry.name) { blender.rename(record.wo, entry.name); record.babylonName = entry.name; }
@@ -328,11 +483,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     blender.activeCollection = collectionPointer(cols.active);
   }
   // The slice's state as Main holds it: collections Blender's code made get new ids, removed ones go.
-  function readCollections() {
+  function readCollections(newId = () => crypto.randomUUID()) {
     const cols = slice(), pointers = blender.ids(ID_GR);
     const byPointer = new Map([...collections].map(([id, record]) => [record.ptr, id]));
     for (const pointer of pointers) if (!byPointer.has(pointer)) {
-      const id = crypto.randomUUID();
+      const id = newId(pointer);
       byPointer.set(pointer, id);
       collections.set(id, { struct: 'Collection', ptr: pointer, shadow: new Map(), layer: { struct: 'LayerCollection', shadow: new Map() } });
     }
@@ -443,6 +598,8 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
           else world.curves.set(node, curveObject(entry).data);
         }
       }
+      const { nodes: added } = adopt();
+      world.objects.push(...added);
       selection.replace([...chosen, ...active]);
       for (const [material, record] of materials) pull(record, material);
       for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) pull(record, entry); }
@@ -591,6 +748,16 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // The scene as a .blend file (its bytes), written by Blender's writer from Main, with the geometry filled as it
     // writes.
     writeBlend: (filepath) => api.withMeshes(() => blender.writeBlend(filepath)),
+    // A .blend's data read into Main and made Babylon's in `scene` (adopt); returns the Babylon objects it made and
+    // Blender's and Bylonder's warnings. Its scene settings and collections follow when the scene sync of the world
+    // starts (ids.read).
+    readBlend(bytes, scene = world.scene) {
+      const read = blender.readBlend(bytes), { nodes, warnings } = adopt(scene);
+      if (world.collections) adoptScene();
+      else ids.read = true;
+      return { nodes, warnings: [...read, ...warnings] };
+    },
+    adopt,
     // Whether Blender's code may change an object's data: its geometry is filled for it (lights and cameras are
     // Bylonder's objects of their own kind).
     holdsData: (node) => ['MESH', 'EMPTY', ...CURVE_TYPES].includes(objects.get(node)?.type),
@@ -606,5 +773,9 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     // Values written into Main so far, to tell that writing back does not echo.
     writes: 0,
   };
+  if (ids.read && world.collections) {
+    adoptScene();
+    ids.read = false;
+  }
   return api;
 }

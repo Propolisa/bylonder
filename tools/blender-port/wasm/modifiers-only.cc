@@ -6,6 +6,7 @@
 
 #include "BKE_global.hh"
 #include "BKE_idtype.hh"
+#include "BLO_readfile.hh"
 #include "BLT_translation.hh"
 #include "DNA_node_types.h"
 #include "DNA_scene_types.h"
@@ -18,6 +19,10 @@ namespace blender {
 Global G;
 UserDef U;
 extern const PointerRNA PointerRNA_NULL = {};
+
+/* As readfile.cc defines them for data not read from a file, which is all this module's data (the scene module reads files). */
+ID_Readfile_Data::Tags BLO_readfile_id_runtime_tags(const ID & /*id*/) { return {}; }
+void BLO_readfile_id_runtime_data_free(ID & /*id*/) {}
 
 IDTypeInfo id_type_without_data(short code, uint64_t filter, int index, size_t size, const char *name,
                                 const char *name_plural, const char *context, uint32_t flags);

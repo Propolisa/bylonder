@@ -5,7 +5,7 @@ import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
 import { evaluateModifiers, drawModifierPanel, meshData, EditMesh } from '../bmesh/bmesh-wasm.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
-import { fieldLayout, writeValues } from './dna-write.js';
+import { fieldLayout, writeValues, readValues } from './dna-write.js';
 
 // The types that evaluate on a mesh alone; the rest need other objects, vertex groups, bind data or simulation.
 const MESH_ONLY = ['ARRAY', 'BEVEL', 'BUILD', 'DECIMATE', 'EDGE_SPLIT', 'MIRROR', 'REMESH', 'SCREW', 'SKIN', 'SOLIDIFY', 'SUBSURF', 'TRIANGULATE',
@@ -46,11 +46,13 @@ function definition(id) {
   const layouts = (values) => Object.fromEntries(Object.keys(values).map((path) => path.match(/^\w+/)[0])
     .filter((prop) => located[prop] && properties[prop]).map((prop) => [prop, fieldLayout(located[prop], properties[prop])]));
   const write = (values) => (view, address) => writeValues(view, address, layouts(values), values);
+  // The settings a ModifierData of this type holds (one Main read from a file).
+  const read = (view, address) => readValues(view, address, layouts(fields), Object.keys(fields));
   return {
     id, name, description, icon, category: 'Generate', blender: `object.modifier_add:${id}`,
     schema: fields,
     defaults: () => Object.fromEntries(Object.entries(fields).map(([path, entry]) => [path, entry.default])),
-    mesh: { type, write, layouts },
+    mesh: { type, write, read, layouts },
   };
 }
 

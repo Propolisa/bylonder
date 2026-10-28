@@ -346,6 +346,8 @@ const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num',
 const SOCKET_TYPES = { NodeSocketFloat: [0, 0], NodeSocketFloatFactor: [0, 15], NodeSocketVector: [1, 0], NodeSocketVectorDirection: [1, 22],
   NodeSocketColor: [2, 0], NodeSocketShader: [3, 0] };
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
+// The attributes of a read Mesh that Bylonder's meshes keep: flat shading's.
+const READ_ATTRIBUTES = [['sharp_face', { domain: 'FACE', type: 'BOOLEAN' }], ['sharp_edge', { domain: 'EDGE', type: 'BOOLEAN' }]];
 
 // Blender's data outside Edit Mode (main-api.cc): a Main of objects and their data, a scene whose view layer holds the
 // selection and the active object, and the context operators run in. Other subsystems add their IDs to `bmain` and
@@ -418,6 +420,10 @@ export class BlenderMain {
     }
     this.#attributes.set(ob, attributes.map(([name, { domain, type }]) => [name, { domain, type }]));
   }
+  // A Mesh Main read from a file: the attributes Bylonder keeps that it has, for mesh() to copy.
+  readAttributes(ob) {
+    this.#attributes.set(ob, READ_ATTRIBUTES.filter(([name]) => withString(name, (p) => x.object_mesh_attribute(ob, p))));
+  }
   // A copy of a mesh object's Mesh, with the attributes setMesh gave it.
   mesh(ob) {
     const mesh = extractedMesh(x.object_mesh_extract(this.#context, ob) >>> 0);
@@ -438,6 +444,14 @@ export class BlenderMain {
   evaluatedMesh(ob) { return ownedMesh(extractedMesh(x.object_mesh_eval(this.#context, ob) >>> 0)); }
   // An object's modifier stack, as setModifiers takes it: their errors from the last evaluation.
   setModifiers(ob, modifiers) { return setModifiers(ob, modifiers).errors; }
+  // An object's modifiers as Main holds them: each one's type (ModifierType), name, mode (ModifierMode) and address.
+  modifiers(ob) {
+    const list = [];
+    for (let md; (md = x.object_modifier(ob, list.length) >>> 0);) list.push({ type: x.modifier_type(md), name: cString(x.modifier_name(md)), mode: x.modifier_mode(md), md });
+    return list;
+  }
+  // Changes an object's rotation mode (eRotationModes), keeping its rotation.
+  setRotationMode(ob, mode) { x.object_rotation_mode_set(ob, mode); }
 
   // Materials and worlds, by address: their users are those that use them.
   addMaterial(name) { return withString(name, (p) => x.main_material_add(this.#context, p)) >>> 0; }
@@ -513,6 +527,12 @@ export class BlenderMain {
     files.delete(filepath);
     if (!(status & OPERATOR_FINISHED) || !bytes) throw new Error(report || 'Blender did not write the file');
     return bytes;
+  }
+  // A .blend's data read into Main (main_read): returns Blender's warnings, or throws when the file cannot be read.
+  readBlend(bytes) {
+    const report = withArrays([Uint8Array.from(bytes)], ([p]) => x.main_read(this.#context, p, bytes.length)) >>> 0;
+    if (!report) throw new Error('Not a .blend file Blender can read');
+    return cString(report).split('\n').filter(Boolean);
   }
 
   // Main's IDs of a type (ID_GR, ID_OB...).

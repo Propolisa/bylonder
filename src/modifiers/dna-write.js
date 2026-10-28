@@ -37,3 +37,22 @@ export function writeValues(view, address, layouts, values) {
   const changed = ({ layout, value, index }) => value !== (Array.isArray(layout.default) ? layout.default[index] : layout.default);
   for (const entry of [...entries.filter((e) => !changed(e)), ...entries.filter(changed)]) writeField(view, address, entry.layout, entry.value, entry.index);
 }
+
+// A field's value at a struct's address, as writeField writes it.
+function readField(view, address, layout, index) {
+  const { offset, size, kind, signed, bit, bitset, negative, boolean, items } = layout;
+  const at = address + offset + (bitset ? 0 : index * size);
+  const type = { 1: signed ? 'Int8' : 'Uint8', 2: signed ? 'Int16' : 'Uint16', 4: signed ? 'Int32' : 'Uint32' }[size];
+  if (kind === 'float') return view.getFloat32(at, true);
+  const word = view[`get${type}`](at, true);
+  if (bit !== undefined && boolean) return !!(word & (bitset ? bit << index : bit)) !== !!negative;
+  return items ? Object.keys(items).find((id) => items[id] === word) ?? null : word;
+}
+
+// The settings at paths (as writeValues takes them) that a struct at an address holds.
+export function readValues(view, address, layouts, paths) {
+  return Object.fromEntries(paths.flatMap((path) => {
+    const [, prop, index] = path.match(/^(\w+)(?:\[(\d+)\])?$/);
+    return layouts[prop] ? [[path, readField(view, address, layouts[prop], Number(index ?? 0))]] : [];
+  }));
+}
