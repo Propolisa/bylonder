@@ -284,7 +284,7 @@ window.addEventListener("message", (e) => {
   if (e.data.type === "resume") views.wake();
   if (e.data.type === "scene-name") world.sceneSettings.renamed(e.data.payload);
   // The workspace's screen (Scripting or Layout), and a project text file changed in the Code workspace.
-  if (e.data.type === "screen") viewportDock.setScreen(e.data.payload);
+  if (e.data.type === "screen") setScreen(e.data.payload);
   if (e.data.type === "text") world.texts.load(e.data.payload.name, e.data.payload.content);
 });
 let ui;
@@ -373,7 +373,7 @@ const tools = createView3DTools({
 // Blender's Main, kept equal to the scene both ways (blenkernel/main-sync.js), which Blender's code runs on. Slices hooks
 // do not see (collections, materials, worlds, modifiers) mark it changed.
 world.mainSync = createMainSync({ rna: blenderRNA, ids: animation.ids });
-for (const slice of [world.collections, world.materials, world.worlds, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
+for (const slice of [world.collections, world.materials, world.worlds, world.textures, world.modifiers]) slice?.subscribe(() => world.mainSync.changed());
 world.mainSync.debug = new URLSearchParams(location.search).has("sync-check");
 registerObjectOperators(world.objectActions, { sync: world.mainSync, transaction: commands.transaction, notify, keying: (run) => animation.keying(run) });
 registerAddOperators(creator);
@@ -455,7 +455,7 @@ const viewportCtx = {
     const preferred = backdrop.shown ? backdrop.view : views.focused;
     const compositorView = world.compositor.enabled ? (rendered.includes(preferred) ? preferred : rendered[0]) || null : null;
     for (const v of all) v.wantsCompositor = v === compositorView;
-    world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera });
+    world.setViewShading({ renderedCameras: rendered.map((v) => v.camera), compositorCamera: compositorView?.camera, preview: all.some((v) => v.preview && v.active !== false) });
     const cameraView = !!views.input?.state.cameraView;
     document.body.classList.toggle("scene-mode", cameraView);
     views.relayout();
@@ -472,6 +472,15 @@ const mountView = (options) => {
 };
 shadingReady = true;
 const primary = mountView({ section: document.querySelector("#viewport-section"), canvas, headerId: "viewport", cameraName: "__editorCamera" });
+// Each screen's 3D Viewport keeps its own shading, as each of Blender's screens has its own: Shading's starts in
+// Material Preview.
+const screenShading = { shading: "material" };
+function setScreen(name) {
+  const previous = viewportDock.screen ?? "layout";
+  viewportDock.setScreen(name);
+  screenShading[previous] = primary.state.shading;
+  primary.setShading(screenShading[name] ?? "solid");
+}
 viewportDock.setFactory("viewport", (host, id) => mountView({ section: host, headerId: id, from: activeView()?.editorCamera || primary.editorCamera }));
 views.setInput(primary);
 views.onFocus = () => viewportCtx.shadingChanged();
@@ -525,6 +534,7 @@ const sequencerEditor = mountSequencerEditor(document.querySelector("#sequencer-
 const fileBrowser = mountFileBrowser(document.querySelector("#files-section"), { adapter: sequencerAdapter, notify });
 for (const event of ["pointermove", "pointerdown", "wheel", "keydown"]) window.addEventListener(event, () => views.wake(), { passive: true, capture: true });
 for (const source of [documentState, world.particles, world.modifiers, animation]) source.subscribe?.(() => views.wake());
+world.modifiers.onDrawn(() => views.wake());
 ownObservers = observerCount() - userObservers;
 function undoRedo(redo) {
   creator.finish();

@@ -34,6 +34,7 @@ import { addModifier } from '../modifiers/stack.js';
 import { BlenderAnimation } from './animation/anim-blender.js';
 import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { Color3, DirectionalLight, FreeCamera, Material, Mesh, MultiMaterial, PBRMaterial, PointLight, SpotLight, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
+import { mainTexture, readTexture, writeTexture } from './texture/texture.js';
 
 // ID codes (MAKE_ID2) and recalc tags (DNA_ID.h).
 const ID_OB = 0x424f, ID_GR = 0x5247, ID_MA = 0x414d;
@@ -80,22 +81,26 @@ const WIDTHS = { ShaderNodeBsdfPrincipled: 240 };
 // A shader node tree as Blender builds it (BlenderMain.setNodeTree), from the RNA of one (its output node and the nodes
 // linked into it), laid out right to left.
 export function shaderTree(tree) {
-  const nodes = [], links = [];
+  const nodes = [], links = [], byName = new Map();
+  // A node once, however many links leave it; the outputs it links from (a closure's, or the link's socket).
   const add = (node, depth) => {
+    if (byName.has(node.name)) return byName.get(node.name);
     const idname = node[INFO].struct, output = SHADER_OUTPUTS[idname];
     const entry = { idname, name: node.name, location: [-300 * depth, 0], width: WIDTHS[idname] ?? 140, inputs: [],
       outputs: output ? [{ identifier: output, socket: 'NodeSocketShader' }] : [] };
     nodes.push(entry);
+    byName.set(node.name, entry);
     for (const input of node.inputs) {
-      const from = input.is_linked ? input.links[0].from_node : null;
+      const link = input.is_linked ? input.links[0] : null;
       // An input Bylonder does not bind has no value: Blender's default is the node type's.
-      const bound = !from && input[INFO].bound.has('default_value');
+      const bound = !link && input[INFO].bound.has('default_value');
       entry.inputs.push({ identifier: input.identifier, name: input.name, socket: input[INFO].struct, value: bound ? plain(input.default_value) ?? null : null });
-      if (from) {
-        add(from, depth + 1);
-        links.push([from.name, SHADER_OUTPUTS[from[INFO].struct], node.name, input.identifier]);
-      }
+      if (!link) continue;
+      const from = add(link.from_node, depth + 1), socket = link.from_socket?.identifier ?? SHADER_OUTPUTS[from.idname];
+      if (!from.outputs.some((o) => o.identifier === socket)) from.outputs.push({ identifier: socket, socket: link.from_socket[INFO].struct });
+      links.push([from.name, socket, node.name, input.identifier]);
     }
+    return entry;
   };
   add(tree.get_output_node(), 0);
   return { nodes, links };
@@ -108,7 +113,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   const blender = ids.blender;
   const key = (node) => 'object:' + nodeId(node);
   // Each synced owner's record: its RNA struct, its Main address and what was last synced, by RNA name.
-  const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map();
+  const objects = new Map(), materials = new Map(), worlds = new Map(), collections = new Map(), textures = new Map();
   const scene = { struct: 'Scene', ptr: blender.scene, shadow: new Map() };
   const SCENE_STRUCTS = { RenderSettings: 'render', UnitSettings: 'unit_settings', ColorManagedViewSettings: 'view_settings', ColorManagedDisplaySettings: 'display_settings' };
   const sceneStruct = (name) => ({ struct: name, ptr: blender.scene + dnaProperty('Scene', SCENE_STRUCTS[name]).offset, shadow: new Map() });
@@ -409,10 +414,11 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
   function pushModifiers(entry) {
     if (entry.type !== 'MESH') return;
     const stack = modifierStack(entry.node).map(asBlenderModifier).filter(Boolean);
-    const signature = JSON.stringify(stack.map(({ type, values, showViewport, showRender }) => [type, values, showViewport, showRender]));
+    const signature = JSON.stringify(stack.map(({ type, values, showViewport, showRender }) => [type, values, showViewport, showRender, textures.get(values.texture)?.tex]));
     if (signature === entry.modifiers) return;
     entry.modifiers = signature;
-    blender.setModifiers(entry.ob, moduleModifiers(stack));
+    // A textured modifier points at Main's Tex of its texture (blenkernel/texture/textures.js).
+    blender.setModifiers(entry.ob, moduleModifiers(stack, (m) => textures.get(m.values.texture)?.tex ?? 0));
   }
   // An object's base in the view layer; its collections' visibility and selectability are Blender's view layer sync's.
   function pushBase({ node, ob }, active = selection.nodes.at(-1)) {
@@ -459,6 +465,26 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     if (signature === record.tree) return;
     blender.setNodeTree(id, tree);
     record.tree = signature;
+  }
+  // Textures (blenkernel/texture/textures.js): a Tex for each record, its settings written where they differ.
+  function pushTextures() {
+    const all = world.textures?.all() ?? [], ids = new Set(all.map((entry) => entry.id));
+    for (const [id, record] of textures) if (!ids.has(id)) { blender.removeID(record.tex); textures.delete(id); }
+    for (const entry of all) {
+      if (!textures.has(entry.id)) textures.set(entry.id, { tex: mainTexture(blender.bmain, entry.name, entry.values), values: entry.values });
+      const record = textures.get(entry.id);
+      if (record.babylonName !== entry.name) { blender.rename(record.tex, entry.name); record.babylonName = entry.name; }
+      blender.setFakeUser(record.tex, entry.fakeUser);
+      if (record.values !== entry.values) { writeTexture(record.tex, entry.values); record.values = entry.values; }
+    }
+  }
+  // What Blender's code changed of a Tex goes back to its record.
+  function pullTextures() {
+    for (const [id, record] of textures) {
+      const entry = world.textures.byId(id), values = readTexture(record.tex);
+      if (entry && !Object.entries(values).every(([name, value]) => same(value, entry.values[name]))) world.textures.assign(entry, values);
+      if (entry) record.values = entry.values;
+    }
   }
   function pushWorlds() {
     const all = world.worlds?.all() ?? [], kept = new Set(all.map((entry) => entry.id));
@@ -556,6 +582,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       listed = world.objects.length;
     }
     if (all || sceneChanged) {
+      pushTextures();
       pushMaterials();
       pushWorlds();
     }
@@ -630,6 +657,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       selection.replace([...chosen, ...active]);
       for (const [material, record] of materials) pull(record, material);
       for (const [id, record] of worlds) { const entry = world.worlds.byId(id); if (entry) pull(record, entry); }
+      pullTextures();
       for (const record of sceneRecords()) pull(record, world);
       blender.evaluate();
     } finally {
@@ -708,6 +736,12 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
       if (!entry) continue;
       compare(`World "${entry.name}"`, record, entry);
       compareTree(`World "${entry.name}"`, record.wo, rna.pointer('World', entry));
+    }
+    for (const [id, { tex }] of textures) {
+      const entry = world.textures.byId(id), values = readTexture(tex);
+      if (!entry) continue;
+      if (!sameName(entry.name, blender.name(tex))) diffs.push(`Texture "${entry.name}".name: Main "${blender.name(tex)}"`);
+      for (const [name, value] of Object.entries(entry.values)) if (!same(value, values[name])) diffs.push(`Texture "${entry.name}".${name}: Babylon ${JSON.stringify(value)}, Main ${JSON.stringify(values[name])}`);
     }
     for (const record of sceneRecords()) compare(record.struct, record, world);
     if (world.renderSettings) for (const [name, value] of Object.entries(viewNames())) {
@@ -794,6 +828,7 @@ export function createMainSync({ rna, ids = createBlenderIDs() }) {
     objectOf: (node) => objects.get(node)?.ob ?? null,
     nodeOf,
     materialOf: (material) => materials.get(material)?.ma ?? null,
+    textureOf: (id) => textures.get(id)?.tex ?? null,
     entryOf,
     // A change Babylon makes that no hook sees (a slice's state): the next flush writes everything.
     changed: () => changed(null),

@@ -8,6 +8,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { chromium, openApp, startServer } from "../../tests/e2e/app.mjs";
+import { displacedSphere, lavaMaterial } from "../../tests/e2e/lava.mjs";
 
 const here = new URL(".", import.meta.url).pathname, root = new URL("../..", import.meta.url).pathname;
 const args = process.argv.slice(2);
@@ -144,6 +145,15 @@ const SETUP = {
   scripting: async (app) => {
     await app.page.click('[data-workspace="scripting"]');
     await app.until(() => /PYTHON INTERACTIVE CONSOLE/.test(document.querySelector(".bl-console")?.textContent ?? ""), null, 180000);
+  },
+  "displaced-sphere": async (app) => { await displacedSphere(app); await app.hover(...REST); },
+  // As ui-shots.py: View > Frame Selected frames the sphere (the keyboard is the Shader Editor's after the nodes).
+  "lava-material": async (app) => {
+    await displacedSphere(app);
+    await lavaMaterial(app);
+    await app.locator('[data-blender="VIEW3D_MT_view"]').click();
+    await app.frame().getByRole("menuitem", { name: "Frame Selected" }).first().click();
+    await app.hover(...REST);
   },
   "outliner-expanded": async (app) => {
     const box = await app.locator(".bl-outliner-region").boundingBox();

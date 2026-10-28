@@ -26,7 +26,7 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
   const { scene, animation } = world;
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => fn());
-  const renderer = createWorldRenderer(scene, { asset });
+  const renderer = createWorldRenderer(scene, { asset, studio: STUDIO });
   const authored = { id: 'world', name: 'World', ...readAuthoredWorld(scene, worldDefaults) };
   const baseline = { worlds: [authored], active: 'world' };
   let state = clone(baseline);
@@ -63,6 +63,9 @@ export function createWorlds(world, { commit = () => {}, asset } = {}) {
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     // Per view: rendered shading or camera view shows the world background and volume. Cheap.
     setViewportActive(value) { renderer.setRendered(value); },
+    // Material Preview's studio lighting while a view shows it, and its background per view.
+    setPreview(value) { renderer.setPreview(value); },
+    showPreview(value) { renderer.showPreview(value); },
     link(entry) { state.active = entry?.id ?? null; changed(); },
     unlink() { state.active = null; changed(); },
     // Blender's world.new copies the current world when there is one.

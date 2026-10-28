@@ -5,10 +5,11 @@
 import { createApp, h, reactive, Teleport, markRaw } from 'vue';
 import { loadRNAUI, rnaProperty, INFO } from '../../makesrna/rna.js';
 import { createPreview } from '../../blenkernel/material/preview.js';
+import { texturePreview } from '../../blenkernel/texture/texture.js';
 import { panelTypes, drawPanels, headerLayout, drawType } from '../interface/panels.js';
 import { panels as blenderPanels, menus as blenderMenus, headers } from '../../python/bpy_interface.js';
 import { UILayout } from '../interface/layout.js';
-import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
+import { LayoutView, RegionView, panelState, menuButton } from '../interface/layout-view.js';
 import { drawMenu } from '../interface/ui-layout.js';
 import { openMenu } from '../interface/menu.js';
 import { menuUI, menuClasses, kw, inArea, invokeOperator } from '../../windowmanager/wm-operators.js';
@@ -41,6 +42,19 @@ function contextBar(context, space) {
 
 // A header (bpy.types.Header) drawn into a layout.
 
+// A texture's preview image (texture.js), by its settings.
+const texturePreviews = new Map();
+function texturePreviewURL(values, size = 128) {
+  const key = JSON.stringify(values);
+  if (!texturePreviews.has(key)) {
+    const canvas = Object.assign(document.createElement('canvas'), { width: size, height: size });
+    canvas.getContext('2d').putImageData(new ImageData(texturePreview(values, size), size), 0, 0);
+    if (texturePreviews.size > 32) texturePreviews.clear();
+    texturePreviews.set(key, canvas.toDataURL());
+  }
+  return texturePreviews.get(key);
+}
+
 export function mountProperties(host, { world, editor, history, rna, systems, properties, storage, files = [] }, areaId = 'properties', headerHost) {
   const key = 'workbench:properties:' + areaId;
   let saved = {};
@@ -72,6 +86,12 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       startFilter: () => host.querySelector('.bl-properties-header input, input[aria-label="Live search filtering string"]')?.focus(),
       clearFilter: () => { space.search = ''; },
       canAddModifier: () => space.context === 'MODIFIER' && !!ob() && hasMesh(ob()),
+      // texture.new: a new texture, given to the data-block selector that asked for it.
+      newTexture(template) {
+        const texture = rna.texture(world.textures.create(null, { finish: false }));
+        template?.set(texture);
+        ui.undoPush('New Texture');
+      },
       // The active object's material slots in the material library.
       materials: () => {
         const node = ob(), library = world.materials;
@@ -110,6 +130,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       Collection: () => world.collections?.all().map((entry) => rna.pointer('Collection', entry)) ?? [],
       Scene: () => [context.scene],
       Material: () => world.materials?.all().map((material) => rna.pointer('Material', material)) ?? [],
+      Texture: () => world.textures?.all().map((entry) => rna.texture(entry)) ?? [],
     })[struct]?.() ?? [],
     drawMenu: (idname) => drawMenu(idname, operatorUI()),
     animation: {
@@ -120,9 +141,18 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
     },
     templates: {
       template_modifiers: modifierTemplates({ world, editor, rna, history }),
+      // uiTemplateTextureUser: the texture user the tab shows (a modifier), chosen from the context's users.
+      template_texture_user: () => {
+        const users = context.texture_users, user = context.texture_user;
+        const items = () => [{ heading: 'Modifiers' }, ...users.map((other, i) => ({ label: other.name, icon: structIcon(other).toLowerCase(),
+          run: () => { space.textureUser = i; state.revision++; } }))];
+        return user ? menuButton({ text: user.name, iconName: structIcon(user), items }) : null;
+      },
       // A material's preview, rendered by Bylonder's preview scene.
       template_preview: (node) => {
         const material = node.id?.[INFO]?.owner;
+        if (material?.values) return h('div', { class: 'bl-preview flex aspect-[1.6] max-h-[220px] items-center justify-center rounded-md' },
+          h('img', { class: 'h-full', src: texturePreviewURL(material.values), alt: material.name }));
         if (!material || !world.materials) return null;
         preview.request(material, (url) => { state.preview = url; });
         return h('div', { class: 'bl-preview flex aspect-[1.6] max-h-[220px] items-center justify-center rounded-md' }, state.preview ? h('img', { class: 'h-full', src: state.preview, alt: material.name }) : null);
@@ -165,7 +195,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
     state.ready = true;
   });
 
-  const sources = [world.modifiers, world.materials, world.particles, world.compositor, world.sceneSettings, world.worlds, world.renderSettings, world.collections].filter(Boolean);
+  const sources = [world.modifiers, world.textures, world.materials, world.particles, world.compositor, world.sceneSettings, world.worlds, world.renderSettings, world.collections].filter(Boolean);
   const unsubscribers = [...sources, ...systems.map((system) => system.store)].map((source) => source.subscribe(() => state.revision++));
   return {
     refresh() { state.revision++; },

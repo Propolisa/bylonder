@@ -1,4 +1,4 @@
-// A DNA struct in the module's memory, by the RNA properties dna-outliner.json and dna-data.json describe
+// A DNA struct in the module's memory, by the RNA properties dna-outliner.json, dna-data.json and dna-textures.json describe
 // (tools/blender-port/modifier_dna.py): booleans (a bit, maybe negative), numbers and number arrays, enums by
 // identifier and strings, read and written in place as Blender's RNA reads and writes them. A struct has its RNA
 // base's properties too (PointLight has Light's).
@@ -6,11 +6,12 @@ import { blenderModule } from '../bmesh/bmesh-wasm.js';
 import { baseOf } from './rna.js';
 import outliner from './dna-outliner.json' with { type: 'json' };
 import data from './dna-data.json' with { type: 'json' };
+import textures from './dna-textures.json' with { type: 'json' };
 
 const { exports: x } = blenderModule;
 const encoder = new TextEncoder(), decoder = new TextDecoder();
 const view = () => new DataView(x.memory.buffer);
-const tables = { ...outliner, ...data };
+const tables = { ...outliner, ...data, ...textures };
 
 const properties = new Map();
 // A struct's properties with its bases', by RNA identifier.

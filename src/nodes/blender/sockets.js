@@ -15,6 +15,8 @@ export const SOCKETS = {
   MENU: { glsl: 'float', kind: 'float' },
   VECTOR: { glsl: 'vec3', kind: 'vec3', babylon: T.Vector3 },
   RGBA: { glsl: 'vec4', kind: 'color4', babylon: T.Color4 },
+  // A closure as the radiance it leaves toward the view, and its alpha (shader-nodes.js).
+  SHADER: { glsl: 'vec4', kind: 'closure', babylon: T.Color4 },
 };
 export const socketType = (type) => SOCKETS[type];
 
@@ -25,9 +27,9 @@ const KINDS = {
 };
 export const kindOf = (type) => KINDS[type];
 export const BABYLON_TYPES = Object.keys(KINDS).map(Number);
-const GLSL = { float: 'float', int: 'int', vec2: 'vec2', vec3: 'vec3', vec4: 'vec4', color3: 'vec3', color4: 'vec4' };
+const GLSL = { float: 'float', int: 'int', vec2: 'vec2', vec3: 'vec3', vec4: 'vec4', color3: 'vec3', color4: 'vec4', closure: 'vec4' };
 export const glslType = (kind) => GLSL[kind];
-const size = (kind) => ({ float: 1, int: 1, vec2: 2, vec3: 3, color3: 3, vec4: 4, color4: 4 })[kind];
+const size = (kind) => ({ float: 1, int: 1, vec2: 2, vec3: 3, color3: 3, vec4: 4, color4: 4, closure: 4 })[kind];
 const isColor = (kind) => kind === 'color3' || kind === 'color4';
 const literal = (v) => (Number.isInteger(v) ? v.toFixed(1) : String(v));
 
@@ -47,8 +49,8 @@ export function convert(e, from, to) {
   return `${e}.xy`;
 }
 
-// Whether Blender converts between the kinds (all but matrices and objects).
-export const converts = (from, to) => !!size(from) && !!size(to);
+// Whether Blender converts between the kinds (all but matrices and objects, and closures only to closures).
+export const converts = (from, to) => !!size(from) && !!size(to) && (from === 'closure') === (to === 'closure');
 
 // A GLSL literal of a socket value of a kind.
 export function glslValue(value, kind) {

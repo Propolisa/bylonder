@@ -30,6 +30,8 @@ namespace blender::ui {
 struct Node {
   /* An operator's enum property, for an operator's enum menu. */
   std::string kind, prop, owner, heading, property;
+  /* A data-block selector's New operator. */
+  std::string new_op;
   /* \x01: none, so the widget shows its RNA name. */
   std::string text = "\x01";
   int index = -1, flag = 0, icon = 0;
@@ -241,10 +243,11 @@ static void template_node(Layout *layout, const char *name, PointerRNA *ptr, Str
   node.owner = owner(ptr);
   node.pointer = *ptr;
 }
-void template_id(Layout *layout, const bContext * /*C*/, PointerRNA *ptr, StringRefNull propname, const char * /*newop*/,
+void template_id(Layout *layout, const bContext * /*C*/, PointerRNA *ptr, StringRefNull propname, const char *newop,
                  const char * /*openop*/, const char * /*unlinkop*/, int /*filter*/, bool /*live_icon*/, std::optional<StringRef> /*text*/)
 {
   template_node(layout, "template_id", ptr, propname);
+  nodes.at(layout)->children.back()->new_op = newop ? newop : "";
 }
 void template_curve_profile(Layout *layout, PointerRNA *ptr, StringRefNull propname)
 {
@@ -299,7 +302,7 @@ static void write(std::ostringstream &out, const Node &node)
   out << "{\"kind\":";
   quote(out, node.kind);
   for (const auto &[key, value] :
-       {std::pair{"prop", &node.prop}, {"owner", &node.owner}, {"heading", &node.heading}, {"property", &node.property}})
+       {std::pair{"prop", &node.prop}, {"owner", &node.owner}, {"heading", &node.heading}, {"property", &node.property}, {"new", &node.new_op}})
   {
     if (!value->empty()) {
       out << ",\"" << key << "\":";

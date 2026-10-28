@@ -19,6 +19,7 @@ import { fileFormats, containers, videoCodecs, qualities } from '../render/forma
 import { SCE_SELECT_VERTEX, SCE_SELECT_EDGE, SCE_SELECT_FACE } from '../bmesh/intern/bmesh-marking.js';
 import { curveStructs } from './rna-curve.js';
 import { isSyntaxHighlightSupported } from '../editors/space_text/text-format.js';
+import { textureSettings, textureStruct } from '../blenkernel/texture/texture.js';
 
 // Swapping two axes is its own inverse and flips handedness.
 const axes = ([x, y, z]) => [x, z, y];
@@ -108,6 +109,9 @@ function modifierValues({ node, modifier }) {
         (owner, values, r) => values.forEach((value, i) => set(`${name}[${i}]`, value, r)))]));
 }
 
+// A texture of the textures slice as its type's struct (CloudsTexture), as RNA refines a Texture.
+const texturePointer = (r, entry) => r.pointer(entry && textureStruct(entry.values.type), entry);
+
 // An object transform's animation channels, by Blender's axis (Blender's X, Y, Z are Babylon's x, z, y).
 const objectChannel = (property) => (ob, index) => address('object:' + nodeId(ob), property + '.' + 'xzy'[index]);
 // Bylonder's transform locks (metadata.wbTransformLocks, by Babylon path) as Blender's lock_location and the like.
@@ -137,14 +141,44 @@ const sliceValue = (slice, path) => ({ get: (world) => world[slice] && path.spli
 // A value is { get, set } on the data; host.update is the notifier, as for bound properties.
 function shaderNode(r, [name, type, inputs]) {
   return rna(type, { name, label: '', bl_idname: type, inputs: collection(inputs.map(([input, socket, value]) => {
-    const linked = Array.isArray(value) ? shaderNode(r, value) : null;
+    // A linked node, or { node, socket }: a node and the output it links from.
+    const from = Array.isArray(value) ? { node: value } : value?.node ? value : null, linked = from && shaderNode(r, from.node);
+    const fromSocket = from?.socket ? rna(from.socket.type, { identifier: from.socket.identifier, name: from.socket.identifier }) : null;
     const data = { name: input, identifier: input, enabled: true, hide_value: false, is_linked: !!linked,
-      links: collection(linked ? [rna('NodeLink', { from_node: linked, from_socket: null, is_valid: true })] : []) };
+      links: collection(linked ? [rna('NodeLink', { from_node: linked, from_socket: fromSocket, is_valid: true })] : []) };
     if (value && !linked) Object.defineProperty(data, 'default_value', { enumerable: true, get: value.get, set: (v) => { value.set(v); r.host.update?.(socket, 'default_value', data); } });
     return rna(socket, data);
   })), outputs: collection() });
 }
 const nodeTree = (r, output) => rna('ShaderNodeTree', { get_output_node: () => shaderNode(r, output) });
+// Blender's socket types (node-types.json) as the socket structs Main's node trees are built with.
+const SOCKET_STRUCTS = { VALUE: 'NodeSocketFloat', RGBA: 'NodeSocketColor', VECTOR: 'NodeSocketVector', SHADER: 'NodeSocketShader' };
+const socketStruct = (s) => (s.type === 'VALUE' && s.subtype === 'FACTOR' ? 'NodeSocketFloatFactor' : SOCKET_STRUCTS[s.type]);
+// A node material's Blender nodes (src/nodes/blender) as Blender's node tree, from its Material Output: each node's
+// inputs, unlinked ones by their values. Babylon's blocks and the nodes' properties are kept in the material's graph
+// only (main-sync's PROPERTIES.graph).
+function blenderNodeTree(r, material) {
+  const output = material.attachedBlocks?.find((b) => b.getClassName() === 'ShaderNodeOutputMaterial');
+  if (!output) return null;
+  const names = new Map();
+  const nameOf = (block) => {
+    if (!names.has(block)) {
+      const taken = new Set(names.values());
+      let name = block.name;
+      for (let i = 1; taken.has(name); i++) name = `${block.name}.${String(i).padStart(3, '0')}`;
+      names.set(block, name);
+    }
+    return names.get(block);
+  };
+  const isBlender = (block) => !!block?.declaration && !!block.idname;
+  const node = (block) => [nameOf(block), block.idname, block.declaration.inputs.filter(socketStruct).map((s) => {
+    const from = block.getInputByName(s.identifier)?.connectedPoint;
+    const out = isBlender(from?.ownerBlock) && from.ownerBlock.declaration.outputs.find((o) => o.identifier === from.name);
+    const value = s.hide_value ? null : { get: () => block.values[s.identifier], set: (v) => { block.values[s.identifier] = v; } };
+    return [s.identifier, socketStruct(s), out ? { node: node(from.ownerBlock), socket: { identifier: out.identifier, type: socketStruct(out) } } : value];
+  })];
+  return nodeTree(r, node(output));
+}
 const rgba = (get, set) => ({ get: () => [...get(), 1], set: (value) => set([...value].slice(0, 3)) });
 // A Babylon material's inputs as Principled BSDF sockets: a PBR material's own, a Standard material's color and alpha.
 const color3 = (owner, key) => owner[key] && ({ get: () => [owner[key].r, owner[key].g, owner[key].b, 1], set: ([red, green, blue]) => owner[key].set(red, green, blue) });
@@ -250,11 +284,12 @@ const STRUCTS = {
     name: { get: (material) => material.name, set: (material, name, r) => r.world.materials.rename(material, name) },
     use_fake_user: { get: (material) => !!material.metadata?.wbFakeUser, set: (material, value, r) => { if (!!value !== !!material.metadata?.wbFakeUser) r.world.materials.toggleFakeUser(material); } },
     use_nodes: () => true,
-    node_tree: (material, r) => nodeTree(r, ['Material Output', 'ShaderNodeOutputMaterial', [
+    node_tree: (material, r) => blenderNodeTree(r, material) ?? nodeTree(r, ['Material Output', 'ShaderNodeOutputMaterial', [
       ['Surface', 'NodeSocketShader', ['Principled BSDF', 'ShaderNodeBsdfPrincipled', principledInputs(material)]],
       ['Volume', 'NodeSocketShader', null]]]),
     use_backface_culling: synced(settable('backFaceCulling')),
-    alpha_threshold: synced(settable('alphaCutOff')),
+    // A node material has no cutoff of its own: Blender's default.
+    alpha_threshold: synced({ ...settable('alphaCutOff'), get: (material) => material.alphaCutOff ?? 0.5 }),
     surface_render_method: synced({ get: (material) => (material.transparencyMode === 2 || material.transparencyMode === 3 ? 'BLENDED' : 'DITHERED'),
       set: (material, method) => { material.transparencyMode = method === 'BLENDED' ? 2 : null; } }),
     // Viewport Display: the surface's color, metalness and roughness, as Blender's Solid shading shows a material.
@@ -269,6 +304,18 @@ const STRUCTS = {
     show_viewport: modifierFlag('showViewport'),
     show_render: modifierFlag('showRender'),
     ...modifierValues(owner),
+    ...('texture' in owner.modifier.values && { texture: {
+      get: ({ modifier }, r) => texturePointer(r, r.world.textures?.byId(modifier.values.texture)),
+      set: ({ node, modifier }, value, r) => r.world.modifiers.set(node, modifier.id, 'texture', value?.[INFO].owner.id ?? null, { finish: false }),
+    } }),
+  }),
+  // A texture of the textures slice (blenkernel/texture/textures.js): the settings of its type's Tex.
+  Texture: (entry) => ({
+    name: { get: () => entry.name, set: (owner, name, r) => r.world.textures.rename(entry, name) },
+    use_fake_user: { get: () => entry.fakeUser, set: (owner, value, r) => { if (!!value !== entry.fakeUser) r.world.textures.toggleFakeUser(entry); } },
+    users: (owner, r) => r.world.textures.users(entry),
+    ...Object.fromEntries(textureSettings(entry.values.type).map((name) => [name,
+      { get: () => entry.values[name], set: (owner, value, r) => r.world.textures.set(entry, name, value, false) }])),
   }),
   Scene: {
     name: { get: (world) => world.sceneSettings?.state.name ?? 'Scene', set: (world, name) => world.sceneSettings.set('name', name, false) },
@@ -590,7 +637,7 @@ const STRUCTS = {
   SpaceOutliner: (space) => ({ type: () => 'OUTLINER', ...Object.fromEntries(Object.keys(space).map((name) => [name,
     { get: () => space[name], set: (owner, value) => { space[name] = value; } }])) }),
 };
-const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
+const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', material: 'MATERIAL', rendered: 'RENDERED' };
 // One of a text's lines (TextLine); writing its body edits the text.
 const textLine = (text, i, r) => rna('TextLine', {
   get body() { return text.lines[i] ?? ''; },
@@ -740,6 +787,19 @@ export function createRNA(host) {
         new: add, py_new: add, remove: (...list) => texts.remove(pyArgs(list, ['text']).text?.[INFO].owner),
       });
     },
+    // bpy.data.textures, with new(name, type).
+    textures() {
+      const textures = host.world.textures;
+      if (!textures) return collection();
+      const add = (...list) => {
+        const { name, type } = pyArgs(list, ['name', 'type']), entry = textures.create();
+        if (name) textures.rename(entry, name);
+        if (type) textures.set(entry, 'type', type);
+        return r.texture(entry);
+      };
+      return Object.assign(collection(textures.all().map((entry) => r.texture(entry))), { new: add, py_new: add });
+    },
+    texture: (entry) => texturePointer(r, entry),
     pointer(struct, owner, key = owner) {
       if (!owner || !struct) return null;
       const structs = cache.get(key) ?? cache.set(key, new Map()).get(key);

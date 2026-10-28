@@ -87,7 +87,7 @@ export function createAddMesh(world, editor, history, commands, config, notify) 
     const before = snapshot(world.objects);
     const defaults = Object.fromEntries(Object.entries(preset.schema).map(([key, def]) => [key, def.default]));
     const recipe = recipeOf(preset, { ...defaults, ...options });
-    const node = buildMesh(world.scene, commands.unique(preset.title.replace(/\s/g, "")), recipe);
+    const node = buildMesh(world.scene, commands.unique(preset.name ?? preset.title.replace(/\s/g, "")), recipe);
     node.metadata = { editable: true, wbId: crypto.randomUUID(), wbCreation: recipe };
     world.objects.push(node);
     const values = { ...recipe.options, ...(preset.operator ? { align: "WORLD" } : {}), location: [...location], rotation: [...rotation] };

@@ -3,7 +3,7 @@
 // layout, kept in Babylon's format so the graph opens the same in Babylon's own editors. Every edit goes through
 // here and ends in `changed(rebuild)`.
 import { InputBlock, NodeMaterial, NodeMaterialBlockConnectionPointTypes as M, NodeRenderGraphBlockConnectionPointTypes as R } from '@babylonjs/core';
-import { BlenderShaderBlock, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
+import { isBlenderShader, shaderNodeClasses } from '../../nodes/blender/shader-nodes.js';
 import { BlenderCompositorBlock, compositorNodeClasses } from '../../nodes/blender/compositor-nodes.js';
 import { availability } from '../../nodes/blender/declarations.js';
 import { categoryOf } from './block-categories.js';
@@ -27,7 +27,19 @@ const ELBOWS = new Set(['ElbowBlock', 'NodeRenderGraphElbowBlock']), REROUTE = '
 // Babylon's port names (worldPosition, rgba) as Blender labels (World Position, RGBA).
 const ACRONYMS = /^(rgba?|xyz|xy|uv|ior)$/i;
 const titleCase = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ').map((w) => (ACRONYMS.test(w) ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1))).join(' ');
-export const isBlender = (block) => block instanceof BlenderShaderBlock || block instanceof BlenderCompositorBlock;
+export const isBlender = (block) => isBlenderShader(block) || block instanceof BlenderCompositorBlock;
+// Bylonder's helper blocks, which link Blender nodes to Babylon's geometry and outputs: named `blender:`, or feeding
+// only what is hidden (a Blender node's own inputs Bylonder links, other helpers). Not drawn.
+const internalInput = (input) => isBlender(input.ownerBlock) && input.ownerBlock.declared?.(input.name) === false;
+const isHelper = (block, seen = new Set()) => {
+  if (block.name?.startsWith('blender:')) return true;
+  if (seen.has(block)) return false;
+  seen.add(block);
+  const ends = block.outputs.flatMap((output) => output.endpoints);
+  return ends.length > 0 && ends.every((end) => internalInput(end) || isHelper(end.ownerBlock, seen));
+};
+// A link Bylonder's editor draws: between drawn blocks, into a Blender node's own socket.
+const drawnLink = (input) => !isHelper(input.connectedPoint.ownerBlock) && !internalInput(input);
 
 // Babylon's editable block properties (@editableInPropertyPage) along the block's class chain.
 export function babylonProperties(block) {
@@ -56,7 +68,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     outputs().forEach((b) => { found.delete(b); visit(b); });
     graph.attachedBlocks.forEach((b) => b.inputs.forEach((i) => visit(i.connectedPoint?.ownerBlock)));
     for (const block of found) if (!graph.attachedBlocks.includes(block)) graph.attachedBlocks.push(block);
-    return [...found];
+    return [...found].filter((block) => !isHelper(block));
   };
   const byId = (id) => blocks().find((b) => b.uniqueId === id);
 
@@ -107,7 +119,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
   function node(block) {
     const at = location(block), blender = isBlender(block) ? block.declaration : null;
     if (ELBOWS.has(block.getClassName())) return { id: block.uniqueId, block, reroute: true, x: at.x, y: at.y, inputs: block.inputs.map((p) => socket(p)), outputs: block.outputs.map((p) => socket(p)) };
-    let inputs, outs, buttons, tag, label;
+    let inputs, outs, buttons, tag, label, ramp = null;
     if (blender) {
       const shown = availability(blender, block.properties, block.values);
       outs = blender.outputs.filter((s) => shown.outputs.has(s.identifier)).map((s) => ({ ...socket(block.getOutputByName(s.identifier) ?? { name: s.identifier }, s) }));
@@ -118,6 +130,8 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       buttons = Object.entries(blender.properties).filter(([key, p]) => (p.type === 'ENUM' || p.type === 'BOOLEAN') && drawn(block.idname, key, block.properties)).map(([key, p]) => ({
         key, label: p.name, type: p.type, items: p.items, get: () => block.properties[key], set: (v) => { block.properties[key] = v; changed(true); },
       }));
+      // A Color Ramp's ramp (template_color_ramp): its stops' edits rebuild, choosing the active one does not.
+      if (block.properties.color_ramp) ramp = { get: () => block.properties.color_ramp, changed };
       tag = shown.tag;
       label = LABELS[block.idname]?.(block.properties, blender) ?? blender.name;
     } else {
@@ -137,7 +151,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
       id: block.uniqueId, block, blender: blender ? block.idname : null, label, tag, x: at.x, y: at.y,
       width: blender?.width ?? Math.max(140, ...[...inputs, ...outs].map((s) => s.label.length * 7 + 50)),
       hidden: !!at.isCollapsed, socketsHidden: !!at.hideSockets, muted: !!(block.mute ?? block.disabled),
-      outputs: shown(outs), inputs: shown(inputs), buttons,
+      outputs: shown(outs), inputs: shown(inputs), buttons, ramp,
     };
   }
   // A Babylon input block's value, as Blender's Value and RGB nodes show theirs.
@@ -159,7 +173,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
     return block ?? (type && type !== M.AutoDetect ? new InputBlock(name, undefined, type) : null);
   };
 
-  const links = () => blocks().flatMap((block) => block.inputs.filter((i) => i.connectedPoint).map((input) => ({ from: input.connectedPoint, to: input })));
+  const links = () => blocks().flatMap((block) => block.inputs.filter((i) => i.connectedPoint && drawnLink(i)).map((input) => ({ from: input.connectedPoint, to: input })));
 
   const tree = {
     kind, graph, catalog, blenderClasses,
@@ -191,6 +205,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
         if (input) block.values[input[1]] = value; else if (block.properties) block.properties[key] = value;
       }
       graph.attachedBlocks.push(block);
+      block.attach?.(graph);
       editor().locations.push({ blockId: block.uniqueId, x, y, isCollapsed: false });
       changed(true);
       return block;

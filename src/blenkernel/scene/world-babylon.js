@@ -17,7 +17,7 @@ export function readAuthoredWorld(scene, defaults) {
   };
 }
 
-export function createWorldRenderer(scene, { asset = path => path } = {}) {
+export function createWorldRenderer(scene, { asset = path => path, studio } = {}) {
   const authoredTexture = scene.environmentTexture;
   const authoredSkyboxes = scene.meshes.filter(m => m.infiniteDistance && !m.name.startsWith('__'));
   const textures = new Map(authoredTexture ? [['scene', authoredTexture]] : []);
@@ -52,8 +52,42 @@ export function createWorldRenderer(scene, { asset = path => path } = {}) {
     skybox.material.reflectionTexture.rotationY = background.rotation;
     skybox.material.environmentIntensity = background.strength;
   };
+  // Material Preview (Blender's default: the studio light as environment and background, blurred at 0.5, with neither
+  // the scene's lights nor its world). port-override: Babylon's studio environment stands in for Blender's forest.exr.
+  // Set when shading changes, not per view: switching the environment or lights recompiles materials. The scene's
+  // lights are left out by a layer no mesh is on, which leaves their settings as they are.
+  const NO_MESH_LAYER = 0x10000000;
+  let preview = null, previewSkybox = null;
+  const applyPreview = () => {
+    const env = texture(studio);
+    scene.environmentTexture = env;
+    scene.environmentIntensity = 1;
+    for (const light of scene.lights) if (!preview.lights.has(light)) { preview.lights.set(light, light.includeOnlyWithLayerMask); light.includeOnlyWithLayerMask = NO_MESH_LAYER; }
+    if (!previewSkybox || previewSkybox.isDisposed()) {
+      previewSkybox = scene.createDefaultSkybox(env, true, 1000, 0.5, false);
+      Object.assign(previewSkybox, { name: '__previewSkybox', isPickable: false, applyFog: false, doNotSerialize: true, metadata: { editable: false } });
+      previewSkybox.setEnabled(false);
+    }
+  };
+  const setPreview = (value) => {
+    if (!!preview === value) return;
+    if (value) {
+      preview = { env: scene.environmentTexture, intensity: scene.environmentIntensity, lights: new Map() };
+      applyPreview();
+      return;
+    }
+    scene.environmentTexture = preview.env;
+    scene.environmentIntensity = preview.intensity;
+    for (const [light, mask] of preview.lights) light.includeOnlyWithLayerMask = mask;
+    previewSkybox?.setEnabled(false);
+    preview = null;
+  };
   return {
     hasAuthoredTexture: !!authoredTexture,
+    // Material Preview's lighting for the scene, while a view shows it.
+    setPreview,
+    // Its background, for the view about to render. Cheap; called per view.
+    showPreview(value) { previewSkybox?.setEnabled(!!preview && value); },
     // Rebuilds the world's Babylon state. Solid and Wireframe views show no world background or volume, as in Blender.
     render(world) {
       const background = world?.background, volume = world?.volume;
@@ -64,6 +98,10 @@ export function createWorldRenderer(scene, { asset = path => path } = {}) {
       const color = background ? background.color.map(v => v * (env ? 1 : background.strength)) : [0, 0, 0];
       scene.clearColor = new Color4(...color.map(v => Math.min(1, v)), 1);
       setSkybox(background?.image, env && world.visibility.camera ? env : null, background);
+      if (preview) {
+        Object.assign(preview, { env: scene.environmentTexture, intensity: scene.environmentIntensity });
+        applyPreview();
+      }
       scene.fogMode = volume ? fogModes[volume.type] : Scene.FOGMODE_NONE;
       if (volume) Object.assign(scene, { fogColor: Color3.FromArray(volume.color), fogDensity: volume.density, fogStart: volume.start, fogEnd: volume.end });
       gate();
@@ -72,6 +110,7 @@ export function createWorldRenderer(scene, { asset = path => path } = {}) {
     setRendered(value) { if (rendered !== value) { rendered = value; gate(); } },
     dispose() {
       skybox?.dispose(false, true);
+      previewSkybox?.dispose(false, true);
       for (const [key, tex] of textures) if (key !== 'scene') tex.dispose();
     },
   };

@@ -14,6 +14,8 @@ names, as Clang parses the RNA definition files for the module's wasm32 target.
   `from`, that pointer's offset in the base struct), and the names of the RNA functions each property has (`funcs`:
   get, set, range, length, update), which the module compiles from rna_fcurve.cc's runtime part (wasm/rna-fcurve.cc).
   A property with functions and no DNA field of its own is kept with its type and array length (`computed`).
+- src/makesrna/dna-textures.json: a Texture of each type (rna_texture.cc: CloudsTexture and the others, all a Tex), for
+  JS to read and write textures in the module.
 - src/makesrna/dna-data.json: the data the scene sync writes into Main by RNA name (main-sync.js): lights, cameras,
   materials, worlds and the scene's settings.
 
@@ -48,6 +50,7 @@ OUTPUTS = {
                                     'FModifierEnvelopeControlPoint', 'FModifierCycles', 'FModifierLimits', 'FModifierNoise',
                                     'FModifierStepped', 'FModifierSmooth'], 'detail': True, 'funcs': True,
                         'computed': True, 'enum_files': ['rna_curve.cc', 'rna_ID.cc']},
+    'dna-textures.json': {'files': ['rna_texture.cc'], 'functions': lambda name: name == 'RNA_def_texture', 'structs': None, 'detail': True},
     'dna-data.json': {'files': ['rna_light.cc', 'rna_camera.cc', 'rna_material.cc', 'rna_world.cc', 'rna_scene.cc', 'rna_color.cc'],
                       'functions': lambda name: name.startswith('rna_def_') or name.startswith('RNA_def_'),
                       'structs': ['Light', 'PointLight', 'SpotLight', 'SunLight', 'AreaLight', 'Camera', 'Material', 'World', 'Scene',

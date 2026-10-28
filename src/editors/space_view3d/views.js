@@ -51,6 +51,9 @@ export function createViews({ engine, scene, live = () => false }) {
   // Decide, once per frame, which views render.
   const frame = engine.onBeginFrameObservable.add(() => {
     if (layoutDirty) layout();
+    // Busy while anything changes, and while a material compiles (a mesh is not drawn until its shader is ready) and a
+    // moment after, to draw what it compiled.
+    if (!scene.isReady(false)) api.wake();
     const busy = live() || performance.now() - lastWake < 500 || scene.getWaitingItemsCount() > 0;
     idle = !busy;
     for (const { view, engineView } of views.values()) {

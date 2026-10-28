@@ -2,7 +2,8 @@
 // object offers, the data each tab draws (context.object, context.light, context.material, ...), and the path the
 // editor shows above its panels.
 import { createContext } from '../../blenkernel/context.js';
-import { INFO } from '../../makesrna/rna.js';
+import { INFO, blRna } from '../../makesrna/rna.js';
+import { TEXTURE_TYPES, textureStruct } from '../../blenkernel/texture/texture.js';
 import modifierTypes from '../../makesrna/rna-modifiers.json' with { type: 'json' };
 
 // Blender's tabs in order (ED_buttons_tabs_list), null between groups.
@@ -22,7 +23,8 @@ export const TAB_CONTEXTS = { TOOL: '.workspace', RENDER: 'render', OUTPUT: 'out
   CONSTRAINT: 'constraint', DATA: 'data', BONE: 'bone', BONE_CONSTRAINT: 'bone_constraint', MATERIAL: 'material', TEXTURE: 'texture' };
 // RNA_struct_ui_icon of the structs the path shows.
 const ICONS = { Scene: 'SCENE_DATA', ViewLayer: 'RENDER_RESULT', World: 'WORLD', Collection: 'OUTLINER_COLLECTION', Object: 'OBJECT_DATA',
-  Material: 'MATERIAL', Mesh: 'MESH_DATA', Camera: 'CAMERA_DATA', PointLight: 'LIGHT_DATA', SpotLight: 'LIGHT_DATA', SunLight: 'LIGHT_DATA', AreaLight: 'LIGHT_DATA' };
+  Material: 'MATERIAL', Mesh: 'MESH_DATA', Camera: 'CAMERA_DATA', PointLight: 'LIGHT_DATA', SpotLight: 'LIGHT_DATA', SunLight: 'LIGHT_DATA', AreaLight: 'LIGHT_DATA',
+  ...Object.fromEntries(TEXTURE_TYPES.map((type) => [textureStruct(type), 'TEXTURE'])) };
 export const structIcon = (struct) => ICONS[struct?.[INFO]?.struct] ?? modifierTypes.types[struct?.type]?.icon ?? 'DOT';
 
 // Whether a tab has something to show for an object (buttons_context_path_*).
@@ -35,7 +37,8 @@ function available(tab, ob, context) {
     case 'DATA': return !!ob && ob.type in DATA;
     case 'BONE': case 'BONE_CONSTRAINT': return ob?.type === 'ARMATURE';
     case 'MATERIAL': return !!ob && MATERIAL_TYPES.has(ob.type);
-    case 'SHADERFX': case 'TEXTURE': return false;
+    case 'TEXTURE': return !!context.texture_user;
+    case 'SHADERFX': return false;
     default: return true;
   }
 }
@@ -54,7 +57,12 @@ export function propertiesContext(r, space) {
       get material_slot() { const ob = object(); return ob?.material_slots[ob.active_material_index] ?? null; },
       get world() { return base.scene.world; },
       get collection() { return collections && collections.active !== collections.MASTER ? r.pointer('Collection', collections.byId(collections.active)) : null; },
-      get texture() { return null; },
+      // The texture users (buttons_texture_users_from_context): the object's modifiers with a texture, the one chosen
+      // in template_texture_user (space.textureUser) or the first, and the texture it points at.
+      get texture_users() { return [...(object()?.modifiers ?? [])].filter((m) => m[INFO].bound.has('texture')); },
+      get texture_user() { const users = members.texture_users; return users[space.textureUser ?? 0] ?? users[0] ?? null; },
+      get texture_user_property() { const user = members.texture_user; return user && blRna(user[INFO].struct).properties.texture; },
+      get texture() { return members.texture_user?.texture ?? null; },
       get particle_system() { return null; },
     };
     for (const member of new Set(Object.values(DATA).map(([name]) => name).filter(Boolean))) Object.defineProperty(members, member, { get: () => data(member), enumerable: true });
@@ -82,6 +90,7 @@ export function propertiesPath(context, tab) {
   if (!sceneLevel && tab !== 'COLLECTION' && tab !== 'TOOL' && ob) path.push(ob);
   if (tab === 'DATA' && ob?.data) path.push(ob.data);
   if (tab === 'MATERIAL' && context.material) path.push(context.material);
+  if (tab === 'TEXTURE' && context.texture) path.push(context.texture);
   if (tab === 'MODIFIER' && ob?.modifiers.active) path.push(ob.modifiers.active);
   return path.filter(Boolean);
 }

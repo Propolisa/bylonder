@@ -16,6 +16,7 @@ import { sdkModuleSource } from "./sdk-module.js";
 import { RUN_CACHE } from "../workspace/module-host.js";
 import { createMaterialLibrary } from "../blenkernel/material/library.js";
 import { createSceneSettings } from "../blenkernel/scene/settings.js";
+import { createTextures } from "../blenkernel/texture/textures.js";
 import { createWorlds } from "../blenkernel/scene/world.js";
 import { createRenderSettings } from "../blenkernel/scene/render.js";
 import { createCollections } from "../blenkernel/scene/collections.js";
@@ -108,6 +109,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   registerObjects(animation, objects);
   const documentState = createDocument();
   world.materials = documentState.register("materials", createMaterialLibrary(world, { commit, asset: (path) => sdk.asset(path), files: input.files || [] }));
+  world.textures = documentState.register("textures", createTextures(world, { commit }));
   world.sceneSettings = documentState.register("scene", createSceneSettings(world, { commit, name: input.scene?.name, rename: renameScene, cameras: {
     list: () => scene.cameras.filter((c) => !c.name.startsWith("__")),
     get: () => authoredCamera,
@@ -127,12 +129,14 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   // (in one view at a time) the compositor. setViewShading runs when view shading or cameras change: it attaches
   // effects to the rendered cameras and binds the compositor camera. beforeViewRender runs per view, per frame,
   // and only flips switches.
-  world.setViewShading = ({ renderedCameras = [], compositorCamera = null }) => {
+  world.setViewShading = ({ renderedCameras = [], compositorCamera = null, preview = false }) => {
+    world.worlds.setPreview(preview && !renderedCameras.length);
     world.renderSettings.setRenderedCameras(renderedCameras);
     world.compositor?.bindCamera(compositorCamera);
   };
-  world.beforeViewRender = ({ rendered, compositor }) => {
+  world.beforeViewRender = ({ rendered, preview = false, compositor }) => {
     world.worlds.setViewportActive(rendered);
+    world.worlds.showPreview(preview);
     world.compositor?.setViewportActive(compositor);
   };
   world.compositor = documentState.register("compositor", createCompositor(world, { commit, notify }));
