@@ -36,6 +36,8 @@ function matches(path, node, ancestors) {
   return i === path.length - 1;
 }
 
+export const DISPATCHED = '*';
+
 export function computeCoverage(surface, implemented, notesMarkdown = '') {
   const notes = parseNotes(notesMarkdown);
   const qualified = new Map(), plain = new Set();
@@ -47,7 +49,11 @@ export function computeCoverage(surface, implemented, notesMarkdown = '') {
     else plain.add(key);
   }
   const has = (key, ancestors) => plain.has(key) || ancestors.some((a) => qualified.get(key)?.has(a.id));
-  const implementedNode = (node, ancestors) => has(node.k === 'key' ? node.id + '|' + normalizeKeys(node.x) : node.id, ancestors);
+  // A binding in a keymap Bylonder dispatches from Blender's own (`*` scoped to it) counts when its operator runs.
+  const dispatched = (node, ancestors) => plain.has(node.id) && has(DISPATCHED, ancestors);
+  const implementedNode = (node, ancestors) => (node.k === 'key'
+    ? has(node.id + '|' + normalizeKeys(node.x), ancestors) || dispatched(node, ancestors)
+    : has(node.id, ancestors));
   const all = [];
 
   function visit(node, ancestors, key) {
@@ -86,5 +92,5 @@ export function computeCoverage(surface, implemented, notesMarkdown = '') {
 
 // Ids in our source that Blender does not have: usually typos.
 function unmatchedIds(implemented, known) {
-  return [...new Set(implemented.map((e) => e.split(/[@|]/)[0]))].filter((id) => !known.has(id.split(':')[0]));
+  return [...new Set(implemented.map((e) => e.split(/[@|]/)[0]))].filter((id) => id !== DISPATCHED && !known.has(id.split(':')[0]));
 }

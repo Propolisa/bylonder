@@ -41,6 +41,7 @@ import { createKeymap } from "./windowmanager/input/keymap.js";
 import { createEditMode } from "./editors/object/object-edit.js";
 import { registerObjectOperators } from "./editors/object/object-operators.js";
 import { registerOperators, appendMenu, kw } from "./windowmanager/wm-operators.js";
+import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createRNA } from "./makesrna/rna-bylonder.js";
 const viewportDock = mountRuntimeLayout();
 const canvas = document.querySelector("#viewport");
@@ -457,24 +458,26 @@ function undoRedo(redo) {
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.timeline') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
-const transform = (type) => () => { creator.finish(); editor.start(type); };
 const inView = (event) => !!event.view;
 // The Add panel's own keys while a new object waits for its settings.
 const creatorKeys = createKeymap([
   { keys: "ESC", poll: () => creator.pending, run: () => creator.finish(false) },
   { keys: "RET", poll: () => creator.pending, run: () => creator.finish() },
 ]);
-const objectModeKeys = createKeymap([
-  { blender: "anim.keyframe_insert", keys: "I", run: () => insertKeys() },
-  { blender: "anim.keyframe_delete_v3d", keys: "Alt I", run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
-  { blender: "transform.translate", keys: "G", run: transform("move") },
-  { blender: "transform.rotate", keys: "R", run: transform("rotate") },
-  { blender: "transform.resize", keys: "S", run: transform("scale") },
-  { keys: "ESC", run: () => renderHost.escape() || editor.setMode("select") },
-], ["Object Mode"]);
 // The 3D View's and screen's operators Bylonder runs, on the view under the pointer.
 const AXIS_VIEWS = { FRONT: ["front", false], BACK: ["front", true], RIGHT: ["right", false], LEFT: ["right", true], TOP: ["top", false], BOTTOM: ["top", true] };
 registerOperators({
+  "anim.keyframe_insert": { run: () => insertKeys() },
+  "anim.keyframe_delete_v3d": { run: () => animation.deleteKeys(objectRefs(editor.selection.roots).map((ref) => ({ ref, frame: Math.round(animation.time.frame) }))) },
+  "view3d.rotate": { poll: inView, run: (props, event) => event.view.nav.rotate(event) },
+  "view3d.move": { poll: inView, run: (props, event) => event.view.nav.move(event) },
+  "view3d.zoom": { supports: ({ delta }) => !!delta, poll: () => !!activeView(), run: ({ delta }, event) => (event?.view ?? activeView()).nav.wheelZoom(delta) },
+  "ed.undo": { run: () => undoRedo(false) },
+  "ed.redo": { run: () => undoRedo(true) },
+  "screen.redo_last": { run: () => creator.reopen() },
+  "screen.animation_play": { run: () => animation.play() },
+  "render.render": { run: ({ animation: all }) => (all ? renderHost.renderAnimation : renderHost.renderImage)() },
+  "render.view_show": { run: () => renderHost.viewRender() },
   "view3d.view_camera": { run: () => activeView()?.toggleCameraView() },
   "view3d.view_persportho": { run: () => activeView()?.nav.toggle() },
   "view3d.view_axis": { supports: ({ type, align_active }) => !!AXIS_VIEWS[type] && !align_active, run: ({ type }) => activeView()?.nav.view(...AXIS_VIEWS[type]) },
@@ -490,40 +493,21 @@ appendMenu("VIEW3D_MT_view", ({ layout }) => {
   layout.operator("bylonder.inspector", kw({ text: "Babylon Inspector" }));
   layout.operator("bylonder.shortcuts", kw({ text: "Keyboard Shortcuts" }));
 });
-const view3dKeys = createKeymap([
-  { blender: "view3d.view_camera", keys: "Numpad 0" },
-  { blender: "view3d.rotate", keys: "MIDDLEMOUSE", poll: inView, run: (event) => event.view.nav.rotate(event) },
-  { blender: "view3d.move", keys: "Shift MIDDLEMOUSE", poll: inView, run: (event) => event.view.nav.move(event) },
-  { blender: "view3d.zoom", keys: "WHEELINMOUSE", poll: inView, run: (event) => event.view.nav.wheelZoom(1) },
-  { blender: "view3d.zoom", keys: "WHEELOUTMOUSE", poll: inView, run: (event) => event.view.nav.wheelZoom(-1) },
-  { blender: "view3d.view_persportho", keys: ["Numpad 5", "5"] },
-  { blender: "view3d.view_axis", props: { type: "FRONT" }, keys: ["Numpad 1", "1"] },
-  { blender: "view3d.view_axis", props: { type: "BACK" }, keys: ["Ctrl Numpad 1", "Ctrl 1"] },
-  { blender: "view3d.view_axis", props: { type: "RIGHT" }, keys: ["Numpad 3", "3"] },
-  { blender: "view3d.view_axis", props: { type: "LEFT" }, keys: ["Ctrl Numpad 3", "Ctrl 3"] },
-  { blender: "view3d.view_axis", props: { type: "TOP" }, keys: ["Numpad 7", "7"] },
-  { blender: "view3d.view_axis", props: { type: "BOTTOM" }, keys: ["Ctrl Numpad 7", "Ctrl 7"] },
-  { blender: "view3d.view_selected", keys: ["Numpad .", "F"] },
-  { blender: "screen.screen_full_area", keys: "Ctrl Space" },
-], ["3D View"]);
-const screenKeys = createKeymap([
-  { blender: "ed.undo", keys: "Ctrl Z", run: () => undoRedo(false) },
-  { blender: "ed.redo", keys: "Shift Ctrl Z", run: () => undoRedo(true) },
-  { blender: "screen.redo_last", keys: "F9", run: () => creator.reopen() },
-  { blender: "screen.animation_play", keys: "Space", run: () => animation.play() },
-  { blender: "render.render", keys: ["F12", "Ctrl F12"], run: (event) => (event.ctrl ? renderHost.renderAnimation : renderHost.renderImage)() },
-  { blender: "render.view_show", keys: "F11", run: () => renderHost.viewRender() },
-  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() },
+// Bylonder's own keys, below Blender's keymaps.
+const bylonderKeys = createKeymap([
+  { keys: "ESC", poll: () => !editor.modal, run: () => renderHost.escape() || (!world.editMode.active && editor.setMode("select")) },
   { keys: "Shift /", run: () => help.showModal() },
   { keys: "Shift Ctrl I", run: () => inspector() },
-], ["Screen", "Frames"]);
-// The handler stack below modal handlers: the mode, then the 3D View, then Screen. Through the scene camera only
-// the camera toggle and Screen keys work.
+]);
+// Blender's keymaps a 3D View runs, Object Mode's only outside Edit Mode, whose own keymap runs before them.
+const blenderKeys = keymapHandler(["Object Mode", "Object Non-modal", "3D View", "3D View Generic", "Frames", "Screen", "Window"],
+  (name) => name !== "Object Mode" || !world.editMode.active);
+// The handler stack below modal handlers: the Add panel, the mode's own keymaps, then Blender's and Bylonder's.
+// Through the scene camera only Blender's keymaps work.
 const keyLayers = () => {
   const view = activeView();
-  if (!view) return [screenKeys];
-  if (view.state.cameraView) return [view3dKeys, screenKeys];
-  return [creatorKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap, world.objectActions.key, objectModeKeys]), view3dKeys, screenKeys];
+  if (!view || view.state.cameraView) return [blenderKeys, bylonderKeys];
+  return [creatorKeys, world.editMode.keymap, ...(world.editMode.active ? [] : [editor.keymap]), blenderKeys, ...(world.editMode.active ? [] : [world.objectActions.key]), bylonderKeys];
 };
 
 let last = 0;

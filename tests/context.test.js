@@ -2,6 +2,7 @@
 // Object and Edit Mode from the context built over a Babylon scene, and bound properties read and write through in
 // Blender's axes.
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { NullEngine, Scene, MeshBuilder, TransformNode, Vector3, Camera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
@@ -14,6 +15,9 @@ import { drawMenu } from '../src/editors/interface/ui-layout.js';
 import { menuUI, menuClasses } from '../src/windowmanager/wm-operators.js';
 import * as spaceView3d from '../src/bl_ui/space_view3d.js';
 import { registerObjectOperators } from '../src/editors/object/object-operators.js';
+import { registerOperator } from '../src/windowmanager/wm-operators.js';
+import { keymapHandler } from '../src/windowmanager/keyconfig.js';
+import { generate_keymaps } from '../src/bl_ui/blender_default.js';
 import * as dataModifier from '../src/bl_ui/properties_data_modifier.js';
 
 const engine = new NullEngine(), scene = new Scene(engine);
@@ -158,7 +162,18 @@ entry(entry(objectMenu, 'Show/Hide').items(), 'Hide Unselected').run();
 entry(objectMenu, 'group').run();
 assert.deepEqual(ran, ['parent', 'hide-others', 'group']);
 
+// Blender's keymaps, transpiled, equal Blender's own, and events run the operator the first matching item names, with
+// its properties.
+assert.deepEqual(JSON.parse(JSON.stringify(generate_keymaps())), JSON.parse(await readFile('tests/fixtures/keymaps.json', 'utf8')));
+const viewed = [];
+registerOperator('view3d.view_axis', { supports: ({ align_active }) => !align_active, run: ({ type }) => viewed.push(type) });
+const keys = keymapHandler(['3D View']);
+const press = (type, modifiers = {}) => keys({ type, value: 'PRESS', shift: false, ctrl: false, alt: false, ...modifiers });
+assert.ok(press('numpad_1') && press('numpad_7', { ctrl: true }));
+assert.equal(press('numpad_1', { shift: true }), false, 'align_active is not run');
+assert.deepEqual(viewed, ['FRONT', 'BOTTOM']);
+
 world.modifiers.dispose();
 scene.dispose();
 engine.dispose();
-console.log(`Context and RNA: Blender's 3D View menus draw ${object.ids.size} ids in Object Mode and ${edit.ids.size} in Edit Mode from Bylonder's data; bound properties read and write through`);
+console.log(`Context and RNA: Blender's 3D View menus draw ${object.ids.size} ids in Object Mode and ${edit.ids.size} in Edit Mode from Bylonder's data; bound properties read and write through; Blender's 280 keymaps transpile exactly`);

@@ -1,7 +1,8 @@
-// Blender's default key configuration (keymap_data/blender_default.py, transpiled into src/bl_ui), for the shortcuts
-// Blender's menus show (WM_key_event_operator_string).
+// Blender's default key configuration (keymap_data/blender_default.py, transpiled into src/bl_ui): the keymaps events
+// run through and the shortcuts Blender's menus show (WM_key_event_operator_string).
 import { generate_keymaps } from '../bl_ui/blender_default.js';
 import { keysLabel } from './input/keymap.js';
+import { invokeOperator } from './wm-operators.js';
 
 let keymaps;
 const keyconfig = () => (keymaps ??= new Map(generate_keymaps().map(([name, , { items }]) => [name, items])));
@@ -26,4 +27,34 @@ export function blenderKeys(names, idname, props = {}) {
       if (item) return eventText(item[1]);
     }
   }
+}
+
+// Blender's event types for the window manager's (wm-event-system.js, lower case), where they differ.
+const EVENT_TYPES = { SPACEBAR: 'SPACE' };
+// Blender's wheel in and out are wheel up and down with the default zoom direction (wm_eventmatch).
+const KEYMAP_TYPES = { WHEELINMOUSE: 'WHEELUPMOUSE', WHEELOUTMOUSE: 'WHEELDOWNMOUSE' };
+const KM_ANY = -1;
+
+// wm_eventmatch for what Bylonder's events carry: no key modifiers or drag directions yet, and Cmd counted as Ctrl.
+function matches(kmi, event) {
+  if (kmi.key_modifier || (kmi.direction && kmi.direction !== 'ANY')) return false;
+  const type = event.type.toUpperCase();
+  if ((KEYMAP_TYPES[kmi.type] ?? kmi.type) !== (EVENT_TYPES[type] ?? type)) return false;
+  if (kmi.value !== 'ANY' && kmi.value !== event.value) return false;
+  return kmi.any === true || ['shift', 'ctrl', 'alt'].every((key) => kmi[key] === KM_ANY || !!kmi[key] === !!event[key]);
+}
+
+// A handler running the named keymaps in order, as the editor's handlers run them, those `active(name)` allows: the
+// first item whose event matches and whose operator Bylonder runs with its properties, and polls, is invoked.
+export function keymapHandler(names, active = () => true) {
+  return (event) => {
+    for (const name of names.filter(active)) {
+      for (const [idname, kmi, data] of keyconfig().get(name) ?? []) {
+        if (!matches(kmi, event) || !invokeOperator(idname, Object.fromEntries(data?.properties ?? []), event)) continue;
+        event.native?.preventDefault();
+        return true;
+      }
+    }
+    return false;
+  };
 }

@@ -12,7 +12,7 @@ export var _Item =  __class__ ('_Item', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'identifier': var identifier = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'icon': var icon = __allkwargs0__ [__attrib0__]; break;
 						case 'description': var description = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -38,7 +38,7 @@ export var _Property =  __class__ ('_Property', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_items': var py_items = __allkwargs0__ [__attrib0__]; break;
+						case 'items': case 'py_items': var py_items = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}

@@ -5,7 +5,7 @@ import * as types from './bpy.types.js';
 import * as utils from './bpy.utils.js';
 import * as path from './bpy.path.js';
 import * as _app from './bpy._app.js';
-export {_app, types, utils, path, app};
+export {path, utils, types, _app, app};
 var __name__ = 'bpy';
 export var data = _app.data;
 export var context = _app.context;

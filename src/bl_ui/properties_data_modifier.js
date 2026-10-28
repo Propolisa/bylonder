@@ -62,7 +62,7 @@ export var ModifierAddMenu =  __class__ ('ModifierAddMenu', [object], {
 					switch (__attrib0__) {
 						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
 						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 						case 'icon': var icon = __allkwargs0__ [__attrib0__]; break;
 					}
 				}

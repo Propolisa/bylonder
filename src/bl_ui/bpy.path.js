@@ -14,7 +14,7 @@ export var display_name = function (py_name, has_ext, title_case) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
-					case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
 					case 'has_ext': var has_ext = __allkwargs0__ [__attrib0__]; break;
 					case 'title_case': var title_case = __allkwargs0__ [__attrib0__]; break;
 				}

@@ -3,9 +3,10 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 // Finds what Bylonder implements of Blender's surface, from Blender identifiers in the source:
-// menu, panel and header ids as string literals (VIEW3D_MT_object), and `blender: 'object.delete'` on operator
-// entries, with their `keys` as key bindings. Bindings count in the Blender keymaps their file names in
-// createKeymap(items, keymaps), or anywhere when it names none.
+// menu, panel and header ids as string literals (VIEW3D_MT_object), `blender: 'object.delete'` on operator
+// entries, with their `keys` as key bindings, and the operators registerOperator(s) registers. Bindings count in the
+// Blender keymaps their file names in createKeymap(items, keymaps), or anywhere when it names none; every binding of a
+// registered operator counts in the Blender keymaps keymapHandler(keymaps) dispatches.
 const UI_ID = /^[A-Z][A-Z0-9]*_(MT|PT|HT)_\w+$/;
 
 async function files(dir) {
@@ -25,7 +26,14 @@ export function scanSource(source, found = new Set()) {
   const visit = (node) => {
     const value = text(node);
     if (value && UI_ID.test(value)) found.add(value);
-    if (ts.isCallExpression(node) && node.expression.getText?.(file) === 'createKeymap') keymaps.push(...strings(node.arguments[1]));
+    const call = ts.isCallExpression(node) && node.expression.getText?.(file);
+    if (call === 'createKeymap') keymaps.push(...strings(node.arguments[1]));
+    if (call === 'keymapHandler') for (const keymap of strings(node.arguments[0])) found.add('*@keymap:' + keymap);
+    const blender = (id) => !id.startsWith('bylonder.') && found.add(id);
+    if (call === 'registerOperator') strings(node.arguments[0]).forEach(blender);
+    if (call === 'registerOperators' && ts.isObjectLiteralExpression(node.arguments[0])) {
+      for (const p of node.arguments[0].properties) if (p.name && ts.isStringLiteralLike(p.name)) blender(p.name.text);
+    }
     if (ts.isObjectLiteralExpression(node)) {
       for (const id of strings(property(node, 'blender'))) {
         found.add(id);

@@ -8,7 +8,7 @@ import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
 
 const operators = new Map(), extensions = new Map();
 
-// An operator: run(props), optionally poll(props), keys(props) for its shortcut when no keymap binds it, supports(props) when Bylonder runs it
+// An operator: run(props, event), optionally poll(props, event) (the event when a key or click ran it), keys(props) for its shortcut when no keymap binds it, supports(props) when Bylonder runs it
 // with some properties only and enumItems(prop) for its enum properties' items where they differ from Blender's
 // (src/makesrna/rna-operators.json), as [identifier, name, description, icon].
 export function registerOperator(idname, operator) {
@@ -20,6 +20,15 @@ export function registerOperators(table) {
 }
 
 export const runOperator = (idname, props = {}) => operators.get(idname).run(props);
+
+// Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls; returns
+// whether it ran. run and poll get the event too.
+export function invokeOperator(idname, props, event) {
+  const operator = operators.get(idname);
+  if (!operator || !(operator.supports?.(props) ?? true) || !(operator.poll?.(props, event) ?? true)) return false;
+  operator.run(props, event);
+  return true;
+}
 
 const extension = (idname) => extensions.get(idname) ?? extensions.set(idname, { prepend: [], append: [] }).get(idname);
 // Menu.append and Menu.prepend: draw(self, context), drawing into self.layout.
