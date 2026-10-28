@@ -20,12 +20,18 @@ function resize(width, height) {
   engine?.setSize(width, height);
 }
 
-function useCamera(name) {
+// Render effects attach to the camera that renders (the scene may already have it active from its code), and
+// their shaders compile before its first frame.
+let shadedCamera = null;
+async function useCamera(name) {
   const { world, scene } = built;
   const camera = name ? scene.cameras.find((c) => c.name === name) : built.authoredCamera;
   if (!camera) throw Error(name ? `No camera named ${name}` : 'No camera found in scene. Add a camera in code or pick one in Properties > Scene.');
   scene.activeCamera = camera;
+  if (camera === shadedCamera) return camera;
+  shadedCamera = camera;
   world.setViewShading({ renderedCameras: [camera], compositorCamera: camera });
+  await scene.whenReadyAsync();
   return camera;
 }
 
@@ -36,7 +42,7 @@ async function open(input, { width, height }, { camera: cameraName } = {}) {
   built = await createWorld({ input, engine, canvas, hooks: { notify: text => warnings.push(String(text)) } });
   const { world, scene } = built;
   engine.setSize(width, height);
-  const camera = useCamera(cameraName);
+  const camera = await useCamera(cameraName);
   world.beforeViewRender({ rendered: true, compositor: true });
   if (input.overrides?.compositor) await world.compositor.apply(input.overrides.compositor);
   await scene.whenReadyAsync();
@@ -84,7 +90,7 @@ function drawFinalFrame(frame, width, height, aborted = () => {}) {
 // One frame for a scene strip: a single sample for previews, full quality for final renders.
 async function renderFrame({ frame, width, height, camera, quality: kind = 'preview' }) {
   resize(width, height);
-  useCamera(camera);
+  await useCamera(camera);
   if (kind === 'final') return createImageBitmap(drawFinalFrame(frame, width, height));
   simulated = null;
   const { start, fps } = quality();

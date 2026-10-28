@@ -1,4 +1,5 @@
 import { DefaultRenderingPipeline, ImageProcessingConfiguration, MotionBlurPostProcess, SSAO2RenderingPipeline, SSRRenderingPipeline } from '@babylonjs/core';
+import { seededRandom } from '../../render/clock.js';
 
 // Babylon adapter for render settings. The only code that writes scene.imageProcessingConfiguration
 // tone mapping/exposure/contrast or creates render-engine effects. Effects are attached per camera, only to the
@@ -23,6 +24,14 @@ export function readAuthoredRender(scene) {
   return { viewTransform, look, exposure: +Math.log2(Math.max(ip.exposure, 1e-6)).toFixed(6) };
 }
 
+// Babylon draws Fast GI's sample kernel and noise from Math.random; a fixed seed gives every view and every render
+// the same pattern, so rendered images match the rendered viewport.
+const withSeededRandom = create => {
+  const random = Math.random;
+  Math.random = seededRandom(1);
+  try { return create(); } finally { Math.random = random; }
+};
+
 export function createRenderEngine(scene) {
   const attached = new Map(); // camera -> { key, effects }
   const usesGeometry = effects => !!(effects.ssao || effects.ssr || effects.motion);
@@ -45,10 +54,10 @@ export function createRenderEngine(scene) {
     if (samples > 1) { effects.pipeline = new DefaultRenderingPipeline(name('renderSamples'), false, scene, [camera]); effects.pipeline.imageProcessingEnabled = false; }
     // Post processes draw a view drawn into part of the canvas (views.js regions) on whole textures, so the geometry
     // buffer must fill whole textures too and Fast GI must not crop its result to the camera viewport.
-    if (e.useRaytracing) effects.ssao = Object.assign(new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true), { useViewportInCombineStage: false });
+    if (e.useRaytracing) effects.ssao = Object.assign(withSeededRandom(() => new SSAO2RenderingPipeline(name('fastGI'), scene, 0.5, [camera], true)), { useViewportInCombineStage: false });
     if (e.useRaytracing && e.rayTracingMethod === 'SCREEN') effects.ssr = new SSRRenderingPipeline(name('screenTrace'), scene, [camera], true);
     if (r.useMotionBlur) effects.motion = new MotionBlurPostProcess(name('motionBlur'), scene, 1, camera, undefined, undefined, undefined, undefined, undefined, true);
-    if (usesGeometry(effects)) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
+    if (usesGeometry(effects) && scene.geometryBufferRenderer) scene.geometryBufferRenderer.getGBuffer().ignoreCameraViewport = true;
     return effects;
   };
   return {

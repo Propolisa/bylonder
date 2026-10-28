@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { NullEngine, Scene, Matrix, Vector3 } from '@babylonjs/core';
+import { NullEngine, Scene, Matrix, Vector3, FreeCamera } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { createRenderSettings, outputSize } from '../src/blenkernel/scene/render.js';
 import { outputSpec, encodeSize, containers } from '../src/render/formats.js';
@@ -76,6 +76,29 @@ const acc = createAccumulator(1, 1);
 acc.add([0, 10, 255, 255]); acc.add([1, 11, 0, 255]);
 assert.deepEqual([...acc.result()], [1, 11, 128, 255]);
 acc.reset(); assert.equal(acc.count, 0);
+
+// Render effects per rendered view: each camera owns its pipelines, so a view leaving Rendered shading takes only
+// its own effects along, and nothing routes every camera through the scene-wide prepass.
+{
+  const engine = new NullEngine(); engine.getCaps().maxMSAASamples = 4;
+  const scene = new Scene(engine), a = new FreeCamera('a', Vector3.Zero(), scene), b = new FreeCamera('b', Vector3.Zero(), scene);
+  const settings = createRenderSettings({ scene, animation: createAnimationModel() });
+  for (const [path, value] of [['eevee.useRaytracing', true], ['eevee.taaSamples', 4], ['render.useMotionBlur', true]]) settings.set(path, value);
+  const pipelinesOf = camera => scene.postProcessRenderPipelineManager.supportedPipelines.filter(p => p.cameras.includes(camera));
+  const effectsOf = camera => camera._postProcesses.filter(Boolean);
+  settings.setRenderedCameras([a, b]);
+  assert.equal(pipelinesOf(a).length, 2, 'samples and fast GI on the first view');
+  assert.equal(pipelinesOf(b).length, 2, 'samples and fast GI on the second view');
+  const kept = effectsOf(b);
+  settings.setRenderedCameras([b]);
+  assert.deepEqual(effectsOf(a), [], 'a view leaving Rendered shading drops its effects');
+  assert.equal(pipelinesOf(b).length, 2, 'the other view keeps its pipelines');
+  assert.deepEqual(effectsOf(b), kept, 'and its post processes');
+  assert.ok(!scene.prePassRenderer?.enabled, 'no scene-wide prepass');
+  settings.dispose();
+  assert.deepEqual(effectsOf(b), []);
+  scene.dispose(); engine.dispose();
+}
 
 settings.dispose(); scene.dispose(); engine.dispose();
 console.log('Render: output settings, formats, virtual clock and sampling passed');
