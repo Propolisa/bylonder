@@ -156,13 +156,13 @@ def first_error(stderr):
 
 def main():
     host = os.path.abspath(sys.argv[1])
-    # The module build's directory: its fetched dependencies and its wasm32 makesdna output (wasm_module.sdna).
-    _, _, includes = module_inputs(host, out)
-    extra = [f'-I{os.path.join(out, "generated", "sdna")}', *includes]
     report = sys.argv[sys.argv.index('--report') + 1] if '--report' in sys.argv else os.path.join(host, '..', 'seam-report.json')
     out = os.path.join(host, '..', 'wasm-build')
     objects = os.path.join(out, 'objects')
     os.makedirs(objects, exist_ok=True)
+    # Every source sees the fetched dependencies and the wasm32 DNA tables (wasm_module.sdna, made in generate()).
+    _, _, includes = module_inputs(host, out)
+    extra = [f'-I{os.path.join(out, "generated", "sdna")}', *includes]
     entries = [e for e in json.load(open(os.path.join(host, 'compile_commands.json'))) if target_of(e['output'] if 'output' in e else e['command'])]
     by_any = {}
     for entry in entries:
