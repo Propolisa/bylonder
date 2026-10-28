@@ -193,6 +193,10 @@ assert.equal(dnaGet('Object', ob(other), 'rotation_mode'), 'QUATERNION');
   area.cancel();
 }
 
+// The mesh an exporter writes: Blender's modifiers applied, from Main's stack, the geometry released after.
+assert.equal(sync.evaluatedMesh(other).faces_num, 6 * 16, 'Subdivision Surface at level 2');
+assert.equal(blender.mesh(ob(other)).verts_num, 0);
+
 // Writing back does not echo: the flush after it writes nothing more into Main.
 const writes = sync.writes;
 sync.flush();
