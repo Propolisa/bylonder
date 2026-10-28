@@ -33,3 +33,6 @@ Thumbs.db
 .blender-reference/
 .shots/
 __pycache__/
+
+# Agent worktrees and local Claude Code state.
+.claude/

@@ -1,6 +1,5 @@
-// Blender's default key configuration (keymap_data/blender_default.py, transpiled into src/bl_ui): the keymaps events
-// run through and the shortcuts Blender's menus show (WM_key_event_operator_string).
-import { generate_keymaps, Params } from '../bl_ui/blender_default.js';
+// Blender's default key configuration (presets/keyconfig/keymap_data/blender_default.py, in Blender's Python tree): the
+// keymaps events run through and the shortcuts Blender's menus show (WM_key_event_operator_string).
 import { keysLabel } from './input/keymap.js';
 import { invokeOperator, kw } from './wm-operators.js';
 
@@ -13,7 +12,12 @@ const PREFERENCES = {
   use_fallback_tool_select_handled: false, use_alt_tool_or_cursor: false, use_alt_click_leader: false, use_pie_click_drag: false,
   use_file_single_click: false, use_alt_navigation: true,
 };
-export const defaultKeymaps = () => generate_keymaps(Params(kw(PREFERENCES)));
+// From the tree's module registry when first needed (python/bpy_interface.js loads the tree; it imports the operator
+// registry, which imports this module).
+export const defaultKeymaps = () => {
+  const { generate_keymaps, Params } = globalThis.__py_modules['keyconfig.keymap_data.blender_default'];
+  return generate_keymaps(Params(kw(PREFERENCES)));
+};
 let keymaps;
 const keyconfig = () => (keymaps ??= new Map(defaultKeymaps().map(([name, , { items }]) => [name, items])));
 
@@ -76,7 +80,8 @@ export function keymapHandler(names, active = () => true, defaults = () => ({}))
       for (const [idname, kmi, data] of keyconfig().get(name) ?? []) {
         if (!matches(kmi, event)) continue;
         const result = invokeOperator(idname, { ...defaults(name, idname), ...Object.fromEntries(data?.properties ?? []) }, event);
-        if (!result || result === 'CANCELLED' || result === 'PASS_THROUGH') continue;
+        if (result === 'FINISHED|PASS_THROUGH') event.handled = true;
+        if (!result || result === 'CANCELLED' || result === 'PASS_THROUGH' || result === 'FINISHED|PASS_THROUGH') continue;
         event.native?.preventDefault();
         return true;
       }

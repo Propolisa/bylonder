@@ -66,20 +66,21 @@ export function createView3DTools({ world, editor, views, area, mode, toolSettin
   };
   registerToolGizmos({
     region, stats: () => world.editMode.gizmoStats(), active: (gizmo) => world.editMode.active && toolActive(gizmo)(), toolKeymap,
+    properties: (group) => world.toolsystem.properties(tool(), group),
     extrude: (event, { normal }) => invokeOperator('mesh.extrude_context_move',
       { TRANSFORM_OT_translate: [['release_confirm', true], ...(normal ? [['orient_type', 'NORMAL']] : [])] }, event),
   });
   const inView = (props, event) => !!(event?.view ?? activeView());
 
   registerOperators({
-    // Returns PASS_THROUGH as Blender's does with FINISHED, so a drag from the same press moves the cursor.
+    // Finishes and passes the press through as Blender's does, so a drag from the same press moves the cursor.
     'view3d.cursor3d': {
       poll: inView,
       run: ({ use_depth = true, orientation: orient = 'VIEW' }, event) => {
         const view = event?.view ?? activeView(), mouse = event ?? editor.pointer;
         cursor3d_update(viewProjection(view), [mouse.x, mouse.y], { use_depth, orientation: orient }, world.sceneSettings);
         views.wake();
-        return 'PASS_THROUGH';
+        return 'FINISHED|PASS_THROUGH';
       },
     },
     // transform_from_gizmo_invoke: the Transform tool's drag off its gizmo runs its drag action.

@@ -377,6 +377,14 @@ const OBJECT_TYPES = { EMPTY: 0, MESH: 1, CURVE: 2, FONT: 4, LIGHT: 10, CAMERA: 
 const ROTATION_MODES = ['QUATERNION', 'XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'];
 // A Mesh attribute's AttrDomain, and its AttrType with the array of its values and their number per element.
 const DOMAINS = { POINT: 0, EDGE: 1, FACE: 2, CORNER: 3 };
+// eBaseFlags, and the bit main_base_get adds for the active base.
+const BASE_SELECTED = 1 << 0, BASE_HIDDEN = 1 << 8, BASE_ACTIVE = 1 << 30;
+// The addresses an export writes when given an array, after it counted them without one.
+const addresses = (fn) => {
+  const count = fn(0);
+  return withArrays([new Uint32Array(count)], ([p]) => { fn(p); return Array.from(new Uint32Array(x.memory.buffer, p, count)); });
+};
+
 const DOMAIN_SIZES = { POINT: 'verts_num', EDGE: 'edges_num', FACE: 'faces_num', CORNER: 'corners_num' };
 const ATTRIBUTE_TYPES = { BOOLEAN: [0, Uint8Array, 1], INT: [3, Int32Array, 1], FLOAT: [5, Float32Array, 1], FLOAT2: [6, Float32Array, 2] };
 
@@ -434,6 +442,8 @@ export class BlenderMain {
   // The scene's 3D cursor location and its pivot point (V3D_AROUND_*), which operators read.
   set cursor(location) { new Float32Array(x.memory.buffer, x.main_cursor(this.#context) >>> 0, 3).set(location); }
   set pivotPoint(pivot) { x.main_pivot_point_set(this.#context, pivot); }
+  // The scene's active camera object (or null).
+  set camera(ob) { x.main_scene_camera_set(this.#context, ob ?? 0); }
 
   // World matrices, parents first, as the depsgraph evaluates them; clears the tags.
   evaluate() { x.main_evaluate(this.#context); }
@@ -464,6 +474,36 @@ export class BlenderMain {
   get scene() { return x.main_scene(this.#context) >>> 0; }
   get C() { return this.#C; }
   data(ob) { return x.object_data(ob) >>> 0; }
+
+  // Collections, by address: the Scene Collection holds the rest. A collection's children and objects are set whole,
+  // in order.
+  get masterCollection() { return x.main_collection_master(this.#context) >>> 0; }
+  addCollection(parent, name) { return withString(name, (p) => x.main_collection_add(this.#context, parent ?? 0, p)) >>> 0; }
+  removeCollection(collection) { x.main_collection_remove(this.#context, collection); }
+  setCollectionChildren(collection, children) {
+    withArrays([Uint32Array.from(children)], ([p]) => x.collection_children_set(this.#context, collection, p, children.length));
+  }
+  setCollectionObjects(collection, objects) {
+    withArrays([Uint32Array.from(objects)], ([p]) => x.collection_objects_set(this.#context, collection, p, objects.length));
+  }
+  collectionChildren(collection) { return addresses((p) => x.collection_items(collection, false, p)); }
+  collectionObjects(collection) { return addresses((p) => x.collection_items(collection, true, p)); }
+  // Main's IDs of a type (ID_GR, ID_OB...).
+  ids(type) { return addresses((p) => x.main_ids(this.#context, type, p)); }
+  name(id) { return cString(x.id_name(id)); }
+  rename(id, name) { withString(name, (p) => x.id_rename(this.#context, id, p)); }
+  // A collection's LayerCollection in the view layer, the active one (its collection), and activating one.
+  layerCollection(collection) { return x.main_layer_collection(this.#context, collection) >>> 0; }
+  get activeCollection() { return x.layer_collection_collection(x.main_layer_collection_active(this.#context)) >>> 0; }
+  set activeCollection(collection) { x.main_layer_collection_activate(this.#context, this.layerCollection(collection)); }
+  syncCollections() { x.main_collections_sync(this.#context); }
+  // An object's base (eBaseFlags, with ACTIVE when it is the active one), or null when it has none in the view layer,
+  // and its parent.
+  base(ob) {
+    const flag = x.main_base_get(this.#context, ob);
+    return flag < 0 ? null : { flag, selected: !!(flag & BASE_SELECTED), hidden: !!(flag & BASE_HIDDEN), active: !!(flag & BASE_ACTIVE) };
+  }
+  parent(ob) { return x.object_parent(ob) >>> 0; }
 
   run(idname, props = {}) { return runOperator(this.#C, idname, props); }
   poll(idname) { return pollOperator(this.#C, idname); }

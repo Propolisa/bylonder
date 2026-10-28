@@ -1,4 +1,4 @@
-// Blender's menus compiled by Transcrypt (src/bl_ui), drawn into Blender's UILayout (layout.js, the layout panels draw
+// Blender's menus compiled by Transcrypt (src/bl_py), drawn into Blender's UILayout (layout.js, the layout panels draw
 // into too) and read as entries for Bylonder's menus (menu.js). `ui` is what Bylonder supplies:
 //   menus: menu classes by idname, context: () => bpy.context as the menus read it,
 //   run(idname, props): runs an operator, supported(idname, props): whether Bylonder runs it with those properties,

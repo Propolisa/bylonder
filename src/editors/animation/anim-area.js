@@ -3,6 +3,7 @@
 // Operators run in it, in one of its regions, as Blender's handlers run them; drawing reads what it lists.
 import { blenderModule, setOperatorProperties, pollOperator } from '../../bmesh/bmesh-wasm.js';
 import { FCurve, EVENT_TYPES, EVENT_VALUES } from '../../blenkernel/animation/anim-blender.js';
+import '../interface/region-draw.js';
 
 const { exports: x, withArrays, withString, cString } = blenderModule;
 const view = () => new DataView(x.memory.buffer);

@@ -28,7 +28,7 @@ import transpile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(transpile.REPO, 'src', 'bl_py')
-ROOTS = ['scripts/startup', 'scripts/modules']
+ROOTS = ['scripts/startup', 'scripts/modules', 'scripts/presets/keyconfig']
 # Modules that reach the operating system or the network (downloads, extensions, translations' tooling, the
 # interactive console's completion), which the browser has no use for.
 EXCLUDED = ['_bpy_internal.http*', '_bpy_internal.extensions*', '_bpy_internal.assets.remote_library*', '_bl_i18n_utils*',
@@ -81,7 +81,8 @@ def assemble(build):
         shutil.copytree(source, target, dirs_exist_ok=True)
     open(os.path.join(build, '_files.py'), 'w').write(
         "# Blender's scripts as files where Blender has them (written by tree.py), for the boundary's os.\n"
-        f'files = {sorted(FILES.values())!r}\n')
+        f'files = {sorted(FILES.values())!r}\n'
+        f'modules = {dict(sorted((path, rel[:-3].replace("/", ".").removesuffix(".__init__")) for rel, path in FILES.items()))!r}\n')
 
 
 def bpy_types(build):
@@ -97,8 +98,14 @@ def bpy_types(build):
         if structs[name]['base']:
             visit(structs[name]['base'])
         order.append(name)
+    # The classes Blender's scripts define and register (TOPBAR_MT_file_new, ...): RNA lists them as structs, but bpy.types
+    # gives the registered class (its __getattr__ below).
+    scripts = {n.name for root, _, files in os.walk(build) if os.path.relpath(root, build).split(os.sep)[0] not in ('_bpy',)
+               for f in files if f.endswith('.py') and f != '_bpy_types.py'
+               for n in ast.walk(ast.parse(open(os.path.join(root, f)).read())) if isinstance(n, ast.ClassDef)}
     for name in sorted(structs):
-        visit(name)
+        if name not in scripts:
+            visit(name)
     additions = ast.parse(open(os.path.join(build, '_bpy_types.py')).read())
     functions = {c.name: c for c in ast.parse(open(os.path.join(HERE, 'rna_functions.py')).read()).body if isinstance(c, ast.ClassDef)}
     defined = [d for n in additions.body for d in transpile.defined_names(n)]
@@ -124,7 +131,9 @@ def bpy_types(build):
         "__pragma__('js', '{}', \"bpy_struct.bl_rna_get_subclass = (id, fallback = null) => hasStruct(id) ? blRna(id) : fallback;\")\n"
         '\n\nclass bpy_struct_meta_idprop(type):\n    pass\n\n\n'
         'class bpy_func:\n    pass\n\n\nclass bpy_prop_collection:\n    pass\n\n\n'
-        + stubs + namespace + '\n\n' + ast.unparse(ast.Module(body=body, type_ignores=[])) + '\n\n\n' + later)
+        + stubs + namespace + '\n\n' + ast.unparse(ast.Module(body=body, type_ignores=[])) + '\n\n\n' + later
+        # Registered classes as bpy.types has them (bpy.types.VIEW3D_MT_editor_menus), as register_class adds them.
+        + "\n\ndef __getattr__(name):\n    return _member('_bpy', 'registered').get(name)\n")
     open(os.path.join(build, '_bpy_types.py'), 'w').write(
         "# Blender's _bpy_types.py, merged into _bpy.types by tree.py.\n" + f"from _bpy.types import {', '.join(defined)}\n")
 

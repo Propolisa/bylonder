@@ -1,5 +1,5 @@
 // Blender's UILayout (UI_interface_layout.hh, as bpy exposes it) for Blender's scripts compiled by Transcrypt
-// (src/bl_ui): a draw records what it lays out as a tree, which menus (ui-layout.js) and panels (layout-view.js) draw.
+// (src/bl_py): a draw records what it lays out as a tree, which menus (ui-layout.js) and panels (layout-view.js) draw.
 // The modifier panels drawn by Blender's C++ in the module record the same tree (tools/blender-port/wasm/panel-layout.cc,
 // read by modifier-panel.js).
 //
@@ -10,7 +10,6 @@
 // under (use_property_split, use_property_decorate, emboss), as Blender reads them when the item is added; a layout's
 // active, enabled and alert apply to all it holds, as Blender applies them when the layout ends.
 
-import { context as bpyContext, data as bpyData } from '../../bl_ui/bpy._app.js';
 import { pyArgs as args } from '../../makesrna/rna.js';
 import { setContext } from '../../python/bpy_interface.js';
 
@@ -147,7 +146,11 @@ export class UILayout {
     return item.props;
   }
   operator_enum(...list) { this.#item('operator_enum', list); }
-  operator_menu_enum(...list) { this.#item('operator_menu_enum', list); }
+  operator_menu_enum(...list) {
+    const item = this.#item('operator_menu_enum', list);
+    item.props = operatorProperties();
+    return item.props;
+  }
   menu(...list) { this.#item('menu', list); }
   menu_contents(...list) { this.#item('menu_contents', list); }
   popover(...list) { this.#item('popover', list); }
@@ -181,12 +184,4 @@ export const isLayout = (node) => node instanceof UILayout || Array.isArray(node
 
 // bpy.context, which some scripts read in place of the context they are given, is the one being drawn with, and
 // bpy.data has what its blend_data binds.
-const contextKeys = new Set();
-export function useContext(context) {
-  contextKeys.forEach((key) => delete bpyContext[key]);
-  contextKeys.clear();
-  for (const key of Object.keys(context)) contextKeys.add(key);
-  Object.assign(bpyContext, context);
-  if (context.blend_data) Object.assign(bpyData, context.blend_data);
-  setContext(context);
-}
+export const useContext = (context) => setContext(context);

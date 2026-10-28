@@ -36,6 +36,7 @@ StructRNA *operator_properties_new(const char *identifier)
 }
 
 void *operator_values_new() { return new OperatorValues(); }
+void *operator_values_copy(const void *values) { return new OperatorValues(*static_cast<const OperatorValues *>(values)); }
 void operator_values_free(void *values) { delete static_cast<OperatorValues *>(values); }
 
 static PropertyRNA *define(StructOrFunctionRNA *cont, const char *identifier, PropertyType type, std::vector<double> defaults)
@@ -70,8 +71,25 @@ struct DnaFieldDefinition {
 };
 static const DnaFieldDefinition dna_field_definitions[] = {
 #define DNA_FIELD(srna, identifier, type, length, ...) {&srna, identifier, type, length, DnaField{__VA_ARGS__}},
+#define DNA_ICON(...)
 #include "rna_dna_fields.inc"
 #undef DNA_FIELD
+#undef DNA_ICON
+};
+
+/* Their icons, as RNA_def_property_ui_icon gives them. */
+struct DnaIconDefinition {
+  StructRNA **srna;
+  const char *identifier;
+  int icon, consecutive;
+};
+static const DnaIconDefinition dna_icon_definitions[] = {
+#define DNA_FIELD(...)
+#define DNA_ICON(srna, identifier, icon, consecutive) {&srna, identifier, icon, consecutive},
+#include "rna_dna_fields.inc"
+#undef DNA_FIELD
+#undef DNA_ICON
+    {nullptr, nullptr, 0, 0},
 };
 
 static void define_dna_fields()
@@ -83,6 +101,13 @@ static void define_dna_fields()
     prop.length = def.length;
     prop.defaults = std::vector<double>(std::max(def.length, 1), 0.0);
     prop.dna = def.dna;
+  }
+  for (const DnaIconDefinition *def = dna_icon_definitions; def->srna; def++) {
+    for (std::unique_ptr<PropertyRNA> &prop : (*def->srna)->properties) {
+      if (prop->identifier == def->identifier) {
+        RNA_def_property_ui_icon(prop.get(), def->icon, def->consecutive);
+      }
+    }
   }
 }
 
@@ -100,11 +125,24 @@ StructRNA *ID_code_to_RNA_type(short idcode)
       return RNA_Camera;
     case ID_LA:
       return RNA_Light;
+    case ID_GR:
+      return RNA_Collection;
     case ID_AC:
       return RNA_Action;
     default:
       return RNA_ID;
   }
+}
+
+/* Whether a type is an ID's: one of the module's ID types. */
+bool RNA_struct_is_ID(const StructRNA *type)
+{
+  for (const short idcode : {ID_OB, ID_ME, ID_SCE, ID_CA, ID_LA, ID_GR}) {
+    if (ID_code_to_RNA_type(idcode) == type) {
+      return true;
+    }
+  }
+  return type == RNA_ID;
 }
 
 /* As rna_access.cc defines it; the module's types have no subtypes to refine to. */
@@ -132,7 +170,15 @@ PropertyRNA *RNA_struct_find_property(PointerRNA *ptr, const char *identifier)
 extern "C" __attribute__((export_name("rna_id_property_define"))) void rna_id_property_define(
     short idcode, const char *identifier, int type, int subtype, int length, const char *name)
 {
-  PropertyRNA *prop = RNA_def_property(ID_code_to_RNA_type(idcode), identifier, type, subtype);
+  StructRNA *srna = ID_code_to_RNA_type(idcode);
+  /* A property with a DNA field (dna-outliner.json) is that one, given the subtype the field lacks. */
+  PropertyRNA *prop = RNA_struct_type_find_property(srna, identifier);
+  if (prop) {
+    prop->subtype = PropertySubType(subtype);
+  }
+  else {
+    prop = RNA_def_property(srna, identifier, type, subtype);
+  }
   RNA_def_property_array(prop, length);
   prop->name = name;
 }
@@ -449,6 +495,31 @@ void RNA_def_property_ui_range(PropertyRNA *prop, double min, double max, double
   prop->softmax = float(max);
   prop->step = float(step);
   prop->precision = precision;
+}
+/* As rna_define.cc defines it. */
+void RNA_def_property_ui_icon(PropertyRNA *prop, int icon, int consecutive)
+{
+  prop->icon = icon;
+  if (consecutive != 0) {
+    RNA_def_property_flag(prop, PROP_ICONS_CONSECUTIVE);
+  }
+  if (consecutive < 0) {
+    RNA_def_property_flag(prop, PROP_ICONS_REVERSE);
+  }
+}
+int RNA_property_ui_icon(const PropertyRNA *prop) { return prop->icon; }
+/* The module's properties have no library data or overrides to make them read-only. */
+bool RNA_property_editable(const PointerRNA * /*ptr*/, PropertyRNA * /*prop*/) { return true; }
+
+void RNA_property_update(bContext *C, PointerRNA *ptr, PropertyRNA *prop)
+{
+  if (prop->update) {
+    prop->update(C, ptr);
+  }
+}
+void rna_property_update_set(StructRNA *srna, const char *identifier, void (*update)(bContext *C, PointerRNA *ptr))
+{
+  RNA_struct_type_find_property(srna, identifier)->update = update;
 }
 void RNA_def_property_ui_text(PropertyRNA *prop, const char *name, const char *) { prop->name = name; }
 /* Operator properties are set from JS, after which nothing updates them, so update functions never run. */

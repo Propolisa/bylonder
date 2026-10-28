@@ -206,7 +206,13 @@ const STRUCTS = {
     material_slots: (ob, r) => collection((r.world.materials?.slots(ob) ?? []).map((material, slot_index) =>
       rna('MaterialSlot', { name: material?.name ?? '', material: r.pointer('Material', material), slot_index }))),
     active_material: (ob, r) => r.pointer('Material', r.world.materials?.activeMaterial(ob)),
-    hide_select: { get: (ob) => ob.isPickable === false, set: (ob, value) => { ob.isPickable = !value; } },
+    // Disable Selection is Bylonder's lock (commands.lock); Disable in Renders and in Viewports are kept with the object.
+    hide_select: { get: (ob) => ob.isPickable === false || !!ob.metadata?.wbLocked, set: (ob, value) => {
+      ob.metadata = { ...ob.metadata, wbLocked: !!value };
+      if ('isPickable' in ob) ob.isPickable = !value;
+    } },
+    hide_render: { get: (ob) => !!ob.metadata?.wbHideRender, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideRender: !!value }; } },
+    hide_viewport: { get: (ob) => !!ob.metadata?.wbHideViewport, set: (ob, value) => { ob.metadata = { ...ob.metadata, wbHideViewport: !!value }; } },
     hide_get: (ob) => () => !ob.isEnabled(false),
     hide_set: (ob, r) => (hide) => { ob.setEnabled(!hide); r.host.update?.('Object', 'hide', ob); },
     visible_get: (ob) => () => !deleted(ob) && ob.isEnabled() && ob.isVisible !== false,
@@ -261,17 +267,17 @@ const STRUCTS = {
     view_layers: (world, r) => collection((world.collections?.viewLayers() ?? []).map((layer) => r.pointer('ViewLayer', layer))),
     unit_settings: (world, r) => r.pointer('UnitSettings', world),
     tool_settings: (world, r) => r.pointer('ToolSettings', world),
-    cursor: (world, r) => world.sceneSettings && r.pointer('View3DCursor', world),
+    cursor: (world, r) => r.pointer('View3DCursor', world),
     // The scene's orientation, then the Move, Rotate and Scale tools' (Default: the scene's), as the scene keeps them.
     transform_orientation_slots: (world) => (orientationSlots.get(world) ?? orientationSlots.set(world, collection([0, 1, 2, 3].map((slot) =>
       rna('TransformOrientationSlot', { type: slot ? 'DEFAULT' : 'GLOBAL' }, { items: { type: () => [...(slot ? [ORIENTATION_DEFAULT] : []),
         ...rnaProperty('TransformOrientationSlot', 'type').items] } })))).get(world)),
   },
   View3DCursor: {
-    location: array((world) => [...world.sceneSettings.state.cursor.location], (world, value) => world.sceneSettings.setCursor({ location: value })),
-    rotation_mode: { get: (world) => world.sceneSettings.state.cursor.rotation_mode, set: (world, rotation_mode) => world.sceneSettings.setCursor({ rotation_mode }) },
-    rotation_euler: array((world) => [...world.sceneSettings.state.cursor.rotation_euler], (world, value) => world.sceneSettings.setCursor({ rotation_euler: value })),
-    rotation_quaternion: array((world) => [...world.sceneSettings.state.cursor.rotation_quaternion],
+    location: array((world) => [...cursorOf(world).location], (world, value) => world.sceneSettings.setCursor({ location: value })),
+    rotation_mode: { get: (world) => cursorOf(world).rotation_mode, set: (world, rotation_mode) => world.sceneSettings.setCursor({ rotation_mode }) },
+    rotation_euler: array((world) => [...cursorOf(world).rotation_euler], (world, value) => world.sceneSettings.setCursor({ rotation_euler: value })),
+    rotation_quaternion: array((world) => [...cursorOf(world).rotation_quaternion],
       (world, value) => world.sceneSettings.setCursor({ rotation_quaternion: value }), 'wxyz'),
   },
   ToolSettings: {
@@ -493,6 +499,9 @@ const STRUCTS = {
     view_perspective: (view) => (view.state.cameraView ? 'CAMERA' : view.editorCamera?.mode === Camera.ORTHOGRAPHIC_CAMERA ? 'ORTHO' : 'PERSP'),
     is_perspective: (view) => view.editorCamera?.mode !== Camera.ORTHOGRAPHIC_CAMERA,
   },
+  // The Outliner's SpaceOutliner is Blender's, in the module (space_outliner/outliner-area.js): its DNA, read in place.
+  SpaceOutliner: (space) => ({ type: () => 'OUTLINER', ...Object.fromEntries(Object.keys(space).map((name) => [name,
+    { get: () => space[name], set: (owner, value) => { space[name] = value; } }])) }),
 };
 const SHADING = { wire: 'WIREFRAME', solid: 'SOLID', rendered: 'RENDERED' };
 // A flag of an animation editor's space (eGraphEdit_Flag, eSAction_Flag), and of its dope sheet's filters; `inverted`
@@ -513,6 +522,9 @@ const PIVOTS = ['BOUNDING_BOX_CENTER', 'CURSOR', 'INDIVIDUAL_ORIGINS'];
 const ACTION_MODES = ['ACTION', 'SHAPEKEY', 'GPENCIL', 'DOPESHEET', 'MASK', 'CACHEFILE', 'TIMELINE'];
 // Scenes' transform orientation slots (Scene.transform_orientation_slots).
 const orientationSlots = new WeakMap();
+// The scene's 3D cursor, or Blender's default one in a world without scene settings.
+const DEFAULT_CURSOR = { location: [0, 0, 0], rotation_mode: 'XYZ', rotation_euler: [0, 0, 0], rotation_quaternion: [1, 0, 0, 0] };
+const cursorOf = (world) => world.sceneSettings?.state.cursor ?? DEFAULT_CURSOR;
 const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'brush_type', 'data_block', 'operator', 'index', 'idname_fallback', 'keymap_fallback'];
 
 // A tool's orientation slot's own choice (rna_scene.cc: rna_TransformOrientation_with_scene_itemf).

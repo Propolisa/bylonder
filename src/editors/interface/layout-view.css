@@ -14,7 +14,7 @@
 .bl-popover:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
 .bl-root{gap:calc(var(--bl-row)*.25)}
 .bl-menu-button:hover:not(:disabled){background:color-mix(in srgb,var(--bl-wcol-menu),white 9%)}
-.bl-menu-button::after{content:'';position:absolute;right:calc(var(--bl-row)*.3);top:50%;width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);margin-top:-1px;background:var(--bl-wcol-menu-item);clip-path:polygon(0 0,100% 0,50% 100%);opacity:.8}
+.bl-menu-button::after{content:'';position:absolute;right:calc(var(--bl-row)*.12);top:calc(50% - var(--bl-row)*.12);width:calc(var(--bl-row)*.4);height:calc(var(--bl-row)*.25);background:currentColor;mask:var(--bl-chevron) center/contain no-repeat;background:var(--bl-wcol-menu-item)}
 .bl-browse::after{right:calc(var(--bl-row)*.15);width:calc(var(--bl-row)*.3);height:calc(var(--bl-row)*.2)}
 .bl-text{background:var(--bl-wcol-text)}
 .bl-text:focus-within{background:var(--bl-wcol-text-sel);box-shadow:inset 0 0 0 1px var(--bl-select)}
@@ -29,8 +29,7 @@
 .bl-split-left{width:var(--bl-split-label)}
 .bl-split-label{padding-right:calc(var(--bl-row)*.4)}
 .bl-prop-split>div:first-child{gap:0}
-.bl-decorator{color:var(--bl-text);opacity:.6;background:none;border:0;padding:0}
-.bl-decorator:not(:disabled):hover{opacity:1}
+.bl-decorator{color:var(--bl-text);background:none;border:0;padding:0}
 .bl-decorator.is-keyed{color:var(--bl-key-sel);opacity:1}.bl-decorator.is-animated{color:#b3d6a7;opacity:1}.bl-decorator.is-changed{color:#ffe0bb;opacity:1}
 .bl-decorator .bl-icon{width:calc(var(--bl-row)*.8);height:calc(var(--bl-row)*.8)}
 .bl-widget .bl-icon,.bl-label .bl-icon{width:calc(var(--bl-row)*.8);height:calc(var(--bl-row)*.8)}
@@ -38,6 +37,9 @@
 .bl-separator[data-type=LINE]{height:calc(var(--bl-row)*.3*var(--factor,1));background:linear-gradient(var(--bl-menu-sep),var(--bl-menu-sep)) center/100% 1px no-repeat}
 .bl-box{background:var(--bl-wcol-box);box-shadow:inset 0 0 0 1px var(--bl-wcol-outline)}
 .bl-alert .bl-widget{background:#b33a3a}
+/* A layout in a row shares the row's width as its buttons do (ui_item_fit); a header's items keep their size. */
+.bl-row>:is(.bl-col,.bl-row,.bl-split,.bl-box,.bl-grid){flex:1 1 0}
+.bl-header :is(.bl-col,.bl-row,.bl-split,.bl-box,.bl-grid){flex:0 0 auto}
 .bl-row.bl-fit>*{flex:0 0 auto}
 .bl-row>*,.bl-split>*{min-width:0}
 .bl-row>.bl-widget,.bl-row>.bl-option{flex:1 1 0}
@@ -54,7 +56,7 @@
 .bl-align-row>:not(:last-child) .bl-widget,.bl-align-row>.bl-widget:not(:last-child){border-top-right-radius:0;border-bottom-right-radius:0}
 .bl-align-col>.bl-prop-split:not(:first-child),.bl-align-col>.bl-col:not(:first-child){margin-top:-1px}
 /* Panels: a header a unit and a fifth high, the body inset; sub-panels inside their parent. */
-.bl-panel{background:var(--bl-panel-back);border-radius:calc(var(--bl-row)*.2);color:var(--bl-text)}
+.bl-panel{background:var(--bl-panel-back);border-radius:calc(var(--bl-row)*.2);box-shadow:inset 0 0 0 1px var(--bl-panel-outline);color:var(--bl-text)}
 /* panel_draw_header: PNL_HEADER high, the chevron 0.2 of it in, the title 1.1 units in, the grip 1.15 units from the end. */
 .bl-panel-header{height:calc(var(--bl-row)*1.25);padding:0 calc(var(--bl-row)*.15) 0 calc(var(--bl-row)*.25);gap:calc(var(--bl-row)*.1);color:var(--bl-panel-title);font:var(--bl-widget-font);cursor:default;user-select:none}
 .bl-panel-header-layout .bl-option{gap:0}
@@ -62,7 +64,7 @@
 .bl-grip{width:var(--bl-row)!important;opacity:.3}
 .bl-panel-body{display:flex;flex-direction:column;gap:calc(var(--bl-row)*.25);padding:calc(var(--bl-row)*.4) calc(var(--bl-row)*.4) calc(var(--bl-row)*.4)}
 .bl-panel.is-active{box-shadow:inset 0 0 0 1px var(--bl-select)}
-.bl-subpanel{background:none;border-radius:0}
+.bl-subpanel{background:none;border-radius:0;box-shadow:none}
 .bl-subpanel>.bl-panel-header{margin:0 calc(var(--bl-row)*-.4);padding-left:calc(var(--bl-row)*.95)}
 .bl-subpanel>.bl-panel-body{padding:calc(var(--bl-row)*.2) 0}
 /* A panel without a header (HIDE_HEADER): its layout on the region, with the panel's margins. */
@@ -72,15 +74,14 @@
 .bl-list-item{border-radius:calc(var(--bl-row)*.2);color:var(--bl-text)}
 .bl-list-item.is-active{background:var(--bl-wcol-list-sel);color:var(--bl-text-sel)}
 .bl-list-item:hover:not(.is-active){background:var(--bl-wcol-hover)}
-/* The Properties editor's navigation bar (prop_tabs_enum). */
 /* The Properties editor's navigation bar (prop_tabs_enum at 1.4 scale): tabs that join the main region when active. */
-.bl-navigation-bar{width:calc(var(--bl-row)*1.55);background:var(--bl-wcol-tab);align-items:flex-end!important}
-.bl-tabs{align-items:flex-end;gap:calc(var(--bl-row)*.1);padding:calc(var(--bl-row)*.55) 0}
-.bl-tab{display:flex;align-items:center;justify-content:center;width:calc(var(--bl-row)*1.3);height:calc(var(--bl-row)*1.3);border:0;border-radius:calc(var(--bl-row)*.2) 0 0 calc(var(--bl-row)*.2);background:none;color:var(--bl-text);cursor:pointer}
+.bl-navigation-bar{width:calc(var(--bl-row)*1.45);background:var(--bl-navigation-bar);align-items:flex-end!important}
+.bl-tabs{align-items:flex-end;padding:calc(var(--bl-row)*.4) 0}
+.bl-tab{display:flex;align-items:center;justify-content:center;width:calc(var(--bl-row)*1.35);height:calc(var(--bl-row)*1.4);border:0;border-radius:calc(var(--bl-row)*.2) 0 0 calc(var(--bl-row)*.2);background:var(--bl-wcol-tab);color:var(--bl-text);cursor:pointer}
 .bl-tab .bl-icon{width:calc(var(--bl-row)*.8);height:calc(var(--bl-row)*.8)}
 .bl-tab:hover{background:var(--bl-wcol-hover)}
 .bl-tab[aria-selected=true]{background:var(--bl-region)}
-.bl-tab-gap{height:calc(var(--bl-row)*.35)}
+.bl-tab-gap{height:calc(var(--bl-row)*.4)}
 /* Icons in their theme color (UI_icons.hh, src/editors/interface/icon-themes.json). */
 .bl-icon-scene{color:var(--bl-icon-scene)}.bl-icon-collection{color:var(--bl-icon-collection)}.bl-icon-object{color:var(--bl-icon-object)}
 .bl-icon-object_data{color:var(--bl-icon-object-data)}.bl-icon-modifier{color:var(--bl-icon-modifier)}.bl-icon-shading{color:var(--bl-icon-shading)}.bl-icon-folder{color:var(--bl-icon-folder)}

@@ -1,15 +1,14 @@
-// Blender's data as its UI scripts read it (src/bl_ui): a struct is the data Bylonder binds, under Blender's property
+// Blender's data as its UI scripts read it (src/bl_py): a struct is the data Bylonder binds, under Blender's property
 // names, and every property it does not bind reads as Blender's default (rna-structs.json, from Blender itself): a
 // pointer as None, or the struct's defaults when Blender's never is None, a collection as empty, the rest as their
 // default values. Bylonder's bindings are in rna-bylonder.js. What the interface shows of a property (name, ranges,
 // enum items, ...) is in rna-ui.json, loaded by loadRNAUI() before an editor first draws properties.
 import structs from './rna-structs.json' with { type: 'json' };
 import operators from './rna-operators.json' with { type: 'json' };
-import * as bpyTypes from '../bl_ui/bpy.types.js';
 
-// A struct's class in bpy.types (type(context.curve) is TextCurve): Blender's Python tree's once it has loaded
-// (python/bpy_interface.js, by its module registry: it imports this module), else the interim src/bl_ui's.
-const structClass = (struct) => globalThis.__py_modules?.['_bpy.types']?.[struct] ?? bpyTypes[struct];
+// A struct's class in bpy.types (type(context.curve) is TextCurve), from Blender's Python tree by its module registry
+// (python/bpy_interface.js imports this module).
+const structClass = (struct) => globalThis.__py_modules?.['_bpy.types']?.[struct];
 
 // Transcrypt renames the Python names its runtime uses (type becomes py_metatype, others take a py_ prefix).
 const rnaName = (key) => (key === 'py_metatype' ? 'type' : key.replace(/^py_/, ''));
@@ -81,11 +80,12 @@ const TYPES = { B: 'BOOLEAN', I: 'INT', F: 'FLOAT', S: 'STRING', E: 'ENUM', P: '
 const blRnas = new Map();
 export const hasStruct = (struct) => struct in structs;
 // An enum's items by index and by identifier (enum_items['VERTEX'].icon), separators left out.
-const enumItems = (items = []) => {
-  const list = collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value })));
-  return new Proxy(list, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key]
-    : target.find((item) => item.identifier === key) ?? target[rnaName(key)]) });
-};
+// A collection whose items are also its keys by identifier (properties['location'], enum_items['VERTEX']), looked up so
+// identifiers that are array names (Bone.length) or numbers do not overwrite the array's own. (A collection's find is
+// Blender's, by name.)
+const byIdentifier = (list) => new Proxy(list, { get: (target, key) => (key in target || typeof key !== 'string' ? target[key]
+  : Array.prototype.find.call(target, (item) => item.identifier === key) ?? target[rnaName(key)]) });
+const enumItems = (items = []) => byIdentifier(collection(items.filter(Boolean).map(([identifier, name, description, icon], value) => python({ identifier, name, description, icon, value }))));
 const propertyNames = (struct) => { const names = new Set(); for (let s = structs[struct]; s; s = structs[s.base]) Object.keys(s.props).forEach((n) => names.add(n)); return names; };
 
 // bpy_struct.bl_rna: a struct's RNA as Blender's scripts read it, its properties (its own and its bases') as
@@ -103,9 +103,8 @@ export function blRna(struct) {
       get fixed_type() { return pointer ? blRna(p.struct) : null; },
     });
   });
-  const list = collection(properties);
-  for (const p of properties) list[p.identifier] = p;
-  const result = python({ identifier: struct, name: structName(struct), description: '', translation_context: '*', get base() { return structs[struct]?.base ? blRna(structs[struct].base) : null; }, properties: python(list) });
+  const list = byIdentifier(collection(properties));
+  const result = python({ identifier: struct, name: structName(struct), description: '', translation_context: '*', get base() { return structs[struct]?.base ? blRna(structs[struct].base) : null; }, properties: list });
   if (ui) blRnas.set(struct, result);
   return result;
 }

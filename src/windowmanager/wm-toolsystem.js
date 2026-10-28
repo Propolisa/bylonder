@@ -12,7 +12,7 @@ const DEFAULT_TOOL = 'builtin.select_box';
 const MODES = ['OBJECT', 'EDIT_MESH'];
 // The gizmo groups with WM_GIZMOGROUPTYPE_TOOL_FALLBACK_KEYMAP, whose tools drag with the fallback tool off the gizmo.
 const FALLBACK_GIZMOS = new Set(['VIEW3D_GGT_xform_gizmo', 'VIEW3D_GGT_xform_gizmo_context', 'VIEW3D_GGT_xform_extrude', 'MESH_GGT_spin', 'MESH_GGT_spin_redo',
-  'VIEW3D_GGT_mesh_preselect_elem', 'VIEW3D_GGT_mesh_preselect_edgering']);
+  'VIEW3D_GGT_mesh_preselect_elem', 'VIEW3D_GGT_mesh_preselect_edgering', 'VIEW3D_GGT_tool_generic_handle_normal', 'VIEW3D_GGT_tool_generic_handle_free']);
 // Blender's tool system, registered as Blender's startup registers it (ToolSelectPanelHelper.register made the tools'
 // keymaps and group memory).
 const { activate_by_id, activate_by_id_or_cycle, item_from_flat_index, item_from_index_active, ToolSelectPanelHelper } = module('bl_ui.space_toolsystem_common');

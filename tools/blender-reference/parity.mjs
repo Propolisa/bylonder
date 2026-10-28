@@ -87,6 +87,11 @@ const SETUP = {
     await app.hover(...REST);
   },
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
+  "outliner-expanded": async (app) => {
+    const box = await app.locator(".bl-outliner-region").boundingBox();
+    await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await app.page.keyboard.press("Shift+A");
+  },
 };
 
 // The object selected alone, and the Properties editor on a tab.

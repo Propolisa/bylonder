@@ -54,6 +54,11 @@ def key(type, x, y, **modifiers):
     window().event_simulate(type=type, value="RELEASE", x=x, y=y, **modifiers)
 
 
+def outliner_point(fx, fy):
+    region = next(r for r in area("OUTLINER").regions if r.type == "WINDOW")
+    return round(region.x + region.width * fx), round(region.y + region.height * (1 - fy))
+
+
 def rest():
     move(*view3d_point(*REST))
 
@@ -103,7 +108,7 @@ def later(seconds, step):
 
 def cursor_tool():
     set_tool("builtin.cursor")
-    click(*view3d_point(0.55, 0.42))
+    later(0.5, lambda: click(*view3d_point(0.55, 0.42)))
 
 
 def inset_tool():
@@ -128,6 +133,7 @@ SETUP = {
     "cursor-tool": cursor_tool,
     "inset-tool": inset_tool,
     "sidebar-item": lambda: key("N", *view3d_point(*REST)),
+    "outliner-expanded": lambda: key("A", *outliner_point(0.5, 0.5), shift=True),
 }
 
 

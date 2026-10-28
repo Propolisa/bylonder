@@ -1,18 +1,23 @@
 body>header,body>footer{display:none!important}
 .runtime-dock .dock-content{background:var(--bl-region)}
 #viewport-section,.viewport-area{background:var(--bl-viewport)}
-.viewport-area{position:relative;overflow:hidden}
-.viewport-area canvas.viewport-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none}
-.viewport-area canvas.tool-overlay{position:absolute;left:0;top:0;pointer-events:none;z-index:1}
+/* The main region spans the area under the header, which overlaps it (Blender's region overlap). */
+.viewport-area{position:relative;overflow:clip;overflow-clip-margin:var(--bl-header-h)}
+.viewport-area canvas.viewport-canvas{position:absolute;inset:calc(-1*var(--bl-header-h)) 0 0;width:100%;height:calc(100% + var(--bl-header-h));display:block;outline:none;touch-action:none}
+.viewport-area canvas.tool-overlay{position:absolute;left:0;top:calc(-1*var(--bl-header-h));pointer-events:none;z-index:1}
 .engine-working-canvas{position:fixed;left:-100000px;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none}
 .view-label{top:8px;left:52px;display:flex;flex-direction:column;gap:3px;font:var(--bl-font);color:var(--bl-text);text-shadow:0 1px 2px #000a}
 .view-name{text-transform:none}
-.nav-gizmo{position:absolute;right:6px;top:6px;width:96px;height:96px;cursor:move;touch-action:none;z-index:3}
+/* VIEW3D_GGT_navigate (view3d_gizmo_navigate.cc): the axis gizmo 80 px across, centered 50 px inside the visible
+   rect's top right corner; the buttons 28 px, 30 px apart, centered 22.5 px from its right and from 110 px below its top,
+   on the group's backdrop (button2d_gizmo.cc): the header color, padded by a fifth of the radius. The gizmo's box has an
+   8 px margin for its hover circle. */
+.nav-gizmo{position:absolute;right:3px;top:2px;width:96px;height:96px;cursor:move;touch-action:none;z-index:3}
 .nav-gizmo-bg{fill:transparent;transition:fill .1s}.nav-gizmo:hover .nav-gizmo-bg{fill:#ffffff1a}
 .nav-axis{cursor:pointer}.nav-axis:hover circle{stroke:#fff;stroke-width:1.5}
 .nav-gizmo text{font:bold 10px var(--bl-font);font-family:"Inter","DejaVu Sans",system-ui,sans-serif;fill:#000;pointer-events:none}
-.nav-buttons{position:absolute;right:38px;top:108px;display:flex;flex-direction:column;gap:4px;z-index:3}
-.nav-buttons .bl-icon-button{width:30px;height:30px;border-radius:50%;background:#00000033}
+.nav-buttons{position:absolute;right:8px;top:93.2px;display:flex;flex-direction:column;gap:2px;padding:1.8px 0;border:1px solid var(--bl-view3d-header);border-radius:14px;background:var(--bl-view3d-header);z-index:3}
+.nav-buttons .bl-icon-button{width:28px;min-width:28px;height:28px;padding:0;border-radius:50%;background:transparent}
 .nav-buttons .bl-icon-button:hover{background:#ffffff26}
 .overlays-off .nav-gizmo,.overlays-off .nav-buttons,.overlays-off .view-label{display:none}
 .camera-view .nav-gizmo,.camera-view .nav-buttons,.camera-view .view-label .view-detail{display:none}
@@ -27,30 +32,10 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 #creation-panel,#redo-panel{left:6px;bottom:6px;background:#303030f0;border:0;border-radius:5px;box-shadow:0 2px 8px #0006}
 @media(pointer:coarse){.nav-gizmo{width:80px;height:80px;top:50px}.nav-buttons{display:none}.view-label{display:none}}
 #panel{background:var(--bl-back)}
+#pane{height:100%}
 .dock-header-content .bl-search{flex:1;min-width:40px;max-width:260px;margin:0 2px}
-#panel>.section-label,#panel>.tree-tools,#tree-info{display:none}
-#tree-root{display:flex;align-items:center;gap:5px;height:var(--bl-row);padding:0 6px 0 var(--bl-row);color:var(--bl-text);background:transparent}
-#objects{padding:0}
-#objects .object-row{min-height:var(--bl-row);height:var(--bl-row);gap:0;padding:0 calc(var(--bl-row)*.4) 0 calc(var(--depth,0)*var(--bl-row));color:var(--bl-text)}
-#objects .object-row:nth-child(even){background:#ffffff05}
-#objects .object-row:hover{background:var(--bl-hover)}
-#objects .object-row.active{background:var(--bl-list-select)}
-#objects .object-row.active:has(+.object-row:not(.active)),#objects .object-row.active:last-child{background:var(--bl-list-active)}
-#objects .object-row.dim .tree-label{color:var(--bl-text-off)}
-#objects .object-row>button{display:inline-flex;align-items:center;justify-content:center;height:var(--bl-row);min-width:20px;padding:0 2px;border:0;border-radius:0;background:transparent;color:var(--bl-text)}
-#objects .object-row>button:hover{background:transparent}
-#objects .object-row>button:not(.tree-name) .bl-icon{opacity:.85}
-#objects .object-row>button:not(.tree-name):hover .bl-icon{opacity:1}
-#objects .tree-toggle{width:var(--bl-row);margin-left:var(--bl-row)}
-#objects .object-row>.tree-restrict{flex:none;width:var(--bl-row);min-width:0;padding:0}
-#objects .data-row .tree-name{display:inline-flex;align-items:center}
-#objects .object-row .tree-name{flex:1;justify-content:flex-start;gap:5px;padding:0 2px;overflow:hidden}
-#objects .tree-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#objects .tree-data{width:14px;height:14px;margin-left:6px}
-@media(pointer:coarse){#panel>.section-label,#panel>.tree-tools{display:flex}#objects .object-row{height:auto}}
-#objects .object-row.active-collection,#tree-root.active-collection{background:#ffffff14}
-#objects .object-row.active-collection .tree-label,#tree-root.active-collection span{color:#fff}
-#tree-root{cursor:default}
+#panel>.section-label,#panel>.tree-tools{display:none}
+@media(pointer:coarse){#panel>.section-label,#panel>.tree-tools{display:flex}}
 
 .bl-select-box{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);background:var(--bl-hover)}
 .bl-select-circle{position:fixed;z-index:20;pointer-events:none;border:1px dashed var(--bl-text);border-radius:50%}
@@ -81,5 +66,5 @@ dialog{background:var(--bl-header);color:var(--bl-text);border:1px solid var(--b
 .bl-menu .bl-icon-image{background:none}
 .toolbar-shown .view-label{left:calc(var(--bl-row)*3.25)}
 .tool-header-shown .view-label{top:calc(var(--bl-header-h) + var(--bl-row)*.5)}
-.tool-header-shown .nav-gizmo{top:calc(var(--bl-header-h) + 6px)}.tool-header-shown .nav-buttons{top:calc(var(--bl-header-h) + 108px)}
-.sidebar-shown .nav-gizmo{right:calc(var(--bl-row)*13.5 + 6px)}.sidebar-shown .nav-buttons{right:calc(var(--bl-row)*13.5 + 38px)}
+.tool-header-shown .nav-gizmo{top:calc(var(--bl-header-h) + 2px)}.tool-header-shown .nav-buttons{top:calc(var(--bl-header-h) + 93.2px)}
+.sidebar-shown .nav-gizmo{right:calc(var(--bl-row)*13.5 + 3px)}.sidebar-shown .nav-buttons{right:calc(var(--bl-row)*13.5 + 8px)}

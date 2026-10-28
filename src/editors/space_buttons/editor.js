@@ -1,4 +1,4 @@
-// The Properties editor (space_buttons.cc): Blender's own header, navigation bar and panels (src/bl_ui, transpiled from
+// The Properties editor (space_buttons.cc): Blender's own header, navigation bar and panels (Blender's Python tree, transpiled from
 // Blender's properties_*.py and space_properties.py), drawn by the shared layout renderer (interface/layout-view.js)
 // over Bylonder's data through Blender's RNA (makesrna/rna-bylonder.js), in the context buttons_context.cc gives
 // (buttons-context.js). Bylonder's own panels go after Blender's in their tab, as add-ons' do.

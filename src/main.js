@@ -13,7 +13,7 @@ import {
 } from "./editors/object/object-actions";
 import { createObjectCommands } from "./editors/object/commands";
 import { createAddMesh } from "./editors/object/add-mesh";
-import { createOutliner } from "./editors/space_outliner/outliner";
+import { createOutliner } from "./editors/space_outliner/space-outliner.js";
 import { visible, deleted } from "./editors/object/identity";
 import { view_3d as theme } from "./editors/interface/userdef-default-theme.js";
 import { createWorkbench } from "./draw/workbench.js";
@@ -50,6 +50,7 @@ import { registerOperators, appendMenu, kw, inArea, contextArea } from "./window
 import { keymapHandler } from "./windowmanager/keyconfig.js";
 import { createToolSystem } from "./windowmanager/wm-toolsystem.js";
 import { createView3DTools } from "./editors/space_view3d/view3d-tools.js";
+import { tagRedraw } from "./draw/overlay-tool.js";
 import { startGestureLasso } from "./windowmanager/wm-gesture-lasso.js";
 import { startGestureCircle } from "./windowmanager/wm-gesture-circle.js";
 import { lassoRegion, circleRegion } from "./editors/space_view3d/view3d-select.js";
@@ -310,7 +311,7 @@ creator = createAddMesh(
   notify,
 );
 commands.setBefore(() => creator.finish());
-world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { refreshUI(); views.wake(); } });
+world.editMode = createEditMode({ world, editor, views, history, notify, changed: () => { refreshUI(); tagRedraw(); views.wake(); } });
 // Edit Mode commits a pending Add, as changing mode does in Blender: its panel no longer adjusts the object.
 world.onModeChange = () => {
   if (world.editMode?.active) creator.finish();
@@ -341,7 +342,7 @@ const applyTool = () => {
 const contextView = () => contextArea()?.space ?? activeView();
 world.toolsystem = createToolSystem({
   context: () => world.blenderContext(contextView()),
-  changed: () => { applyTool(); viewports().forEach((view) => view.sync()); },
+  changed: () => { applyTool(); tagRedraw(); viewports().forEach((view) => view.sync()); },
 });
 // The tools' operators and the active tool's gizmos in the 3D View under the pointer.
 const tools = createView3DTools({
@@ -353,7 +354,7 @@ const blenderObjects = createBlenderObjects({ rna: blenderRNA, transaction: comm
 registerObjectOperators(world.objectActions, blenderObjects);
 registerAddOperators(creator);
 world.dock = viewportDock;
-world.outliner = createOutliner(world, editor, commands);
+world.outliner = createOutliner({ world, editor, commands, objects: blenderObjects, rna: blenderRNA, region: document.querySelector("#outliner"), header: world.dock?.header("objects") });
 const touch = createViewportTouch(world, editor, creator, views);
 // Like Blender, objects hidden or excluded through their collections drop out of the selection.
 world.collections.subscribe(() => {
@@ -363,6 +364,9 @@ world.collections.subscribe(() => {
 const beginSelection = editor.selection.begin;
 editor.selection.begin = () => { animation.pause(); beginSelection(); };
 ui = createUI(world, editor, storage, history, systems, sdk.properties, input.files || [], blenderRNA);
+// Blender's add operators leave the object they add selected and active alone, so a scene opens that way (startup.blend's cube).
+const added = world.objects.findLast((n) => n.metadata?.wbCreation?.operator);
+if (added) { editor.selection.replace([added]); editor.reconcile(); }
 const nodeSection = document.querySelector("#nodes-section");
 let shadingReady = false;
 const backdrop = createCompositorBackdrop({
@@ -518,7 +522,7 @@ function undoRedo(redo) {
 // Keys the window manager takes: not those typed into fields, meant for the Video Sequencer (its menu commands
 // run as synthetic key events) or for an open dialog or menu.
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
-  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor') && !help.open && !creator.open && !world.contextMenu.isOpen;
+  !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
 const inView = (event) => !!event.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);

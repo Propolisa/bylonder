@@ -15,7 +15,7 @@ export var _module = function (module_id) {
 	}
 	else {
 	}
-	return globalThis.__py_modules[module_id]
+	return globalThis.__py_modules[module_id] && new Proxy(globalThis.__py_modules[module_id], {get: (target, key) => key in target || typeof key !== "string" ? target[key] : globalThis.__py_modules[module_id + "." + key]})
 };
 export var _member = function (module_id, member_id) {
 	if (arguments.length) {

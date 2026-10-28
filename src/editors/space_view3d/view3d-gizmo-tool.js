@@ -6,23 +6,26 @@ import { add_v3, mul_v3_fl } from '../../blenlib/math-geom.js';
 import { registerGizmoGroupType } from '../../windowmanager/wm-gizmo-map.js';
 import { css, THEME } from '../../draw/overlay-tool.js';
 
-// U.gizmo_size, and the handles' radii in pixels (handle_free_radius_default, handle_normal_radius_default / 12).
-const GIZMO_SIZE = 75, FREE_RADIUS = 36, NORMAL_RADIUS = 100 / 12, NORMAL_OFFSET = 12;
+// U.gizmo_size, and the handles' default radii and fill (handle_free_radius_default, handle_normal_radius_default).
+const GIZMO_SIZE = 75, FREE_RADIUS = 36, NORMAL_RADIUS = 100, NORMAL_OFFSET = 12, FREE_FILL_ALPHA = 0.125;
 // transform_gizmo_extrude_3d.cc's scales, of the gizmo size.
 const BUTTON_SCALE = 0.15, BUTTON_OFFSET = (0.6666 * 1.5) / 0.15, OUTER_SCALE = 1.2;
 const PLUS = [[0x73, 0x73], [0x73, 0x36], [0x8c, 0x36], [0x8c, 0x73], [0xc9, 0x73], [0xc9, 0x8c], [0x8c, 0x8c], [0x8c, 0xc9], [0x73, 0xc9], [0x73, 0x8c],
   [0x36, 0x8c], [0x36, 0x73]];
 
 // `stats()` gives the selection's center and normal (calc_gizmo_stats), or null; `toolKeymap(event)` runs the active
-// tool's keymap; `extrude(event, { normal })` runs the Extrude Region tool's operator constrained to the normal or not.
-export function registerToolGizmos({ region, stats, active, toolKeymap, extrude }) {
-  // A gizmo's parts on screen: { part, at: [x, y] client, radius, helpline }.
+// tool's keymap; `extrude(event, { normal })` runs the Extrude Region tool's operator constrained to the normal or not;
+// `properties(group)` gives the active tool's settings of a gizmo group (its widget_properties: radius, fill).
+export function registerToolGizmos({ region, stats, active, toolKeymap, extrude, properties }) {
+  // A gizmo's parts on screen: { part, at: [x, y] client, radius, fill, from }.
   const handle = (r, kind) => {
     const s = stats(), c = s && r.project(s.center);
     if (!c) return [];
-    if (kind === 'free') return [{ part: 'free', at: c, radius: FREE_RADIUS }];
-    const tip = r.project(add_v3(s.center, mul_v3_fl(s.normal, NORMAL_OFFSET * NORMAL_RADIUS * r.pixel_size(s.center))));
-    return tip ? [{ part: 'normal', at: tip, radius: NORMAL_RADIUS, from: c }] : [];
+    const props = properties(`VIEW3D_GGT_tool_generic_handle_${kind}`);
+    if (kind === 'free') return [{ part: 'free', at: c, radius: props.radius ?? FREE_RADIUS, fill: props.backdrop_fill_alpha ?? FREE_FILL_ALPHA }];
+    const radius = (props.radius ?? NORMAL_RADIUS) / 12;
+    const tip = r.project(add_v3(s.center, mul_v3_fl(s.normal, NORMAL_OFFSET * radius * r.pixel_size(s.center))));
+    return tip ? [{ part: 'normal', at: tip, radius, from: c }] : [];
   };
   const extrudeParts = (r) => {
     const s = stats(), c = s && r.project(s.center);
@@ -46,7 +49,7 @@ export function registerToolGizmos({ region, stats, active, toolKeymap, extrude 
 
 // GIZMO_GT_button_2d and GIZMO_GT_dial_3d as the tools draw them: the gizmo color, white when highlighted; a free
 // handle a thin circle with a faint fill, a normal handle a filled button with a line from the center.
-function drawButton(ctx, r, { at, radius, from, plus, ring, part }, highlight) {
+function drawButton(ctx, r, { at, radius, fill, from, plus, ring, part }, highlight) {
   const color = highlight ? THEME.gizmo_hi : THEME.gizmo_primary;
   const [x, y] = r.toRegion(at);
   if (from) {
@@ -67,7 +70,7 @@ function drawButton(ctx, r, { at, radius, from, plus, ring, part }, highlight) {
     return;
   }
   if (part === 'free') {
-    ctx.fillStyle = css(color, 0.125);
+    ctx.fillStyle = css(color, fill);
     ctx.fill();
     ctx.lineWidth = 2;
     ctx.strokeStyle = css(color);

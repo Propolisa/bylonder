@@ -1,6 +1,6 @@
 # Blender boundary
 
-How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own code: the UI scripts in `src/bl_ui` (Blender's Python, compiled by Transcrypt), which read `bpy.context` and RNA, and the C++ in `src/bmesh/bmesh.wasm`, which reads a `bContext` and DNA. Decided 2026-10-27.
+How Blender's code sees Bylonder's data. Two parts of Bylonder are Blender's own code: Blender's Python in `src/bl_py` (all of its scripts, compiled by Transcrypt), which read `bpy.context` and RNA, and the C++ in `src/bmesh/bmesh.wasm`, which reads a `bContext` and DNA. Decided 2026-10-27.
 
 ## Decisions
 
@@ -55,7 +55,7 @@ Bylonder's Babylon scene owns all data; the module holds a mirror for as long as
 
 ### Known limits
 
-Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Cameras and lights are not mirrored, since their Babylon nodes have no scale for RNA to read. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
+Text and curve objects go in without their data, so operators that change it (Apply Scale, Set Origin) do nothing on them yet. Lights and cameras go in without their data too. Next to mirror: `scene.unit_settings`, snapping and proportional editing in ToolSettings, `frame_current`, and the 3D Viewport's `RegionView3D` for view-dependent operators.
 
 ### Animation
 
@@ -63,11 +63,24 @@ Decided 2026-10-28. Animation data is Blender's, in the module's Main: each anim
 
 The Timeline, Dope Sheet and Graph Editor are Blender's spaces (`SpaceAction` with its `TIMELINE` and `DOPESHEET` modes, `SpaceGraph`), each a `ScrArea` in the module made by its space type's own `create` (`tools/blender-port/wasm/anim-api.cc`, JS `editors/animation/anim-area.js`). Their operators, the channel list (`ANIM_animdata_filter`), key columns (`keyframes_keylist.cc`), View2D and transform conversion are Blender's code. Bylonder is the window manager (`editors/animation/anim-editor.js`): it lays out the regions, turns DOM events into `wmEvent`s for the editors' keymaps (`keymapHandler`), runs modal operators with their modal keymaps, draws box, circle and lasso gestures and the popups an invoke asks for (confirmation, enum menus), and draws the regions on canvases with the theme's colors (`anim-draw.js`, after `action_draw.cc`, `graph_draw.cc`, `keyframes_draw.cc`). Headers and menus are the registered classes of Blender's Python tree (`python/bpy_interface.js`): headers drawn by the shared layout renderer (`layout-view.js`), menus through `drawMenu`.
 
+### Outliner
+
+Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outliner/tree` in the module, over the same Main: Blender's code builds the tree (`tree_display_view_layer.cc`, `tree_element_*.cc`), lays it out and draws it (`outliner_draw.cc`), and runs every Outliner operator (`outliner_select.cc`, `outliner_tools.cc`, `outliner_dragdrop.cc`, `outliner_edit.cc`, `outliner_collections.cc`). `tools/blender-port/wasm/outliner-api.cc` makes the area as `ED_area_newspace` does (the space type's own `create`), sets up its main region as `outliner_main_region_init` does, and draws it; JS `editors/space_outliner/outliner-area.js` holds it and `space-outliner.js` is its window manager.
+
+- **Collections are Blender's.** `collections-blender.js` mirrors Bylonder's collections into Main (children, objects, exclude and visibility flags, the active layer collection), so the View Layer tree, the exclude checkbox and the restriction toggles are Blender's own `layer.cc` results. What an operator changed comes back through `collections.assign`.
+- **Objects come back by name, base and parent.** After each operator or button: the selection and active object from the bases, hidden, `hide_select`, `hide_render` and `hide_viewport` from Object DNA, names, parents, and objects Blender's code deleted (`outliner.delete`), which leave the mirror (`forget`).
+- **DNA by name.** `tools/blender-port/modifier_dna.py` also writes `src/makesrna/dna-outliner.json` (Object, Base, Collection, LayerCollection and SpaceOutliner fields, with their RNA icons and enum items), read in place by `makesrna/dna-struct.js`. The header's `space_data` is the module's SpaceOutliner through it.
+- **Drawing.** `region-draw.cc` stands in for the GPU module, BLF and the button layer: `imm*`, the round box, text and icons are recorded as JSON with Blender's coordinates, text is measured by JS (`region_text_width`), and `editors/interface/region-draw.js` replays the recording on a canvas with Blender's SVG icons, tinted as `blf_glyph_cache_add_svg` does. Buttons (the toggles, the rename field) are recorded with their rectangles; a press runs `ui_apply_but` as Blender's handlers do (`region_button_press`, `region_button_text`), and dragging over a toggle column sets them alike.
+- **Events.** The canvas makes Blender's event values (PRESS, RELEASE, CLICK, DOUBLE_CLICK within 350 ms, CLICK_DRAG past 3 px) and runs the keymaps of the main region (`Outliner`, `View2D Buttons List`, `Screen`, `Window`) with the Outliner as the context area. Box gestures run through `startGestureBox`; a menu an operator calls (`WM_menu_name_call`, port-override) opens through `drawMenu`.
+- **Drag and drop.** `wm_dragdrop.cc` and `object_relations.cc` are compiled; `drag-drop.cc` runs the main region's dropbox handlers as `wm_event_system.cc` does, for the region JS gives (`drag_update`, `drag_drop`). Dropping on an object moves it into that object's collection, Shift parents it, Ctrl links it; dropping on a collection moves it there.
+- **Scene sync.** The module's Scene is not in Main's scenes, so `BKE_main_collection_sync` does not resync its view layer after an ID is deleted or remapped: the area resyncs it after every operator (`syncCollections`). Main's ID remapping reaches the area's tree store through `BKE_library_callback_remap_editor_id_reference_set`.
+- **Not yet:** the popup menus `outliner_operator_menu` builds (context menus on mesh data, materials and other IDs that are not objects or collections), the edge pan while dragging (`WM_operator_name_call_ptr` runs only an exec), scroll bars, the display modes other than View Layer, and Bylonder's materials as Material IDs under their meshes.
+
 ## Shared foundations
 
 Every subsystem builds on these, one of each:
 
-- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry). `transpile.py`'s per-class manifest is the interim path until `src/bl_py` replaces `src/bl_ui`.
+- Blender's Python: `tools/blender-ui/tree.py` compiles Blender's whole `scripts/startup` and `scripts/modules` into `src/bl_py`, over a boundary of Bylonder's modules (`tools/blender-ui/boundary`: `_bpy` and the C modules, the module registry).
 - Blender's C: one WebAssembly module (`tools/blender-port`), with one Blender world in it (Main, Scene, ViewLayer, bContext stand-ins) that every subsystem's data (meshes, curves, text, animation) lives in.
 - Data: one RNA layer over Bylonder's data (`src/makesrna/rna-bylonder.js`) and one `bpy.context` (`src/blenkernel/context.js`).
 - Operators: one registry by Blender idname (`src/windowmanager/wm-operators.js`); keys only from Blender's keymaps (`src/windowmanager/keyconfig.js`); no hand-written keymaps. An editor runs its keymaps inside its context area (`inArea(area, ...)`), so operators act on that editor (`contextArea()`) and `wm.call_menu` opens the area's own menu (`area.menu(idname)`); editors never keep operator tables of their own.
@@ -96,8 +109,8 @@ Blender's startup, which registers its classes (2094: every menu, panel, header 
 Consumers and running:
 
 - `src/python/bpy_interface.js` loads the tree and exports `registered`, `menus`, `panels`, `headers`, `module(name)` and
-  `setContext`. Menus, the Properties editor's panels, the 3D View's regions and the tool system draw from these;
-  `src/bl_ui` (transpile.py's per-class manifest) is being retired and takes no new entries.
+  `setContext`. Menus, the Properties editor's panels, the 3D View's regions, the animation editors' headers, the tool system and the
+  keymaps (`presets/keyconfig`) all come from these; the per-class transpile it replaced is gone (2026-10-28).
 - Blender's Python operators register in Bylonder's operator registry by idname unless Bylonder registers its own
   (which then wins); they run as Blender runs one: an instance with its property defaults and the given values,
   `poll`, then `execute` (or `invoke` from an event) in `bpy.context`.
@@ -113,6 +126,9 @@ The app opens in the Layout workspace: the window is Blender's (topbar, editors,
 
 - The topbar has Blender's eleven default workspace tabs. A tab opens the screen Bylonder has for it: Scripting opens the code workspace (Text Editor, File Browser, Console beside the scene), every other tab the Layout screen, until Bylonder has their editors (Image Editor, Spreadsheet, sculpt and paint modes).
 - The Layout screen is startup.blend's: its split positions are read from the file's area vertices (1920 x 1080) and kept as fractions, which Blender scales with the window; areas stay at least one header high. The topbar and status bar are fixed heights in pixels at UI scale, as Blender's global areas.
+- Area geometry is Blender's (`areaSizes` in `editors/screen/dock.js`): a split's edge is a screen vertex at its fraction of the vertex range, rounded from the left or bottom (`screen_geom_vertices_scale`), and areas sit 2 px inside their vertices, 1 px below the topbar (`area_calc_totrct`), so areas are 3 px apart. At 1600 x 950 every area matches Blender's to the pixel.
+- An editor whose header overlaps its main region (the 3D Viewport) is a dock item with `overlap`: its main region spans the area under the header, which takes the theme's translucent header color, so the view's projection is Blender's.
+- The scene opens with the object that an add operator made last (`createPrimitive`) selected and active, as startup.blend's cube is, and a primitive's Mesh has all its elements selected, as `EDBM_op_call_and_selectf` leaves it.
 - The topbar's right region is Blender's: the Scene selector and the View Layer selector (the scene window's view layers, set through `send`).
 - Workbench controls sit where an add-on would put them. A project is Bylonder's .blend file: File > Open and Open Recent list projects, the window title names the open one. Run is the Text Editor header's Run Script (Ctrl Enter, also Render > Run), as Blender runs a script from there. Project actions are File, Edit and Render menu entries.
 
@@ -140,7 +156,7 @@ Decided 2026-10-28. A tool is what Blender's is: its keymap, its gizmo group and
 - Object Mode tools: `editors/space_view3d/view3d-tools.js` registers `view3d.cursor3d` (`view3d-cursor.js`, with Blender's surface depth and orientations), `transform.from_gizmo`, `view3d.ruler_add` and `view3d.ruler_remove` (`view3d-gizmo-ruler.js`), `gpencil.annotate` (`editors/gpencil/annotate.js`, all four modes) and `view3d.interactive_add` (`view3d-placement.js`). The cursor is `scene.cursor` (`View3DCursor`), drawn by `draw/overlay-cursor.js`.
 - Annotations are Blender's data model in a document slice (`blenkernel/gpencil/annotations.js`): layers holding frames of strokes. Rulers are strokes of the hidden `RulerData3D` layer, as Blender stores them.
 - Edit Mode tools run Blender's modal operators in the module. The edit context has a 3D View (`edit_context_view_set`: window, screen, area, View3D, window region and a RegionView3D from the Babylon camera), so operators project the mouse as in Blender. `EditMesh.invoke` and `modal` give them events, and Bylonder's window manager matches the operator's modal keymap (`object-edit.js` `moduleOperator`). This runs Shrink/Fatten, Push/Pull, To Sphere, Shear, Vertex Slide, Smooth and Randomize (the generic value modal), Rip, Spin, Knife and Extrude to Cursor. Move, Rotate, Scale, Edge Slide, Inset, Bevel and Loop Cut stay Bylonder's JS ports. The module's own gizmos are off (`V3D_GIZMO_HIDE`): the gizmo map draws the view's.
-- A drag event (CLICK_DRAG) carries the mouse where the drag passed the threshold, as Blender's does; `dragStart(event)` gives the press, for what Blender places at the drag's start (rulers, placement, box gestures, the cursor's transform, gizmo highlighting).
+- A drag event (CLICK_DRAG) carries the mouse where the drag passed the threshold, as Blender's does; `dragStart(event)` gives the press, for what Blender places at the drag's start (rulers, placement, box gestures, the cursor's transform, gizmo highlighting). An operator returning `FINISHED|PASS_THROUGH` (Set 3D Cursor) handles a press as Blender's `WM_HANDLER_HANDLED` does: no click follows, a drag still can.
 - `tests/tools-wasm.test.js` drags the Edit Mode tools on Blender's startup cube as `tools/blender-reference/tool-fixtures.py` drags them in Blender (real input, Drag: Active Tool) and compares the meshes.
 
 ## Layouts and panels
@@ -150,6 +166,8 @@ One recorder and one renderer draw every layout from Blender's scripts: panels, 
 - `editors/interface/layout.js`: `UILayout`, Blender's layout API as a recorder. Each call adds a node `{ kind, ...arguments, ...layout settings }`; sub-layouts hold `children`. Unknown `template_*` calls record their name and arguments.
 - `editors/interface/panels.js`: `panelTypes(modules, { space, region })` gives a region's panel types in Blender's registration order (bl_parent_id, bl_order, HIDE_HEADER first); `drawPanels(types, context, { contexts, open })` runs poll, draw_header, draw_header_preset and draw into layouts; `headerLayout(context, draw)` lays out a header row.
 - `editors/interface/layout-view.js`: the Vue renderer. `h(LayoutView, { layout, ui })`, `h(PanelView, { panel, ui })`, `h(RegionView, { panels, ui })`. `ui` is what the widgets need from the editor (undo push, operators, menus, popovers, panel open state, ID lists, animation); the file's header lists it.
+- Header layouts (`headerLayout`, root type HEADER) are of variable size as Blender's: menus are flat pull-downs, properties keep the width `item_rna_size` estimates (scaled by their layouts' `scale_x`), and sub-layouts keep their size; elsewhere sub-layouts in a row share its width.
+- Icons draw 1600 units of their SVG at the icon's size, centered (`blf_glyph_cache_add_svg`); `icon-sizes.json` (from `tools/blender-ui/icons.py`) lists the documents of other sizes, and `iconStyle(name)` in `icon.js` sizes the mask.
 - Widgets follow `interface_layout.cc` and `interface_widgets.cc`: property split at 0.4 with the row hack that puts later items in the value column, the checkbox exception, decorators, array names above their fields, expanded enums in the layout's direction, and Blender's spacing. Numbers are one component, `components/ui/number-field/NumberField.vue`, with Blender's drag behavior.
 - Property metadata (names, ranges, units, enum items) is Blender's RNA: `rna-ui.json` (from `tools/blender-reference/rna-structs.py`) through `rnaProperty(struct, name)`, and `rna-operators.json` for operator properties. `bl_rna` and `rna_type` give `blRna(struct)` on the same data.
 

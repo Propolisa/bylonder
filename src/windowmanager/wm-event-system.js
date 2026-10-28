@@ -60,8 +60,10 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     const view = viewAt(e);
     if (!view && !modal.length) return;
     const type = BUTTONS[e.button];
-    const handled = dispatch(wmEvent(e, type, 'PRESS', { view }));
-    press = { type, x: e.clientX, y: e.clientY, view, native: e, handled, dragged: false };
+    const event = wmEvent(e, type, 'PRESS', { view }), handled = dispatch(event);
+    // An operator that finished and passed the press through (FINISHED | PASS_THROUGH, WM_HANDLER_HANDLED) leaves no
+    // click, but a drag.
+    press = { type, x: e.clientX, y: e.clientY, view, native: e, handled, clicked: handled || !!event.handled, dragged: false };
     if (handled) e.preventDefault();
   };
   const pointermove = (e) => {
@@ -78,7 +80,7 @@ export function createEventSystem({ layers, viewAt, accepts = () => true, hover 
     if (e.pointerType === 'touch') return;
     const type = BUTTONS[e.button], down = press?.type === type ? press : null;
     if (modal.length || down) dispatch(wmEvent(e, type, 'RELEASE', { view: viewAt(e), press: down }));
-    if (down && !down.handled && !down.dragged) dispatch(wmEvent(down.native, type, 'CLICK', { view: down.view, press: down }));
+    if (down && !down.clicked && !down.dragged) dispatch(wmEvent(down.native, type, 'CLICK', { view: down.view, press: down }));
     if (down) press = null;
   };
   const wheel = (e) => {
