@@ -16,13 +16,26 @@ function rotationTo(direction) {
 }
 
 export function asObject(node) {
-  // A hemispheric light has a direction and no position.
+  // A hemispheric light has a direction and no position: Light's world matrix is then the identity and its absolute
+  // position the origin, so it gets a world matrix of the transform it is given, as a TransformNode's.
+  const positioned = !!node.position;
   node.position ??= Vector3.Zero();
   node.scaling ??= new Vector3(1, 1, 1);
   node.getAbsolutePosition ??= () => node.globalPosition ?? node.position;
   if (!node.rotation) {
     node.rotation = node.direction ? rotationTo(node.direction) : new Vector3();
     node.rotationQuaternion = null;
+  }
+  if (!positioned) {
+    const world = Matrix.Identity(), quaternion = new Quaternion();
+    node.computeWorldMatrix = () => {
+      const rotation = node.rotationQuaternion ?? Quaternion.FromEulerVectorToRef(node.rotation, quaternion);
+      Matrix.ComposeToRef(node.scaling, rotation, node.position, world);
+      if (node.parent) world.multiplyToRef(node.parent.computeWorldMatrix(true), world);
+      return world;
+    };
+    node.getWorldMatrix = node.computeWorldMatrix;
+    node.getAbsolutePosition = () => node.computeWorldMatrix().getTranslation();
   }
   return node;
 }

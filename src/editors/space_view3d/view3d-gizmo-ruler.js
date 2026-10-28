@@ -72,7 +72,9 @@ export function createRuler({ world, region, sources, wm, commit, orientation, a
         if (other) item.co[index === 0 ? 2 : 0] = other;
       }
     } else {
-      if (do_snap) co = snap_object_project_view3d(r, mval, sources)?.co ?? co;
+      // The snap gizmo's previous point, for snapping perpendicular to it: the angle's vertex, else the other end.
+      const prev = index === 1 ? null : item.flag & RULERITEM_USE_ANGLE ? item.co[1] : item.co[index === 0 ? 2 : 0];
+      if (do_snap) co = snap_object_project_view3d(r, mval, sources, { prev })?.co ?? co;
       if (!(item.flag & RULERITEM_USE_ANGLE) && constrain.mode !== CONSTRAIN_MODE_OFF) {
         const mat = orientation(constrain.mode), inv = transpose_m3(mat), other = mul_m3_v3(inv, item.co[index === 0 ? 2 : 0]);
         const local = mul_m3_v3(inv, co).map((x, i) => (i === constrain.axis ? x : other[i]));

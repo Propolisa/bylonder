@@ -127,6 +127,9 @@ const SETUP = {
     await app.locator('[data-tool="builtin.inset_faces"]').click();
     await app.hover(...REST);
   },
+  "loop-cut-tool": (app) => editTool(app, "builtin.loop_cut", [1, 1, 0]),
+  "spin-tool": (app) => editTool(app, "builtin.spin"),
+  "poly-build-tool": (app) => editTool(app, "builtin.poly_build", [1, 1, 0]),
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
   "curve-edit": (app) => addAndEdit(app, "curve.primitive_bezier_circle_add"),
   "text-edit": (app) => addAndEdit(app, "object.text_add"),
@@ -141,6 +144,22 @@ const SETUP = {
     await app.page.keyboard.press("Shift+A");
   },
 };
+// As ui-shots.py: Edit Mode with everything selected and a tool, the mouse over a scene point (Blender's axes) or resting.
+async function editTool(app, tool, anchor) {
+  await app.hover(...REST);
+  await app.page.keyboard.press("Tab");
+  await app.until((b) => b.world.editMode.active);
+  await app.page.keyboard.press("a");
+  await app.locator(`[data-tool="${tool}"]`).click();
+  if (!anchor) return app.hover(...REST);
+  const at = await app.bylonder((b, [x, y, z]) => {
+    const view = b.views.input, { width, height } = view.canvas;
+    const p = BABYLON.Vector3.Project(new BABYLON.Vector3(x, z, y), BABYLON.Matrix.Identity(), view.camera.getTransformationMatrix(), { x: 0, y: 0, width, height });
+    return [p.x / width, p.y / height];
+  }, anchor);
+  await app.hover(...at);
+}
+
 // As ui-shots.py: Delete over the view, the Add operator, then Tab.
 async function addAndEdit(app, idname) {
   await app.hover(...REST);

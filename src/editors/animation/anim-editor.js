@@ -15,7 +15,7 @@ import { inArea, contextArea, registerOperator, registerOperators, runOperator, 
 import { WM_DRAG_THRESHOLD_MOUSE } from '../../windowmanager/wm-event-system.js';
 import { openMenu } from '../interface/menu.js';
 import { drawMenu } from '../interface/ui-layout.js';
-import { headerLayout, drawPanels, panelTypes } from '../interface/panels.js';
+import { headerLayout, drawPanels, panelTypes, drawType } from '../interface/panels.js';
 import { LayoutView, RegionView, panelState } from '../interface/layout-view.js';
 import { drawSidebarPanels } from './anim-buttons.js';
 import { drawRecording, buttonAt } from '../interface/region-draw.js';
@@ -160,7 +160,7 @@ export function mountAnimEditor(section, { header, space, uiType = space === 'GR
       return drawn?.body && { label: drawn.label, layout: drawn.body, units: type.bl_ui_units_x };
     },
   });
-  const drawHeaderType = (type) => (layout) => Object.assign(type(), { layout }).draw(context());
+  const drawHeaderType = (type) => (layout) => drawType(type, layout, context());
 
   // The sidebar (RGN_TYPE_UI): its tabs (the panels' categories) and the active tab's panels whose poll passes, the
   // Graph Editor's drawn by Blender's C code in the module (anim-buttons.js), the Dope Sheet's from Blender's scripts.

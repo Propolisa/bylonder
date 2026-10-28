@@ -25,6 +25,10 @@ export function createEditModes(mesh, curve) {
     get mesh() { return mesh.mesh; },
     gizmoStats: () => mesh.gizmoStats(),
     addPrimitive: (...args) => mesh.addPrimitive(...args),
+    preselectEdgeRing: (...args) => mesh.preselectEdgeRing(...args),
+    preselectElem: (...args) => mesh.preselectElem(...args),
+    set toolGizmoGroup(idname) { mesh.toolGizmoGroup = idname; },
+    get lastOperation() { return mesh.lastOperation; },
     reload() { mesh.reload(); curve.reload(); },
     dispose() { mesh.dispose(); curve.dispose(); },
   };

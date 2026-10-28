@@ -2453,7 +2453,30 @@ export var VIEW3D_PT_sculpt_symmetry_for_topbar =  __class__ ('VIEW3D_PT_sculpt_
 	bl_region_type: 'HEADER',
 	bl_label: 'Symmetry',
 	bl_ui_units_x: 13,
-	draw: VIEW3D_PT_sculpt_symmetry.draw
+	get draw () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return (function () {
+			var __accu0__ = VIEW3D_PT_sculpt_symmetry;
+			return __call__ (__accu0__.draw, __accu0__, self, ...args, __kwargtrans__ (kwargs));
+		}) ();
+	});}
 });
 export var VIEW3D_PT_curves_sculpt_symmetry =  __class__ ('VIEW3D_PT_curves_sculpt_symmetry', [Panel, View3DPaintPanel], {
 	__module__: __name__,
@@ -2521,7 +2544,30 @@ export var VIEW3D_PT_curves_sculpt_symmetry_for_topbar =  __class__ ('VIEW3D_PT_
 	bl_space_type: 'TOPBAR',
 	bl_region_type: 'HEADER',
 	bl_label: 'Symmetry',
-	draw: VIEW3D_PT_curves_sculpt_symmetry.draw
+	get draw () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return (function () {
+			var __accu0__ = VIEW3D_PT_curves_sculpt_symmetry;
+			return __call__ (__accu0__.draw, __accu0__, self, ...args, __kwargtrans__ (kwargs));
+		}) ();
+	});}
 });
 export var VIEW3D_PT_tools_weightpaint_symmetry =  __class__ ('VIEW3D_PT_tools_weightpaint_symmetry', [Panel, View3DPaintPanel], {
 	__module__: __name__,
@@ -2586,7 +2632,30 @@ export var VIEW3D_PT_tools_weightpaint_symmetry_for_topbar =  __class__ ('VIEW3D
 	bl_space_type: 'TOPBAR',
 	bl_region_type: 'HEADER',
 	bl_label: 'Symmetry',
-	draw: VIEW3D_PT_tools_weightpaint_symmetry.draw
+	get draw () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return (function () {
+			var __accu0__ = VIEW3D_PT_tools_weightpaint_symmetry;
+			return __call__ (__accu0__.draw, __accu0__, self, ...args, __kwargtrans__ (kwargs));
+		}) ();
+	});}
 });
 export var VIEW3D_PT_tools_weightpaint_options =  __class__ ('VIEW3D_PT_tools_weightpaint_options', [Panel, View3DPaintPanel], {
 	__module__: __name__,
@@ -2726,7 +2795,30 @@ export var VIEW3D_PT_tools_vertexpaint_symmetry_for_topbar =  __class__ ('VIEW3D
 	bl_space_type: 'TOPBAR',
 	bl_region_type: 'HEADER',
 	bl_label: 'Symmetry',
-	draw: VIEW3D_PT_tools_vertexpaint_symmetry.draw
+	get draw () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return (function () {
+			var __accu0__ = VIEW3D_PT_tools_vertexpaint_symmetry;
+			return __call__ (__accu0__.draw, __accu0__, self, ...args, __kwargtrans__ (kwargs));
+		}) ();
+	});}
 });
 export var VIEW3D_PT_tools_imagepaint_options_external =  __class__ ('VIEW3D_PT_tools_imagepaint_options_external', [Panel, View3DPaintPanel], {
 	__module__: __name__,

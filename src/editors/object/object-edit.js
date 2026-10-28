@@ -10,15 +10,13 @@ import { EDBM_select_pick, EDBM_edge_find_nearest, EDBM_unified_findnearest, EDB
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
 import { dragStart } from '../../windowmanager/wm-event-system.js';
 import { do_mesh_region_select, boxRegion, SEL_OPS } from '../space_view3d/view3d-select.js';
-import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix, view3d_pixel_size } from '../transform/transform.js';
+import { initTransform, createSpaceNormal, toBlender, toBlenderMatrix } from '../transform/transform.js';
 import { regionView3D, viewProjection } from '../space_view3d/view3d-project.js';
 import { modalItem } from '../../windowmanager/keyconfig.js';
 import { createTransMesh } from '../transform/transform-mesh.js';
 import { beginEdgeSlide } from '../transform/transform-mesh-edge-slide.js';
-import { meshOperator, operatorPreview, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
+import { meshOperator, editBMesh, runsMeshOperator } from '../mesh/editmesh-tools.js';
 import { loopcut_modal } from '../mesh/editmesh-loopcut.js';
-import { inset_modal } from '../mesh/editmesh-inset.js';
-import { bevel_modal } from '../mesh/editmesh-bevel.js';
 import { openMenu } from '../interface/menu.js';
 import { createRedoPanel } from '../interface/redo-panel.js';
 import { operatorSchema } from './mesh-catalog.js';
@@ -30,17 +28,28 @@ import { createEditMeshOverlay } from '../../draw/overlay-edit-mesh.js';
 import { createKeymap, operatorKeys } from '../../windowmanager/input/keymap.js';
 import { editMeshMenus, editMeshActions } from '../space_view3d/view3d-menus-edit-mesh.js';
 import { registerOperator, registerOperators } from '../../windowmanager/wm-operators.js';
+import { drawCallbackAdd, tagRedraw, css, THEME } from '../../draw/overlay-tool.js';
 
 const ACTIVE_TYPE = { [BM_VERT]: 'vert', [BM_EDGE]: 'edge', [BM_FACE]: 'face' };
 // Blender's event types where they differ from the window manager's (wm-event-system.js), and its modifier flags.
 const EVENT_TYPES = { SPACEBAR: 'SPACE' };
 // Operators a macro invokes with its event, since they act where the mouse is.
-const INVOKED = new Set(['mesh.rip', 'mesh.rip_edge']);
 // Operators whose invoke reads the mouse or the view, run with their event as Blender's window manager runs them.
-const MOUSE_OPERATORS = new Set([...INVOKED, 'mesh.knife_tool', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_delete_at_cursor', 'mesh.spin']);
+const MOUSE_OPERATORS = new Set(['mesh.knife_tool', 'mesh.dupli_extrude_cursor', 'mesh.polybuild_delete_at_cursor', 'mesh.spin', 'mesh.bisect']);
 const modifierFlags = (e) => (e.shift ? 1 : 0) | (e.ctrl ? 2 : 0) | (e.alt ? 4 : 0) | (e.oskey ? 8 : 0);
 
 const MESH_MODES = ['OBJECT', 'EDIT', 'SCULPT', 'VERTEX_PAINT', 'WEIGHT_PAINT', 'TEXTURE_PAINT'];
+
+// A dashed line in the view's overlay color (ED_region_draw_mouse_line_cb, wm_gesture_draw_line).
+function drawDashedLine(ctx, [[x0, y0], [x1, y1]]) {
+  ctx.setLineDash([6, 6]);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = css(THEME.view_overlay);
+  ctx.beginPath();
+  ctx.moveTo(x0, y0);
+  ctx.lineTo(x1, y1);
+  ctx.stroke();
+}
 
 export function createEditMode({ world, editor, views, history, notify, changed }) {
   const { scene } = world;
@@ -62,6 +71,7 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     if (amend) history.amend();
     else if (commit) {
       redo.hide();
+      adjustLast.apply = null;
       history.commit();
     }
     changed();
@@ -172,29 +182,53 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     em.edit.objectToWorld = toBlenderMatrix(em.object.computeWorldMatrix(true));
     if (views.input?.camera) em.edit.view = regionView3D(views.input);
   };
+  // Preselection geometry in the edit object's space, in Blender world space.
+  const inWorld = (geometry) => {
+    const world_m = em.object.computeWorldMatrix(true);
+    const point = (co) => toBlender(Vector3.TransformCoordinates(new Vector3(co[0], co[2], co[1]), world_m));
+    return Object.fromEntries(Object.entries(geometry).map(([key, points]) => [key, points.map(point)]));
+  };
   // view3d.edit_mesh_extrude_move_normal: extrude, then move along the normal when faces were selected.
-  const extrudeMove = () => macro('mesh.extrude_region', {}, 'transform.translate', em.edit.totals.totfacesel ? { orient_type: 'NORMAL' } : {});
+  const extrudeMove = () => macro([['mesh.extrude_region', {}], ['transform.translate', em.edit.totals.totfacesel ? { orient_type: 'NORMAL' } : {}]]);
   // One of Blender's operators run in the module's 3D View as its window manager runs it: invoked with the event
   // (or the pointer), then given the following events while it runs modally, its modal keymap's items as items. The
   // edit mesh redraws as it changes and the view's header shows its text. A finished run is one undo step, as is a
   // cancelled one after an operator that ran first (`keep`); `then(status)` follows it, as a macro's next step.
   function moduleOperator(idname, props, event, { keep = false, commit = true, then = () => {} } = {}) {
     place();
+    const before = commit && em.edit.copy();
     const view = event?.view ?? views.input, r = viewProjection(view);
     const blenderEvent = (e) => {
       const [x, y] = r.toBlenderRegion([e.x, e.y]), type = e.type.toUpperCase();
-      return { type: EVENT_TYPES[type] ?? type, value: e.value, x, y, modifier: modifierFlags(e), text: e.native?.key?.length === 1 ? e.native.key : '' };
+      const press = e.value === 'CLICK_DRAG' && e.press ? r.toBlenderRegion([e.press.x, e.press.y]) : undefined;
+      return { type: EVENT_TYPES[type] ?? type, value: e.value, x, y, modifier: modifierFlags(e), text: e.native?.key?.length === 1 ? e.native.key : '', press };
     };
     const end = (status) => {
       selectmode = em.edit.selectmode;
       notify('');
+      removeDraw();
       if (commit && (status & OPERATOR_FINISHED || keep)) sync();
       else sync({ commit: false });
+      if (commit && status & OPERATOR_FINISHED) {
+        adjustLast(idname, before, em.edit.lastValues);
+        if (adjustLast.apply) adjustLast.apply.gizmos = em.edit.gizmoRequested();
+      } else if (before) before.free();
       then(status);
     };
+    // What the operator draws while it runs: its gesture's line (Bisect's), or the line from its center to the mouse
+    // (Inset's and Bevel's, ED_region_draw_mouse_line_cb).
+    let running = null;
+    const removeDraw = drawCallbackAdd((ctx, region) => {
+      if (!running || region.view !== view) return;
+      const gesture = em.edit.gesture(running), from = em.edit.mouseLine, mouse = r.toRegion([editor.pointer.x, editor.pointer.y]);
+      const toCanvas = ([x, y]) => [x, r.rect.height - y];
+      const line = gesture?.active ? [toCanvas(gesture.start), toCanvas(gesture.end)] : from && [toCanvas(from), mouse];
+      if (line) drawDashedLine(ctx, line);
+    });
     const { status, op, keymap, report } = em.edit.invoke(idname, props, blenderEvent(event ?? { ...editor.pointer, type: 'mousemove', value: 'NOTHING' }));
     if (report) notify(report);
     if (!op) { end(status); return status; }
+    running = op;
     sync({ commit: false });
     let remove = () => {};
     const handle = (e) => {
@@ -203,7 +237,8 @@ export function createEditMode({ world, editor, views, history, notify, changed 
       if (result & OPERATOR_RUNNING_MODAL) {
         sync({ commit: false });
         notify(em.edit.status);
-      } else { remove(); endTool = () => {}; end(result); }
+      } else { running = null; remove(); endTool = () => {}; end(result); }
+      tagRedraw();
       return !(result & OPERATOR_PASS_THROUGH);
     };
     endTool();
@@ -213,50 +248,52 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     handle({ ...(event ?? editor.pointer), type: 'mousemove', value: 'NOTHING' });
     return status;
   }
-  // A macro: an operator (invoked with the event when it reads the mouse, else run by its exec), then a transform of
-  // its result from the same event, Bylonder's own Move or Edge Slide or one of the module's, as one undo step kept when
-  // the transform is cancelled.
-  function macro(idname, props, transform, transformProps, event) {
-    const startTransform = () => {
-      const releaseConfirm = !!transformProps.release_confirm, point = event, view = event?.view;
-      if (transform === 'transform.translate' || transform === 'transform.edge_slide') {
-        const orient = transformProps.orient_type === 'NORMAL' ? 'NORMAL' : undefined;
-        editor.start(transform === 'transform.translate' ? 'move' : 'edge_slide', { point, view, releaseConfirm, orient, keep: true });
-        if (!editor.modal) sync();
-      } else moduleOperator(transform, transformProps, event, { keep: true });
+  // A macro (wmOperatorTypeMacro): its operators in turn, each invoked with the event as Blender's macro invokes
+  // them (`exec` runs one by its exec, as Loop Cut runs from the tool's preselected edge), the last one modal; one
+  // undo step, kept when that one is cancelled.
+  function macro(steps, event) {
+    const run = (i) => {
+      const [idname, props, { exec: byExec = false } = {}] = steps[i], last = i === steps.length - 1;
+      if (byExec) {
+        place();
+        const report = meshOperator(em.edit, idname, props);
+        if (report) { notify(report); return; }
+        sync({ commit: false });
+        run(i + 1);
+        return;
+      }
+      moduleOperator(idname, props, event, last ? { keep: true } : { commit: false, then: (status) => { if (status & OPERATOR_FINISHED) run(i + 1); } });
     };
-    if (INVOKED.has(idname)) { moduleOperator(idname, props, event, { commit: false, then: (status) => { if (status & OPERATOR_FINISHED) startTransform(); } }); return; }
-    place();
-    const report = meshOperator(em.edit, idname, props);
-    if (report) { notify(report); return; }
-    sync({ commit: false });
-    startTransform();
+    run(0);
   }
   // Runs an operator as one undo step; one with visible properties opens Adjust Last Operation, which re-runs it
   // from a copy of the edit mesh as it was before.
   function exec(idname, props = {}) {
     place();
     const before = em.edit.copy();
-    const run = (values) => { const report = meshOperator(em.edit, idname, values); if (report) notify(report); };
-    run(props);
+    runExec(idname, props);
     selectmode = em.edit.selectmode;
     sync();
+    adjustLast(idname, before, props);
+  }
+  const runExec = (idname, values) => { const report = meshOperator(em.edit, idname, values); if (report) notify(report); };
+  // Adjust Last Operation for an operator that ran from `before` with `props`: its panel re-runs it by its exec, as
+  // Blender's redo does; `adjustLast.apply` is that re-run, for a redo gizmo (Spin's).
+  function adjustLast(idname, before, props) {
     em.before?.free();
     em.before = null;
     const schema = operatorSchema(idname);
-    if (!Object.keys(schema).length) { before.free(); return; }
+    if (!Object.keys(schema).length) { before.free(); adjustLast.apply = null; return; }
     em.before = before;
     const values = { ...Object.fromEntries(Object.entries(schema).map(([key, def]) => [key, def.default])), ...props };
-    redo.show({
-      title: rna[idname].name,
-      schema,
-      values,
-      apply(next) {
-        em.edit.replace(before);
-        run(next);
-        sync({ amend: true });
-      },
-    });
+    const apply = (next) => {
+      em.edit.replace(before);
+      runExec(idname, next);
+      sync({ amend: true });
+    };
+    adjustLast.apply = { idname, values, apply: (next) => { Object.assign(values, next); apply({ ...values }); redo.show(panel); } };
+    const panel = { title: rna[idname].name, schema, values, apply };
+    redo.show(panel);
   }
   const wm = () => world.wm;
   // Starts a modal tool as a window manager modal handler; `create(end)` builds it.
@@ -272,10 +309,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   }
   // mesh.loopcut_slide: from a tool's press the cut at the edge ring under it at once, then Edge Slide from there;
   // otherwise the ring under the mouse previewed until a click.
-  const loopcut = (event, slideProps = {}) => {
+  const loopcut = (event, slideProps = {}, cutProps = {}) => {
     if (event?.view) {
       const edge_index = EDBM_edge_find_nearest(em.mesh, viewAdapter(event.view), [event.x, event.y]);
-      if (edge_index >= 0) macro('mesh.loopcut', { object_index: 0, edge_index, number_cuts: 1 }, 'transform.edge_slide', slideProps, event);
+      if (edge_index >= 0) macro([['mesh.loopcut', { ...cutProps, object_index: 0, edge_index }, { exec: true }], ['transform.edge_slide', slideProps]], event);
       return;
     }
     loopcutModal();
@@ -288,37 +325,10 @@ export function createEditMode({ world, editor, views, history, notify, changed 
     notify,
     end,
     // mesh.loopcut_slide: the cut, then Edge Slide.
-    confirm: (edge_index, number_cuts) => macro('mesh.loopcut', { object_index: 0, edge_index, number_cuts }, 'transform.edge_slide', {}),
+    confirm: (edge_index, number_cuts) => macro([['mesh.loopcut', { object_index: 0, edge_index, number_cuts }, { exec: true }], ['transform.edge_slide', {}]]),
   }));
-  // A modal mesh tool (mesh.inset, mesh.bevel): the median point of the selection on screen, previews of the edit
-  // mesh as it is, then one undo step with its redo panel.
-  function meshModal(operator, modal, extra = {}, event = null) {
-    const view = views.input, world_m = em.object.computeWorldMatrix(true);
-    const { vert_positions, verts_num } = em.mesh, selected = em.mesh.attribute('.select_vert'), median = [0, 0, 0];
-    let count = 0;
-    for (let v = 0; v < verts_num; v++) if (selected[v]) { for (let a = 0; a < 3; a++) median[a] += vert_positions[v * 3 + a]; count++; }
-    if (!count) return;
-    const center = Vector3.TransformCoordinates(new Vector3(median[0] / count, median[2] / count, median[1] / count), world_m);
-    const screen = viewAdapter(view).project([median[0] / count, median[1] / count, median[2] / count]) ?? [0, 0];
-    const scale = new Vector3();
-    world_m.decompose(scale);
-    place();
-    const run = operatorPreview(em.edit, operator);
-    startTool((end) => modal({
-      ...extra,
-      center: { x: screen[0], y: screen[1] },
-      mouse: event ? [event.x, event.y] : [editor.pointer.x, editor.pointer.y],
-      pixel_size: view3d_pixel_size(view, center) / Math.max(Math.abs(scale.x), Math.abs(scale.y), Math.abs(scale.z)),
-      preview(props) { run(props, (copy) => draw(copy.toMesh(), copy.history.at(-1), EXTRACT_ALL, copy)); changed(); },
-      confirm(props) { exec(operator, props); },
-      // The previews drew other meshes, so the edit mesh is drawn anew.
-      cancel() { draw(em.mesh, em.edit.history.at(-1)); changed(); },
-      notify,
-      end,
-    }));
-  }
-  const inset = (event, { release_confirm, ...props } = {}) => em.edit.totals.totfacesel && meshModal('mesh.inset', inset_modal, { props, release_confirm }, event);
-  const bevel = (affect, event, { release_confirm, ...props } = {}) => meshModal('mesh.bevel', bevel_modal, { props: { ...props, affect }, release_confirm }, event);
+  const inset = (event, props = {}) => moduleOperator('mesh.inset', props, event);
+  const bevel = (affect, event, props = {}) => moduleOperator('mesh.bevel', { ...props, affect }, event);
   // Box, lasso and circle select: the elements in a region of the view, by eSelectOp.
   const selectRegion = (view, region, mode) => { if (em && do_mesh_region_select(em.edit, em.mesh, viewAdapter(view ?? views.input), region, SEL_OPS[mode] ?? SEL_OPS.SET)) sync({ extract: EXTRACT_FLAGS }); };
   // view3d.select_box: a box gesture, begun at the drag's press or (from B) at the next press.
@@ -402,6 +412,26 @@ export function createEditMode({ world, editor, views, history, notify, changed 
   return {
     get active() { return !!em; },
     gizmoStats: () => (em ? gizmoStats() : null),
+    // The Loop Cut tool's edge ring under the mouse with `cuts` cuts (VIEW3D_GGT_mesh_preselect_edgering), and the
+    // Poly Build tool's element under it, which its operators then act on, with its preview
+    // (VIEW3D_GGT_mesh_preselect_elem); both in Blender world space, or null.
+    preselectEdgeRing(event, cuts) {
+      if (!em) return null;
+      const edge = EDBM_edge_find_nearest(em.mesh, viewAdapter(event.view), [event.x, event.y]);
+      return edge < 0 ? null : inWorld(em.edit.preselectEdgeRing(edge, cuts));
+    },
+    preselectElem(event) {
+      if (!em) return null;
+      place();
+      const [x, y] = viewProjection(event.view).toBlenderRegion([event.x, event.y]);
+      const found = inWorld(em.edit.preselectElem(x, y, modifierFlags(event)));
+      return found.edges.length || found.verts.length ? { ...found, remove: !!event.shift && !event.ctrl } : null;
+    },
+    // The active tool's gizmo group, as the module's operators see the gizmo map.
+    set toolGizmoGroup(idname) { if (em) em.edit.gizmoGroup = idname; },
+    // The last operator's Adjust Last Operation ({ idname, values, apply(next), gizmos }: the redo gizmos it asked
+    // for), while it can be adjusted.
+    get lastOperation() { return adjustLast.apply ?? null; },
     // A primitive added to the edit mesh by its operator (mesh.primitive_cube_add), as the Add Primitive tools add it.
     addPrimitive: (idname, props) => exec(idname, props),
     // Redraws the modifier result after the stack changed.

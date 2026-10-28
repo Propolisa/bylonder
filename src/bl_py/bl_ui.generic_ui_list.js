@@ -146,7 +146,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	else {
 	}
-	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
 export var __all__ = tuple (['draw_ui_list']);
 export var draw_ui_list = function (layout, context, class_name) {

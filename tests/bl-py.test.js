@@ -26,3 +26,35 @@ const ran = [];
 registerOperator('object.select_all', { run: (props) => ran.push(props) });
 assert.deepEqual([...module('bpy').ops.object.select_all({ action: 'TOGGLE', __kwargtrans__: null })], ['FINISHED']);
 assert.deepEqual(ran, [{ action: 'TOGGLE' }], 'bpy.ops runs the operator Bylonder registered');
+assert.equal(module('bpy').path.display_name('2D_Animation'), '2D Animation', 'bpy.path.display_name, which File > New draws templates with');
+
+// Every menu and header draws in Blender's default context except those that read an editor's data (a space, a node
+// tree, an image): a gap in the runtime or the boundary fails many draws at once.
+const { menus, headers } = await import('../src/python/bpy_interface.js');
+const { UILayout } = await import('../src/editors/interface/layout.js');
+const types = [...Object.values(menus), ...Object.values(headers)];
+const drawn = types.filter((type) => {
+  try {
+    setContext({});
+    Object.assign(type(), { layout: new UILayout() }).draw(module('_bpy').context);
+    return true;
+  } catch {
+    return false;
+  }
+}).length;
+assert.ok(drawn >= 517, `${drawn} of ${types.length} menus and headers draw without an editor's data`);
+
+// Blender's Python operators' polls run in Blender's default context except those that read an editor's data.
+const operators = Object.entries(registered).filter(([idname, cls]) => idname.includes('.') && cls.poll);
+const polled = operators.filter(([, cls]) => {
+  try {
+    setContext({});
+    cls.poll(module('_bpy').context);
+    return true;
+  } catch {
+    return false;
+  }
+}).length;
+assert.ok(polled >= 109, `${polled} of ${operators.length} Python operator polls run without an editor's data`);
+setContext({ mode: 'OBJECT', active_object: null });
+assert.equal(registered['object.quick_fur'].poll(module('_bpy').context), false, 'Add > Curve > Fur: no active mesh, with its poll message set');

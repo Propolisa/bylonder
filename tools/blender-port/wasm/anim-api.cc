@@ -34,6 +34,7 @@
 #include "ED_keyframing.hh"
 #include "ED_markers.hh"
 #include "ED_screen.hh"
+#include "ED_util.hh"
 #include "ED_space_api.hh"
 #include "ED_view3d.hh"
 #include "WM_message.hh"
@@ -891,6 +892,10 @@ enum Gesture { GESTURE_NONE, GESTURE_BOX, GESTURE_CIRCLE, GESTURE_LASSO };
 static Gesture gesture_started = GESTURE_NONE;
 static Vector<int2> lasso_path;
 
+/* The point (region pixels, y up) a running operator draws a dashed line from to the mouse, or null. */
+static const float *mouse_line_from = nullptr;
+EXPORT(region_mouse_line) const float *region_mouse_line() { return mouse_line_from; }
+
 /* The gesture the last invoke started (Gesture), cleared by asking. */
 EXPORT(operator_gesture) int operator_gesture() { return std::exchange(gesture_started, GESTURE_NONE); }
 /* A lasso's path in region pixels (count points of x, y), for its exec. */
@@ -1020,8 +1025,8 @@ wmOperatorStatus WM_generic_select_invoke(bContext *C, wmOperator *op, const wmE
   return op->type->modal(C, op, event);
 }
 
-/* A circle gesture runs its exec once, when it ends. */
-bool WM_gesture_is_modal_first(const wmGesture * /*gesture*/) { return true; }
+/* A circle gesture runs its exec once, when it ends: it has no wmGesture, so wm_gesture.cc's
+ * WM_gesture_is_modal_first answers that it is the first call. */
 Array<int2> WM_gesture_lasso_path_to_array(bContext * /*C*/, wmOperator * /*op*/) { return Array<int2>(lasso_path.as_span()); }
 
 /* port-override: the pointer's shape and timers are Bylonder's window manager's. */
@@ -1061,14 +1066,26 @@ bool WM_event_handler_region_v2d_mask_no_marker_poll(const wmWindow * /*win*/, c
   return true;
 }
 
-/* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks. */
-void *ED_region_draw_cb_activate(ARegionType * /*art*/, void (* /*draw*/)(const bContext *, ARegion *, void *), void * /*customdata*/,
+/* port-override: Bylonder draws the editors (JS), so regions keep no draw callbacks; of them it draws the dashed line
+ * from a point to the mouse (ED_region_draw_mouse_line_cb, Inset's and Bevel's), whose point it reads with
+ * region_mouse_line. */
+void *ED_region_draw_cb_activate(ARegionType * /*art*/, void (*draw)(const bContext *, ARegion *, void *), void *customdata,
                                  int /*type*/)
 {
   static int handle;
+  if (draw == ED_region_draw_mouse_line_cb) {
+    mouse_line_from = static_cast<const float *>(customdata);
+    return &mouse_line_from;
+  }
   return &handle;
 }
-bool ED_region_draw_cb_exit(ARegionType * /*art*/, void * /*handle*/) { return true; }
+bool ED_region_draw_cb_exit(ARegionType * /*art*/, void *handle)
+{
+  if (handle == &mouse_line_from) {
+    mouse_line_from = nullptr;
+  }
+  return true;
+}
 
 /* port-override: Bylonder's objects have no point caches, so the Timeline draws no cache ranges (timeline_draw_cache). */
 void BKE_ptcache_ids_from_object(ListBaseT<PTCacheID> *lb, Object * /*ob*/, Scene * /*scene*/, int /*duplis*/)

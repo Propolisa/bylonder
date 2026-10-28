@@ -5,6 +5,7 @@ import rna from '../makesrna/rna-modifiers.json' with { type: 'json' };
 import dna from '../makesrna/dna-modifiers.json' with { type: 'json' };
 import { evaluateModifiers, drawModifierPanel, meshData, EditMesh } from '../bmesh/bmesh-wasm.js';
 import { createMesh } from '../blenkernel/mesh/mesh.js';
+import { fieldLayout, writeValues } from './dna-write.js';
 
 // The types that evaluate on a mesh alone; the rest need other objects, vertex groups, bind data or simulation.
 const MESH_ONLY = ['ARRAY', 'BEVEL', 'BUILD', 'DECIMATE', 'EDGE_SPLIT', 'MIRROR', 'REMESH', 'SCREW', 'SKIN', 'SOLIDIFY', 'SUBSURF', 'TRIANGULATE',
@@ -37,37 +38,19 @@ function schema(properties, located, hidden = {}) {
       : [[id, field(prop, prop.default, prop.name, hidden[id])]]));
 }
 
-// Writes a value into the DNA field (dna-modifiers.json) at a struct's address: a bit of a flag field, an element of an
-// array, an enum by its item's value, or a number.
-function writeField(view, address, located, prop, value, index = 0) {
-  const { offset, size, kind, signed, bit, bitset, negative } = located;
-  const at = address + offset + (bitset ? 0 : index * size);
-  const get = { 1: signed ? 'Int8' : 'Uint8', 2: signed ? 'Int16' : 'Uint16', 4: signed ? 'Int32' : 'Uint32' }[size];
-  if (kind === 'float') return view.setFloat32(at, value, true);
-  if (bit !== undefined && prop.type === 'BOOLEAN') {
-    const mask = bitset ? bit << index : bit, on = negative ? !value : value;
-    const word = view[`get${get}`](at, true);
-    return view[`set${get}`](at, on ? word | mask : word & ~mask, true);
-  }
-  const number = prop.type === 'ENUM' ? prop.items.find(([id]) => id === value)[3] : Number(value);
-  view[`set${get}`](at, number, true);
-}
-
 function definition(id) {
   const { value: type, name, description, icon, struct, properties } = rna.types[id];
   const located = dna[struct].properties;
   const fields = schema(properties, located, NOT_OFFERED[id]);
-  const write = (values) => (view, address) => {
-    for (const [path, value] of Object.entries(values)) {
-      const [, prop, index] = path.match(/^(\w+)(?:\[(\d+)\])?$/);
-      if (located[prop] && properties[prop]) writeField(view, address, located[prop], properties[prop], value, Number(index ?? 0));
-    }
-  };
+  // The DNA layouts of the properties a stack entry's settings name, which is all writing them needs.
+  const layouts = (values) => Object.fromEntries(Object.keys(values).map((path) => path.match(/^\w+/)[0])
+    .filter((prop) => located[prop] && properties[prop]).map((prop) => [prop, fieldLayout(located[prop], properties[prop])]));
+  const write = (values) => (view, address) => writeValues(view, address, layouts(values), values);
   return {
     id, name, description, icon, category: 'Generate', blender: `object.modifier_add:${id}`,
     schema: fields,
     defaults: () => Object.fromEntries(Object.entries(fields).map(([path, entry]) => [path, entry.default])),
-    mesh: { type, write },
+    mesh: { type, write, layouts },
   };
 }
 

@@ -2,7 +2,7 @@
 import * as __self__ from './bl_ui.space_userpref.js';
 (globalThis.__py_modules ??= {})['bl_ui.space_userpref'] = __self__;
 var bpy = {};
-import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {__pyname__, AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {register_class} from './bpy.utils.js';
 import {PresetPanel} from './bl_ui.utils.js';
 import {contexts as i18n_contexts, pgettext_iface as iface_, pgettext_rpt as rpt_} from './_bpy.app.translations.js';
@@ -149,7 +149,7 @@ export var _super_classmethod = function (owner, cls, method) {
 	}
 	else {
 	}
-	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+	return (() => { const order = [], visit = (c) => { if (!order.includes(c)) { order.push(c); (c.__bases__ ?? []).forEach(visit); } }; visit(cls); for (const c of order.slice(order.indexOf(owner) + 1)) { const d = globalThis.Object.getOwnPropertyDescriptor(c, method); if (d) return d.get ? d.get.call(cls) : d.value; } })()
 };
 export var USERPREF_HT_header =  __class__ ('USERPREF_HT_header', [Header], {
 	__module__: __name__,
@@ -2505,7 +2505,30 @@ export var USERPREF_MT_interface_theme_presets =  __class__ ('USERPREF_MT_interf
 	preset_type: 'XML',
 	preset_xml_map: tuple ([tuple (['preferences.themes[0]', 'Theme']), tuple (['preferences.ui_styles[0]', 'ThemeStyle'])]),
 	preset_xml_secure_types: new set (['Theme', 'ThemeBoneColorSet', 'ThemeClipEditor', 'ThemeCollectionColor', 'ThemeCommon', 'ThemeCommonAnim', 'ThemeCommonCurves', 'ThemeConsole', 'ThemeDopeSheet', 'ThemeFileBrowser', 'ThemeFontStyle', 'ThemeGradientColors', 'ThemeGraphEditor', 'ThemeImageEditor', 'ThemeInfo', 'ThemeNLAEditor', 'ThemeNodeEditor', 'ThemeOutliner', 'ThemePreferences', 'ThemeProperties', 'ThemeRegions', 'ThemeRegionsAssetShelf', 'ThemeRegionsChannels', 'ThemeRegionsScrubbing', 'ThemeRegionsSidebars', 'ThemeSequenceEditor', 'ThemeSpaceGeneric', 'ThemeSpaceGradient', 'ThemeSpaceListGeneric', 'ThemeSpreadsheet', 'ThemeStatusBar', 'ThemeStripColor', 'ThemeStyle', 'ThemeTextEditor', 'ThemeTopBar', 'ThemeUserInterface', 'ThemeView3D', 'ThemeWidgetColors', 'ThemeWidgetStateColors']),
-	draw: Menu.draw_preset,
+	get draw () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__pyname__ (__attrib0__)] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		return (function () {
+			var __accu0__ = Menu;
+			return __call__ (__accu0__.draw_preset, __accu0__, self, ...args, __kwargtrans__ (kwargs));
+		}) ();
+	});},
 	get reset_cb () {return function (_context, _filepath) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;

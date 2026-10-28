@@ -6,7 +6,7 @@
 //   host: { world (runtime/world.js), selection (editors/object/selection.js), preferences,
 //           update(struct, name, owner), undoPush(name) }
 import { Camera, Light, PointLight, SpotLight, Quaternion, VertexBuffer } from '@babylonjs/core';
-import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct } from './rna.js';
+import { rna, collection, baseOf, INFO, pyArgs, rnaProperty, operatorStruct, operatorIdname, defineStructProperties } from './rna.js';
 import modifierTypes from './rna-modifiers.json' with { type: 'json' };
 import rnaOperators from './rna-operators.json' with { type: 'json' };
 import { modifierStack } from '../modifiers/stack.js';
@@ -623,13 +623,22 @@ const TOOL_SETUP = ['idname', 'keymap', 'cursor', 'options', 'gizmo_group', 'bru
 const ORIENTATION_DEFAULT = ['DEFAULT', 'Default', 'Use the scene orientation', 'OBJECT_ORIGIN'];
 
 // The properties tools set on their gizmo groups (the groups' RNA_def_* in transform_gizmo_3d.cc,
-// transform_gizmo_extrude_3d.cc and view3d_gizmo_tool_generic.cc): default and enum items.
+// transform_gizmo_extrude_3d.cc, view3d_gizmo_tool_generic.cc and editmesh_extrude_spin_gizmo.cc): default and enum
+// items, a flag enum's default a list.
 const GIZMO_GROUP_PROPERTIES = {
   VIEW3D_GGT_xform_gizmo: { drag_action: ['TRANSLATE', [['TRANSLATE', 'Move', '', 'NONE'], ['ROTATE', 'Rotate', '', 'NONE'], ['SCALE', 'Scale', '', 'NONE'], ['NONE', 'None', '', 'NONE']]] },
   VIEW3D_GGT_xform_extrude: { axis_type: ['NORMAL', [['NORMAL', 'Normal', 'Only show normal axis', 'NONE'], ['XYZ', 'XYZ', 'Follow scene orientation', 'NONE']]] },
   VIEW3D_GGT_tool_generic_handle_normal: { radius: [100] },
   VIEW3D_GGT_tool_generic_handle_free: { radius: [36], backdrop_fill_alpha: [0.125] },
+  MESH_GGT_spin: { axis: [['Z'], [['X', 'X', '', 'NONE'], ['Y', 'Y', '', 'NONE'], ['Z', 'Z', '', 'NONE']]] },
 };
+// Each group type's properties are a struct named after it, as Blender's are.
+for (const [idname, properties] of Object.entries(GIZMO_GROUP_PROPERTIES)) {
+  defineStructProperties(idname, Object.fromEntries(Object.entries(properties).map(([name, [def, items]]) => [name, {
+    identifier: name, name: name.split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' '), default: def, array: 0,
+    type: items ? 'E' : typeof def === 'number' ? 'F' : 'B', flag: Array.isArray(def), items,
+  }])));
+}
 // A tool's properties of a gizmo group (WM_toolsystem_ref_properties_ensure_from_gizmo_group): the values set on it
 // over the group's defaults.
 export function gizmoGroupProperties(idname, values, host) {
@@ -638,14 +647,23 @@ export function gizmoGroupProperties(idname, values, host) {
     Object.defineProperty(data, name, { enumerable: true, get: () => values[name] ?? def, set: (value) => { values[name] = value; host?.update?.('GizmoGroupProperties', name, values); } });
     if (enumItems) items[name] = () => enumItems;
   }
-  return rna('GizmoGroupProperties', data, { items });
+  return rna(idname, data, { items });
 }
 
 // An operator's properties (OperatorProperties) over the values stored for it: Blender's defaults (rna-operators.json)
-// until set. Writing one is an update (host.update), as a tool setting is.
+// until set. Writing one is an update (host.update), as a tool setting is. A macro's operators' properties are its
+// pointers, stored as [name, value] pairs as keymap items keep them.
 export function operatorProperties(idname, values, host) {
   const data = {};
   for (const [name, def] of Object.entries(rnaOperators[idname]?.properties ?? {})) {
+    if (def.type === 'POINTER' && /_OT_/.test(def.fixed_type)) {
+      const nested = () => {
+        const own = Object.fromEntries(values[name] ?? []);
+        return operatorProperties(operatorIdname(def.fixed_type), own, { update: (struct, key) => { values[name] = Object.entries(own); host?.update?.(struct, key, values); } });
+      };
+      Object.defineProperty(data, name, { enumerable: true, get: nested });
+      continue;
+    }
     Object.defineProperty(data, name, {
       enumerable: true,
       get: () => values[name] ?? def.default,

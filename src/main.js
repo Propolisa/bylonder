@@ -61,6 +61,7 @@ import { createRNA } from "./makesrna/rna-bylonder.js";
 import { createContext } from "./blenkernel/context.js";
 import { createJobs } from "./windowmanager/wm-jobs.js";
 import { createRunningJobs } from "./editors/interface/running-jobs.js";
+import { exportScene } from "./io_scene_babylon/export.js";
 import { createTexts } from "./blenkernel/texts.js";
 import { mountTextEditor } from "./editors/space_text/text-editor.js";
 import { registerTextOperators } from "./editors/space_text/text-ops.js";
@@ -263,6 +264,7 @@ window.addEventListener("message", (e) => {
     ({ set: () => cols.setViewLayer(id), add: () => cols.createViewLayer(), remove: () => cols.removeViewLayer(cols.layer().id) })[op]?.();
   }
   if (e.data.type === "render-settings") applyRenderSettings(engine, e.data.payload);
+  if (e.data.type === "export") exportScene(world, e.data.payload).catch((error) => notify("Export failed: " + error.message));
   if (e.data.type === "render") ({ image: renderHost.renderImage, animation: renderHost.renderAnimation, view: renderHost.viewRender })[e.data.payload]?.();
   if (e.data.type === "snapshot") {
     const requestId = e.data.payload.requestId;
@@ -554,7 +556,7 @@ function undoRedo(redo) {
 const acceptsKey = (e) => e.isTrusted && !e.repeat && (e.key === "F12" || !document.querySelector(".vse-area:hover")) &&
   !e.target.closest('input,textarea,select,[contenteditable="true"],.node-editor-host,.anim-editor,.bl-outliner,.wm-area') && !help.open && !creator.open && !world.contextMenu.isOpen;
 const viewAt = (e) => (e ? views.all.find((v) => v.canvas === e.target) ?? null : activeView());
-const inView = (event) => !!event.view;
+const inView = (event) => !!event?.view;
 const selectRegion = (view, region, mode) => (world.editMode.active ? world.editMode : editor).selectRegion(view, region, mode);
 // The Add panel's own keys while a new object waits for its settings.
 const creatorKeys = createKeymap([
