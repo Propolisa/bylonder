@@ -3,7 +3,7 @@ import { registerPropertiesContext,registerPropertiesPanel } from '../editors/sp
 import { createAnimationModel } from '../blenkernel/animation/model.js';
 import { registerStore, bindProperties } from '../blenkernel/animation/bindings.js';
 import { createText, updateText, textSchema } from "../blenkernel/text/text.js";
-import { builderSchema } from "../editors/object/mesh-catalog";
+import { builderSchema, createPrimitive } from "../editors/object/mesh-catalog";
 import { createStore } from "./store";
 export function createSDK(base, overrides, onChange, onAnimationChange = () => {}) {
   const animation = createAnimationModel(onAnimationChange);
@@ -17,6 +17,7 @@ export function createSDK(base, overrides, onChange, onAnimationChange = () => {
     properties,
     animate(target, definition) { const binding = bindProperties(animation, target, definition); properties.push(binding); return binding; },
     createText,
+    createPrimitive,
     updateText,
     textSchema,
     meshBuilders: builderSchema,

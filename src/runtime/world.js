@@ -45,7 +45,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   await cache.put(
     root + "__wb_sdk.js",
     new Response(
-      "export const BABYLON=globalThis.BABYLON,engine=globalThis.engine,canvas=globalThis.canvas,workbench=globalThis.workbench;export const controls=workbench.controls.bind(workbench),editable=workbench.editable.bind(workbench),asset=workbench.asset.bind(workbench),onDispose=workbench.onDispose.bind(workbench),meshTools=workbench.meshTools.bind(workbench),createText=workbench.createText,updateText=workbench.updateText,textSchema=workbench.textSchema,animate=workbench.animate.bind(workbench),animation=workbench.animation,addModifier=workbench.addModifier,curve=workbench.curve,registerModifier=workbench.registerModifier,registerPropertiesContext=workbench.registerPropertiesContext,registerPropertiesPanel=workbench.registerPropertiesPanel;",
+      "export const BABYLON=globalThis.BABYLON,engine=globalThis.engine,canvas=globalThis.canvas,workbench=globalThis.workbench;export const controls=workbench.controls.bind(workbench),editable=workbench.editable.bind(workbench),asset=workbench.asset.bind(workbench),onDispose=workbench.onDispose.bind(workbench),meshTools=workbench.meshTools.bind(workbench),createText=workbench.createText,createPrimitive=workbench.createPrimitive,updateText=workbench.updateText,textSchema=workbench.textSchema,animate=workbench.animate.bind(workbench),animation=workbench.animation,addModifier=workbench.addModifier,curve=workbench.curve,registerModifier=workbench.registerModifier,registerPropertiesContext=workbench.registerPropertiesContext,registerPropertiesPanel=workbench.registerPropertiesPanel;",
       { headers: { "Content-Type": "text/javascript" } },
     ),
   );

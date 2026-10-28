@@ -47,6 +47,8 @@ export const engine:B.Engine;
 export const canvas:HTMLCanvasElement;
 export interface TextOptions {text?:string;family?:string;weight?:number;italic?:boolean;size?:number;depth?:number;spacing?:number;lineHeight?:number;resolution?:number;align?:'left'|'center'|'right'}
 export function createText(name:string,options:TextOptions,scene:B.Scene):Promise<B.Mesh>;
+/** A mesh built by a Blender primitive operator, e.g. createPrimitive("Cube", "mesh.primitive_cube_add", {size:2}, scene). */
+export function createPrimitive(name:string,operator:string,options:Record<string,number|boolean|string>,scene:B.Scene):B.Mesh;
 export function updateText(node:B.Mesh,options:TextOptions):Promise<B.Mesh>;
 export const textSchema:Record<keyof TextOptions,Parameter>;
 export function meshTools(config:{include?:string[];defaults?:Record<string,Record<string,number|boolean|string>>;fields?:Record<string,Record<string,Parameter>>}):void;
@@ -65,7 +67,7 @@ export function curve<T extends B.TransformNode>(node:T,points:B.Curve3|B.Vector
 export function registerModifier(definition:{id:string;name:string;category:string;icon:string;schema:Schema;defaults:()=>Record<string,number|string|boolean>;evaluate:(input:{data:object;matrices:B.Matrix[]},modifier:Modifier,context:object)=>{data:object;matrices:B.Matrix[]}}):void;
 export function registerPropertiesContext(context:{id:string;title:string;icon:string;color:string}):void;
 export function registerPropertiesPanel(panel:{id:string;context:string;title:string;poll?:(context:any)=>boolean;render:(context:any)=>any}):void;
-export const workbench:{addModifier:typeof addModifier;curve:typeof curve;registerModifier:typeof registerModifier;registerPropertiesContext:typeof registerPropertiesContext;registerPropertiesPanel:typeof registerPropertiesPanel;animation:typeof animation;animate:typeof animate;createText:typeof createText;updateText:typeof updateText;textSchema:typeof textSchema;meshTools:typeof meshTools;meshBuilders:Record<string,{parameters:string[];fields:Record<string,{type:string;required:boolean}>}>;controls:typeof controls;editable:typeof editable;asset:typeof asset;onDispose:typeof onDispose};
+export const workbench:{addModifier:typeof addModifier;curve:typeof curve;registerModifier:typeof registerModifier;registerPropertiesContext:typeof registerPropertiesContext;registerPropertiesPanel:typeof registerPropertiesPanel;animation:typeof animation;animate:typeof animate;createText:typeof createText;createPrimitive:typeof createPrimitive;updateText:typeof updateText;textSchema:typeof textSchema;meshTools:typeof meshTools;meshBuilders:Record<string,{parameters:string[];fields:Record<string,{type:string;required:boolean}>}>;controls:typeof controls;editable:typeof editable;asset:typeof asset;onDispose:typeof onDispose};
 `;
 const globals = `import * as B from '@babylonjs/core';import {workbench as sdk} from '@workbench/sdk';declare global {const BABYLON:typeof B;const engine:B.Engine;const canvas:HTMLCanvasElement;const workbench:typeof sdk;}export {};`;
 const extra = (source, path) =>

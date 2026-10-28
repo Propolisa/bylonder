@@ -89,6 +89,13 @@ export function buildMesh(scene, name, recipe) {
   return fn(name, recipe.options, scene);
 }
 
+// A mesh built by a Blender primitive operator (mesh.primitive_cube_add, ...), edited as that primitive's Mesh data.
+export function createPrimitive(name, operator, options = {}, scene) {
+  const node = buildMesh(scene, name, { operator, options });
+  node.metadata = { ...node.metadata, wbCreation: { operator, options } };
+  return node;
+}
+
 export function rebuildMesh(mesh, recipe) {
   if (recipe.mesh || recipe.operator) mesh_batch_cache_apply(recipeMesh(recipe), mesh);
   else {

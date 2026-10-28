@@ -163,8 +163,8 @@ const renderHost = createRenderHost({
   sequencer: { hasStrips: () => strips(world.sequenceEditor.state).length > 0, openCompositor: (range) => sequencerAdapter.openCompositor(range) },
   name: () => world.sceneSettings.state.name || "render",
 });
-// Development handle for debugging and browser tests; not present in production builds.
-if (import.meta.env.DEV) window.__bylonder = { world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
+// Handle for debugging and the browser tests, which run against the production build.
+window.__bylonder ={ world, renderHost, get editor() { return editor; }, get views() { return views; }, get sequencer() { return sequencerAdapter; }, get history() { return history; }, get sceneFrames() { return sceneFrames; } };
 let remember = input.remember,
   lastOverride = "";
 const currentOverrides = () => {
