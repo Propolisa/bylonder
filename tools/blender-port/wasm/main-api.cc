@@ -42,6 +42,8 @@
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
+#include "BLI_generic_array.hh"
+#include "BLI_map.hh"
 #include "BLI_set.hh"
 #include "BLI_string.h"
 #include "DEG_depsgraph_query.hh"
@@ -474,11 +476,22 @@ EXPORT(object_mesh_extract) const ExtractionHeader *object_mesh_extract(BlenderM
   return &ctx->extraction;
 }
 
-/* An attribute's values in a mesh object's Mesh, or null; valid until the Mesh changes. */
+/* An attribute's values in a mesh object's Mesh, or null; valid until the Mesh changes. One stored as a single value
+ * (a read file's flat shading of every face) is given as one value per element, kept by name until the next call. */
 EXPORT(object_mesh_attribute) const void *object_mesh_attribute(Object *ob, const char *name)
 {
+  static Map<std::string, GArray<>> materialized;
   const bke::GAttributeReader reader = id_cast<Mesh *>(ob->data)->attributes().lookup(name);
-  return reader && reader.varray.is_span() ? reader.varray.get_internal_span().data() : nullptr;
+  if (!reader) {
+    return nullptr;
+  }
+  if (reader.varray.is_span()) {
+    return reader.varray.get_internal_span().data();
+  }
+  GArray<> &values = materialized.lookup_or_add_default(name);
+  values = GArray<>(reader.varray.type(), reader.varray.size());
+  reader.varray.materialize(values.data());
+  return values.data();
 }
 
 /* A mesh object's Mesh without its geometry, as it is at rest: Bylonder's scene owns geometry, and fills the Mesh only
@@ -851,6 +864,7 @@ void BKE_sound_destroy_scene(Scene * /*scene*/) {}
 /* port-override: a read scene's strips are left out (their data is the sequencer's to read), as Bylonder has none. */
 void seq::blend_read(BlendDataReader * /*reader*/, ListBaseT<Strip> *seqbase) { BLI_listbase_clear(seqbase); }
 void seq::foreach_strip(ListBaseT<Strip> * /*seqbase*/, ForEachFunc /*callback*/, void * /*user_data*/) {}
+void seq::foreach_strip(ListBaseT<Strip> * /*seqbase*/, FunctionRef<bool(Strip *)> /*callback*/) {}
 
 /* port-override: the module's IDs are never assets, so none has an asset type's pre-save step (asset_mark_clear.cc). */
 namespace ed::asset {

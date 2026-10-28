@@ -190,6 +190,13 @@ void blender::mesh_extraction(const Mesh &evaluated, ExtractionHeader &h)
   h.orig_index[0] = static_cast<const int *>(CustomData_get_layer(&mesh->vert_data, CD_ORIGINDEX));
   h.orig_index[1] = static_cast<const int *>(CustomData_get_layer(&mesh->edge_data, CD_ORIGINDEX));
   h.orig_index[2] = static_cast<const int *>(CustomData_get_layer(&mesh->face_data, CD_ORIGINDEX));
+  /* Flat shading's attributes, as Blender draws them; their absence is smooth. */
+  for (const auto [flag, name, domain] : {std::tuple{SHARP_FACE, "sharp_face", bke::AttrDomain::Face}, std::tuple{SHARP_EDGE, "sharp_edge", bke::AttrDomain::Edge}}) {
+    const VArray<bool> values = *mesh->attributes().lookup<bool>(name, domain);
+    if (values && values.is_span()) {
+      h.flags[flag] = const_cast<bool *>(values.get_internal_span().data());
+    }
+  }
   const VArray<float2> uvs = *mesh->attributes().lookup<float2>(mesh->active_or_default_uv_map_name(), bke::AttrDomain::Corner);
   if (uvs && uvs.is_span()) {
     h.uvs = reinterpret_cast<float(*)[2]>(const_cast<float2 *>(uvs.get_internal_span().data()));

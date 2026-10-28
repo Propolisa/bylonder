@@ -117,16 +117,17 @@ Babylon.
   `revert()` makes Main Babylon's again (an operator Bylonder refuses).
   Values Blender evaluates in Main (drivers, later) reach Babylon the same way: `pull(record, owner)` sets each synced
   binding whose Main value changed.
-- **Geometry** (point 5): Main's Meshes are empty at rest. `run`'s `meshes`, `withMeshes(fn)` and `evaluatedMesh(node)`
-  fill them from Babylon's Mesh data (`wbCreation.mesh`, or the edit mesh's while in Edit Mode, `editMode.meshOf`) or a
-  curve's Curve data (`world.curves`) and release them after.
+- **Geometry** (point 5): Main's Meshes are empty at rest, the only data Main holds on demand. `run`'s `meshes`,
+  `withMeshes(fn)` and `evaluatedMesh(node)` fill them from Babylon's Mesh data (`wbCreation.mesh`, or the edit mesh's
+  while in Edit Mode, `editMode.meshOf`) and release them after. A curve's or text's Curve data is live in Main like any
+  value (`pushCurve`, from `world.curves`), and comes back when Blender's code tags its geometry.
 - **For exporters:** `sync.evaluatedMesh(node)` is an object's Mesh with Blender's modifiers applied (Main's stack,
-  `mesh_create_eval_final`), in Blender's axes. Bylonder's own modifier types (Array as Geometry Nodes) are not
-  Blender's and are not applied there.
+  `mesh_create_eval_final`), in Blender's axes. Bylonder's Geometry Nodes Array is applied there as Blender's Array
+  where its settings map (below); Bylonder's other modifier types are not Blender's and are not applied.
 - **Custom properties** keep what only Babylon has: `bylonder_id` on objects, `bylonder_material` (the material's
   kind) and `bylonder_node_material` (a node material's graph, as Babylon serializes it) on materials.
 - **Checked.** `check()` lists the differences of the overlap (values, names, parents, bases, slots, node tree inputs,
-  collections, and geometry where Main holds it). With `debug` (`?sync-check` in the app) it throws after every full
+  collections, curve and text data, and geometry where Main holds it). With `debug` (`?sync-check` in the app) it throws after every full
   flush and run. `tests/main-sync.test.js` runs edits from both sides, undoes and redoes them, and checks each step.
 
 ### .blend files
@@ -147,9 +148,25 @@ as its own (File > Save Project As).
 - **Checked.** `tests/blend-write.test.js` saves a scene and reads it in the reference Blender
   (`tools/blender-reference/blend-check.py`, which can also render it): objects, transforms, parents, geometry,
   material slots and Principled BSDF inputs, modifiers, F-Curve keys, world and camera.
-- **Reading** a .blend is not built. It needs `readfile.cc` with versioning (`versioning_*.cc`), the `blend_read_*`
-  callbacks, linking and the lib-link and after-liblink passes, then a sync from Main to Babylon of whole IDs (objects,
-  meshes into Babylon's buffers, materials from node trees), which the write-back does only for values.
+- **Opening** runs Blender's own path: `readfile.cc` with all of versioning reads the file from memory
+  (`BLO_read_from_memory`, zstd-compressed too) and `BKE_blendfile_read_setup_readfile` makes it the Main, as
+  `wm_file_read_post` does without UI (`main_open`). The file's scene, settings, view layers and collections are then
+  Main's. The ID types the module does not build (images, sounds, armatures, the window manager) are read as their ID
+  alone, and sequencer strips are left out.
+- **Adopting.** `sync.adopt()` makes Babylon's what Main holds and the sync does not, through the same mapping (`pull`
+  with nothing synced yet) and `RELATIONS`: objects of their type (a mesh's geometry goes to Babylon once and Main's is
+  released; a curve's or text's Curve data is kept on both sides), materials of Bylonder's kind with their Principled
+  BSDF inputs, modifiers into Bylonder's stack, rotation modes in Bylonder's order, the scene camera and the world's
+  color; the scene's settings and collections follow once the world's slices exist. Objects Blender's code adds come
+  the same way. What Bylonder cannot show is reported to the Info editor as warnings: other object types, Area lights
+  (opened as point lights), modifiers and node types Bylonder lacks, keys on other properties, a world's strength,
+  several materials on one mesh.
+- **In a project**, `openBlend(path, scene)` (`@workbench/sdk`) opens a .blend of the project's files from its code,
+  before the world starts, so Bylonder's edits are kept over it as over any project. `tests/blend-read.test.js` opens
+  a file Bylonder wrote and a user's file the reference Blender makes (`tools/blender-reference/user-file.py`) and
+  checks them against Blender's reading.
+- **Bylonder's Array** (Geometry Nodes) is saved as Blender's Array modifier when its settings are the Array
+  modifier's: a line of copies by relative, constant or endpoint offset, without rotation, scale or randomness.
 
 ### Adding a subsystem
 
@@ -159,7 +176,7 @@ as its own (File > Save Project As).
 
 ### Known limits
 
-Text and curve objects get their Curve data for an operator and give it back when it tags their geometry (`docs/curves-and-text.md`). Operators that would change a light's or camera's data change nothing (`revert`). Material textures (Image Texture nodes), Area lights' shape, snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; objects Blender's code adds do not come to Babylon yet (deleted ones do). In a saved file, Bylonder's own modifier types (Geometry Nodes Array) are missing, a Node Material is a Principled BSDF
+Operators that would change a light's or camera's data change nothing (`revert`). Material textures (Image Texture nodes), Area lights' shape, snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; Actions stay Main's, which the animation's own record mirrors. In a saved file, Bylonder's Geometry Nodes Array is missing unless it is a line of copies, a Node Material is a Principled BSDF
 with Blender's defaults (its graph is kept in `bylonder_node_material`), and a Standard material gives only its color,
 alpha and emission color.
 

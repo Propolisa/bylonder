@@ -1,4 +1,14 @@
 import { textFile } from "./project-model.js";
+// A project made by opening a .blend (File > Open): its scene is the file's, read by Blender's reader.
+export const blendProjectSource = (path) => `import { openBlend } from '@workbench/sdk';
+
+// ${path}, opened with Blender's reader: its objects, materials, modifiers, animation and collections.
+export async function createScene() {
+  const scene = new BABYLON.Scene(engine);
+  await openBlend(${JSON.stringify(path)}, scene);
+  return scene;
+}
+`;
 export const defaultSource = `export const createScene = function () {
     // This creates a basic Babylon Scene object (non-mesh)
     var scene = new BABYLON.Scene(engine);
