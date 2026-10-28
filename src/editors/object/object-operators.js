@@ -53,9 +53,9 @@ export function registerObjectOperators(registry, { sync, transaction, notify, k
     registerOperator(idname, {
       supports: (props) => !!action(props),
       poll: (props) => action(props)?.enabled?.() ?? true,
-      enumItems: (prop) => ENUMS[idname]?.[prop],
+      enumItems: (prop) => action()?.enumItems?.(prop) ?? ENUMS[idname]?.[prop],
       confirm: CONFIRM[idname],
-      run: (props) => registry.invoke(action(props).id),
+      run: (props) => registry.invoke(action(props).id, props),
     });
   }
   const extra = (id) => registry.actions.find((action) => action.id === id);
