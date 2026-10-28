@@ -3,13 +3,14 @@ import { registerPropertiesContext,registerPropertiesPanel } from '../editors/sp
 import { createAnimationModel } from '../blenkernel/animation/model.js';
 import { registerStore, bindProperties } from '../blenkernel/animation/bindings.js';
 import { createText, updateText, textSchema } from "../blenkernel/text/text.js";
-import { builderSchema, createPrimitive } from "../editors/object/mesh-catalog";
+import { builderSchema, createPrimitive, createMesh, shadeSmooth } from "../editors/object/mesh-catalog";
 import { createStore } from "./store";
 export function createSDK(base, overrides, onChange, onAnimationChange = () => {}) {
   const animation = createAnimationModel(onAnimationChange);
   const properties = [];
   const systems = [],
-    cleanups = [];
+    cleanups = [],
+    render = {};
   let dispose = false;
   const sdk = {
     addModifier,curve,registerModifier,registerPropertiesContext,registerPropertiesPanel,
@@ -18,10 +19,20 @@ export function createSDK(base, overrides, onChange, onAnimationChange = () => {
     animate(target, definition) { const binding = bindProperties(animation, target, definition); properties.push(binding); return binding; },
     createText,
     createPrimitive,
+    createMesh,
+    shadeSmooth,
     updateText,
     textSchema,
     meshBuilders: builderSchema,
     meshToolConfig: {},
+    // The scene's render settings as code sets them (Blender's scene.render, scene.eevee, scene.view_settings),
+    // shaped like the render slice: the baseline that edits in Properties are saved against.
+    renderSettings(patch) {
+      for (const [group, values] of Object.entries(patch)) render[group] = { ...render[group], ...values };
+    },
+    get authoredRender() {
+      return render;
+    },
     meshTools(config) {
       this.meshToolConfig = config;
     },

@@ -3,7 +3,7 @@ import { Panel,PropertyRow } from '../interface/primitives.js';
 import { icon,iconButton } from '../interface/icons.js';
 import { propertyContexts,propertyPanels } from './registry.js';
 import { arrayFields } from '../../modifiers/array.js';
-import { nodeId,deleted } from '../object/identity.js';
+import { nodeId,deleted,hasMesh } from '../object/identity.js';
 import { address } from '../../blenkernel/animation/model.js';
 import { materialPanels } from './material-panels.js';
 import { createPreview } from '../../blenkernel/material/preview.js';
@@ -72,7 +72,7 @@ export function mountProperties(host,{world,editor,history,storage,systems,prope
     ],{actions})]);
   };
   const modifiers=()=>{
-    const node=active();if(!node?.getTotalVertices?.())return h('p',{class:'bl-message'},'Select a mesh to add modifiers.');
+    const node=active();if(!node||!hasMesh(node))return h('p',{class:'bl-message'},'Select a mesh to add modifiers.');
     const add=e=>openMenu(modifierAddMenu(world,node,m=>state.activeModifier=m.id),e.currentTarget);
     return [h('button',{class:'bl-add-modifier',onClick:add,title:'Add Modifier (Shift-A)','data-blender':'OBJECT_MT_modifier_add'},[icon('ADD'),' Add Modifier']),...world.modifiers.stack(node).map((m,i)=>modifierPanel(node,m,i)),world.modifiers.errors.get(nodeId(node))?h('p',{class:'bl-message bl-error'},world.modifiers.errors.get(nodeId(node))):null];
   };

@@ -1,6 +1,6 @@
 import { Matrix, Vector3, VertexData } from '@babylonjs/core';
 import '@babylonjs/core/Meshes/thinInstanceMesh.js';
-import { nodeId, deleted } from '../editors/object/identity.js';
+import { nodeId, deleted, hasMesh } from '../editors/object/identity.js';
 import { arrayDefinition, realize } from './array.js';
 import { blenderModifierDefinitions, evaluation, estimatedFaces } from './blender.js';
 import { evaluateHere } from './evaluator.js';
@@ -17,7 +17,7 @@ const valid=(value,def)=>{
 };
 export function addModifier(node,type='GN_ARRAY',values={}){
   const definition=modifierDefinitions.get(type);if(!definition)throw Error('Unknown modifier: '+type);
-  if(!node?.getTotalVertices?.()||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
+  if(!node||!hasMesh(node)||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
   node.metadata||={};node.metadata.wbModifierBase||=VertexData.ExtractFromMesh(node).serialize();
   const modifier={id:crypto.randomUUID(),type,name:definition.name,showViewport:true,showRender:true,values:definition.defaults()};
   for(const [path,value] of Object.entries(values)){if(!definition.schema[path])throw Error('Unknown modifier property: '+path);modifier.values[path]=valid(value,definition.schema[path]);}
@@ -129,7 +129,7 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
     definitions:modifierDefinitions,stack:modifierStack,errors,
     subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn);},
     add(node,type='GN_ARRAY',values={}){
-      if(!node?.getTotalVertices?.()||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
+      if(!node||!hasMesh(node)||node.skeleton||node.morphTargetManager)throw Error('Modifiers require a static mesh.');
       const definition=modifierDefinitions.get(type);if(!definition)throw Error('Unknown modifier');
       node.metadata||={};base(node);
       const id=crypto.randomUUID(),used=modifierStack(node).map(m=>m.name);let name=definition.name,n=1;while(used.includes(name))name=definition.name+'.'+String(n++).padStart(3,'0');
@@ -164,14 +164,14 @@ export function createModifierSystem(world,{commit=()=>{},notify=console.warn,ev
         return null;
       });
     },
-    copyToSelected(node,id,nodes){const m=modifierStack(node).find(m=>m.id===id);if(m)for(const other of nodes)if(other!==node&&other.getTotalVertices?.())api.add(other,m.type,structuredClone(m.values));},
+    copyToSelected(node,id,nodes){const m=modifierStack(node).find(m=>m.id===id);if(m)for(const other of nodes)if(other!==node&&hasMesh(other))api.add(other,m.type,structuredClone(m.values));},
     refresh(){
       if(applying)return;
       for(const node of world.objects){
         // Files saved before Blender's Array came keep Bylonder's as ARRAY.
         for(const m of node.metadata?.wbModifiers||[])if(m.type==='ARRAY'&&'shape' in m.values)m.type='GN_ARRAY';
         // Edit Mode draws the object itself, with Blender's modifiers evaluated on the edit mesh.
-        if(node.isDisposed()||deleted(node)||!node.getTotalVertices?.()||node.metadata?.editing)continue;
+        if(node.isDisposed()||deleted(node)||!hasMesh(node)||node.metadata?.editing)continue;
         const stack=modifierStack(node),prior=cache.get(node);
         if(!stack.length&&!prior)continue;
         if(!stack.length&&prior&&!node.metadata.wbModifierBase){node.thinInstanceSetBuffer('matrix',null);VertexData.Parse(prior.base).applyToMesh(node);cache.delete(node);continue;}
