@@ -18,7 +18,7 @@ export var PHYSICS_PT_rigid_body_constraint =  __class__ ('PHYSICS_PT_rigid_body
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -36,7 +36,7 @@ export var PHYSICS_PT_rigid_body_constraint =  __class__ ('PHYSICS_PT_rigid_body
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -52,7 +52,10 @@ export var PHYSICS_PT_rigid_body_constraint =  __class__ ('PHYSICS_PT_rigid_body
 		layout.use_property_split = true;
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		layout.prop (rbc, 'type');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'type');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_rigid_body_constraint_settings =  __class__ ('PHYSICS_PT_rigid_body_constraint_settings', [PHYSICS_PT_rigidbody_constraint_panel, Panel], {
@@ -63,7 +66,7 @@ export var PHYSICS_PT_rigid_body_constraint_settings =  __class__ ('PHYSICS_PT_r
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -81,7 +84,7 @@ export var PHYSICS_PT_rigid_body_constraint_settings =  __class__ ('PHYSICS_PT_r
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -95,18 +98,42 @@ export var PHYSICS_PT_rigid_body_constraint_settings =  __class__ ('PHYSICS_PT_r
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		var col = flow.column ();
-		col.prop (rbc, 'enabled');
-		col.prop (rbc, 'disable_collisions');
-		if (rbc.py_metatype != 'MOTOR') {
-			var col = flow.column ();
-			col.prop (rbc, 'use_breaking');
-			var sub = col.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'enabled');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'disable_collisions');
+		}) ();
+		if (__ne__ (rbc.py_metatype, 'MOTOR')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_breaking');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			sub.active = rbc.use_breaking;
-			sub.prop (rbc, 'breaking_threshold', __kwargtrans__ ({text: 'Threshold'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'breaking_threshold', __kwargtrans__ ({text: 'Threshold'}));
+			}) ();
 		}
 	});}
 });
@@ -118,7 +145,7 @@ export var PHYSICS_PT_rigid_body_constraint_objects =  __class__ ('PHYSICS_PT_ri
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -136,7 +163,7 @@ export var PHYSICS_PT_rigid_body_constraint_objects =  __class__ ('PHYSICS_PT_ri
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -152,8 +179,14 @@ export var PHYSICS_PT_rigid_body_constraint_objects =  __class__ ('PHYSICS_PT_ri
 		layout.use_property_split = true;
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		layout.prop (rbc, 'object1', __kwargtrans__ ({text: 'First'}));
-		layout.prop (rbc, 'object2', __kwargtrans__ ({text: 'Second'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'object1', __kwargtrans__ ({text: 'First'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'object2', __kwargtrans__ ({text: 'Second'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_rigid_body_constraint_override_iterations =  __class__ ('PHYSICS_PT_rigid_body_constraint_override_iterations', [PHYSICS_PT_rigidbody_constraint_panel, Panel], {
@@ -164,7 +197,7 @@ export var PHYSICS_PT_rigid_body_constraint_override_iterations =  __class__ ('P
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -182,7 +215,7 @@ export var PHYSICS_PT_rigid_body_constraint_override_iterations =  __class__ ('P
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -196,12 +229,18 @@ export var PHYSICS_PT_rigid_body_constraint_override_iterations =  __class__ ('P
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		self.layout.row ().prop (rbc, 'use_override_solver_iterations', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = self.layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_override_solver_iterations', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -218,7 +257,10 @@ export var PHYSICS_PT_rigid_body_constraint_override_iterations =  __class__ ('P
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
 		layout.active = rbc.use_override_solver_iterations;
-		layout.prop (rbc, 'solver_iterations', __kwargtrans__ ({text: 'Iterations'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'solver_iterations', __kwargtrans__ ({text: 'Iterations'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_rigid_body_constraint_limits =  __class__ ('PHYSICS_PT_rigid_body_constraint_limits', [PHYSICS_PT_rigidbody_constraint_panel, Panel], {
@@ -229,7 +271,7 @@ export var PHYSICS_PT_rigid_body_constraint_limits =  __class__ ('PHYSICS_PT_rig
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -248,7 +290,7 @@ export var PHYSICS_PT_rigid_body_constraint_limits =  __class__ ('PHYSICS_PT_rig
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -271,7 +313,7 @@ export var PHYSICS_PT_rigid_body_constraint_limits_linear =  __class__ ('PHYSICS
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -290,7 +332,7 @@ export var PHYSICS_PT_rigid_body_constraint_limits_linear =  __class__ ('PHYSICS
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -304,36 +346,99 @@ export var PHYSICS_PT_rigid_body_constraint_limits_linear =  __class__ ('PHYSICS
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
 		if (__in__ (rbc.py_metatype, new set (['PISTON', 'SLIDER']))) {
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_lin_x');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_lin_x');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_lin_x;
-			sub.prop (rbc, 'limit_lin_x_lower', __kwargtrans__ ({text: 'X Lower'}));
-			sub.prop (rbc, 'limit_lin_x_upper', __kwargtrans__ ({text: 'Upper'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_x_lower', __kwargtrans__ ({text: 'X Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_x_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
 		}
 		else if (__in__ (rbc.py_metatype, new set (['GENERIC', 'GENERIC_SPRING']))) {
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_lin_x');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_lin_x');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_lin_x;
-			sub.prop (rbc, 'limit_lin_x_lower', __kwargtrans__ ({text: 'X Lower'}));
-			sub.prop (rbc, 'limit_lin_x_upper', __kwargtrans__ ({text: 'Upper'}));
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_lin_y');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_x_lower', __kwargtrans__ ({text: 'X Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_x_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_lin_y');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_lin_y;
-			sub.prop (rbc, 'limit_lin_y_lower', __kwargtrans__ ({text: 'Y Lower'}));
-			sub.prop (rbc, 'limit_lin_y_upper', __kwargtrans__ ({text: 'Upper'}));
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_lin_z');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_y_lower', __kwargtrans__ ({text: 'Y Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_y_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_lin_z');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_lin_z;
-			sub.prop (rbc, 'limit_lin_z_lower', __kwargtrans__ ({text: 'Z Lower'}));
-			sub.prop (rbc, 'limit_lin_z_upper', __kwargtrans__ ({text: 'Upper'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_z_lower', __kwargtrans__ ({text: 'Z Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_lin_z_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
 		}
 	});}
 });
@@ -345,7 +450,7 @@ export var PHYSICS_PT_rigid_body_constraint_limits_angular =  __class__ ('PHYSIC
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -364,7 +469,7 @@ export var PHYSICS_PT_rigid_body_constraint_limits_angular =  __class__ ('PHYSIC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -378,44 +483,122 @@ export var PHYSICS_PT_rigid_body_constraint_limits_angular =  __class__ ('PHYSIC
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		if (rbc.py_metatype == 'HINGE') {
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_ang_z');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+		if (__eq__ (rbc.py_metatype, 'HINGE')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_ang_z');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_ang_z;
-			sub.prop (rbc, 'limit_ang_z_lower', __kwargtrans__ ({text: 'Z Lower'}));
-			sub.prop (rbc, 'limit_ang_z_upper', __kwargtrans__ ({text: 'Upper'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_z_lower', __kwargtrans__ ({text: 'Z Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_z_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
 		}
-		else if (rbc.py_metatype == 'PISTON') {
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_ang_x');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+		else if (__eq__ (rbc.py_metatype, 'PISTON')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_ang_x');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_ang_x;
-			sub.prop (rbc, 'limit_ang_x_lower', __kwargtrans__ ({text: 'X Lower'}));
-			sub.prop (rbc, 'limit_ang_x_upper', __kwargtrans__ ({text: 'Upper'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_x_lower', __kwargtrans__ ({text: 'X Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_x_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
 		}
 		else if (__in__ (rbc.py_metatype, new set (['GENERIC', 'GENERIC_SPRING']))) {
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_ang_x');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_ang_x');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_ang_x;
-			sub.prop (rbc, 'limit_ang_x_lower', __kwargtrans__ ({text: 'X Lower'}));
-			sub.prop (rbc, 'limit_ang_x_upper', __kwargtrans__ ({text: 'Upper'}));
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_ang_y');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_x_lower', __kwargtrans__ ({text: 'X Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_x_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_ang_y');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_ang_y;
-			sub.prop (rbc, 'limit_ang_y_lower', __kwargtrans__ ({text: 'Y Lower'}));
-			sub.prop (rbc, 'limit_ang_y_upper', __kwargtrans__ ({text: 'Upper'}));
-			var col = flow.column ();
-			col.prop (rbc, 'use_limit_ang_z');
-			var sub = col.column (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_y_lower', __kwargtrans__ ({text: 'Y Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_y_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'use_limit_ang_z');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = rbc.use_limit_ang_z;
-			sub.prop (rbc, 'limit_ang_z_lower', __kwargtrans__ ({text: 'Z Lower'}));
-			sub.prop (rbc, 'limit_ang_z_upper', __kwargtrans__ ({text: 'Upper'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_z_lower', __kwargtrans__ ({text: 'Z Lower'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, rbc, 'limit_ang_z_upper', __kwargtrans__ ({text: 'Upper'}));
+			}) ();
 		}
 	});}
 });
@@ -427,7 +610,7 @@ export var PHYSICS_PT_rigid_body_constraint_motor =  __class__ ('PHYSICS_PT_rigi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -441,12 +624,12 @@ export var PHYSICS_PT_rigid_body_constraint_motor =  __class__ ('PHYSICS_PT_rigi
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		return ob && rbc && rbc.py_metatype == 'MOTOR' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return ob && rbc && __eq__ (rbc.py_metatype, 'MOTOR') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -469,7 +652,7 @@ export var PHYSICS_PT_rigid_body_constraint_motor_angular =  __class__ ('PHYSICS
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -483,12 +666,12 @@ export var PHYSICS_PT_rigid_body_constraint_motor_angular =  __class__ ('PHYSICS
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		return ob && rbc && rbc.py_metatype == 'MOTOR' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return ob && rbc && __eq__ (rbc.py_metatype, 'MOTOR') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -502,12 +685,18 @@ export var PHYSICS_PT_rigid_body_constraint_motor_angular =  __class__ ('PHYSICS
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		self.layout.row ().prop (rbc, 'use_motor_ang', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = self.layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_motor_ang', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -521,14 +710,29 @@ export var PHYSICS_PT_rigid_body_constraint_motor_angular =  __class__ ('PHYSICS
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
 		flow.active = rbc.use_motor_ang;
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (rbc, 'motor_ang_target_velocity', __kwargtrans__ ({text: 'Target Velocity'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (rbc, 'motor_ang_max_impulse', __kwargtrans__ ({text: 'Max Impulse'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'motor_ang_target_velocity', __kwargtrans__ ({text: 'Target Velocity'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'motor_ang_max_impulse', __kwargtrans__ ({text: 'Max Impulse'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_rigid_body_constraint_motor_linear =  __class__ ('PHYSICS_PT_rigid_body_constraint_motor_linear', [PHYSICS_PT_rigidbody_constraint_panel, Panel], {
@@ -539,7 +743,7 @@ export var PHYSICS_PT_rigid_body_constraint_motor_linear =  __class__ ('PHYSICS_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -553,12 +757,12 @@ export var PHYSICS_PT_rigid_body_constraint_motor_linear =  __class__ ('PHYSICS_
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		return ob && rbc && rbc.py_metatype == 'MOTOR' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return ob && rbc && __eq__ (rbc.py_metatype, 'MOTOR') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -572,12 +776,18 @@ export var PHYSICS_PT_rigid_body_constraint_motor_linear =  __class__ ('PHYSICS_
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		self.layout.row ().prop (rbc, 'use_motor_lin', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = self.layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_motor_lin', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -591,14 +801,29 @@ export var PHYSICS_PT_rigid_body_constraint_motor_linear =  __class__ ('PHYSICS_
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
 		flow.active = rbc.use_motor_lin;
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (rbc, 'motor_lin_target_velocity', __kwargtrans__ ({text: 'Target Velocity'}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (rbc, 'motor_lin_max_impulse', __kwargtrans__ ({text: 'Max Impulse'}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'motor_lin_target_velocity', __kwargtrans__ ({text: 'Target Velocity'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'motor_lin_max_impulse', __kwargtrans__ ({text: 'Max Impulse'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_rigid_body_constraint_springs =  __class__ ('PHYSICS_PT_rigid_body_constraint_springs', [PHYSICS_PT_rigidbody_constraint_panel, Panel], {
@@ -609,7 +834,7 @@ export var PHYSICS_PT_rigid_body_constraint_springs =  __class__ ('PHYSICS_PT_ri
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -623,12 +848,12 @@ export var PHYSICS_PT_rigid_body_constraint_springs =  __class__ ('PHYSICS_PT_ri
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		return ob && ob.rigid_body_constraint && rbc.py_metatype == 'GENERIC_SPRING' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return ob && ob.rigid_body_constraint && __eq__ (rbc.py_metatype, 'GENERIC_SPRING') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -644,7 +869,10 @@ export var PHYSICS_PT_rigid_body_constraint_springs =  __class__ ('PHYSICS_PT_ri
 		layout.use_property_split = true;
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		layout.prop (rbc, 'spring_type', __kwargtrans__ ({text: 'Type'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_type', __kwargtrans__ ({text: 'Type'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_rigid_body_constraint_springs_angular =  __class__ ('PHYSICS_PT_rigid_body_constraint_springs_angular', [PHYSICS_PT_rigidbody_constraint_panel, Panel], {
@@ -655,7 +883,7 @@ export var PHYSICS_PT_rigid_body_constraint_springs_angular =  __class__ ('PHYSI
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -669,12 +897,12 @@ export var PHYSICS_PT_rigid_body_constraint_springs_angular =  __class__ ('PHYSI
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		return ob && ob.rigid_body_constraint && rbc.py_metatype == 'GENERIC_SPRING' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return ob && ob.rigid_body_constraint && __eq__ (rbc.py_metatype, 'GENERIC_SPRING') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -690,25 +918,73 @@ export var PHYSICS_PT_rigid_body_constraint_springs_angular =  __class__ ('PHYSI
 		layout.use_property_split = true;
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (rbc, 'use_spring_ang_x', __kwargtrans__ ({text: 'X Angle'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_spring_ang_x', __kwargtrans__ ({text: 'X Angle'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = rbc.use_spring_ang_x;
-		sub.prop (rbc, 'spring_stiffness_ang_x', __kwargtrans__ ({text: 'X Stiffness'}));
-		sub.prop (rbc, 'spring_damping_ang_x', __kwargtrans__ ({text: 'Damping'}));
-		var col = flow.column ();
-		col.prop (rbc, 'use_spring_ang_y', __kwargtrans__ ({text: 'Y Angle'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_stiffness_ang_x', __kwargtrans__ ({text: 'X Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_damping_ang_x', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_spring_ang_y', __kwargtrans__ ({text: 'Y Angle'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = rbc.use_spring_ang_y;
-		sub.prop (rbc, 'spring_stiffness_ang_y', __kwargtrans__ ({text: 'Y Stiffness'}));
-		sub.prop (rbc, 'spring_damping_ang_y', __kwargtrans__ ({text: 'Damping'}));
-		var col = flow.column ();
-		col.prop (rbc, 'use_spring_ang_z', __kwargtrans__ ({text: 'Z Angle'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_stiffness_ang_y', __kwargtrans__ ({text: 'Y Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_damping_ang_y', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_spring_ang_z', __kwargtrans__ ({text: 'Z Angle'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = rbc.use_spring_ang_z;
-		sub.prop (rbc, 'spring_stiffness_ang_z', __kwargtrans__ ({text: 'Z Stiffness'}));
-		sub.prop (rbc, 'spring_damping_ang_z', __kwargtrans__ ({text: 'Damping'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_stiffness_ang_z', __kwargtrans__ ({text: 'Z Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_damping_ang_z', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_rigid_body_constraint_springs_linear =  __class__ ('PHYSICS_PT_rigid_body_constraint_springs_linear', [PHYSICS_PT_rigidbody_constraint_panel, Panel], {
@@ -719,7 +995,7 @@ export var PHYSICS_PT_rigid_body_constraint_springs_linear =  __class__ ('PHYSIC
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -733,12 +1009,12 @@ export var PHYSICS_PT_rigid_body_constraint_springs_linear =  __class__ ('PHYSIC
 		}
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		return ob && ob.rigid_body_constraint && rbc.py_metatype == 'GENERIC_SPRING' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return ob && ob.rigid_body_constraint && __eq__ (rbc.py_metatype, 'GENERIC_SPRING') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -754,33 +1030,105 @@ export var PHYSICS_PT_rigid_body_constraint_springs_linear =  __class__ ('PHYSIC
 		layout.use_property_split = true;
 		var ob = context.object;
 		var rbc = ob.rigid_body_constraint;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (rbc, 'use_spring_x', __kwargtrans__ ({text: 'X Axis'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_spring_x', __kwargtrans__ ({text: 'X Axis'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = rbc.use_spring_x;
-		sub.prop (rbc, 'spring_stiffness_x', __kwargtrans__ ({text: 'X Stiffness'}));
-		sub.prop (rbc, 'spring_damping_x', __kwargtrans__ ({text: 'Damping'}));
-		var col = flow.column ();
-		col.prop (rbc, 'use_spring_y', __kwargtrans__ ({text: 'Y Axis'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_stiffness_x', __kwargtrans__ ({text: 'X Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_damping_x', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_spring_y', __kwargtrans__ ({text: 'Y Axis'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = rbc.use_spring_y;
-		sub.prop (rbc, 'spring_stiffness_y', __kwargtrans__ ({text: 'Stiffness'}));
-		sub.prop (rbc, 'spring_damping_y', __kwargtrans__ ({text: 'Damping'}));
-		var col = flow.column ();
-		col.prop (rbc, 'use_spring_z', __kwargtrans__ ({text: 'Z Axis'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_stiffness_y', __kwargtrans__ ({text: 'Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_damping_y', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'use_spring_z', __kwargtrans__ ({text: 'Z Axis'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = rbc.use_spring_z;
-		sub.prop (rbc, 'spring_stiffness_z', __kwargtrans__ ({text: 'Stiffness'}));
-		sub.prop (rbc, 'spring_damping_z', __kwargtrans__ ({text: 'Damping'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_stiffness_z', __kwargtrans__ ({text: 'Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, rbc, 'spring_damping_z', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_rigid_body_constraint, PHYSICS_PT_rigid_body_constraint_settings, PHYSICS_PT_rigid_body_constraint_limits, PHYSICS_PT_rigid_body_constraint_limits_angular, PHYSICS_PT_rigid_body_constraint_limits_linear, PHYSICS_PT_rigid_body_constraint_motor, PHYSICS_PT_rigid_body_constraint_motor_angular, PHYSICS_PT_rigid_body_constraint_motor_linear, PHYSICS_PT_rigid_body_constraint_objects, PHYSICS_PT_rigid_body_constraint_override_iterations, PHYSICS_PT_rigid_body_constraint_springs, PHYSICS_PT_rigid_body_constraint_springs_angular, PHYSICS_PT_rigid_body_constraint_springs_linear]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_rigidbody_constraint.map
 export {Panel, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'PHYSICS_PT_rigidbody_constraint_panel': PHYSICS_PT_rigidbody_constraint_panel = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint': PHYSICS_PT_rigid_body_constraint = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_settings': PHYSICS_PT_rigid_body_constraint_settings = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_objects': PHYSICS_PT_rigid_body_constraint_objects = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_override_iterations': PHYSICS_PT_rigid_body_constraint_override_iterations = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_limits': PHYSICS_PT_rigid_body_constraint_limits = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_limits_linear': PHYSICS_PT_rigid_body_constraint_limits_linear = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_limits_angular': PHYSICS_PT_rigid_body_constraint_limits_angular = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_motor': PHYSICS_PT_rigid_body_constraint_motor = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_motor_angular': PHYSICS_PT_rigid_body_constraint_motor_angular = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_motor_linear': PHYSICS_PT_rigid_body_constraint_motor_linear = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_springs': PHYSICS_PT_rigid_body_constraint_springs = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_springs_angular': PHYSICS_PT_rigid_body_constraint_springs_angular = value; break;
+		case 'PHYSICS_PT_rigid_body_constraint_springs_linear': PHYSICS_PT_rigid_body_constraint_springs_linear = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

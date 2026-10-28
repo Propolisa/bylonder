@@ -83,7 +83,7 @@ EXPORT(main_new) BlenderMain *main_new()
   BLI_addtail(&ctx->scene.view_layers, &ctx->view_layer);
   ctx->scene.master_collection = BKE_collection_master_add(&ctx->scene);
   ctx->scene.toolsettings = &ctx->tool_settings;
-  /* port-override: the module has no animation data yet, so Blender's auto keying stays off. */
+  /* Auto keying is off until Bylonder sets its own (anim_scene_time_set). */
   ctx->tool_settings.autokey_mode = eAutokey_Mode(AUTOKEY_MODE_NORMAL & ~AUTOKEY_ON);
   ctx->screen.context = reinterpret_cast<void *>(ed_screen_context);
   ctx->layout.screen = &ctx->screen;
@@ -104,9 +104,9 @@ EXPORT(main_new) BlenderMain *main_new()
 }
 
 EXPORT(main_C) bContext *main_C(BlenderMain *ctx) { return ctx->C; }
+EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return &ctx->scene; }
 /* The Main other subsystems add their IDs to, as BKE_*_add(bmain, name) does. */
 EXPORT(main_bmain) Main *main_bmain(BlenderMain *ctx) { return ctx->bmain; }
-EXPORT(main_scene) Scene *main_scene(BlenderMain *ctx) { return &ctx->scene; }
 EXPORT(main_view_layer) ViewLayer *main_view_layer(BlenderMain *ctx) { return &ctx->view_layer; }
 
 static Base *base_of(BlenderMain *ctx, Object *ob) { return BKE_view_layer_base_find(&ctx->view_layer, ob); }

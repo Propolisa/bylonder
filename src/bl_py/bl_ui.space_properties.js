@@ -15,7 +15,7 @@ export var PROPERTIES_HT_header =  __class__ ('PROPERTIES_HT_header', [Header], 
 	get _search_poll () {return function (space) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -26,10 +26,16 @@ export var PROPERTIES_HT_header =  __class__ ('PROPERTIES_HT_header', [Header], 
 		}
 		else {
 		}
-		return any ((function () {
+		return __call__ (any, null, (function () {
 			var __accu0__ = [];
-			for (var tab_info of tabs_attr_infos) {
-				__accu0__.append (getattr (space, tab_info [0]));
+			var __iterable0__ = tabs_attr_infos;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var tab_info = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (getattr, null, space, __getitem__ (tab_info, 0)));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
@@ -37,7 +43,7 @@ export var PROPERTIES_HT_header =  __class__ ('PROPERTIES_HT_header', [Header], 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -53,26 +59,50 @@ export var PROPERTIES_HT_header =  __class__ ('PROPERTIES_HT_header', [Header], 
 		var view = context.space_data;
 		var region = context.region;
 		var ui_scale = context.preferences.system.ui_scale;
-		layout.template_header ();
-		layout.separator_spacer ();
-		if (self._search_poll (context.space_data)) {
-			var content_size_est = 160 * ui_scale;
-			var layout_scale = min (1, max (0, region.width / content_size_est - 1));
-			if (layout_scale > 0) {
-				var row = layout.row ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_header, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator_spacer, __accu0__);
+		}) ();
+		if ((function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._search_poll, __accu0__, context.space_data);
+		}) ()) {
+			var content_size_est = __mul__ (160, ui_scale);
+			var layout_scale = __call__ (min, null, 1, __call__ (max, null, 0, __sub__ (__truediv__ (region.width, content_size_est), 1)));
+			if (__gt__ (layout_scale, 0)) {
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				row.scale_x = layout_scale;
-				row.label (__kwargtrans__ ({icon: 'BLANK1'}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+				}) ();
 			}
-			layout.prop (view, 'search_filter', __kwargtrans__ ({icon: 'VIEWZOOM', text: ''}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, view, 'search_filter', __kwargtrans__ ({icon: 'VIEWZOOM', text: ''}));
+			}) ();
 		}
-		layout.separator_spacer ();
-		layout.popover (__kwargtrans__ ({panel: 'PROPERTIES_PT_options', text: ''}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator_spacer, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'PROPERTIES_PT_options', text: ''}));
+		}) ();
 	});}
 });
 export var has_hidden_tabs = function (space) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -83,10 +113,16 @@ export var has_hidden_tabs = function (space) {
 	}
 	else {
 	}
-	return !(all ((function () {
+	return !(__call__ (all, null, (function () {
 		var __accu0__ = [];
-		for (var tab_info of tabs_attr_infos) {
-			__accu0__.append (getattr (space, tab_info [0]));
+		var __iterable0__ = tabs_attr_infos;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var tab_info = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, __call__ (getattr, null, space, __getitem__ (tab_info, 0)));
+			}) ();
 		}
 		return __accu0__;
 	}) ()));
@@ -100,7 +136,7 @@ export var PROPERTIES_PT_navigation_bar =  __class__ ('PROPERTIES_PT_navigation_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -117,19 +153,34 @@ export var PROPERTIES_PT_navigation_bar =  __class__ ('PROPERTIES_PT_navigation_
 		layout.scale_x = 1.4;
 		layout.scale_y = 1.4;
 		if (view.search_filter) {
-			layout.prop_tabs_enum (view, 'context', __kwargtrans__ ({data_highlight: view, property_highlight: 'tab_search_results', icon_only: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop_tabs_enum, __accu0__, view, 'context', __kwargtrans__ ({data_highlight: view, property_highlight: 'tab_search_results', icon_only: true}));
+			}) ();
 		}
 		else {
-			layout.prop_tabs_enum (view, 'context', __kwargtrans__ ({icon_only: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop_tabs_enum, __accu0__, view, 'context', __kwargtrans__ ({icon_only: true}));
+			}) ();
 		}
-		var sub = layout.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.alignment = 'CENTER';
 		sub.emboss = 'NONE';
 		sub.scale_x = 0.8;
 		sub.scale_y = 0.8;
-		sub.separator (__kwargtrans__ ({factor: 0.7}));
-		sub.popover (__kwargtrans__ ({panel: 'PROPERTIES_PT_visibility', text: '', direction: 'HORIZONTAL'}));
-		sub.active = has_hidden_tabs (view);
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({factor: 0.7}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'PROPERTIES_PT_visibility', text: '', direction: 'HORIZONTAL'}));
+		}) ();
+		sub.active = __call__ (has_hidden_tabs, null, view);
 	});}
 });
 export var PROPERTIES_PT_options =  __class__ ('PROPERTIES_PT_options', [Panel], {
@@ -140,7 +191,7 @@ export var PROPERTIES_PT_options =  __class__ ('PROPERTIES_PT_options', [Panel],
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -154,9 +205,21 @@ export var PROPERTIES_PT_options =  __class__ ('PROPERTIES_PT_options', [Panel],
 		}
 		var layout = self.layout;
 		var space = context.space_data;
-		var col = layout.column ();
-		col.label (__kwargtrans__ ({text: 'Sync with Outliner'}));
-		col.row ().prop (space, 'outliner_sync', __kwargtrans__ ({expand: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Sync with Outliner'}));
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = col;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, space, 'outliner_sync', __kwargtrans__ ({expand: true}));
+		}) ();
 	});}
 });
 export var PropertiesAnimationMixin =  __class__ ('PropertiesAnimationMixin', [object], {
@@ -166,12 +229,12 @@ export var PropertiesAnimationMixin =  __class__ ('PropertiesAnimationMixin', [o
 	bl_context: 'data',
 	bl_label: 'Animation',
 	bl_options: new set (['DEFAULT_CLOSED']),
-	bl_order: PropertyPanel.bl_order - 1,
+	bl_order: __sub__ (PropertyPanel.bl_order, 1),
 	_animated_id_context_property: '',
 	get _animated_id () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -183,12 +246,12 @@ export var PropertiesAnimationMixin =  __class__ ('PropertiesAnimationMixin', [o
 		}
 		else {
 		}
-		return getattr (context, cls._animated_id_context_property, null);
+		return __call__ (getattr, null, context, cls._animated_id_context_property, null);
 	});},
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -200,13 +263,16 @@ export var PropertiesAnimationMixin =  __class__ ('PropertiesAnimationMixin', [o
 		}
 		else {
 		}
-		var animated_id = cls._animated_id (context);
+		var animated_id = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._animated_id, __accu0__, context);
+		}) ();
 		return animated_id !== null;
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -219,15 +285,24 @@ export var PropertiesAnimationMixin =  __class__ ('PropertiesAnimationMixin', [o
 		else {
 		}
 		var layout = self.layout;
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.use_property_split = true;
 		col.use_property_decorate = false;
-		self.draw_action_and_slot_selector (context, col, self._animated_id (context));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_and_slot_selector, __accu0__, context, col, (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__._animated_id, __accu1__, context);
+			}) ());
+		}) ();
 	});},
 	get draw_action_and_slot_selector () {return __getcm__ (this, function (cls, context, layout, animated_id) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -244,16 +319,34 @@ export var PropertiesAnimationMixin =  __class__ ('PropertiesAnimationMixin', [o
 		if (!(animated_id)) {
 			var class_list = (function () {
 				var __accu0__ = [];
-				for (var c of list (cls.mro ())) {
-					__accu0__.append (c.__name__);
+				var __iterable0__ = __call__ (list, null, (function () {
+					var __accu1__ = cls;
+					return __call__ (__accu1__.mro, __accu1__);
+				}) ());
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var c = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, c.__name__);
+					}) ();
 				}
 				return __accu0__;
 			}) ();
-			print ('PropertiesAnimationMixin: no animatable data-block, this is a bug in one of these classes: {!r}'.format (class_list));
-			layout.label (__kwargtrans__ ({text: 'No animatable data-block, please report as bug', icon: 'ERROR'}));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'PropertiesAnimationMixin: no animatable data-block, this is a bug in one of these classes: {!r}';
+				return __call__ (__accu0__.format, __accu0__, class_list);
+			}) ());
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No animatable data-block, please report as bug', icon: 'ERROR'}));
+			}) ();
 			return ;
 		}
-		anim.draw_action_and_slot_selector_for_id (layout, animated_id);
+		(function () {
+			var __accu0__ = anim;
+			return __call__ (__accu0__.draw_action_and_slot_selector_for_id, __accu0__, layout, animated_id);
+		}) ();
 	});}
 });
 export var PROPERTIES_PT_visibility =  __class__ ('PROPERTIES_PT_visibility', [Panel], {
@@ -264,7 +357,7 @@ export var PROPERTIES_PT_visibility =  __class__ ('PROPERTIES_PT_visibility', [P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -279,21 +372,59 @@ export var PROPERTIES_PT_visibility =  __class__ ('PROPERTIES_PT_visibility', [P
 		var space = context.space_data;
 		var layout = self.layout;
 		layout.use_property_decorate = false;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.label (__kwargtrans__ ({text: 'Visible Tabs'}));
-		for (var [prop, py_name, icon] of tabs_attr_infos) {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			row.label (__kwargtrans__ ({text: iface_ (py_name), icon: icon}));
-			row.prop (space, prop, __kwargtrans__ ({text: ''}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Visible Tabs'}));
+		}) ();
+		var __iterable0__ = tabs_attr_infos;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var prop = __left0__ [0];
+			var py_name = __left0__ [1];
+			var icon = __left0__ [2];
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: __call__ (iface_, null, py_name), icon: icon}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, space, prop, __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 	});}
 });
 export var classes = tuple ([PROPERTIES_HT_header, PROPERTIES_PT_navigation_bar, PROPERTIES_PT_options, PROPERTIES_PT_visibility]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_properties.map
 export {Header, Panel, PropertyPanel, iface_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'tabs_attr_infos': tabs_attr_infos = value; break;
+		case 'PROPERTIES_HT_header': PROPERTIES_HT_header = value; break;
+		case 'has_hidden_tabs': has_hidden_tabs = value; break;
+		case 'PROPERTIES_PT_navigation_bar': PROPERTIES_PT_navigation_bar = value; break;
+		case 'PROPERTIES_PT_options': PROPERTIES_PT_options = value; break;
+		case 'PropertiesAnimationMixin': PropertiesAnimationMixin = value; break;
+		case 'PROPERTIES_PT_visibility': PROPERTIES_PT_visibility = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

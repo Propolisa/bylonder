@@ -6,3 +6,9 @@ var __name__ = 'bpy_extras';
 export var __all__ = tuple (['anim_utils', 'asset_utils', 'object_utils', 'io_utils', 'image_utils', 'keyconfig_utils', 'mesh_utils', 'node_utils', 'view3d_utils', 'id_map_utils']);
 
 //# sourceMappingURL=bpy_extras.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

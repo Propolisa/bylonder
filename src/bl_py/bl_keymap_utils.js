@@ -6,3 +6,9 @@ var __name__ = 'bl_keymap_utils';
 export var __all__ = tuple (['io', 'keymap_from_toolbar', 'keymap_hierarchy']);
 
 //# sourceMappingURL=bl_keymap_utils.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

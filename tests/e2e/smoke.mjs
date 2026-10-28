@@ -35,7 +35,7 @@ const checks = {
   },
 
   async "Render Animation renders the frame range"() {
-    await app.locator('label[title^="End Frame"] input').click();
+    await app.locator('[role="spinbutton"][aria-label="End"]').click();
     await app.page.keyboard.press("Control+A");
     await app.page.keyboard.type("2");
     await app.page.keyboard.press("Enter");
@@ -86,6 +86,30 @@ const checks = {
     await expectStats(({ Objects }) => Objects[1] === 0);
     await app.page.keyboard.press("Control+z");
     await expectStats(({ Objects }) => Objects[1] === total);
+  },
+
+  async "Outliner: click selects, drag moves into a collection, X deletes, Ctrl Z undoes"() {
+    const canvas = app.frame().locator(".bl-outliner-region");
+    const box = await canvas.boundingBox();
+    // A row's place on the page, over its name, from the Outliner's own draw (region pixels, y up).
+    const row = async (name) => {
+      const [x, y] = await app.bylonder((b, name) => b.world.outliner.area.draw().draw.find((c) => c.op === "text" && c.text === name).at, name);
+      return [box.x + x + 5, box.y + box.height - y - 4];
+    };
+    const cube = await row("Cube");
+    await app.page.mouse.click(...cube);
+    await app.until((b) => b.editor.selection.nodes.map((n) => n.name).join() === "Cube");
+    const before = await app.bylonder((b) => b.world.collections.state.scene.objects.length);
+    await app.page.mouse.move(...cube);
+    await app.page.mouse.down();
+    await app.page.mouse.move(...(await row("Scene Collection")), { steps: 8 });
+    await app.page.mouse.up();
+    await app.until((b, n) => b.world.collections.state.scene.objects.length === n + 1, before);
+    await app.page.mouse.move(...(await row("Cube")));
+    await app.page.keyboard.press("x");
+    await app.until((b) => !b.world.objects.some((n) => n.name === "Cube" && !n.metadata?.wbDeleted));
+    await app.page.keyboard.press("Control+z");
+    await app.until((b) => b.world.objects.some((n) => n.name === "Cube" && !n.metadata?.wbDeleted));
   },
 
   async "Edit Mode: Tab, select all, extrude and confirm"() {

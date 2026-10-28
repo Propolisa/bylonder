@@ -14,7 +14,7 @@ export var __all__ = tuple (['classes', 'is_face_uv_selected_fn_from_context']);
 export var is_face_uv_selected_for_uv_select_sync_valid = function (face, any_edge) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -33,7 +33,10 @@ export var is_face_uv_selected_for_uv_select_sync_valid = function (face, any_ed
 		return true;
 	}
 	if (any_edge) {
-		for (var loop of face.loops) {
+		var __iterable0__ = face.loops;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var loop = __getitem__ (__iterable0__, __index0__);
 			if (loop.uv_select_edge) {
 				return true;
 			}
@@ -44,7 +47,7 @@ export var is_face_uv_selected_for_uv_select_sync_valid = function (face, any_ed
 export var is_loop_edge_uv_selected_for_uv_select_sync_valid = function (loop) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -66,7 +69,7 @@ export var is_loop_edge_uv_selected_for_uv_select_sync_valid = function (loop) {
 export var is_face_uv_selected_for_uv_select_sync_invalid = function (face, any_edge) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,7 +88,10 @@ export var is_face_uv_selected_for_uv_select_sync_invalid = function (face, any_
 		return true;
 	}
 	if (any_edge) {
-		for (var loop of face.loops) {
+		var __iterable0__ = face.loops;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var loop = __getitem__ (__iterable0__, __index0__);
 			if (loop.edge.select) {
 				return true;
 			}
@@ -96,7 +102,7 @@ export var is_face_uv_selected_for_uv_select_sync_invalid = function (face, any_
 export var is_loop_edge_uv_selected_for_uv_select_sync_invalid = function (loop) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -118,7 +124,7 @@ export var is_loop_edge_uv_selected_for_uv_select_sync_invalid = function (loop)
 export var is_face_uv_selected_for_uv_select_no_sync = function (face, any_edge) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -138,7 +144,10 @@ export var is_face_uv_selected_for_uv_select_no_sync = function (face, any_edge)
 			return true;
 		}
 		if (any_edge) {
-			for (var loop of face.loops) {
+			var __iterable0__ = face.loops;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var loop = __getitem__ (__iterable0__, __index0__);
 				if (loop.uv_select_edge) {
 					return true;
 				}
@@ -150,7 +159,7 @@ export var is_face_uv_selected_for_uv_select_no_sync = function (face, any_edge)
 export var is_loop_edge_uv_selected_for_uv_select_no_sync = function (loop) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -174,7 +183,7 @@ export var is_loop_edge_uv_selected_for_uv_select_no_sync = function (loop) {
 export var is_face_uv_selected_fn_from_context = function (scene, bm) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -197,7 +206,7 @@ export var is_face_uv_selected_fn_from_context = function (scene, bm) {
 export var is_loop_edge_uv_selected_fn_from_context = function (scene, bm) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -220,7 +229,7 @@ export var is_loop_edge_uv_selected_fn_from_context = function (scene, bm) {
 export var is_island_uv_selected = function (island, any_edge, face_select_test_fn) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -233,8 +242,11 @@ export var is_island_uv_selected = function (island, any_edge, face_select_test_
 	}
 	else {
 	}
-	for (var face of island) {
-		if (face_select_test_fn (face, any_edge)) {
+	var __iterable0__ = island;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face = __getitem__ (__iterable0__, __index0__);
+		if (__call__ (face_select_test_fn, null, face, any_edge)) {
 			return true;
 		}
 	}
@@ -243,7 +255,7 @@ export var is_island_uv_selected = function (island, any_edge, face_select_test_
 export var island_uv_bounds = function (island, uv_layer) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -255,16 +267,22 @@ export var island_uv_bounds = function (island, uv_layer) {
 	}
 	else {
 	}
-	var minmax = [1e+30, 1e+30, -(1e+30), -(1e+30)];
-	for (var face of island) {
-		for (var loop of face.loops) {
-			var __left0__ = loop [uv_layer].uv;
+	var minmax = [1e+30, 1e+30, __neg__ (1e+30), __neg__ (1e+30)];
+	var __iterable0__ = island;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = face.loops;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var loop = __getitem__ (__iterable1__, __index1__);
+			var __left0__ = __getitem__ (loop, uv_layer).uv;
 			var u = __left0__ [0];
 			var v = __left0__ [1];
-			minmax [0] = min (minmax [0], u);
-			minmax [1] = min (minmax [1], v);
-			minmax [2] = max (minmax [2], u);
-			minmax [3] = max (minmax [3], v);
+			__setitem__ (minmax, 0, __call__ (min, null, __getitem__ (minmax, 0), u));
+			__setitem__ (minmax, 1, __call__ (min, null, __getitem__ (minmax, 1), v));
+			__setitem__ (minmax, 2, __call__ (max, null, __getitem__ (minmax, 2), u));
+			__setitem__ (minmax, 3, __call__ (max, null, __getitem__ (minmax, 3), v));
 		}
 	}
 	return minmax;
@@ -272,7 +290,7 @@ export var island_uv_bounds = function (island, uv_layer) {
 export var island_uv_bounds_center = function (island, uv_layer) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -284,13 +302,13 @@ export var island_uv_bounds_center = function (island, uv_layer) {
 	}
 	else {
 	}
-	var minmax = island_uv_bounds (island, uv_layer);
-	return tuple ([(minmax [0] + minmax [2]) / 2.0, (minmax [1] + minmax [3]) / 2.0]);
+	var minmax = __call__ (island_uv_bounds, null, island, uv_layer);
+	return tuple ([__truediv__ (__add__ (__getitem__ (minmax, 0), __getitem__ (minmax, 2)), 2.0), __truediv__ (__add__ (__getitem__ (minmax, 1), __getitem__ (minmax, 3)), 2.0)]);
 };
 export var find_rotation_auto = function (bm, uv_layer, faces, aspect_y) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -304,27 +322,46 @@ export var find_rotation_auto = function (bm, uv_layer, faces, aspect_y) {
 	}
 	else {
 	}
+	// pass;
 	var sum_u = 0.0;
 	var sum_v = 0.0;
-	for (var face of faces) {
-		var prev_uv = face.loops [-(1)] [uv_layer].uv;
-		for (var loop of face.loops) {
-			var uv = loop [uv_layer].uv;
-			var du = uv [0] - prev_uv [0];
-			var dv = uv [1] - prev_uv [1];
-			var edge_angle = math.atan2 (dv, du * aspect_y);
-			edge_angle *= 4.0;
-			sum_u += math.cos (edge_angle);
-			sum_v += math.sin (edge_angle);
+	var __iterable0__ = faces;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face = __getitem__ (__iterable0__, __index0__);
+		var prev_uv = __getitem__ (__getitem__ (face.loops, __neg__ (1)), uv_layer).uv;
+		var __iterable1__ = face.loops;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var loop = __getitem__ (__iterable1__, __index1__);
+			var uv = __getitem__ (loop, uv_layer).uv;
+			var du = __sub__ (__getitem__ (uv, 0), __getitem__ (prev_uv, 0));
+			var dv = __sub__ (__getitem__ (uv, 1), __getitem__ (prev_uv, 1));
+			var edge_angle = (function () {
+				var __accu0__ = math;
+				return __call__ (__accu0__.atan2, __accu0__, dv, __mul__ (du, aspect_y));
+			}) ();
+			var edge_angle = __call__ (__imul__, null, edge_angle, 4.0);
+			var sum_u = __call__ (__iadd__, null, sum_u, (function () {
+				var __accu0__ = math;
+				return __call__ (__accu0__.cos, __accu0__, edge_angle);
+			}) ());
+			var sum_v = __call__ (__iadd__, null, sum_v, (function () {
+				var __accu0__ = math;
+				return __call__ (__accu0__.sin, __accu0__, edge_angle);
+			}) ());
 			var prev_uv = uv;
 		}
 	}
-	return -(math.atan2 (sum_v, sum_u)) / 4.0;
+	return __truediv__ (__neg__ ((function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.atan2, __accu0__, sum_v, sum_u);
+	}) ()), 4.0);
 };
 export var find_rotation_edge = function (bm, uv_layer, faces, aspect_y, loop_edge_select_test_fn) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -339,34 +376,53 @@ export var find_rotation_edge = function (bm, uv_layer, faces, aspect_y, loop_ed
 	}
 	else {
 	}
+	// pass;
 	var sum_u = 0.0;
 	var sum_v = 0.0;
-	for (var face of faces) {
-		var prev_uv = face.loops [-(1)] [uv_layer].uv;
-		var prev_select = loop_edge_select_test_fn (face.loops [-(1)]);
-		for (var loop of face.loops) {
-			var uv = loop [uv_layer].uv;
+	var __iterable0__ = faces;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face = __getitem__ (__iterable0__, __index0__);
+		var prev_uv = __getitem__ (__getitem__ (face.loops, __neg__ (1)), uv_layer).uv;
+		var prev_select = __call__ (loop_edge_select_test_fn, null, __getitem__ (face.loops, __neg__ (1)));
+		var __iterable1__ = face.loops;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var loop = __getitem__ (__iterable1__, __index1__);
+			var uv = __getitem__ (loop, uv_layer).uv;
 			if (prev_select) {
-				var du = uv [0] - prev_uv [0];
-				var dv = uv [1] - prev_uv [1];
-				var edge_angle = math.atan2 (dv, du * aspect_y);
-				edge_angle *= 2.0;
-				sum_u += math.cos (edge_angle);
-				sum_v += math.sin (edge_angle);
+				var du = __sub__ (__getitem__ (uv, 0), __getitem__ (prev_uv, 0));
+				var dv = __sub__ (__getitem__ (uv, 1), __getitem__ (prev_uv, 1));
+				var edge_angle = (function () {
+					var __accu0__ = math;
+					return __call__ (__accu0__.atan2, __accu0__, dv, __mul__ (du, aspect_y));
+				}) ();
+				var edge_angle = __call__ (__imul__, null, edge_angle, 2.0);
+				var sum_u = __call__ (__iadd__, null, sum_u, (function () {
+					var __accu0__ = math;
+					return __call__ (__accu0__.cos, __accu0__, edge_angle);
+				}) ());
+				var sum_v = __call__ (__iadd__, null, sum_v, (function () {
+					var __accu0__ = math;
+					return __call__ (__accu0__.sin, __accu0__, edge_angle);
+				}) ());
 			}
 			var prev_uv = uv;
-			var prev_select = loop_edge_select_test_fn (loop);
+			var prev_select = __call__ (loop_edge_select_test_fn, null, loop);
 		}
 	}
-	var __left0__ = tuple ([-(sum_u), -(sum_v)]);
+	var __left0__ = tuple ([__neg__ (sum_u), __neg__ (sum_v)]);
 	var sum_u = __left0__ [0];
 	var sum_v = __left0__ [1];
-	return -(math.atan2 (sum_v, sum_u)) / 2.0;
+	return __truediv__ (__neg__ ((function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.atan2, __accu0__, sum_v, sum_u);
+	}) ()), 2.0);
 };
 export var find_rotation_geometry = function (bm, uv_layer, faces, axis, aspect_y) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -381,38 +437,51 @@ export var find_rotation_geometry = function (bm, uv_layer, faces, axis, aspect_
 	}
 	else {
 	}
-	var sum_u_co = Vector (tuple ([0.0, 0.0, 0.0]));
-	var sum_v_co = Vector (tuple ([0.0, 0.0, 0.0]));
-	for (var face of faces) {
-		for (var fan = 2; fan < len (face.loops); fan++) {
-			var delta_uv0 = face.loops [fan - 1] [uv_layer].uv - face.loops [0] [uv_layer].uv;
-			var delta_uv1 = face.loops [fan] [uv_layer].uv - face.loops [0] [uv_layer].uv;
-			delta_uv0 [0] *= aspect_y;
-			delta_uv1 [0] *= aspect_y;
-			var mat = Matrix (tuple ([delta_uv0, delta_uv1]));
-			mat.invert_safe ();
-			var delta_co0 = face.loops [fan - 1].vert.co - face.loops [0].vert.co;
-			var delta_co1 = face.loops [fan].vert.co - face.loops [0].vert.co;
-			var w = delta_co0.cross (delta_co1).length;
-			sum_u_co += (delta_co0 * mat [0] [0] + delta_co1 * mat [0] [1]) * w;
-			sum_v_co += (delta_co0 * mat [1] [0] + delta_co1 * mat [1] [1]) * w;
+	// pass;
+	var sum_u_co = __call__ (Vector, null, tuple ([0.0, 0.0, 0.0]));
+	var sum_v_co = __call__ (Vector, null, tuple ([0.0, 0.0, 0.0]));
+	var __iterable0__ = faces;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face = __getitem__ (__iterable0__, __index0__);
+		for (var fan = 2; fan < __call__ (len, null, face.loops); fan++) {
+			var delta_uv0 = __sub__ (__getitem__ (__getitem__ (face.loops, __sub__ (fan, 1)), uv_layer).uv, __getitem__ (__getitem__ (face.loops, 0), uv_layer).uv);
+			var delta_uv1 = __sub__ (__getitem__ (__getitem__ (face.loops, fan), uv_layer).uv, __getitem__ (__getitem__ (face.loops, 0), uv_layer).uv);
+			__setitem__ (delta_uv0, 0, __call__ (__imul__, null, __getitem__ (delta_uv0, 0), aspect_y));
+			__setitem__ (delta_uv1, 0, __call__ (__imul__, null, __getitem__ (delta_uv1, 0), aspect_y));
+			var mat = __call__ (Matrix, null, tuple ([delta_uv0, delta_uv1]));
+			(function () {
+				var __accu0__ = mat;
+				return __call__ (__accu0__.invert_safe, __accu0__);
+			}) ();
+			var delta_co0 = __sub__ (__getitem__ (face.loops, __sub__ (fan, 1)).vert.co, __getitem__ (face.loops, 0).vert.co);
+			var delta_co1 = __sub__ (__getitem__ (face.loops, fan).vert.co, __getitem__ (face.loops, 0).vert.co);
+			var w = (function () {
+				var __accu0__ = delta_co0;
+				return __call__ (__accu0__.cross, __accu0__, delta_co1);
+			}) ().length;
+			var sum_u_co = __call__ (__iadd__, null, sum_u_co, __mul__ (__add__ (__mul__ (delta_co0, __getitem__ (__getitem__ (mat, 0), 0)), __mul__ (delta_co1, __getitem__ (__getitem__ (mat, 0), 1))), w));
+			var sum_v_co = __call__ (__iadd__, null, sum_v_co, __mul__ (__add__ (__mul__ (delta_co0, __getitem__ (__getitem__ (mat, 1), 0)), __mul__ (delta_co1, __getitem__ (__getitem__ (mat, 1), 1))), w));
 		}
 	}
-	if (axis == 'X') {
+	if (__eq__ (axis, 'X')) {
 		var axis_index = 0;
 	}
-	else if (axis == 'Y') {
+	else if (__eq__ (axis, 'Y')) {
 		var axis_index = 1;
 	}
-	else if (axis == 'Z') {
+	else if (__eq__ (axis, 'Z')) {
 		var axis_index = 2;
 	}
-	return math.atan2 (sum_u_co [axis_index], sum_v_co [axis_index]);
+	return (function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.atan2, __accu0__, __getitem__ (sum_u_co, axis_index), __getitem__ (sum_v_co, axis_index));
+	}) ();
 };
 export var align_uv_rotation_island = function (bm, uv_layer, faces, method, axis, aspect_y, loop_edge_select_test_fn) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -430,31 +499,43 @@ export var align_uv_rotation_island = function (bm, uv_layer, faces, method, axi
 	else {
 	}
 	var angle = 0.0;
-	if (method == 'AUTO') {
-		var angle = find_rotation_auto (bm, uv_layer, faces, aspect_y);
+	if (__eq__ (method, 'AUTO')) {
+		var angle = __call__ (find_rotation_auto, null, bm, uv_layer, faces, aspect_y);
 	}
-	else if (method == 'EDGE') {
-		var angle = find_rotation_edge (bm, uv_layer, faces, aspect_y, loop_edge_select_test_fn);
+	else if (__eq__ (method, 'EDGE')) {
+		var angle = __call__ (find_rotation_edge, null, bm, uv_layer, faces, aspect_y, loop_edge_select_test_fn);
 	}
-	else if (method == 'GEOMETRY') {
-		var angle = find_rotation_geometry (bm, uv_layer, faces, axis, aspect_y);
+	else if (__eq__ (method, 'GEOMETRY')) {
+		var angle = __call__ (find_rotation_geometry, null, bm, uv_layer, faces, axis, aspect_y);
 	}
-	if (angle == 0.0) {
+	if (__eq__ (angle, 0.0)) {
 		return false;
 	}
-	var __left0__ = island_uv_bounds_center (faces, uv_layer);
+	var __left0__ = __call__ (island_uv_bounds_center, null, faces, uv_layer);
 	var mid_u = __left0__ [0];
 	var mid_v = __left0__ [1];
-	var cos_angle = math.cos (angle);
-	var sin_angle = math.sin (angle);
-	var delta_u = (mid_u - cos_angle * mid_u) + (sin_angle / aspect_y) * mid_v;
-	var delta_v = (mid_v - (sin_angle * aspect_y) * mid_u) - cos_angle * mid_v;
-	for (var face of faces) {
-		for (var loop of face.loops) {
-			var pre_uv = loop [uv_layer].uv;
-			var u = (cos_angle * pre_uv [0] - (sin_angle / aspect_y) * pre_uv [1]) + delta_u;
-			var v = ((sin_angle * aspect_y) * pre_uv [0] + cos_angle * pre_uv [1]) + delta_v;
-			loop [uv_layer].uv = tuple ([u, v]);
+	var cos_angle = (function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.cos, __accu0__, angle);
+	}) ();
+	var sin_angle = (function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.sin, __accu0__, angle);
+	}) ();
+	var delta_u = __add__ (__sub__ (mid_u, __mul__ (cos_angle, mid_u)), __mul__ (__truediv__ (sin_angle, aspect_y), mid_v));
+	var delta_v = __sub__ (__sub__ (mid_v, __mul__ (__mul__ (sin_angle, aspect_y), mid_u)), __mul__ (cos_angle, mid_v));
+	var __iterable0__ = faces;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = face.loops;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var loop = __getitem__ (__iterable1__, __index1__);
+			var pre_uv = __getitem__ (loop, uv_layer).uv;
+			var u = __add__ (__sub__ (__mul__ (cos_angle, __getitem__ (pre_uv, 0)), __mul__ (__truediv__ (sin_angle, aspect_y), __getitem__ (pre_uv, 1))), delta_u);
+			var v = __add__ (__add__ (__mul__ (__mul__ (sin_angle, aspect_y), __getitem__ (pre_uv, 0)), __mul__ (cos_angle, __getitem__ (pre_uv, 1))), delta_v);
+			__getitem__ (loop, uv_layer).uv = tuple ([u, v]);
 		}
 	}
 	return true;
@@ -462,7 +543,7 @@ export var align_uv_rotation_island = function (bm, uv_layer, faces, method, axi
 export var align_uv_rotation_bmesh = function (bm, method, axis, aspect_y, loop_edge_select_test_fn, face_select_test_fn) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -478,16 +559,22 @@ export var align_uv_rotation_bmesh = function (bm, method, axis, aspect_y, loop_
 	}
 	else {
 	}
-	var bpy_extras = _module ('bpy_extras');
+	var bpy_extras = __call__ (_module, null, 'bpy_extras');
 	var uv_layer = bm.loops.layers.uv.active;
 	if (!(uv_layer)) {
 		return false;
 	}
-	var islands = bpy_extras.bmesh_utils.bmesh_linked_uv_islands (bm, uv_layer);
+	var islands = (function () {
+		var __accu0__ = bpy_extras.bmesh_utils;
+		return __call__ (__accu0__.bmesh_linked_uv_islands, __accu0__, bm, uv_layer);
+	}) ();
 	var changed = false;
-	for (var island of islands) {
-		if (is_island_uv_selected (island, method == 'EDGE', face_select_test_fn)) {
-			if (align_uv_rotation_island (bm, uv_layer, island, method, axis, aspect_y, loop_edge_select_test_fn)) {
+	var __iterable0__ = islands;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var island = __getitem__ (__iterable0__, __index0__);
+		if (__call__ (is_island_uv_selected, null, island, __eq__ (method, 'EDGE'), face_select_test_fn)) {
+			if (__call__ (align_uv_rotation_island, null, bm, uv_layer, island, method, axis, aspect_y, loop_edge_select_test_fn)) {
 				var changed = true;
 			}
 		}
@@ -497,7 +584,7 @@ export var align_uv_rotation_bmesh = function (bm, method, axis, aspect_y, loop_
 export var get_aspect_y = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -519,17 +606,17 @@ export var get_aspect_y = function (context) {
 	if (!(space_data.image)) {
 		return 1.0;
 	}
-	var image_width = space_data.image.size [0];
-	var image_height = space_data.image.size [1];
+	var image_width = __getitem__ (space_data.image.size, 0);
+	var image_height = __getitem__ (space_data.image.size, 1);
 	if (image_height) {
-		return image_width / image_height;
+		return __truediv__ (image_width, image_height);
 	}
 	return 1.0;
 };
 export var align_uv_rotation = function (context, method, axis, correct_aspect) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -543,22 +630,31 @@ export var align_uv_rotation = function (context, method, axis, correct_aspect) 
 	}
 	else {
 	}
-	var bmesh = _module ('bmesh');
+	var bmesh = __call__ (_module, null, 'bmesh');
 	var scene = context.scene;
 	var aspect_y = 1.0;
 	if (correct_aspect) {
-		var aspect_y = get_aspect_y (context);
+		var aspect_y = __call__ (get_aspect_y, null, context);
 	}
 	var ob_list = context.objects_in_mode_unique_data;
-	for (var ob of ob_list) {
-		var bm = bmesh.from_edit_mesh (ob.data);
+	var __iterable0__ = ob_list;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var ob = __getitem__ (__iterable0__, __index0__);
+		var bm = (function () {
+			var __accu0__ = bmesh;
+			return __call__ (__accu0__.from_edit_mesh, __accu0__, ob.data);
+		}) ();
 		if (!(bm.loops.layers.uv)) {
 			continue;
 		}
-		var loop_edge_select_test_fn = is_loop_edge_uv_selected_fn_from_context (scene, bm);
-		var face_select_test_fn = is_face_uv_selected_fn_from_context (scene, bm);
-		if (align_uv_rotation_bmesh (bm, method, axis, aspect_y, loop_edge_select_test_fn, face_select_test_fn)) {
-			bmesh.update_edit_mesh (ob.data);
+		var loop_edge_select_test_fn = __call__ (is_loop_edge_uv_selected_fn_from_context, null, scene, bm);
+		var face_select_test_fn = __call__ (is_face_uv_selected_fn_from_context, null, scene, bm);
+		if (__call__ (align_uv_rotation_bmesh, null, bm, method, axis, aspect_y, loop_edge_select_test_fn, face_select_test_fn)) {
+			(function () {
+				var __accu0__ = bmesh;
+				return __call__ (__accu0__.update_edit_mesh, __accu0__, ob.data);
+			}) ();
 		}
 	}
 	return new set (['FINISHED']);
@@ -571,7 +667,7 @@ export var AlignUVRotation =  __class__ ('AlignUVRotation', [Operator], {
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -583,12 +679,12 @@ export var AlignUVRotation =  __class__ ('AlignUVRotation', [Operator], {
 		}
 		else {
 		}
-		return align_uv_rotation (context, self.method, self.axis, self.correct_aspect);
+		return __call__ (align_uv_rotation, null, context, self.method, self.axis, self.correct_aspect);
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -601,16 +697,25 @@ export var AlignUVRotation =  __class__ ('AlignUVRotation', [Operator], {
 		else {
 		}
 		var layout = self.layout;
-		layout.prop (self, 'method');
-		if (self.method == 'GEOMETRY') {
-			layout.prop (self, 'axis');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'method');
+		}) ();
+		if (__eq__ (self.method, 'GEOMETRY')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, self, 'axis');
+			}) ();
 		}
-		layout.prop (self, 'correct_aspect');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'correct_aspect');
+		}) ();
 	});},
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -622,14 +727,14 @@ export var AlignUVRotation =  __class__ ('AlignUVRotation', [Operator], {
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});}
 });
-AlignUVRotation.__annotations__ = dict ({'method': EnumProperty (__kwargtrans__ ({py_name: 'Method', description: 'Method to calculate rotation angle', py_items: tuple ([tuple (['AUTO', 'Auto', 'Align from all edges']), tuple (['EDGE', 'Edge', 'Only selected edges']), tuple (['GEOMETRY', 'Geometry', 'Align to Geometry axis'])])})), 'axis': EnumProperty (__kwargtrans__ ({py_name: 'Axis', description: 'Axis to align to', py_items: tuple ([tuple (['X', 'X', 'X axis']), tuple (['Y', 'Y', 'Y axis']), tuple (['Z', 'Z', 'Z axis'])])})), 'correct_aspect': BoolProperty (__kwargtrans__ ({py_name: 'Correct Aspect', description: 'Take image aspect ratio into account', py_default: false}))});
+AlignUVRotation.__annotations__ = dict ({'method': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Method', description: 'Method to calculate rotation angle', py_items: tuple ([tuple (['AUTO', 'Auto', 'Align from all edges']), tuple (['EDGE', 'Edge', 'Only selected edges']), tuple (['GEOMETRY', 'Geometry', 'Align to Geometry axis'])])})), 'axis': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Axis', description: 'Axis to align to', py_items: tuple ([tuple (['X', 'X', 'X axis']), tuple (['Y', 'Y', 'Y axis']), tuple (['Z', 'Z', 'Z axis'])])})), 'correct_aspect': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Correct Aspect', description: 'Take image aspect ratio into account', py_default: false}))});
 export var get_random_transform = function (transform_params, entropy) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -641,37 +746,37 @@ export var get_random_transform = function (transform_params, entropy) {
 	}
 	else {
 	}
-	var uniform = _member ('random', 'uniform');
-	var random_seed = _member ('random', 'seed');
+	var uniform = __call__ (_member, null, 'random', 'uniform');
+	var random_seed = __call__ (_member, null, 'random', 'seed');
 	var __left0__ = transform_params;
 	var seed = __left0__ [0];
 	var loc = __left0__ [1];
 	var rot = __left0__ [2];
 	var scale = __left0__ [3];
 	var scale_even = __left0__ [4];
-	random_seed (seed + entropy);
-	var offset_u = uniform (0.0, 1.0);
-	var offset_v = uniform (0.0, 1.0);
-	var angle = uniform (0.0, 1.0);
-	var scale_u = uniform (0.0, 1.0);
-	var scale_v = uniform (0.0, 1.0);
+	__call__ (random_seed, null, __add__ (seed, entropy));
+	var offset_u = __call__ (uniform, null, 0.0, 1.0);
+	var offset_v = __call__ (uniform, null, 0.0, 1.0);
+	var angle = __call__ (uniform, null, 0.0, 1.0);
+	var scale_u = __call__ (uniform, null, 0.0, 1.0);
+	var scale_v = __call__ (uniform, null, 0.0, 1.0);
 	if (loc) {
-		offset_u *= loc [0];
-		offset_v *= loc [1];
+		var offset_u = __call__ (__imul__, null, offset_u, __getitem__ (loc, 0));
+		var offset_v = __call__ (__imul__, null, offset_v, __getitem__ (loc, 1));
 	}
 	else {
 		var offset_u = 0.0;
 		var offset_v = 0.0;
 	}
 	if (rot) {
-		angle *= rot;
+		var angle = __call__ (__imul__, null, angle, rot);
 	}
 	else {
 		var angle = 0.0;
 	}
 	if (scale) {
-		var scale_u = (scale_u * (2.0 * scale [0] - 2.0) + 2.0) - scale [0];
-		var scale_v = (scale_v * (2.0 * scale [1] - 2.0) + 2.0) - scale [1];
+		var scale_u = __sub__ (__add__ (__mul__ (scale_u, __sub__ (__mul__ (2.0, __getitem__ (scale, 0)), 2.0)), 2.0), __getitem__ (scale, 0));
+		var scale_v = __sub__ (__add__ (__mul__ (scale_v, __sub__ (__mul__ (2.0, __getitem__ (scale, 1)), 2.0)), 2.0), __getitem__ (scale, 1));
 	}
 	else {
 		var scale_u = 1.0;
@@ -680,12 +785,24 @@ export var get_random_transform = function (transform_params, entropy) {
 	if (scale_even) {
 		var scale_v = scale_u;
 	}
-	return [[scale_u * math.cos (angle), -(scale_v) * math.sin (angle), offset_u], [scale_u * math.sin (angle), scale_v * math.cos (angle), offset_v]];
+	return [[__mul__ (scale_u, (function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.cos, __accu0__, angle);
+	}) ()), __mul__ (__neg__ (scale_v), (function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.sin, __accu0__, angle);
+	}) ()), offset_u], [__mul__ (scale_u, (function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.sin, __accu0__, angle);
+	}) ()), __mul__ (scale_v, (function () {
+		var __accu0__ = math;
+		return __call__ (__accu0__.cos, __accu0__, angle);
+	}) ()), offset_v]];
 };
 export var randomize_uv_transform_island = function (uv_layer, faces, transform_params) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -698,32 +815,44 @@ export var randomize_uv_transform_island = function (uv_layer, faces, transform_
 	}
 	else {
 	}
-	var entropy = min ((function () {
+	var entropy = __call__ (min, null, (function () {
 		var __accu0__ = [];
-		for (var f of faces) {
-			__accu0__.append (f.index);
+		var __iterable0__ = faces;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var f = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, f.index);
+			}) ();
 		}
 		return __accu0__;
 	}) ());
-	var transform = get_random_transform (transform_params, entropy);
-	var __left0__ = island_uv_bounds_center (faces, uv_layer);
+	var transform = __call__ (get_random_transform, null, transform_params, entropy);
+	var __left0__ = __call__ (island_uv_bounds_center, null, faces, uv_layer);
 	var mid_u = __left0__ [0];
 	var mid_v = __left0__ [1];
-	var del_u = ((transform [0] [2] + mid_u) - transform [0] [0] * mid_u) - transform [0] [1] * mid_v;
-	var del_v = ((transform [1] [2] + mid_v) - transform [1] [0] * mid_u) - transform [1] [1] * mid_v;
-	for (var face of faces) {
-		for (var loop of face.loops) {
-			var pre_uv = loop [uv_layer].uv;
-			var u = (transform [0] [0] * pre_uv [0] + transform [0] [1] * pre_uv [1]) + del_u;
-			var v = (transform [1] [0] * pre_uv [0] + transform [1] [1] * pre_uv [1]) + del_v;
-			loop [uv_layer].uv = tuple ([u, v]);
+	var del_u = __sub__ (__sub__ (__add__ (__getitem__ (__getitem__ (transform, 0), 2), mid_u), __mul__ (__getitem__ (__getitem__ (transform, 0), 0), mid_u)), __mul__ (__getitem__ (__getitem__ (transform, 0), 1), mid_v));
+	var del_v = __sub__ (__sub__ (__add__ (__getitem__ (__getitem__ (transform, 1), 2), mid_v), __mul__ (__getitem__ (__getitem__ (transform, 1), 0), mid_u)), __mul__ (__getitem__ (__getitem__ (transform, 1), 1), mid_v));
+	var __iterable0__ = faces;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var face = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = face.loops;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var loop = __getitem__ (__iterable1__, __index1__);
+			var pre_uv = __getitem__ (loop, uv_layer).uv;
+			var u = __add__ (__add__ (__mul__ (__getitem__ (__getitem__ (transform, 0), 0), __getitem__ (pre_uv, 0)), __mul__ (__getitem__ (__getitem__ (transform, 0), 1), __getitem__ (pre_uv, 1))), del_u);
+			var v = __add__ (__add__ (__mul__ (__getitem__ (__getitem__ (transform, 1), 0), __getitem__ (pre_uv, 0)), __mul__ (__getitem__ (__getitem__ (transform, 1), 1), __getitem__ (pre_uv, 1))), del_v);
+			__getitem__ (loop, uv_layer).uv = tuple ([u, v]);
 		}
 	}
 };
 export var randomize_uv_transform_bmesh = function (bm, transform_params, face_select_test_fn) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -736,19 +865,28 @@ export var randomize_uv_transform_bmesh = function (bm, transform_params, face_s
 	}
 	else {
 	}
-	var bpy_extras = _module ('bpy_extras');
-	var uv_layer = bm.loops.layers.uv.verify ();
-	var islands = bpy_extras.bmesh_utils.bmesh_linked_uv_islands (bm, uv_layer);
-	for (var island of islands) {
-		if (is_island_uv_selected (island, false, face_select_test_fn)) {
-			randomize_uv_transform_island (uv_layer, island, transform_params);
+	var bpy_extras = __call__ (_module, null, 'bpy_extras');
+	var uv_layer = (function () {
+		var __accu0__ = bm.loops.layers.uv;
+		return __call__ (__accu0__.verify, __accu0__);
+	}) ();
+	var islands = (function () {
+		var __accu0__ = bpy_extras.bmesh_utils;
+		return __call__ (__accu0__.bmesh_linked_uv_islands, __accu0__, bm, uv_layer);
+	}) ();
+	var __iterable0__ = islands;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var island = __getitem__ (__iterable0__, __index0__);
+		if (__call__ (is_island_uv_selected, null, island, false, face_select_test_fn)) {
+			__call__ (randomize_uv_transform_island, null, uv_layer, island, transform_params);
 		}
 	}
 };
 export var randomize_uv_transform = function (context, transform_params) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -760,20 +898,35 @@ export var randomize_uv_transform = function (context, transform_params) {
 	}
 	else {
 	}
-	var bmesh = _module ('bmesh');
+	var bmesh = __call__ (_module, null, 'bmesh');
 	var scene = context.scene;
 	var ob_list = context.objects_in_mode_unique_data;
-	for (var ob of ob_list) {
-		var bm = bmesh.from_edit_mesh (ob.data);
+	var __iterable0__ = ob_list;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var ob = __getitem__ (__iterable0__, __index0__);
+		var bm = (function () {
+			var __accu0__ = bmesh;
+			return __call__ (__accu0__.from_edit_mesh, __accu0__, ob.data);
+		}) ();
 		if (!(bm.loops.layers.uv)) {
 			continue;
 		}
-		bm.faces.index_update ();
-		var face_select_test_fn = is_face_uv_selected_fn_from_context (scene, bm);
-		randomize_uv_transform_bmesh (bm, transform_params, face_select_test_fn);
+		(function () {
+			var __accu0__ = bm.faces;
+			return __call__ (__accu0__.index_update, __accu0__);
+		}) ();
+		var face_select_test_fn = __call__ (is_face_uv_selected_fn_from_context, null, scene, bm);
+		__call__ (randomize_uv_transform_bmesh, null, bm, transform_params, face_select_test_fn);
 	}
-	for (var ob of ob_list) {
-		bmesh.update_edit_mesh (ob.data);
+	var __iterable0__ = ob_list;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var ob = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = bmesh;
+			return __call__ (__accu0__.update_edit_mesh, __accu0__, ob.data);
+		}) ();
 	}
 	return new set (['FINISHED']);
 };
@@ -785,7 +938,7 @@ export var RandomizeUVTransform =  __class__ ('RandomizeUVTransform', [Operator]
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -797,12 +950,12 @@ export var RandomizeUVTransform =  __class__ ('RandomizeUVTransform', [Operator]
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -820,11 +973,43 @@ export var RandomizeUVTransform =  __class__ ('RandomizeUVTransform', [Operator]
 		var scale = (!(self.use_scale) ? null : self.scale);
 		var scale_even = self.scale_even;
 		var transform_params = [seed, loc, rot, scale, scale_even];
-		return randomize_uv_transform (context, transform_params);
+		return __call__ (randomize_uv_transform, null, context, transform_params);
 	});}
 });
-RandomizeUVTransform.__annotations__ = dict ({'random_seed': IntProperty (__kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_loc': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': FloatVectorProperty (__kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: -(100.0), max: 100.0, size: 2, subtype: 'TRANSLATION', py_default: tuple ([0.0, 0.0])})), 'use_rot': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation value', py_default: true})), 'rot': FloatProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation', min: -(2.0) * math.pi, max: 2.0 * math.pi, subtype: 'ANGLE', py_default: 0.0})), 'use_scale': BoolProperty (__kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': BoolProperty (__kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for both axes', py_default: false})), 'scale': FloatVectorProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: -(100.0), max: 100.0, py_default: tuple ([1.0, 1.0]), size: 2}))});
+RandomizeUVTransform.__annotations__ = dict ({'random_seed': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Random Seed', description: 'Seed value for the random generator', min: 0, max: 10000, py_default: 0})), 'use_loc': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Randomize Location', description: 'Randomize the location values', py_default: true})), 'loc': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Location', description: 'Maximum distance the objects can spread over each axis', min: __neg__ (100.0), max: 100.0, size: 2, subtype: 'TRANSLATION', py_default: tuple ([0.0, 0.0])})), 'use_rot': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Randomize Rotation', description: 'Randomize the rotation value', py_default: true})), 'rot': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Rotation', description: 'Maximum rotation', min: __mul__ (__neg__ (2.0), math.pi), max: __mul__ (2.0, math.pi), subtype: 'ANGLE', py_default: 0.0})), 'use_scale': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Randomize Scale', description: 'Randomize the scale values', py_default: true})), 'scale_even': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Scale Even', description: 'Use the same scale value for both axes', py_default: false})), 'scale': __call__ (FloatVectorProperty, null, __kwargtrans__ ({py_name: 'Scale', description: 'Maximum scale randomization over each axis', min: __neg__ (100.0), max: 100.0, py_default: tuple ([1.0, 1.0]), size: 2}))});
 export var classes = tuple ([AlignUVRotation, RandomizeUVTransform]);
 
 //# sourceMappingURL=bl_operators.uvcalc_transform.map
 export {BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, Matrix, Operator, Vector, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'is_face_uv_selected_for_uv_select_sync_valid': is_face_uv_selected_for_uv_select_sync_valid = value; break;
+		case 'is_loop_edge_uv_selected_for_uv_select_sync_valid': is_loop_edge_uv_selected_for_uv_select_sync_valid = value; break;
+		case 'is_face_uv_selected_for_uv_select_sync_invalid': is_face_uv_selected_for_uv_select_sync_invalid = value; break;
+		case 'is_loop_edge_uv_selected_for_uv_select_sync_invalid': is_loop_edge_uv_selected_for_uv_select_sync_invalid = value; break;
+		case 'is_face_uv_selected_for_uv_select_no_sync': is_face_uv_selected_for_uv_select_no_sync = value; break;
+		case 'is_loop_edge_uv_selected_for_uv_select_no_sync': is_loop_edge_uv_selected_for_uv_select_no_sync = value; break;
+		case 'is_face_uv_selected_fn_from_context': is_face_uv_selected_fn_from_context = value; break;
+		case 'is_loop_edge_uv_selected_fn_from_context': is_loop_edge_uv_selected_fn_from_context = value; break;
+		case 'is_island_uv_selected': is_island_uv_selected = value; break;
+		case 'island_uv_bounds': island_uv_bounds = value; break;
+		case 'island_uv_bounds_center': island_uv_bounds_center = value; break;
+		case 'find_rotation_auto': find_rotation_auto = value; break;
+		case 'find_rotation_edge': find_rotation_edge = value; break;
+		case 'find_rotation_geometry': find_rotation_geometry = value; break;
+		case 'align_uv_rotation_island': align_uv_rotation_island = value; break;
+		case 'align_uv_rotation_bmesh': align_uv_rotation_bmesh = value; break;
+		case 'get_aspect_y': get_aspect_y = value; break;
+		case 'align_uv_rotation': align_uv_rotation = value; break;
+		case 'AlignUVRotation': AlignUVRotation = value; break;
+		case 'get_random_transform': get_random_transform = value; break;
+		case 'randomize_uv_transform_island': randomize_uv_transform_island = value; break;
+		case 'randomize_uv_transform_bmesh': randomize_uv_transform_bmesh = value; break;
+		case 'randomize_uv_transform': randomize_uv_transform = value; break;
+		case 'RandomizeUVTransform': RandomizeUVTransform = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

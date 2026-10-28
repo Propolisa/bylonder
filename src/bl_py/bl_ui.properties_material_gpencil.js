@@ -18,7 +18,7 @@ export var GREASE_PENCIL_MT_material_context_menu =  __class__ ('GREASE_PENCIL_M
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -31,18 +31,54 @@ export var GREASE_PENCIL_MT_material_context_menu =  __class__ ('GREASE_PENCIL_M
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('grease_pencil.material_reveal', __kwargtrans__ ({icon: 'RESTRICT_VIEW_OFF', text: 'Show All'}));
-		layout.operator ('grease_pencil.material_hide', __kwargtrans__ ({icon: 'RESTRICT_VIEW_ON', text: 'Hide Others'})).invert = true;
-		layout.separator ();
-		layout.operator ('grease_pencil.material_lock_all', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'}));
-		layout.operator ('grease_pencil.material_unlock_all', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'}));
-		layout.operator ('grease_pencil.material_lock_unselected', __kwargtrans__ ({text: 'Lock Unselected'}));
-		layout.operator ('grease_pencil.material_lock_unused', __kwargtrans__ ({text: 'Lock Unused'}));
-		layout.separator ();
-		layout.operator ('grease_pencil.material_copy_to_object', __kwargtrans__ ({text: 'Copy Material to Selected'})).only_active = true;
-		layout.operator ('grease_pencil.material_copy_to_object', __kwargtrans__ ({text: 'Copy All Materials to Selected'})).only_active = false;
-		layout.operator ('object.material_slot_remove_unused');
-		layout.operator ('object.material_slot_remove_all');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_reveal', __kwargtrans__ ({icon: 'RESTRICT_VIEW_OFF', text: 'Show All'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_hide', __kwargtrans__ ({icon: 'RESTRICT_VIEW_ON', text: 'Hide Others'}));
+		}) ().invert = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_lock_all', __kwargtrans__ ({icon: 'LOCKED', text: 'Lock All'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_unlock_all', __kwargtrans__ ({icon: 'UNLOCKED', text: 'Unlock All'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_lock_unselected', __kwargtrans__ ({text: 'Lock Unselected'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_lock_unused', __kwargtrans__ ({text: 'Lock Unused'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_copy_to_object', __kwargtrans__ ({text: 'Copy Material to Selected'}));
+		}) ().only_active = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'grease_pencil.material_copy_to_object', __kwargtrans__ ({text: 'Copy All Materials to Selected'}));
+		}) ().only_active = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_remove_unused');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.material_slot_remove_all');
+		}) ();
 	});}
 });
 export var GPENCIL_UL_matslots =  __class__ ('GPENCIL_UL_matslots', [UIList], {
@@ -50,7 +86,7 @@ export var GPENCIL_UL_matslots =  __class__ ('GPENCIL_UL_matslots', [UIList], {
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -71,8 +107,14 @@ export var GPENCIL_UL_matslots =  __class__ ('GPENCIL_UL_matslots', [UIList], {
 		}
 		var slot = item;
 		var ma = slot.material;
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.label (__kwargtrans__ ({text: '', icon_value: icon}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: '', icon_value: icon}));
+		}) ();
 		if (ma === null) {
 			return ;
 		}
@@ -80,19 +122,37 @@ export var GPENCIL_UL_matslots =  __class__ ('GPENCIL_UL_matslots', [UIList], {
 		if (gpcolor === null) {
 			return ;
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.enabled = !(gpcolor.lock);
-		row.prop (ma, 'name', __kwargtrans__ ({text: '', emboss: false, icon: 'NONE'}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, ma, 'name', __kwargtrans__ ({text: '', emboss: false, icon: 'NONE'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (gpcolor.ghost === true) {
 			var icon = 'ONIONSKIN_OFF';
 		}
 		else {
 			var icon = 'ONIONSKIN_ON';
 		}
-		row.prop (gpcolor, 'ghost', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
-		row.prop (gpcolor, 'hide', __kwargtrans__ ({text: '', emboss: false}));
-		row.prop (gpcolor, 'lock', __kwargtrans__ ({text: '', emboss: false}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, gpcolor, 'ghost', __kwargtrans__ ({text: '', icon: icon, emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, gpcolor, 'hide', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, gpcolor, 'lock', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
 	});}
 });
 export var GPMaterialButtonsPanel =  __class__ ('GPMaterialButtonsPanel', [object], {
@@ -103,7 +163,7 @@ export var GPMaterialButtonsPanel =  __class__ ('GPMaterialButtonsPanel', [objec
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -129,7 +189,7 @@ export var MATERIAL_PT_gpencil_slots =  __class__ ('MATERIAL_PT_gpencil_slots', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -143,7 +203,7 @@ export var MATERIAL_PT_gpencil_slots =  __class__ ('MATERIAL_PT_gpencil_slots', 
 		}
 		var ma = context.material;
 		var found_material = ma && ma.grease_pencil;
-		var found_object = context.object && context.object.py_metatype == 'GREASEPENCIL';
+		var found_object = context.object && __eq__ (context.object.py_metatype, 'GREASEPENCIL');
 		return found_material || found_object;
 	});}
 });
@@ -153,7 +213,7 @@ export var MATERIAL_PT_gpencil_surface =  __class__ ('MATERIAL_PT_gpencil_surfac
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -165,12 +225,15 @@ export var MATERIAL_PT_gpencil_surface =  __class__ ('MATERIAL_PT_gpencil_surfac
 		}
 		else {
 		}
-		MATERIAL_PT_gpencil_material_presets.draw_panel_header (self.layout);
+		(function () {
+			var __accu0__ = MATERIAL_PT_gpencil_material_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, self.layout);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -193,7 +256,7 @@ export var MATERIAL_PT_gpencil_strokecolor =  __class__ ('MATERIAL_PT_gpencil_st
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -214,7 +277,7 @@ export var MATERIAL_PT_gpencil_strokecolor =  __class__ ('MATERIAL_PT_gpencil_st
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -231,44 +294,107 @@ export var MATERIAL_PT_gpencil_strokecolor =  __class__ ('MATERIAL_PT_gpencil_st
 		var ma = context.material;
 		if (ma !== null && ma.grease_pencil !== null) {
 			var gpcolor = ma.grease_pencil;
-			var col = layout.column ();
-			col.prop (gpcolor, 'mode');
-			col.prop (gpcolor, 'stroke_style', __kwargtrans__ ({text: 'Style'}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'mode');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'stroke_style', __kwargtrans__ ({text: 'Style'}));
+			}) ();
 			if (__in__ (gpcolor.mode, new set (['DOTS', 'BOX']))) {
-				col.prop (gpcolor, 'placement_mode');
-				if (gpcolor.placement_mode == 'COUNT') {
-					col.prop (gpcolor, 'placement_count');
-					col.separator ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, gpcolor, 'placement_mode');
+				}) ();
+				if (__eq__ (gpcolor.placement_mode, 'COUNT')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, gpcolor, 'placement_count');
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.separator, __accu0__);
+					}) ();
 				}
-				else if (gpcolor.placement_mode == 'DENSITY') {
-					col.prop (gpcolor, 'placement_density');
-					col.separator ();
+				else if (__eq__ (gpcolor.placement_mode, 'DENSITY')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, gpcolor, 'placement_density');
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.separator, __accu0__);
+					}) ();
 				}
-				else if (gpcolor.placement_mode == 'RADIUS') {
-					col.prop (gpcolor, 'placement_radius_spacing');
-					col.separator ();
+				else if (__eq__ (gpcolor.placement_mode, 'RADIUS')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, gpcolor, 'placement_radius_spacing');
+					}) ();
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.separator, __accu0__);
+					}) ();
 				}
 			}
-			col.prop (gpcolor, 'color', __kwargtrans__ ({text: 'Base Color'}));
-			col.prop (gpcolor, 'use_stroke_holdout');
-			if (gpcolor.stroke_style == 'TEXTURE') {
-				var row = col.row ();
-				var col = row.column (__kwargtrans__ ({align: true}));
-				col.template_ID (gpcolor, 'stroke_image', __kwargtrans__ ({open: 'image.open'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'color', __kwargtrans__ ({text: 'Base Color'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'use_stroke_holdout');
+			}) ();
+			if (__eq__ (gpcolor.stroke_style, 'TEXTURE')) {
+				var row = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				var col = (function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_ID, __accu0__, gpcolor, 'stroke_image', __kwargtrans__ ({open: 'image.open'}));
+				}) ();
 			}
-			if (gpcolor.stroke_style == 'TEXTURE') {
-				var row = col.row ();
-				row.prop (gpcolor, 'mix_stroke_factor', __kwargtrans__ ({text: 'Blend', slider: true}));
-				if (gpcolor.mode == 'LINE') {
-					col.prop (gpcolor, 'pixel_size', __kwargtrans__ ({text: 'UV Factor'}));
+			if (__eq__ (gpcolor.stroke_style, 'TEXTURE')) {
+				var row = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, gpcolor, 'mix_stroke_factor', __kwargtrans__ ({text: 'Blend', slider: true}));
+				}) ();
+				if (__eq__ (gpcolor.mode, 'LINE')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, gpcolor, 'pixel_size', __kwargtrans__ ({text: 'UV Factor'}));
+					}) ();
 				}
 			}
 			if (__in__ (gpcolor.mode, new set (['DOTS', 'BOX']))) {
-				col.prop (gpcolor, 'alignment_mode');
-				col.prop (gpcolor, 'alignment_rotation');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, gpcolor, 'alignment_mode');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, gpcolor, 'alignment_rotation');
+				}) ();
 			}
-			if (gpcolor.mode == 'LINE') {
-				col.prop (gpcolor, 'use_overlap_strokes');
+			if (__eq__ (gpcolor.mode, 'LINE')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, gpcolor, 'use_overlap_strokes');
+				}) ();
 			}
 		}
 	});}
@@ -281,7 +407,7 @@ export var MATERIAL_PT_gpencil_random =  __class__ ('MATERIAL_PT_gpencil_random'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -303,7 +429,7 @@ export var MATERIAL_PT_gpencil_random =  __class__ ('MATERIAL_PT_gpencil_random'
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -321,13 +447,16 @@ export var MATERIAL_PT_gpencil_random =  __class__ ('MATERIAL_PT_gpencil_random'
 		var gpcolor = ma.grease_pencil;
 		if (ma !== null && gpcolor !== null) {
 			layout.use_property_split = false;
-			layout.prop (gpcolor, 'use_randomization', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'use_randomization', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+			}) ();
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -344,17 +473,47 @@ export var MATERIAL_PT_gpencil_random =  __class__ ('MATERIAL_PT_gpencil_random'
 		var ma = context.material;
 		var gpcolor = ma.grease_pencil;
 		if (ma !== null && gpcolor !== null) {
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.enabled = gpcolor.use_randomization;
-			col.prop (gpcolor, 'random_size_factor', __kwargtrans__ ({slider: true}));
-			col.prop (gpcolor, 'random_strength_factor', __kwargtrans__ ({slider: true}));
-			col.prop (gpcolor, 'random_rotation_factor', __kwargtrans__ ({slider: true}));
-			col.separator ();
-			col.prop (gpcolor, 'random_hue_factor', __kwargtrans__ ({slider: true}));
-			col.prop (gpcolor, 'random_saturation_factor', __kwargtrans__ ({slider: true}));
-			col.prop (gpcolor, 'random_value_factor', __kwargtrans__ ({slider: true}));
-			col.separator ();
-			col.prop (gpcolor, 'random_noise_scale', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'random_size_factor', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'random_strength_factor', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'random_rotation_factor', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'random_hue_factor', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'random_saturation_factor', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'random_value_factor', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'random_noise_scale', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 	});}
 });
@@ -365,7 +524,7 @@ export var MATERIAL_PT_gpencil_fillcolor =  __class__ ('MATERIAL_PT_gpencil_fill
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -384,7 +543,7 @@ export var MATERIAL_PT_gpencil_fillcolor =  __class__ ('MATERIAL_PT_gpencil_fill
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -400,34 +559,100 @@ export var MATERIAL_PT_gpencil_fillcolor =  __class__ ('MATERIAL_PT_gpencil_fill
 		layout.use_property_split = true;
 		var ma = context.material;
 		var gpcolor = ma.grease_pencil;
-		var col = layout.column ();
-		col.prop (gpcolor, 'fill_style', __kwargtrans__ ({text: 'Style'}));
-		if (gpcolor.fill_style == 'SOLID') {
-			col.prop (gpcolor, 'fill_color', __kwargtrans__ ({text: 'Base Color'}));
-			col.prop (gpcolor, 'use_fill_holdout');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, gpcolor, 'fill_style', __kwargtrans__ ({text: 'Style'}));
+		}) ();
+		if (__eq__ (gpcolor.fill_style, 'SOLID')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'fill_color', __kwargtrans__ ({text: 'Base Color'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'use_fill_holdout');
+			}) ();
 		}
-		else if (gpcolor.fill_style == 'GRADIENT') {
-			col.prop (gpcolor, 'gradient_type');
-			col.prop (gpcolor, 'fill_color', __kwargtrans__ ({text: 'Base Color'}));
-			col.prop (gpcolor, 'mix_color', __kwargtrans__ ({text: 'Secondary Color'}));
-			col.prop (gpcolor, 'use_fill_holdout');
-			col.prop (gpcolor, 'mix_factor', __kwargtrans__ ({text: 'Blend', slider: true}));
-			col.prop (gpcolor, 'flip', __kwargtrans__ ({text: 'Flip Colors'}));
-			col.prop (gpcolor, 'texture_offset', __kwargtrans__ ({text: 'Location'}));
-			var row = col.row ();
-			row.enabled = gpcolor.gradient_type == 'LINEAR';
-			row.prop (gpcolor, 'texture_angle', __kwargtrans__ ({text: 'Rotation'}));
-			col.prop (gpcolor, 'texture_scale', __kwargtrans__ ({text: 'Scale'}));
+		else if (__eq__ (gpcolor.fill_style, 'GRADIENT')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'gradient_type');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'fill_color', __kwargtrans__ ({text: 'Base Color'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'mix_color', __kwargtrans__ ({text: 'Secondary Color'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'use_fill_holdout');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'mix_factor', __kwargtrans__ ({text: 'Blend', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'flip', __kwargtrans__ ({text: 'Flip Colors'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'texture_offset', __kwargtrans__ ({text: 'Location'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			row.enabled = __eq__ (gpcolor.gradient_type, 'LINEAR');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'texture_angle', __kwargtrans__ ({text: 'Rotation'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'texture_scale', __kwargtrans__ ({text: 'Scale'}));
+			}) ();
 		}
-		else if (gpcolor.fill_style == 'TEXTURE') {
-			col.prop (gpcolor, 'fill_color', __kwargtrans__ ({text: 'Base Color'}));
-			col.prop (gpcolor, 'use_fill_holdout');
-			col.template_ID (gpcolor, 'fill_image', __kwargtrans__ ({open: 'image.open'}));
-			col.prop (gpcolor, 'mix_factor', __kwargtrans__ ({text: 'Blend', slider: true}));
-			col.prop (gpcolor, 'texture_offset', __kwargtrans__ ({text: 'Location'}));
-			col.prop (gpcolor, 'texture_angle', __kwargtrans__ ({text: 'Rotation'}));
-			col.prop (gpcolor, 'texture_scale', __kwargtrans__ ({text: 'Scale'}));
-			col.prop (gpcolor, 'texture_clamp', __kwargtrans__ ({text: 'Clip Image'}));
+		else if (__eq__ (gpcolor.fill_style, 'TEXTURE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'fill_color', __kwargtrans__ ({text: 'Base Color'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'use_fill_holdout');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_ID, __accu0__, gpcolor, 'fill_image', __kwargtrans__ ({open: 'image.open'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'mix_factor', __kwargtrans__ ({text: 'Blend', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'texture_offset', __kwargtrans__ ({text: 'Location'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'texture_angle', __kwargtrans__ ({text: 'Rotation'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'texture_scale', __kwargtrans__ ({text: 'Scale'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, gpcolor, 'texture_clamp', __kwargtrans__ ({text: 'Clip Image'}));
+			}) ();
 		}
 	});}
 });
@@ -442,7 +667,7 @@ export var MATERIAL_PT_gpencil_preview =  __class__ ('MATERIAL_PT_gpencil_previe
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -455,7 +680,10 @@ export var MATERIAL_PT_gpencil_preview =  __class__ ('MATERIAL_PT_gpencil_previe
 		else {
 		}
 		var ma = context.material;
-		self.layout.template_preview (ma);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.template_preview, __accu0__, ma);
+		}) ();
 	});}
 });
 export var MATERIAL_PT_gpencil_custom_props =  __class__ ('MATERIAL_PT_gpencil_custom_props', [GPMaterialButtonsPanel, PropertyPanel, Panel], {
@@ -471,7 +699,7 @@ export var MATERIAL_PT_gpencil_settings =  __class__ ('MATERIAL_PT_gpencil_setti
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -487,7 +715,10 @@ export var MATERIAL_PT_gpencil_settings =  __class__ ('MATERIAL_PT_gpencil_setti
 		layout.use_property_split = true;
 		var ma = context.material;
 		var gpcolor = ma.grease_pencil;
-		layout.prop (gpcolor, 'pass_index');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, gpcolor, 'pass_index');
+		}) ();
 	});}
 });
 export var MATERIAL_PT_gpencil_material_presets =  __class__ ('MATERIAL_PT_gpencil_material_presets', [PresetPanel, Panel], {
@@ -498,11 +729,34 @@ export var MATERIAL_PT_gpencil_material_presets =  __class__ ('MATERIAL_PT_gpenc
 	preset_add_operator: 'scene.gpencil_material_preset_add'
 });
 export var classes = tuple ([GPENCIL_UL_matslots, GREASE_PENCIL_MT_material_context_menu, MATERIAL_PT_gpencil_slots, MATERIAL_PT_gpencil_preview, MATERIAL_PT_gpencil_material_presets, MATERIAL_PT_gpencil_surface, MATERIAL_PT_gpencil_strokecolor, MATERIAL_PT_gpencil_random, MATERIAL_PT_gpencil_fillcolor, MATERIAL_PT_gpencil_settings, MATERIAL_PT_gpencil_animation, MATERIAL_PT_gpencil_custom_props]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_material_gpencil.map
 export {GreasePencilMaterialsPanel, Menu, Panel, PresetPanel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'GREASE_PENCIL_MT_material_context_menu': GREASE_PENCIL_MT_material_context_menu = value; break;
+		case 'GPENCIL_UL_matslots': GPENCIL_UL_matslots = value; break;
+		case 'GPMaterialButtonsPanel': GPMaterialButtonsPanel = value; break;
+		case 'MATERIAL_PT_gpencil_slots': MATERIAL_PT_gpencil_slots = value; break;
+		case 'MATERIAL_PT_gpencil_surface': MATERIAL_PT_gpencil_surface = value; break;
+		case 'MATERIAL_PT_gpencil_strokecolor': MATERIAL_PT_gpencil_strokecolor = value; break;
+		case 'MATERIAL_PT_gpencil_random': MATERIAL_PT_gpencil_random = value; break;
+		case 'MATERIAL_PT_gpencil_fillcolor': MATERIAL_PT_gpencil_fillcolor = value; break;
+		case 'MATERIAL_PT_gpencil_animation': MATERIAL_PT_gpencil_animation = value; break;
+		case 'MATERIAL_PT_gpencil_preview': MATERIAL_PT_gpencil_preview = value; break;
+		case 'MATERIAL_PT_gpencil_custom_props': MATERIAL_PT_gpencil_custom_props = value; break;
+		case 'MATERIAL_PT_gpencil_settings': MATERIAL_PT_gpencil_settings = value; break;
+		case 'MATERIAL_PT_gpencil_material_presets': MATERIAL_PT_gpencil_material_presets = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

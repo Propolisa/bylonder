@@ -11,7 +11,7 @@ export var pgettext = function (text, context) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -34,7 +34,7 @@ export var pgettext_n = __left0__;
 export var locale_explode = function (locale) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -50,7 +50,7 @@ export var locale_explode = function (locale) {
 export var register = function (module_name, translations_dict) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -67,7 +67,7 @@ export var register = function (module_name, translations_dict) {
 export var unregister = function (module_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -146,3 +146,21 @@ export var contexts =  __class__ ('contexts', [object], {
 export var contexts_C_to_py = dict ({'BLT_I18NCONTEXT_DEFAULT': 'default_real', 'BLT_I18NCONTEXT_DEFAULT_BPYRNA': 'default', 'BLT_I18NCONTEXT_OPERATOR_DEFAULT': 'operator_default', 'BLT_I18NCONTEXT_UI_EVENTS': 'ui_events_keymaps', 'BLT_I18NCONTEXT_PLURAL': 'plural', 'BLT_I18NCONTEXT_COUNTABLE': 'countable', 'BLT_I18NCONTEXT_ID_ACTION': 'id_action', 'BLT_I18NCONTEXT_ID_ARMATURE': 'id_armature', 'BLT_I18NCONTEXT_NO_TRANSLATION': 'no_translation', 'BLT_I18NCONTEXT_ID_BRUSH': 'id_brush', 'BLT_I18NCONTEXT_ID_CACHEFILE': 'id_cachefile', 'BLT_I18NCONTEXT_ID_CAMERA': 'id_camera', 'BLT_I18NCONTEXT_ID_COLLECTION': 'id_collection', 'BLT_I18NCONTEXT_ID_CURVES': 'id_curves', 'BLT_I18NCONTEXT_ID_CURVE_LEGACY': 'id_curve', 'BLT_I18NCONTEXT_ID_FREESTYLELINESTYLE': 'id_fs_linestyle', 'BLT_I18NCONTEXT_ID_GPENCIL': 'id_gpencil', 'BLT_I18NCONTEXT_ID_ID': 'id_id', 'BLT_I18NCONTEXT_ID_IMAGE': 'id_image', 'BLT_I18NCONTEXT_ID_LATTICE': 'id_lattice', 'BLT_I18NCONTEXT_ID_LIBRARY': 'id_library', 'BLT_I18NCONTEXT_ID_LIGHT': 'id_light', 'BLT_I18NCONTEXT_ID_LIGHTPROBE': 'id_lightprobe', 'BLT_I18NCONTEXT_ID_MASK': 'id_mask', 'BLT_I18NCONTEXT_ID_MATERIAL': 'id_material', 'BLT_I18NCONTEXT_ID_MESH': 'id_mesh', 'BLT_I18NCONTEXT_ID_METABALL': 'id_metaball', 'BLT_I18NCONTEXT_ID_MOVIECLIP': 'id_movieclip', 'BLT_I18NCONTEXT_ID_NODETREE': 'id_nodetree', 'BLT_I18NCONTEXT_ID_OBJECT': 'id_object', 'BLT_I18NCONTEXT_ID_PAINTCURVE': 'id_paintcurve', 'BLT_I18NCONTEXT_ID_PALETTE': 'id_palette', 'BLT_I18NCONTEXT_ID_PARTICLESETTINGS': 'id_particlesettings', 'BLT_I18NCONTEXT_ID_POINTCLOUD': 'id_pointcloud', 'BLT_I18NCONTEXT_ID_SCENE': 'id_scene', 'BLT_I18NCONTEXT_ID_SCREEN': 'id_screen', 'BLT_I18NCONTEXT_ID_SEQUENCE': 'id_sequence', 'BLT_I18NCONTEXT_ID_SHAPEKEY': 'id_shapekey', 'BLT_I18NCONTEXT_ID_SIMULATION': 'id_simulation', 'BLT_I18NCONTEXT_ID_SOUND': 'id_sound', 'BLT_I18NCONTEXT_ID_SPEAKER': 'id_speaker', 'BLT_I18NCONTEXT_ID_TEXT': 'id_text', 'BLT_I18NCONTEXT_ID_TEXTURE': 'id_texture', 'BLT_I18NCONTEXT_ID_VFONT': 'id_vfont', 'BLT_I18NCONTEXT_ID_VOLUME': 'id_volume', 'BLT_I18NCONTEXT_ID_WINDOWMANAGER': 'id_windowmanager', 'BLT_I18NCONTEXT_ID_WORKSPACE': 'id_workspace', 'BLT_I18NCONTEXT_ID_WORLD': 'id_world', 'BLT_I18NCONTEXT_EDITOR_FILEBROWSER': 'editor_filebrowser', 'BLT_I18NCONTEXT_EDITOR_PYTHON_CONSOLE': 'editor_python_console', 'BLT_I18NCONTEXT_EDITOR_PREFERENCES': 'editor_preferences', 'BLT_I18NCONTEXT_EDITOR_VIEW3D': 'editor_view3d', 'BLT_I18NCONTEXT_AMOUNT': 'amount', 'BLT_I18NCONTEXT_COLOR': 'color', 'BLT_I18NCONTEXT_CONSTRAINT': 'constraint', 'BLT_I18NCONTEXT_MODIFIER': 'modifier', 'BLT_I18NCONTEXT_NAVIGATION': 'navigation', 'BLT_I18NCONTEXT_RENDER_LAYER': 'render_layer', 'BLT_I18NCONTEXT_TIME': 'time', 'BLT_I18NCONTEXT_UNIT': 'unit'});
 
 //# sourceMappingURL=_bpy.app.translations.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'locale': locale = value; break;
+		case 'locales': locales = value; break;
+		case 'pgettext': pgettext = value; break;
+		case 'pgettext_iface': pgettext_iface = value; break;
+		case 'pgettext_tip': pgettext_tip = value; break;
+		case 'pgettext_rpt': pgettext_rpt = value; break;
+		case 'pgettext_data': pgettext_data = value; break;
+		case 'pgettext_n': pgettext_n = value; break;
+		case 'locale_explode': locale_explode = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		case 'contexts': contexts = value; break;
+		case 'contexts_C_to_py': contexts_C_to_py = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

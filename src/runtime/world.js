@@ -1,4 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
+import { asObject } from "./object-transform.js";
 import { createModifierSystem, registerModifier } from "../modifiers/stack.js";
 import { createWorkerEvaluator } from "../modifiers/evaluator.js";
 import { createJobs } from "../windowmanager/wm-jobs.js";
@@ -8,8 +9,9 @@ import { createParticles } from "../nodes/particles.js";
 import { createLogic } from "../nodes/logic.js";
 import { createDocument, channelSlice } from "../blenkernel/document.js";
 import { registerObjects } from "../blenkernel/animation/bindings.js";
-import { identify } from "../editors/object/identity.js";
+import { identify, hasMesh } from "../editors/object/identity.js";
 import { createSDK } from "./sdk.js";
+import { sdkModuleSource } from "./sdk-module.js";
 import { RUN_CACHE } from "../workspace/module-host.js";
 import { createMaterialLibrary } from "../blenkernel/material/library.js";
 import { createSceneSettings } from "../blenkernel/scene/settings.js";
@@ -47,10 +49,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   );
   await cache.put(
     root + "__wb_sdk.js",
-    new Response(
-      "export const BABYLON=globalThis.BABYLON,engine=globalThis.engine,canvas=globalThis.canvas,workbench=globalThis.workbench;export const controls=workbench.controls.bind(workbench),editable=workbench.editable.bind(workbench),asset=workbench.asset.bind(workbench),onDispose=workbench.onDispose.bind(workbench),meshTools=workbench.meshTools.bind(workbench),createText=workbench.createText,createPrimitive=workbench.createPrimitive,updateText=workbench.updateText,textSchema=workbench.textSchema,animate=workbench.animate.bind(workbench),animation=workbench.animation,addModifier=workbench.addModifier,curve=workbench.curve,registerModifier=workbench.registerModifier,registerPropertiesContext=workbench.registerPropertiesContext,registerPropertiesPanel=workbench.registerPropertiesPanel;",
-      { headers: { "Content-Type": "text/javascript" } },
-    ),
+    new Response(sdkModuleSource, { headers: { "Content-Type": "text/javascript" } }),
   );
   const userMap = JSON.parse(input.importmap);
   const imports = {};
@@ -85,9 +84,12 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
   } else scene = new BABYLON.Scene(engine);
   let authoredCamera = scene.activeCamera;
   authoredCamera?.detachControl();
+  const authored = (n) => !n.name.startsWith("__") && n.metadata?.editable !== false;
+  // Skyboxes (infinite-distance meshes) belong to the World, which shows them in rendered views only (world-babylon.js).
   const objects = [
-    ...scene.meshes.filter((m) => m.getTotalVertices() > 0 && m.metadata?.editable !== false),
-    ...scene.transformNodes.filter((n) => !n.name.startsWith("__") && n.metadata?.editable !== false),
+    ...scene.meshes.filter((m) => hasMesh(m) && !m.infiniteDistance && m.metadata?.editable !== false),
+    ...scene.transformNodes.filter(authored),
+    ...[...scene.lights, ...scene.cameras].filter(authored).map(asObject),
   ];
   const names = new Set();
   for (const node of objects) {
@@ -116,7 +118,7 @@ export async function createWorld({ input, engine, canvas, hooks = {} }) {
     },
   } }));
   world.worlds = documentState.register("worlds", createWorlds(world, { commit, asset: (path) => sdk.asset(path) }));
-  world.renderSettings = documentState.register("render", createRenderSettings(world, { commit }));
+  world.renderSettings = documentState.register("render", createRenderSettings(world, { commit, authored: sdk.authoredRender }));
   world.collections = documentState.register("collections", createCollections(world, { commit }));
   world.sequenceEditor = documentState.register("sequenceEditor", createSequenceEditor({ commit }));
   // Views in Rendered shading or camera view show the world background and volume, render-engine effects and

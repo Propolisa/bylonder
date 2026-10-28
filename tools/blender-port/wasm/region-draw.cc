@@ -719,7 +719,6 @@ void button_drawflag_enable(Button *but, int flag) { but->drawflag |= flag; }
 void button_label_alpha_factor_set(Button *but, float alpha_factor) { but->alpha_factor = alpha_factor; }
 void button_retval_set(Button *but, int retval) { but->retval = retval; }
 void button_disable(Button *but, const char * /*disabled_hint*/) { but->flag |= BUT_DISABLED; }
-void button_func_identity_compare_set(Button * /*but*/, ButtonIdentityCompareFunc /*cmp_fn*/) {}
 
 /* port-override: JS applies a button within the event that pressed it, so none stays active, nor shows a tooltip. */
 Button *context_active_but_get(const bContext * /*C*/) { return nullptr; }

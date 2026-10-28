@@ -7,3 +7,10 @@ export var BuiltinMethodType = null;
 export var ModuleType = null;
 
 //# sourceMappingURL=types.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'BuiltinMethodType': BuiltinMethodType = value; break;
+		case 'ModuleType': ModuleType = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -34,3 +34,13 @@ for (const [methods, prototype] of [[__str_methods__, String.prototype], [__list
 }
 // A keyword argument's Python name, for **kwargs: Transcrypt renames those that collide with JS or its runtime.
 export var __pyname__ = (key) => (key == 'py_metatype' ? 'type' : key.startsWith ('py_') ? key.slice (3) : key);
+// A class's __dict__: its own attributes. Transcrypt copies its bases' onto it, so those still the bases' are left out.
+Object.defineProperty (Function.prototype, '__dict__', { configurable: true, get () {
+    const own = dict (), bases = this.__bases__ ?? [];
+    for (const key of Object.keys (this)) {
+        const mine = Object.getOwnPropertyDescriptor (this, key);
+        const inherited = bases.some ((base) => { const theirs = Object.getOwnPropertyDescriptor (base, key); return theirs && theirs.value === mine.value && theirs.get === mine.get; });
+        if (!inherited && !['__metaclass__', '__name__', '__bases__'].includes (key)) own [key] = this [key];
+    }
+    return own;
+} });

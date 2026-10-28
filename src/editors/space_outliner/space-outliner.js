@@ -1,21 +1,25 @@
 // The Outliner (editors/space_outliner), Blender's own: its tree is built, drawn, selected and edited by Blender's code
 // in the module (outliner-area.js) over the world's Blender mirror (object-blender.js, collections-blender.js). Its
-// header is Blender's script (OUTLINER_HT_header, drawn by the interim region-layout.js); its main region is a canvas
+// header is Blender's script (OUTLINER_HT_header, drawn by the shared layout renderer); its main region is a canvas
 // the module's drawing is replayed on (region-draw.js). Events become Blender's: a button under the pointer applies as
 // Blender's handlers apply it, the rest runs Blender's keymaps on the Outliner's operators, registered by idname and
 // run in the Outliner as the context area. After each, what Blender's code changed comes back to Bylonder (writeBack).
-import * as spaceOutliner from '../../bl_ui/space_outliner.js';
 import { blenderModule, operatorNames, pollOperator } from '../../bmesh/bmesh-wasm.js';
 import { createContext } from '../../blenkernel/context.js';
 import { dnaStruct } from '../../makesrna/dna-struct.js';
 import { keymapHandler } from '../../windowmanager/keyconfig.js';
 import { keyType } from '../../windowmanager/input/keymap.js';
-import { inArea, menuClasses, menuUI, registerOperator } from '../../windowmanager/wm-operators.js';
+import { inArea, menuUI, registerOperator } from '../../windowmanager/wm-operators.js';
 import { startGestureBox } from '../../windowmanager/wm-gesture-box.js';
-import { drawMenu, useContext } from '../interface/ui-layout.js';
+import { drawMenu } from '../interface/ui-layout.js';
 import { openMenu } from '../interface/menu.js';
 import { buttonAt, drawRecording } from '../interface/region-draw.js';
-import { RegionLayout, drawLayout, panelLayout, loadRegionRNA } from '../space_view3d/region-layout.js';
+import { headerLayout, drawPanels } from '../interface/panels.js';
+import { LayoutView } from '../interface/layout-view.js';
+import { menus, headers, panels } from '../../python/bpy_interface.js';
+import { propBinding } from '../../makesrna/rna-bylonder.js';
+import { createApp, h, reactive, markRaw } from 'vue';
+import '../interface/layout-view.css';
 import { deleted } from '../object/identity.js';
 import { OutlinerArea, modifierOf, OPERATOR_FINISHED, OPERATOR_CANCELLED, OPERATOR_PASS_THROUGH } from './outliner-area.js';
 import './space-outliner.css';
@@ -44,8 +48,7 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
   // bpy.context in the Outliner, for its header, popover and menus.
   const space = area.space;
   const context = () => createContext(rna, { area: 'OUTLINER', space });
-  const menus = { ...menuClasses(spaceOutliner) };
-  const ui = menuUI({ menus, context, keymaps: () => KEYMAPS });
+  const ui = menuUI({ menus, context, prop: propBinding(rna.host), keymaps: () => KEYMAPS });
   // The Outliner as the context area: its operators act on it, and wm.call_menu opens its menus.
   const outlinerArea = { outliner: true, menu: (name) => (menus[name] ? (event) => openOutlinerMenu(name, event) : null) };
 
@@ -289,29 +292,38 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
     canvas.focus({ preventScroll: true });
   }
 
-  // The header: OUTLINER_HT_header from Blender's script, with its filter popover (OUTLINER_PT_filter).
-  const panels = Object.fromEntries(spaceOutliner._classes_in_order.filter((name) => /_PT_/.test(name)).map((name) => [name, spaceOutliner[name]]));
-  const layoutUI = (c) => ({
-    run: ui.run,
-    supported: ui.supported,
-    menu: (idname) => drawMenu(idname, ui),
-    popover: (idname) => panelLayout(panels[idname], c),
-    panelLabel: (idname) => panels[idname]?.bl_label ?? idname,
-    panelsOf: () => [],
-    changed: () => { commands.transaction(() => {}); draw(); },
+  // The header: OUTLINER_HT_header from Blender's script, drawn by the shared layout renderer, with its popovers'
+  // panels (OUTLINER_PT_filter).
+  const headerState = reactive({ revision: 0 });
+  const drawType = (type) => (layout) => Object.assign(type(), { layout }).draw(context());
+  const layoutUI = markRaw({
+    get revision() { return headerState.revision; },
+    undoPush: () => { commands.transaction(() => {}); draw(); },
+    report: (error) => rna.host.notify?.(error.message),
+    run: (idname, props) => inArea(outlinerArea, () => ui.run(idname, props)),
+    supported: (idname, props) => inArea(outlinerArea, () => ui.supported(idname, props)),
+    poll: (idname, props) => inArea(outlinerArea, () => ui.poll(idname, props)),
+    isOpen: () => true,
+    toggle: () => {},
+    ids: () => [],
+    drawMenu: (idname) => inArea(outlinerArea, () => drawMenu(idname, ui)),
+    menuLabel: (idname) => menus[idname]?.bl_label,
+    menuContents: (idname) => menus[idname] && markRaw(headerLayout(context(), drawType(menus[idname]))),
+    popover: (id) => {
+      const type = panels[id];
+      if (!type) return null;
+      const [drawn] = drawPanels({ roots: [{ type, children: [] }] }, context(), { contexts: [type.bl_context].filter(Boolean) });
+      return drawn?.body && { label: drawn.label, layout: drawn.body, units: type.bl_ui_units_x };
+    },
   });
-  let headerReady = false;
-  const headerHost = Object.assign(document.createElement('div'), { className: 'bl-outliner-header' });
+  const headerHost = Object.assign(document.createElement('div'), { className: 'bl-ui bl-outliner-header' });
   header?.append(headerHost);
-  function drawHeader() {
-    if (!headerReady) return;
-    const c = context(), layout = new RegionLayout(), htHeader = spaceOutliner.OUTLINER_HT_header();
-    htHeader.layout = layout;
-    useContext(c);
-    htHeader.draw(c);
-    headerHost.replaceChildren(drawLayout(layout, layoutUI(c), { horizontal: true }));
-  }
-  loadRegionRNA().then(() => { headerReady = true; drawHeader(); });
+  const headerApp = createApp({ render: () => {
+    void headerState.revision;
+    return h(LayoutView, { layout: headerLayout(context(), drawType(headers.OUTLINER_HT_header)), ui: layoutUI });
+  } });
+  headerApp.mount(headerHost);
+  const drawHeader = () => { headerState.revision++; };
 
   // Draws the main region from the module's recording; a text button being edited shows Bylonder's field.
   let signature = '';
@@ -345,5 +357,5 @@ export function createOutliner({ world, editor, commands, objects, rna, region, 
   const unsubscribe = world.collections.subscribe(() => refresh());
   draw();
 
-  return { refresh, draw, area, dispose() { resized.disconnect(); unsubscribe(); area.cancel(); dragTip.remove(); } };
+  return { refresh, draw, area, dispose() { resized.disconnect(); unsubscribe(); area.cancel(); dragTip.remove(); headerApp.unmount(); } };
 }

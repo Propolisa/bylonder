@@ -17,7 +17,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -30,7 +30,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 		else {
 		}
 		var engine = context.scene.render.engine;
-		return hasattr (context, 'pointcloud') && context.pointcloud && __in__ (engine, cls.COMPAT_ENGINES);
+		return __call__ (hasattr, null, context, 'pointcloud') && context.pointcloud && __in__ (engine, cls.COMPAT_ENGINES);
 	});}
 });
 export var DATA_PT_context_pointcloud =  __class__ ('DATA_PT_context_pointcloud', [DataButtonsPanel, Panel], {
@@ -41,7 +41,7 @@ export var DATA_PT_context_pointcloud =  __class__ ('DATA_PT_context_pointcloud'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -58,10 +58,16 @@ export var DATA_PT_context_pointcloud =  __class__ ('DATA_PT_context_pointcloud'
 		var pointcloud = context.pointcloud;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (pointcloud) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -71,7 +77,7 @@ export var POINTCLOUD_MT_attribute_context_menu =  __class__ ('POINTCLOUD_MT_att
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -84,7 +90,10 @@ export var POINTCLOUD_MT_attribute_context_menu =  __class__ ('POINTCLOUD_MT_att
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('geometry.attribute_convert');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_convert');
+		}) ();
 	});}
 });
 export var POINTCLOUD_MT_add_attribute =  __class__ ('POINTCLOUD_MT_add_attribute', [Menu], {
@@ -93,7 +102,7 @@ export var POINTCLOUD_MT_add_attribute =  __class__ ('POINTCLOUD_MT_add_attribut
 	get add_standard_attribute () {return function (layout, pointcloud, py_name, data_type, domain) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -108,11 +117,20 @@ export var POINTCLOUD_MT_add_attribute =  __class__ ('POINTCLOUD_MT_add_attribut
 		}
 		else {
 		}
-		var exists = pointcloud.attributes.py_get (py_name) !== null;
-		var col = layout.column ();
+		var exists = (function () {
+			var __accu0__ = pointcloud.attributes;
+			return __call__ (__accu0__.py_get, __accu0__, py_name);
+		}) () !== null;
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.enabled = !(exists);
 		col.operator_context = 'EXEC_DEFAULT';
-		var props = col.operator ('geometry.attribute_add', __kwargtrans__ ({text: py_name}));
+		var props = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_add', __kwargtrans__ ({text: py_name}));
+		}) ();
 		props.py_name = py_name;
 		props.data_type = data_type;
 		props.domain = domain;
@@ -120,7 +138,7 @@ export var POINTCLOUD_MT_add_attribute =  __class__ ('POINTCLOUD_MT_add_attribut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -134,13 +152,31 @@ export var POINTCLOUD_MT_add_attribute =  __class__ ('POINTCLOUD_MT_add_attribut
 		}
 		var layout = self.layout;
 		var pointcloud = context.pointcloud;
-		self.add_standard_attribute (layout, pointcloud, 'radius', 'FLOAT', 'POINT');
-		self.add_standard_attribute (layout, pointcloud, 'color', 'FLOAT_COLOR', 'POINT');
-		self.add_standard_attribute (layout, pointcloud, 'id', 'INT', 'POINT');
-		self.add_standard_attribute (layout, pointcloud, 'velocity', 'FLOAT_VECTOR', 'POINT');
-		layout.separator ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.add_standard_attribute, __accu0__, layout, pointcloud, 'radius', 'FLOAT', 'POINT');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.add_standard_attribute, __accu0__, layout, pointcloud, 'color', 'FLOAT_COLOR', 'POINT');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.add_standard_attribute, __accu0__, layout, pointcloud, 'id', 'INT', 'POINT');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.add_standard_attribute, __accu0__, layout, pointcloud, 'velocity', 'FLOAT_VECTOR', 'POINT');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		layout.operator_context = 'INVOKE_DEFAULT';
-		layout.operator ('geometry.attribute_add', __kwargtrans__ ({text: 'Custom...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_add', __kwargtrans__ ({text: 'Custom...'}));
+		}) ();
 	});}
 });
 export var POINTCLOUD_UL_attributes =  __class__ ('POINTCLOUD_UL_attributes', [UIList], {
@@ -148,7 +184,7 @@ export var POINTCLOUD_UL_attributes =  __class__ ('POINTCLOUD_UL_attributes', [U
 	get filter_items () {return __get__ (this, function (self, _context, data, property) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -162,33 +198,50 @@ export var POINTCLOUD_UL_attributes =  __class__ ('POINTCLOUD_UL_attributes', [U
 		}
 		else {
 		}
-		var attributes = getattr (data, property);
+		var attributes = __call__ (getattr, null, data, property);
 		var flags = [];
 		var indices = (function () {
 			var __accu0__ = [];
-			for (var i of list (range (len (attributes)))) {
-				__accu0__.append (i);
+			var __iterable0__ = __call__ (list, null, __call__ (range, null, __call__ (len, null, attributes)));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var i = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, i);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		if (self.filter_name) {
-			var flags = bpy.types.UI_UL_list.filter_items_by_name (self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			var flags = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			}) ();
 		}
 		if (!(flags)) {
-			var flags = [self.bitflag_filter_item] * len (attributes);
+			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
-		for (var [idx, item] of py_enumerate (attributes)) {
-			flags [idx] = (item.is_internal ? 0 : flags [idx]);
+		var __iterable0__ = __call__ (py_enumerate, null, attributes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var idx = __left0__ [0];
+			var item = __left0__ [1];
+			__setitem__ (flags, idx, (item.is_internal ? 0 : __getitem__ (flags, idx)));
 		}
 		if (self.use_filter_sort_alpha) {
-			var indices = bpy.types.UI_UL_list.sort_items_by_name (attributes, 'name');
+			var indices = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
+			}) ();
 		}
 		return tuple ([flags, indices]);
 	});},
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, attribute, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -207,14 +260,26 @@ export var POINTCLOUD_UL_attributes =  __class__ ('POINTCLOUD_UL_attributes', [U
 		}
 		else {
 		}
-		var data_type = attribute.bl_rna.properties ['data_type'].enum_items [attribute.data_type];
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.75}));
+		var data_type = __getitem__ (__getitem__ (attribute.bl_rna.properties, 'data_type').enum_items, attribute.data_type);
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.75}));
+		}) ();
 		py_split.emboss = 'NONE';
-		py_split.prop (attribute, 'name', __kwargtrans__ ({text: ''}));
-		var sub = py_split.row ();
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.prop, __accu0__, attribute, 'name', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		sub.alignment = 'RIGHT';
 		sub.active = false;
-		sub.label (__kwargtrans__ ({text: data_type.py_name}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: data_type.py_name}));
+		}) ();
 	});}
 });
 export var DATA_PT_pointcloud_attributes =  __class__ ('DATA_PT_pointcloud_attributes', [DataButtonsPanel, Panel], {
@@ -224,7 +289,7 @@ export var DATA_PT_pointcloud_attributes =  __class__ ('DATA_PT_pointcloud_attri
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -238,28 +303,69 @@ export var DATA_PT_pointcloud_attributes =  __class__ ('DATA_PT_pointcloud_attri
 		}
 		var pointcloud = context.pointcloud;
 		var layout = self.layout;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('POINTCLOUD_UL_attributes', 'attributes', pointcloud, 'attributes', pointcloud.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.menu ('POINTCLOUD_MT_add_attribute', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		col.separator ();
-		col.menu ('POINTCLOUD_MT_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'POINTCLOUD_UL_attributes', 'attributes', pointcloud, 'attributes', pointcloud.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'POINTCLOUD_MT_add_attribute', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'POINTCLOUD_MT_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
 	});}
 });
 export var DATA_PT_custom_props_pointcloud =  __class__ ('DATA_PT_custom_props_pointcloud', [DataButtonsPanel, PropertyPanel, Panel], {
 	__module__: __name__,
 	COMPAT_ENGINES: new set (['BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH']),
 	_context_path: 'object.data',
-	_property_type: (hasattr (bpy.types, 'PointCloud') ? bpy.types.PointCloud : null)
+	_property_type: (__call__ (hasattr, null, bpy.types, 'PointCloud') ? bpy.types.PointCloud : null)
 });
 export var classes = tuple ([DATA_PT_context_pointcloud, DATA_PT_pointcloud_attributes, DATA_PT_custom_props_pointcloud, POINTCLOUD_MT_add_attribute, POINTCLOUD_MT_attribute_context_menu, POINTCLOUD_UL_attributes]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_pointcloud.map
 export {Menu, Panel, PropertyPanel, UIList, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_context_pointcloud': DATA_PT_context_pointcloud = value; break;
+		case 'POINTCLOUD_MT_attribute_context_menu': POINTCLOUD_MT_attribute_context_menu = value; break;
+		case 'POINTCLOUD_MT_add_attribute': POINTCLOUD_MT_add_attribute = value; break;
+		case 'POINTCLOUD_UL_attributes': POINTCLOUD_UL_attributes = value; break;
+		case 'DATA_PT_pointcloud_attributes': DATA_PT_pointcloud_attributes = value; break;
+		case 'DATA_PT_custom_props_pointcloud': DATA_PT_custom_props_pointcloud = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

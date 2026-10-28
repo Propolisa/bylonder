@@ -11,7 +11,7 @@ export var StringIO =  __class__ ('StringIO', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -28,7 +28,7 @@ export var StringIO =  __class__ ('StringIO', [object], {
 	get write () {return __get__ (this, function (self, text) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -40,13 +40,16 @@ export var StringIO =  __class__ ('StringIO', [object], {
 		}
 		else {
 		}
-		self.parts.append (text);
-		return len (text);
+		(function () {
+			var __accu0__ = self.parts;
+			return __call__ (__accu0__.append, __accu0__, text);
+		}) ();
+		return __call__ (len, null, text);
 	});},
 	get getvalue () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -57,12 +60,15 @@ export var StringIO =  __class__ ('StringIO', [object], {
 		}
 		else {
 		}
-		return ''.join (self.parts);
+		return (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, self.parts);
+		}) ();
 	});},
 	get read () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -73,12 +79,15 @@ export var StringIO =  __class__ ('StringIO', [object], {
 		}
 		else {
 		}
-		return self.getvalue ();
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.getvalue, __accu0__);
+		}) ();
 	});},
 	get close () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -95,3 +104,10 @@ export var StringIO =  __class__ ('StringIO', [object], {
 export var BytesIO = StringIO;
 
 //# sourceMappingURL=io.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'StringIO': StringIO = value; break;
+		case 'BytesIO': BytesIO = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

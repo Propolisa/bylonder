@@ -7,7 +7,7 @@ var __name__ = 'bl_keymap_utils.keymap_hierarchy';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -18,8 +18,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -27,7 +33,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -52,7 +58,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -71,7 +77,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,18 +90,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -106,16 +115,40 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var __all__ = tuple (['generate']);
 export var _km_expand_from_toolsystem = function (space_type, context_mode) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -130,7 +163,7 @@ export var _km_expand_from_toolsystem = function (space_type, context_mode) {
 	var _fn = function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -138,13 +171,22 @@ export var _km_expand_from_toolsystem = function (space_type, context_mode) {
 		}
 		else {
 		}
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
-		for (var cls of ToolSelectPanelHelper.__subclasses__ ()) {
-			if (cls.bl_space_type == space_type) {
-				return cls.keymap_ui_hierarchy (context_mode);
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var __iterable0__ = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__.__subclasses__, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var cls = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (cls.bl_space_type, space_type)) {
+				return (function () {
+					var __accu0__ = cls;
+					return __call__ (__accu0__.keymap_ui_hierarchy, __accu0__, context_mode);
+				}) ();
 			}
 		}
-		var __except0__ = Exception ('keymap not found');
+		var __except0__ = __call__ (Exception, null, 'keymap not found');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	};
@@ -153,7 +195,7 @@ export var _km_expand_from_toolsystem = function (space_type, context_mode) {
 export var _km_hierarchy_iter_recursive = function* (py_items) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -164,19 +206,22 @@ export var _km_hierarchy_iter_recursive = function* (py_items) {
 	}
 	else {
 	}
-	for (var sub of py_items) {
-		if (callable (sub)) {
-			yield* sub ();
+	var __iterable0__ = py_items;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var sub = __getitem__ (__iterable0__, __index0__);
+		if (__call__ (callable, null, sub)) {
+			yield* __call__ (sub, null);
 		}
 		else {
-			yield _joined (sub.__getslice__ (null, 3, 1), [list (_km_hierarchy_iter_recursive (sub [3]))]);
+			yield __call__ (_joined, null, __getslice__ (sub, null, 3, 1), [__call__ (list, null, __call__ (_km_hierarchy_iter_recursive, null, __getitem__ (sub, 3)))]);
 		}
 	}
 	};
 export var generate = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -184,16 +229,43 @@ export var generate = function () {
 	}
 	else {
 	}
-	var bpy = _module ('bpy');
+	var bpy = __call__ (_module, null, 'bpy');
 	if (bpy.app.background) {
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
-		for (var cls of ToolSelectPanelHelper.__subclasses__ ()) {
-			cls.register_ensure ();
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var __iterable0__ = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__.__subclasses__, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var cls = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.register_ensure, __accu0__);
+			}) ();
 		}
 	}
-	return list (_km_hierarchy_iter_recursive (_km_hierarchy));
+	return __call__ (list, null, __call__ (_km_hierarchy_iter_recursive, null, _km_hierarchy));
 };
-export var _km_hierarchy = [tuple (['Window', 'EMPTY', 'WINDOW', []]), tuple (['Screen', 'EMPTY', 'WINDOW', [tuple (['Screen Editing', 'EMPTY', 'WINDOW', []]), tuple (['Region Context Menu', 'EMPTY', 'WINDOW', []])]]), tuple (['View2D', 'EMPTY', 'WINDOW', []]), tuple (['View2D Buttons List', 'EMPTY', 'WINDOW', []]), tuple (['User Interface', 'EMPTY', 'WINDOW', []]), tuple (['3D View', 'VIEW_3D', 'WINDOW', [tuple (['Object Mode', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'OBJECT')]]), tuple (['Mesh', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'EDIT_MESH')]]), tuple (['Curve', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'EDIT_CURVE')]]), tuple (['Curves', 'EMPTY', 'WINDOW', []]), tuple (['Armature', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'EDIT_ARMATURE')]]), tuple (['Metaball', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'EDIT_METABALL')]]), tuple (['Lattice', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'EDIT_LATTICE')]]), tuple (['Font', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'EDIT_TEXT')]]), tuple (['Grease Pencil', 'EMPTY', 'WINDOW', []]), tuple (['Point Cloud', 'EMPTY', 'WINDOW', []]), tuple (['Pose', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'POSE')]]), tuple (['Vertex Paint', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'PAINT_VERTEX')]]), tuple (['Weight Paint', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'PAINT_WEIGHT')]]), tuple (['Paint Vertex Selection (Weight, Vertex)', 'EMPTY', 'WINDOW', []]), tuple (['Paint Face Mask (Weight, Vertex, Texture)', 'EMPTY', 'WINDOW', []]), tuple (['Image Paint', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'PAINT_TEXTURE')]]), tuple (['Sculpt', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'SCULPT')]]), tuple (['Sculpt Curves', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'CURVES_SCULPT')]]), tuple (['Particle', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', 'PARTICLE')]]), tuple (['Primitive Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Pen Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Knife Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Custom Normals Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Bevel Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Paint Stroke Modal', 'EMPTY', 'WINDOW', []]), tuple (['Sculpt Expand Modal', 'EMPTY', 'WINDOW', []]), tuple (['Paint Curve', 'EMPTY', 'WINDOW', []]), tuple (['Curve Pen Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Object Non-modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Placement Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Walk Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Fly Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Rotate Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Move Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Zoom Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Dolly Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D VR Location Scouting Capture Review Modal', 'EMPTY', 'WINDOW', []]), tuple (['3D View Generic', 'VIEW_3D', 'WINDOW', [_km_expand_from_toolsystem ('VIEW_3D', null)]])]]), tuple (['Graph Editor', 'GRAPH_EDITOR', 'WINDOW', [tuple (['Graph Editor Generic', 'GRAPH_EDITOR', 'WINDOW', []])]]), tuple (['Dopesheet', 'DOPESHEET_EDITOR', 'WINDOW', [tuple (['Dopesheet Generic', 'DOPESHEET_EDITOR', 'WINDOW', []])]]), tuple (['NLA Editor', 'NLA_EDITOR', 'WINDOW', [tuple (['NLA Tracks', 'NLA_EDITOR', 'WINDOW', []]), tuple (['NLA Generic', 'NLA_EDITOR', 'WINDOW', []])]]), tuple (['Image', 'IMAGE_EDITOR', 'WINDOW', [tuple (['UV Editor', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('IMAGE_EDITOR', 'UV')]]), tuple (['UV Sculpt', 'EMPTY', 'WINDOW', []]), tuple (['Image Paint', 'EMPTY', 'WINDOW', [_km_expand_from_toolsystem ('IMAGE_EDITOR', 'PAINT')]]), tuple (['Image View', 'IMAGE_EDITOR', 'WINDOW', [_km_expand_from_toolsystem ('IMAGE_EDITOR', 'VIEW')]]), tuple (['Image Generic', 'IMAGE_EDITOR', 'WINDOW', [_km_expand_from_toolsystem ('IMAGE_EDITOR', null)]])]]), tuple (['Outliner', 'OUTLINER', 'WINDOW', []]), tuple (['Node Editor', 'NODE_EDITOR', 'WINDOW', [tuple (['Node Generic', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Tweak', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Tweak (fallback)', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Box', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Box (fallback)', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Lasso', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Lasso (fallback)', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Circle', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Circle (fallback)', 'NODE_EDITOR', 'WINDOW', []])]]), tuple (['Spreadsheet Generic', 'SPREADSHEET', 'WINDOW', []]), tuple (['Video Sequence Editor', 'SEQUENCE_EDITOR', 'WINDOW', [tuple (['Sequencer', 'SEQUENCE_EDITOR', 'WINDOW', [_km_expand_from_toolsystem ('SEQUENCE_EDITOR', 'SEQUENCER')]]), tuple (['Preview', 'SEQUENCE_EDITOR', 'WINDOW', [_km_expand_from_toolsystem ('SEQUENCE_EDITOR', 'PREVIEW')]])]]), tuple (['File Browser', 'FILE_BROWSER', 'WINDOW', [tuple (['File Browser Main', 'FILE_BROWSER', 'WINDOW', []]), tuple (['File Browser Buttons', 'FILE_BROWSER', 'WINDOW', []])]]), tuple (['Info', 'INFO', 'WINDOW', []]), tuple (['Property Editor', 'PROPERTIES', 'WINDOW', []]), tuple (['Text', 'TEXT_EDITOR', 'WINDOW', [tuple (['Text Generic', 'TEXT_EDITOR', 'WINDOW', []])]]), tuple (['Console', 'CONSOLE', 'WINDOW', []]), tuple (['Clip', 'CLIP_EDITOR', 'WINDOW', [tuple (['Clip Editor', 'CLIP_EDITOR', 'WINDOW', []]), tuple (['Clip Graph Editor', 'CLIP_EDITOR', 'WINDOW', []]), tuple (['Clip Dopesheet Editor', 'CLIP_EDITOR', 'WINDOW', []])]]), tuple (['Grease Pencil', 'EMPTY', 'WINDOW', [tuple (['Grease Pencil Draw Mode', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Brush Stroke', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Edit Mode', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Sculpt Mode', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Weight Paint', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Vertex Paint', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Fill Tool', 'EMPTY', 'WINDOW', []])]]), tuple (['Mask Editing', 'EMPTY', 'WINDOW', []]), tuple (['Frames', 'EMPTY', 'WINDOW', []]), tuple (['Markers', 'EMPTY', 'WINDOW', []]), tuple (['Animation', 'EMPTY', 'WINDOW', []]), tuple (['Animation Channels', 'EMPTY', 'WINDOW', []]), tuple (['View3D Gesture Circle', 'EMPTY', 'WINDOW', []]), tuple (['Gesture Straight Line', 'EMPTY', 'WINDOW', []]), tuple (['Gesture Zoom Border', 'EMPTY', 'WINDOW', []]), tuple (['Gesture Box', 'EMPTY', 'WINDOW', []]), tuple (['Standard Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Transform Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Eyedropper Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Eyedropper ColorRamp PointSampling Map', 'EMPTY', 'WINDOW', []]), tuple (['Mesh Filter Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Fill Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo', 'EMPTY', 'WINDOW', [tuple (['Generic Gizmo Drag', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Click Drag', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Maybe Drag', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Select', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Tweak Modal Map', 'EMPTY', 'WINDOW', []])]])];
+export var _km_hierarchy = [tuple (['Window', 'EMPTY', 'WINDOW', []]), tuple (['Screen', 'EMPTY', 'WINDOW', [tuple (['Screen Editing', 'EMPTY', 'WINDOW', []]), tuple (['Region Context Menu', 'EMPTY', 'WINDOW', []])]]), tuple (['View2D', 'EMPTY', 'WINDOW', []]), tuple (['View2D Buttons List', 'EMPTY', 'WINDOW', []]), tuple (['User Interface', 'EMPTY', 'WINDOW', []]), tuple (['3D View', 'VIEW_3D', 'WINDOW', [tuple (['Object Mode', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'OBJECT')]]), tuple (['Mesh', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'EDIT_MESH')]]), tuple (['Curve', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'EDIT_CURVE')]]), tuple (['Curves', 'EMPTY', 'WINDOW', []]), tuple (['Armature', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'EDIT_ARMATURE')]]), tuple (['Metaball', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'EDIT_METABALL')]]), tuple (['Lattice', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'EDIT_LATTICE')]]), tuple (['Font', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'EDIT_TEXT')]]), tuple (['Grease Pencil', 'EMPTY', 'WINDOW', []]), tuple (['Point Cloud', 'EMPTY', 'WINDOW', []]), tuple (['Pose', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'POSE')]]), tuple (['Vertex Paint', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'PAINT_VERTEX')]]), tuple (['Weight Paint', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'PAINT_WEIGHT')]]), tuple (['Paint Vertex Selection (Weight, Vertex)', 'EMPTY', 'WINDOW', []]), tuple (['Paint Face Mask (Weight, Vertex, Texture)', 'EMPTY', 'WINDOW', []]), tuple (['Image Paint', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'PAINT_TEXTURE')]]), tuple (['Sculpt', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'SCULPT')]]), tuple (['Sculpt Curves', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'CURVES_SCULPT')]]), tuple (['Particle', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', 'PARTICLE')]]), tuple (['Primitive Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Pen Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Knife Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Custom Normals Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Bevel Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Paint Stroke Modal', 'EMPTY', 'WINDOW', []]), tuple (['Sculpt Expand Modal', 'EMPTY', 'WINDOW', []]), tuple (['Paint Curve', 'EMPTY', 'WINDOW', []]), tuple (['Curve Pen Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Object Non-modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Placement Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Walk Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Fly Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Rotate Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Move Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Zoom Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D Dolly Modal', 'EMPTY', 'WINDOW', []]), tuple (['View3D VR Location Scouting Capture Review Modal', 'EMPTY', 'WINDOW', []]), tuple (['3D View Generic', 'VIEW_3D', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'VIEW_3D', null)]])]]), tuple (['Graph Editor', 'GRAPH_EDITOR', 'WINDOW', [tuple (['Graph Editor Generic', 'GRAPH_EDITOR', 'WINDOW', []])]]), tuple (['Dopesheet', 'DOPESHEET_EDITOR', 'WINDOW', [tuple (['Dopesheet Generic', 'DOPESHEET_EDITOR', 'WINDOW', []])]]), tuple (['NLA Editor', 'NLA_EDITOR', 'WINDOW', [tuple (['NLA Tracks', 'NLA_EDITOR', 'WINDOW', []]), tuple (['NLA Generic', 'NLA_EDITOR', 'WINDOW', []])]]), tuple (['Image', 'IMAGE_EDITOR', 'WINDOW', [tuple (['UV Editor', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'IMAGE_EDITOR', 'UV')]]), tuple (['UV Sculpt', 'EMPTY', 'WINDOW', []]), tuple (['Image Paint', 'EMPTY', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'IMAGE_EDITOR', 'PAINT')]]), tuple (['Image View', 'IMAGE_EDITOR', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'IMAGE_EDITOR', 'VIEW')]]), tuple (['Image Generic', 'IMAGE_EDITOR', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'IMAGE_EDITOR', null)]])]]), tuple (['Outliner', 'OUTLINER', 'WINDOW', []]), tuple (['Node Editor', 'NODE_EDITOR', 'WINDOW', [tuple (['Node Generic', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Tweak', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Tweak (fallback)', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Box', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Box (fallback)', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Lasso', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Lasso (fallback)', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Circle', 'NODE_EDITOR', 'WINDOW', []]), tuple (['Node Tool: Select Circle (fallback)', 'NODE_EDITOR', 'WINDOW', []])]]), tuple (['Spreadsheet Generic', 'SPREADSHEET', 'WINDOW', []]), tuple (['Video Sequence Editor', 'SEQUENCE_EDITOR', 'WINDOW', [tuple (['Sequencer', 'SEQUENCE_EDITOR', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'SEQUENCE_EDITOR', 'SEQUENCER')]]), tuple (['Preview', 'SEQUENCE_EDITOR', 'WINDOW', [__call__ (_km_expand_from_toolsystem, null, 'SEQUENCE_EDITOR', 'PREVIEW')]])]]), tuple (['File Browser', 'FILE_BROWSER', 'WINDOW', [tuple (['File Browser Main', 'FILE_BROWSER', 'WINDOW', []]), tuple (['File Browser Buttons', 'FILE_BROWSER', 'WINDOW', []])]]), tuple (['Info', 'INFO', 'WINDOW', []]), tuple (['Property Editor', 'PROPERTIES', 'WINDOW', []]), tuple (['Text', 'TEXT_EDITOR', 'WINDOW', [tuple (['Text Generic', 'TEXT_EDITOR', 'WINDOW', []])]]), tuple (['Console', 'CONSOLE', 'WINDOW', []]), tuple (['Clip', 'CLIP_EDITOR', 'WINDOW', [tuple (['Clip Editor', 'CLIP_EDITOR', 'WINDOW', []]), tuple (['Clip Graph Editor', 'CLIP_EDITOR', 'WINDOW', []]), tuple (['Clip Dopesheet Editor', 'CLIP_EDITOR', 'WINDOW', []])]]), tuple (['Grease Pencil', 'EMPTY', 'WINDOW', [tuple (['Grease Pencil Draw Mode', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Brush Stroke', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Edit Mode', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Sculpt Mode', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Weight Paint', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Vertex Paint', 'EMPTY', 'WINDOW', []]), tuple (['Grease Pencil Fill Tool', 'EMPTY', 'WINDOW', []])]]), tuple (['Mask Editing', 'EMPTY', 'WINDOW', []]), tuple (['Frames', 'EMPTY', 'WINDOW', []]), tuple (['Markers', 'EMPTY', 'WINDOW', []]), tuple (['Animation', 'EMPTY', 'WINDOW', []]), tuple (['Animation Channels', 'EMPTY', 'WINDOW', []]), tuple (['View3D Gesture Circle', 'EMPTY', 'WINDOW', []]), tuple (['Gesture Straight Line', 'EMPTY', 'WINDOW', []]), tuple (['Gesture Zoom Border', 'EMPTY', 'WINDOW', []]), tuple (['Gesture Box', 'EMPTY', 'WINDOW', []]), tuple (['Standard Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Transform Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Eyedropper Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Eyedropper ColorRamp PointSampling Map', 'EMPTY', 'WINDOW', []]), tuple (['Mesh Filter Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Fill Tool Modal Map', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo', 'EMPTY', 'WINDOW', [tuple (['Generic Gizmo Drag', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Click Drag', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Maybe Drag', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Select', 'EMPTY', 'WINDOW', []]), tuple (['Generic Gizmo Tweak Modal Map', 'EMPTY', 'WINDOW', []])]])];
 
 //# sourceMappingURL=bl_keymap_utils.keymap_hierarchy.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '__all__': __all__ = value; break;
+		case '_km_expand_from_toolsystem': _km_expand_from_toolsystem = value; break;
+		case '_km_hierarchy_iter_recursive': _km_hierarchy_iter_recursive = value; break;
+		case 'generate': generate = value; break;
+		case '_km_hierarchy': _km_hierarchy = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

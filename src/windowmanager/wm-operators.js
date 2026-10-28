@@ -6,20 +6,25 @@ import { operatorKeys } from './input/keymap.js';
 import { blenderKeys } from './keyconfig.js';
 import rnaOperators from '../makesrna/rna-operators.json' with { type: 'json' };
 
-const operators = new Map(), extensions = new Map();
+const operators = new Map(), spaceOperators = new Map(), extensions = new Map();
 
 // An operator: run(props, event), optionally poll(props, event) (the event when a key or click ran it), keys(props) for its shortcut when no keymap binds it, supports(props) when Bylonder runs it
 // with some properties only and enumItems(prop) for its enum properties' items where they differ from Blender's
-// (src/makesrna/rna-operators.json), as [identifier, name, description, icon].
-export function registerOperator(idname, operator) {
-  operators.set(idname, operator);
+// (src/makesrna/rna-operators.json), as [identifier, name, description, icon]. One registered for a space type
+// ('GRAPH_EDITOR') runs when the context area is of that space, as Blender's operators act on the context area's space
+// (transform in a Graph Editor moves keys); elsewhere the operator registered without one runs.
+export function registerOperator(idname, operator, space = null) {
+  if (space) (spaceOperators.get(space) ?? spaceOperators.set(space, new Map()).get(space)).set(idname, operator);
+  else operators.set(idname, operator);
 }
 
-export function registerOperators(table) {
-  for (const [idname, operator] of Object.entries(table)) registerOperator(idname, operator);
+export function registerOperators(table, space = null) {
+  for (const [idname, operator] of Object.entries(table)) registerOperator(idname, operator, space);
 }
 
-export const runOperator = (idname, props = {}) => operators.get(idname).run(props);
+const operatorFor = (idname) => (area?.space && spaceOperators.get(area.space)?.get(idname)) ?? operators.get(idname);
+
+export const runOperator = (idname, props = {}) => operatorFor(idname).run(props);
 
 // Runs an operator from an event (a keymap item's) when Bylonder runs it with these properties and it polls. Returns
 // false when it did not run, else what run returned, as Blender's operators do: 'FINISHED' (or nothing),
@@ -27,7 +32,7 @@ export const runOperator = (idname, props = {}) => operators.get(idname).run(pro
 // An operator with `confirm: { title, button }` asks first, as WM_operator_confirm_ex does, unless its confirm property
 // (default from Blender's RNA) is off.
 export function invokeOperator(idname, props, event) {
-  const operator = operators.get(idname);
+  const operator = operatorFor(idname);
   if (!operator || !(operator.supports?.(props) ?? true) || !(operator.poll?.(props, event) ?? true)) return false;
   const confirm = operator.confirm && (props.confirm ?? rnaOperators[idname]?.properties.confirm?.default ?? true);
   if (!confirm) return operator.run(props, event) ?? 'FINISHED';
@@ -37,7 +42,8 @@ export function invokeOperator(idname, props, event) {
 }
 
 // The area an event is handled in, Blender's context area: an editor sets it while its keymaps run, so operators act
-// on that editor. An area is { menu(idname): a Blender menu's popup opener, or null when the area has none, ... }.
+// on that editor. An area is { menu(idname): a Blender menu's popup opener, or null when the area has none, space: its
+// Blender space type when operators are registered for it, ... }.
 let area = null;
 export function inArea(handled, run) {
   const outer = area;
@@ -72,11 +78,11 @@ export const menuUI = ({ menus, context, prop, keymaps = () => ['Window', 'Scree
   context,
   prop,
   extensions: (idname) => extensions.get(idname),
-  supported: (idname, props) => !!operators.get(idname) && (operators.get(idname).supports?.(props) ?? true),
-  poll: (idname, props) => operators.get(idname)?.poll?.(props) ?? true,
+  supported: (idname, props) => !!operatorFor(idname) && (operatorFor(idname).supports?.(props) ?? true),
+  poll: (idname, props) => operatorFor(idname)?.poll?.(props) ?? true,
   run: runOperator,
-  keys: (idname, props) => operators.get(idname)?.keys?.(props) ?? operatorKeys(idname, props) ?? blenderKeys(keymaps(), idname, props),
-  enumItems: (idname, prop) => operators.get(idname)?.enumItems?.(prop) ?? rnaOperators[idname]?.properties[prop]?.items ?? [],
+  keys: (idname, props) => operatorFor(idname)?.keys?.(props) ?? operatorKeys(idname, props) ?? blenderKeys(keymaps(), idname, props),
+  enumItems: (idname, prop) => operatorFor(idname)?.enumItems?.(prop) ?? rnaOperators[idname]?.properties[prop]?.items ?? [],
 });
 
 // A script's menu classes by idname (the module's exports named *_MT_*).

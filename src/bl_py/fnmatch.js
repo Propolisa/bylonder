@@ -9,7 +9,7 @@ var __name__ = 'fnmatch';
 export var translate = function (pattern) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -21,15 +21,21 @@ export var translate = function (pattern) {
 	else {
 	}
 	var out = '';
-	for (var c of pattern) {
-		out += (c == '*' ? '.*' : (c == '?' ? '.' : re.escape (c)));
+	var __iterable0__ = pattern;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var c = __getitem__ (__iterable0__, __index0__);
+		var out = __call__ (__iadd__, null, out, (__eq__ (c, '*') ? '.*' : (__eq__ (c, '?') ? '.' : (function () {
+			var __accu0__ = re;
+			return __call__ (__accu0__.escape, __accu0__, c);
+		}) ())));
 	}
-	return ('(?s:' + out) + ')\\Z';
+	return __add__ (__add__ ('(?s:', out), ')\\Z');
 };
 export var fnmatchcase = function (py_name, pattern) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -41,8 +47,25 @@ export var fnmatchcase = function (py_name, pattern) {
 	}
 	else {
 	}
-	return re.match ('^' + translate (pattern).py_replace ('(?s:', '(?:').py_replace ('\\Z', '$'), py_name) !== null;
+	return (function () {
+		var __accu0__ = re;
+		return __call__ (__accu0__.match, __accu0__, __add__ ('^', (function () {
+			var __accu1__ = (function () {
+				var __accu2__ = __call__ (translate, null, pattern);
+				return __call__ (__accu2__.py_replace, __accu2__, '(?s:', '(?:');
+			}) ();
+			return __call__ (__accu1__.py_replace, __accu1__, '\\Z', '$');
+		}) ()), py_name);
+	}) () !== null;
 };
 export var fnmatch = fnmatchcase;
 
 //# sourceMappingURL=fnmatch.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'translate': translate = value; break;
+		case 'fnmatchcase': fnmatchcase = value; break;
+		case 'fnmatch': fnmatch = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

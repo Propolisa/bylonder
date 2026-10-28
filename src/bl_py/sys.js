@@ -10,3 +10,13 @@ export var argv = [];
 export var version_info = tuple ([3, 13, 0]);
 
 //# sourceMappingURL=sys.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'platform': platform = value; break;
+		case 'path': path = value; break;
+		case 'modules': modules = value; break;
+		case 'argv': argv = value; break;
+		case 'version_info': version_info = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

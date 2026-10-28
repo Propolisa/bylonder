@@ -24,7 +24,6 @@ namespace blender {
 void WM_operator_free(wmOperator *op) { operator_free(op); }
 
 /* As wm_operators.cc defines them, over the module's operator properties (no IDProperties). */
-PointerRNA WM_operator_properties_create_ptr(wmOperatorType *ot) { return {nullptr, ot->srna, operator_values_new()}; }
 void WM_operator_properties_alloc(PointerRNA **ptr, IDProperty **properties, const char *opstring)
 {
   if (*ptr == nullptr) {
@@ -33,19 +32,10 @@ void WM_operator_properties_alloc(PointerRNA **ptr, IDProperty **properties, con
   *properties = nullptr;
 }
 void WM_operator_properties_sanitize(PointerRNA * /*ptr*/, const bool /*no_context*/) {}
-void WM_operator_properties_free(PointerRNA *ptr)
-{
-  operator_values_free(ptr->data);
-  ptr->data = nullptr;
-}
 
 /* As wm_event_system.cc defines them, for operators run in the context's area and region. */
 bool WM_operator_poll(bContext *C, wmOperatorType *ot) { return !ot->poll || ot->poll(C); }
 bool WM_operator_poll_context(bContext *C, wmOperatorType *ot, wm::OpCallContext /*context*/) { return WM_operator_poll(C, ot); }
-std::string WM_operatortype_name(wmOperatorType *ot, PointerRNA *properties)
-{
-  return ot->get_name && properties ? ot->get_name(ot, properties) : std::string(ot->name);
-}
 wmEventHandler_Dropbox *WM_event_add_dropbox_handler(ListBaseT<wmEventHandler> *handlers, ListBaseT<wmDropBox> *dropboxes)
 {
   for (wmEventHandler &handler_base : *handlers) {
@@ -101,10 +91,7 @@ ScrArea *ED_screen_areas_iter_next(const bScreen *screen, const ScrArea *area)
   return static_cast<ScrArea *>(screen->areabase.first);
 }
 
-/* port-override: Bylonder's window manager draws the cursor, redraws its areas and has no timers. */
-void WM_cursor_modal_set(wmWindow * /*win*/, int /*val*/) {}
-void WM_cursor_modal_restore(wmWindow * /*win*/) {}
-void WM_event_timer_remove(wmWindowManager * /*wm*/, wmWindow * /*win*/, wmTimer * /*timer*/) {}
+/* port-override: Bylonder's window manager redraws its areas. */
 wmWindow *WM_window_find_under_cursor(wmWindow * /*win*/, const int /*event_xy*/[2], int /*r_event_xy_other*/[2])
 {
   return nullptr;

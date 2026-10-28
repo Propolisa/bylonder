@@ -41,6 +41,22 @@ async function captureBlender(ids) {
   }
 }
 
+// The cube's location keyed as ui-shots.py keys it (Blender's location (2, 0, 1) is Babylon's position (2, 1, 0)), then
+// the Timeline's area switched to another editor from its Editor Type menu.
+const animationEditor = (title) => async (app) => {
+  await app.bylonder((b) => {
+    const a = b.world.animation, cube = b.world.scene.getNodeByName("Cube");
+    const refs = [...a.channels.keys()].filter((ref) => ref.includes("object:") && /position/.test(ref) && a.channels.get(ref).group === "Cube");
+    a.insert(refs, 1);
+    cube.position.set(2, 1, 0);
+    a.insert(refs, 40);
+    a.seek(1);
+  });
+  await app.locator('.dock-editor-type[title="Editor Type · Timeline"]').click();
+  await app.frame().getByRole("menuitem", { name: title, exact: true }).click();
+  await app.hover(...REST);
+};
+
 // Bylonder in each state, from the same input as ui-shots.py. Blender starts with the cube selected; a click selects it.
 const SETUP = {
   startup: async () => {},
@@ -55,6 +71,11 @@ const SETUP = {
     await app.frame().getByRole("menuitem", { name: "Subdivision Surface" }).click();
     await app.hover(...REST);
   },
+  "graph-editor": animationEditor("Graph Editor"),
+  "dope-sheet": animationEditor("Dope Sheet"),
+  "object-tab": (app) => propertiesTab(app, "Cube", "Object"),
+  "light-data": (app) => propertiesTab(app, "Light", "Data"),
+  "camera-data": (app) => propertiesTab(app, "Camera", "Data"),
   toolbar: async (app) => { await app.locator('[data-tool="builtin.move"]').click(); await app.hover(...REST); },
   "sidebar-item": async (app) => { await app.hover(...REST); await app.page.keyboard.press("n"); },
   "outliner-expanded": async (app) => {
@@ -63,6 +84,13 @@ const SETUP = {
     await app.page.keyboard.press("Shift+A");
   },
 };
+
+// The object selected alone, and the Properties editor on a tab.
+async function propertiesTab(app, name, tab) {
+  await app.bylonder((b, name) => b.editor.selection.replace([b.world.objects.find((ob) => ob.name === name)]), name);
+  await app.locator(`[role="tab"][aria-label="${tab}"]`).click();
+  await app.hover(...REST);
+}
 
 async function captureBylonder(browser, url, state) {
   const app = await openApp(browser, url, { size });

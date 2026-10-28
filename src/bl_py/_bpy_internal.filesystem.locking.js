@@ -19,7 +19,7 @@ export var MutexAcquisitionError =  __class__ ('MutexAcquisitionError', [Excepti
 export var mutex_lock_and_open_with_retry = function (file_path, mode) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -33,28 +33,37 @@ export var mutex_lock_and_open_with_retry = function (file_path, mode) {
 	}
 	else {
 	}
-	if (__in__ ('r', mode) && !(file_path.exists ())) {
-		var __except0__ = FileNotFoundError (file_path);
+	if (__in__ ('r', mode) && !((function () {
+		var __accu0__ = file_path;
+		return __call__ (__accu0__.exists, __accu0__);
+	}) ())) {
+		var __except0__ = __call__ (FileNotFoundError, null, file_path);
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
 	for (var _ = 0; _ < max_tries; _++) {
-		var __left0__ = mutex_lock_and_open (file_path, mode);
+		var __left0__ = __call__ (mutex_lock_and_open, null, file_path, mode);
 		var meta_file = __left0__ [0];
 		var unlocker = __left0__ [1];
 		if (meta_file !== null) {
 			return tuple ([meta_file, unlocker]);
 		}
-		time.sleep (wait_time_sec);
+		(function () {
+			var __accu0__ = time;
+			return __call__ (__accu0__.sleep, __accu0__, wait_time_sec);
+		}) ();
 	}
-	var __except0__ = MutexAcquisitionError ('could not open & lock file {!s}'.format (file_path));
+	var __except0__ = __call__ (MutexAcquisitionError, null, (function () {
+		var __accu0__ = 'could not open & lock file {!s}';
+		return __call__ (__accu0__.format, __accu0__, file_path);
+	}) ());
 	__except0__.__cause__ = null;
 	throw __except0__;
 };
 export var mutex_lock_and_open = function (file_path, mode) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -66,13 +75,13 @@ export var mutex_lock_and_open = function (file_path, mode) {
 	}
 	else {
 	}
-	var sys = _module ('sys');
-	if (sys.platform == 'win32') {
-		var msvcrt = _module ('msvcrt');
+	var sys = __call__ (_module, null, 'sys');
+	if (__eq__ (sys.platform, 'win32')) {
+		var msvcrt = __call__ (_module, null, 'msvcrt');
 		var _obtain_lock = function (file) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -83,13 +92,22 @@ export var mutex_lock_and_open = function (file_path, mode) {
 			}
 			else {
 			}
-			file.seek (0);
-			msvcrt.locking (file.fileno (), msvcrt.LK_NBLCK, 1);
+			(function () {
+				var __accu0__ = file;
+				return __call__ (__accu0__.seek, __accu0__, 0);
+			}) ();
+			(function () {
+				var __accu0__ = msvcrt;
+				return __call__ (__accu0__.locking, __accu0__, (function () {
+					var __accu1__ = file;
+					return __call__ (__accu1__.fileno, __accu1__);
+				}) (), msvcrt.LK_NBLCK, 1);
+			}) ();
 		};
 		var _unlock_and_close = function (file) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -100,17 +118,29 @@ export var mutex_lock_and_open = function (file_path, mode) {
 			}
 			else {
 			}
-			file.seek (0);
-			msvcrt.locking (file.fileno (), msvcrt.LK_UNLCK, 1);
-			file.close ();
+			(function () {
+				var __accu0__ = file;
+				return __call__ (__accu0__.seek, __accu0__, 0);
+			}) ();
+			(function () {
+				var __accu0__ = msvcrt;
+				return __call__ (__accu0__.locking, __accu0__, (function () {
+					var __accu1__ = file;
+					return __call__ (__accu1__.fileno, __accu1__);
+				}) (), msvcrt.LK_UNLCK, 1);
+			}) ();
+			(function () {
+				var __accu0__ = file;
+				return __call__ (__accu0__.close, __accu0__);
+			}) ();
 		};
 	}
 	else {
-		var fcntl = _module ('fcntl');
+		var fcntl = __call__ (_module, null, 'fcntl');
 		var _obtain_lock = function (file) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -121,12 +151,15 @@ export var mutex_lock_and_open = function (file_path, mode) {
 			}
 			else {
 			}
-			fcntl.flock (file, fcntl.LOCK_EX | fcntl.LOCK_NB);
+			(function () {
+				var __accu0__ = fcntl;
+				return __call__ (__accu0__.flock, __accu0__, file, __or__ (fcntl.LOCK_EX, fcntl.LOCK_NB));
+			}) ();
 		};
 		var _unlock_and_close = function (file) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -137,11 +170,17 @@ export var mutex_lock_and_open = function (file_path, mode) {
 			}
 			else {
 			}
-			file.close ();
+			(function () {
+				var __accu0__ = file;
+				return __call__ (__accu0__.close, __accu0__);
+			}) ();
 		};
 	}
 	try {
-		var lockfile = file_path.open (mode);
+		var lockfile = (function () {
+			var __accu0__ = file_path;
+			return __call__ (__accu0__.open, __accu0__, mode);
+		}) ();
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, OSError)) {
@@ -152,11 +191,14 @@ export var mutex_lock_and_open = function (file_path, mode) {
 		}
 	}
 	try {
-		_obtain_lock (lockfile);
+		__call__ (_obtain_lock, null, lockfile);
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, OSError)) {
-			lockfile.close ();
+			(function () {
+				var __accu0__ = lockfile;
+				return __call__ (__accu0__.close, __accu0__);
+			}) ();
 			return tuple ([null, null]);
 		}
 		else {
@@ -168,3 +210,13 @@ export var mutex_lock_and_open = function (file_path, mode) {
 
 //# sourceMappingURL=_bpy_internal.filesystem.locking.map
 export {Callable, Path, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'MutexAcquisitionError': MutexAcquisitionError = value; break;
+		case 'mutex_lock_and_open_with_retry': mutex_lock_and_open_with_retry = value; break;
+		case 'mutex_lock_and_open': mutex_lock_and_open = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

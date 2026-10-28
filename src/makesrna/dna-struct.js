@@ -52,10 +52,5 @@ export const dnaStruct = (struct, pointer) => Object.defineProperties({}, Object
   enumerable: true, get: () => dnaGet(struct, pointer, name), set: (value) => dnaSet(struct, pointer, name, value),
 }])));
 
-// The struct's properties as rna-bylonder.js binds them, over the struct at `pointer`.
-export const dnaBindings = (struct, pointer) => Object.fromEntries(Object.keys(structs[struct].properties).map((name) => [name, {
-  get: () => dnaGet(struct, pointer, name), set: (owner, value) => dnaSet(struct, pointer, name, value),
-}]));
-
 // An enum property's items as [value, identifier] pairs.
 export const dnaEnumItems = (struct, name) => structs[struct].properties[name].items ?? [];

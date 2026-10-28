@@ -18,7 +18,7 @@ export var SortedNodeCategory =  __class__ ('SortedNodeCategory', [NodeCategory]
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -33,11 +33,11 @@ export var SortedNodeCategory =  __class__ ('SortedNodeCategory', [NodeCategory]
 		}
 		else {
 		}
-		if (isinstance (py_items, list)) {
-			var py_items = sorted (py_items, __kwargtrans__ ({key: (function __lambda__ (item) {
+		if (__call__ (isinstance, null, py_items, list)) {
+			var py_items = __call__ (sorted, null, py_items, __kwargtrans__ ({key: (function __lambda__ (item) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -48,10 +48,13 @@ export var SortedNodeCategory =  __class__ ('SortedNodeCategory', [NodeCategory]
 				}
 				else {
 				}
-				return item.label.lower ();
+				return (function () {
+					var __accu0__ = item.label;
+					return __call__ (__accu0__.lower, __accu0__);
+				}) ();
 			})}));
 		}
-		__super__ (SortedNodeCategory, '__init__') (self, identifier, py_name, __kwargtrans__ ({description: description, py_items: py_items}));
+		__call__ (__call__ (__super__, null, SortedNodeCategory, '__init__'), null, self, identifier, py_name, __kwargtrans__ ({description: description, py_items: py_items}));
 	});}
 });
 export var CompositorNodeCategory =  __class__ ('CompositorNodeCategory', [SortedNodeCategory], {
@@ -59,7 +62,7 @@ export var CompositorNodeCategory =  __class__ ('CompositorNodeCategory', [Sorte
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -71,7 +74,7 @@ export var CompositorNodeCategory =  __class__ ('CompositorNodeCategory', [Sorte
 		}
 		else {
 		}
-		return context.space_data.py_metatype == 'NODE_EDITOR' && context.space_data.tree_type == 'CompositorNodeTree';
+		return __eq__ (context.space_data.py_metatype, 'NODE_EDITOR') && __eq__ (context.space_data.tree_type, 'CompositorNodeTree');
 	});}
 });
 export var ShaderNodeCategory =  __class__ ('ShaderNodeCategory', [SortedNodeCategory], {
@@ -79,7 +82,7 @@ export var ShaderNodeCategory =  __class__ ('ShaderNodeCategory', [SortedNodeCat
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -91,14 +94,14 @@ export var ShaderNodeCategory =  __class__ ('ShaderNodeCategory', [SortedNodeCat
 		}
 		else {
 		}
-		return context.space_data.py_metatype == 'NODE_EDITOR' && context.space_data.tree_type == 'ShaderNodeTree';
+		return __eq__ (context.space_data.py_metatype, 'NODE_EDITOR') && __eq__ (context.space_data.tree_type, 'ShaderNodeTree');
 	});}
 });
 export var node_tree_group_type = dict ({'CompositorNodeTree': 'CompositorNodeGroup', 'ShaderNodeTree': 'ShaderNodeGroup', 'TextureNodeTree': 'TextureNodeGroup', 'GeometryNodeTree': 'GeometryNodeGroup'});
 export var register = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -111,7 +114,7 @@ export var register = function () {
 export var unregister = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -124,3 +127,15 @@ export var unregister = function () {
 
 //# sourceMappingURL=nodeitems_builtins.map
 export {NodeCategory};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'SortedNodeCategory': SortedNodeCategory = value; break;
+		case 'CompositorNodeCategory': CompositorNodeCategory = value; break;
+		case 'ShaderNodeCategory': ShaderNodeCategory = value; break;
+		case 'node_tree_group_type': node_tree_group_type = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

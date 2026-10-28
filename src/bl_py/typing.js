@@ -17,3 +17,19 @@ export var Sequence = __left0__;
 export var Mapping = __left0__;
 
 //# sourceMappingURL=typing.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'TYPE_CHECKING': TYPE_CHECKING = value; break;
+		case 'Any': Any = value; break;
+		case 'Callable': Callable = value; break;
+		case 'Iterable': Iterable = value; break;
+		case 'Iterator': Iterator = value; break;
+		case 'Optional': Optional = value; break;
+		case 'Protocol': Protocol = value; break;
+		case 'TypeAlias': TypeAlias = value; break;
+		case 'Union': Union = value; break;
+		case 'Sequence': Sequence = value; break;
+		case 'Mapping': Mapping = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

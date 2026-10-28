@@ -16,7 +16,7 @@ var __name__ = 'bl_ui.space_toolsystem_toolbar';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -27,8 +27,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -36,7 +42,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -61,7 +67,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -80,7 +86,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -93,18 +99,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -115,15 +124,39 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var kmi_to_string_or_none = function (kmi) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -134,7 +167,10 @@ export var kmi_to_string_or_none = function (kmi) {
 	}
 	else {
 	}
-	return (kmi ? kmi.to_string () : '<none>');
+	return (kmi ? (function () {
+		var __accu0__ = kmi;
+		return __call__ (__accu0__.to_string, __accu0__);
+	}) () : '<none>');
 };
 export var generate_from_enum_ex = function (_context) {
 	var cursor = 'DEFAULT';
@@ -143,7 +179,7 @@ export var generate_from_enum_ex = function (_context) {
 	var use_separators = true;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -167,12 +203,18 @@ export var generate_from_enum_ex = function (_context) {
 		var tooldef_keywords = dict ({});
 	}
 	var tool_defs = [];
-	var enum_items = getattr (py_metatype.bl_rna.properties [attr], (use_separators ? 'enum_items_static_ui' : 'enum_items_static'));
-	for (var enum_ of enum_items) {
+	var enum_items = __call__ (getattr, null, __getitem__ (py_metatype.bl_rna.properties, attr), (use_separators ? 'enum_items_static_ui' : 'enum_items_static'));
+	var __iterable0__ = enum_items;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var enum_ = __getitem__ (__iterable0__, __index0__);
 		if (use_separators) {
 			var py_name = enum_.py_name;
 			if (!(py_name)) {
-				tool_defs.append (null);
+				(function () {
+					var __accu0__ = tool_defs;
+					return __call__ (__accu0__.append, __accu0__, null);
+				}) ();
 				continue;
 			}
 			var idname = enum_.identifier;
@@ -184,13 +226,25 @@ export var generate_from_enum_ex = function (_context) {
 			var py_name = enum_.py_name;
 			var idname = enum_.identifier;
 		}
-		var icon = icon_prefix + idname.lower ();
+		var icon = __add__ (icon_prefix, (function () {
+			var __accu0__ = idname;
+			return __call__ (__accu0__.lower, __accu0__);
+		}) ());
 		if (icon_map !== null) {
-			var icon = icon_map.py_get (icon, icon);
+			var icon = (function () {
+				var __accu0__ = icon_map;
+				return __call__ (__accu0__.py_get, __accu0__, icon, icon);
+			}) ();
 		}
-		tool_defs.append (ToolDef.from_dict (dict (__kwargtrans__ (_merged (dict ({'idname': idname_prefix + py_name, 'label': py_name, 'description': enum_.description, 'icon': icon, 'cursor': cursor, 'data_block': idname, 'options': options}), tooldef_keywords)))));
+		(function () {
+			var __accu0__ = tool_defs;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = ToolDef;
+				return __call__ (__accu1__.from_dict, __accu1__, __call__ (_merged, null, dict ({'idname': __add__ (idname_prefix, py_name), 'label': py_name, 'description': enum_.description, 'icon': icon, 'cursor': cursor, 'data_block': idname, 'options': options}), tooldef_keywords));
+			}) ());
+		}) ();
 	}
-	return tuple (tool_defs);
+	return __call__ (tuple, null, tool_defs);
 };
 export var _template_widget =  __class__ ('_template_widget', [object], {
 	__module__: __name__,
@@ -199,7 +253,7 @@ export var _template_widget =  __class__ ('_template_widget', [object], {
 		get draw_settings () {return function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -212,9 +266,18 @@ export var _template_widget =  __class__ ('_template_widget', [object], {
 			}
 			else {
 			}
-			var props = tool.gizmo_group_properties ('VIEW3D_GGT_xform_extrude');
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (props, 'axis_type', __kwargtrans__ ({expand: true}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.gizmo_group_properties, __accu0__, 'VIEW3D_GGT_xform_extrude');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'axis_type', __kwargtrans__ ({expand: true}));
+			}) ();
 		};}
 	}),
 	VIEW3D_GGT_xform_gizmo: __class__ ('VIEW3D_GGT_xform_gizmo', [object], {
@@ -222,7 +285,7 @@ export var _template_widget =  __class__ ('_template_widget', [object], {
 		get draw_settings_with_index () {return function (context, layout, index) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -236,17 +299,20 @@ export var _template_widget =  __class__ ('_template_widget', [object], {
 			else {
 			}
 			var scene = context.scene;
-			var orient_slot = scene.transform_orientation_slots [index];
-			layout.prop (orient_slot, 'type');
+			var orient_slot = __getitem__ (scene.transform_orientation_slots, index);
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, orient_slot, 'type');
+			}) ();
 		};}
 	})
 });
 export var _defs_view3d_generic =  __class__ ('_defs_view3d_generic', [object], {
 	__module__: __name__,
-	get cursor () {return __get__ (this, ToolDef.from_fn (function () {
+	get cursor () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -257,7 +323,7 @@ export var _defs_view3d_generic =  __class__ ('_defs_view3d_generic', [object], 
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -270,16 +336,25 @@ export var _defs_view3d_generic =  __class__ ('_defs_view3d_generic', [object], 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('view3d.cursor3d');
-			layout.prop (props, 'use_depth');
-			layout.prop (props, 'orientation');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'view3d.cursor3d');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_depth');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'orientation');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.cursor', label: 'Cursor', description: 'Set the cursor location, drag to transform', icon: 'ops.generic.cursor', keymap: '3D View Tool: Cursor', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.cursor', 'label': 'Cursor', 'description': 'Set the cursor location, drag to transform', 'icon': 'ops.generic.cursor', 'keymap': '3D View Tool: Cursor', 'draw_settings': draw_settings});
 	}));},
-	get cursor_click () {return __get__ (this, ToolDef.from_fn (function () {
+	get cursor_click () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -287,12 +362,12 @@ export var _defs_view3d_generic =  __class__ ('_defs_view3d_generic', [object], 
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.none', label: 'None', icon: 'ops.generic.cursor', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.none', 'label': 'None', 'icon': 'ops.generic.cursor', 'keymap': tuple ([])});
 	}));},
-	get ruler () {return __get__ (this, ToolDef.from_fn (function () {
+	get ruler () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -303,7 +378,7 @@ export var _defs_view3d_generic =  __class__ ('_defs_view3d_generic', [object], 
 		var description = function (_context, _item, km) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -317,132 +392,259 @@ export var _defs_view3d_generic =  __class__ ('_defs_view3d_generic', [object], 
 			else {
 			}
 			if (km !== null) {
-				var kmi_add = km.keymap_items.find_from_operator ('view3d.ruler_add');
-				var kmi_remove = km.keymap_items.find_from_operator ('view3d.ruler_remove');
+				var kmi_add = (function () {
+					var __accu0__ = km.keymap_items;
+					return __call__ (__accu0__.find_from_operator, __accu0__, 'view3d.ruler_add');
+				}) ();
+				var kmi_remove = (function () {
+					var __accu0__ = km.keymap_items;
+					return __call__ (__accu0__.find_from_operator, __accu0__, 'view3d.ruler_remove');
+				}) ();
 			}
 			else {
 				var kmi_add = null;
 				var kmi_remove = null;
 			}
-			return tip_ ('Measure distance and angles\n • {:s} anywhere for new measurement\n • Drag ruler segment to measure an angle\n • {:s} to remove the active ruler\n • Ctrl while dragging to snap\n • Shift while dragging to measure surface thickness').format (kmi_to_string_or_none (kmi_add), kmi_to_string_or_none (kmi_remove));
+			return (function () {
+				var __accu0__ = __call__ (tip_, null, 'Measure distance and angles\n • {:s} anywhere for new measurement\n • Drag ruler segment to measure an angle\n • {:s} to remove the active ruler\n • Ctrl while dragging to snap\n • Shift while dragging to measure surface thickness');
+				return __call__ (__accu0__.format, __accu0__, __call__ (kmi_to_string_or_none, null, kmi_add), __call__ (kmi_to_string_or_none, null, kmi_remove));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.measure', label: 'Measure', description: description, icon: 'ops.view3d.ruler', widget: 'VIEW3D_GGT_ruler', keymap: '3D View Tool: Measure'}));
+		return dict ({'idname': 'builtin.measure', 'label': 'Measure', 'description': description, 'icon': 'ops.view3d.ruler', 'widget': 'VIEW3D_GGT_ruler', 'keymap': '3D View Tool: Measure'});
 	}));}
 });
-export var _defs_annotate =  __class__ ('_defs_annotate', [object], {
-	__module__: __name__,
-	get draw_settings_common () {return __get__ (this, function (context, layout, tool) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-						case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
-						case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
-					}
+export var __defs_annotate_draw_settings_common = function (context, layout, tool) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					case 'layout': var layout = __allkwargs0__ [__attrib0__]; break;
+					case 'tool': var tool = __allkwargs0__ [__attrib0__]; break;
 				}
+			}
+		}
+	}
+	else {
+	}
+	var gpd = context.annotation_data;
+	var region_type = context.region.py_metatype;
+	if (gpd !== null) {
+		if (gpd.layers.active_note !== null) {
+			var text = gpd.layers.active_note;
+			var maxw = 25;
+			if (__gt__ (__call__ (len, null, text), maxw)) {
+				var text = __add__ (__add__ (__getslice__ (text, null, __sub__ (maxw, 5), 1), '..'), __getslice__ (text, __neg__ (3), null, 1));
 			}
 		}
 		else {
+			var text = '';
 		}
-		var gpd = context.annotation_data;
-		var region_type = context.region.py_metatype;
-		if (gpd !== null) {
-			if (gpd.layers.active_note !== null) {
-				var text = gpd.layers.active_note;
-				var maxw = 25;
-				if (len (text) > maxw) {
-					var text = (text.__getslice__ (null, maxw - 5, 1) + '..') + text.__getslice__ (-(3), null, 1);
-				}
-			}
-			else {
-				var text = '';
-			}
-			var gpl = context.active_annotation_layer;
-			if (gpl !== null) {
-				if (__in__ (context.space_data.py_metatype, new set (['VIEW_3D', 'SEQUENCE_EDITOR', 'IMAGE_EDITOR', 'NODE_EDITOR']))) {
-					layout.label (__kwargtrans__ ({text: 'Annotation:'}));
-					if (region_type == 'TOOL_HEADER') {
-						var sub = layout.py_split (__kwargtrans__ ({align: true, factor: 0.5}));
-						sub.ui_units_x = 6.5;
-						sub.prop (gpl, 'color', __kwargtrans__ ({text: ''}));
-					}
-					else {
-						var sub = layout.row (__kwargtrans__ ({align: true}));
-						sub.prop (gpl, 'color', __kwargtrans__ ({text: ''}));
-					}
-					sub.popover (__kwargtrans__ ({panel: 'TOPBAR_PT_annotation_layers', text: text}));
-				}
-				else if (context.space_data.py_metatype == 'PROPERTIES') {
-					var row = layout.row (__kwargtrans__ ({align: true}));
-					row.prop (gpl, 'color', __kwargtrans__ ({text: 'Annotation'}));
-					row.popover (__kwargtrans__ ({panel: 'TOPBAR_PT_annotation_layers', text: text}));
+		var gpl = context.active_annotation_layer;
+		if (gpl !== null) {
+			if (__in__ (context.space_data.py_metatype, new set (['VIEW_3D', 'SEQUENCE_EDITOR', 'IMAGE_EDITOR', 'NODE_EDITOR']))) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Annotation:'}));
+				}) ();
+				if (__eq__ (region_type, 'TOOL_HEADER')) {
+					var sub = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({align: true, factor: 0.5}));
+					}) ();
+					sub.ui_units_x = 6.5;
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, gpl, 'color', __kwargtrans__ ({text: ''}));
+					}) ();
 				}
 				else {
-					layout.label (__kwargtrans__ ({text: 'Annotation:'}));
-					layout.prop (gpl, 'color', __kwargtrans__ ({text: ''}));
+					var sub = (function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, gpl, 'color', __kwargtrans__ ({text: ''}));
+					}) ();
 				}
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TOPBAR_PT_annotation_layers', text: text}));
+				}) ();
 			}
-		}
-		var space_type = tool.space_type;
-		var tool_settings = context.tool_settings;
-		if (space_type == 'VIEW_3D') {
-			if (region_type == 'TOOL_HEADER') {
-				var row = layout.row (__kwargtrans__ ({align: true}));
-			}
-			else {
-				var row = layout.row ().column (__kwargtrans__ ({align: true}));
-			}
-			row.prop (tool_settings, 'annotation_stroke_placement_view3d', __kwargtrans__ ({text: 'Placement'}));
-			if (__in__ (tool_settings.annotation_stroke_placement_view3d, new set (['SURFACE', 'STROKE']))) {
-				row.prop (tool_settings, 'use_annotation_stroke_endpoints');
-				row.prop (tool_settings, 'use_annotation_project_only_selected');
-			}
-		}
-		else if (__in__ (space_type, new set (['IMAGE_EDITOR', 'NODE_EDITOR', 'SEQUENCE_EDITOR', 'CLIP_EDITOR']))) {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (tool_settings, 'annotation_stroke_placement_view2d', __kwargtrans__ ({text: 'Placement'}));
-		}
-		if (tool.idname == 'builtin.annotate_line') {
-			var props = tool.operator_properties ('gpencil.annotate');
-			if (region_type == 'TOOL_HEADER') {
-				var row = layout.row ();
-				row.ui_units_x = 15;
-				row.prop (props, 'arrowstyle_start', __kwargtrans__ ({text: 'Start'}));
-				row.separator ();
-				row.prop (props, 'arrowstyle_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_curve}));
+			else if (__eq__ (context.space_data.py_metatype, 'PROPERTIES')) {
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, gpl, 'color', __kwargtrans__ ({text: 'Annotation'}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TOPBAR_PT_annotation_layers', text: text}));
+				}) ();
 			}
 			else {
-				var col = layout.row ().column (__kwargtrans__ ({align: true}));
-				col.prop (props, 'arrowstyle_start', __kwargtrans__ ({text: 'Style Start'}));
-				col.prop (props, 'arrowstyle_end', __kwargtrans__ ({text: 'End'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Annotation:'}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, gpl, 'color', __kwargtrans__ ({text: ''}));
+				}) ();
 			}
 		}
-		else if (tool.idname == 'builtin.annotate') {
-			var props = tool.operator_properties ('gpencil.annotate');
-			if (region_type == 'TOOL_HEADER') {
-				var row = layout.row ();
-				row.prop (props, 'use_stabilizer', __kwargtrans__ ({text: 'Stabilize Stroke'}));
-				var subrow = layout.row (__kwargtrans__ ({align: false}));
-				subrow.active = props.use_stabilizer;
-				subrow.prop (props, 'stabilizer_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
-				subrow.prop (props, 'stabilizer_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
-			}
-			else {
-				layout.prop (props, 'use_stabilizer', __kwargtrans__ ({text: 'Stabilize Stroke'}));
-				var col = layout.column (__kwargtrans__ ({align: false}));
-				col.active = props.use_stabilizer;
-				col.prop (props, 'stabilizer_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
-				col.prop (props, 'stabilizer_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
-			}
+	}
+	var space_type = tool.space_type;
+	var tool_settings = context.tool_settings;
+	if (__eq__ (space_type, 'VIEW_3D')) {
+		if (__eq__ (region_type, 'TOOL_HEADER')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 		}
-	});},
-	get scribble () {return __get__ (this, ToolDef.from_fn.with_args (__kwargtrans__ ({draw_settings: draw_settings_common})) (function () {
+		else {
+			var row = (function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+		}
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'annotation_stroke_placement_view3d', __kwargtrans__ ({text: 'Placement'}));
+		}) ();
+		if (__in__ (tool_settings.annotation_stroke_placement_view3d, new set (['SURFACE', 'STROKE']))) {
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_annotation_stroke_endpoints');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'use_annotation_project_only_selected');
+			}) ();
+		}
+	}
+	else if (__in__ (space_type, new set (['IMAGE_EDITOR', 'NODE_EDITOR', 'SEQUENCE_EDITOR', 'CLIP_EDITOR']))) {
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, tool_settings, 'annotation_stroke_placement_view2d', __kwargtrans__ ({text: 'Placement'}));
+		}) ();
+	}
+	if (__eq__ (tool.idname, 'builtin.annotate_line')) {
+		var props = (function () {
+			var __accu0__ = tool;
+			return __call__ (__accu0__.operator_properties, __accu0__, 'gpencil.annotate');
+		}) ();
+		if (__eq__ (region_type, 'TOOL_HEADER')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			row.ui_units_x = 15;
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'arrowstyle_start', __kwargtrans__ ({text: 'Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'arrowstyle_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_curve}));
+			}) ();
+		}
+		else {
+			var col = (function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'arrowstyle_start', __kwargtrans__ ({text: 'Style Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'arrowstyle_end', __kwargtrans__ ({text: 'End'}));
+			}) ();
+		}
+	}
+	else if (__eq__ (tool.idname, 'builtin.annotate')) {
+		var props = (function () {
+			var __accu0__ = tool;
+			return __call__ (__accu0__.operator_properties, __accu0__, 'gpencil.annotate');
+		}) ();
+		if (__eq__ (region_type, 'TOOL_HEADER')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_stabilizer', __kwargtrans__ ({text: 'Stabilize Stroke'}));
+			}) ();
+			var subrow = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: false}));
+			}) ();
+			subrow.active = props.use_stabilizer;
+			(function () {
+				var __accu0__ = subrow;
+				return __call__ (__accu0__.prop, __accu0__, props, 'stabilizer_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = subrow;
+				return __call__ (__accu0__.prop, __accu0__, props, 'stabilizer_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
+			}) ();
+		}
+		else {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_stabilizer', __kwargtrans__ ({text: 'Stabilize Stroke'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false}));
+			}) ();
+			col.active = props.use_stabilizer;
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'stabilizer_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'stabilizer_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
+			}) ();
+		}
+	}
+};
+export var _defs_annotate =  __class__ ('_defs_annotate', [object], {
+	__module__: __name__,
+	draw_settings_common: __defs_annotate_draw_settings_common,
+	get scribble () {return __get__ (this, __call__ ((function () {
+		var __accu0__ = ToolDef.from_fn;
+		return __call__ (__accu0__.with_args, __accu0__, __kwargtrans__ ({draw_settings: __defs_annotate_draw_settings_common}));
+	}) (), null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -453,12 +655,15 @@ export var _defs_annotate =  __class__ ('_defs_annotate', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.annotate', label: 'Annotate', icon: 'ops.gpencil.draw', cursor: 'PAINT_BRUSH', keymap: 'Generic Tool: Annotate', draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.annotate', 'label': 'Annotate', 'icon': 'ops.gpencil.draw', 'cursor': 'PAINT_BRUSH', 'keymap': 'Generic Tool: Annotate', 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get line () {return __get__ (this, ToolDef.from_fn.with_args (__kwargtrans__ ({draw_settings: draw_settings_common})) (function () {
+	get line () {return __get__ (this, __call__ ((function () {
+		var __accu0__ = ToolDef.from_fn;
+		return __call__ (__accu0__.with_args, __accu0__, __kwargtrans__ ({draw_settings: __defs_annotate_draw_settings_common}));
+	}) (), null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -469,12 +674,15 @@ export var _defs_annotate =  __class__ ('_defs_annotate', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.annotate_line', label: 'Annotate Line', icon: 'ops.gpencil.draw.line', cursor: 'PAINT_BRUSH', keymap: 'Generic Tool: Annotate Line', draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.annotate_line', 'label': 'Annotate Line', 'icon': 'ops.gpencil.draw.line', 'cursor': 'PAINT_BRUSH', 'keymap': 'Generic Tool: Annotate Line', 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get poly () {return __get__ (this, ToolDef.from_fn.with_args (__kwargtrans__ ({draw_settings: draw_settings_common})) (function () {
+	get poly () {return __get__ (this, __call__ ((function () {
+		var __accu0__ = ToolDef.from_fn;
+		return __call__ (__accu0__.with_args, __accu0__, __kwargtrans__ ({draw_settings: __defs_annotate_draw_settings_common}));
+	}) (), null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -485,12 +693,12 @@ export var _defs_annotate =  __class__ ('_defs_annotate', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.annotate_polygon', label: 'Annotate Polygon', icon: 'ops.gpencil.draw.poly', cursor: 'PAINT_BRUSH', keymap: 'Generic Tool: Annotate Polygon', draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.annotate_polygon', 'label': 'Annotate Polygon', 'icon': 'ops.gpencil.draw.poly', 'cursor': 'PAINT_BRUSH', 'keymap': 'Generic Tool: Annotate Polygon', 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get eraser () {return __get__ (this, ToolDef.from_fn (function () {
+	get eraser () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -501,7 +709,7 @@ export var _defs_annotate =  __class__ ('_defs_annotate', [object], {
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -515,9 +723,12 @@ export var _defs_annotate =  __class__ ('_defs_annotate', [object], {
 			else {
 			}
 			var prefs = context.preferences;
-			layout.prop (prefs.edit, 'grease_pencil_eraser_radius', __kwargtrans__ ({text: 'Radius'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, prefs.edit, 'grease_pencil_eraser_radius', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.annotate_eraser', label: 'Annotate Eraser', icon: 'ops.gpencil.draw.eraser', cursor: 'ERASER', keymap: 'Generic Tool: Annotate Eraser', draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.annotate_eraser', 'label': 'Annotate Eraser', 'icon': 'ops.gpencil.draw.eraser', 'cursor': 'ERASER', 'keymap': 'Generic Tool: Annotate Eraser', 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));}
 });
 export var _defs_transform =  __class__ ('_defs_transform', [object], {
@@ -525,7 +736,7 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 	get draw_transform_sculpt_tool_settings () {return __get__ (this, function (context, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -537,15 +748,18 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		}
 		else {
 		}
-		if (context.mode != 'SCULPT') {
+		if (__ne__ (context.mode, 'SCULPT')) {
 			return ;
 		}
-		layout.prop (context.tool_settings.sculpt, 'transform_mode');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, context.tool_settings.sculpt, 'transform_mode');
+		}) ();
 	});},
-	get translate () {return __get__ (this, ToolDef.from_fn (function () {
+	get translate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -556,7 +770,7 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -569,15 +783,21 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 			}
 			else {
 			}
-			_defs_transform.draw_transform_sculpt_tool_settings (context, layout);
-			_template_widget.VIEW3D_GGT_xform_gizmo.draw_settings_with_index (context, layout, 1);
+			(function () {
+				var __accu0__ = _defs_transform;
+				return __call__ (__accu0__.draw_transform_sculpt_tool_settings, __accu0__, context, layout);
+			}) ();
+			(function () {
+				var __accu0__ = _template_widget.VIEW3D_GGT_xform_gizmo;
+				return __call__ (__accu0__.draw_settings_with_index, __accu0__, context, layout, 1);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.move', label: 'Move', icon: 'ops.transform.translate', widget: 'VIEW3D_GGT_xform_gizmo', operator: 'transform.translate', keymap: '3D View Tool: Move', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.move', 'label': 'Move', 'icon': 'ops.transform.translate', 'widget': 'VIEW3D_GGT_xform_gizmo', 'operator': 'transform.translate', 'keymap': '3D View Tool: Move', 'draw_settings': draw_settings});
 	}));},
-	get rotate () {return __get__ (this, ToolDef.from_fn (function () {
+	get rotate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -588,7 +808,7 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -601,15 +821,21 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 			}
 			else {
 			}
-			_defs_transform.draw_transform_sculpt_tool_settings (context, layout);
-			_template_widget.VIEW3D_GGT_xform_gizmo.draw_settings_with_index (context, layout, 2);
+			(function () {
+				var __accu0__ = _defs_transform;
+				return __call__ (__accu0__.draw_transform_sculpt_tool_settings, __accu0__, context, layout);
+			}) ();
+			(function () {
+				var __accu0__ = _template_widget.VIEW3D_GGT_xform_gizmo;
+				return __call__ (__accu0__.draw_settings_with_index, __accu0__, context, layout, 2);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.rotate', label: 'Rotate', icon: 'ops.transform.rotate', widget: 'VIEW3D_GGT_xform_gizmo', operator: 'transform.rotate', keymap: '3D View Tool: Rotate', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.rotate', 'label': 'Rotate', 'icon': 'ops.transform.rotate', 'widget': 'VIEW3D_GGT_xform_gizmo', 'operator': 'transform.rotate', 'keymap': '3D View Tool: Rotate', 'draw_settings': draw_settings});
 	}));},
-	get scale () {return __get__ (this, ToolDef.from_fn (function () {
+	get scale () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -620,7 +846,7 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -633,15 +859,21 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 			}
 			else {
 			}
-			_defs_transform.draw_transform_sculpt_tool_settings (context, layout);
-			_template_widget.VIEW3D_GGT_xform_gizmo.draw_settings_with_index (context, layout, 3);
+			(function () {
+				var __accu0__ = _defs_transform;
+				return __call__ (__accu0__.draw_transform_sculpt_tool_settings, __accu0__, context, layout);
+			}) ();
+			(function () {
+				var __accu0__ = _template_widget.VIEW3D_GGT_xform_gizmo;
+				return __call__ (__accu0__.draw_settings_with_index, __accu0__, context, layout, 3);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.scale', label: 'Scale', icon: 'ops.transform.resize', widget: 'VIEW3D_GGT_xform_gizmo', operator: 'transform.resize', keymap: '3D View Tool: Scale', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.scale', 'label': 'Scale', 'icon': 'ops.transform.resize', 'widget': 'VIEW3D_GGT_xform_gizmo', 'operator': 'transform.resize', 'keymap': '3D View Tool: Scale', 'draw_settings': draw_settings});
 	}));},
-	get scale_cage () {return __get__ (this, ToolDef.from_fn (function () {
+	get scale_cage () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -652,7 +884,7 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -665,14 +897,17 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 			}
 			else {
 			}
-			_template_widget.VIEW3D_GGT_xform_gizmo.draw_settings_with_index (context, layout, 3);
+			(function () {
+				var __accu0__ = _template_widget.VIEW3D_GGT_xform_gizmo;
+				return __call__ (__accu0__.draw_settings_with_index, __accu0__, context, layout, 3);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.scale_cage', label: 'Scale Cage', icon: 'ops.transform.resize.cage', widget: 'VIEW3D_GGT_xform_cage', operator: 'transform.resize', keymap: '3D View Tool: Scale', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.scale_cage', 'label': 'Scale Cage', 'icon': 'ops.transform.resize.cage', 'widget': 'VIEW3D_GGT_xform_cage', 'operator': 'transform.resize', 'keymap': '3D View Tool: Scale', 'draw_settings': draw_settings});
 	}));},
-	get shear () {return __get__ (this, ToolDef.from_fn (function () {
+	get shear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -683,7 +918,7 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -696,14 +931,17 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 			}
 			else {
 			}
-			_template_widget.VIEW3D_GGT_xform_gizmo.draw_settings_with_index (context, layout, 2);
+			(function () {
+				var __accu0__ = _template_widget.VIEW3D_GGT_xform_gizmo;
+				return __call__ (__accu0__.draw_settings_with_index, __accu0__, context, layout, 2);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.shear', label: 'Shear', icon: 'ops.transform.shear', widget: 'VIEW3D_GGT_xform_shear', keymap: '3D View Tool: Shear', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.shear', 'label': 'Shear', 'icon': 'ops.transform.shear', 'widget': 'VIEW3D_GGT_xform_shear', 'keymap': '3D View Tool: Shear', 'draw_settings': draw_settings});
 	}));},
-	get bend () {return __get__ (this, ToolDef.from_fn (function () {
+	get bend () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -711,12 +949,12 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.bend', label: 'Bend', icon: 'ops.gpencil.edit_bend', widget: null, keymap: '3D View Tool: Bend'}));
+		return dict ({'idname': 'builtin.bend', 'label': 'Bend', 'icon': 'ops.gpencil.edit_bend', 'widget': null, 'keymap': '3D View Tool: Bend'});
 	}));},
-	get transform () {return __get__ (this, ToolDef.from_fn (function () {
+	get transform () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -727,7 +965,7 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -741,29 +979,44 @@ export var _defs_transform =  __class__ ('_defs_transform', [object], {
 			else {
 			}
 			if (layout.use_property_split) {
-				layout.label (__kwargtrans__ ({text: 'Gizmos:'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Gizmos:'}));
+				}) ();
 			}
 			var show_drag = true;
 			var tool_settings = context.tool_settings;
-			if (tool_settings.workspace_tool_type == 'FALLBACK') {
+			if (__eq__ (tool_settings.workspace_tool_type, 'FALLBACK')) {
 				var show_drag = false;
 			}
 			if (show_drag) {
-				var props = tool.gizmo_group_properties ('VIEW3D_GGT_xform_gizmo');
-				layout.prop (props, 'drag_action');
+				var props = (function () {
+					var __accu0__ = tool;
+					return __call__ (__accu0__.gizmo_group_properties, __accu0__, 'VIEW3D_GGT_xform_gizmo');
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'drag_action');
+				}) ();
 			}
-			_defs_transform.draw_transform_sculpt_tool_settings (context, layout);
-			_template_widget.VIEW3D_GGT_xform_gizmo.draw_settings_with_index (context, layout, 1);
+			(function () {
+				var __accu0__ = _defs_transform;
+				return __call__ (__accu0__.draw_transform_sculpt_tool_settings, __accu0__, context, layout);
+			}) ();
+			(function () {
+				var __accu0__ = _template_widget.VIEW3D_GGT_xform_gizmo;
+				return __call__ (__accu0__.draw_settings_with_index, __accu0__, context, layout, 1);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.transform', label: 'Transform', description: 'Supports any combination of grab, rotate, and scale at once', icon: 'ops.transform.transform', widget: 'VIEW3D_GGT_xform_gizmo', keymap: '3D View Tool: Transform', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.transform', 'label': 'Transform', 'description': 'Supports any combination of grab, rotate, and scale at once', 'icon': 'ops.transform.transform', 'widget': 'VIEW3D_GGT_xform_gizmo', 'keymap': '3D View Tool: Transform', 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 	__module__: __name__,
-	get select () {return __get__ (this, ToolDef.from_fn (function () {
+	get select () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -771,12 +1024,12 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.select', label: 'Tweak', icon: 'ops.generic.select', widget: null, keymap: '3D View Tool: Tweak'}));
+		return dict ({'idname': 'builtin.select', 'label': 'Tweak', 'icon': 'ops.generic.select', 'widget': null, 'keymap': '3D View Tool: Tweak'});
 	}));},
-	get box () {return __get__ (this, ToolDef.from_fn (function () {
+	get box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -787,7 +1040,7 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -800,17 +1053,26 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('view3d.select_box');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'view3d.select_box');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_box', label: 'Select Box', icon: 'ops.generic.select_box', widget: null, keymap: '3D View Tool: Select Box', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_box', 'label': 'Select Box', 'icon': 'ops.generic.select_box', 'widget': null, 'keymap': '3D View Tool: Select Box', 'draw_settings': draw_settings});
 	}));},
-	get lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -821,7 +1083,7 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -834,17 +1096,26 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('view3d.select_lasso');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'view3d.select_lasso');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_lasso', label: 'Select Lasso', icon: 'ops.generic.select_lasso', widget: null, keymap: '3D View Tool: Select Lasso', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_lasso', 'label': 'Select Lasso', 'icon': 'ops.generic.select_lasso', 'widget': null, 'keymap': '3D View Tool: Select Lasso', 'draw_settings': draw_settings});
 	}));},
-	get circle () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -855,7 +1126,7 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -868,16 +1139,28 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('view3d.select_circle');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'view3d.select_circle');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
-			layout.prop (props, 'radius');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'radius');
+			}) ();
 		};
 		var draw_cursor = function (_context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -890,22 +1173,25 @@ export var _defs_view3d_select =  __class__ ('_defs_view3d_select', [object], {
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
-			var props = tool.operator_properties ('view3d.select_circle');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'view3d.select_circle');
+			}) ();
 			var radius = props.radius;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius, __kwargtrans__ ({segments: 32}));
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius, __kwargtrans__ ({segments: 32}));
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_circle', label: 'Select Circle', icon: 'ops.generic.select_circle', widget: null, keymap: '3D View Tool: Select Circle', draw_settings: draw_settings, draw_cursor: draw_cursor}));
+		return dict ({'idname': 'builtin.select_circle', 'label': 'Select Circle', 'icon': 'ops.generic.select_circle', 'widget': null, 'keymap': '3D View Tool: Select Circle', 'draw_settings': draw_settings, 'draw_cursor': draw_cursor});
 	}));}
 });
-export var ToolDefaults = namedtuple ('ToolDefaults', ['origin_base', 'aspect_base', 'origin_depth', 'aspect_depth']);
+export var ToolDefaults = __call__ (namedtuple, null, 'ToolDefaults', ['origin_base', 'aspect_base', 'origin_depth', 'aspect_depth']);
 export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 	__module__: __name__,
-	sculpt_tool_defaults: dict ({'CUBE': ToolDefaults ('EDGE', 'FREE', 'EDGE', 'FREE'), 'CONE': ToolDefaults ('CENTER', 'FIXED', 'EDGE', 'FREE'), 'CYLINDER': ToolDefaults ('CENTER', 'FIXED', 'EDGE', 'FREE'), 'SPHERE_UV': ToolDefaults ('CENTER', 'FIXED', 'CENTER', 'FIXED'), 'SPHERE_ICO': ToolDefaults ('CENTER', 'FIXED', 'CENTER', 'FIXED')}),
+	sculpt_tool_defaults: dict ({'CUBE': __call__ (ToolDefaults, null, 'EDGE', 'FREE', 'EDGE', 'FREE'), 'CONE': __call__ (ToolDefaults, null, 'CENTER', 'FIXED', 'EDGE', 'FREE'), 'CYLINDER': __call__ (ToolDefaults, null, 'CENTER', 'FIXED', 'EDGE', 'FREE'), 'SPHERE_UV': __call__ (ToolDefaults, null, 'CENTER', 'FIXED', 'CENTER', 'FIXED'), 'SPHERE_ICO': __call__ (ToolDefaults, null, 'CENTER', 'FIXED', 'CENTER', 'FIXED')}),
 	get description_interactive_add () {return function (context, _item, _km) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -919,11 +1205,11 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 		}
 		else {
 		}
-		var km = context.window_manager.keyconfigs.user.keymaps ['View3D Placement Modal'];
+		var km = __getitem__ (context.window_manager.keyconfigs.user.keymaps, 'View3D Placement Modal');
 		var keymap_item_from_propvalue = function (propvalue) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -934,29 +1220,35 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			}
 			else {
 			}
-			for (var item of km.keymap_items) {
-				if (item.propvalue == propvalue) {
+			var __iterable0__ = km.keymap_items;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var item = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (item.propvalue, propvalue)) {
 					return item;
 				}
 			}
 			return null;
 		};
 		if (km !== null) {
-			var kmi_snap = keymap_item_from_propvalue ('SNAP_ON');
-			var kmi_center = keymap_item_from_propvalue ('PIVOT_CENTER_ON');
-			var kmi_fixed_aspect = keymap_item_from_propvalue ('FIXED_ASPECT_ON');
+			var kmi_snap = __call__ (keymap_item_from_propvalue, null, 'SNAP_ON');
+			var kmi_center = __call__ (keymap_item_from_propvalue, null, 'PIVOT_CENTER_ON');
+			var kmi_fixed_aspect = __call__ (keymap_item_from_propvalue, null, 'FIXED_ASPECT_ON');
 		}
 		else {
 			var kmi_snap = null;
 			var kmi_center = null;
 			var kmi_fixed_aspect = null;
 		}
-		return tip_ ('{:s}\n • {:s} toggles snap while dragging\n • {:s} toggles dragging from the center\n • {:s} toggles fixed aspect').format (prefix, kmi_to_string_or_none (kmi_snap), kmi_to_string_or_none (kmi_center), kmi_to_string_or_none (kmi_fixed_aspect));
+		return (function () {
+			var __accu0__ = __call__ (tip_, null, '{:s}\n • {:s} toggles snap while dragging\n • {:s} toggles dragging from the center\n • {:s} toggles fixed aspect');
+			return __call__ (__accu0__.format, __accu0__, prefix, __call__ (kmi_to_string_or_none, null, kmi_snap), __call__ (kmi_to_string_or_none, null, kmi_center), __call__ (kmi_to_string_or_none, null, kmi_fixed_aspect));
+		}) ();
 	};},
 	get draw_settings_interactive_add () {return function (layout, tool_settings, tool, extra) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -972,13 +1264,31 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 		}
 		var show_extra = false;
 		if (!(extra)) {
-			var row = layout.row ();
-			row.prop (tool_settings, 'plane_depth', __kwargtrans__ ({text: 'Depth'}));
-			var row = layout.row ();
-			row.prop (tool_settings, 'plane_orientation', __kwargtrans__ ({text: 'Orientation'}));
-			var row = layout.row ();
-			row.prop (tool_settings, 'snap_elements_tool');
-			var region_is_header = bpy.context.region.py_metatype == 'TOOL_HEADER';
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'plane_depth', __kwargtrans__ ({text: 'Depth'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'plane_orientation', __kwargtrans__ ({text: 'Orientation'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'snap_elements_tool');
+			}) ();
+			var region_is_header = __eq__ (bpy.context.region.py_metatype, 'TOOL_HEADER');
 			if (region_is_header) {
 				var show_extra = true;
 			}
@@ -987,23 +1297,68 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			}
 		}
 		if (extra) {
-			var props = tool.operator_properties ('view3d.interactive_add');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'view3d.interactive_add');
+			}) ();
 			layout.use_property_split = true;
-			layout.row ().prop (tool_settings, 'plane_axis', __kwargtrans__ ({expand: true}));
-			layout.row ().prop (tool_settings, 'plane_axis_auto');
-			layout.label (__kwargtrans__ ({text: 'Base'}));
-			layout.row ().prop (props, 'plane_origin_base', __kwargtrans__ ({expand: true}));
-			layout.row ().prop (props, 'plane_aspect_base', __kwargtrans__ ({expand: true}));
-			layout.label (__kwargtrans__ ({text: 'Height'}));
-			layout.row ().prop (props, 'plane_origin_depth', __kwargtrans__ ({expand: true}));
-			layout.row ().prop (props, 'plane_aspect_depth', __kwargtrans__ ({expand: true}));
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'plane_axis', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, tool_settings, 'plane_axis_auto');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Base'}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, props, 'plane_origin_base', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, props, 'plane_aspect_base', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Height'}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, props, 'plane_origin_depth', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, props, 'plane_aspect_depth', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 		return show_extra;
 	};},
 	get draw_settings_defaults_init () {return function (mode, tool, primitive_type) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1016,28 +1371,43 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 		}
 		else {
 		}
-		if (mode != 'SCULPT') {
+		if (__ne__ (mode, 'SCULPT')) {
 			return ;
 		}
-		var defaults = _defs_view3d_add.sculpt_tool_defaults [primitive_type];
-		var props = tool.operator_properties ('view3d.interactive_add');
-		if (!(props.is_property_set ('plane_origin_base'))) {
+		var defaults = __getitem__ (_defs_view3d_add.sculpt_tool_defaults, primitive_type);
+		var props = (function () {
+			var __accu0__ = tool;
+			return __call__ (__accu0__.operator_properties, __accu0__, 'view3d.interactive_add');
+		}) ();
+		if (!((function () {
+			var __accu0__ = props;
+			return __call__ (__accu0__.is_property_set, __accu0__, 'plane_origin_base');
+		}) ())) {
 			props.plane_origin_base = defaults.origin_base;
 		}
-		if (!(props.is_property_set ('plane_aspect_base'))) {
+		if (!((function () {
+			var __accu0__ = props;
+			return __call__ (__accu0__.is_property_set, __accu0__, 'plane_aspect_base');
+		}) ())) {
 			props.plane_aspect_base = defaults.aspect_base;
 		}
-		if (!(props.is_property_set ('plane_origin_depth'))) {
+		if (!((function () {
+			var __accu0__ = props;
+			return __call__ (__accu0__.is_property_set, __accu0__, 'plane_origin_depth');
+		}) ())) {
 			props.plane_origin_depth = defaults.origin_depth;
 		}
-		if (!(props.is_property_set ('plane_aspect_depth'))) {
+		if (!((function () {
+			var __accu0__ = props;
+			return __call__ (__accu0__.is_property_set, __accu0__, 'plane_aspect_depth');
+		}) ())) {
 			props.plane_aspect_depth = defaults.aspect_depth;
 		}
 	};},
-	get cube_add () {return __get__ (this, ToolDef.from_fn (function () {
+	get cube_add () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1049,7 +1419,7 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1063,16 +1433,25 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			}
 			else {
 			}
-			var show_extra = _defs_view3d_add.draw_settings_interactive_add (layout, context.tool_settings, tool, extra);
+			var show_extra = (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_interactive_add, __accu0__, layout, context.tool_settings, tool, extra);
+			}) ();
 			if (show_extra) {
-				layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				}) ();
 			}
-			_defs_view3d_add.draw_settings_defaults_init (context.mode, tool, 'CUBE');
+			(function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_defaults_init, __accu0__, context.mode, tool, 'CUBE');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.primitive_cube_add', label: 'Add Cube', icon: 'ops.mesh.primitive_cube_add_gizmo', description: (function __lambda__ () {
+		return dict ({'idname': 'builtin.primitive_cube_add', 'label': 'Add Cube', 'icon': 'ops.mesh.primitive_cube_add_gizmo', 'description': (function __lambda__ () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -1082,13 +1461,16 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			else {
 				var args = tuple ();
 			}
-			return _defs_view3d_add.description_interactive_add (...args, __kwargtrans__ ({prefix: tip_ ('Add cube to mesh interactively')}));
-		}), widget: 'VIEW3D_GGT_placement', keymap: '3D View Tool: Object, Add Primitive', draw_settings: draw_settings}));
+			return (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.description_interactive_add, __accu0__, ...args, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Add cube to mesh interactively')}));
+			}) ();
+		}), 'widget': 'VIEW3D_GGT_placement', 'keymap': '3D View Tool: Object, Add Primitive', 'draw_settings': draw_settings});
 	}));},
-	get cone_add () {return __get__ (this, ToolDef.from_fn (function () {
+	get cone_add () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1100,7 +1482,7 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1114,22 +1496,40 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			}
 			else {
 			}
-			var show_extra = _defs_view3d_add.draw_settings_interactive_add (layout, context.tool_settings, tool, extra);
+			var show_extra = (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_interactive_add, __accu0__, layout, context.tool_settings, tool, extra);
+			}) ();
 			if (extra) {
 				return ;
 			}
-			var props = tool.operator_properties ('mesh.primitive_cone_add');
-			layout.prop (props, 'vertices');
-			layout.prop (props, 'end_fill_type');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.primitive_cone_add');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'vertices');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'end_fill_type');
+			}) ();
 			if (show_extra) {
-				layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				}) ();
 			}
-			_defs_view3d_add.draw_settings_defaults_init (context.mode, tool, 'CONE');
+			(function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_defaults_init, __accu0__, context.mode, tool, 'CONE');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.primitive_cone_add', label: 'Add Cone', icon: 'ops.mesh.primitive_cone_add_gizmo', description: (function __lambda__ () {
+		return dict ({'idname': 'builtin.primitive_cone_add', 'label': 'Add Cone', 'icon': 'ops.mesh.primitive_cone_add_gizmo', 'description': (function __lambda__ () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -1139,13 +1539,16 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			else {
 				var args = tuple ();
 			}
-			return _defs_view3d_add.description_interactive_add (...args, __kwargtrans__ ({prefix: tip_ ('Add cone to mesh interactively')}));
-		}), widget: 'VIEW3D_GGT_placement', keymap: '3D View Tool: Object, Add Primitive', draw_settings: draw_settings}));
+			return (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.description_interactive_add, __accu0__, ...args, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Add cone to mesh interactively')}));
+			}) ();
+		}), 'widget': 'VIEW3D_GGT_placement', 'keymap': '3D View Tool: Object, Add Primitive', 'draw_settings': draw_settings});
 	}));},
-	get cylinder_add () {return __get__ (this, ToolDef.from_fn (function () {
+	get cylinder_add () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1157,7 +1560,7 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1171,22 +1574,40 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			}
 			else {
 			}
-			var show_extra = _defs_view3d_add.draw_settings_interactive_add (layout, context.tool_settings, tool, extra);
+			var show_extra = (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_interactive_add, __accu0__, layout, context.tool_settings, tool, extra);
+			}) ();
 			if (extra) {
 				return ;
 			}
-			var props = tool.operator_properties ('mesh.primitive_cylinder_add');
-			layout.prop (props, 'vertices');
-			layout.prop (props, 'end_fill_type');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.primitive_cylinder_add');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'vertices');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'end_fill_type');
+			}) ();
 			if (show_extra) {
-				layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				}) ();
 			}
-			_defs_view3d_add.draw_settings_defaults_init (context.mode, tool, 'CYLINDER');
+			(function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_defaults_init, __accu0__, context.mode, tool, 'CYLINDER');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.primitive_cylinder_add', label: 'Add Cylinder', icon: 'ops.mesh.primitive_cylinder_add_gizmo', description: (function __lambda__ () {
+		return dict ({'idname': 'builtin.primitive_cylinder_add', 'label': 'Add Cylinder', 'icon': 'ops.mesh.primitive_cylinder_add_gizmo', 'description': (function __lambda__ () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -1196,13 +1617,16 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			else {
 				var args = tuple ();
 			}
-			return _defs_view3d_add.description_interactive_add (...args, __kwargtrans__ ({prefix: tip_ ('Add cylinder to mesh interactively')}));
-		}), widget: 'VIEW3D_GGT_placement', keymap: '3D View Tool: Object, Add Primitive', draw_settings: draw_settings}));
+			return (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.description_interactive_add, __accu0__, ...args, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Add cylinder to mesh interactively')}));
+			}) ();
+		}), 'widget': 'VIEW3D_GGT_placement', 'keymap': '3D View Tool: Object, Add Primitive', 'draw_settings': draw_settings});
 	}));},
-	get uv_sphere_add () {return __get__ (this, ToolDef.from_fn (function () {
+	get uv_sphere_add () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1214,7 +1638,7 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1228,22 +1652,40 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			}
 			else {
 			}
-			var show_extra = _defs_view3d_add.draw_settings_interactive_add (layout, context.tool_settings, tool, extra);
+			var show_extra = (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_interactive_add, __accu0__, layout, context.tool_settings, tool, extra);
+			}) ();
 			if (extra) {
 				return ;
 			}
-			var props = tool.operator_properties ('mesh.primitive_uv_sphere_add');
-			layout.prop (props, 'segments');
-			layout.prop (props, 'ring_count');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.primitive_uv_sphere_add');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'segments');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ring_count');
+			}) ();
 			if (show_extra) {
-				layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				}) ();
 			}
-			_defs_view3d_add.draw_settings_defaults_init (context.mode, tool, 'SPHERE_UV');
+			(function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_defaults_init, __accu0__, context.mode, tool, 'SPHERE_UV');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.primitive_uv_sphere_add', label: 'Add UV Sphere', icon: 'ops.mesh.primitive_sphere_add_gizmo', description: (function __lambda__ () {
+		return dict ({'idname': 'builtin.primitive_uv_sphere_add', 'label': 'Add UV Sphere', 'icon': 'ops.mesh.primitive_sphere_add_gizmo', 'description': (function __lambda__ () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -1253,13 +1695,16 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			else {
 				var args = tuple ();
 			}
-			return _defs_view3d_add.description_interactive_add (...args, __kwargtrans__ ({prefix: tip_ ('Add sphere to mesh interactively')}));
-		}), widget: 'VIEW3D_GGT_placement', keymap: '3D View Tool: Object, Add Primitive', draw_settings: draw_settings}));
+			return (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.description_interactive_add, __accu0__, ...args, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Add sphere to mesh interactively')}));
+			}) ();
+		}), 'widget': 'VIEW3D_GGT_placement', 'keymap': '3D View Tool: Object, Add Primitive', 'draw_settings': draw_settings});
 	}));},
-	get ico_sphere_add () {return __get__ (this, ToolDef.from_fn (function () {
+	get ico_sphere_add () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1271,7 +1716,7 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1285,21 +1730,36 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			}
 			else {
 			}
-			var show_extra = _defs_view3d_add.draw_settings_interactive_add (layout, context.tool_settings, tool, extra);
+			var show_extra = (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_interactive_add, __accu0__, layout, context.tool_settings, tool, extra);
+			}) ();
 			if (extra) {
 				return ;
 			}
-			var props = tool.operator_properties ('mesh.primitive_ico_sphere_add');
-			layout.prop (props, 'subdivisions');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.primitive_ico_sphere_add');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'subdivisions');
+			}) ();
 			if (show_extra) {
-				layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				}) ();
 			}
-			_defs_view3d_add.draw_settings_defaults_init (context.mode, tool, 'SPHERE_ICO');
+			(function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.draw_settings_defaults_init, __accu0__, context.mode, tool, 'SPHERE_ICO');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.primitive_ico_sphere_add', label: 'Add Ico Sphere', icon: 'ops.mesh.primitive_sphere_add_gizmo', description: (function __lambda__ () {
+		return dict ({'idname': 'builtin.primitive_ico_sphere_add', 'label': 'Add Ico Sphere', 'icon': 'ops.mesh.primitive_sphere_add_gizmo', 'description': (function __lambda__ () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -1309,16 +1769,19 @@ export var _defs_view3d_add =  __class__ ('_defs_view3d_add', [object], {
 			else {
 				var args = tuple ();
 			}
-			return _defs_view3d_add.description_interactive_add (...args, __kwargtrans__ ({prefix: tip_ ('Add sphere to mesh interactively')}));
-		}), widget: 'VIEW3D_GGT_placement', keymap: '3D View Tool: Object, Add Primitive', draw_settings: draw_settings}));
+			return (function () {
+				var __accu0__ = _defs_view3d_add;
+				return __call__ (__accu0__.description_interactive_add, __accu0__, ...args, __kwargtrans__ ({prefix: __call__ (tip_, null, 'Add sphere to mesh interactively')}));
+			}) ();
+		}), 'widget': 'VIEW3D_GGT_placement', 'keymap': '3D View Tool: Object, Add Primitive', 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_edit_armature =  __class__ ('_defs_edit_armature', [object], {
 	__module__: __name__,
-	get roll () {return __get__ (this, ToolDef.from_fn (function () {
+	get roll () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1326,12 +1789,12 @@ export var _defs_edit_armature =  __class__ ('_defs_edit_armature', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.roll', label: 'Roll', icon: 'ops.armature.bone.roll', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.roll', 'label': 'Roll', 'icon': 'ops.armature.bone.roll', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([])});
 	}));},
-	get bone_envelope () {return __get__ (this, ToolDef.from_fn (function () {
+	get bone_envelope () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1339,12 +1802,12 @@ export var _defs_edit_armature =  __class__ ('_defs_edit_armature', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.bone_envelope', label: 'Bone Envelope', icon: 'ops.transform.bone_envelope', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.bone_envelope', 'label': 'Bone Envelope', 'icon': 'ops.transform.bone_envelope', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([])});
 	}));},
-	get bone_size () {return __get__ (this, ToolDef.from_fn (function () {
+	get bone_size () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1352,12 +1815,12 @@ export var _defs_edit_armature =  __class__ ('_defs_edit_armature', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.bone_size', label: 'B-Bone Size', icon: 'ops.transform.bone_size', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.bone_size', 'label': 'B-Bone Size', 'icon': 'ops.transform.bone_size', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([])});
 	}));},
-	get extrude () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1365,12 +1828,12 @@ export var _defs_edit_armature =  __class__ ('_defs_edit_armature', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude', label: 'Extrude', icon: 'ops.armature.extrude_move', widget: 'VIEW3D_GGT_xform_extrude', keymap: tuple ([]), draw_settings: _template_widget.VIEW3D_GGT_xform_extrude.draw_settings}));
+		return dict ({'idname': 'builtin.extrude', 'label': 'Extrude', 'icon': 'ops.armature.extrude_move', 'widget': 'VIEW3D_GGT_xform_extrude', 'keymap': tuple ([]), 'draw_settings': _template_widget.VIEW3D_GGT_xform_extrude.draw_settings});
 	}));},
-	get extrude_cursor () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude_cursor () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1378,15 +1841,15 @@ export var _defs_edit_armature =  __class__ ('_defs_edit_armature', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude_to_cursor', label: 'Extrude to Cursor', cursor: 'CROSSHAIR', icon: 'ops.armature.extrude_cursor', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.extrude_to_cursor', 'label': 'Extrude to Cursor', 'cursor': 'CROSSHAIR', 'icon': 'ops.armature.extrude_cursor', 'widget': null, 'keymap': tuple ([])});
 	}));}
 });
 export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 	__module__: __name__,
-	get rip_region () {return __get__ (this, ToolDef.from_fn (function () {
+	get rip_region () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1397,7 +1860,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1410,16 +1873,22 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.rip_move');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.rip_move');
+			}) ();
 			var props_macro = props.MESH_OT_rip;
-			layout.prop (props_macro, 'use_fill');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props_macro, 'use_fill');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.rip_region', label: 'Rip Region', icon: 'ops.mesh.rip', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.rip_region', 'label': 'Rip Region', 'icon': 'ops.mesh.rip', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get rip_edge () {return __get__ (this, ToolDef.from_fn (function () {
+	get rip_edge () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1427,12 +1896,12 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.rip_edge', label: 'Rip Edge', icon: 'ops.mesh.rip_edge', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.rip_edge', 'label': 'Rip Edge', 'icon': 'ops.mesh.rip_edge', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([])});
 	}));},
-	get poly_build () {return __get__ (this, ToolDef.from_fn (function () {
+	get poly_build () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1443,7 +1912,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1456,14 +1925,20 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.polybuild_face_at_cursor_move');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.polybuild_face_at_cursor_move');
+			}) ();
 			var props_macro = props.MESH_OT_polybuild_face_at_cursor;
-			layout.prop (props_macro, 'create_quads');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props_macro, 'create_quads');
+			}) ();
 		};
 		var description = function (_context, _item, km) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1477,23 +1952,35 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			else {
 			}
 			if (km !== null) {
-				var kmi_add = km.keymap_items.find_from_operator ('mesh.polybuild_face_at_cursor_move');
-				var kmi_extrude = km.keymap_items.find_from_operator ('mesh.polybuild_extrude_at_cursor_move');
-				var kmi_delete = km.keymap_items.find_from_operator ('mesh.polybuild_delete_at_cursor');
+				var kmi_add = (function () {
+					var __accu0__ = km.keymap_items;
+					return __call__ (__accu0__.find_from_operator, __accu0__, 'mesh.polybuild_face_at_cursor_move');
+				}) ();
+				var kmi_extrude = (function () {
+					var __accu0__ = km.keymap_items;
+					return __call__ (__accu0__.find_from_operator, __accu0__, 'mesh.polybuild_extrude_at_cursor_move');
+				}) ();
+				var kmi_delete = (function () {
+					var __accu0__ = km.keymap_items;
+					return __call__ (__accu0__.find_from_operator, __accu0__, 'mesh.polybuild_delete_at_cursor');
+				}) ();
 			}
 			else {
 				var kmi_add = null;
 				var kmi_extrude = null;
 				var kmi_delete = null;
 			}
-			return tip_ ('Use multiple operators in an interactive way to add, delete, or move geometry\n • {:s} - Add geometry by moving the cursor close to an element\n • {:s} - Extrude edges by moving the cursor\n • {:s} - Delete mesh element').format (kmi_to_string_or_none (kmi_add), kmi_to_string_or_none (kmi_extrude), kmi_to_string_or_none (kmi_delete));
+			return (function () {
+				var __accu0__ = __call__ (tip_, null, 'Use multiple operators in an interactive way to add, delete, or move geometry\n • {:s} - Add geometry by moving the cursor close to an element\n • {:s} - Extrude edges by moving the cursor\n • {:s} - Delete mesh element');
+				return __call__ (__accu0__.format, __accu0__, __call__ (kmi_to_string_or_none, null, kmi_add), __call__ (kmi_to_string_or_none, null, kmi_extrude), __call__ (kmi_to_string_or_none, null, kmi_delete));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.poly_build', description: description, label: 'Poly Build', icon: 'ops.mesh.polybuild_hover', widget: 'VIEW3D_GGT_mesh_preselect_elem', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.poly_build', 'description': description, 'label': 'Poly Build', 'icon': 'ops.mesh.polybuild_hover', 'widget': 'VIEW3D_GGT_mesh_preselect_elem', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get edge_slide () {return __get__ (this, ToolDef.from_fn (function () {
+	get edge_slide () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1504,7 +1991,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1517,15 +2004,21 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('transform.edge_slide');
-			layout.prop (props, 'correct_uv');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'transform.edge_slide');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'correct_uv');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.edge_slide', label: 'Edge Slide', icon: 'ops.transform.edge_slide', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.edge_slide', 'label': 'Edge Slide', 'icon': 'ops.transform.edge_slide', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get vert_slide () {return __get__ (this, ToolDef.from_fn (function () {
+	get vert_slide () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1536,7 +2029,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1549,15 +2042,21 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('transform.vert_slide');
-			layout.prop (props, 'correct_uv');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'transform.vert_slide');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'correct_uv');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.vertex_slide', label: 'Vertex Slide', icon: 'ops.transform.vert_slide', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.vertex_slide', 'label': 'Vertex Slide', 'icon': 'ops.transform.vert_slide', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get spin () {return __get__ (this, ToolDef.from_fn (function () {
+	get spin () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1568,7 +2067,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1581,19 +2080,37 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.spin');
-			layout.prop (props, 'steps');
-			layout.prop (props, 'dupli');
-			var props = tool.gizmo_group_properties ('MESH_GGT_spin');
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (props, 'axis', __kwargtrans__ ({expand: true}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.spin');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'steps');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'dupli');
+			}) ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.gizmo_group_properties, __accu0__, 'MESH_GGT_spin');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'axis', __kwargtrans__ ({expand: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.spin', label: 'Spin', icon: 'ops.mesh.spin', widget: 'MESH_GGT_spin', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.spin', 'label': 'Spin', 'icon': 'ops.mesh.spin', 'widget': 'MESH_GGT_spin', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get inset () {return __get__ (this, ToolDef.from_fn (function () {
+	get inset () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1604,7 +2121,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1617,18 +2134,33 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.inset');
-			layout.prop (props, 'use_outset');
-			layout.prop (props, 'use_individual');
-			layout.prop (props, 'use_even_offset');
-			layout.prop (props, 'use_relative_offset');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.inset');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_outset');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_individual');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_even_offset');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_relative_offset');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.inset_faces', label: 'Inset Faces', icon: 'ops.mesh.inset', widget: 'VIEW3D_GGT_tool_generic_handle_free', widget_properties: [tuple (['radius', 75.0]), tuple (['backdrop_fill_alpha', 0.0])], keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.inset_faces', 'label': 'Inset Faces', 'icon': 'ops.mesh.inset', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'widget_properties': [tuple (['radius', 75.0]), tuple (['backdrop_fill_alpha', 0.0])], 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get bevel () {return __get__ (this, ToolDef.from_fn (function () {
+	get bevel () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1640,7 +2172,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1654,25 +2186,55 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.bevel');
-			var region_is_header = context.region.py_metatype == 'TOOL_HEADER';
-			var edge_bevel = props.affect == 'EDGES';
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.bevel');
+			}) ();
+			var region_is_header = __eq__ (context.region.py_metatype, 'TOOL_HEADER');
+			var edge_bevel = __eq__ (props.affect, 'EDGES');
 			if (!(extra)) {
 				if (region_is_header) {
-					layout.prop (props, 'offset_type', __kwargtrans__ ({text: ''}));
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.prop, __accu0__, props, 'offset_type', __kwargtrans__ ({text: ''}));
+					}) ();
 				}
 				else {
-					layout.row ().prop (props, 'affect', __kwargtrans__ ({expand: true}));
-					layout.separator ();
-					layout.prop (props, 'offset_type');
+					(function () {
+						var __accu0__ = (function () {
+							var __accu1__ = layout;
+							return __call__ (__accu1__.row, __accu1__);
+						}) ();
+						return __call__ (__accu0__.prop, __accu0__, props, 'affect', __kwargtrans__ ({expand: true}));
+					}) ();
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.separator, __accu0__);
+					}) ();
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.prop, __accu0__, props, 'offset_type');
+					}) ();
 				}
-				layout.prop (props, 'segments');
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'segments');
+				}) ();
 				if (region_is_header) {
-					layout.prop (props, 'affect', __kwargtrans__ ({text: ''}));
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.prop, __accu0__, props, 'affect', __kwargtrans__ ({text: ''}));
+					}) ();
 				}
-				layout.prop (props, 'profile', __kwargtrans__ ({text: 'Shape', slider: true}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'profile', __kwargtrans__ ({text: 'Shape', slider: true}));
+				}) ();
 				if (region_is_header) {
-					layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+					}) ();
 				}
 				else {
 					var extra = true;
@@ -1681,40 +2243,94 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			if (extra) {
 				layout.use_property_split = true;
 				layout.use_property_decorate = false;
-				layout.prop (props, 'material');
-				var col = layout.column ();
-				col.prop (props, 'harden_normals');
-				col.prop (props, 'clamp_overlap');
-				col.prop (props, 'loop_slide');
-				var col = layout.column (__kwargtrans__ ({heading: 'Mark'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'material');
+				}) ();
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'harden_normals');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'clamp_overlap');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'loop_slide');
+				}) ();
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Mark'}));
+				}) ();
 				col.active = edge_bevel;
-				col.prop (props, 'mark_seam', __kwargtrans__ ({text: 'Seam'}));
-				col.prop (props, 'mark_sharp', __kwargtrans__ ({text: 'Sharp'}));
-				var col = layout.column ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'mark_seam', __kwargtrans__ ({text: 'Seam'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'mark_sharp', __kwargtrans__ ({text: 'Sharp'}));
+				}) ();
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				col.active = edge_bevel;
-				col.prop (props, 'miter_outer', __kwargtrans__ ({text: 'Miter Outer'}));
-				col.prop (props, 'miter_inner', __kwargtrans__ ({text: 'Inner'}));
-				if (props.miter_inner == 'ARC') {
-					col.prop (props, 'spread');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'miter_outer', __kwargtrans__ ({text: 'Miter Outer'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'miter_inner', __kwargtrans__ ({text: 'Inner'}));
+				}) ();
+				if (__eq__ (props.miter_inner, 'ARC')) {
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, props, 'spread');
+					}) ();
 				}
-				layout.separator ();
-				var col = layout.column ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				col.active = edge_bevel;
-				col.prop (props, 'vmesh_method', __kwargtrans__ ({text: 'Intersections'}));
-				layout.prop (props, 'face_strength_mode', __kwargtrans__ ({text: 'Face Strength'}));
-				layout.prop (props, 'profile_type');
-				if (props.profile_type == 'CUSTOM') {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'vmesh_method', __kwargtrans__ ({text: 'Intersections'}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'face_strength_mode', __kwargtrans__ ({text: 'Face Strength'}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'profile_type');
+				}) ();
+				if (__eq__ (props.profile_type, 'CUSTOM')) {
 					var tool_settings = context.tool_settings;
-					layout.template_curveprofile (tool_settings, 'custom_bevel_profile_preset');
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.template_curveprofile, __accu0__, tool_settings, 'custom_bevel_profile_preset');
+					}) ();
 				}
 			}
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.bevel', label: 'Bevel', icon: 'ops.mesh.bevel', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.bevel', 'label': 'Bevel', 'icon': 'ops.mesh.bevel', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get extrude () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1722,12 +2338,12 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude_region', label: 'Extrude Region', description: 'Extrude freely or along an axis', icon: 'ops.mesh.extrude_region_move', widget: 'VIEW3D_GGT_xform_extrude', operator: 'view3d.edit_mesh_extrude_move_normal', keymap: tuple ([]), draw_settings: _template_widget.VIEW3D_GGT_xform_extrude.draw_settings}));
+		return dict ({'idname': 'builtin.extrude_region', 'label': 'Extrude Region', 'description': 'Extrude freely or along an axis', 'icon': 'ops.mesh.extrude_region_move', 'widget': 'VIEW3D_GGT_xform_extrude', 'operator': 'view3d.edit_mesh_extrude_move_normal', 'keymap': tuple ([]), 'draw_settings': _template_widget.VIEW3D_GGT_xform_extrude.draw_settings});
 	}));},
-	get extrude_manifold () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude_manifold () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1735,12 +2351,12 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude_manifold', label: 'Extrude Manifold', description: 'Extrude, dissolves edges whose faces form a flat surface and intersect new edges', icon: 'ops.mesh.extrude_manifold', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.extrude_manifold', 'label': 'Extrude Manifold', 'description': 'Extrude, dissolves edges whose faces form a flat surface and intersect new edges', 'icon': 'ops.mesh.extrude_manifold', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([])});
 	}));},
-	get extrude_normals () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude_normals () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1751,7 +2367,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1764,16 +2380,22 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.extrude_region_shrink_fatten');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.extrude_region_shrink_fatten');
+			}) ();
 			var props_macro = props.TRANSFORM_OT_shrink_fatten;
-			layout.prop (props_macro, 'use_even_offset');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props_macro, 'use_even_offset');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude_along_normals', label: 'Extrude Along Normals', icon: 'ops.mesh.extrude_region_shrink_fatten', widget: 'VIEW3D_GGT_tool_generic_handle_normal', operator: 'mesh.extrude_region_shrink_fatten', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.extrude_along_normals', 'label': 'Extrude Along Normals', 'icon': 'ops.mesh.extrude_region_shrink_fatten', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'operator': 'mesh.extrude_region_shrink_fatten', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get extrude_individual () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude_individual () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1781,12 +2403,12 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude_individual', label: 'Extrude Individual', icon: 'ops.mesh.extrude_faces_move', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.extrude_individual', 'label': 'Extrude Individual', 'icon': 'ops.mesh.extrude_faces_move', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([])});
 	}));},
-	get extrude_cursor () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude_cursor () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1797,7 +2419,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1810,15 +2432,21 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.dupli_extrude_cursor');
-			layout.prop (props, 'rotate_source');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.dupli_extrude_cursor');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'rotate_source');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude_to_cursor', label: 'Extrude to Cursor', cursor: 'CROSSHAIR', icon: 'ops.mesh.dupli_extrude_cursor', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.extrude_to_cursor', 'label': 'Extrude to Cursor', 'cursor': 'CROSSHAIR', 'icon': 'ops.mesh.dupli_extrude_cursor', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get loopcut_slide () {return __get__ (this, ToolDef.from_fn (function () {
+	get loopcut_slide () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1829,7 +2457,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1842,18 +2470,27 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.loopcut_slide');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.loopcut_slide');
+			}) ();
 			var props_macro = props.MESH_OT_loopcut;
-			layout.prop (props_macro, 'number_cuts');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props_macro, 'number_cuts');
+			}) ();
 			var props_macro = props.TRANSFORM_OT_edge_slide;
-			layout.prop (props_macro, 'correct_uv');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props_macro, 'correct_uv');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.loop_cut', label: 'Loop Cut', icon: 'ops.mesh.loopcut_slide', widget: 'VIEW3D_GGT_mesh_preselect_edgering', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.loop_cut', 'label': 'Loop Cut', 'icon': 'ops.mesh.loopcut_slide', 'widget': 'VIEW3D_GGT_mesh_preselect_edgering', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get offset_edge_loops_slide () {return __get__ (this, ToolDef.from_fn (function () {
+	get offset_edge_loops_slide () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1861,12 +2498,12 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.offset_edge_loop_cut', label: 'Offset Edge Loop Cut', icon: 'ops.mesh.offset_edge_loops_slide', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.offset_edge_loop_cut', 'label': 'Offset Edge Loop Cut', 'icon': 'ops.mesh.offset_edge_loops_slide', 'widget': null, 'keymap': tuple ([])});
 	}));},
-	get vertex_smooth () {return __get__ (this, ToolDef.from_fn (function () {
+	get vertex_smooth () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1877,7 +2514,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1890,15 +2527,21 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.vertices_smooth');
-			layout.prop (props, 'repeat');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.vertices_smooth');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'repeat');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.smooth', label: 'Smooth', icon: 'ops.mesh.vertices_smooth', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.smooth', 'label': 'Smooth', 'icon': 'ops.mesh.vertices_smooth', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get vertex_randomize () {return __get__ (this, ToolDef.from_fn (function () {
+	get vertex_randomize () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1909,7 +2552,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1922,17 +2565,29 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('transform.vertex_random');
-			layout.prop (props, 'uniform');
-			layout.prop (props, 'normal');
-			layout.prop (props, 'seed');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'transform.vertex_random');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'uniform');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'normal');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'seed');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.randomize', label: 'Randomize', icon: 'ops.transform.vertex_random', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.randomize', 'label': 'Randomize', 'icon': 'ops.transform.vertex_random', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get tosphere () {return __get__ (this, ToolDef.from_fn (function () {
+	get tosphere () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1940,12 +2595,12 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.to_sphere', label: 'To Sphere', icon: 'ops.transform.tosphere', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.to_sphere', 'label': 'To Sphere', 'icon': 'ops.transform.tosphere', 'widget': null, 'keymap': tuple ([])});
 	}));},
-	get shrink_fatten () {return __get__ (this, ToolDef.from_fn (function () {
+	get shrink_fatten () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1956,7 +2611,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -1969,15 +2624,21 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('transform.shrink_fatten');
-			layout.prop (props, 'use_even_offset');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'transform.shrink_fatten');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_even_offset');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.shrink_fatten', label: 'Shrink/Fatten', icon: 'ops.transform.shrink_fatten', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.shrink_fatten', 'label': 'Shrink/Fatten', 'icon': 'ops.transform.shrink_fatten', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get push_pull () {return __get__ (this, ToolDef.from_fn (function () {
+	get push_pull () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -1985,12 +2646,12 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.push_pull', label: 'Push/Pull', icon: 'ops.transform.push_pull', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.push_pull', 'label': 'Push/Pull', 'icon': 'ops.transform.push_pull', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([])});
 	}));},
-	get knife () {return __get__ (this, ToolDef.from_fn (function () {
+	get knife () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2002,7 +2663,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2017,12 +2678,24 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			else {
 			}
 			var show_extra = false;
-			var props = tool.operator_properties ('mesh.knife_tool');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.knife_tool');
+			}) ();
 			if (!(extra)) {
-				layout.prop (props, 'use_occlude_geometry');
-				layout.prop (props, 'only_selected');
-				layout.prop (props, 'xray');
-				var region_is_header = bpy.context.region.py_metatype == 'TOOL_HEADER';
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'use_occlude_geometry');
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'only_selected');
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'xray');
+				}) ();
+				var region_is_header = __eq__ (bpy.context.region.py_metatype, 'TOOL_HEADER');
 				if (region_is_header) {
 					var show_extra = true;
 				}
@@ -2033,20 +2706,32 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			if (extra) {
 				layout.use_property_decorate = false;
 				layout.use_property_split = true;
-				layout.prop (props, 'visible_measurements');
-				layout.prop (props, 'angle_snapping');
-				layout.prop (props, 'angle_snapping_increment', __kwargtrans__ ({text: 'Snap Increment'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'visible_measurements');
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'angle_snapping');
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'angle_snapping_increment', __kwargtrans__ ({text: 'Snap Increment'}));
+				}) ();
 			}
 			if (show_extra) {
-				layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+				}) ();
 			}
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.knife', label: 'Knife', cursor: 'KNIFE', icon: 'ops.mesh.knife_tool', widget: null, keymap: tuple ([]), draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.knife', 'label': 'Knife', 'cursor': 'KNIFE', 'icon': 'ops.mesh.knife_tool', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get bisect () {return __get__ (this, ToolDef.from_fn (function () {
+	get bisect () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2057,7 +2742,7 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2070,20 +2755,35 @@ export var _defs_edit_mesh =  __class__ ('_defs_edit_mesh', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mesh.bisect');
-			layout.prop (props, 'use_fill');
-			layout.prop (props, 'clear_inner');
-			layout.prop (props, 'clear_outer');
-			layout.prop (props, 'threshold');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mesh.bisect');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_fill');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'clear_inner');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'clear_outer');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'threshold');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.bisect', label: 'Bisect', icon: 'ops.mesh.bisect', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.bisect', 'label': 'Bisect', 'icon': 'ops.mesh.bisect', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));}
 });
 export var curve_draw_settings = function (context, layout, tool) {
 	var extra = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2100,71 +2800,173 @@ export var curve_draw_settings = function (context, layout, tool) {
 	var tool_settings = context.tool_settings;
 	var cps = tool_settings.curve_paint_settings;
 	var region_type = context.region.py_metatype;
-	if (region_type == 'TOOL_HEADER') {
+	if (__eq__ (region_type, 'TOOL_HEADER')) {
 		if (!(extra)) {
-			layout.prop (cps, 'curve_type', __kwargtrans__ ({text: ''}));
-			layout.prop (cps, 'depth_mode', __kwargtrans__ ({expand: true}));
-			layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, cps, 'curve_type', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, cps, 'depth_mode', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: '...'}));
+			}) ();
 			return ;
 		}
 	}
 	layout.use_property_split = true;
 	layout.use_property_decorate = false;
-	if (region_type != 'TOOL_HEADER') {
-		layout.prop (cps, 'curve_type');
-		layout.separator ();
+	if (__ne__ (region_type, 'TOOL_HEADER')) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'curve_type');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
-	if (cps.curve_type == 'BEZIER') {
-		layout.prop (cps, 'fit_method');
-		layout.prop (cps, 'error_threshold');
-		if (region_type != 'TOOL_HEADER') {
-			var row = layout.row (__kwargtrans__ ({heading: 'Detect Corners', align: true}));
+	if (__eq__ (cps.curve_type, 'BEZIER')) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'fit_method');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'error_threshold');
+		}) ();
+		if (__ne__ (region_type, 'TOOL_HEADER')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Detect Corners', align: true}));
+			}) ();
 		}
 		else {
-			var row = layout.row (__kwargtrans__ ({heading: 'Corners', align: true}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Corners', align: true}));
+			}) ();
 		}
-		row.prop (cps, 'use_corners_detect', __kwargtrans__ ({text: ''}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'use_corners_detect', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = cps.use_corners_detect;
-		sub.prop (cps, 'corner_angle', __kwargtrans__ ({text: ''}));
-		layout.separator ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'corner_angle', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
-	var col = layout.column (__kwargtrans__ ({align: true}));
-	col.prop (cps, 'radius_taper_start', __kwargtrans__ ({text: 'Taper Start', slider: true}));
-	col.prop (cps, 'radius_taper_end', __kwargtrans__ ({text: 'End', slider: true}));
-	var col = layout.column (__kwargtrans__ ({align: true}));
-	col.prop (cps, 'radius_min', __kwargtrans__ ({text: 'Radius Min'}));
-	col.prop (cps, 'radius_max', __kwargtrans__ ({text: 'Max'}));
-	col.prop (cps, 'use_pressure_radius');
-	if (region_type != 'TOOL_HEADER' || cps.depth_mode == 'SURFACE') {
-		layout.separator ();
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, cps, 'radius_taper_start', __kwargtrans__ ({text: 'Taper Start', slider: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, cps, 'radius_taper_end', __kwargtrans__ ({text: 'End', slider: true}));
+	}) ();
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, cps, 'radius_min', __kwargtrans__ ({text: 'Radius Min'}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, cps, 'radius_max', __kwargtrans__ ({text: 'Max'}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, cps, 'use_pressure_radius');
+	}) ();
+	if (__ne__ (region_type, 'TOOL_HEADER') || __eq__ (cps.depth_mode, 'SURFACE')) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
-	if (region_type != 'TOOL_HEADER') {
-		var row = layout.row ();
-		row.prop (cps, 'depth_mode', __kwargtrans__ ({expand: true}));
+	if (__ne__ (region_type, 'TOOL_HEADER')) {
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'depth_mode', __kwargtrans__ ({expand: true}));
+		}) ();
 	}
-	if (cps.depth_mode == 'SURFACE') {
-		var col = layout.column ();
-		col.prop (cps, 'use_project_only_selected');
-		col.prop (cps, 'surface_offset');
-		col.prop (cps, 'use_offset_absolute');
-		col.prop (cps, 'use_stroke_endpoints');
+	if (__eq__ (cps.depth_mode, 'SURFACE')) {
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'use_project_only_selected');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'surface_offset');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'use_offset_absolute');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, cps, 'use_stroke_endpoints');
+		}) ();
 		if (cps.use_stroke_endpoints) {
-			var colsub = layout.column (__kwargtrans__ ({align: true}));
-			colsub.prop (cps, 'surface_plane');
+			var colsub = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = colsub;
+				return __call__ (__accu0__.prop, __accu0__, cps, 'surface_plane');
+			}) ();
 		}
 	}
-	var props = tool.operator_properties ('curves.draw');
-	var col = layout.column (__kwargtrans__ ({align: true}));
-	col.prop (props, 'is_curve_2d', __kwargtrans__ ({text: 'Curve 2D'}));
-	col.prop (props, 'bezier_as_nurbs', __kwargtrans__ ({text: 'As NURBS'}));
+	var props = (function () {
+		var __accu0__ = tool;
+		return __call__ (__accu0__.operator_properties, __accu0__, 'curves.draw');
+	}) ();
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, props, 'is_curve_2d', __kwargtrans__ ({text: 'Curve 2D'}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, props, 'bezier_as_nurbs', __kwargtrans__ ({text: 'As NURBS'}));
+	}) ();
 };
 export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 	__module__: __name__,
-	get draw () {return __get__ (this, ToolDef.from_fn (function () {
+	get draw () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2172,12 +2974,12 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.draw', label: 'Draw', cursor: 'PAINT_BRUSH', icon: 'ops.curve.draw', widget: null, keymap: tuple ([]), draw_settings: curve_draw_settings}));
+		return dict ({'idname': 'builtin.draw', 'label': 'Draw', 'cursor': 'PAINT_BRUSH', 'icon': 'ops.curve.draw', 'widget': null, 'keymap': tuple ([]), 'draw_settings': curve_draw_settings});
 	}));},
-	get extrude () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2185,12 +2987,12 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude', label: 'Extrude', icon: 'ops.curve.extrude_move', widget: 'VIEW3D_GGT_xform_extrude', keymap: tuple ([]), draw_settings: _template_widget.VIEW3D_GGT_xform_extrude.draw_settings}));
+		return dict ({'idname': 'builtin.extrude', 'label': 'Extrude', 'icon': 'ops.curve.extrude_move', 'widget': 'VIEW3D_GGT_xform_extrude', 'keymap': tuple ([]), 'draw_settings': _template_widget.VIEW3D_GGT_xform_extrude.draw_settings});
 	}));},
-	get extrude_cursor () {return __get__ (this, ToolDef.from_fn (function () {
+	get extrude_cursor () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2198,12 +3000,12 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.extrude_cursor', label: 'Extrude to Cursor', cursor: 'CROSSHAIR', icon: 'ops.curve.extrude_cursor', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.extrude_cursor', 'label': 'Extrude to Cursor', 'cursor': 'CROSSHAIR', 'icon': 'ops.curve.extrude_cursor', 'widget': null, 'keymap': tuple ([])});
 	}));},
-	get pen () {return __get__ (this, ToolDef.from_fn (function () {
+	get pen () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2214,7 +3016,7 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2227,16 +3029,25 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('curve.pen');
-			layout.prop (props, 'close_spline');
-			layout.prop (props, 'extrude_handle');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'curve.pen');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'close_spline');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'extrude_handle');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.pen', label: 'Curve Pen', cursor: 'CROSSHAIR', icon: 'ops.curve.pen', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.pen', 'label': 'Curve Pen', 'cursor': 'CROSSHAIR', 'icon': 'ops.curve.pen', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get tilt () {return __get__ (this, ToolDef.from_fn (function () {
+	get tilt () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2244,12 +3055,12 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.tilt', label: 'Tilt', icon: 'ops.transform.tilt', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.tilt', 'label': 'Tilt', 'icon': 'ops.transform.tilt', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([])});
 	}));},
-	get curve_radius () {return __get__ (this, ToolDef.from_fn (function () {
+	get curve_radius () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2257,12 +3068,12 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.radius', label: 'Radius', description: 'Expand or contract the radius of the selected curve points', icon: 'ops.curve.radius', widget: 'VIEW3D_GGT_tool_generic_handle_free', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.radius', 'label': 'Radius', 'description': 'Expand or contract the radius of the selected curve points', 'icon': 'ops.curve.radius', 'widget': 'VIEW3D_GGT_tool_generic_handle_free', 'keymap': tuple ([])});
 	}));},
-	get curve_vertex_randomize () {return __get__ (this, ToolDef.from_fn (function () {
+	get curve_vertex_randomize () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2273,7 +3084,7 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2286,20 +3097,32 @@ export var _defs_edit_curve =  __class__ ('_defs_edit_curve', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('transform.vertex_random');
-			layout.prop (props, 'uniform');
-			layout.prop (props, 'normal');
-			layout.prop (props, 'seed');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'transform.vertex_random');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'uniform');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'normal');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'seed');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.randomize', label: 'Randomize', icon: 'ops.curve.vertex_random', widget: 'VIEW3D_GGT_tool_generic_handle_normal', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.randomize', 'label': 'Randomize', 'icon': 'ops.curve.vertex_random', 'widget': 'VIEW3D_GGT_tool_generic_handle_normal', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_edit_curves =  __class__ ('_defs_edit_curves', [object], {
 	__module__: __name__,
-	get draw () {return __get__ (this, ToolDef.from_fn (function () {
+	get draw () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2311,7 +3134,7 @@ export var _defs_edit_curves =  __class__ ('_defs_edit_curves', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2325,14 +3148,14 @@ export var _defs_edit_curves =  __class__ ('_defs_edit_curves', [object], {
 			}
 			else {
 			}
-			curve_draw_settings (context, layout, tool, __kwargtrans__ ({extra: extra}));
+			__call__ (curve_draw_settings, null, context, layout, tool, __kwargtrans__ ({extra: extra}));
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.draw', label: 'Draw', cursor: 'PAINT_BRUSH', icon: 'ops.curve.draw', widget: null, keymap: tuple ([]), draw_settings: curve_draw}));
+		return dict ({'idname': 'builtin.draw', 'label': 'Draw', 'cursor': 'PAINT_BRUSH', 'icon': 'ops.curve.draw', 'widget': null, 'keymap': tuple ([]), 'draw_settings': curve_draw});
 	}));},
-	get pen () {return __get__ (this, ToolDef.from_fn (function () {
+	get pen () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2343,7 +3166,7 @@ export var _defs_edit_curves =  __class__ ('_defs_edit_curves', [object], {
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2356,18 +3179,24 @@ export var _defs_edit_curves =  __class__ ('_defs_edit_curves', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('curves.pen');
-			layout.prop (props, 'size');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'curves.pen');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'size');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.pen', label: 'Pen', cursor: 'CROSSHAIR', icon: 'ops.curve.pen', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.pen', 'label': 'Pen', 'cursor': 'CROSSHAIR', 'icon': 'ops.curve.pen', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_edit_text =  __class__ ('_defs_edit_text', [object], {
 	__module__: __name__,
-	get select_text () {return __get__ (this, ToolDef.from_fn (function () {
+	get select_text () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2375,15 +3204,15 @@ export var _defs_edit_text =  __class__ ('_defs_edit_text', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.select_text', label: 'Select Text', cursor: 'TEXT', icon: 'ops.generic.select_box', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.select_text', 'label': 'Select Text', 'cursor': 'TEXT', 'icon': 'ops.generic.select_box', 'widget': null, 'keymap': tuple ([])});
 	}));}
 });
 export var _defs_pose =  __class__ ('_defs_pose', [object], {
 	__module__: __name__,
-	get breakdown () {return __get__ (this, ToolDef.from_fn (function () {
+	get breakdown () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2391,12 +3220,12 @@ export var _defs_pose =  __class__ ('_defs_pose', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.breakdowner', label: 'Breakdowner', icon: 'ops.pose.breakdowner', widget: null, keymap: '3D View Tool: Breakdowner'}));
+		return dict ({'idname': 'builtin.breakdowner', 'label': 'Breakdowner', 'icon': 'ops.pose.breakdowner', 'widget': null, 'keymap': '3D View Tool: Breakdowner'});
 	}));},
-	get push () {return __get__ (this, ToolDef.from_fn (function () {
+	get push () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2404,12 +3233,12 @@ export var _defs_pose =  __class__ ('_defs_pose', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.push', label: 'Push', icon: 'ops.pose.push', widget: null, keymap: '3D View Tool: Push'}));
+		return dict ({'idname': 'builtin.push', 'label': 'Push', 'icon': 'ops.pose.push', 'widget': null, 'keymap': '3D View Tool: Push'});
 	}));},
-	get relax () {return __get__ (this, ToolDef.from_fn (function () {
+	get relax () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2417,7 +3246,7 @@ export var _defs_pose =  __class__ ('_defs_pose', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.relax', label: 'Relax', icon: 'ops.pose.relax', widget: null, keymap: '3D View Tool: Relax'}));
+		return dict ({'idname': 'builtin.relax', 'label': 'Relax', 'icon': 'ops.pose.relax', 'widget': null, 'keymap': '3D View Tool: Relax'});
 	}));}
 });
 export var _defs_particle =  __class__ ('_defs_particle', [object], {
@@ -2425,7 +3254,7 @@ export var _defs_particle =  __class__ ('_defs_particle', [object], {
 	get generate_from_brushes () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2436,15 +3265,15 @@ export var _defs_particle =  __class__ ('_defs_particle', [object], {
 		}
 		else {
 		}
-		return generate_from_enum_ex (context, __kwargtrans__ ({idname_prefix: 'builtin_brush.', icon_prefix: 'brush.particle.', py_metatype: bpy.types.ParticleEdit, attr: 'tool', options: new set (['USE_BRUSHES'])}));
+		return __call__ (generate_from_enum_ex, null, context, __kwargtrans__ ({idname_prefix: 'builtin_brush.', icon_prefix: 'brush.particle.', py_metatype: bpy.types.ParticleEdit, attr: 'tool', options: new set (['USE_BRUSHES'])}));
 	};}
 });
 export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 	__module__: __name__,
-	get mask () {return __get__ (this, ToolDef.from_fn (function () {
+	get mask () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2452,12 +3281,12 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.mask', label: 'Mask', icon: 'brush.sculpt.mask', options: new set (['USE_BRUSHES']), brush_type: 'MASK'}));
+		return dict ({'idname': 'builtin_brush.mask', 'label': 'Mask', 'icon': 'brush.sculpt.mask', 'options': new set (['USE_BRUSHES']), 'brush_type': 'MASK'});
 	}));},
-	get draw_face_sets () {return __get__ (this, ToolDef.from_fn (function () {
+	get draw_face_sets () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2465,12 +3294,12 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.draw_face_sets', label: 'Draw Face Sets', icon: 'brush.sculpt.draw_face_sets', options: new set (['USE_BRUSHES']), brush_type: 'DRAW_FACE_SETS'}));
+		return dict ({'idname': 'builtin_brush.draw_face_sets', 'label': 'Draw Face Sets', 'icon': 'brush.sculpt.draw_face_sets', 'options': new set (['USE_BRUSHES']), 'brush_type': 'DRAW_FACE_SETS'});
 	}));},
-	get paint () {return __get__ (this, ToolDef.from_fn (function () {
+	get paint () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2478,12 +3307,12 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.paint', label: 'Paint', icon: 'brush.sculpt.paint', options: new set (['USE_BRUSHES']), brush_type: 'PAINT'}));
+		return dict ({'idname': 'builtin_brush.paint', 'label': 'Paint', 'icon': 'brush.sculpt.paint', 'options': new set (['USE_BRUSHES']), 'brush_type': 'PAINT'});
 	}));},
 	get poll_dyntopo () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2499,10 +3328,10 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		}
 		return context.sculpt_object && context.sculpt_object.use_dynamic_topology_sculpting;
 	};},
-	get dyntopo_density () {return __get__ (this, ToolDef.from_fn (function () {
+	get dyntopo_density () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2510,12 +3339,12 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.simplify', label: 'Density', icon: 'brush.sculpt.simplify', options: new set (['USE_BRUSHES']), brush_type: 'SIMPLIFY'}));
+		return dict ({'idname': 'builtin_brush.simplify', 'label': 'Density', 'icon': 'brush.sculpt.simplify', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SIMPLIFY'});
 	}));},
 	get poll_multires () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2529,17 +3358,20 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		if (context === null || context.sculpt_object === null) {
 			return true;
 		}
-		for (var mod of context.sculpt_object.modifiers) {
-			if (mod.py_metatype == 'MULTIRES') {
+		var __iterable0__ = context.sculpt_object.modifiers;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var mod = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (mod.py_metatype, 'MULTIRES')) {
 				return true;
 			}
 		}
 		return false;
 	};},
-	get multires_eraser () {return __get__ (this, ToolDef.from_fn (function () {
+	get multires_eraser () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2547,12 +3379,12 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.displacement_eraser', label: 'Multires Displacement Eraser', icon: 'brush.sculpt.displacement_eraser', options: new set (['USE_BRUSHES']), brush_type: 'DISPLACEMENT_ERASER'}));
+		return dict ({'idname': 'builtin_brush.displacement_eraser', 'label': 'Multires Displacement Eraser', 'icon': 'brush.sculpt.displacement_eraser', 'options': new set (['USE_BRUSHES']), 'brush_type': 'DISPLACEMENT_ERASER'});
 	}));},
-	get multires_smear () {return __get__ (this, ToolDef.from_fn (function () {
+	get multires_smear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2560,12 +3392,12 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.displacement_smear', label: 'Multires Displacement Smear', icon: 'brush.sculpt.displacement_smear', options: new set (['USE_BRUSHES']), brush_type: 'DISPLACEMENT_SMEAR'}));
+		return dict ({'idname': 'builtin_brush.displacement_smear', 'label': 'Multires Displacement Smear', 'icon': 'brush.sculpt.displacement_smear', 'options': new set (['USE_BRUSHES']), 'brush_type': 'DISPLACEMENT_SMEAR'});
 	}));},
 	get draw_lasso_stroke_settings () {return function (layout, props, draw_inline, draw_popover) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2580,22 +3412,37 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		else {
 		}
 		if (draw_inline) {
-			layout.prop (props, 'use_smooth_stroke', __kwargtrans__ ({text: 'Stabilize Stroke'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_smooth_stroke', __kwargtrans__ ({text: 'Stabilize Stroke'}));
+			}) ();
 			layout.use_property_split = true;
 			layout.use_property_decorate = false;
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.active = props.use_smooth_stroke;
-			col.prop (props, 'smooth_stroke_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
-			col.prop (props, 'smooth_stroke_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'smooth_stroke_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, props, 'smooth_stroke_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
+			}) ();
 		}
 		if (draw_popover) {
-			layout.popover ('TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: 'Stroke'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'TOPBAR_PT_tool_settings_extra', __kwargtrans__ ({text: 'Stroke'}));
+			}) ();
 		}
 	};},
-	get mask_border () {return __get__ (this, ToolDef.from_fn (function () {
+	get mask_border () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2606,7 +3453,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2619,15 +3466,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('paint.mask_box_gesture');
-			layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.mask_box_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.box_mask', label: 'Box Mask', icon: 'ops.sculpt.border_mask', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.box_mask', 'label': 'Box Mask', 'icon': 'ops.sculpt.border_mask', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get mask_lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get mask_lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2639,7 +3492,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2654,10 +3507,16 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			else {
 			}
 			var draw_popover = false;
-			var props = tool.operator_properties ('paint.mask_lasso_gesture');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.mask_lasso_gesture');
+			}) ();
 			if (!(extra)) {
-				layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
-				var region_is_header = bpy.context.region.py_metatype == 'TOOL_HEADER';
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+				}) ();
+				var region_is_header = __eq__ (bpy.context.region.py_metatype, 'TOOL_HEADER');
 				if (region_is_header) {
 					var draw_popover = true;
 				}
@@ -2665,14 +3524,17 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 					var extra = true;
 				}
 			}
-			_defs_sculpt.draw_lasso_stroke_settings (layout, props, extra, draw_popover);
+			(function () {
+				var __accu0__ = _defs_sculpt;
+				return __call__ (__accu0__.draw_lasso_stroke_settings, __accu0__, layout, props, extra, draw_popover);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.lasso_mask', label: 'Lasso Mask', icon: 'ops.sculpt.lasso_mask', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.lasso_mask', 'label': 'Lasso Mask', 'icon': 'ops.sculpt.lasso_mask', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get mask_line () {return __get__ (this, ToolDef.from_fn (function () {
+	get mask_line () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2683,7 +3545,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2696,16 +3558,25 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('paint.mask_line_gesture');
-			layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.mask_line_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.line_mask', label: 'Line Mask', icon: 'ops.sculpt.line_mask', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.line_mask', 'label': 'Line Mask', 'icon': 'ops.sculpt.line_mask', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get mask_polyline () {return __get__ (this, ToolDef.from_fn (function () {
+	get mask_polyline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2716,7 +3587,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2729,15 +3600,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('paint.mask_polyline_gesture');
-			layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.mask_polyline_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.polyline_mask', label: 'Polyline Mask', icon: 'ops.sculpt.polyline_mask', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.polyline_mask', 'label': 'Polyline Mask', 'icon': 'ops.sculpt.polyline_mask', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get hide_border () {return __get__ (this, ToolDef.from_fn (function () {
+	get hide_border () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2748,7 +3625,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2761,15 +3638,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('paint.hide_show');
-			layout.prop (props, 'area', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.hide_show');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'area', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.box_hide', label: 'Box Hide', icon: 'ops.sculpt.border_hide', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.box_hide', 'label': 'Box Hide', 'icon': 'ops.sculpt.border_hide', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get hide_lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get hide_lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2781,7 +3664,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2796,10 +3679,16 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			else {
 			}
 			var draw_popover = false;
-			var props = tool.operator_properties ('paint.hide_show_lasso_gesture');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.hide_show_lasso_gesture');
+			}) ();
 			if (!(extra)) {
-				layout.prop (props, 'area', __kwargtrans__ ({expand: false}));
-				var region_is_header = bpy.context.region.py_metatype == 'TOOL_HEADER';
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'area', __kwargtrans__ ({expand: false}));
+				}) ();
+				var region_is_header = __eq__ (bpy.context.region.py_metatype, 'TOOL_HEADER');
 				if (region_is_header) {
 					var draw_popover = true;
 				}
@@ -2807,14 +3696,17 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 					var extra = true;
 				}
 			}
-			_defs_sculpt.draw_lasso_stroke_settings (layout, props, extra, draw_popover);
+			(function () {
+				var __accu0__ = _defs_sculpt;
+				return __call__ (__accu0__.draw_lasso_stroke_settings, __accu0__, layout, props, extra, draw_popover);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.lasso_hide', label: 'Lasso Hide', icon: 'ops.sculpt.lasso_hide', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.lasso_hide', 'label': 'Lasso Hide', 'icon': 'ops.sculpt.lasso_hide', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get hide_line () {return __get__ (this, ToolDef.from_fn (function () {
+	get hide_line () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2825,7 +3717,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2838,15 +3730,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('paint.hide_show_line_gesture');
-			layout.prop (props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.hide_show_line_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.line_hide', label: 'Line Hide', icon: 'ops.sculpt.line_hide', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.line_hide', 'label': 'Line Hide', 'icon': 'ops.sculpt.line_hide', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get hide_polyline () {return __get__ (this, ToolDef.from_fn (function () {
+	get hide_polyline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2857,7 +3755,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2870,15 +3768,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('paint.hide_show_polyline_gesture');
-			layout.prop (props, 'area', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.hide_show_polyline_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'area', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.polyline_hide', label: 'Polyline Hide', icon: 'ops.sculpt.polyline_hide', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.polyline_hide', 'label': 'Polyline Hide', 'icon': 'ops.sculpt.polyline_hide', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get face_set_box () {return __get__ (this, ToolDef.from_fn (function () {
+	get face_set_box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2889,7 +3793,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2902,15 +3806,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.face_set_box_gesture');
-			layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.face_set_box_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.box_face_set', label: 'Box Face Set', icon: 'ops.sculpt.border_face_set', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.box_face_set', 'label': 'Box Face Set', 'icon': 'ops.sculpt.border_face_set', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get face_set_lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get face_set_lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2922,7 +3832,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2937,10 +3847,16 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			else {
 			}
 			var draw_popover = false;
-			var props = tool.operator_properties ('sculpt.face_set_lasso_gesture');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.face_set_lasso_gesture');
+			}) ();
 			if (!(extra)) {
-				layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
-				var region_is_header = bpy.context.region.py_metatype == 'TOOL_HEADER';
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+				}) ();
+				var region_is_header = __eq__ (bpy.context.region.py_metatype, 'TOOL_HEADER');
 				if (region_is_header) {
 					var draw_popover = true;
 				}
@@ -2948,14 +3864,17 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 					var extra = true;
 				}
 			}
-			_defs_sculpt.draw_lasso_stroke_settings (layout, props, extra, draw_popover);
+			(function () {
+				var __accu0__ = _defs_sculpt;
+				return __call__ (__accu0__.draw_lasso_stroke_settings, __accu0__, layout, props, extra, draw_popover);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.lasso_face_set', label: 'Lasso Face Set', icon: 'ops.sculpt.lasso_face_set', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.lasso_face_set', 'label': 'Lasso Face Set', 'icon': 'ops.sculpt.lasso_face_set', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get face_set_line () {return __get__ (this, ToolDef.from_fn (function () {
+	get face_set_line () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2966,7 +3885,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -2979,16 +3898,25 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.face_set_line_gesture');
-			layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.face_set_line_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.line_face_set', label: 'Line Face Set', icon: 'ops.sculpt.line_face_set', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.line_face_set', 'label': 'Line Face Set', 'icon': 'ops.sculpt.line_face_set', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get face_set_polyline () {return __get__ (this, ToolDef.from_fn (function () {
+	get face_set_polyline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -2999,7 +3927,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3012,15 +3940,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.face_set_polyline_gesture');
-			layout.prop (props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.face_set_polyline_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_front_faces_only', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.polyline_face_set', label: 'Polyline Face Set', icon: 'ops.sculpt.polyline_face_set', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.polyline_face_set', 'label': 'Polyline Face Set', 'icon': 'ops.sculpt.polyline_face_set', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get trim_box () {return __get__ (this, ToolDef.from_fn (function () {
+	get trim_box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3031,7 +3965,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3044,19 +3978,37 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.trim_box_gesture');
-			layout.prop (props, 'trim_solver', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_mode', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_orientation', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.trim_box_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_solver', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_mode', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_orientation', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.box_trim', label: 'Box Trim', icon: 'ops.sculpt.box_trim', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.box_trim', 'label': 'Box Trim', 'icon': 'ops.sculpt.box_trim', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get trim_lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get trim_lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3068,7 +4020,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			var extra = false;
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3083,14 +4035,32 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			else {
 			}
 			var draw_popover = false;
-			var props = tool.operator_properties ('sculpt.trim_lasso_gesture');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.trim_lasso_gesture');
+			}) ();
 			if (!(extra)) {
-				layout.prop (props, 'trim_solver', __kwargtrans__ ({expand: false}));
-				layout.prop (props, 'trim_mode', __kwargtrans__ ({expand: false}));
-				layout.prop (props, 'trim_orientation', __kwargtrans__ ({expand: false}));
-				layout.prop (props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
-				layout.prop (props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
-				var region_is_header = bpy.context.region.py_metatype == 'TOOL_HEADER';
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'trim_solver', __kwargtrans__ ({expand: false}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'trim_mode', __kwargtrans__ ({expand: false}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'trim_orientation', __kwargtrans__ ({expand: false}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
+				}) ();
+				var region_is_header = __eq__ (bpy.context.region.py_metatype, 'TOOL_HEADER');
 				if (region_is_header) {
 					var draw_popover = true;
 				}
@@ -3098,14 +4068,17 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 					var extra = true;
 				}
 			}
-			_defs_sculpt.draw_lasso_stroke_settings (layout, props, extra, draw_popover);
+			(function () {
+				var __accu0__ = _defs_sculpt;
+				return __call__ (__accu0__.draw_lasso_stroke_settings, __accu0__, layout, props, extra, draw_popover);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.lasso_trim', label: 'Lasso Trim', icon: 'ops.sculpt.lasso_trim', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.lasso_trim', 'label': 'Lasso Trim', 'icon': 'ops.sculpt.lasso_trim', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get trim_line () {return __get__ (this, ToolDef.from_fn (function () {
+	get trim_line () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3116,7 +4089,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3129,19 +4102,37 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.trim_line_gesture');
-			layout.prop (props, 'trim_solver', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_orientation', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.trim_line_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_solver', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_orientation', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.line_trim', label: 'Line Trim', icon: 'ops.sculpt.line_trim', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.line_trim', 'label': 'Line Trim', 'icon': 'ops.sculpt.line_trim', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get trim_polyline () {return __get__ (this, ToolDef.from_fn (function () {
+	get trim_polyline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3152,7 +4143,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3165,19 +4156,37 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.trim_polyline_gesture');
-			layout.prop (props, 'trim_solver', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_mode', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_orientation', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.trim_polyline_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_solver', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_mode', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_orientation', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'trim_extrude_mode', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_cursor_depth', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.polyline_trim', label: 'Polyline Trim', icon: 'ops.sculpt.polyline_trim', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.polyline_trim', 'label': 'Polyline Trim', 'icon': 'ops.sculpt.polyline_trim', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get project_line () {return __get__ (this, ToolDef.from_fn (function () {
+	get project_line () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3188,7 +4197,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3201,15 +4210,21 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.project_line_gesture');
-			layout.prop (props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.project_line_gesture');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_limit_to_segment', __kwargtrans__ ({expand: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.line_project', label: 'Line Project', icon: 'ops.sculpt.line_project', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.line_project', 'label': 'Line Project', 'icon': 'ops.sculpt.line_project', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get mesh_filter () {return __get__ (this, ToolDef.from_fn (function () {
+	get mesh_filter () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3220,7 +4235,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3233,28 +4248,61 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.mesh_filter');
-			layout.prop (props, 'type', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'strength');
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (props, 'deform_axis');
-			layout.prop (props, 'orientation', __kwargtrans__ ({expand: false}));
-			if (props.py_metatype == 'SURFACE_SMOOTH') {
-				layout.prop (props, 'surface_smooth_shape_preservation', __kwargtrans__ ({expand: false}));
-				layout.prop (props, 'surface_smooth_current_vertex', __kwargtrans__ ({expand: false}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.mesh_filter');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'type', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'strength');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'deform_axis');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'orientation', __kwargtrans__ ({expand: false}));
+			}) ();
+			if (__eq__ (props.py_metatype, 'SURFACE_SMOOTH')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'surface_smooth_shape_preservation', __kwargtrans__ ({expand: false}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'surface_smooth_current_vertex', __kwargtrans__ ({expand: false}));
+				}) ();
 			}
-			else if (props.py_metatype == 'SHARPEN') {
-				layout.prop (props, 'sharpen_smooth_ratio', __kwargtrans__ ({expand: false}));
-				layout.prop (props, 'sharpen_intensify_detail_strength', __kwargtrans__ ({expand: false}));
-				layout.prop (props, 'sharpen_curvature_smooth_iterations', __kwargtrans__ ({expand: false}));
+			else if (__eq__ (props.py_metatype, 'SHARPEN')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'sharpen_smooth_ratio', __kwargtrans__ ({expand: false}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'sharpen_intensify_detail_strength', __kwargtrans__ ({expand: false}));
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, props, 'sharpen_curvature_smooth_iterations', __kwargtrans__ ({expand: false}));
+				}) ();
 			}
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.mesh_filter', label: 'Mesh Filter', icon: 'ops.sculpt.mesh_filter', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.mesh_filter', 'label': 'Mesh Filter', 'icon': 'ops.sculpt.mesh_filter', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get cloth_filter () {return __get__ (this, ToolDef.from_fn (function () {
+	get cloth_filter () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3265,7 +4313,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3278,23 +4326,53 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.cloth_filter');
-			layout.prop (props, 'type', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'strength');
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (props, 'force_axis');
-			layout.prop (props, 'orientation', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'cloth_mass');
-			layout.prop (props, 'cloth_damping');
-			layout.prop (props, 'use_face_sets');
-			layout.prop (props, 'use_collisions');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.cloth_filter');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'type', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'strength');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'force_axis');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'orientation', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'cloth_mass');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'cloth_damping');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_face_sets');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'use_collisions');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.cloth_filter', label: 'Cloth Filter', icon: 'ops.sculpt.cloth_filter', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.cloth_filter', 'label': 'Cloth Filter', 'icon': 'ops.sculpt.cloth_filter', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get color_filter () {return __get__ (this, ToolDef.from_fn (function () {
+	get color_filter () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3305,7 +4383,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3318,32 +4396,59 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.color_filter');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.color_filter');
+			}) ();
 			var settings = context.tool_settings.sculpt;
 			var ups = (settings ? settings.unified_paint_settings : null);
-			var region_is_header = context.region.py_metatype == 'TOOL_HEADER';
-			layout.prop (props, 'type', __kwargtrans__ ({expand: false}));
-			if (props.py_metatype == 'FILL' && ups) {
-				var row = layout.row (__kwargtrans__ ({align: true}));
+			var region_is_header = __eq__ (context.region.py_metatype, 'TOOL_HEADER');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'type', __kwargtrans__ ({expand: false}));
+			}) ();
+			if (__eq__ (props.py_metatype, 'FILL') && ups) {
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
 				if (region_is_header) {
 					row.ui_units_x = 4;
-					row.prop (ups, 'color', __kwargtrans__ ({text: ''}));
-					row.prop (ups, 'secondary_color', __kwargtrans__ ({text: ''}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, ups, 'color', __kwargtrans__ ({text: ''}));
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, ups, 'secondary_color', __kwargtrans__ ({text: ''}));
+					}) ();
 				}
 				else {
-					row.prop (ups, 'color', __kwargtrans__ ({text: ''}));
-					row.prop (ups, 'secondary_color', __kwargtrans__ ({text: ''}));
-					row.operator ('paint.brush_colors_flip', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, ups, 'color', __kwargtrans__ ({text: ''}));
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop, __accu0__, ups, 'secondary_color', __kwargtrans__ ({text: ''}));
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.operator, __accu0__, 'paint.brush_colors_flip', __kwargtrans__ ({icon: 'FILE_REFRESH', text: ''}));
+					}) ();
 				}
 			}
-			layout.prop (props, 'strength');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'strength');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.color_filter', label: 'Color Filter', icon: 'ops.sculpt.color_filter', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.color_filter', 'label': 'Color Filter', 'icon': 'ops.sculpt.color_filter', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get mask_by_color () {return __get__ (this, ToolDef.from_fn (function () {
+	get mask_by_color () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3354,7 +4459,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3367,18 +4472,33 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.mask_by_color');
-			layout.prop (props, 'threshold');
-			layout.prop (props, 'contiguous');
-			layout.prop (props, 'invert');
-			layout.prop (props, 'preserve_previous_mask');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.mask_by_color');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'threshold');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'contiguous');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'invert');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'preserve_previous_mask');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.mask_by_color', label: 'Mask by Color', icon: 'ops.sculpt.mask_by_color', widget: null, cursor: 'PAINT_CROSS', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.mask_by_color', 'label': 'Mask by Color', 'icon': 'ops.sculpt.mask_by_color', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get face_set_edit () {return __get__ (this, ToolDef.from_fn (function () {
+	get face_set_edit () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3389,7 +4509,7 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3402,11 +4522,20 @@ export var _defs_sculpt =  __class__ ('_defs_sculpt', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sculpt.face_set_edit');
-			layout.prop (props, 'mode', __kwargtrans__ ({expand: false}));
-			layout.prop (props, 'modify_hidden');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.face_set_edit');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({expand: false}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'modify_hidden');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.face_set_edit', label: 'Edit Face Set', icon: 'ops.sculpt.face_set_edit', widget: null, cursor: 'PAINT_CROSS', keymap: '3D View Tool: Sculpt, Face Set Edit', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.face_set_edit', 'label': 'Edit Face Set', 'icon': 'ops.sculpt.face_set_edit', 'widget': null, 'cursor': 'PAINT_CROSS', 'keymap': '3D View Tool: Sculpt, Face Set Edit', 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_vertex_paint =  __class__ ('_defs_vertex_paint', [object], {
@@ -3414,7 +4543,7 @@ export var _defs_vertex_paint =  __class__ ('_defs_vertex_paint', [object], {
 	get poll_select_mask () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3429,12 +4558,12 @@ export var _defs_vertex_paint =  __class__ ('_defs_vertex_paint', [object], {
 			return true;
 		}
 		var ob = context.active_object;
-		return ob && ob.py_metatype == 'MESH' && (ob.data.use_paint_mask || ob.data.use_paint_mask_vertex);
+		return ob && __eq__ (ob.py_metatype, 'MESH') && (ob.data.use_paint_mask || ob.data.use_paint_mask_vertex);
 	};},
-	get blur () {return __get__ (this, ToolDef.from_fn (function () {
+	get blur () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3442,12 +4571,12 @@ export var _defs_vertex_paint =  __class__ ('_defs_vertex_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.blur', label: 'Blur', icon: 'brush.paint_vertex.blur', options: new set (['USE_BRUSHES']), brush_type: 'BLUR'}));
+		return dict ({'idname': 'builtin_brush.blur', 'label': 'Blur', 'icon': 'brush.paint_vertex.blur', 'options': new set (['USE_BRUSHES']), 'brush_type': 'BLUR'});
 	}));},
-	get average () {return __get__ (this, ToolDef.from_fn (function () {
+	get average () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3455,12 +4584,12 @@ export var _defs_vertex_paint =  __class__ ('_defs_vertex_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.average', label: 'Average', icon: 'brush.paint_vertex.average', options: new set (['USE_BRUSHES']), brush_type: 'AVERAGE'}));
+		return dict ({'idname': 'builtin_brush.average', 'label': 'Average', 'icon': 'brush.paint_vertex.average', 'options': new set (['USE_BRUSHES']), 'brush_type': 'AVERAGE'});
 	}));},
-	get smear () {return __get__ (this, ToolDef.from_fn (function () {
+	get smear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3468,7 +4597,7 @@ export var _defs_vertex_paint =  __class__ ('_defs_vertex_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.smear', label: 'Smear', icon: 'brush.paint_vertex.smear', options: new set (['USE_BRUSHES']), brush_type: 'SMEAR'}));
+		return dict ({'idname': 'builtin_brush.smear', 'label': 'Smear', 'icon': 'brush.paint_vertex.smear', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SMEAR'});
 	}));}
 });
 export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
@@ -3476,7 +4605,7 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 	get poll_select_mask () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3491,12 +4620,12 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 			return true;
 		}
 		var ob = context.active_object;
-		return ob && ob.py_metatype == 'MESH' && ob.data.use_paint_mask;
+		return ob && __eq__ (ob.py_metatype, 'MESH') && ob.data.use_paint_mask;
 	};},
-	get brush () {return __get__ (this, ToolDef.from_fn (function () {
+	get brush () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3504,12 +4633,12 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.brush', label: 'Paint', icon: 'brush.sculpt.paint', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin.brush', 'label': 'Paint', 'icon': 'brush.sculpt.paint', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get blur () {return __get__ (this, ToolDef.from_fn (function () {
+	get blur () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3517,12 +4646,12 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.soften', label: 'Blur', icon: 'brush.paint_texture.soften', options: new set (['USE_BRUSHES']), brush_type: 'SOFTEN'}));
+		return dict ({'idname': 'builtin_brush.soften', 'label': 'Blur', 'icon': 'brush.paint_texture.soften', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SOFTEN'});
 	}));},
-	get smear () {return __get__ (this, ToolDef.from_fn (function () {
+	get smear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3530,12 +4659,12 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.smear', label: 'Smear', icon: 'brush.paint_texture.smear', options: new set (['USE_BRUSHES']), brush_type: 'SMEAR'}));
+		return dict ({'idname': 'builtin_brush.smear', 'label': 'Smear', 'icon': 'brush.paint_texture.smear', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SMEAR'});
 	}));},
-	get clone () {return __get__ (this, ToolDef.from_fn (function () {
+	get clone () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3543,12 +4672,12 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.clone', label: 'Clone', icon: 'brush.paint_texture.clone', options: new set (['USE_BRUSHES']), brush_type: 'CLONE'}));
+		return dict ({'idname': 'builtin_brush.clone', 'label': 'Clone', 'icon': 'brush.paint_texture.clone', 'options': new set (['USE_BRUSHES']), 'brush_type': 'CLONE'});
 	}));},
-	get fill () {return __get__ (this, ToolDef.from_fn (function () {
+	get fill () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3556,12 +4685,12 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.fill', label: 'Fill', icon: 'brush.paint_texture.fill', options: new set (['USE_BRUSHES']), brush_type: 'FILL'}));
+		return dict ({'idname': 'builtin_brush.fill', 'label': 'Fill', 'icon': 'brush.paint_texture.fill', 'options': new set (['USE_BRUSHES']), 'brush_type': 'FILL'});
 	}));},
-	get mask () {return __get__ (this, ToolDef.from_fn (function () {
+	get mask () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3569,7 +4698,7 @@ export var _defs_texture_paint =  __class__ ('_defs_texture_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.mask', label: 'Mask', icon: 'brush.paint_texture.mask', options: new set (['USE_BRUSHES']), brush_type: 'MASK'}));
+		return dict ({'idname': 'builtin_brush.mask', 'label': 'Mask', 'icon': 'brush.paint_texture.mask', 'options': new set (['USE_BRUSHES']), 'brush_type': 'MASK'});
 	}));}
 });
 export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
@@ -3577,7 +4706,7 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 	get poll_select_tools () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3592,7 +4721,7 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 			return VIEW3D_PT_tools_active._tools_select;
 		}
 		var ob = context.active_object;
-		if (ob && ob.py_metatype == 'MESH' && (ob.data.use_paint_mask || ob.data.use_paint_mask_vertex)) {
+		if (ob && __eq__ (ob.py_metatype, 'MESH') && (ob.data.use_paint_mask || ob.data.use_paint_mask_vertex)) {
 			return VIEW3D_PT_tools_active._tools_select;
 		}
 		else if (context.pose_object) {
@@ -3600,10 +4729,10 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 		}
 		return tuple ([]);
 	};},
-	get blur () {return __get__ (this, ToolDef.from_fn (function () {
+	get blur () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3611,12 +4740,12 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.blur', label: 'Blur', icon: 'brush.paint_weight.blur', options: new set (['USE_BRUSHES']), brush_type: 'BLUR'}));
+		return dict ({'idname': 'builtin_brush.blur', 'label': 'Blur', 'icon': 'brush.paint_weight.blur', 'options': new set (['USE_BRUSHES']), 'brush_type': 'BLUR'});
 	}));},
-	get average () {return __get__ (this, ToolDef.from_fn (function () {
+	get average () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3624,12 +4753,12 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.average', label: 'Average', icon: 'brush.paint_weight.average', options: new set (['USE_BRUSHES']), brush_type: 'AVERAGE'}));
+		return dict ({'idname': 'builtin_brush.average', 'label': 'Average', 'icon': 'brush.paint_weight.average', 'options': new set (['USE_BRUSHES']), 'brush_type': 'AVERAGE'});
 	}));},
-	get smear () {return __get__ (this, ToolDef.from_fn (function () {
+	get smear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3637,12 +4766,12 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.smear', label: 'Smear', icon: 'brush.paint_weight.smear', options: new set (['USE_BRUSHES']), brush_type: 'SMEAR'}));
+		return dict ({'idname': 'builtin_brush.smear', 'label': 'Smear', 'icon': 'brush.paint_weight.smear', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SMEAR'});
 	}));},
-	get sample_weight () {return __get__ (this, ToolDef.from_fn (function () {
+	get sample_weight () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3653,7 +4782,7 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3676,14 +4805,20 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 			else {
 				return ;
 			}
-			layout.label (__kwargtrans__ ({text: iface_ ('Weight: {:.3f}').format (weight), translate: false}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+					var __accu1__ = __call__ (iface_, null, 'Weight: {:.3f}');
+					return __call__ (__accu1__.format, __accu1__, weight);
+				}) (), translate: false}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.sample_weight', label: 'Sample Weight', icon: 'ops.paint.weight_sample', cursor: 'EYEDROPPER', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.sample_weight', 'label': 'Sample Weight', 'icon': 'ops.paint.weight_sample', 'cursor': 'EYEDROPPER', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get sample_weight_group () {return __get__ (this, ToolDef.from_fn (function () {
+	get sample_weight_group () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3691,12 +4826,12 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.sample_vertex_group', label: 'Sample Vertex Group', icon: 'ops.paint.weight_sample_group', cursor: 'EYEDROPPER', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.sample_vertex_group', 'label': 'Sample Vertex Group', 'icon': 'ops.paint.weight_sample_group', 'cursor': 'EYEDROPPER', 'widget': null, 'keymap': tuple ([])});
 	}));},
-	get gradient () {return __get__ (this, ToolDef.from_fn (function () {
+	get gradient () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3707,7 +4842,7 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3722,25 +4857,46 @@ export var _defs_weight_paint =  __class__ ('_defs_weight_paint', [object], {
 			}
 			var brush = context.tool_settings.weight_paint.brush;
 			if (brush !== null) {
-				var UnifiedPaintPanel = _member ('bl_ui.properties_paint_common', 'UnifiedPaintPanel');
-				UnifiedPaintPanel.prop_unified (layout, context, brush, 'weight', __kwargtrans__ ({unified_paint_settings_override: context.tool_settings.weight_paint.unified_paint_settings, unified_name: 'use_unified_weight', slider: true, header: true}));
-				UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({unified_paint_settings_override: context.tool_settings.weight_paint.unified_paint_settings, unified_name: 'use_unified_strength', header: true}));
+				var UnifiedPaintPanel = __call__ (_member, null, 'bl_ui.properties_paint_common', 'UnifiedPaintPanel');
+				(function () {
+					var __accu0__ = UnifiedPaintPanel;
+					return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'weight', __kwargtrans__ ({unified_paint_settings_override: context.tool_settings.weight_paint.unified_paint_settings, unified_name: 'use_unified_weight', slider: true, header: true}));
+				}) ();
+				(function () {
+					var __accu0__ = UnifiedPaintPanel;
+					return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'strength', __kwargtrans__ ({unified_paint_settings_override: context.tool_settings.weight_paint.unified_paint_settings, unified_name: 'use_unified_strength', header: true}));
+				}) ();
 			}
-			var props = tool.operator_properties ('paint.weight_gradient');
-			var row = layout.row ();
-			row.prop (props, 'type', __kwargtrans__ ({expand: true}));
-			var row = layout.row ();
-			row.popover ('VIEW3D_PT_tools_weight_gradient');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'paint.weight_gradient');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'type', __kwargtrans__ ({expand: true}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.popover, __accu0__, 'VIEW3D_PT_tools_weight_gradient');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.gradient', label: 'Gradient', icon: 'ops.paint.weight_gradient', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.gradient', 'label': 'Gradient', 'icon': 'ops.paint.weight_gradient', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', [object], {
 	__module__: __name__,
-	get fill () {return __get__ (this, ToolDef.from_fn (function () {
+	get fill () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3748,12 +4904,12 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.Fill', label: 'Fill', icon: 'brush.gpencil_draw.fill', brush_type: 'FILL', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin_brush.Fill', 'label': 'Fill', 'icon': 'brush.gpencil_draw.fill', 'brush_type': 'FILL', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get erase () {return __get__ (this, ToolDef.from_fn (function () {
+	get erase () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3761,12 +4917,12 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.Erase', label: 'Erase', icon: 'brush.gpencil_draw.erase', brush_type: 'ERASE', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin_brush.Erase', 'label': 'Erase', 'icon': 'brush.gpencil_draw.erase', 'brush_type': 'ERASE', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get trim () {return __get__ (this, ToolDef.from_fn (function () {
+	get trim () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3777,7 +4933,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3792,17 +4948,26 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			var brush = context.tool_settings.gpencil_paint.brush;
 			var gp_settings = brush.gpencil_settings;
-			var row = layout.row ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (gp_settings, 'use_active_layer_only');
-			row.prop (gp_settings, 'use_keep_caps_eraser');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_active_layer_only');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_keep_caps_eraser');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.trim', label: 'Trim', icon: 'ops.gpencil.stroke_trim', cursor: 'KNIFE', keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.trim', 'label': 'Trim', 'icon': 'ops.gpencil.stroke_trim', 'cursor': 'KNIFE', 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
 	get grease_pencil_primitive_toolbar () {return function (context, layout, _tool, props) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3822,18 +4987,24 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			return false;
 		}
 		var gp_settings = brush.gpencil_settings;
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		BrushAssetShelf.draw_popup_selector (row, context, brush);
-		var brush_basic_grease_pencil_paint_settings = _member ('bl_ui.properties_paint_common', 'brush_basic_grease_pencil_paint_settings');
-		var brush_basic__draw_color_selector = _member ('bl_ui.properties_paint_common', 'brush_basic__draw_color_selector');
-		brush_basic__draw_color_selector (context, layout, brush, gp_settings);
-		brush_basic_grease_pencil_paint_settings (layout, context, brush, props, __kwargtrans__ ({compact: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = BrushAssetShelf;
+			return __call__ (__accu0__.draw_popup_selector, __accu0__, row, context, brush);
+		}) ();
+		var brush_basic_grease_pencil_paint_settings = __call__ (_member, null, 'bl_ui.properties_paint_common', 'brush_basic_grease_pencil_paint_settings');
+		var brush_basic__draw_color_selector = __call__ (_member, null, 'bl_ui.properties_paint_common', 'brush_basic__draw_color_selector');
+		__call__ (brush_basic__draw_color_selector, null, context, layout, brush, gp_settings);
+		__call__ (brush_basic_grease_pencil_paint_settings, null, layout, context, brush, props, __kwargtrans__ ({compact: true}));
 		return true;
 	};},
-	get line () {return __get__ (this, ToolDef.from_fn (function () {
+	get line () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3844,7 +5015,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3857,15 +5028,21 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.primitive_line');
-			_defs_grease_pencil_paint.grease_pencil_primitive_toolbar (context, layout, tool, props);
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.primitive_line');
+			}) ();
+			(function () {
+				var __accu0__ = _defs_grease_pencil_paint;
+				return __call__ (__accu0__.grease_pencil_primitive_toolbar, __accu0__, context, layout, tool, props);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.line', label: 'Line', icon: 'ops.gpencil.primitive_line', cursor: 'CROSSHAIR', widget: null, keymap: tuple ([]), draw_settings: draw_settings, brush_type: 'DRAW', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin.line', 'label': 'Line', 'icon': 'ops.gpencil.primitive_line', 'cursor': 'CROSSHAIR', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'brush_type': 'DRAW', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get polyline () {return __get__ (this, ToolDef.from_fn (function () {
+	get polyline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3876,7 +5053,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3889,15 +5066,21 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.primitive_polyline');
-			_defs_grease_pencil_paint.grease_pencil_primitive_toolbar (context, layout, tool, props);
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.primitive_polyline');
+			}) ();
+			(function () {
+				var __accu0__ = _defs_grease_pencil_paint;
+				return __call__ (__accu0__.grease_pencil_primitive_toolbar, __accu0__, context, layout, tool, props);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.polyline', label: 'Polyline', icon: 'ops.gpencil.primitive_polyline', cursor: 'CROSSHAIR', widget: null, keymap: tuple ([]), draw_settings: draw_settings, brush_type: 'DRAW', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin.polyline', 'label': 'Polyline', 'icon': 'ops.gpencil.primitive_polyline', 'cursor': 'CROSSHAIR', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'brush_type': 'DRAW', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get arc () {return __get__ (this, ToolDef.from_fn (function () {
+	get arc () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3908,7 +5091,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3921,15 +5104,21 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.primitive_arc');
-			_defs_grease_pencil_paint.grease_pencil_primitive_toolbar (context, layout, tool, props);
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.primitive_arc');
+			}) ();
+			(function () {
+				var __accu0__ = _defs_grease_pencil_paint;
+				return __call__ (__accu0__.grease_pencil_primitive_toolbar, __accu0__, context, layout, tool, props);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.arc', label: 'Arc', icon: 'ops.gpencil.primitive_arc', cursor: 'CROSSHAIR', widget: null, keymap: tuple ([]), draw_settings: draw_settings, brush_type: 'DRAW', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin.arc', 'label': 'Arc', 'icon': 'ops.gpencil.primitive_arc', 'cursor': 'CROSSHAIR', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'brush_type': 'DRAW', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get curve () {return __get__ (this, ToolDef.from_fn (function () {
+	get curve () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3940,7 +5129,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3953,15 +5142,21 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.primitive_curve');
-			_defs_grease_pencil_paint.grease_pencil_primitive_toolbar (context, layout, tool, props);
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.primitive_curve');
+			}) ();
+			(function () {
+				var __accu0__ = _defs_grease_pencil_paint;
+				return __call__ (__accu0__.grease_pencil_primitive_toolbar, __accu0__, context, layout, tool, props);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.curve', label: 'Curve', icon: 'ops.gpencil.primitive_curve', cursor: 'CROSSHAIR', widget: null, keymap: tuple ([]), draw_settings: draw_settings, brush_type: 'DRAW', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin.curve', 'label': 'Curve', 'icon': 'ops.gpencil.primitive_curve', 'cursor': 'CROSSHAIR', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'brush_type': 'DRAW', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get box () {return __get__ (this, ToolDef.from_fn (function () {
+	get box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -3972,7 +5167,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -3985,15 +5180,21 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.primitive_box');
-			_defs_grease_pencil_paint.grease_pencil_primitive_toolbar (context, layout, tool, props);
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.primitive_box');
+			}) ();
+			(function () {
+				var __accu0__ = _defs_grease_pencil_paint;
+				return __call__ (__accu0__.grease_pencil_primitive_toolbar, __accu0__, context, layout, tool, props);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.box', label: 'Box', icon: 'ops.gpencil.primitive_box', cursor: 'CROSSHAIR', widget: null, keymap: tuple ([]), draw_settings: draw_settings, brush_type: 'DRAW', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin.box', 'label': 'Box', 'icon': 'ops.gpencil.primitive_box', 'cursor': 'CROSSHAIR', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'brush_type': 'DRAW', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get circle () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4004,7 +5205,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4017,15 +5218,21 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.primitive_circle');
-			_defs_grease_pencil_paint.grease_pencil_primitive_toolbar (context, layout, tool, props);
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.primitive_circle');
+			}) ();
+			(function () {
+				var __accu0__ = _defs_grease_pencil_paint;
+				return __call__ (__accu0__.grease_pencil_primitive_toolbar, __accu0__, context, layout, tool, props);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.circle', label: 'Circle', icon: 'ops.gpencil.primitive_circle', cursor: 'CROSSHAIR', widget: null, keymap: tuple ([]), draw_settings: draw_settings, brush_type: 'DRAW', options: new set (['USE_BRUSHES'])}));
+		return dict ({'idname': 'builtin.circle', 'label': 'Circle', 'icon': 'ops.gpencil.primitive_circle', 'cursor': 'CROSSHAIR', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'brush_type': 'DRAW', 'options': new set (['USE_BRUSHES'])});
 	}));},
-	get interpolate () {return __get__ (this, ToolDef.from_fn (function () {
+	get interpolate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4036,7 +5243,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4049,19 +5256,37 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.interpolate');
-			layout.prop (props, 'layers');
-			layout.prop (props, 'flip');
-			layout.prop (props, 'smooth_factor');
-			layout.prop (props, 'smooth_steps');
-			layout.prop (props, 'exclude_breakdowns');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.interpolate');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'layers');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'flip');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'smooth_factor');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'smooth_steps');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'exclude_breakdowns');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.interpolate', label: 'Interpolate', icon: 'ops.pose.breakdowner', cursor: 'DEFAULT', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.interpolate', 'label': 'Interpolate', 'icon': 'ops.pose.breakdowner', 'cursor': 'DEFAULT', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get eyedropper () {return __get__ (this, ToolDef.from_fn (function () {
+	get eyedropper () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4072,7 +5297,7 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4085,34 +5310,61 @@ export var _defs_grease_pencil_paint =  __class__ ('_defs_grease_pencil_paint', 
 			}
 			else {
 			}
-			var props = tool.operator_properties ('ui.eyedropper_grease_pencil_color');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'ui.eyedropper_grease_pencil_color');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({expand: true}));
-			if (props.mode == 'MATERIAL') {
-				var col = layout.column ();
-				col.prop (props, 'material_mode');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({expand: true}));
+			}) ();
+			if (__eq__ (props.mode, 'MATERIAL')) {
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, props, 'material_mode');
+				}) ();
 			}
-			else if (props.mode == 'PALETTE') {
+			else if (__eq__ (props.mode, 'PALETTE')) {
 				var tool_settings = context.tool_settings;
 				var settings = tool_settings.gpencil_paint;
-				var col = layout.column ();
-				var row = col.row (__kwargtrans__ ({align: true}));
-				row.template_ID (settings, 'palette', __kwargtrans__ ({py_new: 'palette.new'}));
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				var row = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.template_ID, __accu0__, settings, 'palette', __kwargtrans__ ({py_new: 'palette.new'}));
+				}) ();
 				if (settings.palette) {
-					col.template_palette (settings, 'palette');
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.template_palette, __accu0__, settings, 'palette');
+					}) ();
 				}
 			}
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.eyedropper', label: 'Eyedropper', icon: 'ops.paint.eyedropper_add', cursor: 'EYEDROPPER', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.eyedropper', 'label': 'Eyedropper', 'icon': 'ops.paint.eyedropper_add', 'cursor': 'EYEDROPPER', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [object], {
 	__module__: __name__,
-	get shear () {return __get__ (this, ToolDef.from_fn (function () {
+	get shear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4123,7 +5375,7 @@ export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [o
 		var draw_settings = function (context, layout, _tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4136,14 +5388,17 @@ export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [o
 			}
 			else {
 			}
-			_template_widget.VIEW3D_GGT_xform_gizmo.draw_settings_with_index (context, layout, 2);
+			(function () {
+				var __accu0__ = _template_widget.VIEW3D_GGT_xform_gizmo;
+				return __call__ (__accu0__.draw_settings_with_index, __accu0__, context, layout, 2);
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.shear', label: 'Shear', icon: 'ops.gpencil.edit_shear', widget: 'VIEW3D_GGT_xform_shear', keymap: '3D View Tool: Shear', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.shear', 'label': 'Shear', 'icon': 'ops.gpencil.edit_shear', 'widget': 'VIEW3D_GGT_xform_shear', 'keymap': '3D View Tool: Shear', 'draw_settings': draw_settings});
 	}));},
-	get interpolate () {return __get__ (this, ToolDef.from_fn (function () {
+	get interpolate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4154,7 +5409,7 @@ export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [o
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4167,19 +5422,37 @@ export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [o
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.interpolate');
-			layout.prop (props, 'layers');
-			layout.prop (props, 'exclude_breakdowns');
-			layout.prop (props, 'flip');
-			layout.prop (props, 'smooth_factor');
-			layout.prop (props, 'smooth_steps');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.interpolate');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'layers');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'exclude_breakdowns');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'flip');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'smooth_factor');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'smooth_steps');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.interpolate', label: 'Interpolate', icon: 'ops.pose.breakdowner', cursor: 'DEFAULT', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.interpolate', 'label': 'Interpolate', 'icon': 'ops.pose.breakdowner', 'cursor': 'DEFAULT', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get texture_gradient () {return __get__ (this, ToolDef.from_fn (function () {
+	get texture_gradient () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4187,12 +5460,12 @@ export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [o
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.texture_gradient', label: 'Gradient', icon: 'ops.paint.weight_gradient', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.texture_gradient', 'label': 'Gradient', 'icon': 'ops.paint.weight_gradient', 'widget': null, 'keymap': tuple ([])});
 	}));},
-	get pen () {return __get__ (this, ToolDef.from_fn (function () {
+	get pen () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4203,7 +5476,7 @@ export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [o
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4216,17 +5489,38 @@ export var _defs_grease_pencil_edit =  __class__ ('_defs_grease_pencil_edit', [o
 			}
 			else {
 			}
-			var props = tool.operator_properties ('grease_pencil.pen');
-			layout.prop (props, 'size');
-			layout.separator ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'grease_pencil.pen');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'size');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 			var tool_settings = context.tool_settings;
-			var sub = layout.row (__kwargtrans__ ({align: true}));
-			sub.prop_with_popover (tool_settings, 'gpencil_stroke_placement_view3d', __kwargtrans__ ({text: '', panel: 'VIEW3D_PT_grease_pencil_origin'}));
-			var sub = layout.row (__kwargtrans__ ({align: true}));
-			sub.active = tool_settings.gpencil_stroke_placement_view3d != 'SURFACE';
-			sub.prop_with_popover (tool_settings.gpencil_sculpt, 'lock_axis', __kwargtrans__ ({text: '', panel: 'VIEW3D_PT_grease_pencil_lock'}));
+			var sub = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop_with_popover, __accu0__, tool_settings, 'gpencil_stroke_placement_view3d', __kwargtrans__ ({text: '', panel: 'VIEW3D_PT_grease_pencil_origin'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			sub.active = __ne__ (tool_settings.gpencil_stroke_placement_view3d, 'SURFACE');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop_with_popover, __accu0__, tool_settings.gpencil_sculpt, 'lock_axis', __kwargtrans__ ({text: '', panel: 'VIEW3D_PT_grease_pencil_lock'}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.pen', label: 'Pen', cursor: 'CROSSHAIR', icon: 'ops.curve.pen', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.pen', 'label': 'Pen', 'cursor': 'CROSSHAIR', 'icon': 'ops.curve.pen', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_image_generic =  __class__ ('_defs_image_generic', [object], {
@@ -4234,7 +5528,7 @@ export var _defs_image_generic =  __class__ ('_defs_image_generic', [object], {
 	get poll_uvedit () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4252,15 +5546,15 @@ export var _defs_image_generic =  __class__ ('_defs_image_generic', [object], {
 		if (ob !== null) {
 			var data = ob.data;
 			if (data !== null) {
-				return bool (getattr (data, 'uv_layers', false));
+				return __call__ (bool, null, __call__ (getattr, null, data, 'uv_layers', false));
 			}
 		}
 		return false;
 	};},
-	get cursor () {return __get__ (this, ToolDef.from_fn (function () {
+	get cursor () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4268,12 +5562,12 @@ export var _defs_image_generic =  __class__ ('_defs_image_generic', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.cursor', label: 'Cursor', description: 'Set the cursor location, drag to transform', icon: 'ops.generic.cursor', keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.cursor', 'label': 'Cursor', 'description': 'Set the cursor location, drag to transform', 'icon': 'ops.generic.cursor', 'keymap': tuple ([])});
 	}));},
-	get sample () {return __get__ (this, ToolDef.from_fn (function () {
+	get sample () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4284,7 +5578,7 @@ export var _defs_image_generic =  __class__ ('_defs_image_generic', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4297,18 +5591,24 @@ export var _defs_image_generic =  __class__ ('_defs_image_generic', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('image.sample');
-			layout.prop (props, 'size');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'image.sample');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'size');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.sample', label: 'Sample', description: 'Sample pixel values under the cursor', icon: 'ops.paint.weight_sample', keymap: 'Image Editor Tool: Sample', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.sample', 'label': 'Sample', 'description': 'Sample pixel values under the cursor', 'icon': 'ops.paint.weight_sample', 'keymap': 'Image Editor Tool: Sample', 'draw_settings': draw_settings});
 	}));}
 });
 export var _defs_image_mask_transform =  __class__ ('_defs_image_mask_transform', [object], {
 	__module__: __name__,
-	get translate () {return __get__ (this, ToolDef.from_fn (function () {
+	get translate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4316,12 +5616,12 @@ export var _defs_image_mask_transform =  __class__ ('_defs_image_mask_transform'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.move', label: 'Move', icon: 'ops.transform.translate', widget: 'IMAGE_GGT_gizmo2d_translate', operator: 'transform.translate', keymap: 'Image Editor Tool: Mask, Move'}));
+		return dict ({'idname': 'builtin.move', 'label': 'Move', 'icon': 'ops.transform.translate', 'widget': 'IMAGE_GGT_gizmo2d_translate', 'operator': 'transform.translate', 'keymap': 'Image Editor Tool: Mask, Move'});
 	}));},
-	get rotate () {return __get__ (this, ToolDef.from_fn (function () {
+	get rotate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4329,12 +5629,12 @@ export var _defs_image_mask_transform =  __class__ ('_defs_image_mask_transform'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.rotate', label: 'Rotate', icon: 'ops.transform.rotate', widget: 'IMAGE_GGT_gizmo2d_rotate', operator: 'transform.rotate', keymap: 'Image Editor Tool: Mask, Rotate'}));
+		return dict ({'idname': 'builtin.rotate', 'label': 'Rotate', 'icon': 'ops.transform.rotate', 'widget': 'IMAGE_GGT_gizmo2d_rotate', 'operator': 'transform.rotate', 'keymap': 'Image Editor Tool: Mask, Rotate'});
 	}));},
-	get scale () {return __get__ (this, ToolDef.from_fn (function () {
+	get scale () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4342,12 +5642,12 @@ export var _defs_image_mask_transform =  __class__ ('_defs_image_mask_transform'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.scale', label: 'Scale', icon: 'ops.transform.resize', widget: 'IMAGE_GGT_gizmo2d_resize', operator: 'transform.resize', keymap: 'Image Editor Tool: Mask, Scale'}));
+		return dict ({'idname': 'builtin.scale', 'label': 'Scale', 'icon': 'ops.transform.resize', 'widget': 'IMAGE_GGT_gizmo2d_resize', 'operator': 'transform.resize', 'keymap': 'Image Editor Tool: Mask, Scale'});
 	}));},
-	get transform () {return __get__ (this, ToolDef.from_fn (function () {
+	get transform () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4355,15 +5655,15 @@ export var _defs_image_mask_transform =  __class__ ('_defs_image_mask_transform'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.transform', label: 'Transform', description: 'Supports any combination of grab, rotate, and scale at once', icon: 'ops.transform.transform', widget: 'IMAGE_GGT_gizmo2d'}));
+		return dict ({'idname': 'builtin.transform', 'label': 'Transform', 'description': 'Supports any combination of grab, rotate, and scale at once', 'icon': 'ops.transform.transform', 'widget': 'IMAGE_GGT_gizmo2d'});
 	}));}
 });
 export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [object], {
 	__module__: __name__,
-	get select () {return __get__ (this, ToolDef.from_fn (function () {
+	get select () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4371,12 +5671,12 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.select', label: 'Tweak', icon: 'ops.generic.select', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.select', 'label': 'Tweak', 'icon': 'ops.generic.select', 'widget': null, 'keymap': tuple ([])});
 	}));},
-	get box () {return __get__ (this, ToolDef.from_fn (function () {
+	get box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4387,7 +5687,7 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4400,17 +5700,26 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mask.select_box');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mask.select_box');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_box', label: 'Select Box', icon: 'ops.generic.select_box', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_box', 'label': 'Select Box', 'icon': 'ops.generic.select_box', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4421,7 +5730,7 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4434,17 +5743,26 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mask.select_lasso');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mask.select_lasso');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_lasso', label: 'Select Lasso', icon: 'ops.generic.select_lasso', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_lasso', 'label': 'Select Lasso', 'icon': 'ops.generic.select_lasso', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get circle () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4455,7 +5773,7 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4468,16 +5786,28 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mask.select_circle');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mask.select_circle');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
-			layout.prop (props, 'radius');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'radius');
+			}) ();
 		};
 		var draw_cursor = function (_context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4490,20 +5820,23 @@ export var _defs_image_mask_select =  __class__ ('_defs_image_mask_select', [obj
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
-			var props = tool.operator_properties ('mask.select_circle');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mask.select_circle');
+			}) ();
 			var radius = props.radius;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius, __kwargtrans__ ({segments: 32}));
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius, __kwargtrans__ ({segments: 32}));
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_circle', label: 'Select Circle', icon: 'ops.generic.select_circle', widget: null, keymap: tuple ([]), draw_settings: draw_settings, draw_cursor: draw_cursor}));
+		return dict ({'idname': 'builtin.select_circle', 'label': 'Select Circle', 'icon': 'ops.generic.select_circle', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'draw_cursor': draw_cursor});
 	}));}
 });
 export var _defs_image_mask_primitive =  __class__ ('_defs_image_mask_primitive', [object], {
 	__module__: __name__,
-	get box () {return __get__ (this, ToolDef.from_fn (function () {
+	get box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4514,7 +5847,7 @@ export var _defs_image_mask_primitive =  __class__ ('_defs_image_mask_primitive'
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4527,16 +5860,25 @@ export var _defs_image_mask_primitive =  __class__ ('_defs_image_mask_primitive'
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mask.primitive_square_add');
-			layout.prop (props, 'size');
-			layout.prop (props, 'location');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mask.primitive_square_add');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'size');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'location');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.box', label: 'Box', icon: 'ops.gpencil.primitive_box', cursor: 'CROSSHAIR', draw_settings: draw_settings, widget: null, keymap: 'Image Editor Tool: Mask, Box'}));
+		return dict ({'idname': 'builtin.box', 'label': 'Box', 'icon': 'ops.gpencil.primitive_box', 'cursor': 'CROSSHAIR', 'draw_settings': draw_settings, 'widget': null, 'keymap': 'Image Editor Tool: Mask, Box'});
 	}));},
-	get circle () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4547,7 +5889,7 @@ export var _defs_image_mask_primitive =  __class__ ('_defs_image_mask_primitive'
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4560,19 +5902,28 @@ export var _defs_image_mask_primitive =  __class__ ('_defs_image_mask_primitive'
 			}
 			else {
 			}
-			var props = tool.operator_properties ('mask.primitive_circle_add');
-			layout.prop (props, 'size');
-			layout.prop (props, 'location');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'mask.primitive_circle_add');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'size');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'location');
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.circle', label: 'Circle', icon: 'ops.gpencil.primitive_circle', cursor: 'CROSSHAIR', draw_settings: draw_settings, widget: null, keymap: 'Image Editor Tool: Mask, Circle'}));
+		return dict ({'idname': 'builtin.circle', 'label': 'Circle', 'icon': 'ops.gpencil.primitive_circle', 'cursor': 'CROSSHAIR', 'draw_settings': draw_settings, 'widget': null, 'keymap': 'Image Editor Tool: Mask, Circle'});
 	}));}
 });
 export var _defs_image_uv_transform =  __class__ ('_defs_image_uv_transform', [object], {
 	__module__: __name__,
-	get translate () {return __get__ (this, ToolDef.from_fn (function () {
+	get translate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4580,12 +5931,12 @@ export var _defs_image_uv_transform =  __class__ ('_defs_image_uv_transform', [o
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.move', label: 'Move', icon: 'ops.transform.translate', widget: 'IMAGE_GGT_gizmo2d_translate', operator: 'transform.translate', keymap: 'Image Editor Tool: Uv, Move'}));
+		return dict ({'idname': 'builtin.move', 'label': 'Move', 'icon': 'ops.transform.translate', 'widget': 'IMAGE_GGT_gizmo2d_translate', 'operator': 'transform.translate', 'keymap': 'Image Editor Tool: Uv, Move'});
 	}));},
-	get rotate () {return __get__ (this, ToolDef.from_fn (function () {
+	get rotate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4593,12 +5944,12 @@ export var _defs_image_uv_transform =  __class__ ('_defs_image_uv_transform', [o
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.rotate', label: 'Rotate', icon: 'ops.transform.rotate', widget: 'IMAGE_GGT_gizmo2d_rotate', operator: 'transform.rotate', keymap: 'Image Editor Tool: Uv, Rotate'}));
+		return dict ({'idname': 'builtin.rotate', 'label': 'Rotate', 'icon': 'ops.transform.rotate', 'widget': 'IMAGE_GGT_gizmo2d_rotate', 'operator': 'transform.rotate', 'keymap': 'Image Editor Tool: Uv, Rotate'});
 	}));},
-	get scale () {return __get__ (this, ToolDef.from_fn (function () {
+	get scale () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4606,12 +5957,12 @@ export var _defs_image_uv_transform =  __class__ ('_defs_image_uv_transform', [o
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.scale', label: 'Scale', icon: 'ops.transform.resize', widget: 'IMAGE_GGT_gizmo2d_resize', operator: 'transform.resize', keymap: 'Image Editor Tool: Uv, Scale'}));
+		return dict ({'idname': 'builtin.scale', 'label': 'Scale', 'icon': 'ops.transform.resize', 'widget': 'IMAGE_GGT_gizmo2d_resize', 'operator': 'transform.resize', 'keymap': 'Image Editor Tool: Uv, Scale'});
 	}));},
-	get transform () {return __get__ (this, ToolDef.from_fn (function () {
+	get transform () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4619,15 +5970,15 @@ export var _defs_image_uv_transform =  __class__ ('_defs_image_uv_transform', [o
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.transform', label: 'Transform', description: 'Supports any combination of grab, rotate, and scale at once', icon: 'ops.transform.transform', widget: 'IMAGE_GGT_gizmo2d'}));
+		return dict ({'idname': 'builtin.transform', 'label': 'Transform', 'description': 'Supports any combination of grab, rotate, and scale at once', 'icon': 'ops.transform.transform', 'widget': 'IMAGE_GGT_gizmo2d'});
 	}));}
 });
 export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object], {
 	__module__: __name__,
-	get select () {return __get__ (this, ToolDef.from_fn (function () {
+	get select () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4635,12 +5986,12 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.select', label: 'Tweak', icon: 'ops.generic.select', widget: null, keymap: tuple ([])}));
+		return dict ({'idname': 'builtin.select', 'label': 'Tweak', 'icon': 'ops.generic.select', 'widget': null, 'keymap': tuple ([])});
 	}));},
-	get box () {return __get__ (this, ToolDef.from_fn (function () {
+	get box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4651,7 +6002,7 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4664,17 +6015,26 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 			}
 			else {
 			}
-			var props = tool.operator_properties ('uv.select_box');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'uv.select_box');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_box', label: 'Select Box', icon: 'ops.generic.select_box', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_box', 'label': 'Select Box', 'icon': 'ops.generic.select_box', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4685,7 +6045,7 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4698,17 +6058,26 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 			}
 			else {
 			}
-			var props = tool.operator_properties ('uv.select_lasso');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'uv.select_lasso');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_lasso', label: 'Select Lasso', icon: 'ops.generic.select_lasso', widget: null, keymap: tuple ([]), draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_lasso', 'label': 'Select Lasso', 'icon': 'ops.generic.select_lasso', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings});
 	}));},
-	get circle () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4719,7 +6088,7 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4732,16 +6101,28 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 			}
 			else {
 			}
-			var props = tool.operator_properties ('uv.select_circle');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'uv.select_circle');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
-			layout.prop (props, 'radius');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'radius');
+			}) ();
 		};
 		var draw_cursor = function (_context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4754,20 +6135,23 @@ export var _defs_image_uv_select =  __class__ ('_defs_image_uv_select', [object]
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
-			var props = tool.operator_properties ('uv.select_circle');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'uv.select_circle');
+			}) ();
 			var radius = props.radius;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius, __kwargtrans__ ({segments: 32}));
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius, __kwargtrans__ ({segments: 32}));
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_circle', label: 'Select Circle', icon: 'ops.generic.select_circle', widget: null, keymap: tuple ([]), draw_settings: draw_settings, draw_cursor: draw_cursor}));
+		return dict ({'idname': 'builtin.select_circle', 'label': 'Select Circle', 'icon': 'ops.generic.select_circle', 'widget': null, 'keymap': tuple ([]), 'draw_settings': draw_settings, 'draw_cursor': draw_cursor});
 	}));}
 });
 export var _defs_image_uv_edit =  __class__ ('_defs_image_uv_edit', [object], {
 	__module__: __name__,
-	get rip_region () {return __get__ (this, ToolDef.from_fn (function () {
+	get rip_region () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4775,15 +6159,15 @@ export var _defs_image_uv_edit =  __class__ ('_defs_image_uv_edit', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.rip_region', label: 'Rip Region', icon: 'ops.mesh.rip', widget: null, keymap: tuple ([]), options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.rip_region', 'label': 'Rip Region', 'icon': 'ops.mesh.rip', 'widget': null, 'keymap': tuple ([]), 'options': new set (['KEYMAP_FALLBACK'])});
 	}));}
 });
 export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object], {
 	__module__: __name__,
-	get grab () {return __get__ (this, ToolDef.from_fn (function () {
+	get grab () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4794,7 +6178,7 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4808,15 +6192,27 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 			else {
 			}
 			var uv_sculpt = context.scene.tool_settings.uv_sculpt;
-			layout.prop (uv_sculpt, 'size');
-			layout.prop (uv_sculpt, 'strength');
-			layout.popover ('IMAGE_PT_uv_sculpt_curve');
-			layout.popover ('IMAGE_PT_uv_sculpt_options');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, uv_sculpt, 'size');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, uv_sculpt, 'strength');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'IMAGE_PT_uv_sculpt_curve');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'IMAGE_PT_uv_sculpt_options');
+			}) ();
 		};
 		var draw_cursor = function (context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4829,17 +6225,17 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
 			var uv_sculpt = context.scene.tool_settings.uv_sculpt;
-			var radius = uv_sculpt.size / 2;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius);
+			var radius = __truediv__ (uv_sculpt.size, 2);
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius);
 		};
-		return dict (__kwargtrans__ ({idname: 'sculpt.uv_sculpt_grab', label: 'Grab', icon: 'brush.uv_sculpt.grab', keymap: tuple ([]), draw_cursor: draw_cursor, draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'sculpt.uv_sculpt_grab', 'label': 'Grab', 'icon': 'brush.uv_sculpt.grab', 'keymap': tuple ([]), 'draw_cursor': draw_cursor, 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get relax () {return __get__ (this, ToolDef.from_fn (function () {
+	get relax () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4850,7 +6246,7 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4864,17 +6260,35 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 			else {
 			}
 			var uv_sculpt = context.scene.tool_settings.uv_sculpt;
-			layout.prop (uv_sculpt, 'size');
-			layout.prop (uv_sculpt, 'strength');
-			layout.popover ('IMAGE_PT_uv_sculpt_curve');
-			layout.popover ('IMAGE_PT_uv_sculpt_options');
-			var props = tool.operator_properties ('sculpt.uv_sculpt_relax');
-			layout.prop (props, 'relax_method', __kwargtrans__ ({text: 'Method'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, uv_sculpt, 'size');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, uv_sculpt, 'strength');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'IMAGE_PT_uv_sculpt_curve');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'IMAGE_PT_uv_sculpt_options');
+			}) ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sculpt.uv_sculpt_relax');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'relax_method', __kwargtrans__ ({text: 'Method'}));
+			}) ();
 		};
 		var draw_cursor = function (context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4887,17 +6301,17 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
 			var uv_sculpt = context.scene.tool_settings.uv_sculpt;
-			var radius = uv_sculpt.size / 2;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius);
+			var radius = __truediv__ (uv_sculpt.size, 2);
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius);
 		};
-		return dict (__kwargtrans__ ({idname: 'sculpt.uv_sculpt_relax', label: 'Relax', icon: 'brush.uv_sculpt.relax', keymap: tuple ([]), draw_cursor: draw_cursor, draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'sculpt.uv_sculpt_relax', 'label': 'Relax', 'icon': 'brush.uv_sculpt.relax', 'keymap': tuple ([]), 'draw_cursor': draw_cursor, 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get pinch () {return __get__ (this, ToolDef.from_fn (function () {
+	get pinch () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4908,7 +6322,7 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 		var draw_settings = function (context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4922,15 +6336,27 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 			else {
 			}
 			var uv_sculpt = context.scene.tool_settings.uv_sculpt;
-			layout.prop (uv_sculpt, 'size');
-			layout.prop (uv_sculpt, 'strength');
-			layout.popover ('IMAGE_PT_uv_sculpt_curve');
-			layout.popover ('IMAGE_PT_uv_sculpt_options');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, uv_sculpt, 'size');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, uv_sculpt, 'strength');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'IMAGE_PT_uv_sculpt_curve');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.popover, __accu0__, 'IMAGE_PT_uv_sculpt_options');
+			}) ();
 		};
 		var draw_cursor = function (context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -4943,12 +6369,12 @@ export var _defs_image_uv_sculpt =  __class__ ('_defs_image_uv_sculpt', [object]
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
 			var uv_sculpt = context.scene.tool_settings.uv_sculpt;
-			var radius = uv_sculpt.size / 2;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius);
+			var radius = __truediv__ (uv_sculpt.size, 2);
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius);
 		};
-		return dict (__kwargtrans__ ({idname: 'sculpt.uv_sculpt_pinch', label: 'Pinch', icon: 'brush.uv_sculpt.pinch', keymap: tuple ([]), draw_cursor: draw_cursor, draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'sculpt.uv_sculpt_pinch', 'label': 'Pinch', 'icon': 'brush.uv_sculpt.pinch', 'keymap': tuple ([]), 'draw_cursor': draw_cursor, 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));}
 });
 export var _defs_grease_pencil_sculpt =  __class__ ('_defs_grease_pencil_sculpt', [object], {
@@ -4956,7 +6382,7 @@ export var _defs_grease_pencil_sculpt =  __class__ ('_defs_grease_pencil_sculpt'
 	get poll_select_mask () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -4972,12 +6398,12 @@ export var _defs_grease_pencil_sculpt =  __class__ ('_defs_grease_pencil_sculpt'
 		}
 		var ob = context.active_object;
 		var tool_settings = context.scene.tool_settings;
-		return ob !== null && ob.py_metatype == 'GREASEPENCIL' && (tool_settings.use_gpencil_select_mask_point || tool_settings.use_gpencil_select_mask_stroke || tool_settings.use_gpencil_select_mask_segment);
+		return ob !== null && __eq__ (ob.py_metatype, 'GREASEPENCIL') && (tool_settings.use_gpencil_select_mask_point || tool_settings.use_gpencil_select_mask_stroke || tool_settings.use_gpencil_select_mask_segment);
 	};},
-	get clone () {return __get__ (this, ToolDef.from_fn (function () {
+	get clone () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -4985,15 +6411,15 @@ export var _defs_grease_pencil_sculpt =  __class__ ('_defs_grease_pencil_sculpt'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.clone', label: 'Clone', icon: 'ops.gpencil.sculpt_clone', options: new set (['USE_BRUSHES']), brush_type: 'CLONE'}));
+		return dict ({'idname': 'builtin_brush.clone', 'label': 'Clone', 'icon': 'ops.gpencil.sculpt_clone', 'options': new set (['USE_BRUSHES']), 'brush_type': 'CLONE'});
 	}));}
 });
 export var _defs_grease_pencil_weight =  __class__ ('_defs_grease_pencil_weight', [object], {
 	__module__: __name__,
-	get blur () {return __get__ (this, ToolDef.from_fn (function () {
+	get blur () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5001,12 +6427,12 @@ export var _defs_grease_pencil_weight =  __class__ ('_defs_grease_pencil_weight'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.blur', label: 'Blur', icon: 'ops.gpencil.sculpt_blur', options: new set (['USE_BRUSHES']), brush_type: 'BLUR'}));
+		return dict ({'idname': 'builtin_brush.blur', 'label': 'Blur', 'icon': 'ops.gpencil.sculpt_blur', 'options': new set (['USE_BRUSHES']), 'brush_type': 'BLUR'});
 	}));},
-	get average () {return __get__ (this, ToolDef.from_fn (function () {
+	get average () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5014,12 +6440,12 @@ export var _defs_grease_pencil_weight =  __class__ ('_defs_grease_pencil_weight'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.average', label: 'Average', icon: 'ops.gpencil.sculpt_average', options: new set (['USE_BRUSHES']), brush_type: 'AVERAGE'}));
+		return dict ({'idname': 'builtin_brush.average', 'label': 'Average', 'icon': 'ops.gpencil.sculpt_average', 'options': new set (['USE_BRUSHES']), 'brush_type': 'AVERAGE'});
 	}));},
-	get smear () {return __get__ (this, ToolDef.from_fn (function () {
+	get smear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5027,7 +6453,7 @@ export var _defs_grease_pencil_weight =  __class__ ('_defs_grease_pencil_weight'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.smear', label: 'Smear', icon: 'ops.gpencil.sculpt_smear', options: new set (['USE_BRUSHES']), brush_type: 'SMEAR'}));
+		return dict ({'idname': 'builtin_brush.smear', 'label': 'Smear', 'icon': 'ops.gpencil.sculpt_smear', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SMEAR'});
 	}));}
 });
 export var _defs_grease_pencil_vertex =  __class__ ('_defs_grease_pencil_vertex', [object], {
@@ -5035,7 +6461,7 @@ export var _defs_grease_pencil_vertex =  __class__ ('_defs_grease_pencil_vertex'
 	get poll_select_mask () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5051,12 +6477,12 @@ export var _defs_grease_pencil_vertex =  __class__ ('_defs_grease_pencil_vertex'
 		}
 		var ob = context.active_object;
 		var tool_settings = context.scene.tool_settings;
-		return ob !== null && ob.py_metatype == 'GREASEPENCIL' && (tool_settings.use_gpencil_vertex_select_mask_point || tool_settings.use_gpencil_vertex_select_mask_stroke || tool_settings.use_gpencil_vertex_select_mask_segment);
+		return ob !== null && __eq__ (ob.py_metatype, 'GREASEPENCIL') && (tool_settings.use_gpencil_vertex_select_mask_point || tool_settings.use_gpencil_vertex_select_mask_stroke || tool_settings.use_gpencil_vertex_select_mask_segment);
 	};},
-	get blur () {return __get__ (this, ToolDef.from_fn (function () {
+	get blur () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5064,12 +6490,12 @@ export var _defs_grease_pencil_vertex =  __class__ ('_defs_grease_pencil_vertex'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.blur', label: 'Blur', icon: 'brush.paint_vertex.blur', options: new set (['USE_BRUSHES']), brush_type: 'BLUR'}));
+		return dict ({'idname': 'builtin_brush.blur', 'label': 'Blur', 'icon': 'brush.paint_vertex.blur', 'options': new set (['USE_BRUSHES']), 'brush_type': 'BLUR'});
 	}));},
-	get average () {return __get__ (this, ToolDef.from_fn (function () {
+	get average () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5077,12 +6503,12 @@ export var _defs_grease_pencil_vertex =  __class__ ('_defs_grease_pencil_vertex'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.average', label: 'Average', icon: 'brush.paint_vertex.average', options: new set (['USE_BRUSHES']), brush_type: 'AVERAGE'}));
+		return dict ({'idname': 'builtin_brush.average', 'label': 'Average', 'icon': 'brush.paint_vertex.average', 'options': new set (['USE_BRUSHES']), 'brush_type': 'AVERAGE'});
 	}));},
-	get smear () {return __get__ (this, ToolDef.from_fn (function () {
+	get smear () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5090,12 +6516,12 @@ export var _defs_grease_pencil_vertex =  __class__ ('_defs_grease_pencil_vertex'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.smear', label: 'Smear', icon: 'brush.paint_vertex.smear', options: new set (['USE_BRUSHES']), brush_type: 'SMEAR'}));
+		return dict ({'idname': 'builtin_brush.smear', 'label': 'Smear', 'icon': 'brush.paint_vertex.smear', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SMEAR'});
 	}));},
-	get py_replace () {return __get__ (this, ToolDef.from_fn (function () {
+	get py_replace () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5103,15 +6529,15 @@ export var _defs_grease_pencil_vertex =  __class__ ('_defs_grease_pencil_vertex'
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.replace', label: 'Replace', icon: 'brush.paint_vertex.replace', options: new set (['USE_BRUSHES']), brush_type: 'REPLACE'}));
+		return dict ({'idname': 'builtin_brush.replace', 'label': 'Replace', 'icon': 'brush.paint_vertex.replace', 'options': new set (['USE_BRUSHES']), 'brush_type': 'REPLACE'});
 	}));}
 });
 export var _defs_curves_sculpt =  __class__ ('_defs_curves_sculpt', [object], {
 	__module__: __name__,
-	get select () {return __get__ (this, ToolDef.from_fn (function () {
+	get select () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5119,12 +6545,12 @@ export var _defs_curves_sculpt =  __class__ ('_defs_curves_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.selection_paint', label: 'Selection Paint', icon: 'ops.generic.select_paint', options: new set (['USE_BRUSHES']), brush_type: 'SELECTION_PAINT'}));
+		return dict ({'idname': 'builtin_brush.selection_paint', 'label': 'Selection Paint', 'icon': 'ops.generic.select_paint', 'options': new set (['USE_BRUSHES']), 'brush_type': 'SELECTION_PAINT'});
 	}));},
-	get density () {return __get__ (this, ToolDef.from_fn (function () {
+	get density () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5132,12 +6558,12 @@ export var _defs_curves_sculpt =  __class__ ('_defs_curves_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.density', label: 'Density', icon: 'ops.curves.sculpt_density', options: new set (['USE_BRUSHES']), brush_type: 'DENSITY'}));
+		return dict ({'idname': 'builtin_brush.density', 'label': 'Density', 'icon': 'ops.curves.sculpt_density', 'options': new set (['USE_BRUSHES']), 'brush_type': 'DENSITY'});
 	}));},
-	get add () {return __get__ (this, ToolDef.from_fn (function () {
+	get add () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5145,12 +6571,12 @@ export var _defs_curves_sculpt =  __class__ ('_defs_curves_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.add', label: 'Add', icon: 'ops.curves.sculpt_add', options: new set (['USE_BRUSHES']), brush_type: 'ADD'}));
+		return dict ({'idname': 'builtin_brush.add', 'label': 'Add', 'icon': 'ops.curves.sculpt_add', 'options': new set (['USE_BRUSHES']), 'brush_type': 'ADD'});
 	}));},
-	get delete () {return __get__ (this, ToolDef.from_fn (function () {
+	get delete () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5158,15 +6584,15 @@ export var _defs_curves_sculpt =  __class__ ('_defs_curves_sculpt', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin_brush.delete', label: 'Delete', icon: 'ops.curves.sculpt_delete', options: new set (['USE_BRUSHES']), brush_type: 'DELETE'}));
+		return dict ({'idname': 'builtin_brush.delete', 'label': 'Delete', 'icon': 'ops.curves.sculpt_delete', 'options': new set (['USE_BRUSHES']), 'brush_type': 'DELETE'});
 	}));}
 });
 export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 	__module__: __name__,
-	get select () {return __get__ (this, ToolDef.from_fn (function () {
+	get select () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5174,12 +6600,12 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.select', label: 'Tweak', icon: 'ops.generic.select', widget: null, keymap: 'Node Tool: Tweak'}));
+		return dict ({'idname': 'builtin.select', 'label': 'Tweak', 'icon': 'ops.generic.select', 'widget': null, 'keymap': 'Node Tool: Tweak'});
 	}));},
-	get box () {return __get__ (this, ToolDef.from_fn (function () {
+	get box () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5190,7 +6616,7 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5203,17 +6629,26 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('node.select_box');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'node.select_box');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_box', label: 'Select Box', icon: 'ops.generic.select_box', widget: null, keymap: 'Node Tool: Select Box', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_box', 'label': 'Select Box', 'icon': 'ops.generic.select_box', 'widget': null, 'keymap': 'Node Tool: Select Box', 'draw_settings': draw_settings});
 	}));},
-	get lasso () {return __get__ (this, ToolDef.from_fn (function () {
+	get lasso () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5224,7 +6659,7 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5237,17 +6672,26 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('node.select_lasso');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'node.select_lasso');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_lasso', label: 'Select Lasso', icon: 'ops.generic.select_lasso', widget: null, keymap: 'Node Tool: Select Lasso', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_lasso', 'label': 'Select Lasso', 'icon': 'ops.generic.select_lasso', 'widget': null, 'keymap': 'Node Tool: Select Lasso', 'draw_settings': draw_settings});
 	}));},
-	get circle () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5258,7 +6702,7 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5271,16 +6715,28 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 			}
 			else {
 			}
-			var props = tool.operator_properties ('node.select_circle');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'node.select_circle');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
-			layout.prop (props, 'radius');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'radius');
+			}) ();
 		};
 		var draw_cursor = function (_context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5293,20 +6749,23 @@ export var _defs_node_select =  __class__ ('_defs_node_select', [object], {
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
-			var props = tool.operator_properties ('node.select_circle');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'node.select_circle');
+			}) ();
 			var radius = props.radius;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius, __kwargtrans__ ({segments: 32}));
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius, __kwargtrans__ ({segments: 32}));
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_circle', label: 'Select Circle', icon: 'ops.generic.select_circle', widget: null, keymap: 'Node Tool: Select Circle', draw_settings: draw_settings, draw_cursor: draw_cursor}));
+		return dict ({'idname': 'builtin.select_circle', 'label': 'Select Circle', 'icon': 'ops.generic.select_circle', 'widget': null, 'keymap': 'Node Tool: Select Circle', 'draw_settings': draw_settings, 'draw_cursor': draw_cursor});
 	}));}
 });
 export var _defs_node_edit =  __class__ ('_defs_node_edit', [object], {
 	__module__: __name__,
-	get links_cut () {return __get__ (this, ToolDef.from_fn (function () {
+	get links_cut () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5314,12 +6773,12 @@ export var _defs_node_edit =  __class__ ('_defs_node_edit', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.links_cut', label: 'Links Cut', icon: 'ops.node.links_cut', widget: null, keymap: 'Node Tool: Links Cut', options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.links_cut', 'label': 'Links Cut', 'icon': 'ops.node.links_cut', 'widget': null, 'keymap': 'Node Tool: Links Cut', 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get links_mute () {return __get__ (this, ToolDef.from_fn (function () {
+	get links_mute () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5327,12 +6786,12 @@ export var _defs_node_edit =  __class__ ('_defs_node_edit', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.links_mute', label: 'Mute Links', icon: 'ops.node.links_mute', widget: null, keymap: 'Node Tool: Mute Links', options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.links_mute', 'label': 'Mute Links', 'icon': 'ops.node.links_mute', 'widget': null, 'keymap': 'Node Tool: Mute Links', 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get add_reroute () {return __get__ (this, ToolDef.from_fn (function () {
+	get add_reroute () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5340,15 +6799,15 @@ export var _defs_node_edit =  __class__ ('_defs_node_edit', [object], {
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.add_reroute', label: 'Add Reroute', icon: 'ops.node.add_reroute', widget: null, keymap: 'Node Tool: Add Reroute', options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.add_reroute', 'label': 'Add Reroute', 'icon': 'ops.node.add_reroute', 'widget': null, 'keymap': 'Node Tool: Add Reroute', 'options': new set (['KEYMAP_FALLBACK'])});
 	}));}
 });
 export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [object], {
 	__module__: __name__,
-	get cursor () {return __get__ (this, ToolDef.from_fn (function () {
+	get cursor () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5356,12 +6815,12 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.cursor', label: 'Cursor', description: 'Set the cursor location, drag to transform', icon: 'ops.generic.cursor', keymap: 'Preview Tool: Cursor'}));
+		return dict ({'idname': 'builtin.cursor', 'label': 'Cursor', 'description': 'Set the cursor location, drag to transform', 'icon': 'ops.generic.cursor', 'keymap': 'Preview Tool: Cursor'});
 	}));},
-	get blade () {return __get__ (this, ToolDef.from_fn (function () {
+	get blade () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5372,7 +6831,7 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5385,21 +6844,45 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sequencer.split');
-			var row = layout.row ();
-			row.prop (props, 'type', __kwargtrans__ ({expand: true}));
-			layout.separator ();
-			var props = tool.operator_properties ('sequencer.box_blade');
-			layout.prop (props, 'remove_gaps', __kwargtrans__ ({expand: true}));
-			layout.prop (props, 'ignore_selection', __kwargtrans__ ({expand: true}));
-			layout.prop (props, 'ignore_connections', __kwargtrans__ ({expand: true}));
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.split');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'type', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.box_blade');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'remove_gaps', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ignore_selection', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'ignore_connections', __kwargtrans__ ({expand: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.blade', label: 'Blade', icon: 'ops.sequencer.blade', cursor: 'CROSSHAIR', widget: null, keymap: 'Sequencer Tool: Blade', draw_settings: draw_settings, options: new set (['KEYMAP_FALLBACK'])}));
+		return dict ({'idname': 'builtin.blade', 'label': 'Blade', 'icon': 'ops.sequencer.blade', 'cursor': 'CROSSHAIR', 'widget': null, 'keymap': 'Sequencer Tool: Blade', 'draw_settings': draw_settings, 'options': new set (['KEYMAP_FALLBACK'])});
 	}));},
-	get slip () {return __get__ (this, ToolDef.from_fn (function () {
+	get slip () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5407,12 +6890,12 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.slip', label: 'Slip', description: 'Shift underlying strip content without affecting handles', icon: 'ops.sequencer.slip', keymap: 'Sequencer Tool: Slip'}));
+		return dict ({'idname': 'builtin.slip', 'label': 'Slip', 'description': 'Shift underlying strip content without affecting handles', 'icon': 'ops.sequencer.slip', 'keymap': 'Sequencer Tool: Slip'});
 	}));},
-	get sample () {return __get__ (this, ToolDef.from_fn (function () {
+	get sample () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5420,12 +6903,12 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.sample', label: 'Sample', description: 'Sample pixel values under the cursor', icon: 'ops.paint.weight_sample', keymap: 'Preview Tool: Sample'}));
+		return dict ({'idname': 'builtin.sample', 'label': 'Sample', 'description': 'Sample pixel values under the cursor', 'icon': 'ops.paint.weight_sample', 'keymap': 'Preview Tool: Sample'});
 	}));},
-	get translate () {return __get__ (this, ToolDef.from_fn (function () {
+	get translate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5433,12 +6916,12 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.move', label: 'Move', icon: 'ops.transform.translate', widget: 'SEQUENCER_GGT_gizmo2d_translate', operator: 'transform.translate', keymap: 'Preview Tool: Move'}));
+		return dict ({'idname': 'builtin.move', 'label': 'Move', 'icon': 'ops.transform.translate', 'widget': 'SEQUENCER_GGT_gizmo2d_translate', 'operator': 'transform.translate', 'keymap': 'Preview Tool: Move'});
 	}));},
-	get rotate () {return __get__ (this, ToolDef.from_fn (function () {
+	get rotate () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5446,12 +6929,12 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.rotate', label: 'Rotate', icon: 'ops.transform.rotate', widget: 'SEQUENCER_GGT_gizmo2d_rotate', operator: 'transform.rotate', keymap: 'Preview Tool: Rotate'}));
+		return dict ({'idname': 'builtin.rotate', 'label': 'Rotate', 'icon': 'ops.transform.rotate', 'widget': 'SEQUENCER_GGT_gizmo2d_rotate', 'operator': 'transform.rotate', 'keymap': 'Preview Tool: Rotate'});
 	}));},
-	get scale () {return __get__ (this, ToolDef.from_fn (function () {
+	get scale () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5459,12 +6942,12 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.scale', label: 'Scale', icon: 'ops.transform.resize', widget: 'SEQUENCER_GGT_gizmo2d_resize', operator: 'transform.resize', keymap: 'Preview Tool: Scale'}));
+		return dict ({'idname': 'builtin.scale', 'label': 'Scale', 'icon': 'ops.transform.resize', 'widget': 'SEQUENCER_GGT_gizmo2d_resize', 'operator': 'transform.resize', 'keymap': 'Preview Tool: Scale'});
 	}));},
-	get transform () {return __get__ (this, ToolDef.from_fn (function () {
+	get transform () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5472,15 +6955,15 @@ export var _defs_sequencer_generic =  __class__ ('_defs_sequencer_generic', [obj
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.transform', label: 'Transform', description: 'Supports any combination of grab, rotate, and scale at once', icon: 'ops.transform.transform', widget: 'SEQUENCER_GGT_gizmo2d'}));
+		return dict ({'idname': 'builtin.transform', 'label': 'Transform', 'description': 'Supports any combination of grab, rotate, and scale at once', 'icon': 'ops.transform.transform', 'widget': 'SEQUENCER_GGT_gizmo2d'});
 	}));}
 });
 export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [object], {
 	__module__: __name__,
-	get select_preview () {return __get__ (this, ToolDef.from_fn (function () {
+	get select_preview () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5488,12 +6971,12 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 		}
 		else {
 		}
-		return dict (__kwargtrans__ ({idname: 'builtin.select', label: 'Tweak', icon: 'ops.generic.select', widget: null, keymap: 'Preview Tool: Tweak'}));
+		return dict ({'idname': 'builtin.select', 'label': 'Tweak', 'icon': 'ops.generic.select', 'widget': null, 'keymap': 'Preview Tool: Tweak'});
 	}));},
-	get box_timeline () {return __get__ (this, ToolDef.from_fn (function () {
+	get box_timeline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5504,7 +6987,7 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5517,17 +7000,26 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sequencer.select_box');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_box');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_box', label: 'Select Box', icon: 'ops.generic.select_box', widget: null, keymap: 'Sequencer Tool: Select Box', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_box', 'label': 'Select Box', 'icon': 'ops.generic.select_box', 'widget': null, 'keymap': 'Sequencer Tool: Select Box', 'draw_settings': draw_settings});
 	}));},
-	get box_preview () {return __get__ (this, ToolDef.from_fn (function () {
+	get box_preview () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5538,7 +7030,7 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5551,17 +7043,26 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sequencer.select_box');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_box');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'builtin.select_box', label: 'Select Box', icon: 'ops.generic.select_box', widget: null, keymap: 'Preview Tool: Select Box', draw_settings: draw_settings}));
+		return dict ({'idname': 'builtin.select_box', 'label': 'Select Box', 'icon': 'ops.generic.select_box', 'widget': null, 'keymap': 'Preview Tool: Select Box', 'draw_settings': draw_settings});
 	}));},
-	get lasso_timeline () {return __get__ (this, ToolDef.from_fn (function () {
+	get lasso_timeline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5572,7 +7073,7 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5585,17 +7086,26 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sequencer.select_lasso');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_lasso');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'sequencer.select_lasso', label: 'Select Lasso', icon: 'ops.generic.select_lasso', widget: null, keymap: 'Sequencer Tool: Select Lasso', draw_settings: draw_settings}));
+		return dict ({'idname': 'sequencer.select_lasso', 'label': 'Select Lasso', 'icon': 'ops.generic.select_lasso', 'widget': null, 'keymap': 'Sequencer Tool: Select Lasso', 'draw_settings': draw_settings});
 	}));},
-	get lasso_preview () {return __get__ (this, ToolDef.from_fn (function () {
+	get lasso_preview () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5606,7 +7116,7 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5619,17 +7129,26 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sequencer.select_lasso');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_lasso');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
 		};
-		return dict (__kwargtrans__ ({idname: 'sequencer.select_lasso', label: 'Select Lasso', icon: 'ops.generic.select_lasso', widget: null, keymap: 'Preview Tool: Select Lasso', draw_settings: draw_settings}));
+		return dict ({'idname': 'sequencer.select_lasso', 'label': 'Select Lasso', 'icon': 'ops.generic.select_lasso', 'widget': null, 'keymap': 'Preview Tool: Select Lasso', 'draw_settings': draw_settings});
 	}));},
-	get circle_timeline () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle_timeline () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5640,7 +7159,7 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5653,16 +7172,28 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sequencer.select_circle');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_circle');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
-			layout.prop (props, 'radius');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'radius');
+			}) ();
 		};
 		var draw_cursor = function (_context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5675,17 +7206,20 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
-			var props = tool.operator_properties ('sequencer.select_circle');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_circle');
+			}) ();
 			var radius = props.radius;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius, __kwargtrans__ ({segments: 32}));
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius, __kwargtrans__ ({segments: 32}));
 		};
-		return dict (__kwargtrans__ ({idname: 'sequencer.select_circle', label: 'Select Circle', icon: 'ops.generic.select_circle', widget: null, keymap: 'Sequencer Tool: Select Circle', draw_settings: draw_settings, draw_cursor: draw_cursor}));
+		return dict ({'idname': 'sequencer.select_circle', 'label': 'Select Circle', 'icon': 'ops.generic.select_circle', 'widget': null, 'keymap': 'Sequencer Tool: Select Circle', 'draw_settings': draw_settings, 'draw_cursor': draw_cursor});
 	}));},
-	get circle_preview () {return __get__ (this, ToolDef.from_fn (function () {
+	get circle_preview () {return __get__ (this, __call__ (ToolDef.from_fn, null, function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -5696,7 +7230,7 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 		var draw_settings = function (_context, layout, tool) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5709,16 +7243,28 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var props = tool.operator_properties ('sequencer.select_circle');
-			var row = layout.row ();
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_circle');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.use_property_split = false;
-			row.prop (props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
-			layout.prop (props, 'radius');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, props, 'mode', __kwargtrans__ ({text: '', expand: true, icon_only: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, props, 'radius');
+			}) ();
 		};
 		var draw_cursor = function (_context, tool, xy) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -5731,14 +7277,26 @@ export var _defs_sequencer_select =  __class__ ('_defs_sequencer_select', [objec
 			}
 			else {
 			}
-			var draw_circle_2d = _member ('gpu_extras.presets', 'draw_circle_2d');
-			var props = tool.operator_properties ('sequencer.select_circle');
+			var draw_circle_2d = __call__ (_member, null, 'gpu_extras.presets', 'draw_circle_2d');
+			var props = (function () {
+				var __accu0__ = tool;
+				return __call__ (__accu0__.operator_properties, __accu0__, 'sequencer.select_circle');
+			}) ();
 			var radius = props.radius;
-			draw_circle_2d (xy, tuple ([1.0]) * 4, radius, __kwargtrans__ ({segments: 32}));
+			__call__ (draw_circle_2d, null, xy, __mul__ (tuple ([1.0]), 4), radius, __kwargtrans__ ({segments: 32}));
 		};
-		return dict (__kwargtrans__ ({idname: 'sequencer.select_circle', label: 'Select Circle', icon: 'ops.generic.select_circle', widget: null, keymap: 'Preview Tool: Select Circle', draw_settings: draw_settings, draw_cursor: draw_cursor}));
+		return dict ({'idname': 'sequencer.select_circle', 'label': 'Select Circle', 'icon': 'ops.generic.select_circle', 'widget': null, 'keymap': 'Preview Tool: Select Circle', 'draw_settings': draw_settings, 'draw_cursor': draw_cursor});
 	}));}
 });
+export var _IMAGE_PT_tools_active__brush_tool = (function () {
+	var __accu0__ = ToolDef;
+	return __call__ (__accu0__.from_dict, __accu0__, dict ({'idname': 'builtin.brush', 'label': 'Brush', 'icon': 'brush.generic', 'options': new set (['USE_BRUSHES'])}));
+}) ();
+export var _IMAGE_PT_tools_active__tools_transform = tuple ([_defs_image_uv_transform.translate, _defs_image_uv_transform.rotate, _defs_image_uv_transform.scale, _defs_image_uv_transform.transform]);
+export var _IMAGE_PT_tools_active__tools_select = tuple ([tuple ([_defs_image_uv_select.select, _defs_image_uv_select.box, _defs_image_uv_select.circle, _defs_image_uv_select.lasso])]);
+export var _IMAGE_PT_tools_active__tools_mask_transform = tuple ([_defs_image_mask_transform.translate, _defs_image_mask_transform.rotate, _defs_image_mask_transform.scale, _defs_image_mask_transform.transform]);
+export var _IMAGE_PT_tools_active__tools_mask_select = tuple ([tuple ([_defs_image_mask_select.select, _defs_image_mask_select.box, _defs_image_mask_select.circle, _defs_image_mask_select.lasso])]);
+export var _IMAGE_PT_tools_active__tools_annotate = tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]);
 export var IMAGE_PT_tools_active =  __class__ ('IMAGE_PT_tools_active', [ToolSelectPanelHelper, Panel], {
 	__module__: __name__,
 	bl_space_type: 'IMAGE_EDITOR',
@@ -5753,7 +7311,7 @@ export var IMAGE_PT_tools_active =  __class__ ('IMAGE_PT_tools_active', [ToolSel
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5774,10 +7332,19 @@ export var IMAGE_PT_tools_active =  __class__ ('IMAGE_PT_tools_active', [ToolSel
 				var mode = context.space_data.mode;
 			}
 		}
-		for (var tools of tuple ([cls._tools [null], cls._tools.py_get (mode, tuple ([]))])) {
-			for (var item of tools) {
-				if (!(py_typeof (item) === ToolDef) && callable (item)) {
-					yield* item (context);
+		var __iterable0__ = tuple ([__getitem__ (cls._tools, null), (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_get, __accu0__, mode, tuple ([]));
+		}) ()]);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var tools = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = tools;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var item = __getitem__ (__iterable1__, __index1__);
+				if (!(py_typeof (item) === ToolDef) && __call__ (callable, null, item)) {
+					yield* __call__ (item, null, context);
 				}
 				else {
 					yield item;
@@ -5788,7 +7355,7 @@ export var IMAGE_PT_tools_active =  __class__ ('IMAGE_PT_tools_active', [ToolSel
 	get tools_all () {return __getcm__ (this, function* (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5799,16 +7366,21 @@ export var IMAGE_PT_tools_active =  __class__ ('IMAGE_PT_tools_active', [ToolSel
 		}
 		else {
 		}
-		yield* cls._tools.py_items ()});},
-	_brush_tool: ToolDef.from_dict (dict (__kwargtrans__ ({idname: 'builtin.brush', label: 'Brush', icon: 'brush.generic', options: new set (['USE_BRUSHES'])}))),
-	_tools_transform: tuple ([_defs_image_uv_transform.translate, _defs_image_uv_transform.rotate, _defs_image_uv_transform.scale, _defs_image_uv_transform.transform]),
-	_tools_select: tuple ([tuple ([_defs_image_uv_select.select, _defs_image_uv_select.box, _defs_image_uv_select.circle, _defs_image_uv_select.lasso])]),
-	_tools_mask_transform: tuple ([_defs_image_mask_transform.translate, _defs_image_mask_transform.rotate, _defs_image_mask_transform.scale, _defs_image_mask_transform.transform]),
-	_tools_mask_select: tuple ([tuple ([_defs_image_mask_select.select, _defs_image_mask_select.box, _defs_image_mask_select.circle, _defs_image_mask_select.lasso])]),
+		yield* (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ()});},
+	_brush_tool: _IMAGE_PT_tools_active__brush_tool,
+	_tools_transform: _IMAGE_PT_tools_active__tools_transform,
+	_tools_select: _IMAGE_PT_tools_active__tools_select,
+	_tools_mask_transform: _IMAGE_PT_tools_active__tools_mask_transform,
+	_tools_mask_select: _IMAGE_PT_tools_active__tools_mask_select,
 	_tools_mask_primitive: tuple ([tuple ([_defs_image_mask_primitive.circle, _defs_image_mask_primitive.box])]),
-	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])])
+	_tools_annotate: _IMAGE_PT_tools_active__tools_annotate,
+	_tools: dict ({null: [], 'VIEW': __call__ (_joined, null, [_defs_image_generic.sample], _IMAGE_PT_tools_active__tools_annotate), 'UV': __call__ (_joined, null, _IMAGE_PT_tools_active__tools_select, [_defs_image_generic.cursor, null], _IMAGE_PT_tools_active__tools_transform, [null], _IMAGE_PT_tools_active__tools_annotate, [null, _defs_image_uv_edit.rip_region, null, _defs_image_uv_sculpt.grab, _defs_image_uv_sculpt.relax, _defs_image_uv_sculpt.pinch]), 'MASK': __call__ (_joined, null, _IMAGE_PT_tools_active__tools_mask_select, [_defs_image_generic.cursor, null], _IMAGE_PT_tools_active__tools_mask_transform, [null], _IMAGE_PT_tools_active__tools_annotate, [null]), 'PAINT': __call__ (_joined, null, [_IMAGE_PT_tools_active__brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null], _IMAGE_PT_tools_active__tools_annotate)})
 });
-IMAGE_PT_tools_active._tools = dict ({null: [], 'VIEW': _joined ([_defs_image_generic.sample], IMAGE_PT_tools_active._tools_annotate), 'UV': _joined (IMAGE_PT_tools_active._tools_select, [_defs_image_generic.cursor, null], IMAGE_PT_tools_active._tools_transform, [null], IMAGE_PT_tools_active._tools_annotate, [null, _defs_image_uv_edit.rip_region, null, _defs_image_uv_sculpt.grab, _defs_image_uv_sculpt.relax, _defs_image_uv_sculpt.pinch]), 'MASK': _joined (IMAGE_PT_tools_active._tools_mask_select, [_defs_image_generic.cursor, null], IMAGE_PT_tools_active._tools_mask_transform, [null], IMAGE_PT_tools_active._tools_annotate, [null]), 'PAINT': _joined ([IMAGE_PT_tools_active._brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null], IMAGE_PT_tools_active._tools_annotate)});
+export var _NODE_PT_tools_active__tools_select = tuple ([tuple ([_defs_node_select.select, _defs_node_select.box, _defs_node_select.circle, _defs_node_select.lasso])]);
+export var _NODE_PT_tools_active__tools_annotate = tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]);
 export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelectPanelHelper, Panel], {
 	__module__: __name__,
 	bl_space_type: 'NODE_EDITOR',
@@ -5823,7 +7395,7 @@ export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelec
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5844,10 +7416,19 @@ export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelec
 				var mode = context.space_data.tree_type;
 			}
 		}
-		for (var tools of tuple ([cls._tools [null], cls._tools.py_get (mode, tuple ([]))])) {
-			for (var item of tools) {
-				if (!(py_typeof (item) === ToolDef) && callable (item)) {
-					yield* item (context);
+		var __iterable0__ = tuple ([__getitem__ (cls._tools, null), (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_get, __accu0__, mode, tuple ([]));
+		}) ()]);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var tools = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = tools;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var item = __getitem__ (__iterable1__, __index1__);
+				if (!(py_typeof (item) === ToolDef) && __call__ (callable, null, item)) {
+					yield* __call__ (item, null, context);
 				}
 				else {
 					yield item;
@@ -5858,7 +7439,7 @@ export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelec
 	get tools_all () {return __getcm__ (this, function* (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5869,11 +7450,33 @@ export var NODE_PT_tools_active =  __class__ ('NODE_PT_tools_active', [ToolSelec
 		}
 		else {
 		}
-		yield* cls._tools.py_items ()});},
-	_tools_select: tuple ([tuple ([_defs_node_select.select, _defs_node_select.box, _defs_node_select.circle, _defs_node_select.lasso])]),
-	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])])
+		yield* (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ()});},
+	_tools_select: _NODE_PT_tools_active__tools_select,
+	_tools_annotate: _NODE_PT_tools_active__tools_annotate,
+	_tools: dict ({null: __call__ (_joined, null, _NODE_PT_tools_active__tools_select, [null], _NODE_PT_tools_active__tools_annotate, [null, _defs_node_edit.links_cut, _defs_node_edit.links_mute, _defs_node_edit.add_reroute])})
 });
-NODE_PT_tools_active._tools = dict ({null: _joined (NODE_PT_tools_active._tools_select, [null], NODE_PT_tools_active._tools_annotate, [null, _defs_node_edit.links_cut, _defs_node_edit.links_mute, _defs_node_edit.add_reroute])});
+export var _VIEW3D_PT_tools_active__brush_tool = (function () {
+	var __accu0__ = ToolDef;
+	return __call__ (__accu0__.from_dict, __accu0__, dict ({'idname': 'builtin.brush', 'label': 'Brush', 'icon': 'brush.generic', 'options': new set (['USE_BRUSHES'])}));
+}) ();
+export var _VIEW3D_PT_tools_active__sculpt_tool = (function () {
+	var __accu0__ = ToolDef;
+	return __call__ (__accu0__.from_dict, __accu0__, dict ({'idname': 'builtin.brush', 'label': 'Brush', 'icon': 'brush.sculpt', 'options': new set (['USE_BRUSHES'])}));
+}) ();
+export var _VIEW3D_PT_tools_active__draw_tool = (function () {
+	var __accu0__ = ToolDef;
+	return __call__ (__accu0__.from_dict, __accu0__, dict ({'idname': 'builtin.brush', 'label': 'Brush', 'icon': 'brush.draw', 'options': new set (['USE_BRUSHES'])}));
+}) ();
+export var _VIEW3D_PT_tools_active__tools_transform = tuple ([_defs_transform.translate, _defs_transform.rotate, tuple ([_defs_transform.scale, _defs_transform.scale_cage]), _defs_transform.transform]);
+export var _VIEW3D_PT_tools_active__tools_select = tuple ([tuple ([_defs_view3d_select.select, _defs_view3d_select.box, _defs_view3d_select.circle, _defs_view3d_select.lasso])]);
+export var _VIEW3D_PT_tools_active__tools_annotate = tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]);
+export var _VIEW3D_PT_tools_active__tools_grease_pencil_primitives = tuple ([tuple ([_defs_grease_pencil_paint.box, _defs_grease_pencil_paint.circle, _defs_grease_pencil_paint.line, _defs_grease_pencil_paint.polyline, _defs_grease_pencil_paint.arc, _defs_grease_pencil_paint.curve])]);
+export var _VIEW3D_PT_tools_active__tools_view3d_add = tuple ([_defs_view3d_add.cube_add, _defs_view3d_add.cone_add, _defs_view3d_add.cylinder_add, _defs_view3d_add.uv_sphere_add, _defs_view3d_add.ico_sphere_add]);
+export var _VIEW3D_PT_tools_active__tools_pose = tuple ([_defs_pose.breakdown, _defs_pose.push, _defs_pose.relax]);
+export var _VIEW3D_PT_tools_active__tools_default = __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_select, [_defs_view3d_generic.cursor, null], _VIEW3D_PT_tools_active__tools_transform, [null], _VIEW3D_PT_tools_active__tools_annotate, [_defs_view3d_generic.ruler]);
 export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolSelectPanelHelper, Panel], {
 	__module__: __name__,
 	bl_space_type: 'VIEW_3D',
@@ -5888,7 +7491,7 @@ export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolS
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5904,10 +7507,19 @@ export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolS
 		if (mode === null) {
 			var mode = context.mode;
 		}
-		for (var tools of tuple ([cls._tools [null], cls._tools.py_get (mode, tuple ([]))])) {
-			for (var item of tools) {
-				if (!(py_typeof (item) === ToolDef) && callable (item)) {
-					yield* item (context);
+		var __iterable0__ = tuple ([__getitem__ (cls._tools, null), (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_get, __accu0__, mode, tuple ([]));
+		}) ()]);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var tools = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = tools;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var item = __getitem__ (__iterable1__, __index1__);
+				if (!(py_typeof (item) === ToolDef) && __call__ (callable, null, item)) {
+					yield* __call__ (item, null, context);
 				}
 				else {
 					yield item;
@@ -5918,7 +7530,7 @@ export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolS
 	get tools_all () {return __getcm__ (this, function* (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -5929,124 +7541,146 @@ export var VIEW3D_PT_tools_active =  __class__ ('VIEW3D_PT_tools_active', [ToolS
 		}
 		else {
 		}
-		yield* cls._tools.py_items ()});},
-	_brush_tool: ToolDef.from_dict (dict (__kwargtrans__ ({idname: 'builtin.brush', label: 'Brush', icon: 'brush.generic', options: new set (['USE_BRUSHES'])}))),
-	_sculpt_tool: ToolDef.from_dict (dict (__kwargtrans__ ({idname: 'builtin.brush', label: 'Brush', icon: 'brush.sculpt', options: new set (['USE_BRUSHES'])}))),
-	_draw_tool: ToolDef.from_dict (dict (__kwargtrans__ ({idname: 'builtin.brush', label: 'Brush', icon: 'brush.draw', options: new set (['USE_BRUSHES'])}))),
-	_tools_transform: tuple ([_defs_transform.translate, _defs_transform.rotate, tuple ([_defs_transform.scale, _defs_transform.scale_cage]), _defs_transform.transform]),
-	_tools_select: tuple ([tuple ([_defs_view3d_select.select, _defs_view3d_select.box, _defs_view3d_select.circle, _defs_view3d_select.lasso])]),
-	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]),
-	_tools_grease_pencil_primitives: tuple ([tuple ([_defs_grease_pencil_paint.box, _defs_grease_pencil_paint.circle, _defs_grease_pencil_paint.line, _defs_grease_pencil_paint.polyline, _defs_grease_pencil_paint.arc, _defs_grease_pencil_paint.curve])]),
-	_tools_view3d_add: tuple ([_defs_view3d_add.cube_add, _defs_view3d_add.cone_add, _defs_view3d_add.cylinder_add, _defs_view3d_add.uv_sphere_add, _defs_view3d_add.ico_sphere_add]),
-	_tools_pose: tuple ([_defs_pose.breakdown, _defs_pose.push, _defs_pose.relax])
+		yield* (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ()});},
+	_brush_tool: _VIEW3D_PT_tools_active__brush_tool,
+	_sculpt_tool: _VIEW3D_PT_tools_active__sculpt_tool,
+	_draw_tool: _VIEW3D_PT_tools_active__draw_tool,
+	_tools_transform: _VIEW3D_PT_tools_active__tools_transform,
+	_tools_select: _VIEW3D_PT_tools_active__tools_select,
+	_tools_annotate: _VIEW3D_PT_tools_active__tools_annotate,
+	_tools_grease_pencil_primitives: _VIEW3D_PT_tools_active__tools_grease_pencil_primitives,
+	_tools_view3d_add: _VIEW3D_PT_tools_active__tools_view3d_add,
+	_tools_pose: _VIEW3D_PT_tools_active__tools_pose,
+	_tools_default: _VIEW3D_PT_tools_active__tools_default,
+	_tools: dict ({null: [], 'OBJECT': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _VIEW3D_PT_tools_active__tools_view3d_add, null, _VIEW3D_PT_tools_active__tools_pose]), 'POSE': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _VIEW3D_PT_tools_active__tools_pose]), 'EDIT_ARMATURE': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _defs_edit_armature.roll, tuple ([_defs_edit_armature.bone_size, _defs_edit_armature.bone_envelope]), null, tuple ([_defs_edit_armature.extrude, _defs_edit_armature.extrude_cursor]), _defs_transform.shear]), 'EDIT_MESH': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _VIEW3D_PT_tools_active__tools_view3d_add, null, tuple ([_defs_edit_mesh.extrude, _defs_edit_mesh.extrude_manifold, _defs_edit_mesh.extrude_normals, _defs_edit_mesh.extrude_individual, _defs_edit_mesh.extrude_cursor]), _defs_edit_mesh.inset, _defs_edit_mesh.bevel, tuple ([_defs_edit_mesh.loopcut_slide, _defs_edit_mesh.offset_edge_loops_slide]), tuple ([_defs_edit_mesh.knife, _defs_edit_mesh.bisect]), _defs_edit_mesh.poly_build, _defs_edit_mesh.spin, tuple ([_defs_edit_mesh.vertex_smooth, _defs_edit_mesh.vertex_randomize]), tuple ([_defs_edit_mesh.edge_slide, _defs_edit_mesh.vert_slide]), tuple ([_defs_edit_mesh.shrink_fatten, _defs_edit_mesh.push_pull]), tuple ([_defs_transform.shear, _defs_edit_mesh.tosphere]), tuple ([_defs_edit_mesh.rip_region, _defs_edit_mesh.rip_edge])]), 'EDIT_CURVE': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _defs_edit_curve.draw, _defs_edit_curve.pen, tuple ([_defs_edit_curve.extrude, _defs_edit_curve.extrude_cursor]), null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt, null, _defs_transform.shear, _defs_edit_curve.curve_vertex_randomize]), 'EDIT_CURVES': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _defs_edit_curves.draw, _defs_edit_curves.pen, null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt]), 'EDIT_SURFACE': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _defs_transform.shear]), 'EDIT_METABALL': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _defs_transform.shear]), 'EDIT_LATTICE': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_default, [null, _defs_transform.shear]), 'EDIT_TEXT': __call__ (_joined, null, [_defs_edit_text.select_text, _defs_view3d_generic.cursor, null], _VIEW3D_PT_tools_active__tools_annotate, [_defs_view3d_generic.ruler]), 'EDIT_GREASE_PENCIL': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_select, [_defs_view3d_generic.cursor, null], _VIEW3D_PT_tools_active__tools_transform, [null, _defs_grease_pencil_edit.pen, null, _defs_edit_curve.curve_radius, _defs_transform.bend, tuple ([_defs_grease_pencil_edit.shear, _defs_edit_mesh.tosphere]), null, _defs_grease_pencil_edit.interpolate, null, _defs_grease_pencil_edit.texture_gradient, null], _VIEW3D_PT_tools_active__tools_annotate), 'EDIT_POINTCLOUD': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_select, [_defs_view3d_generic.cursor, null], _VIEW3D_PT_tools_active__tools_transform, [null], _VIEW3D_PT_tools_active__tools_annotate, [_defs_view3d_generic.ruler]), 'PARTICLE': __call__ (_joined, null, _VIEW3D_PT_tools_active__tools_select, [_defs_view3d_generic.cursor, null, _defs_particle.generate_from_brushes]), 'SCULPT': __call__ (_joined, null, [_VIEW3D_PT_tools_active__sculpt_tool, _defs_sculpt.paint, _defs_sculpt.mask, _defs_sculpt.draw_face_sets, (function __lambda__ (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return ((function () {
+			var __accu0__ = _defs_sculpt;
+			return __call__ (__accu0__.poll_dyntopo, __accu0__, context);
+		}) () ? tuple ([_defs_sculpt.dyntopo_density]) : tuple ([]));
+	}), (function __lambda__ (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return ((function () {
+			var __accu0__ = _defs_sculpt;
+			return __call__ (__accu0__.poll_multires, __accu0__, context);
+		}) () ? tuple ([_defs_sculpt.multires_eraser, _defs_sculpt.multires_smear]) : tuple ([]));
+	}), null, _VIEW3D_PT_tools_active__tools_view3d_add, null, tuple ([_defs_sculpt.mask_border, _defs_sculpt.mask_lasso, _defs_sculpt.mask_line, _defs_sculpt.mask_polyline]), tuple ([_defs_sculpt.hide_border, _defs_sculpt.hide_lasso, _defs_sculpt.hide_line, _defs_sculpt.hide_polyline]), tuple ([_defs_sculpt.face_set_box, _defs_sculpt.face_set_lasso, _defs_sculpt.face_set_line, _defs_sculpt.face_set_polyline]), tuple ([_defs_sculpt.trim_box, _defs_sculpt.trim_lasso, _defs_sculpt.trim_line, _defs_sculpt.trim_polyline]), _defs_sculpt.project_line, null, _defs_sculpt.mesh_filter, _defs_sculpt.cloth_filter, _defs_sculpt.color_filter, null, _defs_sculpt.face_set_edit, _defs_sculpt.mask_by_color, null, _defs_transform.translate, _defs_transform.rotate, _defs_transform.scale, _defs_transform.transform, null], _VIEW3D_PT_tools_active__tools_annotate), 'SCULPT_GREASE_PENCIL': __call__ (_joined, null, [_VIEW3D_PT_tools_active__sculpt_tool, _defs_grease_pencil_sculpt.clone, null], _VIEW3D_PT_tools_active__tools_annotate, [(function __lambda__ (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return ((function () {
+			var __accu0__ = _defs_grease_pencil_sculpt;
+			return __call__ (__accu0__.poll_select_mask, __accu0__, context);
+		}) () ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+	})]), 'PAINT_TEXTURE': __call__ (_joined, null, [_VIEW3D_PT_tools_active__brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null, (function __lambda__ (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return ((function () {
+			var __accu0__ = _defs_texture_paint;
+			return __call__ (__accu0__.poll_select_mask, __accu0__, context);
+		}) () ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+	})], _VIEW3D_PT_tools_active__tools_annotate), 'PAINT_VERTEX': __call__ (_joined, null, [_VIEW3D_PT_tools_active__brush_tool, _defs_vertex_paint.blur, _defs_vertex_paint.average, _defs_vertex_paint.smear, null, (function __lambda__ (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return ((function () {
+			var __accu0__ = _defs_vertex_paint;
+			return __call__ (__accu0__.poll_select_mask, __accu0__, context);
+		}) () ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+	})], _VIEW3D_PT_tools_active__tools_annotate), 'PAINT_WEIGHT': __call__ (_joined, null, [_VIEW3D_PT_tools_active__brush_tool, _defs_weight_paint.blur, _defs_weight_paint.average, _defs_weight_paint.smear, _defs_weight_paint.gradient, null, tuple ([_defs_weight_paint.sample_weight, _defs_weight_paint.sample_weight_group]), null, (function __lambda__ (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return (context === null || context.pose_object ? __call__ (_joined, null, [_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform) : tuple ([]));
+	}), null, _defs_weight_paint.poll_select_tools], _VIEW3D_PT_tools_active__tools_annotate), 'PAINT_GREASE_PENCIL': __call__ (_joined, null, [_defs_view3d_generic.cursor, null, _VIEW3D_PT_tools_active__draw_tool, _defs_grease_pencil_paint.erase, _defs_grease_pencil_paint.fill], _VIEW3D_PT_tools_active__tools_grease_pencil_primitives, [null, _defs_grease_pencil_paint.trim, null, _defs_grease_pencil_paint.eyedropper, null, _defs_grease_pencil_paint.interpolate]), 'WEIGHT_GREASE_PENCIL': __call__ (_joined, null, [_VIEW3D_PT_tools_active__brush_tool, _defs_grease_pencil_weight.blur, _defs_grease_pencil_weight.average, _defs_grease_pencil_weight.smear, null], _VIEW3D_PT_tools_active__tools_annotate), 'VERTEX_GREASE_PENCIL': __call__ (_joined, null, [_VIEW3D_PT_tools_active__brush_tool, _defs_grease_pencil_vertex.blur, _defs_grease_pencil_vertex.average, _defs_grease_pencil_vertex.smear, _defs_grease_pencil_vertex.py_replace, null], _VIEW3D_PT_tools_active__tools_annotate, [null, (function __lambda__ (context) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return ((function () {
+			var __accu0__ = _defs_grease_pencil_vertex;
+			return __call__ (__accu0__.poll_select_mask, __accu0__, context);
+		}) () ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
+	})]), 'SCULPT_CURVES': __call__ (_joined, null, [_VIEW3D_PT_tools_active__sculpt_tool, _defs_curves_sculpt.select, _defs_curves_sculpt.density, _defs_curves_sculpt.add, _defs_curves_sculpt.delete, null], _VIEW3D_PT_tools_active__tools_annotate)})
 });
-VIEW3D_PT_tools_active._tools_default = _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform, [null], VIEW3D_PT_tools_active._tools_annotate, [_defs_view3d_generic.ruler]);
-VIEW3D_PT_tools_active._tools = dict ({null: [], 'OBJECT': _joined (VIEW3D_PT_tools_active._tools_default, [null, VIEW3D_PT_tools_active._tools_view3d_add, null, VIEW3D_PT_tools_active._tools_pose]), 'POSE': _joined (VIEW3D_PT_tools_active._tools_default, [null, VIEW3D_PT_tools_active._tools_pose]), 'EDIT_ARMATURE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_edit_armature.roll, tuple ([_defs_edit_armature.bone_size, _defs_edit_armature.bone_envelope]), null, tuple ([_defs_edit_armature.extrude, _defs_edit_armature.extrude_cursor]), _defs_transform.shear]), 'EDIT_MESH': _joined (VIEW3D_PT_tools_active._tools_default, [null, VIEW3D_PT_tools_active._tools_view3d_add, null, tuple ([_defs_edit_mesh.extrude, _defs_edit_mesh.extrude_manifold, _defs_edit_mesh.extrude_normals, _defs_edit_mesh.extrude_individual, _defs_edit_mesh.extrude_cursor]), _defs_edit_mesh.inset, _defs_edit_mesh.bevel, tuple ([_defs_edit_mesh.loopcut_slide, _defs_edit_mesh.offset_edge_loops_slide]), tuple ([_defs_edit_mesh.knife, _defs_edit_mesh.bisect]), _defs_edit_mesh.poly_build, _defs_edit_mesh.spin, tuple ([_defs_edit_mesh.vertex_smooth, _defs_edit_mesh.vertex_randomize]), tuple ([_defs_edit_mesh.edge_slide, _defs_edit_mesh.vert_slide]), tuple ([_defs_edit_mesh.shrink_fatten, _defs_edit_mesh.push_pull]), tuple ([_defs_transform.shear, _defs_edit_mesh.tosphere]), tuple ([_defs_edit_mesh.rip_region, _defs_edit_mesh.rip_edge])]), 'EDIT_CURVE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_edit_curve.draw, _defs_edit_curve.pen, tuple ([_defs_edit_curve.extrude, _defs_edit_curve.extrude_cursor]), null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt, null, _defs_transform.shear, _defs_edit_curve.curve_vertex_randomize]), 'EDIT_CURVES': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_edit_curves.draw, _defs_edit_curves.pen, null, _defs_edit_curve.curve_radius, _defs_edit_curve.tilt]), 'EDIT_SURFACE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_transform.shear]), 'EDIT_METABALL': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_transform.shear]), 'EDIT_LATTICE': _joined (VIEW3D_PT_tools_active._tools_default, [null, _defs_transform.shear]), 'EDIT_TEXT': _joined ([_defs_edit_text.select_text, _defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_annotate, [_defs_view3d_generic.ruler]), 'EDIT_GREASE_PENCIL': _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform, [null, _defs_grease_pencil_edit.pen, null, _defs_edit_curve.curve_radius, _defs_transform.bend, tuple ([_defs_grease_pencil_edit.shear, _defs_edit_mesh.tosphere]), null, _defs_grease_pencil_edit.interpolate, null, _defs_grease_pencil_edit.texture_gradient, null], VIEW3D_PT_tools_active._tools_annotate), 'EDIT_POINTCLOUD': _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform, [null], VIEW3D_PT_tools_active._tools_annotate, [_defs_view3d_generic.ruler]), 'PARTICLE': _joined (VIEW3D_PT_tools_active._tools_select, [_defs_view3d_generic.cursor, null, _defs_particle.generate_from_brushes]), 'SCULPT': _joined ([VIEW3D_PT_tools_active._sculpt_tool, _defs_sculpt.paint, _defs_sculpt.mask, _defs_sculpt.draw_face_sets, (function __lambda__ (context) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return (_defs_sculpt.poll_dyntopo (context) ? tuple ([_defs_sculpt.dyntopo_density]) : tuple ([]));
-}), (function __lambda__ (context) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return (_defs_sculpt.poll_multires (context) ? tuple ([_defs_sculpt.multires_eraser, _defs_sculpt.multires_smear]) : tuple ([]));
-}), null, VIEW3D_PT_tools_active._tools_view3d_add, null, tuple ([_defs_sculpt.mask_border, _defs_sculpt.mask_lasso, _defs_sculpt.mask_line, _defs_sculpt.mask_polyline]), tuple ([_defs_sculpt.hide_border, _defs_sculpt.hide_lasso, _defs_sculpt.hide_line, _defs_sculpt.hide_polyline]), tuple ([_defs_sculpt.face_set_box, _defs_sculpt.face_set_lasso, _defs_sculpt.face_set_line, _defs_sculpt.face_set_polyline]), tuple ([_defs_sculpt.trim_box, _defs_sculpt.trim_lasso, _defs_sculpt.trim_line, _defs_sculpt.trim_polyline]), _defs_sculpt.project_line, null, _defs_sculpt.mesh_filter, _defs_sculpt.cloth_filter, _defs_sculpt.color_filter, null, _defs_sculpt.face_set_edit, _defs_sculpt.mask_by_color, null, _defs_transform.translate, _defs_transform.rotate, _defs_transform.scale, _defs_transform.transform, null], VIEW3D_PT_tools_active._tools_annotate), 'SCULPT_GREASE_PENCIL': _joined ([VIEW3D_PT_tools_active._sculpt_tool, _defs_grease_pencil_sculpt.clone, null], VIEW3D_PT_tools_active._tools_annotate, [(function __lambda__ (context) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return (_defs_grease_pencil_sculpt.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-})]), 'PAINT_TEXTURE': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_texture_paint.blur, _defs_texture_paint.smear, _defs_texture_paint.clone, _defs_texture_paint.fill, _defs_texture_paint.mask, null, (function __lambda__ (context) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return (_defs_texture_paint.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-})], VIEW3D_PT_tools_active._tools_annotate), 'PAINT_VERTEX': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_vertex_paint.blur, _defs_vertex_paint.average, _defs_vertex_paint.smear, null, (function __lambda__ (context) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return (_defs_vertex_paint.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-})], VIEW3D_PT_tools_active._tools_annotate), 'PAINT_WEIGHT': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_weight_paint.blur, _defs_weight_paint.average, _defs_weight_paint.smear, _defs_weight_paint.gradient, null, tuple ([_defs_weight_paint.sample_weight, _defs_weight_paint.sample_weight_group]), null, (function __lambda__ (context) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return (context === null || context.pose_object ? _joined ([_defs_view3d_generic.cursor, null], VIEW3D_PT_tools_active._tools_transform) : tuple ([]));
-}), null, _defs_weight_paint.poll_select_tools], VIEW3D_PT_tools_active._tools_annotate), 'PAINT_GREASE_PENCIL': _joined ([_defs_view3d_generic.cursor, null, VIEW3D_PT_tools_active._draw_tool, _defs_grease_pencil_paint.erase, _defs_grease_pencil_paint.fill], VIEW3D_PT_tools_active._tools_grease_pencil_primitives, [null, _defs_grease_pencil_paint.trim, null, _defs_grease_pencil_paint.eyedropper, null, _defs_grease_pencil_paint.interpolate]), 'WEIGHT_GREASE_PENCIL': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_grease_pencil_weight.blur, _defs_grease_pencil_weight.average, _defs_grease_pencil_weight.smear, null], VIEW3D_PT_tools_active._tools_annotate), 'VERTEX_GREASE_PENCIL': _joined ([VIEW3D_PT_tools_active._brush_tool, _defs_grease_pencil_vertex.blur, _defs_grease_pencil_vertex.average, _defs_grease_pencil_vertex.smear, _defs_grease_pencil_vertex.py_replace, null], VIEW3D_PT_tools_active._tools_annotate, [null, (function __lambda__ (context) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	return (_defs_grease_pencil_vertex.poll_select_mask (context) ? VIEW3D_PT_tools_active._tools_select : tuple ([]));
-})]), 'SCULPT_CURVES': _joined ([VIEW3D_PT_tools_active._sculpt_tool, _defs_curves_sculpt.select, _defs_curves_sculpt.density, _defs_curves_sculpt.add, _defs_curves_sculpt.delete, null], VIEW3D_PT_tools_active._tools_annotate)});
+export var _SEQUENCER_PT_tools_active__tools_annotate = tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])]);
 export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', [ToolSelectPanelHelper, Panel], {
 	__module__: __name__,
 	bl_space_type: 'SEQUENCE_EDITOR',
@@ -6061,7 +7695,7 @@ export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', 
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6079,10 +7713,19 @@ export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', 
 				var mode = context.space_data.view_type;
 			}
 		}
-		for (var tools of tuple ([cls._tools [null], cls._tools.py_get (mode, tuple ([]))])) {
-			for (var item of tools) {
-				if (!(py_typeof (item) === ToolDef) && callable (item)) {
-					yield* item (context);
+		var __iterable0__ = tuple ([__getitem__ (cls._tools, null), (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_get, __accu0__, mode, tuple ([]));
+		}) ()]);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var tools = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = tools;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var item = __getitem__ (__iterable1__, __index1__);
+				if (!(py_typeof (item) === ToolDef) && __call__ (callable, null, item)) {
+					yield* __call__ (item, null, context);
 				}
 				else {
 					yield item;
@@ -6093,7 +7736,7 @@ export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', 
 	get tools_all () {return __getcm__ (this, function* (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -6104,16 +7747,99 @@ export var SEQUENCER_PT_tools_active =  __class__ ('SEQUENCER_PT_tools_active', 
 		}
 		else {
 		}
-		yield* cls._tools.py_items ()});},
-	_tools_annotate: tuple ([tuple ([_defs_annotate.scribble, _defs_annotate.line, _defs_annotate.poly, _defs_annotate.eraser])])
+		yield* (function () {
+			var __accu0__ = cls._tools;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ()});},
+	_tools_annotate: _SEQUENCER_PT_tools_active__tools_annotate,
+	_tools: dict ({null: [], 'PREVIEW': __call__ (_joined, null, [tuple ([_defs_sequencer_select.select_preview, _defs_sequencer_select.box_preview, _defs_sequencer_select.circle_preview, _defs_sequencer_select.lasso_preview]), _defs_sequencer_generic.cursor, null, _defs_sequencer_generic.translate, _defs_sequencer_generic.rotate, _defs_sequencer_generic.scale, _defs_sequencer_generic.transform, null, _defs_sequencer_generic.sample], _SEQUENCER_PT_tools_active__tools_annotate), 'SEQUENCER': [tuple ([_defs_sequencer_select.box_timeline, _defs_sequencer_select.circle_timeline, _defs_sequencer_select.lasso_timeline]), _defs_sequencer_generic.blade, _defs_sequencer_generic.slip], 'SEQUENCER_PREVIEW': __call__ (_joined, null, [_defs_sequencer_select.box_timeline], _SEQUENCER_PT_tools_active__tools_annotate, [null, _defs_sequencer_generic.blade])})
 });
-SEQUENCER_PT_tools_active._tools = dict ({null: [], 'PREVIEW': _joined ([tuple ([_defs_sequencer_select.select_preview, _defs_sequencer_select.box_preview, _defs_sequencer_select.circle_preview, _defs_sequencer_select.lasso_preview]), _defs_sequencer_generic.cursor, null, _defs_sequencer_generic.translate, _defs_sequencer_generic.rotate, _defs_sequencer_generic.scale, _defs_sequencer_generic.transform, null, _defs_sequencer_generic.sample], SEQUENCER_PT_tools_active._tools_annotate), 'SEQUENCER': [tuple ([_defs_sequencer_select.box_timeline, _defs_sequencer_select.circle_timeline, _defs_sequencer_select.lasso_timeline]), _defs_sequencer_generic.blade, _defs_sequencer_generic.slip], 'SEQUENCER_PREVIEW': _joined ([_defs_sequencer_select.box_timeline], SEQUENCER_PT_tools_active._tools_annotate, [null, _defs_sequencer_generic.blade])});
 export var classes = tuple ([IMAGE_PT_tools_active, NODE_PT_tools_active, VIEW3D_PT_tools_active, SEQUENCER_PT_tools_active]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_toolsystem_toolbar.map
 export {BrushAssetShelf, Panel, ToolDef, ToolSelectPanelHelper, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, namedtuple, register_class, tip_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case 'kmi_to_string_or_none': kmi_to_string_or_none = value; break;
+		case 'generate_from_enum_ex': generate_from_enum_ex = value; break;
+		case '_template_widget': _template_widget = value; break;
+		case '_defs_view3d_generic': _defs_view3d_generic = value; break;
+		case '__defs_annotate_draw_settings_common': __defs_annotate_draw_settings_common = value; break;
+		case '_defs_annotate': _defs_annotate = value; break;
+		case '_defs_transform': _defs_transform = value; break;
+		case '_defs_view3d_select': _defs_view3d_select = value; break;
+		case 'ToolDefaults': ToolDefaults = value; break;
+		case '_defs_view3d_add': _defs_view3d_add = value; break;
+		case '_defs_edit_armature': _defs_edit_armature = value; break;
+		case '_defs_edit_mesh': _defs_edit_mesh = value; break;
+		case 'curve_draw_settings': curve_draw_settings = value; break;
+		case '_defs_edit_curve': _defs_edit_curve = value; break;
+		case '_defs_edit_curves': _defs_edit_curves = value; break;
+		case '_defs_edit_text': _defs_edit_text = value; break;
+		case '_defs_pose': _defs_pose = value; break;
+		case '_defs_particle': _defs_particle = value; break;
+		case '_defs_sculpt': _defs_sculpt = value; break;
+		case '_defs_vertex_paint': _defs_vertex_paint = value; break;
+		case '_defs_texture_paint': _defs_texture_paint = value; break;
+		case '_defs_weight_paint': _defs_weight_paint = value; break;
+		case '_defs_grease_pencil_paint': _defs_grease_pencil_paint = value; break;
+		case '_defs_grease_pencil_edit': _defs_grease_pencil_edit = value; break;
+		case '_defs_image_generic': _defs_image_generic = value; break;
+		case '_defs_image_mask_transform': _defs_image_mask_transform = value; break;
+		case '_defs_image_mask_select': _defs_image_mask_select = value; break;
+		case '_defs_image_mask_primitive': _defs_image_mask_primitive = value; break;
+		case '_defs_image_uv_transform': _defs_image_uv_transform = value; break;
+		case '_defs_image_uv_select': _defs_image_uv_select = value; break;
+		case '_defs_image_uv_edit': _defs_image_uv_edit = value; break;
+		case '_defs_image_uv_sculpt': _defs_image_uv_sculpt = value; break;
+		case '_defs_grease_pencil_sculpt': _defs_grease_pencil_sculpt = value; break;
+		case '_defs_grease_pencil_weight': _defs_grease_pencil_weight = value; break;
+		case '_defs_grease_pencil_vertex': _defs_grease_pencil_vertex = value; break;
+		case '_defs_curves_sculpt': _defs_curves_sculpt = value; break;
+		case '_defs_node_select': _defs_node_select = value; break;
+		case '_defs_node_edit': _defs_node_edit = value; break;
+		case '_defs_sequencer_generic': _defs_sequencer_generic = value; break;
+		case '_defs_sequencer_select': _defs_sequencer_select = value; break;
+		case '_IMAGE_PT_tools_active__brush_tool': _IMAGE_PT_tools_active__brush_tool = value; break;
+		case '_IMAGE_PT_tools_active__tools_transform': _IMAGE_PT_tools_active__tools_transform = value; break;
+		case '_IMAGE_PT_tools_active__tools_select': _IMAGE_PT_tools_active__tools_select = value; break;
+		case '_IMAGE_PT_tools_active__tools_mask_transform': _IMAGE_PT_tools_active__tools_mask_transform = value; break;
+		case '_IMAGE_PT_tools_active__tools_mask_select': _IMAGE_PT_tools_active__tools_mask_select = value; break;
+		case '_IMAGE_PT_tools_active__tools_annotate': _IMAGE_PT_tools_active__tools_annotate = value; break;
+		case 'IMAGE_PT_tools_active': IMAGE_PT_tools_active = value; break;
+		case '_NODE_PT_tools_active__tools_select': _NODE_PT_tools_active__tools_select = value; break;
+		case '_NODE_PT_tools_active__tools_annotate': _NODE_PT_tools_active__tools_annotate = value; break;
+		case 'NODE_PT_tools_active': NODE_PT_tools_active = value; break;
+		case '_VIEW3D_PT_tools_active__brush_tool': _VIEW3D_PT_tools_active__brush_tool = value; break;
+		case '_VIEW3D_PT_tools_active__sculpt_tool': _VIEW3D_PT_tools_active__sculpt_tool = value; break;
+		case '_VIEW3D_PT_tools_active__draw_tool': _VIEW3D_PT_tools_active__draw_tool = value; break;
+		case '_VIEW3D_PT_tools_active__tools_transform': _VIEW3D_PT_tools_active__tools_transform = value; break;
+		case '_VIEW3D_PT_tools_active__tools_select': _VIEW3D_PT_tools_active__tools_select = value; break;
+		case '_VIEW3D_PT_tools_active__tools_annotate': _VIEW3D_PT_tools_active__tools_annotate = value; break;
+		case '_VIEW3D_PT_tools_active__tools_grease_pencil_primitives': _VIEW3D_PT_tools_active__tools_grease_pencil_primitives = value; break;
+		case '_VIEW3D_PT_tools_active__tools_view3d_add': _VIEW3D_PT_tools_active__tools_view3d_add = value; break;
+		case '_VIEW3D_PT_tools_active__tools_pose': _VIEW3D_PT_tools_active__tools_pose = value; break;
+		case '_VIEW3D_PT_tools_active__tools_default': _VIEW3D_PT_tools_active__tools_default = value; break;
+		case 'VIEW3D_PT_tools_active': VIEW3D_PT_tools_active = value; break;
+		case '_SEQUENCER_PT_tools_active__tools_annotate': _SEQUENCER_PT_tools_active__tools_annotate = value; break;
+		case 'SEQUENCER_PT_tools_active': SEQUENCER_PT_tools_active = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -12,7 +12,7 @@ export var import_module = function (py_name, package_) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -24,12 +24,12 @@ export var import_module = function (py_name, package_) {
 	}
 	else {
 	}
-	return _module (py_name);
+	return __call__ (_module, null, py_name);
 };
 export var reload = function (module) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -44,3 +44,10 @@ export var reload = function (module) {
 };
 
 //# sourceMappingURL=importlib.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'import_module': import_module = value; break;
+		case 'reload': reload = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

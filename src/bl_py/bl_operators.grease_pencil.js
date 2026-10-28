@@ -16,7 +16,7 @@ export var GREASE_PENCIL_OT_relative_layer_mask_add =  __class__ ('GREASE_PENCIL
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -29,12 +29,12 @@ export var GREASE_PENCIL_OT_relative_layer_mask_add =  __class__ ('GREASE_PENCIL
 		else {
 		}
 		var obj = context.active_object;
-		return obj !== null && obj.is_editable && obj.py_metatype == 'GREASEPENCIL' && obj.data.layers.active !== null && obj.data.is_editable;
+		return obj !== null && obj.is_editable && __eq__ (obj.py_metatype, 'GREASEPENCIL') && obj.data.layers.active !== null && obj.data.is_editable;
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -48,27 +48,44 @@ export var GREASE_PENCIL_OT_relative_layer_mask_add =  __class__ ('GREASE_PENCIL
 		}
 		var obj = context.active_object;
 		var active_layer = obj.data.layers.active;
-		if (self.mode == 'ABOVE') {
+		if (__eq__ (self.mode, 'ABOVE')) {
 			var masking_layer = active_layer.next_node;
 		}
-		else if (self.mode == 'BELOW') {
+		else if (__eq__ (self.mode, 'BELOW')) {
 			var masking_layer = active_layer.prev_node;
 		}
-		if (masking_layer === null || py_typeof (masking_layer) != bpy.types.GreasePencilLayer) {
-			self.report (new set (['ERROR']), 'No layer found');
+		if (masking_layer === null || __ne__ (py_typeof (masking_layer), bpy.types.GreasePencilLayer)) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No layer found');
+			}) ();
 			return new set (['CANCELLED']);
 		}
 		if (__in__ (masking_layer.py_name, active_layer.mask_layers)) {
-			self.report (new set (['ERROR']), 'Layer is already added as a mask');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Layer is already added as a mask');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		bpy.ops.grease_pencil.layer_mask_add (__kwargtrans__ ({py_name: masking_layer.py_name}));
+		(function () {
+			var __accu0__ = bpy.ops.grease_pencil;
+			return __call__ (__accu0__.layer_mask_add, __accu0__, __kwargtrans__ ({py_name: masking_layer.py_name}));
+		}) ();
 		active_layer.use_masks = true;
 		return new set (['FINISHED']);
 	});}
 });
-GREASE_PENCIL_OT_relative_layer_mask_add.__annotations__ = dict ({'mode': EnumProperty (__kwargtrans__ ({py_name: 'Mode', py_items: tuple ([tuple (['ABOVE', 'Above', '']), tuple (['BELOW', 'Below', ''])]), description: 'Which relative layer (above or below) to use as a mask', py_default: 'ABOVE'}))});
+GREASE_PENCIL_OT_relative_layer_mask_add.__annotations__ = dict ({'mode': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Mode', py_items: tuple ([tuple (['ABOVE', 'Above', '']), tuple (['BELOW', 'Below', ''])]), description: 'Which relative layer (above or below) to use as a mask', py_default: 'ABOVE'}))});
 export var classes = tuple ([GREASE_PENCIL_OT_relative_layer_mask_add]);
 
 //# sourceMappingURL=bl_operators.grease_pencil.map
 export {EnumProperty, Operator};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'GREASE_PENCIL_OT_relative_layer_mask_add': GREASE_PENCIL_OT_relative_layer_mask_add = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

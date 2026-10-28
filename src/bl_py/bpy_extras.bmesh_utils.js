@@ -7,7 +7,7 @@ export var __all__ = tuple (['bmesh_linked_uv_islands']);
 export var match_uv = function (face, vert, uv, uv_layer) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -21,9 +21,12 @@ export var match_uv = function (face, vert, uv, uv_layer) {
 	}
 	else {
 	}
-	for (var loop of face.loops) {
-		if (loop.vert == vert) {
-			return uv == loop [uv_layer].uv;
+	var __iterable0__ = face.loops;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var loop = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (loop.vert, vert)) {
+			return __eq__ (uv, __getitem__ (loop, uv_layer).uv);
 		}
 	}
 	return false;
@@ -31,7 +34,7 @@ export var match_uv = function (face, vert, uv, uv_layer) {
 export var bmesh_linked_uv_islands = function (bm, uv_layer) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -44,35 +47,70 @@ export var bmesh_linked_uv_islands = function (bm, uv_layer) {
 	else {
 	}
 	var result = [];
-	var used = set ();
-	for (var seed_face of bm.faces) {
+	var used = __call__ (set, null);
+	var __iterable0__ = bm.faces;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var seed_face = __getitem__ (__iterable0__, __index0__);
 		if (__in__ (seed_face, used)) {
 			continue;
 		}
-		used.add (seed_face);
+		(function () {
+			var __accu0__ = used;
+			return __call__ (__accu0__.add, __accu0__, seed_face);
+		}) ();
 		var island = [seed_face];
 		var stack = [seed_face];
 		while (stack) {
-			var current_face = stack.py_pop ();
-			for (var loop of current_face.loops) {
+			var current_face = (function () {
+				var __accu0__ = stack;
+				return __call__ (__accu0__.py_pop, __accu0__);
+			}) ();
+			var __iterable1__ = current_face.loops;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var loop = __getitem__ (__iterable1__, __index1__);
 				var v = loop.vert;
-				var uv = loop [uv_layer].uv;
-				for (var f of v.link_faces) {
+				var uv = __getitem__ (loop, uv_layer).uv;
+				var __iterable2__ = v.link_faces;
+				__iterable2__ = __i__ (__iterable2__);
+				for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+					var f = __getitem__ (__iterable2__, __index2__);
 					if (f === current_face || __in__ (f, used)) {
 						continue;
 					}
-					if (!(match_uv (f, v, uv, uv_layer))) {
+					if (!(__call__ (match_uv, null, f, v, uv, uv_layer))) {
 						continue;
 					}
-					used.add (f);
-					island.append (f);
-					stack.append (f);
+					(function () {
+						var __accu0__ = used;
+						return __call__ (__accu0__.add, __accu0__, f);
+					}) ();
+					(function () {
+						var __accu0__ = island;
+						return __call__ (__accu0__.append, __accu0__, f);
+					}) ();
+					(function () {
+						var __accu0__ = stack;
+						return __call__ (__accu0__.append, __accu0__, f);
+					}) ();
 				}
 			}
 		}
-		result.append (island);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.append, __accu0__, island);
+		}) ();
 	}
 	return result;
 };
 
 //# sourceMappingURL=bpy_extras.bmesh_utils.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'match_uv': match_uv = value; break;
+		case 'bmesh_linked_uv_islands': bmesh_linked_uv_islands = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

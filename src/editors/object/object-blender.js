@@ -3,7 +3,8 @@
 // values and axes) with its name, parent, mode, collections (collections-blender.js) and base, and the selected
 // meshes when their Mesh changed. After it runs, what it tagged comes back the same way: transforms through RNA, a
 // Mesh as the object's Mesh data.
-import { BlenderMain, OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
+import { OPERATOR_FINISHED } from '../../bmesh/bmesh-wasm.js';
+import { createBlenderIDs } from '../../blenkernel/blender-ids.js';
 import { mesh_serialize } from '../../blenkernel/mesh/mesh.js';
 import { createBlenderCollections } from '../../blenkernel/scene/collections-blender.js';
 import { dnaSet } from '../../makesrna/dna-struct.js';
@@ -20,10 +21,13 @@ const V3D_AROUND = { BOUNDING_BOX_CENTER: 0, CURSOR: 1, INDIVIDUAL_ORIGINS: 2, M
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const isIdentity = (matrix) => matrix.every((v, i) => v === IDENTITY[i]);
 
-//   rna: createRNA(host), whose host has the world and selection; transaction(fn): an undo step around a change.
-export function createBlenderObjects({ rna, transaction, notify }) {
+//   rna: createRNA(host), whose host has the world and selection; transaction(fn): an undo step around a change;
+//   ids: the world's IDs in the module (blender-ids.js), shared with its animation; keying(run): runs an operator
+//   that may insert keys (auto keying), for the animation to take them.
+export function createBlenderObjects({ rna, transaction, notify, ids = createBlenderIDs(), keying = (fn) => fn() }) {
   const { world, selection } = rna.host;
-  const blender = new BlenderMain();
+  const blender = ids.blender;
+  const key = (node) => 'object:' + nodeId(node);
   // Each node's object in the module: { ob, type, mesh (what its Mesh was made from) }.
   const mirrored = new Map();
 
@@ -38,25 +42,23 @@ export function createBlenderObjects({ rna, transaction, notify }) {
     stale.forEach(([node]) => mirrored.delete(node));
     for (const node of nodes) {
       const type = rna.pointer('Object', node).type;
-      if (!mirrored.has(node)) mirrored.set(node, { ob: blender.add(type, node.name), type, name: node.name });
+      if (!mirrored.has(node)) mirrored.set(node, { ob: ids.object(key(node), type, node.name), type, name: node.name });
       const entry = mirrored.get(node);
       if (entry.name !== node.name) {
         blender.rename(entry.ob, node.name);
         entry.name = node.name;
       }
     }
-    for (const [, { ob }] of stale) blender.remove(ob);
+    for (const [node] of stale) if (!mirrored.has(node)) ids.remove(key(node));
     collections?.sync();
     for (const [node, { ob }] of mirrored) {
-      const data = rna.pointer('Object', node);
+      const data = rna.pointer('Object', node), status = world.collections?.status(node) ?? { visible: true, selectable: true };
       blender.setParent(ob, mirrored.get(node.parent)?.ob);
       blender.setMode(ob, data.mode);
-      // Bylonder's lights and cameras have no scale for their RNA to give: their transforms stay Blender's default.
-      if (node.scaling) {
-        blender.setTransform(ob, { location: Array.from(data.location), rotation_mode: data.rotation_mode, rotation_euler: Array.from(data.rotation_euler),
-          rotation_quaternion: Array.from(data.rotation_quaternion), scale: Array.from(data.scale), matrix_parent_inverse: IDENTITY });
-      }
-      blender.setBase(ob, { hidden: data.hide_get(), hide_select: data.hide_select, select: data.select_get(), active: node === selection.nodes.at(-1) });
+      blender.setTransform(ob, { location: Array.from(data.location), rotation_mode: data.rotation_mode, rotation_euler: Array.from(data.rotation_euler),
+        rotation_quaternion: Array.from(data.rotation_quaternion), scale: Array.from(data.scale), matrix_parent_inverse: IDENTITY });
+      blender.setBase(ob, { visible: status.visible, hidden: data.hide_get(), hide_select: data.hide_select || !status.selectable,
+        select: data.select_get(), active: node === selection.nodes.at(-1) });
       dnaSet('Object', ob, 'hide_render', data.hide_render);
       dnaSet('Object', ob, 'hide_viewport', data.hide_viewport);
     }
@@ -102,7 +104,7 @@ export function createBlenderObjects({ rna, transaction, notify }) {
     transaction(() => {
       sync();
       syncMeshes();
-      result = blender.run(idname, props);
+      keying(() => { result = blender.run(idname, props); });
       const objects = result.status & OPERATOR_FINISHED ? changed() : [];
       const unheld = objects.find(({ entry, geometry }) => geometry && !OWN_DATA.includes(entry.type));
       if (unheld) result = { status: 0, report: `Bylonder does not apply this to ${unheld.entry.type === 'FONT' ? 'text' : 'curve'} objects yet` };
@@ -114,6 +116,7 @@ export function createBlenderObjects({ rna, transaction, notify }) {
 
   return {
     run,
+    sync,
     poll(idname) {
       sync();
       return blender.poll(idname);
@@ -125,7 +128,10 @@ export function createBlenderObjects({ rna, transaction, notify }) {
     objectOf: (node) => mirrored.get(node)?.ob ?? null,
     nodeOf,
     collections,
-    forget: (node) => mirrored.delete(node),
+    forget(node) {
+      mirrored.delete(node);
+      ids.forget(key(node));
+    },
     // The name an object had when last synced, to tell a rename by Blender's code.
     syncedName: (node) => mirrored.get(node)?.name,
     named(node, name) { const entry = mirrored.get(node); if (entry) entry.name = name; },

@@ -49,7 +49,7 @@ export var BUILTIN_KSI_LocRot =  __class__ ('BUILTIN_KSI_LocRot', [KeyingSetInfo
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -63,8 +63,14 @@ export var BUILTIN_KSI_LocRot =  __class__ ('BUILTIN_KSI_LocRot', [KeyingSetInfo
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_location (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_rotation (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_location, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_rotation, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_LocScale =  __class__ ('BUILTIN_KSI_LocScale', [KeyingSetInfo], {
@@ -75,7 +81,7 @@ export var BUILTIN_KSI_LocScale =  __class__ ('BUILTIN_KSI_LocScale', [KeyingSet
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -89,8 +95,14 @@ export var BUILTIN_KSI_LocScale =  __class__ ('BUILTIN_KSI_LocScale', [KeyingSet
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_location (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_scaling (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_location, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_scaling, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_LocRotScale =  __class__ ('BUILTIN_KSI_LocRotScale', [KeyingSetInfo], {
@@ -102,7 +114,7 @@ export var BUILTIN_KSI_LocRotScale =  __class__ ('BUILTIN_KSI_LocRotScale', [Key
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -116,9 +128,18 @@ export var BUILTIN_KSI_LocRotScale =  __class__ ('BUILTIN_KSI_LocRotScale', [Key
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_location (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_rotation (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_scaling (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_location, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_rotation, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_scaling, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_LocRotScaleCProp =  __class__ ('BUILTIN_KSI_LocRotScaleCProp', [KeyingSetInfo], {
@@ -130,7 +151,7 @@ export var BUILTIN_KSI_LocRotScaleCProp =  __class__ ('BUILTIN_KSI_LocRotScaleCP
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -144,10 +165,22 @@ export var BUILTIN_KSI_LocRotScaleCProp =  __class__ ('BUILTIN_KSI_LocRotScaleCP
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_location (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_rotation (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_scaling (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_custom_props (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_location, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_rotation, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_scaling, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_custom_props, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_RotScale =  __class__ ('BUILTIN_KSI_RotScale', [KeyingSetInfo], {
@@ -158,7 +191,7 @@ export var BUILTIN_KSI_RotScale =  __class__ ('BUILTIN_KSI_RotScale', [KeyingSet
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -172,8 +205,14 @@ export var BUILTIN_KSI_RotScale =  __class__ ('BUILTIN_KSI_RotScale', [KeyingSet
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_rotation (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_scaling (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_rotation, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_scaling, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_BendyBones =  __class__ ('BUILTIN_KSI_BendyBones', [KeyingSetInfo], {
@@ -216,7 +255,7 @@ export var BUILTIN_KSI_VisualLocRot =  __class__ ('BUILTIN_KSI_VisualLocRot', [K
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -230,8 +269,14 @@ export var BUILTIN_KSI_VisualLocRot =  __class__ ('BUILTIN_KSI_VisualLocRot', [K
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_location (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_rotation (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_location, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_rotation, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_VisualLocScale =  __class__ ('BUILTIN_KSI_VisualLocScale', [KeyingSetInfo], {
@@ -243,7 +288,7 @@ export var BUILTIN_KSI_VisualLocScale =  __class__ ('BUILTIN_KSI_VisualLocScale'
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -257,8 +302,14 @@ export var BUILTIN_KSI_VisualLocScale =  __class__ ('BUILTIN_KSI_VisualLocScale'
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_location (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_scaling (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_location, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_scaling, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_VisualLocRotScale =  __class__ ('BUILTIN_KSI_VisualLocRotScale', [KeyingSetInfo], {
@@ -270,7 +321,7 @@ export var BUILTIN_KSI_VisualLocRotScale =  __class__ ('BUILTIN_KSI_VisualLocRot
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -284,9 +335,18 @@ export var BUILTIN_KSI_VisualLocRotScale =  __class__ ('BUILTIN_KSI_VisualLocRot
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_location (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_rotation (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_scaling (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_location, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_rotation, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_scaling, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_VisualRotScale =  __class__ ('BUILTIN_KSI_VisualRotScale', [KeyingSetInfo], {
@@ -298,7 +358,7 @@ export var BUILTIN_KSI_VisualRotScale =  __class__ ('BUILTIN_KSI_VisualRotScale'
 	get generate () {return __get__ (this, function (self, context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -312,8 +372,14 @@ export var BUILTIN_KSI_VisualRotScale =  __class__ ('BUILTIN_KSI_VisualRotScale'
 		}
 		else {
 		}
-		keyingsets_utils.RKS_GEN_rotation (self, context, ks, data);
-		keyingsets_utils.RKS_GEN_scaling (self, context, ks, data);
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_rotation, __accu0__, self, context, ks, data);
+		}) ();
+		(function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.RKS_GEN_scaling, __accu0__, self, context, ks, data);
+		}) ();
 	});}
 });
 export var BUILTIN_KSI_Available =  __class__ ('BUILTIN_KSI_Available', [KeyingSetInfo], {
@@ -323,7 +389,7 @@ export var BUILTIN_KSI_Available =  __class__ ('BUILTIN_KSI_Available', [KeyingS
 	get poll () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -335,7 +401,7 @@ export var BUILTIN_KSI_Available =  __class__ ('BUILTIN_KSI_Available', [KeyingS
 		}
 		else {
 		}
-		return bool (context.selected_objects || context.area.py_metatype == 'SEQUENCE_EDITOR' && context.selected_strips);
+		return __call__ (bool, null, context.selected_objects || __eq__ (context.area.py_metatype, 'SEQUENCE_EDITOR') && context.selected_strips);
 	});},
 	iterator: keyingsets_utils.RKS_ITER_selected_item,
 	generate: keyingsets_utils.RKS_GEN_available
@@ -346,7 +412,7 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 	get poll () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -358,12 +424,12 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}
 		else {
 		}
-		return context.active_object && context.active_object.pose && context.active_object.mode == 'POSE';
+		return context.active_object && context.active_object.pose && __eq__ (context.active_object.mode, 'POSE');
 	});},
 	get iterator () {return __get__ (this, function (self, context, ks) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -376,16 +442,25 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}
 		else {
 		}
-		for (var bone of context.active_object.pose.bones) {
-			if (!(bone.py_name.startswith (self.badBonePrefixes))) {
-				self.generate (context, ks, bone);
+		var __iterable0__ = context.active_object.pose.bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
+			if (!((function () {
+				var __accu0__ = bone.py_name;
+				return __call__ (__accu0__.startswith, __accu0__, self.badBonePrefixes);
+			}) ())) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.generate, __accu0__, context, ks, bone);
+				}) ();
 			}
 		}
 	});},
 	get generate () {return __get__ (this, function (self, context, ks, bone) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -400,28 +475,46 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		else {
 		}
 		if (!(bone.bone.use_connect)) {
-			self.doLoc (ks, bone);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.doLoc, __accu0__, ks, bone);
+			}) ();
 		}
 		if (__in__ (bone.rotation_mode, new set (['QUATERNION', 'AXIS_ANGLE']))) {
-			self.doRot4d (ks, bone);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.doRot4d, __accu0__, ks, bone);
+			}) ();
 		}
 		else {
-			self.doRot3d (ks, bone);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.doRot3d, __accu0__, ks, bone);
+			}) ();
 		}
-		self.doScale (ks, bone);
-		self.doBBone (context, ks, bone);
-		self.doCustomProps (ks, bone);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.doScale, __accu0__, ks, bone);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.doBBone, __accu0__, context, ks, bone);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.doCustomProps, __accu0__, ks, bone);
+		}) ();
 	});},
 	get addProp () {return __get__ (this, function (self, ks, bone, prop, index, use_groups) {
 		if (typeof index == 'undefined' || (index != null && index.hasOwnProperty ("__kwargtrans__"))) {;
-			var index = -(1);
+			var index = __neg__ (1);
 		};
 		if (typeof use_groups == 'undefined' || (use_groups != null && use_groups.hasOwnProperty ("__kwargtrans__"))) {;
 			var use_groups = true;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -437,25 +530,40 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}
 		else {
 		}
-		var id_path = bone.path_from_id ();
+		var id_path = (function () {
+			var __accu0__ = bone;
+			return __call__ (__accu0__.path_from_id, __accu0__);
+		}) ();
 		var id_block = bone.id_data;
-		if (prop.startswith ('[')) {
-			var path = id_path + prop;
+		if ((function () {
+			var __accu0__ = prop;
+			return __call__ (__accu0__.startswith, __accu0__, '[');
+		}) ()) {
+			var path = __add__ (id_path, prop);
 		}
 		else {
-			var path = keyingsets_utils.path_add_property (id_path, prop);
+			var path = (function () {
+				var __accu0__ = keyingsets_utils;
+				return __call__ (__accu0__.path_add_property, __accu0__, id_path, prop);
+			}) ();
 		}
 		if (use_groups) {
-			ks.paths.add (id_block, path, __kwargtrans__ ({index: index, group_method: 'NAMED', group_name: bone.py_name}));
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({index: index, group_method: 'NAMED', group_name: bone.py_name}));
+			}) ();
 		}
 		else {
-			ks.paths.add (id_block, path, __kwargtrans__ ({index: index}));
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({index: index}));
+			}) ();
 		}
 	});},
 	get doLoc () {return __get__ (this, function (self, ks, bone) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -468,13 +576,19 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}
 		else {
 		}
-		if (bone.lock_location == tuple ([false, false, false])) {
-			self.addProp (ks, bone, 'location');
+		if (__eq__ (bone.lock_location, tuple ([false, false, false]))) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.addProp, __accu0__, ks, bone, 'location');
+			}) ();
 		}
 		else {
 			for (var i = 0; i < 3; i++) {
-				if (!(bone.lock_location [i])) {
-					self.addProp (ks, bone, 'location', i);
+				if (!(__getitem__ (bone.lock_location, i))) {
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.addProp, __accu0__, ks, bone, 'location', i);
+					}) ();
 				}
 			}
 		}
@@ -482,7 +596,7 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 	get doRot4d () {return __get__ (this, function (self, ks, bone) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -495,35 +609,47 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}
 		else {
 		}
-		if (bone.rotation_mode == 'QUATERNION') {
+		if (__eq__ (bone.rotation_mode, 'QUATERNION')) {
 			var prop = 'rotation_quaternion';
 		}
-		else if (bone.rotation_mode == 'AXIS_ANGLE') {
+		else if (__eq__ (bone.rotation_mode, 'AXIS_ANGLE')) {
 			var prop = 'rotation_axis_angle';
 		}
 		if (bone.lock_rotations_4d) {
-			if (bone.lock_rotation == tuple ([false, false, false]) && bone.lock_rotation_w === false) {
-				self.addProp (ks, bone, prop);
+			if (__eq__ (bone.lock_rotation, tuple ([false, false, false])) && bone.lock_rotation_w === false) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.addProp, __accu0__, ks, bone, prop);
+				}) ();
 			}
 			else {
 				if (bone.lock_rotation_w === false) {
-					self.addProp (ks, bone, prop, 0);
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.addProp, __accu0__, ks, bone, prop, 0);
+					}) ();
 				}
 				for (var i = 0; i < 3; i++) {
-					if (!(bone.lock_rotation [i])) {
-						self.addProp (ks, bone, prop, i + 1);
+					if (!(__getitem__ (bone.lock_rotation, i))) {
+						(function () {
+							var __accu0__ = self;
+							return __call__ (__accu0__.addProp, __accu0__, ks, bone, prop, __add__ (i, 1));
+						}) ();
 					}
 				}
 			}
 		}
 		else if (!__in__ (true, bone.lock_rotation)) {
-			self.addProp (ks, bone, prop);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.addProp, __accu0__, ks, bone, prop);
+			}) ();
 		}
 	});},
 	get doRot3d () {return __get__ (this, function (self, ks, bone) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -536,13 +662,19 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}
 		else {
 		}
-		if (bone.lock_rotation == tuple ([false, false, false])) {
-			self.addProp (ks, bone, 'rotation_euler');
+		if (__eq__ (bone.lock_rotation, tuple ([false, false, false]))) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.addProp, __accu0__, ks, bone, 'rotation_euler');
+			}) ();
 		}
 		else {
 			for (var i = 0; i < 3; i++) {
-				if (!(bone.lock_rotation [i])) {
-					self.addProp (ks, bone, 'rotation_euler', i);
+				if (!(__getitem__ (bone.lock_rotation, i))) {
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.addProp, __accu0__, ks, bone, 'rotation_euler', i);
+					}) ();
 				}
 			}
 		}
@@ -550,7 +682,7 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 	get doScale () {return __get__ (this, function (self, ks, bone) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -563,13 +695,19 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		}
 		else {
 		}
-		if (bone.lock_scale == tuple ([0, 0, 0])) {
-			self.addProp (ks, bone, 'scale');
+		if (__eq__ (bone.lock_scale, tuple ([0, 0, 0]))) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.addProp, __accu0__, ks, bone, 'scale');
+			}) ();
 		}
 		else {
 			for (var i = 0; i < 3; i++) {
-				if (!(bone.lock_scale [i])) {
-					self.addProp (ks, bone, 'scale', i);
+				if (!(__getitem__ (bone.lock_scale, i))) {
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.addProp, __accu0__, ks, bone, 'scale', i);
+					}) ();
 				}
 			}
 		}
@@ -577,7 +715,7 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 	get doBBone () {return __get__ (this, function (self, context, ks, pchan) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -592,14 +730,17 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		else {
 		}
 		var bone = pchan.bone;
-		if (bone.bbone_segments > 1) {
-			keyingsets_utils.RKS_GEN_bendy_bones (self, context, ks, pchan);
+		if (__gt__ (bone.bbone_segments, 1)) {
+			(function () {
+				var __accu0__ = keyingsets_utils;
+				return __call__ (__accu0__.RKS_GEN_bendy_bones, __accu0__, self, context, ks, pchan);
+			}) ();
 		}
 	});},
 	get doCustomProps () {return __get__ (this, function (self, ks, bone) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -613,12 +754,30 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 		else {
 		}
 		var prop_type_compat = new set ([bpy.types.BoolProperty, bpy.types.IntProperty, bpy.types.FloatProperty, bpy.types.EnumProperty]);
-		for (var prop of bone.py_keys ()) {
-			var prop_rna = py_typeof (bone).bl_rna.properties.py_get (prop, null);
+		var __iterable0__ = (function () {
+			var __accu0__ = bone;
+			return __call__ (__accu0__.py_keys, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var prop = __getitem__ (__iterable0__, __index0__);
+			var prop_rna = (function () {
+				var __accu0__ = py_typeof (bone).bl_rna.properties;
+				return __call__ (__accu0__.py_get, __accu0__, prop, null);
+			}) ();
 			if (prop_rna === null) {
-				var prop_path = '["{:s}"]'.format (bpy.utils.escape_identifier (prop));
+				var prop_path = (function () {
+					var __accu0__ = '["{:s}"]';
+					return __call__ (__accu0__.format, __accu0__, (function () {
+						var __accu1__ = bpy.utils;
+						return __call__ (__accu1__.escape_identifier, __accu1__, prop);
+					}) ());
+				}) ();
 				try {
-					var rna_property = bone.path_resolve (prop_path, false);
+					var rna_property = (function () {
+						var __accu0__ = bone;
+						return __call__ (__accu0__.path_resolve, __accu0__, prop_path, false);
+					}) ();
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, ValueError)) {
@@ -632,11 +791,17 @@ export var WholeCharacterMixin =  __class__ ('WholeCharacterMixin', [object], {
 					continue;
 				}
 				if (__in__ (rna_property.rna_type, prop_type_compat)) {
-					self.addProp (ks, bone, prop_path);
+					(function () {
+						var __accu0__ = self;
+						return __call__ (__accu0__.addProp, __accu0__, ks, bone, prop_path);
+					}) ();
 				}
 			}
 			else if (prop_rna.is_animatable) {
-				self.addProp (ks, bone, prop);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.addProp, __accu0__, ks, bone, prop);
+				}) ();
 			}
 		}
 	});}
@@ -653,7 +818,7 @@ export var BUILTIN_KSI_WholeCharacterSelected =  __class__ ('BUILTIN_KSI_WholeCh
 	get iterator () {return __get__ (this, function (self, context, ks) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -667,11 +832,20 @@ export var BUILTIN_KSI_WholeCharacterSelected =  __class__ ('BUILTIN_KSI_WholeCh
 		else {
 		}
 		var bones = context.selected_pose_bones_from_active_object || context.active_object.pose.bones;
-		for (var bone of bones) {
-			if (bone.py_name.startswith (self.badBonePrefixes)) {
+		var __iterable0__ = bones;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var bone = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu0__ = bone.py_name;
+				return __call__ (__accu0__.startswith, __accu0__, self.badBonePrefixes);
+			}) ()) {
 				continue;
 			}
-			self.generate (context, ks, bone);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.generate, __accu0__, context, ks, bone);
+			}) ();
 		}
 	});}
 });
@@ -683,7 +857,7 @@ export var BUILTIN_KSI_DeltaLocation =  __class__ ('BUILTIN_KSI_DeltaLocation', 
 	get generate () {return __get__ (this, function (self, _context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -697,16 +871,28 @@ export var BUILTIN_KSI_DeltaLocation =  __class__ ('BUILTIN_KSI_DeltaLocation', 
 		}
 		else {
 		}
-		var __left0__ = keyingsets_utils.get_transform_generators_base_info (data);
+		var __left0__ = (function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.get_transform_generators_base_info, __accu0__, data);
+		}) ();
 		var id_block = __left0__ [0];
 		var base_path = __left0__ [1];
 		var grouping = __left0__ [2];
-		var path = keyingsets_utils.path_add_property (base_path, 'delta_location');
+		var path = (function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.path_add_property, __accu0__, base_path, 'delta_location');
+		}) ();
 		if (grouping) {
-			ks.paths.add (id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
+			}) ();
 		}
 		else {
-			ks.paths.add (id_block, path);
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path);
+			}) ();
 		}
 	});}
 });
@@ -718,7 +904,7 @@ export var BUILTIN_KSI_DeltaRotation =  __class__ ('BUILTIN_KSI_DeltaRotation', 
 	get generate () {return __get__ (this, function (self, _context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -732,24 +918,39 @@ export var BUILTIN_KSI_DeltaRotation =  __class__ ('BUILTIN_KSI_DeltaRotation', 
 		}
 		else {
 		}
-		var __left0__ = keyingsets_utils.get_transform_generators_base_info (data);
+		var __left0__ = (function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.get_transform_generators_base_info, __accu0__, data);
+		}) ();
 		var id_block = __left0__ [0];
 		var base_path = __left0__ [1];
 		var grouping = __left0__ [2];
-		if (data.rotation_mode == 'QUATERNION') {
-			var path = keyingsets_utils.path_add_property (base_path, 'delta_rotation_quaternion');
+		if (__eq__ (data.rotation_mode, 'QUATERNION')) {
+			var path = (function () {
+				var __accu0__ = keyingsets_utils;
+				return __call__ (__accu0__.path_add_property, __accu0__, base_path, 'delta_rotation_quaternion');
+			}) ();
 		}
-		else if (data.rotation_mode == 'AXIS_ANGLE') {
+		else if (__eq__ (data.rotation_mode, 'AXIS_ANGLE')) {
 			return ;
 		}
 		else {
-			var path = keyingsets_utils.path_add_property (base_path, 'delta_rotation_euler');
+			var path = (function () {
+				var __accu0__ = keyingsets_utils;
+				return __call__ (__accu0__.path_add_property, __accu0__, base_path, 'delta_rotation_euler');
+			}) ();
 		}
 		if (grouping) {
-			ks.paths.add (id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
+			}) ();
 		}
 		else {
-			ks.paths.add (id_block, path);
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path);
+			}) ();
 		}
 	});}
 });
@@ -761,7 +962,7 @@ export var BUILTIN_KSI_DeltaScale =  __class__ ('BUILTIN_KSI_DeltaScale', [Keyin
 	get generate () {return __get__ (this, function (self, _context, ks, data) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -775,16 +976,28 @@ export var BUILTIN_KSI_DeltaScale =  __class__ ('BUILTIN_KSI_DeltaScale', [Keyin
 		}
 		else {
 		}
-		var __left0__ = keyingsets_utils.get_transform_generators_base_info (data);
+		var __left0__ = (function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.get_transform_generators_base_info, __accu0__, data);
+		}) ();
 		var id_block = __left0__ [0];
 		var base_path = __left0__ [1];
 		var grouping = __left0__ [2];
-		var path = keyingsets_utils.path_add_property (base_path, 'delta_scale');
+		var path = (function () {
+			var __accu0__ = keyingsets_utils;
+			return __call__ (__accu0__.path_add_property, __accu0__, base_path, 'delta_scale');
+		}) ();
 		if (grouping) {
-			ks.paths.add (id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path, __kwargtrans__ ({group_method: 'NAMED', group_name: grouping}));
+			}) ();
 		}
 		else {
-			ks.paths.add (id_block, path);
+			(function () {
+				var __accu0__ = ks.paths;
+				return __call__ (__accu0__.add, __accu0__, id_block, path);
+			}) ();
 		}
 	});}
 });
@@ -792,7 +1005,7 @@ export var classes = tuple ([BUILTIN_KSI_Available, BUILTIN_KSI_Location, BUILTI
 export var register = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -800,15 +1013,18 @@ export var register = function () {
 	}
 	else {
 	}
-	var register_class = _member ('bpy.utils', 'register_class');
-	for (var cls of classes) {
-		register_class (cls);
+	var register_class = __call__ (_member, null, 'bpy.utils', 'register_class');
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 };
 export var unregister = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -816,14 +1032,57 @@ export var unregister = function () {
 	}
 	else {
 	}
-	var unregister_class = _member ('bpy.utils', 'unregister_class');
-	for (var cls of classes) {
-		unregister_class (cls);
+	var unregister_class = __call__ (_member, null, 'bpy.utils', 'unregister_class');
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (unregister_class, null, cls);
 	}
 };
-if (__name__ == '__main__') {
-	register ();
+if (__eq__ (__name__, '__main__')) {
+	__call__ (register, null);
 }
 
 //# sourceMappingURL=keyingsets_builtins.map
 export {KeyingSetInfo, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'ANIM_KS_LOCATION_ID': ANIM_KS_LOCATION_ID = value; break;
+		case 'ANIM_KS_ROTATION_ID': ANIM_KS_ROTATION_ID = value; break;
+		case 'ANIM_KS_SCALING_ID': ANIM_KS_SCALING_ID = value; break;
+		case 'ANIM_KS_LOC_ROT_SCALE_ID': ANIM_KS_LOC_ROT_SCALE_ID = value; break;
+		case 'ANIM_KS_LOC_ROT_SCALE_CPROP_ID': ANIM_KS_LOC_ROT_SCALE_CPROP_ID = value; break;
+		case 'ANIM_KS_AVAILABLE_ID': ANIM_KS_AVAILABLE_ID = value; break;
+		case 'ANIM_KS_WHOLE_CHARACTER_ID': ANIM_KS_WHOLE_CHARACTER_ID = value; break;
+		case 'ANIM_KS_WHOLE_CHARACTER_SELECTED_ID': ANIM_KS_WHOLE_CHARACTER_SELECTED_ID = value; break;
+		case 'BUILTIN_KSI_Location': BUILTIN_KSI_Location = value; break;
+		case 'BUILTIN_KSI_Rotation': BUILTIN_KSI_Rotation = value; break;
+		case 'BUILTIN_KSI_Scaling': BUILTIN_KSI_Scaling = value; break;
+		case 'BUILTIN_KSI_LocRot': BUILTIN_KSI_LocRot = value; break;
+		case 'BUILTIN_KSI_LocScale': BUILTIN_KSI_LocScale = value; break;
+		case 'BUILTIN_KSI_LocRotScale': BUILTIN_KSI_LocRotScale = value; break;
+		case 'BUILTIN_KSI_LocRotScaleCProp': BUILTIN_KSI_LocRotScaleCProp = value; break;
+		case 'BUILTIN_KSI_RotScale': BUILTIN_KSI_RotScale = value; break;
+		case 'BUILTIN_KSI_BendyBones': BUILTIN_KSI_BendyBones = value; break;
+		case 'BUILTIN_KSI_VisualLoc': BUILTIN_KSI_VisualLoc = value; break;
+		case 'BUILTIN_KSI_VisualRot': BUILTIN_KSI_VisualRot = value; break;
+		case 'BUILTIN_KSI_VisualScaling': BUILTIN_KSI_VisualScaling = value; break;
+		case 'BUILTIN_KSI_VisualLocRot': BUILTIN_KSI_VisualLocRot = value; break;
+		case 'BUILTIN_KSI_VisualLocScale': BUILTIN_KSI_VisualLocScale = value; break;
+		case 'BUILTIN_KSI_VisualLocRotScale': BUILTIN_KSI_VisualLocRotScale = value; break;
+		case 'BUILTIN_KSI_VisualRotScale': BUILTIN_KSI_VisualRotScale = value; break;
+		case 'BUILTIN_KSI_Available': BUILTIN_KSI_Available = value; break;
+		case 'WholeCharacterMixin': WholeCharacterMixin = value; break;
+		case 'BUILTIN_KSI_WholeCharacter': BUILTIN_KSI_WholeCharacter = value; break;
+		case 'BUILTIN_KSI_WholeCharacterSelected': BUILTIN_KSI_WholeCharacterSelected = value; break;
+		case 'BUILTIN_KSI_DeltaLocation': BUILTIN_KSI_DeltaLocation = value; break;
+		case 'BUILTIN_KSI_DeltaRotation': BUILTIN_KSI_DeltaRotation = value; break;
+		case 'BUILTIN_KSI_DeltaScale': BUILTIN_KSI_DeltaScale = value; break;
+		case 'classes': classes = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

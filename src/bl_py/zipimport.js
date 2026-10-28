@@ -6,3 +6,9 @@ var __name__ = 'zipimport';
 export var zipimporter = null;
 
 //# sourceMappingURL=zipimport.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'zipimporter': zipimporter = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

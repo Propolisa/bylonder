@@ -11,7 +11,7 @@ export var STATUSBAR_HT_header =  __class__ ('STATUSBAR_HT_header', [Header], {
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -24,22 +24,54 @@ export var STATUSBAR_HT_header =  __class__ ('STATUSBAR_HT_header', [Header], {
 		else {
 		}
 		var layout = self.layout;
-		layout.template_input_status ();
-		layout.separator_spacer ();
-		layout.template_reports_banner ();
-		layout.template_running_jobs ();
-		layout.separator_spacer ();
-		var row = layout.row ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_input_status, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator_spacer, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_reports_banner, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_running_jobs, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator_spacer, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.alignment = 'RIGHT';
-		layout.template_status_info ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_status_info, __accu0__);
+		}) ();
 	});}
 });
 export var classes = tuple ([STATUSBAR_HT_header]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_statusbar.map
 export {Header, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'STATUSBAR_HT_header': STATUSBAR_HT_header = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

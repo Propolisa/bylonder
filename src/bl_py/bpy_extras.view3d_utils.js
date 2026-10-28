@@ -8,7 +8,7 @@ export var __all__ = tuple (['region_2d_to_vector_3d', 'region_2d_to_origin_3d',
 export var region_2d_to_vector_3d = function (region, rv3d, coord) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -21,25 +21,37 @@ export var region_2d_to_vector_3d = function (region, rv3d, coord) {
 	}
 	else {
 	}
-	var Vector = _member ('mathutils', 'Vector');
-	var viewinv = rv3d.view_matrix.inverted ();
+	var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+	var viewinv = (function () {
+		var __accu0__ = rv3d.view_matrix;
+		return __call__ (__accu0__.inverted, __accu0__);
+	}) ();
 	if (rv3d.is_perspective) {
-		var persinv = rv3d.perspective_matrix.inverted ();
-		var out = Vector (tuple ([(2.0 * coord [0]) / region.width - 1.0, (2.0 * coord [1]) / region.height - 1.0, -(0.5)]));
-		var w = out.dot (persinv [3].xyz) + persinv [3] [3];
-		var view_vector = (__matmul__ (persinv, out)) / w - viewinv.translation;
+		var persinv = (function () {
+			var __accu0__ = rv3d.perspective_matrix;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) ();
+		var out = __call__ (Vector, null, tuple ([__sub__ (__truediv__ (__mul__ (2.0, __getitem__ (coord, 0)), region.width), 1.0), __sub__ (__truediv__ (__mul__ (2.0, __getitem__ (coord, 1)), region.height), 1.0), __neg__ (0.5)]));
+		var w = __add__ ((function () {
+			var __accu0__ = out;
+			return __call__ (__accu0__.dot, __accu0__, __getitem__ (persinv, 3).xyz);
+		}) (), __getitem__ (__getitem__ (persinv, 3), 3));
+		var view_vector = __sub__ (__truediv__ (__matmul__ (persinv, out), w), viewinv.translation);
 	}
 	else {
-		var view_vector = -(viewinv.col [2].xyz);
+		var view_vector = __neg__ (__getitem__ (viewinv.col, 2).xyz);
 	}
-	view_vector.normalize ();
+	(function () {
+		var __accu0__ = view_vector;
+		return __call__ (__accu0__.normalize, __accu0__);
+	}) ();
 	return view_vector;
 };
 export var region_2d_to_origin_3d = function (region, rv3d, coord) {
 	var clamp = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -53,29 +65,44 @@ export var region_2d_to_origin_3d = function (region, rv3d, coord) {
 	}
 	else {
 	}
-	var viewinv = rv3d.view_matrix.inverted ();
+	var viewinv = (function () {
+		var __accu0__ = rv3d.view_matrix;
+		return __call__ (__accu0__.inverted, __accu0__);
+	}) ();
 	if (rv3d.is_perspective) {
-		var origin_start = viewinv.translation.py_copy ();
+		var origin_start = (function () {
+			var __accu0__ = viewinv.translation;
+			return __call__ (__accu0__.py_copy, __accu0__);
+		}) ();
 	}
 	else {
-		var persmat = rv3d.perspective_matrix.py_copy ();
-		var dx = (2.0 * coord [0]) / region.width - 1.0;
-		var dy = (2.0 * coord [1]) / region.height - 1.0;
-		var persinv = persmat.inverted ();
-		var origin_start = (persinv.col [0].xyz * dx + persinv.col [1].xyz * dy) + persinv.translation;
-		if (clamp != 0.0) {
-			if (rv3d.view_perspective != 'CAMERA') {
-				var origin_offset = persinv.col [2].xyz;
+		var persmat = (function () {
+			var __accu0__ = rv3d.perspective_matrix;
+			return __call__ (__accu0__.py_copy, __accu0__);
+		}) ();
+		var dx = __sub__ (__truediv__ (__mul__ (2.0, __getitem__ (coord, 0)), region.width), 1.0);
+		var dy = __sub__ (__truediv__ (__mul__ (2.0, __getitem__ (coord, 1)), region.height), 1.0);
+		var persinv = (function () {
+			var __accu0__ = persmat;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) ();
+		var origin_start = __add__ (__add__ (__mul__ (__getitem__ (persinv.col, 0).xyz, dx), __mul__ (__getitem__ (persinv.col, 1).xyz, dy)), persinv.translation);
+		if (__ne__ (clamp, 0.0)) {
+			if (__ne__ (rv3d.view_perspective, 'CAMERA')) {
+				var origin_offset = __getitem__ (persinv.col, 2).xyz;
 				if (clamp !== null) {
-					if (clamp < 0.0) {
-						origin_offset.negate ();
-						var clamp = -(clamp);
+					if (__lt__ (clamp, 0.0)) {
+						(function () {
+							var __accu0__ = origin_offset;
+							return __call__ (__accu0__.negate, __accu0__);
+						}) ();
+						var clamp = __neg__ (clamp);
 					}
-					if (origin_offset.length > clamp) {
+					if (__gt__ (origin_offset.length, clamp)) {
 						origin_offset.length = clamp;
 					}
 				}
-				origin_start -= origin_offset;
+				var origin_start = __call__ (__isub__, null, origin_start, origin_offset);
 			}
 		}
 	}
@@ -84,7 +111,7 @@ export var region_2d_to_origin_3d = function (region, rv3d, coord) {
 export var region_2d_to_location_3d = function (region, rv3d, coord, depth_location) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -98,27 +125,33 @@ export var region_2d_to_location_3d = function (region, rv3d, coord, depth_locat
 	}
 	else {
 	}
-	var Vector = _member ('mathutils', 'Vector');
-	var coord_vec = region_2d_to_vector_3d (region, rv3d, coord);
-	var depth_location = Vector (depth_location);
-	var origin_start = region_2d_to_origin_3d (region, rv3d, coord);
-	var origin_end = origin_start + coord_vec;
+	var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+	var coord_vec = __call__ (region_2d_to_vector_3d, null, region, rv3d, coord);
+	var depth_location = __call__ (Vector, null, depth_location);
+	var origin_start = __call__ (region_2d_to_origin_3d, null, region, rv3d, coord);
+	var origin_end = __add__ (origin_start, coord_vec);
 	if (rv3d.is_perspective) {
-		var intersect_line_plane = _member ('mathutils.geometry', 'intersect_line_plane');
-		var viewinv = rv3d.view_matrix.inverted ();
-		var view_vec = viewinv.col [2].py_copy ();
-		return intersect_line_plane (origin_start, origin_end, depth_location, view_vec, 1);
+		var intersect_line_plane = __call__ (_member, null, 'mathutils.geometry', 'intersect_line_plane');
+		var viewinv = (function () {
+			var __accu0__ = rv3d.view_matrix;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) ();
+		var view_vec = (function () {
+			var __accu0__ = __getitem__ (viewinv.col, 2);
+			return __call__ (__accu0__.py_copy, __accu0__);
+		}) ();
+		return __call__ (intersect_line_plane, null, origin_start, origin_end, depth_location, view_vec, 1);
 	}
 	else {
-		var intersect_point_line = _member ('mathutils.geometry', 'intersect_point_line');
-		return intersect_point_line (depth_location, origin_start, origin_end) [0];
+		var intersect_point_line = __call__ (_member, null, 'mathutils.geometry', 'intersect_point_line');
+		return __getitem__ (__call__ (intersect_point_line, null, depth_location, origin_start, origin_end), 0);
 	}
 };
 export var location_3d_to_region_2d = function (region, rv3d, coord) {
 	var py_default = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -132,12 +165,12 @@ export var location_3d_to_region_2d = function (region, rv3d, coord) {
 	}
 	else {
 	}
-	var Vector = _member ('mathutils', 'Vector');
-	var prj = __matmul__ (rv3d.perspective_matrix, Vector (tuple ([coord [0], coord [1], coord [2], 1.0])));
-	if (prj.w > 0.0) {
-		var width_half = region.width / 2.0;
-		var height_half = region.height / 2.0;
-		return Vector (tuple ([width_half + width_half * (prj.x / prj.w), height_half + height_half * (prj.y / prj.w)]));
+	var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+	var prj = __matmul__ (rv3d.perspective_matrix, __call__ (Vector, null, tuple ([__getitem__ (coord, 0), __getitem__ (coord, 1), __getitem__ (coord, 2), 1.0])));
+	if (__gt__ (prj.w, 0.0)) {
+		var width_half = __truediv__ (region.width, 2.0);
+		var height_half = __truediv__ (region.height, 2.0);
+		return __call__ (Vector, null, tuple ([__add__ (width_half, __mul__ (width_half, __truediv__ (prj.x, prj.w))), __add__ (height_half, __mul__ (height_half, __truediv__ (prj.y, prj.w)))]));
 	}
 	else {
 		return py_default;
@@ -146,3 +179,14 @@ export var location_3d_to_region_2d = function (region, rv3d, coord) {
 
 //# sourceMappingURL=bpy_extras.view3d_utils.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'region_2d_to_vector_3d': region_2d_to_vector_3d = value; break;
+		case 'region_2d_to_origin_3d': region_2d_to_origin_3d = value; break;
+		case 'region_2d_to_location_3d': region_2d_to_location_3d = value; break;
+		case 'location_3d_to_region_2d': location_3d_to_region_2d = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -6,3 +6,9 @@ var __name__ = 'gpu_extras';
 export var __all__ = tuple (['batch', 'presets']);
 
 //# sourceMappingURL=gpu_extras.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

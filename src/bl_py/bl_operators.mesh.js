@@ -13,7 +13,7 @@ export var MeshSelectNext =  __class__ ('MeshSelectNext', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -25,12 +25,12 @@ export var MeshSelectNext =  __class__ ('MeshSelectNext', [Operator], {
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -42,14 +42,26 @@ export var MeshSelectNext =  __class__ ('MeshSelectNext', [Operator], {
 		}
 		else {
 		}
-		var bmesh = _module ('bmesh');
-		var find_adjacent = _member ('bl_operators.bmesh', 'find_adjacent');
+		var bmesh = __call__ (_module, null, 'bmesh');
+		var find_adjacent = __call__ (_member, null, 'bl_operators.bmesh', 'find_adjacent');
 		var obj = context.active_object;
 		var me = obj.data;
-		var bm = bmesh.from_edit_mesh (me);
-		if (find_adjacent.select_next (bm, self.report)) {
-			bm.select_flush_mode ();
-			bmesh.update_edit_mesh (me, __kwargtrans__ ({loop_triangles: false}));
+		var bm = (function () {
+			var __accu0__ = bmesh;
+			return __call__ (__accu0__.from_edit_mesh, __accu0__, me);
+		}) ();
+		if ((function () {
+			var __accu0__ = find_adjacent;
+			return __call__ (__accu0__.select_next, __accu0__, bm, self.report);
+		}) ()) {
+			(function () {
+				var __accu0__ = bm;
+				return __call__ (__accu0__.select_flush_mode, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = bmesh;
+				return __call__ (__accu0__.update_edit_mesh, __accu0__, me, __kwargtrans__ ({loop_triangles: false}));
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
@@ -62,7 +74,7 @@ export var MeshSelectPrev =  __class__ ('MeshSelectPrev', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -74,12 +86,12 @@ export var MeshSelectPrev =  __class__ ('MeshSelectPrev', [Operator], {
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -91,14 +103,26 @@ export var MeshSelectPrev =  __class__ ('MeshSelectPrev', [Operator], {
 		}
 		else {
 		}
-		var bmesh = _module ('bmesh');
-		var find_adjacent = _member ('bl_operators.bmesh', 'find_adjacent');
+		var bmesh = __call__ (_module, null, 'bmesh');
+		var find_adjacent = __call__ (_member, null, 'bl_operators.bmesh', 'find_adjacent');
 		var obj = context.active_object;
 		var me = obj.data;
-		var bm = bmesh.from_edit_mesh (me);
-		if (find_adjacent.select_prev (bm, self.report)) {
-			bm.select_flush_mode ();
-			bmesh.update_edit_mesh (me, __kwargtrans__ ({loop_triangles: false}));
+		var bm = (function () {
+			var __accu0__ = bmesh;
+			return __call__ (__accu0__.from_edit_mesh, __accu0__, me);
+		}) ();
+		if ((function () {
+			var __accu0__ = find_adjacent;
+			return __call__ (__accu0__.select_prev, __accu0__, bm, self.report);
+		}) ()) {
+			(function () {
+				var __accu0__ = bm;
+				return __call__ (__accu0__.select_flush_mode, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = bmesh;
+				return __call__ (__accu0__.update_edit_mesh, __accu0__, me, __kwargtrans__ ({loop_triangles: false}));
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
@@ -107,3 +131,12 @@ export var classes = tuple ([MeshSelectNext, MeshSelectPrev]);
 
 //# sourceMappingURL=bl_operators.mesh.map
 export {Operator, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'MeshSelectNext': MeshSelectNext = value; break;
+		case 'MeshSelectPrev': MeshSelectPrev = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

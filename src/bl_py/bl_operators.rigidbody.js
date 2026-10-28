@@ -12,7 +12,7 @@ var __name__ = 'bl_operators.rigidbody';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -23,8 +23,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -32,7 +38,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -57,7 +63,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -76,7 +82,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -89,18 +95,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -111,10 +120,34 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var CopyRigidbodySettings =  __class__ ('CopyRigidbodySettings', [Operator], {
 	__module__: __name__,
@@ -125,7 +158,7 @@ export var CopyRigidbodySettings =  __class__ ('CopyRigidbodySettings', [Operato
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -143,7 +176,7 @@ export var CopyRigidbodySettings =  __class__ ('CopyRigidbodySettings', [Operato
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -157,28 +190,52 @@ export var CopyRigidbodySettings =  __class__ ('CopyRigidbodySettings', [Operato
 		}
 		var obj_act = context.object;
 		var rb_objects = [];
-		for (var o of context.selected_objects) {
-			if (o.py_metatype != 'MESH' || o.rigid_body !== null) {
-				o.select_set (false);
+		var __iterable0__ = context.selected_objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var o = __getitem__ (__iterable0__, __index0__);
+			if (__ne__ (o.py_metatype, 'MESH') || o.rigid_body !== null) {
+				(function () {
+					var __accu0__ = o;
+					return __call__ (__accu0__.select_set, __accu0__, false);
+				}) ();
 				if (o.rigid_body !== null) {
-					rb_objects.append (o);
+					(function () {
+						var __accu0__ = rb_objects;
+						return __call__ (__accu0__.append, __accu0__, o);
+					}) ();
 				}
 			}
 		}
-		bpy.ops.rigidbody.objects_add ();
-		for (var o of rb_objects) {
-			o.select_set (true);
+		(function () {
+			var __accu0__ = bpy.ops.rigidbody;
+			return __call__ (__accu0__.objects_add, __accu0__);
+		}) ();
+		var __iterable0__ = rb_objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var o = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = o;
+				return __call__ (__accu0__.select_set, __accu0__, true);
+			}) ();
 		}
 		var objects = context.selected_objects;
 		if (objects) {
 			var rb_from = obj_act.rigid_body;
-			for (var o of objects) {
+			var __iterable0__ = objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var o = __getitem__ (__iterable0__, __index0__);
 				var rb_to = o.rigid_body;
-				if (o == obj_act) {
+				if (__eq__ (o, obj_act)) {
 					continue;
 				}
-				for (var attr of self._attrs) {
-					setattr (rb_to, attr, getattr (rb_from, attr));
+				var __iterable1__ = self._attrs;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var attr = __getitem__ (__iterable1__, __index1__);
+					__call__ (setattr, null, rb_to, attr, __call__ (getattr, null, rb_from, attr));
 				}
 			}
 		}
@@ -193,7 +250,7 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -211,7 +268,7 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -223,92 +280,176 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 		}
 		else {
 		}
-		var anim_utils = _member ('bpy_extras', 'anim_utils');
+		var anim_utils = __call__ (_member, null, 'bpy_extras', 'anim_utils');
 		var bake = [];
 		var objects = [];
 		var scene = context.scene;
 		var frame_orig = scene.frame_current;
-		var frames_step = range (self.frame_start, self.frame_end + 1, self.step);
-		var frames_full = range (self.frame_start, self.frame_end + 1);
-		for (var obj of context.selected_objects) {
-			if (!(obj.rigid_body) || obj.rigid_body.py_metatype != 'ACTIVE') {
-				obj.select_set (false);
+		var frames_step = __call__ (range, null, self.frame_start, __add__ (self.frame_end, 1), self.step);
+		var frames_full = __call__ (range, null, self.frame_start, __add__ (self.frame_end, 1));
+		var __iterable0__ = context.selected_objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var obj = __getitem__ (__iterable0__, __index0__);
+			if (!(obj.rigid_body) || __ne__ (obj.rigid_body.py_metatype, 'ACTIVE')) {
+				(function () {
+					var __accu0__ = obj;
+					return __call__ (__accu0__.select_set, __accu0__, false);
+				}) ();
 			}
 		}
 		var objects = context.selected_objects;
 		if (objects) {
-			for (var f of frames_full) {
-				scene.frame_set (f);
+			var __iterable0__ = frames_full;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var f = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = scene;
+					return __call__ (__accu0__.frame_set, __accu0__, f);
+				}) ();
 				if (__in__ (f, frames_step)) {
 					var mat = dict ({});
-					for (var [i, obj] of py_enumerate (objects)) {
-						mat [i] = obj.matrix_world.py_copy ();
+					var __iterable1__ = __call__ (py_enumerate, null, objects);
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var __left0__ = __getitem__ (__iterable1__, __index1__);
+						var i = __left0__ [0];
+						var obj = __left0__ [1];
+						__setitem__ (mat, i, (function () {
+							var __accu0__ = obj.matrix_world;
+							return __call__ (__accu0__.py_copy, __accu0__);
+						}) ());
 					}
-					bake.append (mat);
+					(function () {
+						var __accu0__ = bake;
+						return __call__ (__accu0__.append, __accu0__, mat);
+					}) ();
 				}
 			}
-			for (var [i, f] of py_enumerate (frames_step)) {
-				scene.frame_set (f);
-				for (var [j, obj] of py_enumerate (objects)) {
-					var mat = bake [i] [j];
+			var __iterable0__ = __call__ (py_enumerate, null, frames_step);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var i = __left0__ [0];
+				var f = __left0__ [1];
+				(function () {
+					var __accu0__ = scene;
+					return __call__ (__accu0__.frame_set, __accu0__, f);
+				}) ();
+				var __iterable1__ = __call__ (py_enumerate, null, objects);
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var __left0__ = __getitem__ (__iterable1__, __index1__);
+					var j = __left0__ [0];
+					var obj = __left0__ [1];
+					var mat = __getitem__ (__getitem__ (bake, i), j);
 					if (obj.parent) {
-						var mat = __matmul__ (__matmul__ (obj.matrix_parent_inverse.inverted (), obj.parent.matrix_world.inverted ()), mat);
+						var mat = __matmul__ (__matmul__ ((function () {
+							var __accu0__ = obj.matrix_parent_inverse;
+							return __call__ (__accu0__.inverted, __accu0__);
+						}) (), (function () {
+							var __accu0__ = obj.parent.matrix_world;
+							return __call__ (__accu0__.inverted, __accu0__);
+						}) ()), mat);
 					}
-					obj.location = mat.to_translation ();
+					obj.location = (function () {
+						var __accu0__ = mat;
+						return __call__ (__accu0__.to_translation, __accu0__);
+					}) ();
 					var rot_mode = obj.rotation_mode;
-					if (rot_mode == 'QUATERNION') {
+					if (__eq__ (rot_mode, 'QUATERNION')) {
 						var q1 = obj.rotation_quaternion;
-						var q2 = mat.to_quaternion ();
-						if (q1.dot (q2) < 0.0) {
-							obj.rotation_quaternion = -(q2);
+						var q2 = (function () {
+							var __accu0__ = mat;
+							return __call__ (__accu0__.to_quaternion, __accu0__);
+						}) ();
+						if (__lt__ ((function () {
+							var __accu0__ = q1;
+							return __call__ (__accu0__.dot, __accu0__, q2);
+						}) (), 0.0)) {
+							obj.rotation_quaternion = __neg__ (q2);
 						}
 						else {
 							obj.rotation_quaternion = q2;
 						}
 					}
-					else if (rot_mode == 'AXIS_ANGLE') {
-						var aa = mat.to_quaternion ().to_axis_angle ();
-						obj.rotation_axis_angle = _joined ([aa [1]], aa [0]);
+					else if (__eq__ (rot_mode, 'AXIS_ANGLE')) {
+						var aa = (function () {
+							var __accu0__ = (function () {
+								var __accu1__ = mat;
+								return __call__ (__accu1__.to_quaternion, __accu1__);
+							}) ();
+							return __call__ (__accu0__.to_axis_angle, __accu0__);
+						}) ();
+						obj.rotation_axis_angle = __call__ (_joined, null, [__getitem__ (aa, 1)], __getitem__ (aa, 0));
 					}
 					else {
-						obj.rotation_euler = mat.to_euler (rot_mode, obj.rotation_euler);
+						obj.rotation_euler = (function () {
+							var __accu0__ = mat;
+							return __call__ (__accu0__.to_euler, __accu0__, rot_mode, obj.rotation_euler);
+						}) ();
 					}
 				}
-				bpy.ops.anim.keyframe_insert_by_name (__kwargtrans__ ({py_metatype: 'BUILTIN_KSI_LocRot'}));
+				(function () {
+					var __accu0__ = bpy.ops.anim;
+					return __call__ (__accu0__.keyframe_insert_by_name, __accu0__, __kwargtrans__ ({py_metatype: 'BUILTIN_KSI_LocRot'}));
+				}) ();
 			}
-			bpy.ops.rigidbody.objects_remove ();
-			for (var obj of objects) {
-				var channelbag = anim_utils.action_get_channelbag_for_slot (obj.animation_data.action, obj.animation_data.action_slot);
+			(function () {
+				var __accu0__ = bpy.ops.rigidbody;
+				return __call__ (__accu0__.objects_remove, __accu0__);
+			}) ();
+			var __iterable0__ = objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var obj = __getitem__ (__iterable0__, __index0__);
+				var channelbag = (function () {
+					var __accu0__ = anim_utils;
+					return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, obj.animation_data.action, obj.animation_data.action_slot);
+				}) ();
 				if (!(channelbag)) {
 					continue;
 				}
-				for (var fcu of channelbag.fcurves) {
+				var __iterable1__ = channelbag.fcurves;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var fcu = __getitem__ (__iterable1__, __index1__);
 					var keyframe_points = fcu.keyframe_points;
 					var i = 1;
-					while (i < len (keyframe_points) - 1) {
-						var val_prev = keyframe_points [i - 1].co [1];
-						var val_next = keyframe_points [i + 1].co [1];
-						var val = keyframe_points [i].co [1];
-						if (abs (val - val_prev) + abs (val - val_next) < 0.0001) {
-							keyframe_points.remove (keyframe_points [i]);
+					while (__lt__ (i, __sub__ (__call__ (len, null, keyframe_points), 1))) {
+						var val_prev = __getitem__ (__getitem__ (keyframe_points, __sub__ (i, 1)).co, 1);
+						var val_next = __getitem__ (__getitem__ (keyframe_points, __add__ (i, 1)).co, 1);
+						var val = __getitem__ (__getitem__ (keyframe_points, i).co, 1);
+						if (__lt__ (__add__ (__call__ (abs, null, __sub__ (val, val_prev)), __call__ (abs, null, __sub__ (val, val_next))), 0.0001)) {
+							(function () {
+								var __accu0__ = keyframe_points;
+								return __call__ (__accu0__.remove, __accu0__, __getitem__ (keyframe_points, i));
+							}) ();
 						}
 						else {
-							i++;
+							var i = __call__ (__iadd__, null, i, 1);
 						}
 					}
-					for (var keyframe of keyframe_points) {
+					var __iterable2__ = keyframe_points;
+					__iterable2__ = __i__ (__iterable2__);
+					for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+						var keyframe = __getitem__ (__iterable2__, __index2__);
 						keyframe.interpolation = 'LINEAR';
 					}
 				}
 			}
-			scene.frame_set (frame_orig);
+			(function () {
+				var __accu0__ = scene;
+				return __call__ (__accu0__.frame_set, __accu0__, frame_orig);
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -325,10 +466,13 @@ export var BakeToKeyframes =  __class__ ('BakeToKeyframes', [Operator], {
 		self.frame_start = scene.frame_start;
 		self.frame_end = scene.frame_end;
 		var wm = context.window_manager;
-		return wm.invoke_props_dialog (self);
+		return (function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.invoke_props_dialog, __accu0__, self);
+		}) ();
 	});}
 });
-BakeToKeyframes.__annotations__ = dict ({'frame_start': IntProperty (__kwargtrans__ ({py_name: 'Start Frame', description: 'Start frame for baking', min: 0, max: 300000, py_default: 1})), 'frame_end': IntProperty (__kwargtrans__ ({py_name: 'End Frame', description: 'End frame for baking', min: 1, max: 300000, py_default: 250})), 'step': IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Frame Step', min: 1, max: 120, py_default: 1}))});
+BakeToKeyframes.__annotations__ = dict ({'frame_start': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Start Frame', description: 'Start frame for baking', min: 0, max: 300000, py_default: 1})), 'frame_end': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'End Frame', description: 'End frame for baking', min: 1, max: 300000, py_default: 250})), 'step': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Frame Step', description: 'Frame Step', min: 1, max: 120, py_default: 1}))});
 export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 	__module__: __name__,
 	bl_idname: 'rigidbody.connect',
@@ -337,7 +481,7 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -355,7 +499,7 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 	get _add_constraint () {return __get__ (this, function (self, context, object1, object2) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -369,24 +513,36 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 		}
 		else {
 		}
-		if (object1 == object2) {
+		if (__eq__ (object1, object2)) {
 			return ;
 		}
-		if (self.pivot_type == 'ACTIVE') {
+		if (__eq__ (self.pivot_type, 'ACTIVE')) {
 			var loc = object1.location;
 		}
-		else if (self.pivot_type == 'SELECTED') {
+		else if (__eq__ (self.pivot_type, 'SELECTED')) {
 			var loc = object2.location;
 		}
 		else {
-			var loc = (object1.location + object2.location) / 2.0;
+			var loc = __truediv__ (__add__ (object1.location, object2.location), 2.0);
 		}
-		var ob = bpy.data.objects.py_new ('Constraint', __kwargtrans__ ({object_data: null}));
+		var ob = (function () {
+			var __accu0__ = bpy.data.objects;
+			return __call__ (__accu0__.py_new, __accu0__, 'Constraint', __kwargtrans__ ({object_data: null}));
+		}) ();
 		ob.location = loc;
-		context.scene.collection.objects.link (ob);
+		(function () {
+			var __accu0__ = context.scene.collection.objects;
+			return __call__ (__accu0__.link, __accu0__, ob);
+		}) ();
 		context.view_layer.objects.active = ob;
-		ob.select_set (true);
-		bpy.ops.rigidbody.constraint_add ();
+		(function () {
+			var __accu0__ = ob;
+			return __call__ (__accu0__.select_set, __accu0__, true);
+		}) ();
+		(function () {
+			var __accu0__ = bpy.ops.rigidbody;
+			return __call__ (__accu0__.constraint_add, __accu0__);
+		}) ();
 		var con_obj = context.active_object;
 		con_obj.empty_display_type = 'ARROWS';
 		var con = con_obj.rigid_body_constraint;
@@ -397,7 +553,7 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -413,11 +569,14 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 		var objects = context.selected_objects;
 		var obj_act = context.active_object;
 		var change = false;
-		if (self.connection_pattern == 'CHAIN_DISTANCE') {
+		if (__eq__ (self.connection_pattern, 'CHAIN_DISTANCE')) {
 			var objs_sorted = [obj_act];
 			var objects_tmp = context.selected_objects;
 			try {
-				objects_tmp.remove (obj_act);
+				(function () {
+					var __accu0__ = objects_tmp;
+					return __call__ (__accu0__.remove, __accu0__, obj_act);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, ValueError)) {
@@ -429,58 +588,111 @@ export var ConnectRigidBodies =  __class__ ('ConnectRigidBodies', [Operator], {
 			}
 			var last_obj = obj_act;
 			while (objects_tmp) {
-				objects_tmp.py_sort (__kwargtrans__ ({key: (function __lambda__ (o) {
-					if (arguments.length) {
-						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-							var __allkwargs0__ = arguments [__ilastarg0__--];
-							for (var __attrib0__ in __allkwargs0__) {
-								switch (__attrib0__) {
-									case 'o': var o = __allkwargs0__ [__attrib0__]; break;
+				(function () {
+					var __accu0__ = objects_tmp;
+					return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (o) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case 'o': var o = __allkwargs0__ [__attrib0__]; break;
+									}
 								}
 							}
 						}
-					}
-					else {
-					}
-					return (last_obj.location - o.location).length;
-				})}));
-				var last_obj = objects_tmp.py_pop (0);
-				objs_sorted.append (last_obj);
+						else {
+						}
+						return (__sub__ (last_obj.location, o.location)).length;
+					})}));
+				}) ();
+				var last_obj = (function () {
+					var __accu0__ = objects_tmp;
+					return __call__ (__accu0__.py_pop, __accu0__, 0);
+				}) ();
+				(function () {
+					var __accu0__ = objs_sorted;
+					return __call__ (__accu0__.append, __accu0__, last_obj);
+				}) ();
 			}
-			for (var i = 1; i < len (objs_sorted); i++) {
-				self._add_constraint (context, objs_sorted [i - 1], objs_sorted [i]);
+			for (var i = 1; i < __call__ (len, null, objs_sorted); i++) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__._add_constraint, __accu0__, context, __getitem__ (objs_sorted, __sub__ (i, 1)), __getitem__ (objs_sorted, i));
+				}) ();
 				var change = true;
 			}
 		}
 		else {
-			for (var obj of objects) {
-				self._add_constraint (context, obj_act, obj);
+			var __iterable0__ = objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var obj = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__._add_constraint, __accu0__, context, obj_act, obj);
+				}) ();
 				var change = true;
 			}
 		}
 		if (change) {
-			bpy.ops.object.select_all (__kwargtrans__ ({action: 'DESELECT'}));
-			for (var obj of objects) {
-				obj.select_set (true);
+			(function () {
+				var __accu0__ = bpy.ops.object;
+				return __call__ (__accu0__.select_all, __accu0__, __kwargtrans__ ({action: 'DESELECT'}));
+			}) ();
+			var __iterable0__ = objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var obj = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = obj;
+					return __call__ (__accu0__.select_set, __accu0__, true);
+				}) ();
 			}
 			view_layer.objects.active = obj_act;
 			return new set (['FINISHED']);
 		}
 		else {
-			self.report (new set (['WARNING']), 'No other objects selected');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No other objects selected');
+			}) ();
 			return new set (['CANCELLED']);
 		}
 	});}
 });
-ConnectRigidBodies.__annotations__ = dict ({'con_type': EnumProperty (__kwargtrans__ ({py_name: 'Type', description: 'Type of generated constraint', py_items: tuple ((function () {
+ConnectRigidBodies.__annotations__ = dict ({'con_type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Type', description: 'Type of generated constraint', py_items: __call__ (tuple, null, (function () {
 	var __accu0__ = [];
-	for (var e of bpy.types.RigidBodyConstraint.bl_rna.properties ['type'].enum_items) {
-		__accu0__.append (tuple ([e.identifier, e.py_name, e.description, e.value]));
+	var __iterable0__ = __getitem__ (bpy.types.RigidBodyConstraint.bl_rna.properties, 'type').enum_items;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var e = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu1__ = __accu0__;
+			return __call__ (__accu1__.append, __accu1__, tuple ([e.identifier, e.py_name, e.description, e.value]));
+		}) ();
 	}
 	return __accu0__;
-}) ()), py_default: 'FIXED'})), 'pivot_type': EnumProperty (__kwargtrans__ ({py_name: 'Location', description: 'Constraint pivot location', py_items: tuple ([tuple (['CENTER', 'Center', 'Pivot location is between the constrained rigid bodies']), tuple (['ACTIVE', 'Active', 'Pivot location is at the active object position']), tuple (['SELECTED', 'Selected', 'Pivot location is at the selected object position'])]), py_default: 'CENTER'})), 'connection_pattern': EnumProperty (__kwargtrans__ ({py_name: 'Connection Pattern', description: 'Pattern used to connect objects', py_items: tuple ([tuple (['SELECTED_TO_ACTIVE', 'Selected to Active', 'Connect selected objects to the active object']), tuple (['CHAIN_DISTANCE', 'Chain by Distance', 'Connect objects as a chain based on distance, starting at the active object'])]), py_default: 'SELECTED_TO_ACTIVE'}))});
+}) ()), py_default: 'FIXED'})), 'pivot_type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Location', description: 'Constraint pivot location', py_items: tuple ([tuple (['CENTER', 'Center', 'Pivot location is between the constrained rigid bodies']), tuple (['ACTIVE', 'Active', 'Pivot location is at the active object position']), tuple (['SELECTED', 'Selected', 'Pivot location is at the selected object position'])]), py_default: 'CENTER'})), 'connection_pattern': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Connection Pattern', description: 'Pattern used to connect objects', py_items: tuple ([tuple (['SELECTED_TO_ACTIVE', 'Selected to Active', 'Connect selected objects to the active object']), tuple (['CHAIN_DISTANCE', 'Chain by Distance', 'Connect objects as a chain based on distance, starting at the active object'])]), py_default: 'SELECTED_TO_ACTIVE'}))});
 export var classes = tuple ([BakeToKeyframes, ConnectRigidBodies, CopyRigidbodySettings]);
 
 //# sourceMappingURL=bl_operators.rigidbody.map
 export {EnumProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case 'CopyRigidbodySettings': CopyRigidbodySettings = value; break;
+		case 'BakeToKeyframes': BakeToKeyframes = value; break;
+		case 'ConnectRigidBodies': ConnectRigidBodies = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

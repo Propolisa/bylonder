@@ -5,3 +5,8 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 var __name__ = '_bpy.msgbus';
 
 //# sourceMappingURL=_bpy.msgbus.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

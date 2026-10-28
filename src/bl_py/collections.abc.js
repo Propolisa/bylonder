@@ -15,3 +15,17 @@ export var Set = __left0__;
 export var Generator = __left0__;
 
 //# sourceMappingURL=collections.abc.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'Callable': Callable = value; break;
+		case 'Iterable': Iterable = value; break;
+		case 'Iterator': Iterator = value; break;
+		case 'Mapping': Mapping = value; break;
+		case 'MutableMapping': MutableMapping = value; break;
+		case 'Sequence': Sequence = value; break;
+		case 'MutableSequence': MutableSequence = value; break;
+		case 'Set': Set = value; break;
+		case 'Generator': Generator = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

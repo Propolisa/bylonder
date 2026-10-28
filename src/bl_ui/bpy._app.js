@@ -7,7 +7,7 @@ export var _BlendData =  __class__ ('_BlendData', [object], {
 	get __init__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -30,7 +30,7 @@ export var _Hooks =  __class__ ('_Hooks', [object], {
 	get menu_extended () {return __get__ (this, function (self, py_name) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -50,5 +50,9 @@ export var _Context =  __class__ ('_Context', [object], {
 	__module__: __name__,
 });
 export var context = _Context ();
+export var _Types =  __class__ ('_Types', [object], {
+	__module__: __name__,
+});
+export var types = _Types ();
 
 //# sourceMappingURL=bpy._app.map

@@ -12,7 +12,7 @@ export var ObjectConstraintPanel =  __class__ ('ObjectConstraintPanel', [object]
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -33,7 +33,7 @@ export var BoneConstraintPanel =  __class__ ('BoneConstraintPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -57,7 +57,7 @@ export var OBJECT_PT_constraints =  __class__ ('OBJECT_PT_constraints', [ObjectC
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -70,8 +70,14 @@ export var OBJECT_PT_constraints =  __class__ ('OBJECT_PT_constraints', [ObjectC
 		else {
 		}
 		var layout = self.layout;
-		layout.operator_menu_enum ('object.constraint_add', 'type', __kwargtrans__ ({text: 'Add Object Constraint'}));
-		layout.template_constraints (__kwargtrans__ ({use_bone_constraints: false}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'object.constraint_add', 'type', __kwargtrans__ ({text: 'Add Object Constraint'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_constraints, __accu0__, __kwargtrans__ ({use_bone_constraints: false}));
+		}) ();
 	});}
 });
 export var BONE_PT_constraints =  __class__ ('BONE_PT_constraints', [BoneConstraintPanel, Panel], {
@@ -83,7 +89,7 @@ export var BONE_PT_constraints =  __class__ ('BONE_PT_constraints', [BoneConstra
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -96,8 +102,14 @@ export var BONE_PT_constraints =  __class__ ('BONE_PT_constraints', [BoneConstra
 		else {
 		}
 		var layout = self.layout;
-		layout.operator_menu_enum ('pose.constraint_add', 'type', __kwargtrans__ ({text: 'Add Bone Constraint'}));
-		layout.template_constraints (__kwargtrans__ ({use_bone_constraints: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'pose.constraint_add', 'type', __kwargtrans__ ({text: 'Add Bone Constraint'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_constraints, __accu0__, __kwargtrans__ ({use_bone_constraints: true}));
+		}) ();
 	});}
 });
 export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [object], {
@@ -109,7 +121,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 	get draw_influence () {return function (layout, con) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -121,14 +133,29 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		}
 		else {
 		}
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		if (__in__ (con.py_metatype, new set (['IK', 'SPLINE_IK']))) {
-			layout.prop (con, 'influence');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'influence');
+			}) ();
 		}
 		else {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (con, 'influence');
-			row.operator ('constraint.disable_keep_transform', __kwargtrans__ ({text: '', icon: 'CANCEL'}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'influence');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'constraint.disable_keep_transform', __kwargtrans__ ({text: '', icon: 'CANCEL'}));
+			}) ();
 		}
 	};},
 	get space_template () {return function (layout, con, target, owner, separator) {
@@ -143,7 +170,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -160,25 +187,46 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		}
 		if (target || owner) {
 			if (separator) {
-				layout.separator ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.separator, __accu0__);
+				}) ();
 			}
 			if (target) {
-				layout.prop (con, 'target_space', __kwargtrans__ ({text: 'Target'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, con, 'target_space', __kwargtrans__ ({text: 'Target'}));
+				}) ();
 			}
 			if (owner) {
-				layout.prop (con, 'owner_space', __kwargtrans__ ({text: 'Owner'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, con, 'owner_space', __kwargtrans__ ({text: 'Owner'}));
+				}) ();
 			}
-			if (con.target_space == 'CUSTOM' || con.owner_space == 'CUSTOM') {
-				var col = layout.column ();
-				col.prop (con, 'space_object');
+			if (__eq__ (con.target_space, 'CUSTOM') || __eq__ (con.owner_space, 'CUSTOM')) {
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'space_object');
+				}) ();
 				var space_object = con.space_object;
 				if (space_object) {
 					var _match_subject = space_object.py_metatype;
-					if (_match_subject == 'ARMATURE') {
-						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+					if (__eq__ (_match_subject, 'ARMATURE')) {
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop_search, __accu0__, con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+						}) ();
 					}
-					else if (isinstance (_match_subject, tuple ([list, tuple])) && len (_match_subject) == 2 && _match_subject [0] == 'MESH' && _match_subject [1] == 'LATTICE') {
-						col.prop_search (con, 'space_subtarget', con.space_object, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+					else if (__call__ (isinstance, null, _match_subject, tuple ([list, tuple])) && __eq__ (__call__ (len, null, _match_subject), 2) && __eq__ (__getitem__ (_match_subject, 0), 'MESH') && __eq__ (__getitem__ (_match_subject, 1), 'LATTICE')) {
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop_search, __accu0__, con, 'space_subtarget', con.space_object, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+						}) ();
 					}
 				}
 			}
@@ -190,7 +238,7 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -203,29 +251,56 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		}
 		else {
 		}
-		var col = layout.column ();
-		col.prop (con, 'target');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'target');
+		}) ();
 		if (con.target && subtargets) {
-			if (con.target.py_metatype == 'ARMATURE') {
-				col.prop_search (con, 'subtarget', con.target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
-				if (con.subtarget && hasattr (con, 'head_tail')) {
-					var row = col.row (__kwargtrans__ ({align: true}));
+			if (__eq__ (con.target.py_metatype, 'ARMATURE')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop_search, __accu0__, con, 'subtarget', con.target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+				}) ();
+				if (con.subtarget && __call__ (hasattr, null, con, 'head_tail')) {
+					var row = (function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
 					row.use_property_decorate = false;
-					var sub = row.row (__kwargtrans__ ({align: true}));
-					sub.prop (con, 'head_tail');
-					sub.prop (con, 'use_bbone_shape', __kwargtrans__ ({text: '', icon: 'IPO_BEZIER'}));
-					row.prop_decorator (con, 'head_tail');
+					var sub = (function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, con, 'head_tail');
+					}) ();
+					(function () {
+						var __accu0__ = sub;
+						return __call__ (__accu0__.prop, __accu0__, con, 'use_bbone_shape', __kwargtrans__ ({text: '', icon: 'IPO_BEZIER'}));
+					}) ();
+					(function () {
+						var __accu0__ = row;
+						return __call__ (__accu0__.prop_decorator, __accu0__, con, 'head_tail');
+					}) ();
 				}
 			}
 			else if (__in__ (con.target.py_metatype, new set (['MESH', 'LATTICE']))) {
-				col.prop_search (con, 'subtarget', con.target, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop_search, __accu0__, con, 'subtarget', con.target, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+				}) ();
 			}
 		}
 	};},
 	get get_constraint () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -238,13 +313,16 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var con = self.custom_data;
-		self.layout.context_pointer_set ('constraint', con);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.context_pointer_set, __accu0__, 'constraint', con);
+		}) ();
 		return con;
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -257,13 +335,19 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
-		layout.template_constraint_header (con);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_constraint_header, __accu0__, con);
+		}) ();
 	});},
 	get draw_childof () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -276,37 +360,100 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		var row = layout.row (__kwargtrans__ ({heading: 'Location'}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Location'}));
+		}) ();
 		row.use_property_decorate = false;
-		row.prop (con, 'use_location_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		row.prop (con, 'use_location_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		row.prop (con, 'use_location_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var row = layout.row (__kwargtrans__ ({heading: 'Rotation'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_location_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_location_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_location_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Rotation'}));
+		}) ();
 		row.use_property_decorate = false;
-		row.prop (con, 'use_rotation_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		row.prop (con, 'use_rotation_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		row.prop (con, 'use_rotation_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var row = layout.row (__kwargtrans__ ({heading: 'Scale'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_rotation_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_rotation_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_rotation_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Scale'}));
+		}) ();
 		row.use_property_decorate = false;
-		row.prop (con, 'use_scale_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		row.prop (con, 'use_scale_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		row.prop (con, 'use_scale_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var row = layout.row ();
-		row.operator ('constraint.childof_set_inverse');
-		row.operator ('constraint.childof_clear_inverse');
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_scale_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_scale_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_scale_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.childof_set_inverse');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.childof_clear_inverse');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_trackto () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -319,20 +466,41 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'track_axis', __kwargtrans__ ({expand: true}));
-		layout.prop (con, 'up_axis', __kwargtrans__ ({text: 'Up', expand: true}));
-		layout.prop (con, 'use_target_z');
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'track_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'up_axis', __kwargtrans__ ({text: 'Up', expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_target_z');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_follow_path () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -345,29 +513,65 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
 		if (con.use_fixed_location) {
-			layout.prop (con, 'offset_factor', __kwargtrans__ ({text: 'Offset Factor'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'offset_factor', __kwargtrans__ ({text: 'Offset Factor'}));
+			}) ();
 		}
 		else {
-			layout.prop (con, 'offset');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'offset');
+			}) ();
 		}
-		layout.prop (con, 'forward_axis', __kwargtrans__ ({expand: true}));
-		layout.prop (con, 'up_axis', __kwargtrans__ ({expand: true}));
-		var col = layout.column ();
-		col.prop (con, 'use_fixed_location');
-		col.prop (con, 'use_curve_radius');
-		col.prop (con, 'use_curve_follow');
-		layout.operator ('constraint.followpath_path_animate', __kwargtrans__ ({text: 'Animate Path', icon: 'ANIM_DATA'}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'forward_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'up_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_fixed_location');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_curve_radius');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_curve_follow');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.followpath_path_animate', __kwargtrans__ ({text: 'Animate Path', icon: 'ANIM_DATA'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_rot_limit () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -380,43 +584,115 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var row = layout.row (__kwargtrans__ ({heading: 'Limit X', align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Limit X', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		row.prop (con, 'use_limit_x', __kwargtrans__ ({text: ''}));
-		var sub = row.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_limit_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = con.use_limit_x;
-		sub.prop (con, 'min_x', __kwargtrans__ ({text: 'Min'}));
-		sub.prop (con, 'max_x', __kwargtrans__ ({text: 'Max'}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var row = layout.row (__kwargtrans__ ({heading: 'Y', align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_x', __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_x', __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Y', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		row.prop (con, 'use_limit_y', __kwargtrans__ ({text: ''}));
-		var sub = row.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_limit_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = con.use_limit_y;
-		sub.prop (con, 'min_y', __kwargtrans__ ({text: 'Min'}));
-		sub.prop (con, 'max_y', __kwargtrans__ ({text: 'Max'}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var row = layout.row (__kwargtrans__ ({heading: 'Z', align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_y', __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_y', __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Z', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		row.prop (con, 'use_limit_z', __kwargtrans__ ({text: ''}));
-		var sub = row.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_limit_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = con.use_limit_z;
-		sub.prop (con, 'min_z', __kwargtrans__ ({text: 'Min'}));
-		sub.prop (con, 'max_z', __kwargtrans__ ({text: 'Max'}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		layout.prop (con, 'euler_order', __kwargtrans__ ({text: 'Order'}));
-		layout.prop (con, 'use_transform_limit');
-		layout.prop (con, 'use_legacy_behavior');
-		self.space_template (layout, con, __kwargtrans__ ({target: false, owner: true}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_z', __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_z', __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'euler_order', __kwargtrans__ ({text: 'Order'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_transform_limit');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_legacy_behavior');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con, __kwargtrans__ ({target: false, owner: true}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_loc_limit () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -429,67 +705,193 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var col = layout.column ();
-		var row = col.row (__kwargtrans__ ({heading: 'Minimum X', align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Minimum X', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_min_x', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_min_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_min_x;
-		subsub.prop (con, 'min_x', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'min_x');
-		var row = col.row (__kwargtrans__ ({heading: 'Y', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'min_x');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Y', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_min_y', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_min_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_min_y;
-		subsub.prop (con, 'min_y', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'min_y');
-		var row = col.row (__kwargtrans__ ({heading: 'Z', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'min_y');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Z', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_min_z', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_min_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_min_z;
-		subsub.prop (con, 'min_z', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'min_z');
-		col.separator ();
-		var row = col.row (__kwargtrans__ ({heading: 'Maximum X', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'min_z');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Maximum X', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_max_x', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_max_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_max_x;
-		subsub.prop (con, 'max_x', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'max_x');
-		var row = col.row (__kwargtrans__ ({heading: 'Y', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'max_x');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Y', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_max_y', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_max_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_max_y;
-		subsub.prop (con, 'max_y', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'max_y');
-		var row = col.row (__kwargtrans__ ({heading: 'Z', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'max_y');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Z', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_max_z', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_max_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_max_z;
-		subsub.prop (con, 'max_z', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'max_z');
-		layout.prop (con, 'use_transform_limit');
-		self.space_template (layout, con, __kwargtrans__ ({target: false, owner: true}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'max_z');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_transform_limit');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con, __kwargtrans__ ({target: false, owner: true}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_size_limit () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -502,67 +904,193 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var col = layout.column ();
-		var row = col.row (__kwargtrans__ ({heading: 'Minimum X', align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Minimum X', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_min_x', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_min_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_min_x;
-		subsub.prop (con, 'min_x', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'min_x');
-		var row = col.row (__kwargtrans__ ({heading: 'Y', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'min_x');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Y', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_min_y', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_min_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_min_y;
-		subsub.prop (con, 'min_y', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'min_y');
-		var row = col.row (__kwargtrans__ ({heading: 'Z', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'min_y');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Z', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_min_z', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_min_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_min_z;
-		subsub.prop (con, 'min_z', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'min_z');
-		col.separator ();
-		var row = col.row (__kwargtrans__ ({heading: 'Maximum X', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'min_z');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Maximum X', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_max_x', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_max_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_max_x;
-		subsub.prop (con, 'max_x', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'max_x');
-		var row = col.row (__kwargtrans__ ({heading: 'Y', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_x', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'max_x');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Y', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_max_y', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_max_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_max_y;
-		subsub.prop (con, 'max_y', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'max_y');
-		var row = col.row (__kwargtrans__ ({heading: 'Z', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_y', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'max_y');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Z', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_max_z', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_max_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_max_z;
-		subsub.prop (con, 'max_z', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'max_z');
-		layout.prop (con, 'use_transform_limit');
-		self.space_template (layout, con, __kwargtrans__ ({target: false, owner: true}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max_z', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'max_z');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_transform_limit');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con, __kwargtrans__ ({target: false, owner: true}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_rotate_like () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -575,33 +1103,87 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'euler_order', __kwargtrans__ ({text: 'Order'}));
-		var row = layout.row (__kwargtrans__ ({heading: 'Axis', align: true}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'euler_order', __kwargtrans__ ({text: 'Order'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Axis', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		sub.prop (con, 'use_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		sub.prop (con, 'use_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var row = layout.row (__kwargtrans__ ({heading: 'Invert', align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Invert', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'invert_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		sub.prop (con, 'invert_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		sub.prop (con, 'invert_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		layout.prop (con, 'mix_mode', __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'invert_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'invert_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'invert_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'mix_mode', __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_locate_like () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -614,32 +1196,83 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		var row = layout.row (__kwargtrans__ ({heading: 'Axis', align: true}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Axis', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		sub.prop (con, 'use_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		sub.prop (con, 'use_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var row = layout.row (__kwargtrans__ ({heading: 'Invert', align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Invert', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'invert_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		sub.prop (con, 'invert_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		sub.prop (con, 'invert_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		layout.prop (con, 'use_offset');
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'invert_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'invert_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'invert_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_offset');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_size_like () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -652,31 +1285,79 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		var row = layout.row (__kwargtrans__ ({heading: 'Axis', align: true}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Axis', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_x', __kwargtrans__ ({text: 'X', toggle: true}));
-		sub.prop (con, 'use_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-		sub.prop (con, 'use_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-		row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-		var col = layout.column ();
-		col.prop (con, 'power');
-		col.prop (con, 'use_make_uniform');
-		col.prop (con, 'use_offset');
-		var row = col.row ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_x', __kwargtrans__ ({text: 'X', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'power');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_make_uniform');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_offset');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = con.use_offset;
-		row.prop (con, 'use_add');
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_add');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_same_volume () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -689,20 +1370,41 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		layout.prop (con, 'mode');
-		var row = layout.row (__kwargtrans__ ({heading: 'Free Axis'}));
-		row.prop (con, 'free_axis', __kwargtrans__ ({expand: true}));
-		layout.prop (con, 'volume');
-		self.space_template (layout, con, __kwargtrans__ ({target: false, owner: true}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'mode');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Free Axis'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'free_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'volume');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con, __kwargtrans__ ({target: false, owner: true}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_trans_like () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -715,19 +1417,37 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'remove_target_shear');
-		layout.prop (con, 'mix_mode', __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'remove_target_shear');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'mix_mode', __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_action () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -740,27 +1460,60 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var target_row = layout.row (__kwargtrans__ ({align: true}));
+		var target_row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		target_row.active = !(con.use_eval_time);
-		self.target_template (target_row, con);
-		var row = layout.row (__kwargtrans__ ({align: true, heading: 'Evaluation Time'}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, target_row, con);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Evaluation Time'}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_eval_time', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_eval_time', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_eval_time;
-		subsub.prop (con, 'eval_time', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'eval_time');
-		layout.prop (con, 'mix_mode', __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'eval_time', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'eval_time');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'mix_mode', __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_lock_track () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -773,18 +1526,33 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'track_axis', __kwargtrans__ ({expand: true}));
-		layout.prop (con, 'lock_axis', __kwargtrans__ ({expand: true}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'track_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'lock_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_dist_limit () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -797,22 +1565,49 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		var row = layout.row ();
-		row.prop (con, 'distance');
-		row.operator ('constraint.limitdistance_reset', __kwargtrans__ ({text: '', icon: 'X'}));
-		layout.prop (con, 'limit_mode', __kwargtrans__ ({text: 'Clamp Region'}));
-		layout.prop (con, 'use_transform_limit');
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'distance');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.limitdistance_reset', __kwargtrans__ ({text: '', icon: 'X'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'limit_mode', __kwargtrans__ ({text: 'Clamp Region'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_transform_limit');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_stretch_to () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -825,43 +1620,118 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		var row = layout.row ();
-		row.prop (con, 'rest_length');
-		row.operator ('constraint.stretchto_reset', __kwargtrans__ ({text: '', icon: 'X'}));
-		layout.separator ();
-		var col = layout.column ();
-		col.prop (con, 'bulge', __kwargtrans__ ({text: 'Volume Variation'}));
-		var row = col.row (__kwargtrans__ ({heading: 'Volume Min', align: true}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'rest_length');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.stretchto_reset', __kwargtrans__ ({text: '', icon: 'X'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'bulge', __kwargtrans__ ({text: 'Volume Variation'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Volume Min', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_bulge_min', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_bulge_min', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_bulge_min;
-		subsub.prop (con, 'bulge_min', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'bulge_min');
-		var row = col.row (__kwargtrans__ ({heading: 'Max', align: true}));
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'bulge_min', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'bulge_min');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Max', align: true}));
+		}) ();
 		row.use_property_decorate = false;
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'use_bulge_max', __kwargtrans__ ({text: ''}));
-		var subsub = sub.row (__kwargtrans__ ({align: true}));
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_bulge_max', __kwargtrans__ ({text: ''}));
+		}) ();
+		var subsub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subsub.active = con.use_bulge_max;
-		subsub.prop (con, 'bulge_max', __kwargtrans__ ({text: ''}));
-		row.prop_decorator (con, 'bulge_max');
-		var row = col.row ();
+		(function () {
+			var __accu0__ = subsub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'bulge_max', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop_decorator, __accu0__, con, 'bulge_max');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = con.use_bulge_min || con.use_bulge_max;
-		row.prop (con, 'bulge_smooth', __kwargtrans__ ({text: 'Smooth'}));
-		layout.prop (con, 'volume', __kwargtrans__ ({expand: true}));
-		layout.prop (con, 'keep_axis', __kwargtrans__ ({text: 'Rotation', expand: true}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'bulge_smooth', __kwargtrans__ ({text: 'Smooth'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'volume', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'keep_axis', __kwargtrans__ ({text: 'Rotation', expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_min_max () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -874,20 +1744,41 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'offset');
-		layout.prop (con, 'floor_location', __kwargtrans__ ({expand: true, text: 'Min/Max'}));
-		layout.prop (con, 'use_rotation');
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'offset');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'floor_location', __kwargtrans__ ({expand: true, text: 'Min/Max'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_rotation');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_clamp_to () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -900,18 +1791,33 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'main_axis', __kwargtrans__ ({expand: true}));
-		layout.prop (con, 'use_cyclic');
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'main_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_cyclic');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_transform () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -924,18 +1830,33 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'use_motion_extrapolate', __kwargtrans__ ({text: 'Extrapolate'}));
-		self.space_template (layout, con);
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_motion_extrapolate', __kwargtrans__ ({text: 'Extrapolate'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.space_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_shrinkwrap () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -948,58 +1869,142 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con, false);
-		layout.prop (con, 'distance');
-		layout.prop (con, 'shrinkwrap_type', __kwargtrans__ ({text: 'Mode'}));
-		layout.separator ();
-		if (con.shrinkwrap_type == 'PROJECT') {
-			layout.prop (con, 'project_axis', __kwargtrans__ ({expand: true, text: 'Project Axis'}));
-			layout.prop (con, 'project_axis_space', __kwargtrans__ ({text: 'Space'}));
-			if (con.project_axis_space == 'CUSTOM') {
-				var col = layout.column ();
-				col.prop (con, 'space_object');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con, false);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'distance');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'shrinkwrap_type', __kwargtrans__ ({text: 'Mode'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		if (__eq__ (con.shrinkwrap_type, 'PROJECT')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'project_axis', __kwargtrans__ ({expand: true, text: 'Project Axis'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'project_axis_space', __kwargtrans__ ({text: 'Space'}));
+			}) ();
+			if (__eq__ (con.project_axis_space, 'CUSTOM')) {
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'space_object');
+				}) ();
 				var space_object = con.space_object;
 				if (space_object) {
 					var _match_subject = space_object.py_metatype;
-					if (_match_subject == 'ARMATURE') {
-						col.prop_search (con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+					if (__eq__ (_match_subject, 'ARMATURE')) {
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop_search, __accu0__, con, 'space_subtarget', con.space_object.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+						}) ();
 					}
-					else if (isinstance (_match_subject, tuple ([list, tuple])) && len (_match_subject) == 2 && _match_subject [0] == 'MESH' && _match_subject [1] == 'LATTICE') {
-						col.prop_search (con, 'space_subtarget', con.space_object, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+					else if (__call__ (isinstance, null, _match_subject, tuple ([list, tuple])) && __eq__ (__call__ (len, null, _match_subject), 2) && __eq__ (__getitem__ (_match_subject, 0), 'MESH') && __eq__ (__getitem__ (_match_subject, 1), 'LATTICE')) {
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop_search, __accu0__, con, 'space_subtarget', con.space_object, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+						}) ();
 					}
 				}
 			}
-			layout.prop (con, 'project_limit', __kwargtrans__ ({text: 'Distance'}));
-			layout.prop (con, 'use_project_opposite');
-			layout.separator ();
-			var col = layout.column ();
-			var row = col.row ();
-			row.prop (con, 'cull_face', __kwargtrans__ ({expand: true}));
-			var row = col.row ();
-			row.active = con.use_project_opposite && con.cull_face != 'OFF';
-			row.prop (con, 'use_invert_cull');
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'project_limit', __kwargtrans__ ({text: 'Distance'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_project_opposite');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'cull_face', __kwargtrans__ ({expand: true}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			row.active = con.use_project_opposite && __ne__ (con.cull_face, 'OFF');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_invert_cull');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		if (__in__ (con.shrinkwrap_type, new set (['PROJECT', 'NEAREST_SURFACE', 'TARGET_PROJECT']))) {
-			layout.prop (con, 'wrap_mode', __kwargtrans__ ({text: 'Snap Mode'}));
-			var row = layout.row (__kwargtrans__ ({heading: 'Align to Normal', align: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'wrap_mode', __kwargtrans__ ({text: 'Snap Mode'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Align to Normal', align: true}));
+			}) ();
 			row.use_property_decorate = false;
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.prop (con, 'use_track_normal', __kwargtrans__ ({text: ''}));
-			var subsub = sub.row (__kwargtrans__ ({align: true}));
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_track_normal', __kwargtrans__ ({text: ''}));
+			}) ();
+			var subsub = (function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			subsub.active = con.use_track_normal;
-			subsub.prop (con, 'track_axis', __kwargtrans__ ({text: ''}));
-			row.prop_decorator (con, 'track_axis');
+			(function () {
+				var __accu0__ = subsub;
+				return __call__ (__accu0__.prop, __accu0__, con, 'track_axis', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_decorator, __accu0__, con, 'track_axis');
+			}) ();
 		}
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_damp_track () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1012,17 +2017,29 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		layout.prop (con, 'track_axis', __kwargtrans__ ({expand: true}));
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'track_axis', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_spline_ik () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1035,16 +2052,25 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_pivot () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1057,30 +2083,57 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
 		if (con.target) {
-			layout.prop (con, 'offset', __kwargtrans__ ({text: 'Pivot Offset'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'offset', __kwargtrans__ ({text: 'Pivot Offset'}));
+			}) ();
 		}
 		else {
-			layout.prop (con, 'use_relative_location');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_relative_location');
+			}) ();
 			if (con.use_relative_location) {
-				layout.prop (con, 'offset', __kwargtrans__ ({text: 'Pivot Point'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, con, 'offset', __kwargtrans__ ({text: 'Pivot Point'}));
+				}) ();
 			}
 			else {
-				layout.prop (con, 'offset', __kwargtrans__ ({text: 'Pivot Point'}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, con, 'offset', __kwargtrans__ ({text: 'Pivot Point'}));
+				}) ();
 			}
 		}
-		var col = layout.column ();
-		col.prop (con, 'rotation_range', __kwargtrans__ ({text: 'Rotation Range'}));
-		self.draw_influence (layout, con);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'rotation_range', __kwargtrans__ ({text: 'Rotation Range'}));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_follow_track () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1093,7 +2146,10 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
 		var clip = null;
@@ -1103,32 +2159,74 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 			var clip = con.clip;
 		}
-		layout.prop (con, 'use_active_clip');
-		layout.prop (con, 'use_3d_position');
-		var row = layout.row ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_active_clip');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_3d_position');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = !(con.use_3d_position);
-		row.prop (con, 'use_undistorted_position');
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_undistorted_position');
+		}) ();
 		if (!(con.use_active_clip)) {
-			layout.prop (con, 'clip');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'clip');
+			}) ();
 		}
-		layout.prop (con, 'frame_method');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'frame_method');
+		}) ();
 		if (clip) {
 			var tracking = clip.tracking;
-			layout.prop_search (con, 'object', tracking, 'objects', __kwargtrans__ ({icon: 'OBJECT_DATA'}));
-			var tracking_object = tracking.objects.py_get (con.object, tracking.objects [0]);
-			layout.prop_search (con, 'track', tracking_object, 'tracks', __kwargtrans__ ({icon: 'ANIM_DATA'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop_search, __accu0__, con, 'object', tracking, 'objects', __kwargtrans__ ({icon: 'OBJECT_DATA'}));
+			}) ();
+			var tracking_object = (function () {
+				var __accu0__ = tracking.objects;
+				return __call__ (__accu0__.py_get, __accu0__, con.object, __getitem__ (tracking.objects, 0));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop_search, __accu0__, con, 'track', tracking_object, 'tracks', __kwargtrans__ ({icon: 'ANIM_DATA'}));
+			}) ();
 		}
-		layout.prop (con, 'camera');
-		var row = layout.row ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'camera');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = !(con.use_3d_position);
-		row.prop (con, 'depth_object');
-		layout.operator ('clip.constraint_to_fcurve');
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, con, 'depth_object');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'clip.constraint_to_fcurve');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_camera_solver () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1141,20 +2239,35 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		layout.prop (con, 'use_active_clip');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_active_clip');
+		}) ();
 		if (!(con.use_active_clip)) {
-			layout.prop (con, 'clip');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'clip');
+			}) ();
 		}
-		layout.operator ('clip.constraint_to_fcurve');
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'clip.constraint_to_fcurve');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_object_solver () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1167,7 +2280,10 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
 		var clip = null;
@@ -1177,24 +2293,51 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 			var clip = con.clip;
 		}
-		layout.prop (con, 'use_active_clip');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_active_clip');
+		}) ();
 		if (!(con.use_active_clip)) {
-			layout.prop (con, 'clip');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'clip');
+			}) ();
 		}
 		if (clip) {
-			layout.prop_search (con, 'object', clip.tracking, 'objects', __kwargtrans__ ({icon: 'OBJECT_DATA'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop_search, __accu0__, con, 'object', clip.tracking, 'objects', __kwargtrans__ ({icon: 'OBJECT_DATA'}));
+			}) ();
 		}
-		layout.prop (con, 'camera');
-		var row = layout.row ();
-		row.operator ('constraint.objectsolver_set_inverse');
-		row.operator ('constraint.objectsolver_clear_inverse');
-		layout.operator ('clip.constraint_to_fcurve');
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'camera');
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.objectsolver_set_inverse');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.objectsolver_clear_inverse');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'clip.constraint_to_fcurve');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_transform_cache () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1207,20 +2350,32 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		layout.template_cache_file (con, 'cache_file');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_cache_file, __accu0__, con, 'cache_file');
+		}) ();
 		var cache_file = con.cache_file;
 		if (cache_file !== null) {
-			layout.prop_search (con, 'object_path', cache_file, 'object_paths');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop_search, __accu0__, con, 'object_path', cache_file, 'object_paths');
+			}) ();
 		}
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_armature () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1233,26 +2388,53 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var col = layout.column ();
-		col.prop (con, 'use_deform_preserve_volume');
-		col.prop (con, 'use_bone_envelopes');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_deform_preserve_volume');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_bone_envelopes');
+		}) ();
 		if (context.pose_bone) {
-			col.prop (con, 'use_current_location');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_current_location');
+			}) ();
 		}
-		layout.operator ('constraint.add_target', __kwargtrans__ ({text: 'Add Target Bone'}));
-		layout.operator ('constraint.normalize_target_weights');
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.add_target', __kwargtrans__ ({text: 'Add Target Bone'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'constraint.normalize_target_weights');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 		if (!(con.targets)) {
-			layout.label (__kwargtrans__ ({text: 'No target bones added', icon: 'ERROR'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No target bones added', icon: 'ERROR'}));
+			}) ();
 		}
 	});},
 	get draw_kinematic () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1265,92 +2447,257 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con);
-		if (context.object.pose.ik_solver == 'ITASC') {
-			layout.prop (con, 'ik_type');
-			var col = layout.column ();
-			col.prop (con, 'pole_target');
-			if (con.pole_target && con.pole_target.py_metatype == 'ARMATURE') {
-				col.prop_search (con, 'pole_subtarget', con.pole_target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con);
+		}) ();
+		if (__eq__ (context.object.pose.ik_solver, 'ITASC')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'ik_type');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'pole_target');
+			}) ();
+			if (con.pole_target && __eq__ (con.pole_target.py_metatype, 'ARMATURE')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop_search, __accu0__, con, 'pole_subtarget', con.pole_target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+				}) ();
 			}
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			if (con.pole_target) {
-				col.prop (con, 'pole_angle');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'pole_angle');
+				}) ();
 			}
-			col.prop (con, 'use_tail');
-			col.prop (con, 'use_stretch');
-			col.prop (con, 'chain_count');
-			if (con.ik_type == 'COPY_POSE') {
-				layout.prop (con, 'reference_axis', __kwargtrans__ ({expand: true}));
-				var loc_col = layout.column ();
-				loc_col.prop (con, 'use_location');
-				var row = loc_col.row ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_tail');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_stretch');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'chain_count');
+			}) ();
+			if (__eq__ (con.ik_type, 'COPY_POSE')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, con, 'reference_axis', __kwargtrans__ ({expand: true}));
+				}) ();
+				var loc_col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = loc_col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'use_location');
+				}) ();
+				var row = (function () {
+					var __accu0__ = loc_col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				row.active = con.use_location;
-				row.prop (con, 'weight', __kwargtrans__ ({text: 'Weight', slider: true}));
-				var row = loc_col.row (__kwargtrans__ ({heading: 'Lock', align: true}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, con, 'weight', __kwargtrans__ ({text: 'Weight', slider: true}));
+				}) ();
+				var row = (function () {
+					var __accu0__ = loc_col;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Lock', align: true}));
+				}) ();
 				row.use_property_decorate = false;
 				row.active = con.use_location;
-				var sub = row.row (__kwargtrans__ ({align: true}));
-				sub.prop (con, 'lock_location_x', __kwargtrans__ ({text: 'X', toggle: true}));
-				sub.prop (con, 'lock_location_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-				sub.prop (con, 'lock_location_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-				row.label (__kwargtrans__ ({icon: 'BLANK1'}));
-				var rot_col = layout.column ();
-				rot_col.prop (con, 'use_rotation');
-				var row = rot_col.row ();
+				var sub = (function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, con, 'lock_location_x', __kwargtrans__ ({text: 'X', toggle: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, con, 'lock_location_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, con, 'lock_location_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+				}) ();
+				var rot_col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = rot_col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'use_rotation');
+				}) ();
+				var row = (function () {
+					var __accu0__ = rot_col;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				row.active = con.use_rotation;
-				row.prop (con, 'orient_weight', __kwargtrans__ ({text: 'Weight', slider: true}));
-				var row = rot_col.row (__kwargtrans__ ({heading: 'Lock', align: true}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, con, 'orient_weight', __kwargtrans__ ({text: 'Weight', slider: true}));
+				}) ();
+				var row = (function () {
+					var __accu0__ = rot_col;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Lock', align: true}));
+				}) ();
 				row.use_property_decorate = false;
 				row.active = con.use_rotation;
-				var sub = row.row (__kwargtrans__ ({align: true}));
-				sub.prop (con, 'lock_rotation_x', __kwargtrans__ ({text: 'X', toggle: true}));
-				sub.prop (con, 'lock_rotation_y', __kwargtrans__ ({text: 'Y', toggle: true}));
-				sub.prop (con, 'lock_rotation_z', __kwargtrans__ ({text: 'Z', toggle: true}));
-				row.label (__kwargtrans__ ({icon: 'BLANK1'}));
+				var sub = (function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, con, 'lock_rotation_x', __kwargtrans__ ({text: 'X', toggle: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, con, 'lock_rotation_y', __kwargtrans__ ({text: 'Y', toggle: true}));
+				}) ();
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, con, 'lock_rotation_z', __kwargtrans__ ({text: 'Z', toggle: true}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+				}) ();
 			}
-			else if (con.ik_type == 'DISTANCE') {
-				layout.prop (con, 'limit_mode');
-				var col = layout.column ();
-				col.prop (con, 'weight', __kwargtrans__ ({text: 'Weight', slider: true}));
-				col.prop (con, 'distance', __kwargtrans__ ({text: 'Distance', slider: true}));
+			else if (__eq__ (con.ik_type, 'DISTANCE')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, con, 'limit_mode');
+				}) ();
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'weight', __kwargtrans__ ({text: 'Weight', slider: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'distance', __kwargtrans__ ({text: 'Distance', slider: true}));
+				}) ();
 			}
 		}
 		else {
-			var col = layout.column ();
-			col.prop (con, 'pole_target');
-			if (con.pole_target && con.pole_target.py_metatype == 'ARMATURE') {
-				col.prop_search (con, 'pole_subtarget', con.pole_target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'pole_target');
+			}) ();
+			if (con.pole_target && __eq__ (con.pole_target.py_metatype, 'ARMATURE')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop_search, __accu0__, con, 'pole_subtarget', con.pole_target.data, 'bones', __kwargtrans__ ({text: 'Bone'}));
+				}) ();
 			}
-			var col = layout.column ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			if (con.pole_target) {
-				col.prop (con, 'pole_angle');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, con, 'pole_angle');
+				}) ();
 			}
-			col.prop (con, 'iterations');
-			col.prop (con, 'chain_count');
-			col.prop (con, 'use_tail');
-			col.prop (con, 'use_stretch');
-			var col = layout.column ();
-			var row = col.row (__kwargtrans__ ({align: true, heading: 'Weight Position'}));
-			row.prop (con, 'use_location', __kwargtrans__ ({text: ''}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'iterations');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'chain_count');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_tail');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_stretch');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Weight Position'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_location', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = con.use_location;
-			sub.prop (con, 'weight', __kwargtrans__ ({text: '', slider: true}));
-			var row = col.row (__kwargtrans__ ({align: true, heading: 'Rotation'}));
-			row.prop (con, 'use_rotation', __kwargtrans__ ({text: ''}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, con, 'weight', __kwargtrans__ ({text: '', slider: true}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true, heading: 'Rotation'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_rotation', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = con.use_rotation;
-			sub.prop (con, 'orient_weight', __kwargtrans__ ({text: '', slider: true}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, con, 'orient_weight', __kwargtrans__ ({text: '', slider: true}));
+			}) ();
 		}
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});},
 	get draw_geometry_attribute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1363,25 +2710,70 @@ export var ConstraintButtonsPanel =  __class__ ('ConstraintButtonsPanel', [objec
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		self.target_template (layout, con, false);
-		layout.prop (con, 'apply_target_transform', __kwargtrans__ ({text: 'Offset with Target Transform'}));
-		layout.prop (con, 'attribute_name', __kwargtrans__ ({text: 'Attribute Name'}));
-		layout.prop (con, 'data_type', __kwargtrans__ ({text: 'Data Type'}));
-		layout.prop (con, 'domain', __kwargtrans__ ({text: 'Domain'}));
-		layout.prop (con, 'sample_index', __kwargtrans__ ({text: 'Sample Index'}));
-		layout.separator ();
-		layout.prop (con, 'mix_mode', __kwargtrans__ ({text: 'Mix Mode', text_ctxt: i18n_contexts.constraint}));
-		if (con.data_type == 'FLOAT4X4') {
-			var row = layout.row (__kwargtrans__ ({heading: 'Enabled'}));
-			row.prop (con, 'mix_loc', __kwargtrans__ ({text: 'Location', toggle: true}));
-			row.prop (con, 'mix_rot', __kwargtrans__ ({text: 'Rotation', toggle: true}));
-			row.prop (con, 'mix_scl', __kwargtrans__ ({text: 'Scale', toggle: true}));
-			row.label (__kwargtrans__ ({icon: 'BLANK1'}));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.target_template, __accu0__, layout, con, false);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'apply_target_transform', __kwargtrans__ ({text: 'Offset with Target Transform'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'attribute_name', __kwargtrans__ ({text: 'Attribute Name'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'data_type', __kwargtrans__ ({text: 'Data Type'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'domain', __kwargtrans__ ({text: 'Domain'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'sample_index', __kwargtrans__ ({text: 'Sample Index'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'mix_mode', __kwargtrans__ ({text: 'Mix Mode', text_ctxt: i18n_contexts.constraint}));
+		}) ();
+		if (__eq__ (con.data_type, 'FLOAT4X4')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Enabled'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'mix_loc', __kwargtrans__ ({text: 'Location', toggle: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'mix_rot', __kwargtrans__ ({text: 'Rotation', toggle: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'mix_scl', __kwargtrans__ ({text: 'Scale', toggle: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({icon: 'BLANK1'}));
+			}) ();
 		}
-		self.draw_influence (layout, con);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_influence, __accu0__, layout, con);
+		}) ();
 	});}
 });
 export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', [object], {
@@ -1392,7 +2784,7 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 	get get_constraint () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1405,13 +2797,16 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var con = self.custom_data;
-		self.layout.context_pointer_set ('constraint', con);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.context_pointer_set, __accu0__, 'constraint', con);
+		}) ();
 		return con;
 	});},
 	get draw_transform_from () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1424,32 +2819,68 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
-		layout.prop (con, 'map_from', __kwargtrans__ ({expand: true}));
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'map_from', __kwargtrans__ ({expand: true}));
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
 		var from_axes = [con.map_to_x_from, con.map_to_y_from, con.map_to_z_from];
-		if (con.map_from == 'ROTATION') {
-			layout.prop (con, 'from_rotation_mode', __kwargtrans__ ({text: 'Mode'}));
+		if (__eq__ (con.map_from, 'ROTATION')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'from_rotation_mode', __kwargtrans__ ({text: 'Mode'}));
+			}) ();
 		}
-		var ext = (con.map_from == 'LOCATION' ? '' : (con.map_from == 'ROTATION' ? '_rot' : '_scale'));
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		var ext = (__eq__ (con.map_from, 'LOCATION') ? '' : (__eq__ (con.map_from, 'ROTATION') ? '_rot' : '_scale'));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.active = __in__ ('X', from_axes);
-		col.prop (con, 'from_min_x' + ext, __kwargtrans__ ({text: 'X Min'}));
-		col.prop (con, 'from_max_x' + ext, __kwargtrans__ ({text: 'Max'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('from_min_x', ext), __kwargtrans__ ({text: 'X Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('from_max_x', ext), __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.active = __in__ ('Y', from_axes);
-		col.prop (con, 'from_min_y' + ext, __kwargtrans__ ({text: 'Y Min'}));
-		col.prop (con, 'from_max_y' + ext, __kwargtrans__ ({text: 'Max'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('from_min_y', ext), __kwargtrans__ ({text: 'Y Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('from_max_y', ext), __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.active = __in__ ('Z', from_axes);
-		col.prop (con, 'from_min_z' + ext, __kwargtrans__ ({text: 'Z Min'}));
-		col.prop (con, 'from_max_z' + ext, __kwargtrans__ ({text: 'Max'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('from_min_z', ext), __kwargtrans__ ({text: 'Z Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('from_max_z', ext), __kwargtrans__ ({text: 'Max'}));
+		}) ();
 	});},
 	get draw_transform_to () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1462,32 +2893,80 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
-		layout.prop (con, 'map_to', __kwargtrans__ ({expand: true}));
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'map_to', __kwargtrans__ ({expand: true}));
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		if (con.map_to == 'ROTATION') {
-			layout.prop (con, 'to_euler_order', __kwargtrans__ ({text: 'Order'}));
+		if (__eq__ (con.map_to, 'ROTATION')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'to_euler_order', __kwargtrans__ ({text: 'Order'}));
+			}) ();
 		}
-		var ext = (con.map_to == 'LOCATION' ? '' : (con.map_to == 'ROTATION' ? '_rot' : '_scale'));
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (con, 'map_to_x_from', __kwargtrans__ ({expand: false, text: 'X Source Axis'}));
-		col.prop (con, 'to_min_x' + ext, __kwargtrans__ ({text: 'Min'}));
-		col.prop (con, 'to_max_x' + ext, __kwargtrans__ ({text: 'Max'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (con, 'map_to_y_from', __kwargtrans__ ({expand: false, text: 'Y Source Axis'}));
-		col.prop (con, 'to_min_y' + ext, __kwargtrans__ ({text: 'Min'}));
-		col.prop (con, 'to_max_y' + ext, __kwargtrans__ ({text: 'Max'}));
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (con, 'map_to_z_from', __kwargtrans__ ({expand: false, text: 'Z Source Axis'}));
-		col.prop (con, 'to_min_z' + ext, __kwargtrans__ ({text: 'Min'}));
-		col.prop (con, 'to_max_z' + ext, __kwargtrans__ ({text: 'Max'}));
-		layout.prop (con, 'mix_mode' + ext, __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
+		var ext = (__eq__ (con.map_to, 'LOCATION') ? '' : (__eq__ (con.map_to, 'ROTATION') ? '_rot' : '_scale'));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'map_to_x_from', __kwargtrans__ ({expand: false, text: 'X Source Axis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('to_min_x', ext), __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('to_max_x', ext), __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'map_to_y_from', __kwargtrans__ ({expand: false, text: 'Y Source Axis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('to_min_y', ext), __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('to_max_y', ext), __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'map_to_z_from', __kwargtrans__ ({expand: false, text: 'Z Source Axis'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('to_min_z', ext), __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('to_max_z', ext), __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, __add__ ('mix_mode', ext), __kwargtrans__ ({text: 'Mix', text_ctxt: i18n_contexts.constraint}));
+		}) ();
 	});},
 	get draw_armature_bones () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1500,34 +2979,72 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		for (var [i, tgt] of py_enumerate (con.targets)) {
+		var __iterable0__ = __call__ (py_enumerate, null, con.targets);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var tgt = __left0__ [1];
 			var has_target = tgt.target !== null;
-			var box = layout.box ();
-			var header = box.row ();
+			var box = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.box, __accu0__);
+			}) ();
+			var header = (function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			header.use_property_split = false;
-			var py_split = header.py_split (__kwargtrans__ ({factor: 0.45, align: true}));
-			py_split.prop (tgt, 'target', __kwargtrans__ ({text: ''}));
-			var row = py_split.row (__kwargtrans__ ({align: true}));
+			var py_split = (function () {
+				var __accu0__ = header;
+				return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.45, align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.prop, __accu0__, tgt, 'target', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = py_split;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.active = has_target;
 			if (has_target) {
-				row.prop_search (tgt, 'subtarget', tgt.target.data, 'bones', __kwargtrans__ ({text: ''}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop_search, __accu0__, tgt, 'subtarget', tgt.target.data, 'bones', __kwargtrans__ ({text: ''}));
+				}) ();
 			}
 			else {
-				row.prop (tgt, 'subtarget', __kwargtrans__ ({text: '', icon: 'BONE_DATA'}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, tgt, 'subtarget', __kwargtrans__ ({text: '', icon: 'BONE_DATA'}));
+				}) ();
 			}
-			header.operator ('constraint.remove_target', __kwargtrans__ ({text: '', icon: 'X'})).index = i;
-			var row = box.row ();
-			row.active = has_target && tgt.subtarget != '';
-			row.prop (tgt, 'weight', __kwargtrans__ ({slider: true, text: 'Weight'}));
+			(function () {
+				var __accu0__ = header;
+				return __call__ (__accu0__.operator, __accu0__, 'constraint.remove_target', __kwargtrans__ ({text: '', icon: 'X'}));
+			}) ().index = i;
+			var row = (function () {
+				var __accu0__ = box;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			row.active = has_target && __ne__ (tgt.subtarget, '');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, tgt, 'weight', __kwargtrans__ ({slider: true, text: 'Weight'}));
+			}) ();
 		}
 	});},
 	get draw_spline_ik_fitting () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1540,18 +3057,33 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var col = layout.column ();
-		col.prop (con, 'chain_count');
-		col.prop (con, 'use_even_divisions');
-		col.prop (con, 'use_chain_offset');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'chain_count');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_even_divisions');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_chain_offset');
+		}) ();
 	});},
 	get draw_spline_ik_chain_scaling () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1564,37 +3096,88 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		layout.prop (con, 'use_curve_radius');
-		layout.prop (con, 'y_scale_mode');
-		layout.prop (con, 'xz_scale_mode');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_curve_radius');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'y_scale_mode');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'xz_scale_mode');
+		}) ();
 		if (__in__ (con.xz_scale_mode, new set (['INVERSE_PRESERVE', 'VOLUME_PRESERVE']))) {
-			layout.prop (con, 'use_original_scale');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_original_scale');
+			}) ();
 		}
-		if (con.xz_scale_mode == 'VOLUME_PRESERVE') {
-			var col = layout.column ();
-			col.prop (con, 'bulge', __kwargtrans__ ({text: 'Volume Variation'}));
-			var row = col.row (__kwargtrans__ ({heading: 'Volume Min'}));
-			row.prop (con, 'use_bulge_min', __kwargtrans__ ({text: ''}));
-			var sub = row.row ();
+		if (__eq__ (con.xz_scale_mode, 'VOLUME_PRESERVE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, con, 'bulge', __kwargtrans__ ({text: 'Volume Variation'}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Volume Min'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_bulge_min', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			sub.active = con.use_bulge_min;
-			sub.prop (con, 'bulge_min', __kwargtrans__ ({text: ''}));
-			var row = col.row (__kwargtrans__ ({heading: 'Max'}));
-			row.prop (con, 'use_bulge_max', __kwargtrans__ ({text: ''}));
-			var sub = row.row ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, con, 'bulge_min', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Max'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'use_bulge_max', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			sub.active = con.use_bulge_max;
-			sub.prop (con, 'bulge_max', __kwargtrans__ ({text: ''}));
-			var row = layout.row ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, con, 'bulge_max', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			row.active = con.use_bulge_min || con.use_bulge_max;
-			row.prop (con, 'bulge_smooth', __kwargtrans__ ({text: 'Smooth'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, con, 'bulge_smooth', __kwargtrans__ ({text: 'Smooth'}));
+			}) ();
 		}
 	});},
 	get draw_action_target () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1607,21 +3190,42 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = !(con.use_eval_time);
-		col.prop (con, 'transform_channel', __kwargtrans__ ({text: 'Channel'}));
-		ConstraintButtonsPanel.space_template (col, con, __kwargtrans__ ({target: true, owner: false, separator: false}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (con, 'min', __kwargtrans__ ({text: 'Range Min'}));
-		sub.prop (con, 'max', __kwargtrans__ ({text: 'Max'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'transform_channel', __kwargtrans__ ({text: 'Channel'}));
+		}) ();
+		(function () {
+			var __accu0__ = ConstraintButtonsPanel;
+			return __call__ (__accu0__.space_template, __accu0__, col, con, __kwargtrans__ ({target: true, owner: false, separator: false}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'min', __kwargtrans__ ({text: 'Range Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, con, 'max', __kwargtrans__ ({text: 'Max'}));
+		}) ();
 	});},
 	get draw_action_action () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1634,24 +3238,51 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		else {
 		}
 		var layout = self.layout;
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (con, 'action');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'action');
+		}) ();
 		if (con.action) {
-			col.context_pointer_set ('animated_id', con.id_data);
-			col.template_search (con, 'action_slot', con, 'action_suitable_slots', __kwargtrans__ ({py_new: '', unlink: 'anim.slot_unassign_from_constraint', text: 'Slot'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.context_pointer_set, __accu0__, 'animated_id', con.id_data);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_search, __accu0__, con, 'action_slot', con, 'action_suitable_slots', __kwargtrans__ ({py_new: '', unlink: 'anim.slot_unassign_from_constraint', text: 'Slot'}));
+			}) ();
 		}
-		layout.prop (con, 'use_bone_object_action');
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (con, 'frame_start', __kwargtrans__ ({text: 'Frame Start'}));
-		col.prop (con, 'frame_end', __kwargtrans__ ({text: 'End'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, con, 'use_bone_object_action');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'frame_start', __kwargtrans__ ({text: 'Frame Start'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, con, 'frame_end', __kwargtrans__ ({text: 'End'}));
+		}) ();
 	});},
 	get draw_transform_cache_velocity () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1663,12 +3294,15 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		}
 		else {
 		}
-		self.draw_transform_cache_subpanel (context, self.layout.template_cache_file_velocity);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_subpanel, __accu0__, context, self.layout.template_cache_file_velocity);
+		}) ();
 	});},
 	get draw_transform_cache_time () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1680,12 +3314,15 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		}
 		else {
 		}
-		self.draw_transform_cache_subpanel (context, self.layout.template_cache_file_time_settings);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_subpanel, __accu0__, context, self.layout.template_cache_file_time_settings);
+		}) ();
 	});},
 	get draw_transform_cache_layers () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1697,12 +3334,15 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		}
 		else {
 		}
-		self.draw_transform_cache_subpanel (context, self.layout.template_cache_file_layers);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_subpanel, __accu0__, context, self.layout.template_cache_file_layers);
+		}) ();
 	});},
 	get draw_transform_cache_subpanel () {return __get__ (this, function (self, context, template_func) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1715,14 +3355,17 @@ export var ConstraintButtonsSubPanel =  __class__ ('ConstraintButtonsSubPanel', 
 		}
 		else {
 		}
-		var con = self.get_constraint (context);
+		var con = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_constraint, __accu0__, context);
+		}) ();
 		if (con.cache_file === null) {
 			return ;
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = true;
-		template_func (con, 'cache_file');
+		__call__ (template_func, null, con, 'cache_file');
 	});}
 });
 export var OBJECT_PT_bChildOfConstraint =  __class__ ('OBJECT_PT_bChildOfConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1730,7 +3373,7 @@ export var OBJECT_PT_bChildOfConstraint =  __class__ ('OBJECT_PT_bChildOfConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1742,7 +3385,10 @@ export var OBJECT_PT_bChildOfConstraint =  __class__ ('OBJECT_PT_bChildOfConstra
 		}
 		else {
 		}
-		self.draw_childof (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_childof, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bChildOfConstraint =  __class__ ('BONE_PT_bChildOfConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1750,7 +3396,7 @@ export var BONE_PT_bChildOfConstraint =  __class__ ('BONE_PT_bChildOfConstraint'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1762,7 +3408,10 @@ export var BONE_PT_bChildOfConstraint =  __class__ ('BONE_PT_bChildOfConstraint'
 		}
 		else {
 		}
-		self.draw_childof (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_childof, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTrackToConstraint =  __class__ ('OBJECT_PT_bTrackToConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1770,7 +3419,7 @@ export var OBJECT_PT_bTrackToConstraint =  __class__ ('OBJECT_PT_bTrackToConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1782,7 +3431,10 @@ export var OBJECT_PT_bTrackToConstraint =  __class__ ('OBJECT_PT_bTrackToConstra
 		}
 		else {
 		}
-		self.draw_trackto (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_trackto, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTrackToConstraint =  __class__ ('BONE_PT_bTrackToConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1790,7 +3442,7 @@ export var BONE_PT_bTrackToConstraint =  __class__ ('BONE_PT_bTrackToConstraint'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1802,7 +3454,10 @@ export var BONE_PT_bTrackToConstraint =  __class__ ('BONE_PT_bTrackToConstraint'
 		}
 		else {
 		}
-		self.draw_trackto (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_trackto, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bFollowPathConstraint =  __class__ ('OBJECT_PT_bFollowPathConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1810,7 +3465,7 @@ export var OBJECT_PT_bFollowPathConstraint =  __class__ ('OBJECT_PT_bFollowPathC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1822,7 +3477,10 @@ export var OBJECT_PT_bFollowPathConstraint =  __class__ ('OBJECT_PT_bFollowPathC
 		}
 		else {
 		}
-		self.draw_follow_path (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_follow_path, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bFollowPathConstraint =  __class__ ('BONE_PT_bFollowPathConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1830,7 +3488,7 @@ export var BONE_PT_bFollowPathConstraint =  __class__ ('BONE_PT_bFollowPathConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1842,7 +3500,10 @@ export var BONE_PT_bFollowPathConstraint =  __class__ ('BONE_PT_bFollowPathConst
 		}
 		else {
 		}
-		self.draw_follow_path (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_follow_path, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bRotLimitConstraint =  __class__ ('OBJECT_PT_bRotLimitConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1850,7 +3511,7 @@ export var OBJECT_PT_bRotLimitConstraint =  __class__ ('OBJECT_PT_bRotLimitConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1862,7 +3523,10 @@ export var OBJECT_PT_bRotLimitConstraint =  __class__ ('OBJECT_PT_bRotLimitConst
 		}
 		else {
 		}
-		self.draw_rot_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_rot_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bRotLimitConstraint =  __class__ ('BONE_PT_bRotLimitConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1870,7 +3534,7 @@ export var BONE_PT_bRotLimitConstraint =  __class__ ('BONE_PT_bRotLimitConstrain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1882,7 +3546,10 @@ export var BONE_PT_bRotLimitConstraint =  __class__ ('BONE_PT_bRotLimitConstrain
 		}
 		else {
 		}
-		self.draw_rot_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_rot_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bLocLimitConstraint =  __class__ ('OBJECT_PT_bLocLimitConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1890,7 +3557,7 @@ export var OBJECT_PT_bLocLimitConstraint =  __class__ ('OBJECT_PT_bLocLimitConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1902,7 +3569,10 @@ export var OBJECT_PT_bLocLimitConstraint =  __class__ ('OBJECT_PT_bLocLimitConst
 		}
 		else {
 		}
-		self.draw_loc_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_loc_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bLocLimitConstraint =  __class__ ('BONE_PT_bLocLimitConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1910,7 +3580,7 @@ export var BONE_PT_bLocLimitConstraint =  __class__ ('BONE_PT_bLocLimitConstrain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1922,7 +3592,10 @@ export var BONE_PT_bLocLimitConstraint =  __class__ ('BONE_PT_bLocLimitConstrain
 		}
 		else {
 		}
-		self.draw_loc_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_loc_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bSizeLimitConstraint =  __class__ ('OBJECT_PT_bSizeLimitConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1930,7 +3603,7 @@ export var OBJECT_PT_bSizeLimitConstraint =  __class__ ('OBJECT_PT_bSizeLimitCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1942,7 +3615,10 @@ export var OBJECT_PT_bSizeLimitConstraint =  __class__ ('OBJECT_PT_bSizeLimitCon
 		}
 		else {
 		}
-		self.draw_size_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_size_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bSizeLimitConstraint =  __class__ ('BONE_PT_bSizeLimitConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1950,7 +3626,7 @@ export var BONE_PT_bSizeLimitConstraint =  __class__ ('BONE_PT_bSizeLimitConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1962,7 +3638,10 @@ export var BONE_PT_bSizeLimitConstraint =  __class__ ('BONE_PT_bSizeLimitConstra
 		}
 		else {
 		}
-		self.draw_size_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_size_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bRotateLikeConstraint =  __class__ ('OBJECT_PT_bRotateLikeConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1970,7 +3649,7 @@ export var OBJECT_PT_bRotateLikeConstraint =  __class__ ('OBJECT_PT_bRotateLikeC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1982,7 +3661,10 @@ export var OBJECT_PT_bRotateLikeConstraint =  __class__ ('OBJECT_PT_bRotateLikeC
 		}
 		else {
 		}
-		self.draw_rotate_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_rotate_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bRotateLikeConstraint =  __class__ ('BONE_PT_bRotateLikeConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -1990,7 +3672,7 @@ export var BONE_PT_bRotateLikeConstraint =  __class__ ('BONE_PT_bRotateLikeConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2002,7 +3684,10 @@ export var BONE_PT_bRotateLikeConstraint =  __class__ ('BONE_PT_bRotateLikeConst
 		}
 		else {
 		}
-		self.draw_rotate_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_rotate_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bLocateLikeConstraint =  __class__ ('OBJECT_PT_bLocateLikeConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2010,7 +3695,7 @@ export var OBJECT_PT_bLocateLikeConstraint =  __class__ ('OBJECT_PT_bLocateLikeC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2022,7 +3707,10 @@ export var OBJECT_PT_bLocateLikeConstraint =  __class__ ('OBJECT_PT_bLocateLikeC
 		}
 		else {
 		}
-		self.draw_locate_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_locate_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bLocateLikeConstraint =  __class__ ('BONE_PT_bLocateLikeConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2030,7 +3718,7 @@ export var BONE_PT_bLocateLikeConstraint =  __class__ ('BONE_PT_bLocateLikeConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2042,7 +3730,10 @@ export var BONE_PT_bLocateLikeConstraint =  __class__ ('BONE_PT_bLocateLikeConst
 		}
 		else {
 		}
-		self.draw_locate_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_locate_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bSizeLikeConstraint =  __class__ ('OBJECT_PT_bSizeLikeConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2050,7 +3741,7 @@ export var OBJECT_PT_bSizeLikeConstraint =  __class__ ('OBJECT_PT_bSizeLikeConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2062,7 +3753,10 @@ export var OBJECT_PT_bSizeLikeConstraint =  __class__ ('OBJECT_PT_bSizeLikeConst
 		}
 		else {
 		}
-		self.draw_size_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_size_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bSizeLikeConstraint =  __class__ ('BONE_PT_bSizeLikeConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2070,7 +3764,7 @@ export var BONE_PT_bSizeLikeConstraint =  __class__ ('BONE_PT_bSizeLikeConstrain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2082,7 +3776,10 @@ export var BONE_PT_bSizeLikeConstraint =  __class__ ('BONE_PT_bSizeLikeConstrain
 		}
 		else {
 		}
-		self.draw_size_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_size_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bSameVolumeConstraint =  __class__ ('OBJECT_PT_bSameVolumeConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2090,7 +3787,7 @@ export var OBJECT_PT_bSameVolumeConstraint =  __class__ ('OBJECT_PT_bSameVolumeC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2102,7 +3799,10 @@ export var OBJECT_PT_bSameVolumeConstraint =  __class__ ('OBJECT_PT_bSameVolumeC
 		}
 		else {
 		}
-		self.draw_same_volume (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_same_volume, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bSameVolumeConstraint =  __class__ ('BONE_PT_bSameVolumeConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2110,7 +3810,7 @@ export var BONE_PT_bSameVolumeConstraint =  __class__ ('BONE_PT_bSameVolumeConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2122,7 +3822,10 @@ export var BONE_PT_bSameVolumeConstraint =  __class__ ('BONE_PT_bSameVolumeConst
 		}
 		else {
 		}
-		self.draw_same_volume (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_same_volume, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransLikeConstraint =  __class__ ('OBJECT_PT_bTransLikeConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2130,7 +3833,7 @@ export var OBJECT_PT_bTransLikeConstraint =  __class__ ('OBJECT_PT_bTransLikeCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2142,7 +3845,10 @@ export var OBJECT_PT_bTransLikeConstraint =  __class__ ('OBJECT_PT_bTransLikeCon
 		}
 		else {
 		}
-		self.draw_trans_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_trans_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransLikeConstraint =  __class__ ('BONE_PT_bTransLikeConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2150,7 +3856,7 @@ export var BONE_PT_bTransLikeConstraint =  __class__ ('BONE_PT_bTransLikeConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2162,7 +3868,10 @@ export var BONE_PT_bTransLikeConstraint =  __class__ ('BONE_PT_bTransLikeConstra
 		}
 		else {
 		}
-		self.draw_trans_like (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_trans_like, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bActionConstraint =  __class__ ('OBJECT_PT_bActionConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2170,7 +3879,7 @@ export var OBJECT_PT_bActionConstraint =  __class__ ('OBJECT_PT_bActionConstrain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2182,7 +3891,10 @@ export var OBJECT_PT_bActionConstraint =  __class__ ('OBJECT_PT_bActionConstrain
 		}
 		else {
 		}
-		self.draw_action (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bActionConstraint =  __class__ ('BONE_PT_bActionConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2190,7 +3902,7 @@ export var BONE_PT_bActionConstraint =  __class__ ('BONE_PT_bActionConstraint', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2202,7 +3914,10 @@ export var BONE_PT_bActionConstraint =  __class__ ('BONE_PT_bActionConstraint', 
 		}
 		else {
 		}
-		self.draw_action (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bActionConstraint_target =  __class__ ('OBJECT_PT_bActionConstraint_target', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2212,7 +3927,7 @@ export var OBJECT_PT_bActionConstraint_target =  __class__ ('OBJECT_PT_bActionCo
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2224,7 +3939,10 @@ export var OBJECT_PT_bActionConstraint_target =  __class__ ('OBJECT_PT_bActionCo
 		}
 		else {
 		}
-		self.draw_action_target (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_target, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bActionConstraint_target =  __class__ ('BONE_PT_bActionConstraint_target', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2234,7 +3952,7 @@ export var BONE_PT_bActionConstraint_target =  __class__ ('BONE_PT_bActionConstr
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2246,7 +3964,10 @@ export var BONE_PT_bActionConstraint_target =  __class__ ('BONE_PT_bActionConstr
 		}
 		else {
 		}
-		self.draw_action_target (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_target, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bActionConstraint_action =  __class__ ('OBJECT_PT_bActionConstraint_action', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2256,7 +3977,7 @@ export var OBJECT_PT_bActionConstraint_action =  __class__ ('OBJECT_PT_bActionCo
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2268,7 +3989,10 @@ export var OBJECT_PT_bActionConstraint_action =  __class__ ('OBJECT_PT_bActionCo
 		}
 		else {
 		}
-		self.draw_action_action (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_action, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bActionConstraint_action =  __class__ ('BONE_PT_bActionConstraint_action', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2278,7 +4002,7 @@ export var BONE_PT_bActionConstraint_action =  __class__ ('BONE_PT_bActionConstr
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2290,7 +4014,10 @@ export var BONE_PT_bActionConstraint_action =  __class__ ('BONE_PT_bActionConstr
 		}
 		else {
 		}
-		self.draw_action_action (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_action_action, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bLockTrackConstraint =  __class__ ('OBJECT_PT_bLockTrackConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2298,7 +4025,7 @@ export var OBJECT_PT_bLockTrackConstraint =  __class__ ('OBJECT_PT_bLockTrackCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2310,7 +4037,10 @@ export var OBJECT_PT_bLockTrackConstraint =  __class__ ('OBJECT_PT_bLockTrackCon
 		}
 		else {
 		}
-		self.draw_lock_track (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_lock_track, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bLockTrackConstraint =  __class__ ('BONE_PT_bLockTrackConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2318,7 +4048,7 @@ export var BONE_PT_bLockTrackConstraint =  __class__ ('BONE_PT_bLockTrackConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2330,7 +4060,10 @@ export var BONE_PT_bLockTrackConstraint =  __class__ ('BONE_PT_bLockTrackConstra
 		}
 		else {
 		}
-		self.draw_lock_track (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_lock_track, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bDistLimitConstraint =  __class__ ('OBJECT_PT_bDistLimitConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2338,7 +4071,7 @@ export var OBJECT_PT_bDistLimitConstraint =  __class__ ('OBJECT_PT_bDistLimitCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2350,7 +4083,10 @@ export var OBJECT_PT_bDistLimitConstraint =  __class__ ('OBJECT_PT_bDistLimitCon
 		}
 		else {
 		}
-		self.draw_dist_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_dist_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bDistLimitConstraint =  __class__ ('BONE_PT_bDistLimitConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2358,7 +4094,7 @@ export var BONE_PT_bDistLimitConstraint =  __class__ ('BONE_PT_bDistLimitConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2370,7 +4106,10 @@ export var BONE_PT_bDistLimitConstraint =  __class__ ('BONE_PT_bDistLimitConstra
 		}
 		else {
 		}
-		self.draw_dist_limit (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_dist_limit, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bStretchToConstraint =  __class__ ('OBJECT_PT_bStretchToConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2378,7 +4117,7 @@ export var OBJECT_PT_bStretchToConstraint =  __class__ ('OBJECT_PT_bStretchToCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2390,7 +4129,10 @@ export var OBJECT_PT_bStretchToConstraint =  __class__ ('OBJECT_PT_bStretchToCon
 		}
 		else {
 		}
-		self.draw_stretch_to (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_stretch_to, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bStretchToConstraint =  __class__ ('BONE_PT_bStretchToConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2398,7 +4140,7 @@ export var BONE_PT_bStretchToConstraint =  __class__ ('BONE_PT_bStretchToConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2410,7 +4152,10 @@ export var BONE_PT_bStretchToConstraint =  __class__ ('BONE_PT_bStretchToConstra
 		}
 		else {
 		}
-		self.draw_stretch_to (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_stretch_to, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bMinMaxConstraint =  __class__ ('OBJECT_PT_bMinMaxConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2418,7 +4163,7 @@ export var OBJECT_PT_bMinMaxConstraint =  __class__ ('OBJECT_PT_bMinMaxConstrain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2430,7 +4175,10 @@ export var OBJECT_PT_bMinMaxConstraint =  __class__ ('OBJECT_PT_bMinMaxConstrain
 		}
 		else {
 		}
-		self.draw_min_max (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_min_max, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bMinMaxConstraint =  __class__ ('BONE_PT_bMinMaxConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2438,7 +4186,7 @@ export var BONE_PT_bMinMaxConstraint =  __class__ ('BONE_PT_bMinMaxConstraint', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2450,7 +4198,10 @@ export var BONE_PT_bMinMaxConstraint =  __class__ ('BONE_PT_bMinMaxConstraint', 
 		}
 		else {
 		}
-		self.draw_min_max (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_min_max, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bClampToConstraint =  __class__ ('OBJECT_PT_bClampToConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2458,7 +4209,7 @@ export var OBJECT_PT_bClampToConstraint =  __class__ ('OBJECT_PT_bClampToConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2470,7 +4221,10 @@ export var OBJECT_PT_bClampToConstraint =  __class__ ('OBJECT_PT_bClampToConstra
 		}
 		else {
 		}
-		self.draw_clamp_to (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_clamp_to, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bClampToConstraint =  __class__ ('BONE_PT_bClampToConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2478,7 +4232,7 @@ export var BONE_PT_bClampToConstraint =  __class__ ('BONE_PT_bClampToConstraint'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2490,7 +4244,10 @@ export var BONE_PT_bClampToConstraint =  __class__ ('BONE_PT_bClampToConstraint'
 		}
 		else {
 		}
-		self.draw_clamp_to (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_clamp_to, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransformConstraint =  __class__ ('OBJECT_PT_bTransformConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2498,7 +4255,7 @@ export var OBJECT_PT_bTransformConstraint =  __class__ ('OBJECT_PT_bTransformCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2510,7 +4267,10 @@ export var OBJECT_PT_bTransformConstraint =  __class__ ('OBJECT_PT_bTransformCon
 		}
 		else {
 		}
-		self.draw_transform (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransformConstraint =  __class__ ('BONE_PT_bTransformConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2518,7 +4278,7 @@ export var BONE_PT_bTransformConstraint =  __class__ ('BONE_PT_bTransformConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2530,7 +4290,10 @@ export var BONE_PT_bTransformConstraint =  __class__ ('BONE_PT_bTransformConstra
 		}
 		else {
 		}
-		self.draw_transform (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransformConstraint_source =  __class__ ('OBJECT_PT_bTransformConstraint_source', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2540,7 +4303,7 @@ export var OBJECT_PT_bTransformConstraint_source =  __class__ ('OBJECT_PT_bTrans
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2552,7 +4315,10 @@ export var OBJECT_PT_bTransformConstraint_source =  __class__ ('OBJECT_PT_bTrans
 		}
 		else {
 		}
-		self.draw_transform_from (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_from, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransformConstraint_from =  __class__ ('BONE_PT_bTransformConstraint_from', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2562,7 +4328,7 @@ export var BONE_PT_bTransformConstraint_from =  __class__ ('BONE_PT_bTransformCo
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2574,7 +4340,10 @@ export var BONE_PT_bTransformConstraint_from =  __class__ ('BONE_PT_bTransformCo
 		}
 		else {
 		}
-		self.draw_transform_from (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_from, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransformConstraint_destination =  __class__ ('OBJECT_PT_bTransformConstraint_destination', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2584,7 +4353,7 @@ export var OBJECT_PT_bTransformConstraint_destination =  __class__ ('OBJECT_PT_b
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2596,7 +4365,10 @@ export var OBJECT_PT_bTransformConstraint_destination =  __class__ ('OBJECT_PT_b
 		}
 		else {
 		}
-		self.draw_transform_to (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_to, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransformConstraint_to =  __class__ ('BONE_PT_bTransformConstraint_to', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2606,7 +4378,7 @@ export var BONE_PT_bTransformConstraint_to =  __class__ ('BONE_PT_bTransformCons
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2618,7 +4390,10 @@ export var BONE_PT_bTransformConstraint_to =  __class__ ('BONE_PT_bTransformCons
 		}
 		else {
 		}
-		self.draw_transform_to (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_to, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bShrinkwrapConstraint =  __class__ ('OBJECT_PT_bShrinkwrapConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2626,7 +4401,7 @@ export var OBJECT_PT_bShrinkwrapConstraint =  __class__ ('OBJECT_PT_bShrinkwrapC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2638,7 +4413,10 @@ export var OBJECT_PT_bShrinkwrapConstraint =  __class__ ('OBJECT_PT_bShrinkwrapC
 		}
 		else {
 		}
-		self.draw_shrinkwrap (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_shrinkwrap, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bShrinkwrapConstraint =  __class__ ('BONE_PT_bShrinkwrapConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2646,7 +4424,7 @@ export var BONE_PT_bShrinkwrapConstraint =  __class__ ('BONE_PT_bShrinkwrapConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2658,7 +4436,10 @@ export var BONE_PT_bShrinkwrapConstraint =  __class__ ('BONE_PT_bShrinkwrapConst
 		}
 		else {
 		}
-		self.draw_shrinkwrap (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_shrinkwrap, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bDampTrackConstraint =  __class__ ('OBJECT_PT_bDampTrackConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2666,7 +4447,7 @@ export var OBJECT_PT_bDampTrackConstraint =  __class__ ('OBJECT_PT_bDampTrackCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2678,7 +4459,10 @@ export var OBJECT_PT_bDampTrackConstraint =  __class__ ('OBJECT_PT_bDampTrackCon
 		}
 		else {
 		}
-		self.draw_damp_track (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_damp_track, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bDampTrackConstraint =  __class__ ('BONE_PT_bDampTrackConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2686,7 +4470,7 @@ export var BONE_PT_bDampTrackConstraint =  __class__ ('BONE_PT_bDampTrackConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2698,7 +4482,10 @@ export var BONE_PT_bDampTrackConstraint =  __class__ ('BONE_PT_bDampTrackConstra
 		}
 		else {
 		}
-		self.draw_damp_track (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_damp_track, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bSplineIKConstraint =  __class__ ('BONE_PT_bSplineIKConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2706,7 +4493,7 @@ export var BONE_PT_bSplineIKConstraint =  __class__ ('BONE_PT_bSplineIKConstrain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2718,7 +4505,10 @@ export var BONE_PT_bSplineIKConstraint =  __class__ ('BONE_PT_bSplineIKConstrain
 		}
 		else {
 		}
-		self.draw_spline_ik (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_spline_ik, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bSplineIKConstraint_fitting =  __class__ ('BONE_PT_bSplineIKConstraint_fitting', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2728,7 +4518,7 @@ export var BONE_PT_bSplineIKConstraint_fitting =  __class__ ('BONE_PT_bSplineIKC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2740,7 +4530,10 @@ export var BONE_PT_bSplineIKConstraint_fitting =  __class__ ('BONE_PT_bSplineIKC
 		}
 		else {
 		}
-		self.draw_spline_ik_fitting (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_spline_ik_fitting, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bSplineIKConstraint_chain_scaling =  __class__ ('BONE_PT_bSplineIKConstraint_chain_scaling', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2750,7 +4543,7 @@ export var BONE_PT_bSplineIKConstraint_chain_scaling =  __class__ ('BONE_PT_bSpl
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2762,7 +4555,10 @@ export var BONE_PT_bSplineIKConstraint_chain_scaling =  __class__ ('BONE_PT_bSpl
 		}
 		else {
 		}
-		self.draw_spline_ik_chain_scaling (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_spline_ik_chain_scaling, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bPivotConstraint =  __class__ ('OBJECT_PT_bPivotConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2770,7 +4566,7 @@ export var OBJECT_PT_bPivotConstraint =  __class__ ('OBJECT_PT_bPivotConstraint'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2782,7 +4578,10 @@ export var OBJECT_PT_bPivotConstraint =  __class__ ('OBJECT_PT_bPivotConstraint'
 		}
 		else {
 		}
-		self.draw_pivot (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_pivot, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bPivotConstraint =  __class__ ('BONE_PT_bPivotConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2790,7 +4589,7 @@ export var BONE_PT_bPivotConstraint =  __class__ ('BONE_PT_bPivotConstraint', [B
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2802,7 +4601,10 @@ export var BONE_PT_bPivotConstraint =  __class__ ('BONE_PT_bPivotConstraint', [B
 		}
 		else {
 		}
-		self.draw_pivot (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_pivot, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bFollowTrackConstraint =  __class__ ('OBJECT_PT_bFollowTrackConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2810,7 +4612,7 @@ export var OBJECT_PT_bFollowTrackConstraint =  __class__ ('OBJECT_PT_bFollowTrac
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2822,7 +4624,10 @@ export var OBJECT_PT_bFollowTrackConstraint =  __class__ ('OBJECT_PT_bFollowTrac
 		}
 		else {
 		}
-		self.draw_follow_track (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_follow_track, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bFollowTrackConstraint =  __class__ ('BONE_PT_bFollowTrackConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2830,7 +4635,7 @@ export var BONE_PT_bFollowTrackConstraint =  __class__ ('BONE_PT_bFollowTrackCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2842,7 +4647,10 @@ export var BONE_PT_bFollowTrackConstraint =  __class__ ('BONE_PT_bFollowTrackCon
 		}
 		else {
 		}
-		self.draw_follow_track (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_follow_track, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bCameraSolverConstraint =  __class__ ('OBJECT_PT_bCameraSolverConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2850,7 +4658,7 @@ export var OBJECT_PT_bCameraSolverConstraint =  __class__ ('OBJECT_PT_bCameraSol
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2862,7 +4670,10 @@ export var OBJECT_PT_bCameraSolverConstraint =  __class__ ('OBJECT_PT_bCameraSol
 		}
 		else {
 		}
-		self.draw_camera_solver (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_camera_solver, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bCameraSolverConstraint =  __class__ ('BONE_PT_bCameraSolverConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2870,7 +4681,7 @@ export var BONE_PT_bCameraSolverConstraint =  __class__ ('BONE_PT_bCameraSolverC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2882,7 +4693,10 @@ export var BONE_PT_bCameraSolverConstraint =  __class__ ('BONE_PT_bCameraSolverC
 		}
 		else {
 		}
-		self.draw_camera_solver (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_camera_solver, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bObjectSolverConstraint =  __class__ ('OBJECT_PT_bObjectSolverConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2890,7 +4704,7 @@ export var OBJECT_PT_bObjectSolverConstraint =  __class__ ('OBJECT_PT_bObjectSol
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2902,7 +4716,10 @@ export var OBJECT_PT_bObjectSolverConstraint =  __class__ ('OBJECT_PT_bObjectSol
 		}
 		else {
 		}
-		self.draw_object_solver (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_object_solver, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bObjectSolverConstraint =  __class__ ('BONE_PT_bObjectSolverConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2910,7 +4727,7 @@ export var BONE_PT_bObjectSolverConstraint =  __class__ ('BONE_PT_bObjectSolverC
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2922,7 +4739,10 @@ export var BONE_PT_bObjectSolverConstraint =  __class__ ('BONE_PT_bObjectSolverC
 		}
 		else {
 		}
-		self.draw_object_solver (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_object_solver, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransformCacheConstraint =  __class__ ('OBJECT_PT_bTransformCacheConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2930,7 +4750,7 @@ export var OBJECT_PT_bTransformCacheConstraint =  __class__ ('OBJECT_PT_bTransfo
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2942,7 +4762,10 @@ export var OBJECT_PT_bTransformCacheConstraint =  __class__ ('OBJECT_PT_bTransfo
 		}
 		else {
 		}
-		self.draw_transform_cache (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransformCacheConstraint =  __class__ ('BONE_PT_bTransformCacheConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -2950,7 +4773,7 @@ export var BONE_PT_bTransformCacheConstraint =  __class__ ('BONE_PT_bTransformCa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2962,7 +4785,10 @@ export var BONE_PT_bTransformCacheConstraint =  __class__ ('BONE_PT_bTransformCa
 		}
 		else {
 		}
-		self.draw_transform_cache (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransformCacheConstraint_velocity =  __class__ ('OBJECT_PT_bTransformCacheConstraint_velocity', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2972,7 +4798,7 @@ export var OBJECT_PT_bTransformCacheConstraint_velocity =  __class__ ('OBJECT_PT
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2984,7 +4810,10 @@ export var OBJECT_PT_bTransformCacheConstraint_velocity =  __class__ ('OBJECT_PT
 		}
 		else {
 		}
-		self.draw_transform_cache_velocity (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_velocity, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransformCacheConstraint_velocity =  __class__ ('BONE_PT_bTransformCacheConstraint_velocity', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -2994,7 +4823,7 @@ export var BONE_PT_bTransformCacheConstraint_velocity =  __class__ ('BONE_PT_bTr
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3006,7 +4835,10 @@ export var BONE_PT_bTransformCacheConstraint_velocity =  __class__ ('BONE_PT_bTr
 		}
 		else {
 		}
-		self.draw_transform_cache_velocity (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_velocity, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransformCacheConstraint_layers =  __class__ ('OBJECT_PT_bTransformCacheConstraint_layers', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -3016,7 +4848,7 @@ export var OBJECT_PT_bTransformCacheConstraint_layers =  __class__ ('OBJECT_PT_b
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3028,7 +4860,10 @@ export var OBJECT_PT_bTransformCacheConstraint_layers =  __class__ ('OBJECT_PT_b
 		}
 		else {
 		}
-		self.draw_transform_cache_layers (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_layers, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransformCacheConstraint_layers =  __class__ ('BONE_PT_bTransformCacheConstraint_layers', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -3038,7 +4873,7 @@ export var BONE_PT_bTransformCacheConstraint_layers =  __class__ ('BONE_PT_bTran
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3050,7 +4885,10 @@ export var BONE_PT_bTransformCacheConstraint_layers =  __class__ ('BONE_PT_bTran
 		}
 		else {
 		}
-		self.draw_transform_cache_layers (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_layers, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bTransformCacheConstraint_time =  __class__ ('OBJECT_PT_bTransformCacheConstraint_time', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -3060,7 +4898,7 @@ export var OBJECT_PT_bTransformCacheConstraint_time =  __class__ ('OBJECT_PT_bTr
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3072,7 +4910,10 @@ export var OBJECT_PT_bTransformCacheConstraint_time =  __class__ ('OBJECT_PT_bTr
 		}
 		else {
 		}
-		self.draw_transform_cache_time (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_time, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bTransformCacheConstraint_time =  __class__ ('BONE_PT_bTransformCacheConstraint_time', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -3082,7 +4923,7 @@ export var BONE_PT_bTransformCacheConstraint_time =  __class__ ('BONE_PT_bTransf
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3094,7 +4935,10 @@ export var BONE_PT_bTransformCacheConstraint_time =  __class__ ('BONE_PT_bTransf
 		}
 		else {
 		}
-		self.draw_transform_cache_time (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_transform_cache_time, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bArmatureConstraint =  __class__ ('OBJECT_PT_bArmatureConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -3102,7 +4946,7 @@ export var OBJECT_PT_bArmatureConstraint =  __class__ ('OBJECT_PT_bArmatureConst
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3114,7 +4958,10 @@ export var OBJECT_PT_bArmatureConstraint =  __class__ ('OBJECT_PT_bArmatureConst
 		}
 		else {
 		}
-		self.draw_armature (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_armature, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bArmatureConstraint =  __class__ ('BONE_PT_bArmatureConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -3122,7 +4969,7 @@ export var BONE_PT_bArmatureConstraint =  __class__ ('BONE_PT_bArmatureConstrain
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3134,7 +4981,10 @@ export var BONE_PT_bArmatureConstraint =  __class__ ('BONE_PT_bArmatureConstrain
 		}
 		else {
 		}
-		self.draw_armature (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_armature, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bArmatureConstraint_bones =  __class__ ('OBJECT_PT_bArmatureConstraint_bones', [ObjectConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -3144,7 +4994,7 @@ export var OBJECT_PT_bArmatureConstraint_bones =  __class__ ('OBJECT_PT_bArmatur
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3156,7 +5006,10 @@ export var OBJECT_PT_bArmatureConstraint_bones =  __class__ ('OBJECT_PT_bArmatur
 		}
 		else {
 		}
-		self.draw_armature_bones (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_armature_bones, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bArmatureConstraint_bones =  __class__ ('BONE_PT_bArmatureConstraint_bones', [BoneConstraintPanel, ConstraintButtonsSubPanel, Panel], {
@@ -3166,7 +5019,7 @@ export var BONE_PT_bArmatureConstraint_bones =  __class__ ('BONE_PT_bArmatureCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3178,7 +5031,10 @@ export var BONE_PT_bArmatureConstraint_bones =  __class__ ('BONE_PT_bArmatureCon
 		}
 		else {
 		}
-		self.draw_armature_bones (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_armature_bones, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bKinematicConstraint =  __class__ ('OBJECT_PT_bKinematicConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -3186,7 +5042,7 @@ export var OBJECT_PT_bKinematicConstraint =  __class__ ('OBJECT_PT_bKinematicCon
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3198,7 +5054,10 @@ export var OBJECT_PT_bKinematicConstraint =  __class__ ('OBJECT_PT_bKinematicCon
 		}
 		else {
 		}
-		self.draw_kinematic (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_kinematic, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bKinematicConstraint =  __class__ ('BONE_PT_bKinematicConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -3206,7 +5065,7 @@ export var BONE_PT_bKinematicConstraint =  __class__ ('BONE_PT_bKinematicConstra
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3218,7 +5077,10 @@ export var BONE_PT_bKinematicConstraint =  __class__ ('BONE_PT_bKinematicConstra
 		}
 		else {
 		}
-		self.draw_kinematic (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_kinematic, __accu0__, context);
+		}) ();
 	});}
 });
 export var OBJECT_PT_bGeometryAttributeConstraint =  __class__ ('OBJECT_PT_bGeometryAttributeConstraint', [ObjectConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -3226,7 +5088,7 @@ export var OBJECT_PT_bGeometryAttributeConstraint =  __class__ ('OBJECT_PT_bGeom
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3238,7 +5100,10 @@ export var OBJECT_PT_bGeometryAttributeConstraint =  __class__ ('OBJECT_PT_bGeom
 		}
 		else {
 		}
-		self.draw_geometry_attribute (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_geometry_attribute, __accu0__, context);
+		}) ();
 	});}
 });
 export var BONE_PT_bGeometryAttributeConstraint =  __class__ ('BONE_PT_bGeometryAttributeConstraint', [BoneConstraintPanel, ConstraintButtonsPanel, Panel], {
@@ -3246,7 +5111,7 @@ export var BONE_PT_bGeometryAttributeConstraint =  __class__ ('BONE_PT_bGeometry
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -3258,15 +5123,109 @@ export var BONE_PT_bGeometryAttributeConstraint =  __class__ ('BONE_PT_bGeometry
 		}
 		else {
 		}
-		self.draw_geometry_attribute (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.draw_geometry_attribute, __accu0__, context);
+		}) ();
 	});}
 });
 export var classes = tuple ([OBJECT_PT_constraints, BONE_PT_constraints, OBJECT_PT_bChildOfConstraint, OBJECT_PT_bTrackToConstraint, OBJECT_PT_bKinematicConstraint, OBJECT_PT_bFollowPathConstraint, OBJECT_PT_bRotLimitConstraint, OBJECT_PT_bLocLimitConstraint, OBJECT_PT_bSizeLimitConstraint, OBJECT_PT_bRotateLikeConstraint, OBJECT_PT_bLocateLikeConstraint, OBJECT_PT_bSizeLikeConstraint, OBJECT_PT_bSameVolumeConstraint, OBJECT_PT_bTransLikeConstraint, OBJECT_PT_bActionConstraint, OBJECT_PT_bActionConstraint_target, OBJECT_PT_bActionConstraint_action, OBJECT_PT_bLockTrackConstraint, OBJECT_PT_bDistLimitConstraint, OBJECT_PT_bStretchToConstraint, OBJECT_PT_bMinMaxConstraint, OBJECT_PT_bClampToConstraint, OBJECT_PT_bTransformConstraint, OBJECT_PT_bTransformConstraint_source, OBJECT_PT_bTransformConstraint_destination, OBJECT_PT_bShrinkwrapConstraint, OBJECT_PT_bDampTrackConstraint, OBJECT_PT_bPivotConstraint, OBJECT_PT_bFollowTrackConstraint, OBJECT_PT_bCameraSolverConstraint, OBJECT_PT_bObjectSolverConstraint, OBJECT_PT_bTransformCacheConstraint, OBJECT_PT_bTransformCacheConstraint_time, OBJECT_PT_bTransformCacheConstraint_velocity, OBJECT_PT_bTransformCacheConstraint_layers, OBJECT_PT_bArmatureConstraint, OBJECT_PT_bArmatureConstraint_bones, OBJECT_PT_bGeometryAttributeConstraint, BONE_PT_bChildOfConstraint, BONE_PT_bTrackToConstraint, BONE_PT_bKinematicConstraint, BONE_PT_bFollowPathConstraint, BONE_PT_bRotLimitConstraint, BONE_PT_bLocLimitConstraint, BONE_PT_bSizeLimitConstraint, BONE_PT_bRotateLikeConstraint, BONE_PT_bLocateLikeConstraint, BONE_PT_bSizeLikeConstraint, BONE_PT_bSameVolumeConstraint, BONE_PT_bTransLikeConstraint, BONE_PT_bActionConstraint, BONE_PT_bActionConstraint_target, BONE_PT_bActionConstraint_action, BONE_PT_bLockTrackConstraint, BONE_PT_bDistLimitConstraint, BONE_PT_bStretchToConstraint, BONE_PT_bMinMaxConstraint, BONE_PT_bClampToConstraint, BONE_PT_bTransformConstraint, BONE_PT_bTransformConstraint_from, BONE_PT_bTransformConstraint_to, BONE_PT_bShrinkwrapConstraint, BONE_PT_bDampTrackConstraint, BONE_PT_bSplineIKConstraint, BONE_PT_bSplineIKConstraint_fitting, BONE_PT_bSplineIKConstraint_chain_scaling, BONE_PT_bPivotConstraint, BONE_PT_bFollowTrackConstraint, BONE_PT_bCameraSolverConstraint, BONE_PT_bObjectSolverConstraint, BONE_PT_bTransformCacheConstraint, BONE_PT_bTransformCacheConstraint_time, BONE_PT_bTransformCacheConstraint_velocity, BONE_PT_bTransformCacheConstraint_layers, BONE_PT_bArmatureConstraint, BONE_PT_bArmatureConstraint_bones, BONE_PT_bGeometryAttributeConstraint]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_constraint.map
 export {Panel, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'ObjectConstraintPanel': ObjectConstraintPanel = value; break;
+		case 'BoneConstraintPanel': BoneConstraintPanel = value; break;
+		case 'OBJECT_PT_constraints': OBJECT_PT_constraints = value; break;
+		case 'BONE_PT_constraints': BONE_PT_constraints = value; break;
+		case 'ConstraintButtonsPanel': ConstraintButtonsPanel = value; break;
+		case 'ConstraintButtonsSubPanel': ConstraintButtonsSubPanel = value; break;
+		case 'OBJECT_PT_bChildOfConstraint': OBJECT_PT_bChildOfConstraint = value; break;
+		case 'BONE_PT_bChildOfConstraint': BONE_PT_bChildOfConstraint = value; break;
+		case 'OBJECT_PT_bTrackToConstraint': OBJECT_PT_bTrackToConstraint = value; break;
+		case 'BONE_PT_bTrackToConstraint': BONE_PT_bTrackToConstraint = value; break;
+		case 'OBJECT_PT_bFollowPathConstraint': OBJECT_PT_bFollowPathConstraint = value; break;
+		case 'BONE_PT_bFollowPathConstraint': BONE_PT_bFollowPathConstraint = value; break;
+		case 'OBJECT_PT_bRotLimitConstraint': OBJECT_PT_bRotLimitConstraint = value; break;
+		case 'BONE_PT_bRotLimitConstraint': BONE_PT_bRotLimitConstraint = value; break;
+		case 'OBJECT_PT_bLocLimitConstraint': OBJECT_PT_bLocLimitConstraint = value; break;
+		case 'BONE_PT_bLocLimitConstraint': BONE_PT_bLocLimitConstraint = value; break;
+		case 'OBJECT_PT_bSizeLimitConstraint': OBJECT_PT_bSizeLimitConstraint = value; break;
+		case 'BONE_PT_bSizeLimitConstraint': BONE_PT_bSizeLimitConstraint = value; break;
+		case 'OBJECT_PT_bRotateLikeConstraint': OBJECT_PT_bRotateLikeConstraint = value; break;
+		case 'BONE_PT_bRotateLikeConstraint': BONE_PT_bRotateLikeConstraint = value; break;
+		case 'OBJECT_PT_bLocateLikeConstraint': OBJECT_PT_bLocateLikeConstraint = value; break;
+		case 'BONE_PT_bLocateLikeConstraint': BONE_PT_bLocateLikeConstraint = value; break;
+		case 'OBJECT_PT_bSizeLikeConstraint': OBJECT_PT_bSizeLikeConstraint = value; break;
+		case 'BONE_PT_bSizeLikeConstraint': BONE_PT_bSizeLikeConstraint = value; break;
+		case 'OBJECT_PT_bSameVolumeConstraint': OBJECT_PT_bSameVolumeConstraint = value; break;
+		case 'BONE_PT_bSameVolumeConstraint': BONE_PT_bSameVolumeConstraint = value; break;
+		case 'OBJECT_PT_bTransLikeConstraint': OBJECT_PT_bTransLikeConstraint = value; break;
+		case 'BONE_PT_bTransLikeConstraint': BONE_PT_bTransLikeConstraint = value; break;
+		case 'OBJECT_PT_bActionConstraint': OBJECT_PT_bActionConstraint = value; break;
+		case 'BONE_PT_bActionConstraint': BONE_PT_bActionConstraint = value; break;
+		case 'OBJECT_PT_bActionConstraint_target': OBJECT_PT_bActionConstraint_target = value; break;
+		case 'BONE_PT_bActionConstraint_target': BONE_PT_bActionConstraint_target = value; break;
+		case 'OBJECT_PT_bActionConstraint_action': OBJECT_PT_bActionConstraint_action = value; break;
+		case 'BONE_PT_bActionConstraint_action': BONE_PT_bActionConstraint_action = value; break;
+		case 'OBJECT_PT_bLockTrackConstraint': OBJECT_PT_bLockTrackConstraint = value; break;
+		case 'BONE_PT_bLockTrackConstraint': BONE_PT_bLockTrackConstraint = value; break;
+		case 'OBJECT_PT_bDistLimitConstraint': OBJECT_PT_bDistLimitConstraint = value; break;
+		case 'BONE_PT_bDistLimitConstraint': BONE_PT_bDistLimitConstraint = value; break;
+		case 'OBJECT_PT_bStretchToConstraint': OBJECT_PT_bStretchToConstraint = value; break;
+		case 'BONE_PT_bStretchToConstraint': BONE_PT_bStretchToConstraint = value; break;
+		case 'OBJECT_PT_bMinMaxConstraint': OBJECT_PT_bMinMaxConstraint = value; break;
+		case 'BONE_PT_bMinMaxConstraint': BONE_PT_bMinMaxConstraint = value; break;
+		case 'OBJECT_PT_bClampToConstraint': OBJECT_PT_bClampToConstraint = value; break;
+		case 'BONE_PT_bClampToConstraint': BONE_PT_bClampToConstraint = value; break;
+		case 'OBJECT_PT_bTransformConstraint': OBJECT_PT_bTransformConstraint = value; break;
+		case 'BONE_PT_bTransformConstraint': BONE_PT_bTransformConstraint = value; break;
+		case 'OBJECT_PT_bTransformConstraint_source': OBJECT_PT_bTransformConstraint_source = value; break;
+		case 'BONE_PT_bTransformConstraint_from': BONE_PT_bTransformConstraint_from = value; break;
+		case 'OBJECT_PT_bTransformConstraint_destination': OBJECT_PT_bTransformConstraint_destination = value; break;
+		case 'BONE_PT_bTransformConstraint_to': BONE_PT_bTransformConstraint_to = value; break;
+		case 'OBJECT_PT_bShrinkwrapConstraint': OBJECT_PT_bShrinkwrapConstraint = value; break;
+		case 'BONE_PT_bShrinkwrapConstraint': BONE_PT_bShrinkwrapConstraint = value; break;
+		case 'OBJECT_PT_bDampTrackConstraint': OBJECT_PT_bDampTrackConstraint = value; break;
+		case 'BONE_PT_bDampTrackConstraint': BONE_PT_bDampTrackConstraint = value; break;
+		case 'BONE_PT_bSplineIKConstraint': BONE_PT_bSplineIKConstraint = value; break;
+		case 'BONE_PT_bSplineIKConstraint_fitting': BONE_PT_bSplineIKConstraint_fitting = value; break;
+		case 'BONE_PT_bSplineIKConstraint_chain_scaling': BONE_PT_bSplineIKConstraint_chain_scaling = value; break;
+		case 'OBJECT_PT_bPivotConstraint': OBJECT_PT_bPivotConstraint = value; break;
+		case 'BONE_PT_bPivotConstraint': BONE_PT_bPivotConstraint = value; break;
+		case 'OBJECT_PT_bFollowTrackConstraint': OBJECT_PT_bFollowTrackConstraint = value; break;
+		case 'BONE_PT_bFollowTrackConstraint': BONE_PT_bFollowTrackConstraint = value; break;
+		case 'OBJECT_PT_bCameraSolverConstraint': OBJECT_PT_bCameraSolverConstraint = value; break;
+		case 'BONE_PT_bCameraSolverConstraint': BONE_PT_bCameraSolverConstraint = value; break;
+		case 'OBJECT_PT_bObjectSolverConstraint': OBJECT_PT_bObjectSolverConstraint = value; break;
+		case 'BONE_PT_bObjectSolverConstraint': BONE_PT_bObjectSolverConstraint = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint': OBJECT_PT_bTransformCacheConstraint = value; break;
+		case 'BONE_PT_bTransformCacheConstraint': BONE_PT_bTransformCacheConstraint = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint_velocity': OBJECT_PT_bTransformCacheConstraint_velocity = value; break;
+		case 'BONE_PT_bTransformCacheConstraint_velocity': BONE_PT_bTransformCacheConstraint_velocity = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint_layers': OBJECT_PT_bTransformCacheConstraint_layers = value; break;
+		case 'BONE_PT_bTransformCacheConstraint_layers': BONE_PT_bTransformCacheConstraint_layers = value; break;
+		case 'OBJECT_PT_bTransformCacheConstraint_time': OBJECT_PT_bTransformCacheConstraint_time = value; break;
+		case 'BONE_PT_bTransformCacheConstraint_time': BONE_PT_bTransformCacheConstraint_time = value; break;
+		case 'OBJECT_PT_bArmatureConstraint': OBJECT_PT_bArmatureConstraint = value; break;
+		case 'BONE_PT_bArmatureConstraint': BONE_PT_bArmatureConstraint = value; break;
+		case 'OBJECT_PT_bArmatureConstraint_bones': OBJECT_PT_bArmatureConstraint_bones = value; break;
+		case 'BONE_PT_bArmatureConstraint_bones': BONE_PT_bArmatureConstraint_bones = value; break;
+		case 'OBJECT_PT_bKinematicConstraint': OBJECT_PT_bKinematicConstraint = value; break;
+		case 'BONE_PT_bKinematicConstraint': BONE_PT_bKinematicConstraint = value; break;
+		case 'OBJECT_PT_bGeometryAttributeConstraint': OBJECT_PT_bGeometryAttributeConstraint = value; break;
+		case 'BONE_PT_bGeometryAttributeConstraint': BONE_PT_bGeometryAttributeConstraint = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

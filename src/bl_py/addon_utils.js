@@ -8,7 +8,7 @@ var __name__ = 'addon_utils';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -19,8 +19,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -28,7 +34,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -53,7 +59,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -72,7 +78,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,18 +91,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -107,10 +116,34 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var __all__ = tuple (['paths', 'modules', 'check', 'check_extension', 'enable', 'disable', 'disable_all', 'reset_all', 'module_bl_info', 'extensions_refresh', 'stale_pending_remove_paths', 'stale_pending_stage_paths']);
 export var _bpy = __cycle0__;
@@ -125,7 +158,7 @@ export var _addons_hidden_core = new set (['bl_pkg', 'io_anim_bvh', 'io_curve_sv
 export var _initialize_once = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -133,26 +166,38 @@ export var _initialize_once = function () {
 	}
 	else {
 	}
-	for (var path of paths ()) {
-		_bpy.utils._sys_path_ensure_append (path);
+	var __iterable0__ = __call__ (paths, null);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var path = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = _bpy.utils;
+			return __call__ (__accu0__._sys_path_ensure_append, __accu0__, path);
+		}) ();
 	}
-	_stale_pending_check_and_remove_once ();
-	_initialize_extensions_repos_once ();
-	for (var module_name of _addons_hidden_core) {
-		enable (module_name, __kwargtrans__ ({refresh_handled: true, default_set: false, persistent: true}));
+	__call__ (_stale_pending_check_and_remove_once, null);
+	__call__ (_initialize_extensions_repos_once, null);
+	var __iterable0__ = _addons_hidden_core;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var module_name = __getitem__ (__iterable0__, __index0__);
+		__call__ (enable, null, module_name, __kwargtrans__ ({refresh_handled: true, default_set: false, persistent: true}));
 	}
-	for (var addon of _preferences.addons) {
+	var __iterable0__ = _preferences.addons;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var addon = __getitem__ (__iterable0__, __index0__);
 		var module_name = addon.module;
 		if (__in__ (module_name, _addons_hidden_core)) {
 			continue;
 		}
-		enable (module_name, __kwargtrans__ ({refresh_handled: true}));
+		__call__ (enable, null, module_name, __kwargtrans__ ({refresh_handled: true}));
 	}
 };
 export var paths = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -160,15 +205,32 @@ export var paths = function () {
 	}
 	else {
 	}
-	var os = _module ('os');
+	var os = __call__ (_module, null, 'os');
 	var paths = [];
-	for (var [i, p] of py_enumerate (_bpy.utils.script_paths ())) {
-		var addon_dir = os.path.join (p, (i == 0 ? 'addons_core' : 'addons'));
-		if (os.path.isdir (addon_dir)) {
-			paths.append (addon_dir);
+	var __iterable0__ = __call__ (py_enumerate, null, (function () {
+		var __accu0__ = _bpy.utils;
+		return __call__ (__accu0__.script_paths, __accu0__);
+	}) ());
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var i = __left0__ [0];
+		var p = __left0__ [1];
+		var addon_dir = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, p, (__eq__ (i, 0) ? 'addons_core' : 'addons'));
+		}) ();
+		if ((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isdir, __accu0__, addon_dir);
+		}) ()) {
+			(function () {
+				var __accu0__ = paths;
+				return __call__ (__accu0__.append, __accu0__, addon_dir);
+			}) ();
 		}
-		else if (i == 0) {
-			print ('Internal error:', addon_dir, 'was not found!');
+		else if (__eq__ (i, 0)) {
+			__call__ (print, null, 'Internal error:', addon_dir, 'was not found!');
 		}
 	}
 	return paths;
@@ -176,7 +238,7 @@ export var paths = function () {
 export var _paths_with_extension_repos = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -184,23 +246,41 @@ export var _paths_with_extension_repos = function () {
 	}
 	else {
 	}
-	var os = _module ('os');
+	var os = __call__ (_module, null, 'os');
 	var addon_paths = (function () {
 		var __accu0__ = [];
-		for (var path of list (paths ())) {
-			__accu0__.append (tuple ([path, '']));
+		var __iterable0__ = __call__ (list, null, __call__ (paths, null));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, tuple ([path, '']));
+			}) ();
 		}
 		return __accu0__;
 	}) ();
-	for (var repo of _preferences.extensions.repos) {
+	var __iterable0__ = _preferences.extensions.repos;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var repo = __getitem__ (__iterable0__, __index0__);
 		if (!(repo.enabled)) {
 			continue;
 		}
 		var dirpath = repo.directory;
-		if (!(os.path.isdir (dirpath))) {
+		if (!((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isdir, __accu0__, dirpath);
+		}) ())) {
 			continue;
 		}
-		addon_paths.append (tuple ([dirpath, '{:s}.{:s}'.format (_ext_base_pkg_idname, repo.module)]));
+		(function () {
+			var __accu0__ = addon_paths;
+			return __call__ (__accu0__.append, __accu0__, tuple ([dirpath, (function () {
+				var __accu1__ = '{:s}.{:s}';
+				return __call__ (__accu1__.format, __accu1__, _ext_base_pkg_idname, repo.module);
+			}) ()]));
+		}) ();
 	}
 	return addon_paths;
 };
@@ -210,7 +290,7 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -223,22 +303,25 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 	}
 	else {
 	}
-	var os = _module ('os');
+	var os = __call__ (_module, null, 'os');
 	if (_bpy.app.debug_python) {
-		print ('fake_module', mod_path, mod_name);
+		__call__ (print, null, 'fake_module', mod_path, mod_name);
 	}
-	if (mod_name.startswith (_ext_base_pkg_idname_with_dot)) {
-		return _fake_module_from_extension (mod_name, mod_path);
+	if ((function () {
+		var __accu0__ = mod_name;
+		return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
+	}) ()) {
+		return __call__ (_fake_module_from_extension, null, mod_name, mod_path);
 	}
-	var ast = _module ('ast');
+	var ast = __call__ (_module, null, 'ast');
 	var ModuleType = py_typeof (ast);
 	try {
-		var file_mod = open (mod_path, 'r', __kwargtrans__ ({encoding: 'UTF-8'}));
+		var file_mod = __call__ (open, null, mod_path, 'r', __kwargtrans__ ({encoding: 'UTF-8'}));
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, OSError)) {
 			var ex = __except0__;
-			print ('Error opening file:', mod_path, ex);
+			__call__ (print, null, 'Error opening file:', mod_path, ex);
 			return null;
 		}
 		else {
@@ -250,18 +333,24 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 		__withid0__.__enter__ ();
 		if (speedy) {
 			var lines = [];
-			var line_iter = py_iter (file_mod);
+			var line_iter = __call__ (py_iter, null, file_mod);
 			var line = '';
-			while (!(line.startswith ('bl_info'))) {
+			while (!((function () {
+				var __accu0__ = line;
+				return __call__ (__accu0__.startswith, __accu0__, 'bl_info');
+			}) ())) {
 				try {
-					var line = line_iter.readline ();
+					var line = (function () {
+						var __accu0__ = line_iter;
+						return __call__ (__accu0__.readline, __accu0__);
+					}) ();
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, UnicodeDecodeError)) {
 						var ex = __except0__;
 						if (!(error_encoding)) {
 							error_encoding = true;
-							print ('Error reading file as UTF-8:', mod_path, ex);
+							__call__ (print, null, 'Error reading file as UTF-8:', mod_path, ex);
 						}
 						return null;
 					}
@@ -269,21 +358,30 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 						throw __except0__;
 					}
 				}
-				if (len (line) == 0) {
+				if (__eq__ (__call__ (len, null, line), 0)) {
 					break;
 				}
 			}
-			while (line.rstrip ()) {
-				lines.append (line);
+			while ((function () {
+				var __accu0__ = line;
+				return __call__ (__accu0__.rstrip, __accu0__);
+			}) ()) {
+				(function () {
+					var __accu0__ = lines;
+					return __call__ (__accu0__.append, __accu0__, line);
+				}) ();
 				try {
-					var line = line_iter.readline ();
+					var line = (function () {
+						var __accu0__ = line_iter;
+						return __call__ (__accu0__.readline, __accu0__);
+					}) ();
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, UnicodeDecodeError)) {
 						var ex = __except0__;
 						if (!(error_encoding)) {
 							error_encoding = true;
-							print ('Error reading file as UTF-8:', mod_path, ex);
+							__call__ (print, null, 'Error reading file as UTF-8:', mod_path, ex);
 						}
 						return null;
 					}
@@ -292,10 +390,16 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 					}
 				}
 			}
-			var data = ''.join (lines);
+			var data = (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, lines);
+			}) ();
 		}
 		else {
-			var data = file_mod.read ();
+			var data = (function () {
+				var __accu0__ = file_mod;
+				return __call__ (__accu0__.read, __accu0__);
+			}) ();
 		}
 		__withid0__.__exit__ ();
 	}
@@ -304,14 +408,21 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 			throw __except0__;
 		}
 	}
+	// pass;
 	try {
-		var ast_data = ast.parse (data, __kwargtrans__ ({filename: mod_path}));
+		var ast_data = (function () {
+			var __accu0__ = ast;
+			return __call__ (__accu0__.parse, __accu0__, data, __kwargtrans__ ({filename: mod_path}));
+		}) ();
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
-			print ("Syntax error 'ast.parse' cannot read:", repr (mod_path));
-			var traceback = _module ('traceback');
-			traceback.print_exc ();
+			__call__ (print, null, "Syntax error 'ast.parse' cannot read:", __call__ (repr, null, mod_path));
+			var traceback = __call__ (_module, null, 'traceback');
+			(function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.print_exc, __accu0__);
+			}) ();
 			var ast_data = null;
 		}
 		else {
@@ -320,10 +431,13 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 	}
 	var body_info = null;
 	if (ast_data) {
-		for (var body of ast_data.body) {
-			if (body.__class__ == ast.Assign) {
-				if (len (body.targets) == 1) {
-					if (getattr (body.targets [0], 'id', '') == 'bl_info') {
+		var __iterable0__ = ast_data.body;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var body = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (body.__class__, ast.Assign)) {
+				if (__eq__ (__call__ (len, null, body.targets), 1)) {
+					if (__eq__ (__call__ (getattr, null, __getitem__ (body.targets, 0), 'id', ''), 'bl_info')) {
 						var body_info = body;
 						break;
 					}
@@ -333,16 +447,25 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 	}
 	if (body_info) {
 		try {
-			var mod = ModuleType (mod_name);
-			mod.bl_info = ast.literal_eval (body.value);
+			var mod = __call__ (ModuleType, null, mod_name);
+			mod.bl_info = (function () {
+				var __accu0__ = ast;
+				return __call__ (__accu0__.literal_eval, __accu0__, body.value);
+			}) ();
 			mod.__file__ = mod_path;
-			mod.__time__ = os.path.getmtime (mod_path);
+			mod.__time__ = (function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.getmtime, __accu0__, mod_path);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
-				print ('AST error parsing bl_info for:', repr (mod_path));
-				var traceback = _module ('traceback');
-				traceback.print_exc ();
+				__call__ (print, null, 'AST error parsing bl_info for:', __call__ (repr, null, mod_path));
+				var traceback = __call__ (_module, null, 'traceback');
+				(function () {
+					var __accu0__ = traceback;
+					return __call__ (__accu0__.print_exc, __accu0__);
+				}) ();
 				return null;
 			}
 			else {
@@ -352,7 +475,7 @@ export var _fake_module = function (mod_name, mod_path, speedy) {
 		return mod;
 	}
 	else {
-		print ("Warning: add-on missing 'bl_info', this can cause poor performance!:", repr (mod_path));
+		__call__ (print, null, "Warning: add-on missing 'bl_info', this can cause poor performance!:", __call__ (repr, null, mod_path));
 		return null;
 	}
 };
@@ -360,7 +483,7 @@ export var modules_refresh = function () {
 	var module_cache = addons_fake_modules;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -371,53 +494,100 @@ export var modules_refresh = function () {
 	}
 	else {
 	}
-	var os = _module ('os');
+	var os = __call__ (_module, null, 'os');
 	error_encoding = false;
-	error_duplicates.py_clear ();
-	var modules_stale = set (module_cache.py_keys ());
-	for (var [path, pkg_id] of _paths_with_extension_repos ()) {
-		for (var [mod_name, mod_path] of _bpy.path.module_names (path, __kwargtrans__ ({package_: pkg_id}))) {
-			modules_stale.discard (mod_name);
-			var mod = module_cache.py_get (mod_name);
+	(function () {
+		var __accu0__ = error_duplicates;
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
+	var modules_stale = __call__ (set, null, (function () {
+		var __accu0__ = module_cache;
+		return __call__ (__accu0__.py_keys, __accu0__);
+	}) ());
+	var __iterable0__ = __call__ (_paths_with_extension_repos, null);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var path = __left0__ [0];
+		var pkg_id = __left0__ [1];
+		var __iterable1__ = (function () {
+			var __accu0__ = _bpy.path;
+			return __call__ (__accu0__.module_names, __accu0__, path, __kwargtrans__ ({package_: pkg_id}));
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var mod_name = __left0__ [0];
+			var mod_path = __left0__ [1];
+			(function () {
+				var __accu0__ = modules_stale;
+				return __call__ (__accu0__.discard, __accu0__, mod_name);
+			}) ();
+			var mod = (function () {
+				var __accu0__ = module_cache;
+				return __call__ (__accu0__.py_get, __accu0__, mod_name);
+			}) ();
 			if (mod !== null) {
-				if (mod.__file__ != mod_path) {
-					print ('multiple addons with the same name:\n  {!r}\n  {!r}'.format (mod.__file__, mod_path));
-					error_duplicates.append (tuple ([mod.bl_info ['name'], mod.__file__, mod_path]));
+				if (__ne__ (mod.__file__, mod_path)) {
+					__call__ (print, null, (function () {
+						var __accu0__ = 'multiple addons with the same name:\n  {!r}\n  {!r}';
+						return __call__ (__accu0__.format, __accu0__, mod.__file__, mod_path);
+					}) ());
+					(function () {
+						var __accu0__ = error_duplicates;
+						return __call__ (__accu0__.append, __accu0__, tuple ([__getitem__ (mod.bl_info, 'name'), mod.__file__, mod_path]));
+					}) ();
 				}
 				else {
 					if (!(pkg_id)) {
 						var metadata_path = mod_path;
-						var _walrus2 = mod.__time__ != os.path.getmtime (metadata_path);
+						var _walrus2 = __ne__ (mod.__time__, (function () {
+							var __accu0__ = os.path;
+							return __call__ (__accu0__.getmtime, __accu0__, metadata_path);
+						}) ());
 					}
 					else {
 						var metadata_path = mod.__file_manifest__;
-						var _walrus2 = mod.__time_manifest__ != os.path.getmtime (metadata_path);
+						var _walrus2 = __ne__ (mod.__time_manifest__, (function () {
+							var __accu0__ = os.path;
+							return __call__ (__accu0__.getmtime, __accu0__, metadata_path);
+						}) ());
 					}
 					if (_walrus2) {
-						print ('reloading addon meta-data:', mod_name, repr (metadata_path), '(time-stamp change detected)');
-						module_cache.py_pop (mod_name);
+						__call__ (print, null, 'reloading addon meta-data:', mod_name, __call__ (repr, null, metadata_path), '(time-stamp change detected)');
+						(function () {
+							var __accu0__ = module_cache;
+							return __call__ (__accu0__.py_pop, __accu0__, mod_name);
+						}) ();
 						var mod = null;
 					}
 				}
 			}
 			if (mod === null) {
-				var mod = _fake_module (mod_name, mod_path);
+				var mod = __call__ (_fake_module, null, mod_name, mod_path);
 				if (mod) {
-					module_cache [mod_name] = mod;
+					__setitem__ (module_cache, mod_name, mod);
 				}
 			}
 		}
 	}
-	for (var mod_stale of modules_stale) {
-		module_cache.py_pop (mod_stale);
+	var __iterable0__ = modules_stale;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var mod_stale = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = module_cache;
+			return __call__ (__accu0__.py_pop, __accu0__, mod_stale);
+		}) ();
 	}
+	// pass;
 };
 export var modules = function () {
 	var module_cache = addons_fake_modules;
 	var refresh = true;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -430,41 +600,70 @@ export var modules = function () {
 	else {
 	}
 	if (refresh || module_cache === addons_fake_modules && modules._is_first) {
-		modules_refresh (__kwargtrans__ ({module_cache: module_cache}));
+		__call__ (modules_refresh, null, __kwargtrans__ ({module_cache: module_cache}));
 		modules._is_first = false;
-		var module_cache_items = list (module_cache.py_items ());
-		module_cache_items.py_sort (__kwargtrans__ ({key: (function __lambda__ (item) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'item': var item = __allkwargs0__ [__attrib0__]; break;
+		var module_cache_items = __call__ (list, null, (function () {
+			var __accu0__ = module_cache;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ());
+		(function () {
+			var __accu0__ = module_cache_items;
+			return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (item) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'item': var item = __allkwargs0__ [__attrib0__]; break;
+							}
 						}
 					}
 				}
-			}
-			else {
-			}
-			return tuple ([(item [1].bl_info.py_get ('name') || item [0]).casefold (), item [0]]);
-		})}));
-		module_cache.py_clear ();
-		module_cache.py_update ((function () {
-			var __accu0__ = [];
-			for (var [key, value] of module_cache_items) {
-				__accu0__.append (tuple ([key, value]));
-			}
-			return __accu0__;
-		}) ());
+				else {
+				}
+				return tuple ([(function () {
+					var __accu1__ = (function () {
+						var __accu2__ = __getitem__ (item, 1).bl_info;
+						return __call__ (__accu2__.py_get, __accu2__, 'name');
+					}) () || __getitem__ (item, 0);
+					return __call__ (__accu1__.casefold, __accu1__);
+				}) (), __getitem__ (item, 0)]);
+			})}));
+		}) ();
+		(function () {
+			var __accu0__ = module_cache;
+			return __call__ (__accu0__.py_clear, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = module_cache;
+			return __call__ (__accu0__.py_update, __accu0__, (function () {
+				var __accu1__ = [];
+				var __iterable0__ = module_cache_items;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var __left0__ = __getitem__ (__iterable0__, __index0__);
+					var key = __left0__ [0];
+					var value = __left0__ [1];
+					(function () {
+						var __accu2__ = __accu1__;
+						return __call__ (__accu2__.append, __accu2__, tuple ([key, value]));
+					}) ();
+				}
+				return __accu1__;
+			}) ());
+		}) ();
 	}
-	return module_cache.py_values ();
+	return (function () {
+		var __accu0__ = module_cache;
+		return __call__ (__accu0__.py_values, __accu0__);
+	}) ();
 };
 modules._is_first = true;
 export var check = function (module_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -475,15 +674,18 @@ export var check = function (module_name) {
 	}
 	else {
 	}
-	var sys = _module ('sys');
+	var sys = __call__ (_module, null, 'sys');
 	var loaded_default = __in__ (module_name, _preferences.addons);
-	var mod = sys.modules.py_get (module_name);
-	var loaded_state = mod !== null && getattr (mod, '__addon_enabled__', Ellipsis);
+	var mod = (function () {
+		var __accu0__ = sys.modules;
+		return __call__ (__accu0__.py_get, __accu0__, module_name);
+	}) ();
+	var loaded_state = mod !== null && __call__ (getattr, null, mod, '__addon_enabled__', Ellipsis);
 	if (loaded_state === Ellipsis) {
-		print ('Warning: addon-module', module_name, "found module but without '__addon_enabled__' field, possible name collision from file:", repr (getattr (mod, '__file__', '<unknown>')));
+		__call__ (print, null, 'Warning: addon-module', module_name, "found module but without '__addon_enabled__' field, possible name collision from file:", __call__ (repr, null, __call__ (getattr, null, mod, '__file__', '<unknown>')));
 		var loaded_state = false;
 	}
-	if (mod && getattr (mod, '__addon_persistent__', false)) {
+	if (mod && __call__ (getattr, null, mod, '__addon_persistent__', false)) {
 		var loaded_default = true;
 	}
 	return tuple ([loaded_default, loaded_state]);
@@ -491,7 +693,7 @@ export var check = function (module_name) {
 export var check_extension = function (module_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -502,12 +704,15 @@ export var check_extension = function (module_name) {
 	}
 	else {
 	}
-	return module_name.startswith (_ext_base_pkg_idname_with_dot);
+	return (function () {
+		var __accu0__ = module_name;
+		return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
+	}) ();
 };
 export var _addon_ensure = function (module_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -519,16 +724,22 @@ export var _addon_ensure = function (module_name) {
 	else {
 	}
 	var addons = _preferences.addons;
-	var addon = addons.py_get (module_name);
+	var addon = (function () {
+		var __accu0__ = addons;
+		return __call__ (__accu0__.py_get, __accu0__, module_name);
+	}) ();
 	if (!(addon)) {
-		var addon = addons.py_new ();
+		var addon = (function () {
+			var __accu0__ = addons;
+			return __call__ (__accu0__.py_new, __accu0__);
+		}) ();
 		addon.module = module_name;
 	}
 };
 export var _addon_remove = function (module_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -541,9 +752,15 @@ export var _addon_remove = function (module_name) {
 	}
 	var addons = _preferences.addons;
 	while (__in__ (module_name, addons)) {
-		var addon = addons.py_get (module_name);
+		var addon = (function () {
+			var __accu0__ = addons;
+			return __call__ (__accu0__.py_get, __accu0__, module_name);
+		}) ();
 		if (addon) {
-			addons.remove (addon);
+			(function () {
+				var __accu0__ = addons;
+				return __call__ (__accu0__.remove, __accu0__, addon);
+			}) ();
 		}
 	}
 };
@@ -554,7 +771,7 @@ export var enable = function (module_name) {
 	var handle_error = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -569,15 +786,15 @@ export var enable = function (module_name) {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var sys = _module ('sys');
-	var importlib = _module ('importlib');
-	var RestrictBlend = _member ('_bpy_restrict_state', 'RestrictBlend');
+	var os = __call__ (_module, null, 'os');
+	var sys = __call__ (_module, null, 'sys');
+	var importlib = __call__ (_module, null, 'importlib');
+	var RestrictBlend = __call__ (_member, null, '_bpy_restrict_state', 'RestrictBlend');
 	if (handle_error === null) {
 		var handle_error = function (ex) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -588,34 +805,52 @@ export var enable = function (module_name) {
 			}
 			else {
 			}
-			if (isinstance (ex, ImportError)) {
+			if (__call__ (isinstance, null, ex, ImportError)) {
 				var msg = ex.msg;
-				if (py_typeof (msg) === str && msg.startswith ('Add-on ')) {
-					print (msg);
+				if (py_typeof (msg) === str && (function () {
+					var __accu0__ = msg;
+					return __call__ (__accu0__.startswith, __accu0__, 'Add-on ');
+				}) ()) {
+					__call__ (print, null, msg);
 					return ;
 				}
 			}
-			var traceback = _module ('traceback');
-			traceback.print_exc ();
+			var traceback = __call__ (_module, null, 'traceback');
+			(function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.print_exc, __accu0__);
+			}) ();
 		};
 	}
-	var is_extension = module_name.startswith (_ext_base_pkg_idname_with_dot);
+	var is_extension = (function () {
+		var __accu0__ = module_name;
+		return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
+	}) ();
 	if (is_extension) {
 		if (!(refresh_handled)) {
-			extensions_refresh (__kwargtrans__ ({addon_modules_pending: [module_name], handle_error: handle_error}));
+			__call__ (extensions_refresh, null, __kwargtrans__ ({addon_modules_pending: [module_name], handle_error: handle_error}));
 		}
 		if (_extensions_incompatible) {
-			var error = _extensions_incompatible.py_get (module_name.__getslice__ (len (_ext_base_pkg_idname_with_dot), null, 1).partition ('.').__getslice__ (0, null, 2));
+			var error = (function () {
+				var __accu0__ = _extensions_incompatible;
+				return __call__ (__accu0__.py_get, __accu0__, __getslice__ ((function () {
+					var __accu1__ = __getslice__ (module_name, __call__ (len, null, _ext_base_pkg_idname_with_dot), null, 1);
+					return __call__ (__accu1__.partition, __accu1__, '.');
+				}) (), 0, null, 2));
+			}) ();
 			if (error) {
 				try {
-					var __except0__ = RuntimeError ('Extension {:s} is incompatible ({:s})'.format (module_name, error));
+					var __except0__ = __call__ (RuntimeError, null, (function () {
+						var __accu0__ = 'Extension {:s} is incompatible ({:s})';
+						return __call__ (__accu0__.format, __accu0__, module_name, error);
+					}) ());
 					__except0__.__cause__ = null;
 					throw __except0__;
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, RuntimeError)) {
 						var ex = __except0__;
-						handle_error (ex);
+						__call__ (handle_error, null, ex);
 						return null;
 					}
 					else {
@@ -625,7 +860,10 @@ export var enable = function (module_name) {
 			}
 		}
 	}
-	var mod = sys.modules.py_get (module_name);
+	var mod = (function () {
+		var __accu0__ = sys.modules;
+		return __call__ (__accu0__.py_get, __accu0__, module_name);
+	}) ();
 	var mod_file = null;
 	var _walrus1 = mod !== null;
 	if (_walrus1) {
@@ -633,20 +871,26 @@ export var enable = function (module_name) {
 		var _walrus1 = mod_file !== null;
 	}
 	if (_walrus1) {
-		var _walrus1 = os.path.exists (mod_file);
+		var _walrus1 = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.exists, __accu0__, mod_file);
+		}) ();
 	}
 	if (_walrus1) {
-		if (getattr (mod, '__addon_enabled__', false)) {
+		if (__call__ (getattr, null, mod, '__addon_enabled__', false)) {
 			try {
-				mod.unregister ();
+				(function () {
+					var __accu0__ = mod;
+					return __call__ (__accu0__.unregister, __accu0__);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
 					var ex = __except0__;
-					print ('Exception in module unregister():', mod_file || module_name);
-					handle_error (ex);
+					__call__ (print, null, 'Exception in module unregister():', mod_file || module_name);
+					__call__ (handle_error, null, ex);
 					if (is_extension && !(refresh_handled)) {
-						extensions_refresh (__kwargtrans__ ({handle_error: handle_error}));
+						__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 					}
 					return null;
 				}
@@ -656,20 +900,29 @@ export var enable = function (module_name) {
 			}
 		}
 		mod.__addon_enabled__ = false;
-		var mtime_orig = getattr (mod, '__time__', 0);
-		var mtime_new = os.path.getmtime (mod_file);
-		if (mtime_orig != mtime_new) {
-			print ('module changed on disk:', repr (mod_file), 'reloading...');
+		var mtime_orig = __call__ (getattr, null, mod, '__time__', 0);
+		var mtime_new = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.getmtime, __accu0__, mod_file);
+		}) ();
+		if (__ne__ (mtime_orig, mtime_new)) {
+			__call__ (print, null, 'module changed on disk:', __call__ (repr, null, mod_file), 'reloading...');
 			try {
-				importlib.reload (mod);
+				(function () {
+					var __accu0__ = importlib;
+					return __call__ (__accu0__.reload, __accu0__, mod);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
 					var ex = __except0__;
-					handle_error (ex);
-					sys.modules.py_pop (module_name);
+					__call__ (handle_error, null, ex);
+					(function () {
+						var __accu0__ = sys.modules;
+						return __call__ (__accu0__.py_pop, __accu0__, module_name);
+					}) ();
 					if (is_extension && !(refresh_handled)) {
-						extensions_refresh (__kwargtrans__ ({handle_error: handle_error}));
+						__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 					}
 					return null;
 				}
@@ -681,57 +934,90 @@ export var enable = function (module_name) {
 		}
 	}
 	if (default_set) {
-		_addon_ensure (module_name);
+		__call__ (_addon_ensure, null, module_name);
 	}
-	var __withid0__ = RestrictBlend ();
+	var __withid0__ = __call__ (RestrictBlend, null);
 	try {
 		__withid0__.__enter__ ();
 		try {
-			var mod = importlib.import_module (module_name);
+			var mod = (function () {
+				var __accu0__ = importlib;
+				return __call__ (__accu0__.import_module, __accu0__, module_name);
+			}) ();
 			var mod_file = mod.__file__;
 			if (mod_file === null) {
-				var __except0__ = ImportError ('module loaded with no associated file, __path__={!r}, aborting!'.format (getattr (mod, '__path__', null)), __kwargtrans__ ({py_name: module_name}));
+				var __except0__ = __call__ (ImportError, null, (function () {
+					var __accu0__ = 'module loaded with no associated file, __path__={!r}, aborting!';
+					return __call__ (__accu0__.format, __accu0__, __call__ (getattr, null, mod, '__path__', null));
+				}) (), __kwargtrans__ ({py_name: module_name}));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			mod.__time__ = os.path.getmtime (mod_file);
+			mod.__time__ = (function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.getmtime, __accu0__, mod_file);
+			}) ();
 			mod.__addon_enabled__ = false;
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				if (isinstance (ex, ImportError)) {
-					if (ex.py_name == module_name) {
-						ex.msg = 'Add-on not loaded: "{:s}", cause: {:s}'.format (module_name, str (ex));
+				if (__call__ (isinstance, null, ex, ImportError)) {
+					if (__eq__ (ex.py_name, module_name)) {
+						ex.msg = (function () {
+							var __accu0__ = 'Add-on not loaded: "{:s}", cause: {:s}';
+							return __call__ (__accu0__.format, __accu0__, module_name, __call__ (str, null, ex));
+						}) ();
 					}
-					else if (is_extension && module_name.startswith (ex.py_name + '.')) {
-						var repo_id = module_name.__getslice__ (len (_ext_base_pkg_idname_with_dot), null, 1).rpartition ('.') [0];
-						var repo = py_next ((function () {
+					else if (is_extension && (function () {
+						var __accu0__ = module_name;
+						return __call__ (__accu0__.startswith, __accu0__, __add__ (ex.py_name, '.'));
+					}) ()) {
+						var repo_id = __getitem__ ((function () {
+							var __accu0__ = __getslice__ (module_name, __call__ (len, null, _ext_base_pkg_idname_with_dot), null, 1);
+							return __call__ (__accu0__.rpartition, __accu0__, '.');
+						}) (), 0);
+						var repo = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 							var __accu0__ = [];
-							for (var repo of _preferences.extensions.repos) {
-								if (repo.module == repo_id) {
-									__accu0__.append (repo);
+							var __iterable0__ = _preferences.extensions.repos;
+							__iterable0__ = __i__ (__iterable0__);
+							for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+								var repo = __getitem__ (__iterable0__, __index0__);
+								if (__eq__ (repo.module, repo_id)) {
+									(function () {
+										var __accu1__ = __accu0__;
+										return __call__ (__accu1__.append, __accu1__, repo);
+									}) ();
 								}
 							}
 							return __accu0__;
-						}) (), null);
+						}) ()), null);
 						if (repo === null) {
-							ex.msg = 'Add-on not loaded: "{:s}", cause: extension repository "{:s}" doesn\'t exist'.format (module_name, repo_id);
+							ex.msg = (function () {
+								var __accu0__ = 'Add-on not loaded: "{:s}", cause: extension repository "{:s}" doesn\'t exist';
+								return __call__ (__accu0__.format, __accu0__, module_name, repo_id);
+							}) ();
 						}
 						else if (!(repo.enabled)) {
-							ex.msg = 'Add-on not loaded: "{:s}", cause: extension repository "{:s}" is disabled'.format (module_name, repo_id);
+							ex.msg = (function () {
+								var __accu0__ = 'Add-on not loaded: "{:s}", cause: extension repository "{:s}" is disabled';
+								return __call__ (__accu0__.format, __accu0__, module_name, repo_id);
+							}) ();
 						}
 						else {
-							ex.msg = 'Add-on not loaded: "{:s}", cause: {:s}'.format (module_name, str (ex));
+							ex.msg = (function () {
+								var __accu0__ = 'Add-on not loaded: "{:s}", cause: {:s}';
+								return __call__ (__accu0__.format, __accu0__, module_name, __call__ (str, null, ex));
+							}) ();
 						}
 					}
 				}
-				handle_error (ex);
+				__call__ (handle_error, null, ex);
 				if (default_set) {
-					_addon_remove (module_name);
+					__call__ (_addon_remove, null, module_name);
 				}
 				if (is_extension && !(refresh_handled)) {
-					extensions_refresh (__kwargtrans__ ({handle_error: handle_error}));
+					__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 				}
 				return null;
 			}
@@ -740,35 +1026,44 @@ export var enable = function (module_name) {
 			}
 		}
 		if (is_extension) {
-			var bl_info = getattr (mod, 'bl_info', null);
+			var bl_info = __call__ (getattr, null, mod, 'bl_info', null);
 			if (bl_info !== null) {
 				if (py_typeof (bl_info) === dict && !__in__ ('_init', bl_info)) {
 					if (_bpy.app.debug_python) {
-						print ('Add-on "{:s}" has a "bl_info" which will be ignored in favor of "{:s}"'.format (module_name, _ext_manifest_filename_toml));
+						__call__ (print, null, (function () {
+							var __accu0__ = 'Add-on "{:s}" has a "bl_info" which will be ignored in favor of "{:s}"';
+							return __call__ (__accu0__.format, __accu0__, module_name, _ext_manifest_filename_toml);
+						}) ());
 					}
 				}
-				delete mod.bl_info;
+				mod.bl_info = null;
 			}
 		}
 		var use_owner = is_extension || !__in__ (module_name, _addons_hidden_core);
-		var _bl_owner_id_get = _member ('_bpy', '_bl_owner_id_get');
-		var _bl_owner_id_set = _member ('_bpy', '_bl_owner_id_set');
-		var owner_id_prev = _bl_owner_id_get ();
-		_bl_owner_id_set ((use_owner ? module_name : ''));
+		var _bl_owner_id_get = __call__ (_member, null, '_bpy', '_bl_owner_id_get');
+		var _bl_owner_id_set = __call__ (_member, null, '_bpy', '_bl_owner_id_set');
+		var owner_id_prev = __call__ (_bl_owner_id_get, null);
+		__call__ (_bl_owner_id_set, null, (use_owner ? module_name : ''));
 		try {
-			mod.register ();
+			(function () {
+				var __accu0__ = mod;
+				return __call__ (__accu0__.register, __accu0__);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				print ('Exception in module register():', mod_file || module_name);
-				handle_error (ex);
-				sys.modules.py_pop (module_name);
+				__call__ (print, null, 'Exception in module register():', mod_file || module_name);
+				__call__ (handle_error, null, ex);
+				(function () {
+					var __accu0__ = sys.modules;
+					return __call__ (__accu0__.py_pop, __accu0__, module_name);
+				}) ();
 				if (default_set) {
-					_addon_remove (module_name);
+					__call__ (_addon_remove, null, module_name);
 				}
 				if (is_extension && !(refresh_handled)) {
-					extensions_refresh (__kwargtrans__ ({handle_error: handle_error}));
+					__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 				}
 				return null;
 			}
@@ -777,7 +1072,7 @@ export var enable = function (module_name) {
 			}
 		}
 		finally {
-			_bl_owner_id_set (owner_id_prev);
+			__call__ (_bl_owner_id_set, null, owner_id_prev);
 		}
 		__withid0__.__exit__ ();
 	}
@@ -789,7 +1084,7 @@ export var enable = function (module_name) {
 	mod.__addon_enabled__ = true;
 	mod.__addon_persistent__ = persistent;
 	if (_bpy.app.debug_python) {
-		print ('\taddon_utils.enable', mod.__name__);
+		__call__ (print, null, '\taddon_utils.enable', mod.__name__);
 	}
 	return mod;
 };
@@ -799,7 +1094,7 @@ export var disable = function (module_name) {
 	var handle_error = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -813,12 +1108,12 @@ export var disable = function (module_name) {
 	}
 	else {
 	}
-	var sys = _module ('sys');
+	var sys = __call__ (_module, null, 'sys');
 	if (handle_error === null) {
 		var handle_error = function (_ex) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -829,23 +1124,33 @@ export var disable = function (module_name) {
 			}
 			else {
 			}
-			var traceback = _module ('traceback');
-			traceback.print_exc ();
+			var traceback = __call__ (_module, null, 'traceback');
+			(function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.print_exc, __accu0__);
+			}) ();
 		};
 	}
-	var mod = sys.modules.py_get (module_name);
-	if (mod && getattr (mod, '__addon_enabled__', false) !== false) {
+	var mod = (function () {
+		var __accu0__ = sys.modules;
+		return __call__ (__accu0__.py_get, __accu0__, module_name);
+	}) ();
+	if (mod && __call__ (getattr, null, mod, '__addon_enabled__', false) !== false) {
 		mod.__addon_enabled__ = false;
 		mod.__addon_persistent__ = false;
 		try {
-			mod.unregister ();
+			(function () {
+				var __accu0__ = mod;
+				return __call__ (__accu0__.unregister, __accu0__);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				var mod_path = getattr (mod, '__file__', module_name);
-				print ('Exception in module unregister():', repr (mod_path));
-				handle_error (ex);
+				var mod_path = __call__ (getattr, null, mod, '__file__', module_name);
+				__call__ (print, null, 'Exception in module unregister():', __call__ (repr, null, mod_path));
+				// pass;
+				__call__ (handle_error, null, ex);
 			}
 			else {
 				throw __except0__;
@@ -853,23 +1158,26 @@ export var disable = function (module_name) {
 		}
 	}
 	else {
-		print ('addon_utils.disable: {:s} not {:s}'.format (module_name, (mod === null ? 'loaded' : 'enabled')));
+		__call__ (print, null, (function () {
+			var __accu0__ = 'addon_utils.disable: {:s} not {:s}';
+			return __call__ (__accu0__.format, __accu0__, module_name, (mod === null ? 'loaded' : 'enabled'));
+		}) ());
 	}
 	if (default_set) {
-		_addon_remove (module_name);
+		__call__ (_addon_remove, null, module_name);
 	}
 	if (!(refresh_handled)) {
-		extensions_refresh (__kwargtrans__ ({handle_error: handle_error}));
+		__call__ (extensions_refresh, null, __kwargtrans__ ({handle_error: handle_error}));
 	}
 	if (_bpy.app.debug_python) {
-		print ('\taddon_utils.disable', module_name);
+		__call__ (print, null, '\taddon_utils.disable', module_name);
 	}
 };
 export var reset_all = function () {
 	var reload_scripts = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -880,34 +1188,59 @@ export var reset_all = function () {
 	}
 	else {
 	}
-	var sys = _module ('sys');
+	var sys = __call__ (_module, null, 'sys');
 	modules._is_first = true;
-	addons_fake_modules.py_clear ();
-	extensions_refresh ();
-	for (var [path, pkg_id] of _paths_with_extension_repos ()) {
+	(function () {
+		var __accu0__ = addons_fake_modules;
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
+	__call__ (extensions_refresh, null);
+	var __iterable0__ = __call__ (_paths_with_extension_repos, null);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var path = __left0__ [0];
+		var pkg_id = __left0__ [1];
 		if (!(pkg_id)) {
-			_bpy.utils._sys_path_ensure_append (path);
+			(function () {
+				var __accu0__ = _bpy.utils;
+				return __call__ (__accu0__._sys_path_ensure_append, __accu0__, path);
+			}) ();
 		}
-		for (var [mod_name, _mod_path] of _bpy.path.module_names (path, __kwargtrans__ ({package_: pkg_id}))) {
-			var __left0__ = check (mod_name);
+		var __iterable1__ = (function () {
+			var __accu0__ = _bpy.path;
+			return __call__ (__accu0__.module_names, __accu0__, path, __kwargtrans__ ({package_: pkg_id}));
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var mod_name = __left0__ [0];
+			var _mod_path = __left0__ [1];
+			var __left0__ = __call__ (check, null, mod_name);
 			var is_enabled = __left0__ [0];
 			var is_loaded = __left0__ [1];
 			if (reload_scripts) {
-				var importlib = _module ('importlib');
-				var mod = sys.modules.py_get (mod_name);
+				var importlib = __call__ (_module, null, 'importlib');
+				var mod = (function () {
+					var __accu0__ = sys.modules;
+					return __call__ (__accu0__.py_get, __accu0__, mod_name);
+				}) ();
 				if (mod) {
-					importlib.reload (mod);
+					(function () {
+						var __accu0__ = importlib;
+						return __call__ (__accu0__.reload, __accu0__, mod);
+					}) ();
 				}
 			}
-			if (is_enabled == is_loaded) {
+			if (__eq__ (is_enabled, is_loaded)) {
 				// pass;
 			}
 			else if (is_enabled) {
-				enable (mod_name, __kwargtrans__ ({refresh_handled: true}));
+				__call__ (enable, null, mod_name, __kwargtrans__ ({refresh_handled: true}));
 			}
 			else if (is_loaded) {
-				print ('\taddon_utils.reset_all unloading', mod_name);
-				disable (mod_name);
+				__call__ (print, null, '\taddon_utils.reset_all unloading', mod_name);
+				__call__ (disable, null, mod_name);
 			}
 		}
 	}
@@ -915,7 +1248,7 @@ export var reset_all = function () {
 export var disable_all = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -923,31 +1256,54 @@ export var disable_all = function () {
 	}
 	else {
 	}
-	var sys = _module ('sys');
-	var modules = sys.modules.py_copy ();
+	var sys = __call__ (_module, null, 'sys');
+	var modules = (function () {
+		var __accu0__ = sys.modules;
+		return __call__ (__accu0__.py_copy, __accu0__);
+	}) ();
 	var addon_modules = (function () {
 		var __accu0__ = [];
-		for (var item of list (modules.py_items ())) {
-			for (var mod_dict of [getattr (item [1], '__dict__', null)]) {
+		var __iterable0__ = __call__ (list, null, (function () {
+			var __accu1__ = modules;
+			return __call__ (__accu1__.py_items, __accu1__);
+		}) ());
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var item = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = [__call__ (getattr, null, __getitem__ (item, 1), '__dict__', null)];
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var mod_dict = __getitem__ (__iterable1__, __index1__);
 				if (py_typeof (mod_dict) === dict) {
-					if (mod_dict.py_get ('__addon_enabled__')) {
-						__accu0__.append (item);
+					if ((function () {
+						var __accu1__ = mod_dict;
+						return __call__ (__accu1__.py_get, __accu1__, '__addon_enabled__');
+					}) ()) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, item);
+						}) ();
 					}
 				}
 			}
 		}
 		return __accu0__;
 	}) ();
-	for (var [mod_name, mod] of addon_modules) {
-		if (getattr (mod, '__addon_enabled__', false)) {
-			disable (mod_name, __kwargtrans__ ({refresh_handled: true}));
+	var __iterable0__ = addon_modules;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var mod_name = __left0__ [0];
+		var mod = __left0__ [1];
+		if (__call__ (getattr, null, mod, '__addon_enabled__', false)) {
+			__call__ (disable, null, mod_name, __kwargtrans__ ({refresh_handled: true}));
 		}
 	}
 };
 export var _blender_manual_url_prefix = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -955,12 +1311,18 @@ export var _blender_manual_url_prefix = function () {
 	}
 	else {
 	}
-	return 'https://docs.blender.org/manual/{:s}/{:d}.{:d}'.format (_bpy.utils.manual_language_code (), ..._bpy.app.version.__getslice__ (null, 2, 1));
+	return (function () {
+		var __accu0__ = 'https://docs.blender.org/manual/{:s}/{:d}.{:d}';
+		return __call__ (__accu0__.format, __accu0__, (function () {
+			var __accu1__ = _bpy.utils;
+			return __call__ (__accu1__.manual_language_code, __accu1__);
+		}) (), ...__getslice__ (_bpy.app.version, null, 2, 1));
+	}) ();
 };
 export var _bl_info_basis = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -974,7 +1336,7 @@ export var module_bl_info = function (mod) {
 	var info_basis = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -987,48 +1349,68 @@ export var module_bl_info = function (mod) {
 	else {
 	}
 	if (info_basis === null) {
-		var info_basis = _bl_info_basis ();
+		var info_basis = __call__ (_bl_info_basis, null);
 	}
-	var addon_info = getattr (mod, 'bl_info', dict ({}));
+	var addon_info = __call__ (getattr, null, mod, 'bl_info', dict ({}));
 	if (__in__ ('_init', addon_info)) {
 		return addon_info;
 	}
 	if (!(addon_info)) {
-		if (mod.__name__.startswith (_ext_base_pkg_idname_with_dot)) {
-			var __left0__ = _bl_info_from_extension (mod.__name__, mod.__file__);
+		if ((function () {
+			var __accu0__ = mod.__name__;
+			return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
+		}) ()) {
+			var __left0__ = __call__ (_bl_info_from_extension, null, mod.__name__, mod.__file__);
 			var addon_info = __left0__ [0];
 			var filepath_toml = __left0__ [1];
 			if (addon_info === null) {
-				print ('module_bl_info: failed to extract meta-data from', filepath_toml);
+				__call__ (print, null, 'module_bl_info: failed to extract meta-data from', filepath_toml);
 				var addon_info = dict ({});
 			}
 		}
 		mod.bl_info = addon_info;
 	}
-	for (var [key, value] of info_basis.py_items ()) {
-		addon_info.py_setdefault (key, value);
+	var __iterable0__ = (function () {
+		var __accu0__ = info_basis;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var key = __left0__ [0];
+		var value = __left0__ [1];
+		(function () {
+			var __accu0__ = addon_info;
+			return __call__ (__accu0__.py_setdefault, __accu0__, key, value);
+		}) ();
 	}
-	if (!(addon_info ['name'])) {
-		addon_info ['name'] = mod.__name__;
+	if (!(__getitem__ (addon_info, 'name'))) {
+		__setitem__ (addon_info, 'name', mod.__name__);
 	}
-	var doc_url = addon_info ['doc_url'];
+	var doc_url = __getitem__ (addon_info, 'doc_url');
 	if (doc_url) {
 		var doc_url_prefix = '{BLENDER_MANUAL_URL}';
 		if (__in__ (doc_url_prefix, doc_url)) {
-			addon_info ['doc_url'] = doc_url.py_replace (doc_url_prefix, _blender_manual_url_prefix ());
+			__setitem__ (addon_info, 'doc_url', (function () {
+				var __accu0__ = doc_url;
+				return __call__ (__accu0__.py_replace, __accu0__, doc_url_prefix, __call__ (_blender_manual_url_prefix, null));
+			}) ());
 		}
 	}
-	var re = _module ('re');
+	var re = __call__ (_module, null, 're');
 	if (__in__ ('author', addon_info)) {
-		addon_info ['author'] = re.sub ('\\s*<.*?>', '', addon_info ['author']);
+		__setitem__ (addon_info, 'author', (function () {
+			var __accu0__ = re;
+			return __call__ (__accu0__.sub, __accu0__, '\\s*<.*?>', '', __getitem__ (addon_info, 'author'));
+		}) ());
 	}
-	addon_info ['_init'] = null;
+	__setitem__ (addon_info, '_init', null);
 	return addon_info;
 };
 export var _stale_pending_filepath = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1036,13 +1418,19 @@ export var _stale_pending_filepath = function () {
 	}
 	else {
 	}
-	var os = _module ('os');
-	return os.path.join (_bpy.utils.user_resource ('CONFIG'), 'stale-pending');
+	var os = __call__ (_module, null, 'os');
+	return (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.join, __accu0__, (function () {
+			var __accu1__ = _bpy.utils;
+			return __call__ (__accu1__.user_resource, __accu1__, 'CONFIG');
+		}) (), 'stale-pending');
+	}) ();
 };
 export var _stale_pending_stage = function (debug) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1053,15 +1441,24 @@ export var _stale_pending_stage = function (debug) {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var stale_pending_filepath = _stale_pending_filepath ();
-	var dirpath = os.path.dirname (stale_pending_filepath);
-	if (os.path.exists (stale_pending_filepath)) {
+	var os = __call__ (_module, null, 'os');
+	var stale_pending_filepath = __call__ (_stale_pending_filepath, null);
+	var dirpath = (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.dirname, __accu0__, stale_pending_filepath);
+	}) ();
+	if ((function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.exists, __accu0__, stale_pending_filepath);
+	}) ()) {
 		return ;
 	}
 	try {
-		os.makedirs (dirpath, __kwargtrans__ ({exist_ok: true}));
-		var _ = open (stale_pending_filepath, 'wb');
+		(function () {
+			var __accu0__ = os;
+			return __call__ (__accu0__.makedirs, __accu0__, dirpath, __kwargtrans__ ({exist_ok: true}));
+		}) ();
+		var _ = __call__ (open, null, stale_pending_filepath, 'wb');
 		try {
 			_.__enter__ ();
 			// pass;
@@ -1076,7 +1473,7 @@ export var _stale_pending_stage = function (debug) {
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var ex = __except0__;
-			print ('Unable to set stale files pending:', str (ex));
+			__call__ (print, null, 'Unable to set stale files pending:', __call__ (str, null, ex));
 		}
 		else {
 			throw __except0__;
@@ -1086,7 +1483,7 @@ export var _stale_pending_stage = function (debug) {
 export var _stale_file_directory_iter = function* () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1094,23 +1491,38 @@ export var _stale_file_directory_iter = function* () {
 	}
 	else {
 	}
-	var os = _module ('os');
-	for (var repo of _preferences.extensions.repos) {
+	var os = __call__ (_module, null, 'os');
+	var __iterable0__ = _preferences.extensions.repos;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var repo = __getitem__ (__iterable0__, __index0__);
 		if (!(repo.enabled)) {
 			continue;
 		}
-		if (repo.source == 'SYSTEM') {
+		if (__eq__ (repo.source, 'SYSTEM')) {
 			continue;
 		}
 		yield repo.directory;
 	}
-	yield* paths ().__getslice__ (1, null, 1);
-	yield os.path.join (_bpy.utils.user_resource ('EXTENSIONS'), '.local');
-	yield _bpy.utils.user_resource ('SCRIPTS', __kwargtrans__ ({path: os.path.join ('startup', 'bl_app_templates_user'), create: false}))};
+	yield* __getslice__ (__call__ (paths, null), 1, null, 1);
+	yield (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.join, __accu0__, (function () {
+			var __accu1__ = _bpy.utils;
+			return __call__ (__accu1__.user_resource, __accu1__, 'EXTENSIONS');
+		}) (), '.local');
+	}) ();
+	yield (function () {
+		var __accu0__ = _bpy.utils;
+		return __call__ (__accu0__.user_resource, __accu0__, 'SCRIPTS', __kwargtrans__ ({path: (function () {
+			var __accu1__ = os.path;
+			return __call__ (__accu1__.join, __accu1__, 'startup', 'bl_app_templates_user');
+		}) (), create: false}));
+	}) ()};
 export var _stale_pending_check_and_remove_once = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1118,35 +1530,65 @@ export var _stale_pending_check_and_remove_once = function () {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var stale_pending_filepath = _stale_pending_filepath ();
-	if (!(os.path.exists (stale_pending_filepath))) {
+	var os = __call__ (_module, null, 'os');
+	var stale_pending_filepath = __call__ (_stale_pending_filepath, null);
+	if (!((function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.exists, __accu0__, stale_pending_filepath);
+	}) ())) {
 		return ;
 	}
-	var StaleFiles = _member ('_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
+	var StaleFiles = __call__ (_member, null, '_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
 	var debug = _bpy.app.debug_python;
 	var is_empty = true;
-	for (var dirpath of _stale_file_directory_iter ()) {
-		if (!(os.path.exists (os.path.join (dirpath, _stale_filename)))) {
+	var __iterable0__ = __call__ (_stale_file_directory_iter, null);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var dirpath = __getitem__ (__iterable0__, __index0__);
+		if (!((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.exists, __accu0__, (function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.join, __accu1__, dirpath, _stale_filename);
+			}) ());
+		}) ())) {
 			continue;
 		}
 		try {
-			var stale_handle = StaleFiles (__kwargtrans__ ({base_directory: dirpath, stale_filename: _stale_filename, debug: debug}));
-			stale_handle.state_load (__kwargtrans__ ({check_exists: true}));
-			if (!(stale_handle.is_empty ())) {
-				stale_handle.state_remove_all ();
-				if (!(stale_handle.is_empty ())) {
+			var stale_handle = __call__ (StaleFiles, null, __kwargtrans__ ({base_directory: dirpath, stale_filename: _stale_filename, debug: debug}));
+			(function () {
+				var __accu0__ = stale_handle;
+				return __call__ (__accu0__.state_load, __accu0__, __kwargtrans__ ({check_exists: true}));
+			}) ();
+			if (!((function () {
+				var __accu0__ = stale_handle;
+				return __call__ (__accu0__.is_empty, __accu0__);
+			}) ())) {
+				(function () {
+					var __accu0__ = stale_handle;
+					return __call__ (__accu0__.state_remove_all, __accu0__);
+				}) ();
+				if (!((function () {
+					var __accu0__ = stale_handle;
+					return __call__ (__accu0__.is_empty, __accu0__);
+				}) ())) {
 					var is_empty = false;
 				}
 			}
-			if (stale_handle.is_modified ()) {
-				stale_handle.state_store (__kwargtrans__ ({check_exists: false}));
+			if ((function () {
+				var __accu0__ = stale_handle;
+				return __call__ (__accu0__.is_modified, __accu0__);
+			}) ()) {
+				(function () {
+					var __accu0__ = stale_handle;
+					return __call__ (__accu0__.state_store, __accu0__, __kwargtrans__ ({check_exists: false}));
+				}) ();
 			}
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				print ('Unexpected error clearing stale data, this is a bug!', str (ex));
+				__call__ (print, null, 'Unexpected error clearing stale data, this is a bug!', __call__ (str, null, ex));
 			}
 			else {
 				throw __except0__;
@@ -1155,13 +1597,16 @@ export var _stale_pending_check_and_remove_once = function () {
 	}
 	if (is_empty) {
 		try {
-			os.remove (stale_pending_filepath);
+			(function () {
+				var __accu0__ = os;
+				return __call__ (__accu0__.remove, __accu0__, stale_pending_filepath);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
 				if (debug) {
-					print ('Failed to remove stale-pending file:', str (ex));
+					__call__ (print, null, 'Failed to remove stale-pending file:', __call__ (str, null, ex));
 				}
 			}
 			else {
@@ -1173,7 +1618,7 @@ export var _stale_pending_check_and_remove_once = function () {
 export var stale_pending_stage_paths = function (path_base, paths) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1185,17 +1630,20 @@ export var stale_pending_stage_paths = function (path_base, paths) {
 	}
 	else {
 	}
-	var StaleFiles = _member ('_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
+	var StaleFiles = __call__ (_member, null, '_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
 	var debug = _bpy.app.debug_python;
-	var stale_handle = StaleFiles (__kwargtrans__ ({base_directory: path_base, stale_filename: _stale_filename, debug: debug}));
-	if (stale_handle.state_load_add_and_store (__kwargtrans__ ({paths: paths}))) {
-		_stale_pending_stage (debug);
+	var stale_handle = __call__ (StaleFiles, null, __kwargtrans__ ({base_directory: path_base, stale_filename: _stale_filename, debug: debug}));
+	if ((function () {
+		var __accu0__ = stale_handle;
+		return __call__ (__accu0__.state_load_add_and_store, __accu0__, __kwargtrans__ ({paths: paths}));
+	}) ()) {
+		__call__ (_stale_pending_stage, null, debug);
 	}
 };
 export var stale_pending_remove_paths = function (path_base, paths) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1207,17 +1655,20 @@ export var stale_pending_remove_paths = function (path_base, paths) {
 	}
 	else {
 	}
-	var StaleFiles = _member ('_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
+	var StaleFiles = __call__ (_member, null, '_bpy_internal.extensions.stale_file_manager', 'StaleFiles');
 	var debug = _bpy.app.debug_python;
-	var stale_handle = StaleFiles (__kwargtrans__ ({base_directory: path_base, stale_filename: _stale_filename, debug: debug}));
-	if (stale_handle.state_load_remove_and_store (__kwargtrans__ ({paths: paths}))) {
+	var stale_handle = __call__ (StaleFiles, null, __kwargtrans__ ({base_directory: path_base, stale_filename: _stale_filename, debug: debug}));
+	if ((function () {
+		var __accu0__ = stale_handle;
+		return __call__ (__accu0__.state_load_remove_and_store, __accu0__, __kwargtrans__ ({paths: paths}));
+	}) ()) {
 		// pass;
 	}
 };
 export var _pickle_zlib_file_read = function (filepath) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1228,12 +1679,18 @@ export var _pickle_zlib_file_read = function (filepath) {
 	}
 	else {
 	}
-	var pickle = _module ('pickle');
-	var gzip = _module ('gzip');
-	var fh = gzip.GzipFile (filepath, 'rb');
+	var pickle = __call__ (_module, null, 'pickle');
+	var gzip = __call__ (_module, null, 'gzip');
+	var fh = (function () {
+		var __accu0__ = gzip;
+		return __call__ (__accu0__.GzipFile, __accu0__, filepath, 'rb');
+	}) ();
 	try {
 		fh.__enter__ ();
-		var data = pickle.load (fh);
+		var data = (function () {
+			var __accu0__ = pickle;
+			return __call__ (__accu0__.load, __accu0__, fh);
+		}) ();
 		fh.__exit__ ();
 	}
 	catch (__except0__) {
@@ -1246,7 +1703,7 @@ export var _pickle_zlib_file_read = function (filepath) {
 export var _pickle_zlib_file_write = function (filepath, data) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1258,12 +1715,18 @@ export var _pickle_zlib_file_write = function (filepath, data) {
 	}
 	else {
 	}
-	var pickle = _module ('pickle');
-	var gzip = _module ('gzip');
-	var fh = gzip.GzipFile (filepath, 'wb', __kwargtrans__ ({compresslevel: 9}));
+	var pickle = __call__ (_module, null, 'pickle');
+	var gzip = __call__ (_module, null, 'gzip');
+	var fh = (function () {
+		var __accu0__ = gzip;
+		return __call__ (__accu0__.GzipFile, __accu0__, filepath, 'wb', __kwargtrans__ ({compresslevel: 9}));
+	}) ();
 	try {
 		fh.__enter__ ();
-		pickle.dump (data, fh);
+		(function () {
+			var __accu0__ = pickle;
+			return __call__ (__accu0__.dump, __accu0__, data, fh);
+		}) ();
 		fh.__exit__ ();
 	}
 	catch (__except0__) {
@@ -1275,7 +1738,7 @@ export var _pickle_zlib_file_write = function (filepath, data) {
 export var _extension_repos_module_to_directory_map = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1285,9 +1748,15 @@ export var _extension_repos_module_to_directory_map = function () {
 	}
 	return (function () {
 		var __accu0__ = [];
-		for (var repo of _preferences.extensions.repos) {
+		var __iterable0__ = _preferences.extensions.repos;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var repo = __getitem__ (__iterable0__, __index0__);
 			if (repo.enabled) {
-				__accu0__.append ([repo.module, repo.directory]);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, [repo.module, repo.directory]);
+				}) ();
 			}
 		}
 		return dict (__accu0__);
@@ -1296,7 +1765,7 @@ export var _extension_repos_module_to_directory_map = function () {
 export var _extension_compat_cache_update_needed = function (cache_data, blender_id, extensions_enabled, print_debug) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1310,39 +1779,61 @@ export var _extension_compat_cache_update_needed = function (cache_data, blender
 	}
 	else {
 	}
-	if (cache_data.py_get ('blender') != blender_id) {
+	if (__ne__ ((function () {
+		var __accu0__ = cache_data;
+		return __call__ (__accu0__.py_get, __accu0__, 'blender');
+	}) (), blender_id)) {
 		if (print_debug !== null) {
-			print_debug ('blender changed');
+			__call__ (print_debug, null, 'blender changed');
 		}
 		return true;
 	}
-	var cache_filesystem = cache_data.py_get ('filesystem', []);
-	if (len (cache_filesystem) != len (extensions_enabled)) {
+	var cache_filesystem = (function () {
+		var __accu0__ = cache_data;
+		return __call__ (__accu0__.py_get, __accu0__, 'filesystem', []);
+	}) ();
+	if (__ne__ (__call__ (len, null, cache_filesystem), __call__ (len, null, extensions_enabled))) {
 		if (print_debug !== null) {
-			print_debug ('length changes ({:d} -> {:d}).'.format (len (cache_filesystem), len (extensions_enabled)));
+			__call__ (print_debug, null, (function () {
+				var __accu0__ = 'length changes ({:d} -> {:d}).';
+				return __call__ (__accu0__.format, __accu0__, __call__ (len, null, cache_filesystem), __call__ (len, null, extensions_enabled));
+			}) ());
 		}
 		return true;
 	}
-	var stat = _member ('os', 'stat');
-	var join = _member ('os.path', 'join');
-	var repos_module_to_directory_map = _extension_repos_module_to_directory_map ();
-	for (var [repo_module, pkg_id, cache_stat_time, cache_stat_size] of cache_filesystem) {
+	var stat = __call__ (_member, null, 'os', 'stat');
+	var join = __call__ (_member, null, 'os.path', 'join');
+	var repos_module_to_directory_map = __call__ (_extension_repos_module_to_directory_map, null);
+	var __iterable0__ = cache_filesystem;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var repo_module = __left0__ [0];
+		var pkg_id = __left0__ [1];
+		var cache_stat_time = __left0__ [2];
+		var cache_stat_size = __left0__ [3];
 		if (!__in__ (tuple ([repo_module, pkg_id]), extensions_enabled)) {
 			if (print_debug !== null) {
-				print_debug ('"{:s}.{:s}" no longer enabled.'.format (repo_module, pkg_id));
+				__call__ (print_debug, null, (function () {
+					var __accu0__ = '"{:s}.{:s}" no longer enabled.';
+					return __call__ (__accu0__.format, __accu0__, repo_module, pkg_id);
+				}) ());
 			}
 			return true;
 		}
-		var repo_directory = repos_module_to_directory_map.py_get (repo_module, '');
+		var repo_directory = (function () {
+			var __accu0__ = repos_module_to_directory_map;
+			return __call__ (__accu0__.py_get, __accu0__, repo_module, '');
+		}) ();
 		if (repo_directory) {
-			var pkg_manifest_filepath = join (repo_directory, pkg_id, _ext_manifest_filename_toml);
+			var pkg_manifest_filepath = __call__ (join, null, repo_directory, pkg_id, _ext_manifest_filename_toml);
 		}
 		else {
 			var pkg_manifest_filepath = '';
 		}
 		if (pkg_manifest_filepath) {
 			try {
-				var statinfo = stat (pkg_manifest_filepath);
+				var statinfo = __call__ (stat, null, pkg_manifest_filepath);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -1364,15 +1855,21 @@ export var _extension_compat_cache_update_needed = function (cache_data, blender
 			var test_time = statinfo.st_mtime;
 			var test_size = statinfo.st_size;
 		}
-		if (cache_stat_time != test_time) {
+		if (__ne__ (cache_stat_time, test_time)) {
 			if (print_debug !== null) {
-				print_debug ('"{:s}.{:s}" time changed ({:g} -> {:g}).'.format (repo_module, pkg_id, cache_stat_time, test_time));
+				__call__ (print_debug, null, (function () {
+					var __accu0__ = '"{:s}.{:s}" time changed ({:g} -> {:g}).';
+					return __call__ (__accu0__.format, __accu0__, repo_module, pkg_id, cache_stat_time, test_time);
+				}) ());
 			}
 			return true;
 		}
-		if (cache_stat_size != test_size) {
+		if (__ne__ (cache_stat_size, test_size)) {
 			if (print_debug !== null) {
-				print_debug ('"{:s}.{:s}" size changed ({:d} -> {:d}).'.format (repo_module, pkg_id, cache_stat_size, test_size));
+				__call__ (print_debug, null, (function () {
+					var __accu0__ = '"{:s}.{:s}" size changed ({:d} -> {:d}).';
+					return __call__ (__accu0__.format, __accu0__, repo_module, pkg_id, cache_stat_size, test_size);
+				}) ());
 			}
 			return true;
 		}
@@ -1382,7 +1879,7 @@ export var _extension_compat_cache_update_needed = function (cache_data, blender
 export var _extension_compat_cache_create = function (blender_id, extensions_enabled, wheel_list, print_debug) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1396,33 +1893,50 @@ export var _extension_compat_cache_create = function (blender_id, extensions_ena
 	}
 	else {
 	}
-	var os = _module ('os');
-	var join = _member ('os.path', 'join');
+	var os = __call__ (_module, null, 'os');
+	var join = __call__ (_member, null, 'os.path', 'join');
 	var filesystem = [];
 	var incompatible = dict ({});
 	var cache_data = dict ({'blender': blender_id, 'filesystem': filesystem, 'incompatible': incompatible});
-	var repos_module_to_directory_map = _extension_repos_module_to_directory_map ();
+	var repos_module_to_directory_map = __call__ (_extension_repos_module_to_directory_map, null);
 	var bl_pkg = null;
-	for (var [repo_module, pkg_id] of extensions_enabled) {
-		var repo_directory = repos_module_to_directory_map.py_get (repo_module, '');
+	var __iterable0__ = extensions_enabled;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var repo_module = __left0__ [0];
+		var pkg_id = __left0__ [1];
+		var repo_directory = (function () {
+			var __accu0__ = repos_module_to_directory_map;
+			return __call__ (__accu0__.py_get, __accu0__, repo_module, '');
+		}) ();
 		if (repo_directory) {
-			var pkg_manifest_filepath = join (repo_directory, pkg_id, _ext_manifest_filename_toml);
+			var pkg_manifest_filepath = __call__ (join, null, repo_directory, pkg_id, _ext_manifest_filename_toml);
 		}
 		else {
 			var pkg_manifest_filepath = '';
 			if (print_debug !== null) {
-				print_debug ('directory for module "{:s}" not found!'.format (repo_module));
+				__call__ (print_debug, null, (function () {
+					var __accu0__ = 'directory for module "{:s}" not found!';
+					return __call__ (__accu0__.format, __accu0__, repo_module);
+				}) ());
 			}
 		}
 		if (pkg_manifest_filepath) {
 			try {
-				var statinfo = os.stat (pkg_manifest_filepath);
+				var statinfo = (function () {
+					var __accu0__ = os;
+					return __call__ (__accu0__.stat, __accu0__, pkg_manifest_filepath);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
 					var statinfo = null;
 					if (print_debug !== null) {
-						print_debug ('unable to find "{:s}"'.format (pkg_manifest_filepath));
+						__call__ (print_debug, null, (function () {
+							var __accu0__ = 'unable to find "{:s}"';
+							return __call__ (__accu0__.format, __accu0__, pkg_manifest_filepath);
+						}) ());
 					}
 				}
 				else {
@@ -1441,16 +1955,19 @@ export var _extension_compat_cache_create = function (blender_id, extensions_ena
 			var test_time = statinfo.st_mtime;
 			var test_size = statinfo.st_size;
 			if (bl_pkg === null) {
-				var bl_pkg = _module ('bl_pkg');
-				if (getattr (bl_pkg, '__time__', 0) == 0) {
+				var bl_pkg = __call__ (_module, null, 'bl_pkg');
+				if (__eq__ (__call__ (getattr, null, bl_pkg, '__time__', 0), 0)) {
 					try {
-						bl_pkg.__time__ = os.path.getmtime (bl_pkg.__file__);
+						bl_pkg.__time__ = (function () {
+							var __accu0__ = os.path;
+							return __call__ (__accu0__.getmtime, __accu0__, bl_pkg.__file__);
+						}) ();
 					}
 					catch (__except0__) {
 						if (isinstance (__except0__, Exception)) {
 							var ex = __except0__;
 							if (print_debug !== null) {
-								print_debug (str (ex));
+								__call__ (print_debug, null, __call__ (str, null, ex));
 							}
 						}
 						else {
@@ -1459,19 +1976,25 @@ export var _extension_compat_cache_create = function (blender_id, extensions_ena
 					}
 				}
 			}
-			var error = bl_pkg.manifest_compatible_with_wheel_data_or_error (pkg_manifest_filepath, repo_module, pkg_id, repo_directory, wheel_list);
+			var error = (function () {
+				var __accu0__ = bl_pkg;
+				return __call__ (__accu0__.manifest_compatible_with_wheel_data_or_error, __accu0__, pkg_manifest_filepath, repo_module, pkg_id, repo_directory, wheel_list);
+			}) ();
 			if (error !== null) {
 				incompatible.__setitem__ ([repo_module, pkg_id], error);
 			}
 		}
-		filesystem.append (tuple ([repo_module, pkg_id, test_time, test_size]));
+		(function () {
+			var __accu0__ = filesystem;
+			return __call__ (__accu0__.append, __accu0__, tuple ([repo_module, pkg_id, test_time, test_size]));
+		}) ();
 	}
 	return cache_data;
 };
 export var _initialize_extensions_compat_ensure_up_to_date = function (extensions_directory, extensions_enabled, print_debug) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1484,23 +2007,38 @@ export var _initialize_extensions_compat_ensure_up_to_date = function (extension
 	}
 	else {
 	}
-	var os = _module ('os');
-	var platform = _module ('platform');
-	var sys = _module ('sys');
+	var os = __call__ (_module, null, 'os');
+	var platform = __call__ (_module, null, 'platform');
+	var sys = __call__ (_module, null, 'sys');
 	var updated = false;
 	var wheel_list = [];
 	var magic_number = 0;
-	var blender_id = tuple ([_bpy.app.version, platform.system (), platform.machine (), sys.version_info.__getslice__ (0, 2, 1), magic_number]);
-	var filepath_compat = os.path.join (extensions_directory, '.cache', 'compat.dat');
-	if (os.path.exists (filepath_compat)) {
+	var blender_id = tuple ([_bpy.app.version, (function () {
+		var __accu0__ = platform;
+		return __call__ (__accu0__.system, __accu0__);
+	}) (), (function () {
+		var __accu0__ = platform;
+		return __call__ (__accu0__.machine, __accu0__);
+	}) (), __getslice__ (sys.version_info, 0, 2, 1), magic_number]);
+	var filepath_compat = (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.join, __accu0__, extensions_directory, '.cache', 'compat.dat');
+	}) ();
+	if ((function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.exists, __accu0__, filepath_compat);
+	}) ()) {
 		try {
-			var cache_data = _pickle_zlib_file_read (filepath_compat);
+			var cache_data = __call__ (_pickle_zlib_file_read, null, filepath_compat);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
 				var cache_data = null;
-				print ('Extensions: reading cache failed ({:s}), creating...'.format (str (ex)));
+				__call__ (print, null, (function () {
+					var __accu0__ = 'Extensions: reading cache failed ({:s}), creating...';
+					return __call__ (__accu0__.format, __accu0__, __call__ (str, null, ex));
+				}) ());
 			}
 			else {
 				throw __except0__;
@@ -1510,20 +2048,23 @@ export var _initialize_extensions_compat_ensure_up_to_date = function (extension
 	else {
 		var cache_data = null;
 		if (print_debug !== null) {
-			print_debug ("doesn't exist, creating...");
+			__call__ (print_debug, null, "doesn't exist, creating...");
 		}
 	}
 	if (cache_data !== null) {
 		try {
-			if (_extension_compat_cache_update_needed (cache_data, blender_id, extensions_enabled, print_debug)) {
+			if (__call__ (_extension_compat_cache_update_needed, null, cache_data, blender_id, extensions_enabled, print_debug)) {
 				var cache_data = null;
 			}
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
-				print ('Extension: unexpected error reading cache, this is a bug! (regenerating)');
-				var traceback = _module ('traceback');
-				traceback.print_exc ();
+				__call__ (print, null, 'Extension: unexpected error reading cache, this is a bug! (regenerating)');
+				var traceback = __call__ (_module, null, 'traceback');
+				(function () {
+					var __accu0__ = traceback;
+					return __call__ (__accu0__.print_exc, __accu0__);
+				}) ();
 				var cache_data = null;
 			}
 			else {
@@ -1532,18 +2073,27 @@ export var _initialize_extensions_compat_ensure_up_to_date = function (extension
 		}
 	}
 	if (cache_data === null) {
-		var cache_data = _extension_compat_cache_create (blender_id, extensions_enabled, wheel_list, print_debug);
+		var cache_data = __call__ (_extension_compat_cache_create, null, blender_id, extensions_enabled, wheel_list, print_debug);
 		try {
-			os.makedirs (os.path.dirname (filepath_compat), __kwargtrans__ ({exist_ok: true}));
-			_pickle_zlib_file_write (filepath_compat, cache_data);
+			(function () {
+				var __accu0__ = os;
+				return __call__ (__accu0__.makedirs, __accu0__, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.dirname, __accu1__, filepath_compat);
+				}) (), __kwargtrans__ ({exist_ok: true}));
+			}) ();
+			__call__ (_pickle_zlib_file_write, null, filepath_compat, cache_data);
 			if (print_debug !== null) {
-				print_debug ('update written to disk.');
+				__call__ (print_debug, null, 'update written to disk.');
 			}
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				print ('Extensions: writing cache failed ({:s}).'.format (str (ex)));
+				__call__ (print, null, (function () {
+					var __accu0__ = 'Extensions: writing cache failed ({:s}).';
+					return __call__ (__accu0__.format, __accu0__, __call__ (str, null, ex));
+				}) ());
 			}
 			else {
 				throw __except0__;
@@ -1552,15 +2102,15 @@ export var _initialize_extensions_compat_ensure_up_to_date = function (extension
 		var updated = true;
 	}
 	else if (print_debug !== null) {
-		print_debug ('up to date.');
+		__call__ (print_debug, null, 'up to date.');
 	}
-	_extensions_incompatible = cache_data ['incompatible'];
+	_extensions_incompatible = __getitem__ (cache_data, 'incompatible');
 	return tuple ([updated, wheel_list]);
 };
 export var _initialize_extensions_compat_ensure_up_to_date_wheels = function (extensions_directory, wheel_list, debug, error_fn) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1574,13 +2124,16 @@ export var _initialize_extensions_compat_ensure_up_to_date_wheels = function (ex
 	}
 	else {
 	}
-	var os = _module ('os');
-	_extension_sync_wheels (__kwargtrans__ ({local_dir: os.path.join (extensions_directory, '.local'), wheel_list: wheel_list, debug: debug, error_fn: error_fn}));
+	var os = __call__ (_module, null, 'os');
+	__call__ (_extension_sync_wheels, null, __kwargtrans__ ({local_dir: (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.join, __accu0__, extensions_directory, '.local');
+	}) (), wheel_list: wheel_list, debug: debug, error_fn: error_fn}));
 };
 export var _initialize_extensions_compat_data = function (extensions_directory) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1595,19 +2148,40 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 	}
 	else {
 	}
-	_extensions_incompatible.py_clear ();
-	var extensions_enabled = set ();
-	var extensions_prefix_len = len (_ext_base_pkg_idname_with_dot);
-	for (var addon of _preferences.addons) {
+	(function () {
+		var __accu0__ = _extensions_incompatible;
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
+	var extensions_enabled = __call__ (set, null);
+	var extensions_prefix_len = __call__ (len, null, _ext_base_pkg_idname_with_dot);
+	var __iterable0__ = _preferences.addons;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var addon = __getitem__ (__iterable0__, __index0__);
 		var module_name = addon.module;
-		if (check_extension (module_name)) {
-			extensions_enabled.add (module_name.__getslice__ (extensions_prefix_len, null, 1).partition ('.').__getslice__ (0, null, 2));
+		if (__call__ (check_extension, null, module_name)) {
+			(function () {
+				var __accu0__ = extensions_enabled;
+				return __call__ (__accu0__.add, __accu0__, __getslice__ ((function () {
+					var __accu1__ = __getslice__ (module_name, extensions_prefix_len, null, 1);
+					return __call__ (__accu1__.partition, __accu1__, '.');
+				}) (), 0, null, 2));
+			}) ();
 		}
 	}
 	if (addon_modules_pending !== null) {
-		for (var module_name of addon_modules_pending) {
-			if (check_extension (module_name)) {
-				extensions_enabled.add (module_name.__getslice__ (extensions_prefix_len, null, 1).partition ('.').__getslice__ (0, null, 2));
+		var __iterable0__ = addon_modules_pending;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var module_name = __getitem__ (__iterable0__, __index0__);
+			if (__call__ (check_extension, null, module_name)) {
+				(function () {
+					var __accu0__ = extensions_enabled;
+					return __call__ (__accu0__.add, __accu0__, __getslice__ ((function () {
+						var __accu1__ = __getslice__ (module_name, extensions_prefix_len, null, 1);
+						return __call__ (__accu1__.partition, __accu1__, '.');
+					}) (), 0, null, 2));
+				}) ();
 			}
 		}
 	}
@@ -1616,7 +2190,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1630,24 +2204,27 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 		else {
 			var args = tuple ();
 		}
-		return print ('Extension version cache:', ...args, __kwargtrans__ (_merged (kwargs)));
+		return __call__ (print, null, 'Extension version cache:', ...args, __kwargtrans__ (__call__ (_merged, null, kwargs)));
 	}) : null);
 	if (use_startup_fastpath && !(extensions_enabled)) {
 		if (print_debug !== null) {
-			print_debug ('no extensions, skipping cache data.');
+			__call__ (print_debug, null, 'no extensions, skipping cache data.');
 		}
 		return ;
 	}
 	try {
-		var __left0__ = _initialize_extensions_compat_ensure_up_to_date (extensions_directory, extensions_enabled, print_debug);
+		var __left0__ = __call__ (_initialize_extensions_compat_ensure_up_to_date, null, extensions_directory, extensions_enabled, print_debug);
 		var updated = __left0__ [0];
 		var wheel_list = __left0__ [1];
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
-			print ('Extension: unexpected error detecting cache, this is a bug!');
-			var traceback = _module ('traceback');
-			traceback.print_exc ();
+			__call__ (print, null, 'Extension: unexpected error detecting cache, this is a bug!');
+			var traceback = __call__ (_module, null, 'traceback');
+			(function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.print_exc, __accu0__);
+			}) ();
 			var updated = false;
 		}
 		else {
@@ -1660,7 +2237,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 				var error_fn = function (ex) {
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 								switch (__attrib0__) {
@@ -1671,17 +2248,20 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 					}
 					else {
 					}
-					print ('Error:', str (ex));
+					__call__ (print, null, 'Error:', __call__ (str, null, ex));
 				};
 			}
 			try {
-				_initialize_extensions_compat_ensure_up_to_date_wheels (extensions_directory, wheel_list, debug, __kwargtrans__ ({error_fn: error_fn}));
+				__call__ (_initialize_extensions_compat_ensure_up_to_date_wheels, null, extensions_directory, wheel_list, debug, __kwargtrans__ ({error_fn: error_fn}));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					print ('Extension: unexpected error updating wheels, this is a bug!');
-					var traceback = _module ('traceback');
-					traceback.print_exc ();
+					__call__ (print, null, 'Extension: unexpected error updating wheels, this is a bug!');
+					var traceback = __call__ (_module, null, 'traceback');
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 				}
 				else {
 					throw __except0__;
@@ -1693,7 +2273,7 @@ export var _initialize_extensions_compat_data = function (extensions_directory) 
 export var _version_int_left_digits = function (x) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1704,20 +2284,31 @@ export var _version_int_left_digits = function (x) {
 	}
 	else {
 	}
-	return int (x.__getslice__ (null, py_next ((function () {
+	return __call__ (int, null, __getslice__ (x, null, __call__ (py_next, null, __call__ (py_iter, null, (function () {
 		var __accu0__ = [];
-		for (var [i, c] of list (py_enumerate (x))) {
-			if (!(c.isdigit ())) {
-				__accu0__.append (i);
+		var __iterable0__ = __call__ (list, null, __call__ (py_enumerate, null, x));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var c = __left0__ [1];
+			if (!((function () {
+				var __accu1__ = c;
+				return __call__ (__accu1__.isdigit, __accu1__);
+			}) ())) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, i);
+				}) ();
 			}
 		}
 		return __accu0__;
-	}) (), len (x)), 1) || '0');
+	}) ()), __call__ (len, null, x)), 1) || '0');
 };
 export var _bl_info_from_extension = function (mod_name, mod_path) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1729,15 +2320,24 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var tomllib = _module ('tomllib');
-	var bl_info = _bl_info_basis ();
-	var filepath_toml = os.path.join (os.path.dirname (mod_path), _ext_manifest_filename_toml);
+	var os = __call__ (_module, null, 'os');
+	var tomllib = __call__ (_module, null, 'tomllib');
+	var bl_info = __call__ (_bl_info_basis, null);
+	var filepath_toml = (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.join, __accu0__, (function () {
+			var __accu1__ = os.path;
+			return __call__ (__accu1__.dirname, __accu1__, mod_path);
+		}) (), _ext_manifest_filename_toml);
+	}) ();
 	try {
-		var fh = open (filepath_toml, 'rb');
+		var fh = __call__ (open, null, filepath_toml, 'rb');
 		try {
 			fh.__enter__ ();
-			var data = tomllib.load (fh);
+			var data = (function () {
+				var __accu0__ = tomllib;
+				return __call__ (__accu0__.load, __accu0__, fh);
+			}) ();
 			fh.__exit__ ();
 		}
 		catch (__except0__) {
@@ -1748,42 +2348,59 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, FileNotFoundError)) {
-			print ('Warning: add-on missing manifest, this can cause poor performance!:', repr (filepath_toml));
+			__call__ (print, null, 'Warning: add-on missing manifest, this can cause poor performance!:', __call__ (repr, null, filepath_toml));
 			return tuple ([null, filepath_toml]);
 		}
 		else if (isinstance (__except0__, Exception)) {
 			var ex = __except0__;
-			print ('Error:', str (ex), 'in', filepath_toml);
+			__call__ (print, null, 'Error:', __call__ (str, null, ex), 'in', filepath_toml);
 			return tuple ([null, filepath_toml]);
 		}
 		else {
 			throw __except0__;
 		}
 	}
-	var value = data.py_get ('name', null);
+	var value = (function () {
+		var __accu0__ = data;
+		return __call__ (__accu0__.py_get, __accu0__, 'name', null);
+	}) ();
 	if (value === null) {
-		print ('Error: missing "name" in', filepath_toml);
+		__call__ (print, null, 'Error: missing "name" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
 	if (py_typeof (value) !== str) {
-		print ('Error: "name" is not a string in', filepath_toml);
+		__call__ (print, null, 'Error: "name" is not a string in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
-	bl_info ['name'] = value;
-	var value = data.py_get ('version', null);
+	__setitem__ (bl_info, 'name', value);
+	var value = (function () {
+		var __accu0__ = data;
+		return __call__ (__accu0__.py_get, __accu0__, 'version', null);
+	}) ();
 	if (value === null) {
-		print ('Error: missing "version" in', filepath_toml);
+		__call__ (print, null, 'Error: missing "version" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
 	if (py_typeof (value) !== str) {
-		print ('Error: "version" is not a string in', filepath_toml);
+		__call__ (print, null, 'Error: "version" is not a string in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
 	try {
-		var value = tuple ((function () {
+		var value = __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var [i, x] of list (py_enumerate (value.py_split ('.', 2)))) {
-				__accu0__.append ((i < 2 ? int : _version_int_left_digits) (x));
+			var __iterable0__ = __call__ (list, null, __call__ (py_enumerate, null, (function () {
+				var __accu1__ = value;
+				return __call__ (__accu1__.py_split, __accu1__, '.', 2);
+			}) ()));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var i = __left0__ [0];
+				var x = __left0__ [1];
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ ((__lt__ (i, 2) ? int : _version_int_left_digits), null, x));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
@@ -1791,28 +2408,40 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var ex = __except0__;
-			print ('Error: "version" is not a semantic version (X.Y.Z) in ', filepath_toml, str (ex));
+			__call__ (print, null, 'Error: "version" is not a semantic version (X.Y.Z) in ', filepath_toml, __call__ (str, null, ex));
 			return tuple ([null, filepath_toml]);
 		}
 		else {
 			throw __except0__;
 		}
 	}
-	bl_info ['version'] = value;
-	var value = data.py_get ('blender_version_min', null);
+	__setitem__ (bl_info, 'version', value);
+	var value = (function () {
+		var __accu0__ = data;
+		return __call__ (__accu0__.py_get, __accu0__, 'blender_version_min', null);
+	}) ();
 	if (value === null) {
-		print ('Error: missing "blender_version_min" in', filepath_toml);
+		__call__ (print, null, 'Error: missing "blender_version_min" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
 	if (py_typeof (value) !== str) {
-		print ('Error: "blender_version_min" is not a string in', filepath_toml);
+		__call__ (print, null, 'Error: "blender_version_min" is not a string in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
 	try {
-		var value = tuple ((function () {
+		var value = __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var x of list (value.py_split ('.'))) {
-				__accu0__.append (int (x));
+			var __iterable0__ = __call__ (list, null, (function () {
+				var __accu1__ = value;
+				return __call__ (__accu1__.py_split, __accu1__, '.');
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var x = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (int, null, x));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
@@ -1820,41 +2449,47 @@ export var _bl_info_from_extension = function (mod_name, mod_path) {
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var ex = __except0__;
-			print ('Error:', str (ex), 'in "blender_version_min"', filepath_toml);
+			__call__ (print, null, 'Error:', __call__ (str, null, ex), 'in "blender_version_min"', filepath_toml);
 			return tuple ([null, filepath_toml]);
 		}
 		else {
 			throw __except0__;
 		}
 	}
-	bl_info ['blender'] = value;
-	var value = data.py_get ('tagline', null);
+	__setitem__ (bl_info, 'blender', value);
+	var value = (function () {
+		var __accu0__ = data;
+		return __call__ (__accu0__.py_get, __accu0__, 'tagline', null);
+	}) ();
 	if (value === null) {
-		print ('Warning: missing "tagline" in', filepath_toml);
+		__call__ (print, null, 'Warning: missing "tagline" in', filepath_toml);
 	}
 	else if (py_typeof (value) !== str) {
-		print ('Warning: "tagline" is not a string', filepath_toml);
+		__call__ (print, null, 'Warning: "tagline" is not a string', filepath_toml);
 	}
 	else {
-		bl_info ['description'] = value;
+		__setitem__ (bl_info, 'description', value);
 	}
-	var value = data.py_get ('maintainer', null);
+	var value = (function () {
+		var __accu0__ = data;
+		return __call__ (__accu0__.py_get, __accu0__, 'maintainer', null);
+	}) ();
 	if (value === null) {
-		print ('Error: missing "author" in', filepath_toml);
+		__call__ (print, null, 'Error: missing "author" in', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
 	if (py_typeof (value) !== str) {
-		print ('Error: "maintainer" is not a string', filepath_toml);
+		__call__ (print, null, 'Error: "maintainer" is not a string', filepath_toml);
 		return tuple ([null, filepath_toml]);
 	}
-	bl_info ['author'] = value;
-	bl_info ['category'] = 'Development';
+	__setitem__ (bl_info, 'author', value);
+	__setitem__ (bl_info, 'category', 'Development');
 	return tuple ([bl_info, filepath_toml]);
 };
 export var _fake_module_from_extension = function (mod_name, mod_path) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1866,26 +2501,32 @@ export var _fake_module_from_extension = function (mod_name, mod_path) {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var __left0__ = _bl_info_from_extension (mod_name, mod_path);
+	var os = __call__ (_module, null, 'os');
+	var __left0__ = __call__ (_bl_info_from_extension, null, mod_name, mod_path);
 	var bl_info = __left0__ [0];
 	var filepath_toml = __left0__ [1];
 	if (bl_info === null) {
 		return null;
 	}
 	var ModuleType = py_typeof (os);
-	var mod = ModuleType (mod_name);
+	var mod = __call__ (ModuleType, null, mod_name);
 	mod.bl_info = bl_info;
 	mod.__file__ = mod_path;
-	mod.__time__ = os.path.getmtime (mod_path);
+	mod.__time__ = (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.getmtime, __accu0__, mod_path);
+	}) ();
 	mod.__file_manifest__ = filepath_toml;
-	mod.__time_manifest__ = os.path.getmtime (filepath_toml);
+	mod.__time_manifest__ = (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.getmtime, __accu0__, filepath_toml);
+	}) ();
 	return mod;
 };
 export var _extension_sync_wheels = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1899,15 +2540,21 @@ export var _extension_sync_wheels = function () {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var sys = _module ('sys');
-	var apply_action = _member ('_bpy_internal.extensions.wheel_manager', 'apply_action');
-	var local_dir_site_packages = os.path.join (local_dir, 'lib', 'python{:d}.{:d}'.format (...sys.version_info.__getslice__ (0, 2, 1)), 'site-packages');
+	var os = __call__ (_module, null, 'os');
+	var sys = __call__ (_module, null, 'sys');
+	var apply_action = __call__ (_member, null, '_bpy_internal.extensions.wheel_manager', 'apply_action');
+	var local_dir_site_packages = (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.join, __accu0__, local_dir, 'lib', (function () {
+			var __accu1__ = 'python{:d}.{:d}';
+			return __call__ (__accu1__.format, __accu1__, ...__getslice__ (sys.version_info, 0, 2, 1));
+		}) (), 'site-packages');
+	}) ();
 	var paths_stale = [];
 	var remove_error_fn = function (filepath, _ex) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1919,15 +2566,24 @@ export var _extension_sync_wheels = function () {
 		}
 		else {
 		}
-		paths_stale.append (filepath);
+		(function () {
+			var __accu0__ = paths_stale;
+			return __call__ (__accu0__.append, __accu0__, filepath);
+		}) ();
 	};
-	apply_action (__kwargtrans__ ({local_dir: local_dir, local_dir_site_packages: local_dir_site_packages, wheel_list: wheel_list, error_fn: error_fn, remove_error_fn: remove_error_fn, debug: debug}));
+	__call__ (apply_action, null, __kwargtrans__ ({local_dir: local_dir, local_dir_site_packages: local_dir_site_packages, wheel_list: wheel_list, error_fn: error_fn, remove_error_fn: remove_error_fn, debug: debug}));
 	if (paths_stale) {
-		stale_pending_stage_paths (local_dir, paths_stale);
+		__call__ (stale_pending_stage_paths, null, local_dir, paths_stale);
 	}
-	if (os.path.exists (local_dir_site_packages)) {
+	if ((function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.exists, __accu0__, local_dir_site_packages);
+	}) ()) {
 		if (!__in__ (local_dir_site_packages, sys.path)) {
-			sys.path.append (local_dir_site_packages);
+			(function () {
+				var __accu0__ = sys.path;
+				return __call__ (__accu0__.append, __accu0__, local_dir_site_packages);
+			}) ();
 		}
 	}
 };
@@ -1938,12 +2594,12 @@ export var _ext_global =  __class__ ('_ext_global', [object], {
 	module_handle: null
 });
 export var _ext_base_pkg_idname = 'bl_ext';
-export var _ext_base_pkg_idname_with_dot = _ext_base_pkg_idname + '.';
+export var _ext_base_pkg_idname_with_dot = __add__ (_ext_base_pkg_idname, '.');
 export var _ext_manifest_filename_toml = 'blender_manifest.toml';
 export var _extension_module_name_decompose = function (package_) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1954,26 +2610,44 @@ export var _extension_module_name_decompose = function (package_) {
 	}
 	else {
 	}
-	if (!(package_.startswith (_ext_base_pkg_idname_with_dot))) {
-		var __except0__ = ValueError ('The "package" does not name an extension');
+	if (!((function () {
+		var __accu0__ = package_;
+		return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
+	}) ())) {
+		var __except0__ = __call__ (ValueError, null, 'The "package" does not name an extension');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	var __left0__ = package_.__getslice__ (len (_ext_base_pkg_idname_with_dot), null, 1).partition ('.').__getslice__ (0, null, 2);
+	var __left0__ = __getslice__ ((function () {
+		var __accu0__ = __getslice__ (package_, __call__ (len, null, _ext_base_pkg_idname_with_dot), null, 1);
+		return __call__ (__accu0__.partition, __accu0__, '.');
+	}) (), 0, null, 2);
 	var repo_module = __left0__ [0];
 	var pkg_idname = __left0__ [1];
 	if (!(repo_module && pkg_idname)) {
-		var __except0__ = ValueError ('The "package" is expected to be a module name containing 3 components');
+		var __except0__ = __call__ (ValueError, null, 'The "package" is expected to be a module name containing 3 components');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
 	if (__in__ ('.', pkg_idname)) {
-		var __except0__ = ValueError ('The "package" is expected to be a module name containing 3 components, found {:d}'.format (pkg_idname.count ('.') + 3));
+		var __except0__ = __call__ (ValueError, null, (function () {
+			var __accu0__ = 'The "package" is expected to be a module name containing 3 components, found {:d}';
+			return __call__ (__accu0__.format, __accu0__, __add__ ((function () {
+				var __accu1__ = pkg_idname;
+				return __call__ (__accu1__.count, __accu1__, '.');
+			}) (), 3));
+		}) ());
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	if (!(repo_module.isidentifier () && pkg_idname.isidentifier ())) {
-		var __except0__ = ValueError ('The "package" contains non-identifier characters');
+	if (!((function () {
+		var __accu0__ = repo_module;
+		return __call__ (__accu0__.isidentifier, __accu0__);
+	}) () && (function () {
+		var __accu0__ = pkg_idname;
+		return __call__ (__accu0__.isidentifier, __accu0__);
+	}) ())) {
+		var __except0__ = __call__ (ValueError, null, 'The "package" contains non-identifier characters');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
@@ -1982,7 +2656,7 @@ export var _extension_module_name_decompose = function (package_) {
 export var _extension_preferences_idmap = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1992,12 +2666,21 @@ export var _extension_preferences_idmap = function () {
 	}
 	var repos_idmap = dict ({});
 	var repos_idmap_disabled = dict ({});
-	for (var repo of _preferences.extensions.repos) {
+	var __iterable0__ = _preferences.extensions.repos;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var repo = __getitem__ (__iterable0__, __index0__);
 		if (repo.enabled) {
-			repos_idmap [repo.as_pointer ()] = repo.module;
+			__setitem__ (repos_idmap, (function () {
+				var __accu0__ = repo;
+				return __call__ (__accu0__.as_pointer, __accu0__);
+			}) (), repo.module);
 		}
 		else {
-			repos_idmap_disabled [repo.as_pointer ()] = repo.module;
+			__setitem__ (repos_idmap_disabled, (function () {
+				var __accu0__ = repo;
+				return __call__ (__accu0__.as_pointer, __accu0__);
+			}) (), repo.module);
 		}
 	}
 	return tuple ([repos_idmap, repos_idmap_disabled]);
@@ -2005,7 +2688,7 @@ export var _extension_preferences_idmap = function () {
 export var _extension_dirpath_from_preferences = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2014,18 +2697,21 @@ export var _extension_dirpath_from_preferences = function () {
 	else {
 	}
 	var repos_dict = dict ({});
-	for (var repo of _preferences.extensions.repos) {
+	var __iterable0__ = _preferences.extensions.repos;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var repo = __getitem__ (__iterable0__, __index0__);
 		if (!(repo.enabled)) {
 			continue;
 		}
-		repos_dict [repo.module] = repo.directory;
+		__setitem__ (repos_dict, repo.module, repo.directory);
 	}
 	return repos_dict;
 };
 export var _extension_dirpath_from_handle = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2034,9 +2720,17 @@ export var _extension_dirpath_from_handle = function () {
 	else {
 	}
 	var repos_info = dict ({});
-	for (var [module_id, module] of _ext_global.module_handle.submodule_items ()) {
+	var __iterable0__ = (function () {
+		var __accu0__ = _ext_global.module_handle;
+		return __call__ (__accu0__.submodule_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id = __left0__ [0];
+		var module = __left0__ [1];
 		try {
-			var dirpath = module.__path__ [0];
+			var dirpath = __getitem__ (module.__path__, 0);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
@@ -2046,14 +2740,14 @@ export var _extension_dirpath_from_handle = function () {
 				throw __except0__;
 			}
 		}
-		repos_info [module_id] = dirpath;
+		__setitem__ (repos_info, module_id, dirpath);
 	}
 	return repos_info;
 };
 export var _initialize_extension_repos_post_addons_prepare = function (module_handle) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2074,20 +2768,29 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 		return addons_to_enable;
 	}
 	var addon_userdef_info = dict ({});
-	for (var addon of _preferences.addons) {
+	var __iterable0__ = _preferences.addons;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var addon = __getitem__ (__iterable0__, __index0__);
 		var module = addon.module;
-		if (!(module.startswith (_ext_base_pkg_idname_with_dot))) {
+		if (!((function () {
+			var __accu0__ = module;
+			return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
+		}) ())) {
 			continue;
 		}
-		var __left0__ = module.__getslice__ (len (_ext_base_pkg_idname_with_dot), null, 1).partition ('.').__getslice__ (0, null, 2);
+		var __left0__ = __getslice__ ((function () {
+			var __accu0__ = __getslice__ (module, __call__ (len, null, _ext_base_pkg_idname_with_dot), null, 1);
+			return __call__ (__accu0__.partition, __accu0__, '.');
+		}) (), 0, null, 2);
 		var module_id = __left0__ [0];
 		var submodule_id = __left0__ [1];
 		try {
-			addon_userdef_info [module_id] [submodule_id] = addon;
+			__setitem__ (__getitem__ (addon_userdef_info, module_id), submodule_id, addon);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, KeyError)) {
-				addon_userdef_info [module_id] = dict ([[submodule_id, addon]]);
+				__setitem__ (addon_userdef_info, module_id, dict ([[submodule_id, addon]]));
 			}
 			else {
 				throw __except0__;
@@ -2095,88 +2798,230 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 		}
 	}
 	var addon_runtime_info = dict ({});
-	for (var [module_id, repo_module] of module_handle.submodule_items ()) {
+	var __iterable0__ = (function () {
+		var __accu0__ = module_handle;
+		return __call__ (__accu0__.submodule_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id = __left0__ [0];
+		var repo_module = __left0__ [1];
 		var extensions_info = dict ({});
-		for (var submodule_id of dir (repo_module)) {
-			if (submodule_id.startswith ('_')) {
+		var __iterable1__ = __call__ (dir, null, repo_module);
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var submodule_id = __getitem__ (__iterable1__, __index1__);
+			if ((function () {
+				var __accu0__ = submodule_id;
+				return __call__ (__accu0__.startswith, __accu0__, '_');
+			}) ()) {
 				continue;
 			}
-			var mod = getattr (repo_module, submodule_id);
-			if (!(hasattr (mod, '__addon_enabled__'))) {
+			var mod = __call__ (getattr, null, repo_module, submodule_id);
+			if (!(__call__ (hasattr, null, mod, '__addon_enabled__'))) {
 				continue;
 			}
-			extensions_info [submodule_id] = mod;
+			__setitem__ (extensions_info, submodule_id, mod);
 		}
-		addon_runtime_info [module_id] = extensions_info;
+		__setitem__ (addon_runtime_info, module_id, extensions_info);
+		// pass;
 	}
 	if (submodules_add) {
-		for (var [module_id, _dirpath] of submodules_add) {
-			var repo_userdef = addon_userdef_info.py_get (module_id, dict ({}));
-			var repo_runtime = addon_runtime_info.py_get (module_id, dict ({}));
-			for (var [submodule_id, addon] of repo_userdef.py_items ()) {
-				var module_name_next = '{:s}.{:s}.{:s}'.format (_ext_base_pkg_idname, module_id, submodule_id);
+		var __iterable0__ = submodules_add;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var module_id = __left0__ [0];
+			var _dirpath = __left0__ [1];
+			var repo_userdef = (function () {
+				var __accu0__ = addon_userdef_info;
+				return __call__ (__accu0__.py_get, __accu0__, module_id, dict ({}));
+			}) ();
+			var repo_runtime = (function () {
+				var __accu0__ = addon_runtime_info;
+				return __call__ (__accu0__.py_get, __accu0__, module_id, dict ({}));
+			}) ();
+			var __iterable1__ = (function () {
+				var __accu0__ = repo_userdef;
+				return __call__ (__accu0__.py_items, __accu0__);
+			}) ();
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var submodule_id = __left0__ [0];
+				var addon = __left0__ [1];
+				var module_name_next = (function () {
+					var __accu0__ = '{:s}.{:s}.{:s}';
+					return __call__ (__accu0__.format, __accu0__, _ext_base_pkg_idname, module_id, submodule_id);
+				}) ();
 				var default_set = true;
 				var persistent = true;
-				addons_to_enable.append (tuple ([module_name_next, addon, default_set, persistent]));
+				(function () {
+					var __accu0__ = addons_to_enable;
+					return __call__ (__accu0__.append, __accu0__, tuple ([module_name_next, addon, default_set, persistent]));
+				}) ();
 			}
 		}
 	}
-	for (var [module_id_prev, module_id_next] of submodules_rename_module) {
-		var repo_userdef = addon_userdef_info.py_get (module_id_prev, dict ({}));
-		var repo_runtime = addon_runtime_info.py_get (module_id_prev, dict ({}));
-		for (var [submodule_id, mod] of repo_runtime.py_items ()) {
-			if (!(getattr (mod, '__addon_enabled__', false))) {
+	var __iterable0__ = submodules_rename_module;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id_prev = __left0__ [0];
+		var module_id_next = __left0__ [1];
+		var repo_userdef = (function () {
+			var __accu0__ = addon_userdef_info;
+			return __call__ (__accu0__.py_get, __accu0__, module_id_prev, dict ({}));
+		}) ();
+		var repo_runtime = (function () {
+			var __accu0__ = addon_runtime_info;
+			return __call__ (__accu0__.py_get, __accu0__, module_id_prev, dict ({}));
+		}) ();
+		var __iterable1__ = (function () {
+			var __accu0__ = repo_runtime;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var submodule_id = __left0__ [0];
+			var mod = __left0__ [1];
+			if (!(__call__ (getattr, null, mod, '__addon_enabled__', false))) {
 				continue;
 			}
-			var module_name_prev = '{:s}.{:s}.{:s}'.format (_ext_base_pkg_idname, module_id_prev, submodule_id);
-			var module_name_next = '{:s}.{:s}.{:s}'.format (_ext_base_pkg_idname, module_id_next, submodule_id);
-			disable (module_name_prev, __kwargtrans__ ({default_set: false, refresh_handled: true}));
-			var addon = repo_userdef.py_get (submodule_id);
+			var module_name_prev = (function () {
+				var __accu0__ = '{:s}.{:s}.{:s}';
+				return __call__ (__accu0__.format, __accu0__, _ext_base_pkg_idname, module_id_prev, submodule_id);
+			}) ();
+			var module_name_next = (function () {
+				var __accu0__ = '{:s}.{:s}.{:s}';
+				return __call__ (__accu0__.format, __accu0__, _ext_base_pkg_idname, module_id_next, submodule_id);
+			}) ();
+			__call__ (disable, null, module_name_prev, __kwargtrans__ ({default_set: false, refresh_handled: true}));
+			var addon = (function () {
+				var __accu0__ = repo_userdef;
+				return __call__ (__accu0__.py_get, __accu0__, submodule_id);
+			}) ();
 			var default_set = addon !== null;
-			var persistent = getattr (mod, '__addon_persistent__', false);
-			addons_to_enable.append (tuple ([module_name_next, addon, default_set, persistent]));
+			var persistent = __call__ (getattr, null, mod, '__addon_persistent__', false);
+			(function () {
+				var __accu0__ = addons_to_enable;
+				return __call__ (__accu0__.append, __accu0__, tuple ([module_name_next, addon, default_set, persistent]));
+			}) ();
 		}
 	}
-	for (var [module_id_prev, module_id_next] of submodules_rename_module_disabled) {
-		var repo_userdef = addon_userdef_info.py_get (module_id_prev, dict ({}));
-		var repo_runtime = addon_runtime_info.py_get (module_id_prev, dict ({}));
-		for (var [submodule_id, addon] of repo_userdef.py_items ()) {
-			var mod = repo_runtime.py_get (submodule_id);
-			if (mod !== null && getattr (mod, '__addon_enabled__', false)) {
+	var __iterable0__ = submodules_rename_module_disabled;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id_prev = __left0__ [0];
+		var module_id_next = __left0__ [1];
+		var repo_userdef = (function () {
+			var __accu0__ = addon_userdef_info;
+			return __call__ (__accu0__.py_get, __accu0__, module_id_prev, dict ({}));
+		}) ();
+		var repo_runtime = (function () {
+			var __accu0__ = addon_runtime_info;
+			return __call__ (__accu0__.py_get, __accu0__, module_id_prev, dict ({}));
+		}) ();
+		var __iterable1__ = (function () {
+			var __accu0__ = repo_userdef;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var submodule_id = __left0__ [0];
+			var addon = __left0__ [1];
+			var mod = (function () {
+				var __accu0__ = repo_runtime;
+				return __call__ (__accu0__.py_get, __accu0__, submodule_id);
+			}) ();
+			if (mod !== null && __call__ (getattr, null, mod, '__addon_enabled__', false)) {
 				continue;
 			}
-			var module_name_next = '{:s}.{:s}.{:s}'.format (_ext_base_pkg_idname, module_id_next, submodule_id);
+			var module_name_next = (function () {
+				var __accu0__ = '{:s}.{:s}.{:s}';
+				return __call__ (__accu0__.format, __accu0__, _ext_base_pkg_idname, module_id_next, submodule_id);
+			}) ();
 			addon.module = module_name_next;
 		}
 	}
 	if (submodules_del) {
 		var repo_module_map = (function () {
 			var __accu0__ = [];
-			for (var repo of _preferences.extensions.repos) {
-				__accu0__.append ([repo.module, repo]);
+			var __iterable0__ = _preferences.extensions.repos;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var repo = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, [repo.module, repo]);
+				}) ();
 			}
 			return dict (__accu0__);
 		}) ();
-		for (var module_id of submodules_del) {
-			var repo_userdef = addon_userdef_info.py_get (module_id, dict ({}));
-			var repo_runtime = addon_runtime_info.py_get (module_id, dict ({}));
-			var repo = repo_module_map.py_get (module_id);
+		var __iterable0__ = submodules_del;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var module_id = __getitem__ (__iterable0__, __index0__);
+			var repo_userdef = (function () {
+				var __accu0__ = addon_userdef_info;
+				return __call__ (__accu0__.py_get, __accu0__, module_id, dict ({}));
+			}) ();
+			var repo_runtime = (function () {
+				var __accu0__ = addon_runtime_info;
+				return __call__ (__accu0__.py_get, __accu0__, module_id, dict ({}));
+			}) ();
+			var repo = (function () {
+				var __accu0__ = repo_module_map;
+				return __call__ (__accu0__.py_get, __accu0__, module_id);
+			}) ();
 			var default_set = true;
 			if (repo && !(repo.enabled)) {
 				var default_set = false;
 			}
-			for (var [submodule_id, mod] of repo_runtime.py_items ()) {
-				var module_name_prev = '{:s}.{:s}.{:s}'.format (_ext_base_pkg_idname, module_id, submodule_id);
-				disable (module_name_prev, __kwargtrans__ ({default_set: default_set, refresh_handled: true}));
+			var __iterable1__ = (function () {
+				var __accu0__ = repo_runtime;
+				return __call__ (__accu0__.py_items, __accu0__);
+			}) ();
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var submodule_id = __left0__ [0];
+				var mod = __left0__ [1];
+				var module_name_prev = (function () {
+					var __accu0__ = '{:s}.{:s}.{:s}';
+					return __call__ (__accu0__.format, __accu0__, _ext_base_pkg_idname, module_id, submodule_id);
+				}) ();
+				__call__ (disable, null, module_name_prev, __kwargtrans__ ({default_set: default_set, refresh_handled: true}));
 			}
+			// pass;
 		}
+		// pass;
 	}
 	if (submodules_del_disabled) {
-		for (var module_id_prev of submodules_del_disabled) {
-			var repo_userdef = addon_userdef_info.py_get (module_id_prev, dict ({}));
-			for (var submodule_id of repo_userdef.py_keys ()) {
-				var module_name_prev = '{:s}.{:s}.{:s}'.format (_ext_base_pkg_idname, module_id_prev, submodule_id);
-				disable (module_name_prev, __kwargtrans__ ({default_set: true, refresh_handled: true}));
+		var __iterable0__ = submodules_del_disabled;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var module_id_prev = __getitem__ (__iterable0__, __index0__);
+			var repo_userdef = (function () {
+				var __accu0__ = addon_userdef_info;
+				return __call__ (__accu0__.py_get, __accu0__, module_id_prev, dict ({}));
+			}) ();
+			var __iterable1__ = (function () {
+				var __accu0__ = repo_userdef;
+				return __call__ (__accu0__.py_keys, __accu0__);
+			}) ();
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var submodule_id = __getitem__ (__iterable1__, __index1__);
+				var module_name_prev = (function () {
+					var __accu0__ = '{:s}.{:s}.{:s}';
+					return __call__ (__accu0__.format, __accu0__, _ext_base_pkg_idname, module_id_prev, submodule_id);
+				}) ();
+				__call__ (disable, null, module_name_prev, __kwargtrans__ ({default_set: true, refresh_handled: true}));
 			}
 		}
 	}
@@ -2185,7 +3030,7 @@ export var _initialize_extension_repos_post_addons_prepare = function (module_ha
 export var _initialize_extension_repos_post_addons_restore = function (addons_to_enable) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2199,31 +3044,48 @@ export var _initialize_extension_repos_post_addons_restore = function (addons_to
 	if (!(addons_to_enable)) {
 		return ;
 	}
-	extensions_refresh (__kwargtrans__ ({addon_modules_pending: (function () {
+	__call__ (extensions_refresh, null, __kwargtrans__ ({addon_modules_pending: (function () {
 		var __accu0__ = [];
-		for (var [module_name_next, _, _, _] of addons_to_enable) {
-			__accu0__.append (module_name_next);
+		var __iterable0__ = addons_to_enable;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var module_name_next = __left0__ [0];
+			var _ = __left0__ [1];
+			var _ = __left0__ [2];
+			var _ = __left0__ [3];
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, module_name_next);
+			}) ();
 		}
 		return __accu0__;
 	}) ()}));
 	var any_failed = false;
-	for (var [module_name_next, addon, default_set, persistent] of addons_to_enable) {
+	var __iterable0__ = addons_to_enable;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_name_next = __left0__ [0];
+		var addon = __left0__ [1];
+		var default_set = __left0__ [2];
+		var persistent = __left0__ [3];
 		if (addon !== null) {
 			addon.module = module_name_next;
 		}
-		if (enable (module_name_next, __kwargtrans__ ({default_set: default_set, persistent: persistent})) === null) {
+		if (__call__ (enable, null, module_name_next, __kwargtrans__ ({default_set: default_set, persistent: persistent})) === null) {
 			var any_failed = true;
 		}
 	}
 	if (any_failed) {
-		extensions_refresh ();
+		__call__ (extensions_refresh, null);
 	}
-	_is_first_reset ();
+	__call__ (_is_first_reset, null);
 };
-export var _initialize_extension_repos_pre = _bpy.app.handlers.persistent (function () {
+export var _initialize_extension_repos_pre = __call__ (_bpy.app.handlers.persistent, null, function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2233,13 +3095,13 @@ export var _initialize_extension_repos_pre = _bpy.app.handlers.persistent (funct
 	else {
 		var _ = tuple ();
 	}
-	_ext_global.idmap_pair = _extension_preferences_idmap ();
+	_ext_global.idmap_pair = __call__ (_extension_preferences_idmap, null);
 });
-export var _initialize_extension_repos_post = _bpy.app.handlers.persistent (function () {
+export var _initialize_extension_repos_post = __call__ (_bpy.app.handlers.persistent, null, function () {
 	var is_first = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2253,103 +3115,232 @@ export var _initialize_extension_repos_post = _bpy.app.handlers.persistent (func
 		var _ = tuple ();
 	}
 	var do_addons = !(is_first);
-	var repos_info_prev = _extension_dirpath_from_handle ();
-	var repos_info_next = _extension_dirpath_from_preferences ();
+	var repos_info_prev = __call__ (_extension_dirpath_from_handle, null);
+	var repos_info_next = __call__ (_extension_dirpath_from_preferences, null);
 	var __left0__ = _ext_global.idmap_pair;
 	var repos_idmap_prev = __left0__ [0];
 	var repos_idmap_prev_disabled = __left0__ [1];
-	var __left0__ = _extension_preferences_idmap ();
+	var __left0__ = __call__ (_extension_preferences_idmap, null);
 	var repos_idmap_next = __left0__ [0];
 	var repos_idmap_next_disabled = __left0__ [1];
 	var repos_idmap_next_reverse = (function () {
 		var __accu0__ = [];
-		for (var [key, value] of list (repos_idmap_next.py_items ())) {
-			__accu0__.append ([value, key]);
+		var __iterable0__ = __call__ (list, null, (function () {
+			var __accu1__ = repos_idmap_next;
+			return __call__ (__accu1__.py_items, __accu1__);
+		}) ());
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var key = __left0__ [0];
+			var value = __left0__ [1];
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, [value, key]);
+			}) ();
 		}
 		return dict (__accu0__);
 	}) ();
-	for (var [repo_id_prev, module_id_prev] of list (repos_idmap_prev.py_items ())) {
+	var __iterable0__ = __call__ (list, null, (function () {
+		var __accu0__ = repos_idmap_prev;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ());
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var repo_id_prev = __left0__ [0];
+		var module_id_prev = __left0__ [1];
 		if (!__in__ (module_id_prev, repos_info_prev)) {
-			repos_idmap_prev.py_pop (repo_id_prev);
+			(function () {
+				var __accu0__ = repos_idmap_prev;
+				return __call__ (__accu0__.py_pop, __accu0__, repo_id_prev);
+			}) ();
 		}
 	}
 	var submodules_add = [];
 	var submodules_del = [];
 	var submodules_rename_module = [];
 	var submodules_rename_dirpath = [];
-	var renamed_prev = set ();
-	var renamed_next = set ();
-	for (var [module_id_next, dirpath_next] of repos_info_next.py_items ()) {
-		var repo_id = repos_idmap_next_reverse [module_id_next];
-		var module_id_prev = repos_idmap_prev.py_get (repo_id);
+	var renamed_prev = __call__ (set, null);
+	var renamed_next = __call__ (set, null);
+	var __iterable0__ = (function () {
+		var __accu0__ = repos_info_next;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id_next = __left0__ [0];
+		var dirpath_next = __left0__ [1];
+		var repo_id = __getitem__ (repos_idmap_next_reverse, module_id_next);
+		var module_id_prev = (function () {
+			var __accu0__ = repos_idmap_prev;
+			return __call__ (__accu0__.py_get, __accu0__, repo_id);
+		}) ();
 		if (module_id_prev === null) {
 			continue;
 		}
-		if (module_id_next != module_id_prev) {
-			submodules_rename_module.append (tuple ([module_id_prev, module_id_next]));
-			renamed_prev.add (module_id_prev);
-			renamed_next.add (module_id_next);
+		if (__ne__ (module_id_next, module_id_prev)) {
+			(function () {
+				var __accu0__ = submodules_rename_module;
+				return __call__ (__accu0__.append, __accu0__, tuple ([module_id_prev, module_id_next]));
+			}) ();
+			(function () {
+				var __accu0__ = renamed_prev;
+				return __call__ (__accu0__.add, __accu0__, module_id_prev);
+			}) ();
+			(function () {
+				var __accu0__ = renamed_next;
+				return __call__ (__accu0__.add, __accu0__, module_id_next);
+			}) ();
 		}
-		if (dirpath_next != repos_info_prev [module_id_prev]) {
-			submodules_rename_dirpath.append (tuple ([module_id_next, dirpath_next]));
+		if (__ne__ (dirpath_next, __getitem__ (repos_info_prev, module_id_prev))) {
+			(function () {
+				var __accu0__ = submodules_rename_dirpath;
+				return __call__ (__accu0__.append, __accu0__, tuple ([module_id_next, dirpath_next]));
+			}) ();
 		}
 	}
-	for (var [module_id, dirpath] of repos_info_next.py_items ()) {
+	var __iterable0__ = (function () {
+		var __accu0__ = repos_info_next;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id = __left0__ [0];
+		var dirpath = __left0__ [1];
 		if (!__in__ (module_id, repos_info_prev) && !__in__ (module_id, renamed_next)) {
-			submodules_add.append (tuple ([module_id, dirpath]));
+			(function () {
+				var __accu0__ = submodules_add;
+				return __call__ (__accu0__.append, __accu0__, tuple ([module_id, dirpath]));
+			}) ();
 		}
 	}
-	for (var [module_id, _dirpath] of repos_info_prev.py_items ()) {
+	var __iterable0__ = (function () {
+		var __accu0__ = repos_info_prev;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id = __left0__ [0];
+		var _dirpath = __left0__ [1];
 		if (!__in__ (module_id, repos_info_next) && !__in__ (module_id, renamed_prev)) {
-			submodules_del.append (module_id);
+			(function () {
+				var __accu0__ = submodules_del;
+				return __call__ (__accu0__.append, __accu0__, module_id);
+			}) ();
 		}
 	}
 	if (do_addons) {
 		var submodules_del_disabled = [];
 		var submodules_rename_module_disabled = [];
-		for (var [repo_id_prev, module_id_prev] of repos_idmap_prev_disabled.py_items ()) {
+		var __iterable0__ = (function () {
+			var __accu0__ = repos_idmap_prev_disabled;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var repo_id_prev = __left0__ [0];
+			var module_id_prev = __left0__ [1];
 			if (!__in__ (repo_id_prev, repos_idmap_next_disabled) && !__in__ (repo_id_prev, repos_idmap_next)) {
-				submodules_del_disabled.append (module_id_prev);
+				(function () {
+					var __accu0__ = submodules_del_disabled;
+					return __call__ (__accu0__.append, __accu0__, module_id_prev);
+				}) ();
 			}
 		}
-		for (var [repo_id_next, module_id_next] of repos_idmap_next_disabled.py_items ()) {
-			var module_id_prev = repos_idmap_prev_disabled.py_get (repo_id_next);
+		var __iterable0__ = (function () {
+			var __accu0__ = repos_idmap_next_disabled;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var repo_id_next = __left0__ [0];
+			var module_id_next = __left0__ [1];
+			var module_id_prev = (function () {
+				var __accu0__ = repos_idmap_prev_disabled;
+				return __call__ (__accu0__.py_get, __accu0__, repo_id_next);
+			}) ();
 			if (module_id_prev === null) {
 				continue;
 			}
-			if (module_id_next != module_id_prev) {
-				submodules_rename_module_disabled.append (tuple ([module_id_prev, module_id_next]));
+			if (__ne__ (module_id_next, module_id_prev)) {
+				(function () {
+					var __accu0__ = submodules_rename_module_disabled;
+					return __call__ (__accu0__.append, __accu0__, tuple ([module_id_prev, module_id_next]));
+				}) ();
 			}
 		}
-		var addons_to_enable = _initialize_extension_repos_post_addons_prepare (_ext_global.module_handle, __kwargtrans__ ({submodules_del: submodules_del, submodules_add: submodules_add, submodules_rename_module: submodules_rename_module, submodules_del_disabled: submodules_del_disabled, submodules_rename_module_disabled: submodules_rename_module_disabled}));
+		var addons_to_enable = __call__ (_initialize_extension_repos_post_addons_prepare, null, _ext_global.module_handle, __kwargtrans__ ({submodules_del: submodules_del, submodules_add: submodules_add, submodules_rename_module: submodules_rename_module, submodules_del_disabled: submodules_del_disabled, submodules_rename_module_disabled: submodules_rename_module_disabled}));
+		// pass;
 	}
 	var module_handle = _ext_global.module_handle;
-	for (var module_id of submodules_del) {
-		module_handle.unregister_submodule (module_id);
+	var __iterable0__ = submodules_del;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var module_id = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = module_handle;
+			return __call__ (__accu0__.unregister_submodule, __accu0__, module_id);
+		}) ();
 	}
-	for (var [module_id, dirpath] of submodules_add) {
-		module_handle.register_submodule (module_id, dirpath);
+	var __iterable0__ = submodules_add;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id = __left0__ [0];
+		var dirpath = __left0__ [1];
+		(function () {
+			var __accu0__ = module_handle;
+			return __call__ (__accu0__.register_submodule, __accu0__, module_id, dirpath);
+		}) ();
 	}
-	for (var [module_id_prev, module_id_next] of submodules_rename_module) {
-		module_handle.rename_submodule (module_id_prev, module_id_next);
+	var __iterable0__ = submodules_rename_module;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id_prev = __left0__ [0];
+		var module_id_next = __left0__ [1];
+		(function () {
+			var __accu0__ = module_handle;
+			return __call__ (__accu0__.rename_submodule, __accu0__, module_id_prev, module_id_next);
+		}) ();
 	}
-	for (var [module_id, dirpath] of submodules_rename_dirpath) {
-		module_handle.rename_directory (module_id, dirpath);
+	var __iterable0__ = submodules_rename_dirpath;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_id = __left0__ [0];
+		var dirpath = __left0__ [1];
+		(function () {
+			var __accu0__ = module_handle;
+			return __call__ (__accu0__.rename_directory, __accu0__, module_id, dirpath);
+		}) ();
 	}
-	_ext_global.idmap_pair [0].py_clear ();
-	_ext_global.idmap_pair [1].py_clear ();
+	(function () {
+		var __accu0__ = __getitem__ (_ext_global.idmap_pair, 0);
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = __getitem__ (_ext_global.idmap_pair, 1);
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
 	if (do_addons) {
-		_initialize_extension_repos_post_addons_restore (addons_to_enable);
+		__call__ (_initialize_extension_repos_post_addons_restore, null, addons_to_enable);
 	}
 	if (submodules_del || submodules_add || submodules_rename_dirpath) {
-		_is_first_reset ();
+		__call__ (_is_first_reset, null);
 	}
 });
 export var _initialize_extensions_site_packages = function () {
 	var create = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2361,24 +3352,44 @@ export var _initialize_extensions_site_packages = function () {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var sys = _module ('sys');
-	var site_packages = os.path.join (extensions_directory, '.local', 'lib', 'python{:d}.{:d}'.format (sys.version_info.major, sys.version_info.minor), 'site-packages');
+	var os = __call__ (_module, null, 'os');
+	var sys = __call__ (_module, null, 'sys');
+	var site_packages = (function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.join, __accu0__, extensions_directory, '.local', 'lib', (function () {
+			var __accu1__ = 'python{:d}.{:d}';
+			return __call__ (__accu1__.format, __accu1__, sys.version_info.major, sys.version_info.minor);
+		}) (), 'site-packages');
+	}) ();
 	if (create) {
-		if (!(os.path.exists (site_packages))) {
-			os.makedirs (site_packages);
+		if (!((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.exists, __accu0__, site_packages);
+		}) ())) {
+			(function () {
+				var __accu0__ = os;
+				return __call__ (__accu0__.makedirs, __accu0__, site_packages);
+			}) ();
 		}
 		var found = true;
 	}
 	else {
-		var found = os.path.exists (site_packages);
+		var found = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.exists, __accu0__, site_packages);
+		}) ();
 	}
 	if (found) {
-		var getsitepackages = _member ('site', 'getsitepackages');
+		var getsitepackages = __call__ (_member, null, 'site', 'getsitepackages');
 		var index = null;
-		var builtin_site_packages = set (getsitepackages ());
+		var builtin_site_packages = __call__ (set, null, __call__ (getsitepackages, null));
 		if (builtin_site_packages) {
-			for (var [i, dirpath] of py_enumerate (sys.path)) {
+			var __iterable0__ = __call__ (py_enumerate, null, sys.path);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var i = __left0__ [0];
+				var dirpath = __left0__ [1];
 				if (__in__ (dirpath, builtin_site_packages)) {
 					var index = i;
 					break;
@@ -2386,15 +3397,24 @@ export var _initialize_extensions_site_packages = function () {
 			}
 		}
 		if (index === null) {
-			sys.path.append (site_packages);
+			(function () {
+				var __accu0__ = sys.path;
+				return __call__ (__accu0__.append, __accu0__, site_packages);
+			}) ();
 		}
 		else {
-			sys.path.insert (index, site_packages);
+			(function () {
+				var __accu0__ = sys.path;
+				return __call__ (__accu0__.insert, __accu0__, index, site_packages);
+			}) ();
 		}
 	}
 	else {
 		try {
-			sys.path.remove (site_packages);
+			(function () {
+				var __accu0__ = sys.path;
+				return __call__ (__accu0__.remove, __accu0__, site_packages);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, ValueError)) {
@@ -2410,7 +3430,7 @@ export var _initialize_extensions_site_packages = function () {
 export var _initialize_extensions_repos_once = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2418,16 +3438,28 @@ export var _initialize_extensions_repos_once = function () {
 	}
 	else {
 	}
-	var JunctionModuleHandle = _member ('_bpy_internal.extensions.junction_module', 'JunctionModuleHandle');
-	var module_handle = JunctionModuleHandle (_ext_base_pkg_idname);
-	module_handle.register_module ();
+	var JunctionModuleHandle = __call__ (_member, null, '_bpy_internal.extensions.junction_module', 'JunctionModuleHandle');
+	var module_handle = __call__ (JunctionModuleHandle, null, _ext_base_pkg_idname);
+	(function () {
+		var __accu0__ = module_handle;
+		return __call__ (__accu0__.register_module, __accu0__);
+	}) ();
 	_ext_global.module_handle = module_handle;
-	var extensions_directory = _bpy.utils.user_resource ('EXTENSIONS');
-	_initialize_extensions_site_packages (__kwargtrans__ ({extensions_directory: extensions_directory}));
-	_initialize_extensions_compat_data (extensions_directory, __kwargtrans__ ({ensure_wheels: true, addon_modules_pending: null, use_startup_fastpath: true, error_fn: null}));
-	_initialize_extension_repos_post (__kwargtrans__ ({is_first: true}));
-	_bpy.app.handlers._extension_repos_update_pre.append (_initialize_extension_repos_pre);
-	_bpy.app.handlers._extension_repos_update_post.append (_initialize_extension_repos_post);
+	var extensions_directory = (function () {
+		var __accu0__ = _bpy.utils;
+		return __call__ (__accu0__.user_resource, __accu0__, 'EXTENSIONS');
+	}) ();
+	__call__ (_initialize_extensions_site_packages, null, __kwargtrans__ ({extensions_directory: extensions_directory}));
+	__call__ (_initialize_extensions_compat_data, null, extensions_directory, __kwargtrans__ ({ensure_wheels: true, addon_modules_pending: null, use_startup_fastpath: true, error_fn: null}));
+	__call__ (_initialize_extension_repos_post, null, __kwargtrans__ ({is_first: true}));
+	(function () {
+		var __accu0__ = _bpy.app.handlers._extension_repos_update_pre;
+		return __call__ (__accu0__.append, __accu0__, _initialize_extension_repos_pre);
+	}) ();
+	(function () {
+		var __accu0__ = _bpy.app.handlers._extension_repos_update_post;
+		return __call__ (__accu0__.append, __accu0__, _initialize_extension_repos_post);
+	}) ();
 };
 export var extensions_refresh = function (ensure_wheels, addon_modules_pending, handle_error) {
 	if (typeof ensure_wheels == 'undefined' || (ensure_wheels != null && ensure_wheels.hasOwnProperty ("__kwargtrans__"))) {;
@@ -2441,7 +3473,7 @@ export var extensions_refresh = function (ensure_wheels, addon_modules_pending, 
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2454,12 +3486,15 @@ export var extensions_refresh = function (ensure_wheels, addon_modules_pending, 
 	}
 	else {
 	}
-	_initialize_extensions_compat_data (_bpy.utils.user_resource ('EXTENSIONS'), __kwargtrans__ ({ensure_wheels: ensure_wheels, addon_modules_pending: addon_modules_pending, use_startup_fastpath: false, error_fn: handle_error}));
+	__call__ (_initialize_extensions_compat_data, null, (function () {
+		var __accu0__ = _bpy.utils;
+		return __call__ (__accu0__.user_resource, __accu0__, 'EXTENSIONS');
+	}) (), __kwargtrans__ ({ensure_wheels: ensure_wheels, addon_modules_pending: addon_modules_pending, use_startup_fastpath: false, error_fn: handle_error}));
 };
 export var _extensions_warnings_get = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2470,112 +3505,258 @@ export var _extensions_warnings_get = function () {
 	if (_extensions_warnings_get._is_first === false) {
 		return _extensions_warnings;
 	}
-	var sys = _module ('sys');
-	var os = _module ('os');
+	var sys = __call__ (_module, null, 'sys');
+	var os = __call__ (_module, null, 'os');
 	_extensions_warnings_get._is_first = false;
-	_extensions_warnings.py_clear ();
-	var dirs_skip_expected = _joined ([os.path.normpath (os.path.join (os.path.dirname (_bpy.__file__), '..')) + os.sep, os.path.normpath (os.path.join (os.path.dirname (_import ('bl_ui').__file__), '..')) + os.sep, os.path.normpath (os.path.dirname (os.__file__)) + os.sep], (function () {
+	(function () {
+		var __accu0__ = _extensions_warnings;
+		return __call__ (__accu0__.py_clear, __accu0__);
+	}) ();
+	var dirs_skip_expected = __call__ (_joined, null, [__add__ ((function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.normpath, __accu0__, (function () {
+			var __accu1__ = os.path;
+			return __call__ (__accu1__.join, __accu1__, (function () {
+				var __accu2__ = os.path;
+				return __call__ (__accu2__.dirname, __accu2__, _bpy.__file__);
+			}) (), '..');
+		}) ());
+	}) (), os.sep), __add__ ((function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.normpath, __accu0__, (function () {
+			var __accu1__ = os.path;
+			return __call__ (__accu1__.join, __accu1__, (function () {
+				var __accu2__ = os.path;
+				return __call__ (__accu2__.dirname, __accu2__, __call__ (_import, null, 'bl_ui').__file__);
+			}) (), '..');
+		}) ());
+	}) (), os.sep), __add__ ((function () {
+		var __accu0__ = os.path;
+		return __call__ (__accu0__.normpath, __accu0__, (function () {
+			var __accu1__ = os.path;
+			return __call__ (__accu1__.dirname, __accu1__, os.__file__);
+		}) ());
+	}) (), os.sep)], (function () {
 		var __accu0__ = [];
-		for (var path of list (paths ())) {
-			__accu0__.append (os.path.normpath (path) + os.sep);
+		var __iterable0__ = __call__ (list, null, __call__ (paths, null));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, __add__ ((function () {
+					var __accu2__ = os.path;
+					return __call__ (__accu2__.normpath, __accu2__, path);
+				}) (), os.sep));
+			}) ();
 		}
 		return __accu0__;
 	}) ());
 	var extensions_directory_map = dict ({});
 	var modules_other = [];
-	for (var [module_name, module] of sys.modules.py_items ()) {
-		if (module_name == '__main__') {
+	var __iterable0__ = (function () {
+		var __accu0__ = sys.modules;
+		return __call__ (__accu0__.py_items, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var module_name = __left0__ [0];
+		var module = __left0__ [1];
+		if (__eq__ (module_name, '__main__')) {
 			continue;
 		}
-		var module_file = getattr (module, '__file__', null) || '';
+		var module_file = __call__ (getattr, null, module, '__file__', null) || '';
 		if (!(module_file)) {
 			continue;
 		}
-		var module_file = os.path.normpath (module_file);
-		if (module_file.startswith (dirs_skip_expected)) {
+		var module_file = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.normpath, __accu0__, module_file);
+		}) ();
+		if ((function () {
+			var __accu0__ = module_file;
+			return __call__ (__accu0__.startswith, __accu0__, dirs_skip_expected);
+		}) ()) {
 			continue;
 		}
-		if (module_name.startswith (_ext_base_pkg_idname_with_dot)) {
-			if (module_name.find ('.', len (_ext_base_pkg_idname_with_dot)) != -(1)) {
-				if (module_name.count ('.') > 2) {
+		if ((function () {
+			var __accu0__ = module_name;
+			return __call__ (__accu0__.startswith, __accu0__, _ext_base_pkg_idname_with_dot);
+		}) ()) {
+			if (__ne__ ((function () {
+				var __accu0__ = module_name;
+				return __call__ (__accu0__.find, __accu0__, '.', __call__ (len, null, _ext_base_pkg_idname_with_dot));
+			}) (), __neg__ (1))) {
+				if (__gt__ ((function () {
+					var __accu0__ = module_name;
+					return __call__ (__accu0__.count, __accu0__, '.');
+				}) (), 2)) {
 					continue;
 				}
-				extensions_directory_map [module_name] = os.path.dirname (module_file) + os.sep;
+				__setitem__ (extensions_directory_map, module_name, __add__ ((function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.dirname, __accu0__, module_file);
+				}) (), os.sep));
 			}
 		}
 		else {
-			modules_other.append (tuple ([module_name, module_file]));
+			(function () {
+				var __accu0__ = modules_other;
+				return __call__ (__accu0__.append, __accu0__, tuple ([module_name, module_file]));
+			}) ();
 		}
 	}
-	var dirs_extensions = tuple ((function () {
+	var dirs_extensions = __call__ (tuple, null, (function () {
 		var __accu0__ = [];
-		for (var path of list (extensions_directory_map.py_values ())) {
-			__accu0__.append (path);
+		var __iterable0__ = __call__ (list, null, (function () {
+			var __accu1__ = extensions_directory_map;
+			return __call__ (__accu1__.py_values, __accu1__);
+		}) ());
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, path);
+			}) ();
 		}
 		return __accu0__;
 	}) ());
-	var dirs_extensions_noslash = set ((function () {
+	var dirs_extensions_noslash = __call__ (set, null, (function () {
 		var __accu0__ = [];
-		for (var path of dirs_extensions) {
-			__accu0__.append (path.rstrip (os.sep));
+		var __iterable0__ = dirs_extensions;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, (function () {
+					var __accu2__ = path;
+					return __call__ (__accu2__.rstrip, __accu2__, os.sep);
+				}) ());
+			}) ();
 		}
 		return __accu0__;
 	}) ());
 	if (dirs_extensions) {
-		for (var [module_other_name, module_other_file] of modules_other) {
-			if (!(module_other_file.startswith (dirs_extensions))) {
+		var __iterable0__ = modules_other;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var module_other_name = __left0__ [0];
+			var module_other_file = __left0__ [1];
+			if (!((function () {
+				var __accu0__ = module_other_file;
+				return __call__ (__accu0__.startswith, __accu0__, dirs_extensions);
+			}) ())) {
 				continue;
 			}
 			var found = false;
-			for (var [module_name, module_dirpath] of extensions_directory_map.py_items ()) {
-				if (!(module_other_file.startswith (module_dirpath))) {
+			var __iterable1__ = (function () {
+				var __accu0__ = extensions_directory_map;
+				return __call__ (__accu0__.py_items, __accu0__);
+			}) ();
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var module_name = __left0__ [0];
+				var module_dirpath = __left0__ [1];
+				if (!((function () {
+					var __accu0__ = module_other_file;
+					return __call__ (__accu0__.startswith, __accu0__, module_dirpath);
+				}) ())) {
 					continue;
 				}
 				try {
-					var warning_list = _extensions_warnings [module_name];
+					var warning_list = __getitem__ (_extensions_warnings, module_name);
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, KeyError)) {
 						var __left0__ = [];
 						var warning_list = __left0__;
-						_extensions_warnings [module_name] = __left0__;
+						__setitem__ (_extensions_warnings, module_name, __left0__);
 					}
 					else {
 						throw __except0__;
 					}
 				}
-				warning_list.append ('Policy violation with top level module: {:s}'.format (module_other_name));
+				(function () {
+					var __accu0__ = warning_list;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = 'Policy violation with top level module: {:s}';
+						return __call__ (__accu1__.format, __accu1__, module_other_name);
+					}) ());
+				}) ();
 				var found = true;
 				break;
 			}
 		}
-		for (var path of sys.path) {
-			var path = os.path.normpath (path);
-			if (path.startswith (dirs_skip_expected)) {
+		var __iterable0__ = sys.path;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var path = __getitem__ (__iterable0__, __index0__);
+			var path = (function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.normpath, __accu0__, path);
+			}) ();
+			if ((function () {
+				var __accu0__ = path;
+				return __call__ (__accu0__.startswith, __accu0__, dirs_skip_expected);
+			}) ()) {
 				continue;
 			}
-			if (!(__in__ (path, dirs_extensions_noslash) || path.startswith (dirs_extensions))) {
+			if (!(__in__ (path, dirs_extensions_noslash) || (function () {
+				var __accu0__ = path;
+				return __call__ (__accu0__.startswith, __accu0__, dirs_extensions);
+			}) ())) {
 				continue;
 			}
 			var found = false;
-			for (var [module_name, module_dirpath] of extensions_directory_map.py_items ()) {
-				if (!(path == module_dirpath.rstrip (os.sep) || path.startswith (module_dirpath))) {
+			var __iterable1__ = (function () {
+				var __accu0__ = extensions_directory_map;
+				return __call__ (__accu0__.py_items, __accu0__);
+			}) ();
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var module_name = __left0__ [0];
+				var module_dirpath = __left0__ [1];
+				if (!(__eq__ (path, (function () {
+					var __accu0__ = module_dirpath;
+					return __call__ (__accu0__.rstrip, __accu0__, os.sep);
+				}) ()) || (function () {
+					var __accu0__ = path;
+					return __call__ (__accu0__.startswith, __accu0__, module_dirpath);
+				}) ())) {
 					continue;
 				}
 				try {
-					var warning_list = _extensions_warnings [module_name];
+					var warning_list = __getitem__ (_extensions_warnings, module_name);
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, KeyError)) {
 						var __left0__ = [];
 						var warning_list = __left0__;
-						_extensions_warnings [module_name] = __left0__;
+						__setitem__ (_extensions_warnings, module_name, __left0__);
 					}
 					else {
 						throw __except0__;
 					}
 				}
-				warning_list.append ('Policy violation with sys.path: {:s}'.format ('.{:s}{:s}'.format (os.sep, os.path.relpath (path, module_dirpath))));
+				(function () {
+					var __accu0__ = warning_list;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = 'Policy violation with sys.path: {:s}';
+						return __call__ (__accu1__.format, __accu1__, (function () {
+							var __accu2__ = '.{:s}{:s}';
+							return __call__ (__accu2__.format, __accu2__, os.sep, (function () {
+								var __accu3__ = os.path;
+								return __call__ (__accu3__.relpath, __accu3__, path, module_dirpath);
+							}) ());
+						}) ());
+					}) ());
+				}) ();
 				var found = true;
 				break;
 			}
@@ -2587,7 +3768,7 @@ _extensions_warnings_get._is_first = true;
 export var _is_first_reset = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2601,3 +3782,78 @@ export var _is_first_reset = function () {
 
 //# sourceMappingURL=addon_utils.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '__all__': __all__ = value; break;
+		case '_bpy': _bpy = value; break;
+		case '_preferences': _preferences = value; break;
+		case 'error_encoding': error_encoding = value; break;
+		case 'error_duplicates': error_duplicates = value; break;
+		case 'addons_fake_modules': addons_fake_modules = value; break;
+		case '_extensions_incompatible': _extensions_incompatible = value; break;
+		case '_extensions_warnings': _extensions_warnings = value; break;
+		case '_stale_filename': _stale_filename = value; break;
+		case '_addons_hidden_core': _addons_hidden_core = value; break;
+		case '_initialize_once': _initialize_once = value; break;
+		case 'paths': paths = value; break;
+		case '_paths_with_extension_repos': _paths_with_extension_repos = value; break;
+		case '_fake_module': _fake_module = value; break;
+		case 'modules_refresh': modules_refresh = value; break;
+		case 'modules': modules = value; break;
+		case 'check': check = value; break;
+		case 'check_extension': check_extension = value; break;
+		case '_addon_ensure': _addon_ensure = value; break;
+		case '_addon_remove': _addon_remove = value; break;
+		case 'enable': enable = value; break;
+		case 'disable': disable = value; break;
+		case 'reset_all': reset_all = value; break;
+		case 'disable_all': disable_all = value; break;
+		case '_blender_manual_url_prefix': _blender_manual_url_prefix = value; break;
+		case '_bl_info_basis': _bl_info_basis = value; break;
+		case 'module_bl_info': module_bl_info = value; break;
+		case '_stale_pending_filepath': _stale_pending_filepath = value; break;
+		case '_stale_pending_stage': _stale_pending_stage = value; break;
+		case '_stale_file_directory_iter': _stale_file_directory_iter = value; break;
+		case '_stale_pending_check_and_remove_once': _stale_pending_check_and_remove_once = value; break;
+		case 'stale_pending_stage_paths': stale_pending_stage_paths = value; break;
+		case 'stale_pending_remove_paths': stale_pending_remove_paths = value; break;
+		case '_pickle_zlib_file_read': _pickle_zlib_file_read = value; break;
+		case '_pickle_zlib_file_write': _pickle_zlib_file_write = value; break;
+		case '_extension_repos_module_to_directory_map': _extension_repos_module_to_directory_map = value; break;
+		case '_extension_compat_cache_update_needed': _extension_compat_cache_update_needed = value; break;
+		case '_extension_compat_cache_create': _extension_compat_cache_create = value; break;
+		case '_initialize_extensions_compat_ensure_up_to_date': _initialize_extensions_compat_ensure_up_to_date = value; break;
+		case '_initialize_extensions_compat_ensure_up_to_date_wheels': _initialize_extensions_compat_ensure_up_to_date_wheels = value; break;
+		case '_initialize_extensions_compat_data': _initialize_extensions_compat_data = value; break;
+		case '_version_int_left_digits': _version_int_left_digits = value; break;
+		case '_bl_info_from_extension': _bl_info_from_extension = value; break;
+		case '_fake_module_from_extension': _fake_module_from_extension = value; break;
+		case '_extension_sync_wheels': _extension_sync_wheels = value; break;
+		case '_ext_global': _ext_global = value; break;
+		case '_ext_base_pkg_idname': _ext_base_pkg_idname = value; break;
+		case '_ext_base_pkg_idname_with_dot': _ext_base_pkg_idname_with_dot = value; break;
+		case '_ext_manifest_filename_toml': _ext_manifest_filename_toml = value; break;
+		case '_extension_module_name_decompose': _extension_module_name_decompose = value; break;
+		case '_extension_preferences_idmap': _extension_preferences_idmap = value; break;
+		case '_extension_dirpath_from_preferences': _extension_dirpath_from_preferences = value; break;
+		case '_extension_dirpath_from_handle': _extension_dirpath_from_handle = value; break;
+		case '_initialize_extension_repos_post_addons_prepare': _initialize_extension_repos_post_addons_prepare = value; break;
+		case '_initialize_extension_repos_post_addons_restore': _initialize_extension_repos_post_addons_restore = value; break;
+		case '_initialize_extension_repos_pre': _initialize_extension_repos_pre = value; break;
+		case '_initialize_extension_repos_post': _initialize_extension_repos_post = value; break;
+		case '_initialize_extensions_site_packages': _initialize_extensions_site_packages = value; break;
+		case '_initialize_extensions_repos_once': _initialize_extensions_repos_once = value; break;
+		case 'extensions_refresh': extensions_refresh = value; break;
+		case '_extensions_warnings_get': _extensions_warnings_get = value; break;
+		case '_is_first_reset': _is_first_reset = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

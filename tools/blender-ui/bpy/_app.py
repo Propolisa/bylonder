@@ -29,3 +29,11 @@ class _Context:
 
 
 context = _Context()
+
+
+# bpy.types at draw time: the registered classes and RNA structs, set from JS (editors/interface/panels.js).
+class _Types:
+    pass
+
+
+types = _Types()

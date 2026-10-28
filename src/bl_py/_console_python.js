@@ -18,7 +18,7 @@ export var _TempModuleOverride =  __class__ ('_TempModuleOverride', [object], {
 	get __init__ () {return __get__ (this, function (self, module_name, module_override) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -38,7 +38,7 @@ export var _TempModuleOverride =  __class__ ('_TempModuleOverride', [object], {
 	get __enter__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -49,13 +49,16 @@ export var _TempModuleOverride =  __class__ ('_TempModuleOverride', [object], {
 		}
 		else {
 		}
-		self.module = sys.modules.py_get (self.module_name);
-		sys.modules [self.module_name] = self.module_override;
+		self.module = (function () {
+			var __accu0__ = sys.modules;
+			return __call__ (__accu0__.py_get, __accu0__, self.module_name);
+		}) ();
+		__setitem__ (sys.modules, self.module_name, self.module_override);
 	});},
 	get __exit__ () {return __get__ (this, function (self, _type, _value, _traceback) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -70,17 +73,20 @@ export var _TempModuleOverride =  __class__ ('_TempModuleOverride', [object], {
 		else {
 		}
 		if (self.module === null) {
-			sys.modules.py_pop (self.module_name, null);
+			(function () {
+				var __accu0__ = sys.modules;
+				return __call__ (__accu0__.py_pop, __accu0__, self.module_name, null);
+			}) ();
 		}
 		else {
-			sys.modules [self.module_name] = self.module;
+			__setitem__ (sys.modules, self.module_name, self.module);
 		}
 	});}
 });
 export var add_scrollback = function (text, text_type) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -92,14 +98,23 @@ export var add_scrollback = function (text, text_type) {
 	}
 	else {
 	}
-	for (var line of text.py_split ('\n')) {
-		bpy.ops.console.scrollback_append (__kwargtrans__ ({text: line, py_metatype: text_type}));
+	var __iterable0__ = (function () {
+		var __accu0__ = text;
+		return __call__ (__accu0__.py_split, __accu0__, '\n');
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var line = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = bpy.ops.console;
+			return __call__ (__accu0__.scrollback_append, __accu0__, __kwargtrans__ ({text: line, py_metatype: text_type}));
+		}) ();
 	}
 };
 export var replace_help = function (namespace) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -113,7 +128,7 @@ export var replace_help = function (namespace) {
 	var _help = function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -123,11 +138,11 @@ export var replace_help = function (namespace) {
 		else {
 			var args = tuple ();
 		}
-		var pydoc = _module ('pydoc');
+		var pydoc = __call__ (_module, null, 'pydoc');
 		pydoc.getpager = (function __lambda__ () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -140,7 +155,7 @@ export var replace_help = function (namespace) {
 		pydoc.Helper.getline = (function __lambda__ (self, prompt) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -157,7 +172,7 @@ export var replace_help = function (namespace) {
 		pydoc.TextDoc.use_bold = (function __lambda__ (self, text) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -171,14 +186,17 @@ export var replace_help = function (namespace) {
 			}
 			return text;
 		});
-		pydoc.help (...args);
+		(function () {
+			var __accu0__ = pydoc;
+			return __call__ (__accu0__.help, __accu0__, ...args);
+		}) ();
 	};
-	namespace ['help'] = _help;
+	__setitem__ (namespace, 'help', _help);
 };
 export var get_console = function (console_id) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -189,9 +207,9 @@ export var get_console = function (console_id) {
 	}
 	else {
 	}
-	var InteractiveConsole = _member ('code', 'InteractiveConsole');
-	var consoles = getattr (get_console, 'consoles', null);
-	var hash_next = hash (bpy.context.window_manager);
+	var InteractiveConsole = __call__ (_member, null, 'code', 'InteractiveConsole');
+	var consoles = __call__ (getattr, null, get_console, 'consoles', null);
+	var hash_next = __call__ (hash, null, bpy.context.window_manager);
 	if (consoles === null) {
 		var __left0__ = dict ({});
 		var consoles = __left0__;
@@ -199,39 +217,66 @@ export var get_console = function (console_id) {
 		get_console.consoles_namespace_hash = hash_next;
 	}
 	else {
-		var hash_prev = getattr (get_console, 'consoles_namespace_hash', 0);
-		if (hash_prev != hash_next) {
+		var hash_prev = __call__ (getattr, null, get_console, 'consoles_namespace_hash', 0);
+		if (__ne__ (hash_prev, hash_next)) {
 			get_console.consoles_namespace_hash = hash_next;
-			consoles.py_clear ();
+			(function () {
+				var __accu0__ = consoles;
+				return __call__ (__accu0__.py_clear, __accu0__);
+			}) ();
 		}
 	}
-	var console_data = consoles.py_get (console_id);
+	var console_data = (function () {
+		var __accu0__ = consoles;
+		return __call__ (__accu0__.py_get, __accu0__, console_id);
+	}) ();
 	if (console_data) {
 		var __left0__ = console_data;
 		var console = __left0__ [0];
 		var stdout = __left0__ [1];
 		var stderr = __left0__ [2];
-		var io = _module ('io');
-		var stdout = io.StringIO ();
-		var stderr = io.StringIO ();
+		var io = __call__ (_module, null, 'io');
+		var stdout = (function () {
+			var __accu0__ = io;
+			return __call__ (__accu0__.StringIO, __accu0__);
+		}) ();
+		var stderr = (function () {
+			var __accu0__ = io;
+			return __call__ (__accu0__.StringIO, __accu0__);
+		}) ();
 	}
 	else {
-		var types = _module ('types');
-		var bpy_main_mod = types.ModuleType ('__main__');
+		var types = __call__ (_module, null, 'types');
+		var bpy_main_mod = (function () {
+			var __accu0__ = types;
+			return __call__ (__accu0__.ModuleType, __accu0__, '__main__');
+		}) ();
 		var namespace = bpy_main_mod.__dict__;
-		namespace ['__builtins__'] = sys.modules ['builtins'];
-		namespace ['bpy'] = bpy;
-		namespace ['C'] = bpy.context;
-		namespace ['D'] = bpy.data;
-		replace_help (namespace);
-		var console = InteractiveConsole (__kwargtrans__ ({locals: namespace, filename: '<blender_console>'}));
-		console.push ('from mathutils import *');
-		console.push ('from math import *');
+		__setitem__ (namespace, '__builtins__', __getitem__ (sys.modules, 'builtins'));
+		__setitem__ (namespace, 'bpy', bpy);
+		__setitem__ (namespace, 'C', bpy.context);
+		__setitem__ (namespace, 'D', bpy.data);
+		__call__ (replace_help, null, namespace);
+		var console = __call__ (InteractiveConsole, null, __kwargtrans__ ({locals: namespace, filename: '<blender_console>'}));
+		(function () {
+			var __accu0__ = console;
+			return __call__ (__accu0__.push, __accu0__, 'from mathutils import *');
+		}) ();
+		(function () {
+			var __accu0__ = console;
+			return __call__ (__accu0__.push, __accu0__, 'from math import *');
+		}) ();
 		console._bpy_main_mod = bpy_main_mod;
-		var io = _module ('io');
-		var stdout = io.StringIO ();
-		var stderr = io.StringIO ();
-		consoles [console_id] = tuple ([console, stdout, stderr]);
+		var io = __call__ (_module, null, 'io');
+		var stdout = (function () {
+			var __accu0__ = io;
+			return __call__ (__accu0__.StringIO, __accu0__);
+		}) ();
+		var stderr = (function () {
+			var __accu0__ = io;
+			return __call__ (__accu0__.StringIO, __accu0__);
+		}) ();
+		__setitem__ (consoles, console_id, tuple ([console, stdout, stderr]));
 	}
 	return tuple ([console, stdout, stderr]);
 };
@@ -240,7 +285,7 @@ export var PROMPT_MULTI = '... ';
 export var execute = function (context, is_interactive) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -254,48 +299,69 @@ export var execute = function (context, is_interactive) {
 	}
 	var sc = context.space_data;
 	try {
-		var line_object = sc.history [-(1)];
+		var line_object = __getitem__ (sc.history, __neg__ (1));
 	}
 	catch (__except0__) {
 		return new set (['CANCELLED']);
 	}
-	var __left0__ = get_console (hash (context.region));
+	var __left0__ = __call__ (get_console, null, __call__ (hash, null, context.region));
 	var console = __left0__ [0];
 	var stdout = __left0__ [1];
 	var stderr = __left0__ [2];
-	var redirect_stdout = _member ('contextlib', 'redirect_stdout');
-	var redirect_stderr = _member ('contextlib', 'redirect_stderr');
+	var redirect_stdout = __call__ (_member, null, 'contextlib', 'redirect_stdout');
+	var redirect_stderr = __call__ (_member, null, 'contextlib', 'redirect_stderr');
 	var redirect_stdin = __class__ ('redirect_stdin', [redirect_stdout.__base__], {
 		__module__: __name__,
 		_stream: 'stdin'
 	});
-	var __withid0__ = redirect_stdout (stdout);
+	var __withid0__ = __call__ (redirect_stdout, null, stdout);
 	try {
 		__withid0__.__enter__ ();
-		var __withid1__ = redirect_stderr (stderr);
+		var __withid1__ = __call__ (redirect_stderr, null, stderr);
 		try {
 			__withid1__.__enter__ ();
-			var __withid2__ = redirect_stdin (null);
+			var __withid2__ = __call__ (redirect_stdin, null, null);
 			try {
 				__withid2__.__enter__ ();
-				var __withid3__ = _TempModuleOverride ('__main__', console._bpy_main_mod);
+				var __withid3__ = __call__ (_TempModuleOverride, null, '__main__', console._bpy_main_mod);
 				try {
 					__withid3__.__enter__ ();
 					var line = '';
 					var is_multiline = false;
 					try {
 						var line = line_object.body;
-						var line_exec = (line.strip () ? line : '\n');
-						var is_multiline = console.push (line_exec);
+						var line_exec = ((function () {
+							var __accu0__ = line;
+							return __call__ (__accu0__.strip, __accu0__);
+						}) () ? line : '\n');
+						var is_multiline = (function () {
+							var __accu0__ = console;
+							return __call__ (__accu0__.push, __accu0__, line_exec);
+						}) ();
 					}
 					catch (__except0__) {
 						if (isinstance (__except0__, SystemExit)) {
 							var ex = __except0__;
-							stderr.write ('{!r}\n'.format (ex));
-							console.resetbuffer ();
+							(function () {
+								var __accu0__ = stderr;
+								return __call__ (__accu0__.write, __accu0__, (function () {
+									var __accu1__ = '{!r}\n';
+									return __call__ (__accu1__.format, __accu1__, ex);
+								}) ());
+							}) ();
+							(function () {
+								var __accu0__ = console;
+								return __call__ (__accu0__.resetbuffer, __accu0__);
+							}) ();
 						}
-						else var traceback = _module ('traceback');
-						stderr.write (traceback.format_exc ());
+						else var traceback = __call__ (_module, null, 'traceback');
+						(function () {
+							var __accu0__ = stderr;
+							return __call__ (__accu0__.write, __accu0__, (function () {
+								var __accu1__ = traceback;
+								return __call__ (__accu1__.format_exc, __accu1__);
+							}) ());
+						}) ();
 					}
 					__withid3__.__exit__ ();
 				}
@@ -325,21 +391,48 @@ export var execute = function (context, is_interactive) {
 			throw __except0__;
 		}
 	}
-	var output = stdout.getvalue ();
-	var output_err = stderr.getvalue ();
-	sys.last_traceback = null;
-	stdout.truncate (0);
-	stderr.truncate (0);
-	if (hash (sc) != hash (context.space_data)) {
+	var output = (function () {
+		var __accu0__ = stdout;
+		return __call__ (__accu0__.getvalue, __accu0__);
+	}) ();
+	var output_err = (function () {
+		var __accu0__ = stderr;
+		return __call__ (__accu0__.getvalue, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = sys;
+		return __call__ (__accu0__.__py_setattr__, __accu0__, 'last_traceback', null);
+	}) ();
+	(function () {
+		var __accu0__ = stdout;
+		return __call__ (__accu0__.truncate, __accu0__, 0);
+	}) ();
+	(function () {
+		var __accu0__ = stderr;
+		return __call__ (__accu0__.truncate, __accu0__, 0);
+	}) ();
+	if (__ne__ (__call__ (hash, null, sc), __call__ (hash, null, context.space_data))) {
 		return new set (['FINISHED']);
 	}
-	bpy.ops.console.scrollback_append (__kwargtrans__ ({text: sc.prompt + line, py_metatype: 'INPUT'}));
+	(function () {
+		var __accu0__ = bpy.ops.console;
+		return __call__ (__accu0__.scrollback_append, __accu0__, __kwargtrans__ ({text: __add__ (sc.prompt, line), py_metatype: 'INPUT'}));
+	}) ();
 	if (is_multiline) {
 		sc.prompt = PROMPT_MULTI;
 		if (is_interactive) {
-			var indent = line.__getslice__ (null, len (line) - len (line.lstrip ()), 1);
-			if (line.rstrip ().endswith (':')) {
-				indent += '    ';
+			var indent = __getslice__ (line, null, __sub__ (__call__ (len, null, line), __call__ (len, null, (function () {
+				var __accu0__ = line;
+				return __call__ (__accu0__.lstrip, __accu0__);
+			}) ())), 1);
+			if ((function () {
+				var __accu0__ = (function () {
+					var __accu1__ = line;
+					return __call__ (__accu1__.rstrip, __accu1__);
+				}) ();
+				return __call__ (__accu0__.endswith, __accu0__, ':');
+			}) ()) {
+				var indent = __call__ (__iadd__, null, indent, '    ');
 			}
 		}
 		else {
@@ -350,16 +443,24 @@ export var execute = function (context, is_interactive) {
 		sc.prompt = PROMPT;
 		var indent = '';
 	}
-	bpy.ops.console.history_append (__kwargtrans__ ({text: indent, current_character: 0, remove_duplicates: true}));
-	sc.history [-(1)].current_character = len (indent);
+	(function () {
+		var __accu0__ = bpy.ops.console;
+		return __call__ (__accu0__.history_append, __accu0__, __kwargtrans__ ({text: indent, current_character: 0, remove_duplicates: true}));
+	}) ();
+	__getitem__ (sc.history, __neg__ (1)).current_character = __call__ (len, null, indent);
 	if (output) {
-		add_scrollback (output, 'OUTPUT');
+		__call__ (add_scrollback, null, output, 'OUTPUT');
 	}
 	if (output_err) {
-		add_scrollback (output_err, 'ERROR');
+		__call__ (add_scrollback, null, output_err, 'ERROR');
 	}
-	for (var [func, args] of execute.hooks) {
-		func (...args);
+	var __iterable0__ = execute.hooks;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var func = __left0__ [0];
+		var args = __left0__ [1];
+		__call__ (func, null, ...args);
 	}
 	return new set (['FINISHED']);
 };
@@ -367,7 +468,7 @@ execute.hooks = [];
 export var autocomplete = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -378,41 +479,48 @@ export var autocomplete = function (context) {
 	}
 	else {
 	}
-	var intellisense = _member ('_bl_console_utils.autocomplete', 'intellisense');
+	var intellisense = __call__ (_member, null, '_bl_console_utils.autocomplete', 'intellisense');
 	var sc = context.space_data;
-	var console = get_console (hash (context.region)) [0];
+	var console = __getitem__ (__call__ (get_console, null, __call__ (hash, null, context.region)), 0);
 	if (!(console)) {
 		return new set (['CANCELLED']);
 	}
 	var scrollback = '';
 	var scrollback_error = '';
-	var redirect_stdout = _member ('contextlib', 'redirect_stdout');
+	var redirect_stdout = __call__ (_member, null, 'contextlib', 'redirect_stdout');
 	var redirect_stdin = __class__ ('redirect_stdin', [redirect_stdout.__base__], {
 		__module__: __name__,
 		_stream: 'stdin'
 	});
-	var __withid0__ = redirect_stdin (null);
+	var __withid0__ = __call__ (redirect_stdin, null, null);
 	try {
 		__withid0__.__enter__ ();
-		var __withid1__ = _TempModuleOverride ('__main__', console._bpy_main_mod);
+		var __withid1__ = __call__ (_TempModuleOverride, null, '__main__', console._bpy_main_mod);
 		try {
 			__withid1__.__enter__ ();
 			try {
-				var current_line = sc.history [-(1)];
+				var current_line = __getitem__ (sc.history, __neg__ (1));
 				var line = current_line.body;
-				var result = intellisense.expand (__kwargtrans__ ({line: line, cursor: current_line.current_character, namespace: console.locals, private_: bpy.app.debug_python}));
-				var line_new = result [0];
+				var result = (function () {
+					var __accu0__ = intellisense;
+					return __call__ (__accu0__.expand, __accu0__, __kwargtrans__ ({line: line, cursor: current_line.current_character, namespace: console.locals, private_: bpy.app.debug_python}));
+				}) ();
+				var line_new = __getitem__ (result, 0);
 				var __left0__ = result;
 				current_line.body = __left0__ [0];
 				current_line.current_character = __left0__ [1];
 				var scrollback = __left0__ [2];
-				var ofs = len (line_new) - len (line);
-				sc.select_start += ofs;
-				sc.select_end += ofs;
+				// pass;
+				var ofs = __sub__ (__call__ (len, null, line_new), __call__ (len, null, line));
+				sc.select_start = __call__ (__iadd__, null, sc.select_start, ofs);
+				sc.select_end = __call__ (__iadd__, null, sc.select_end, ofs);
 			}
 			catch (__except0__) {
-				var traceback = _module ('traceback');
-				var scrollback_error = traceback.format_exc ();
+				var traceback = __call__ (_module, null, 'traceback');
+				var scrollback_error = (function () {
+					var __accu0__ = traceback;
+					return __call__ (__accu0__.format_exc, __accu0__);
+				}) ();
 			}
 			__withid1__.__exit__ ();
 		}
@@ -428,22 +536,28 @@ export var autocomplete = function (context) {
 			throw __except0__;
 		}
 	}
-	if (scrollback != '') {
-		bpy.ops.console.scrollback_append (__kwargtrans__ ({text: sc.prompt + current_line.body, py_metatype: 'INPUT'}));
+	if (__ne__ (scrollback, '')) {
+		(function () {
+			var __accu0__ = bpy.ops.console;
+			return __call__ (__accu0__.scrollback_append, __accu0__, __kwargtrans__ ({text: __add__ (sc.prompt, current_line.body), py_metatype: 'INPUT'}));
+		}) ();
 	}
 	if (scrollback) {
-		add_scrollback (scrollback, 'INFO');
+		__call__ (add_scrollback, null, scrollback, 'INFO');
 	}
 	if (scrollback_error) {
-		add_scrollback (scrollback_error, 'ERROR');
+		__call__ (add_scrollback, null, scrollback_error, 'ERROR');
 	}
-	context.area.tag_redraw ();
+	(function () {
+		var __accu0__ = context.area;
+		return __call__ (__accu0__.tag_redraw, __accu0__);
+	}) ();
 	return new set (['FINISHED']);
 };
 export var copy_as_script = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -456,35 +570,50 @@ export var copy_as_script = function (context) {
 	}
 	var sc = context.space_data;
 	var lines = ['import bpy', 'from bpy import data as D', 'from bpy import context as C', 'from mathutils import *', 'from math import *', ''];
-	for (var line of sc.scrollback) {
+	var __iterable0__ = sc.scrollback;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var line = __getitem__ (__iterable0__, __index0__);
 		var text = line.body;
 		var py_metatype = line.py_metatype;
-		if (py_metatype == 'INFO') {
+		if (__eq__ (py_metatype, 'INFO')) {
 			continue;
 		}
-		if (py_metatype == 'INPUT') {
-			if (text.startswith (PROMPT)) {
-				var text = text.__getslice__ (len (PROMPT), null, 1);
+		if (__eq__ (py_metatype, 'INPUT')) {
+			if ((function () {
+				var __accu0__ = text;
+				return __call__ (__accu0__.startswith, __accu0__, PROMPT);
+			}) ()) {
+				var text = __getslice__ (text, __call__ (len, null, PROMPT), null, 1);
 			}
-			else if (text.startswith (PROMPT_MULTI)) {
-				var text = text.__getslice__ (len (PROMPT_MULTI), null, 1);
+			else if ((function () {
+				var __accu0__ = text;
+				return __call__ (__accu0__.startswith, __accu0__, PROMPT_MULTI);
+			}) ()) {
+				var text = __getslice__ (text, __call__ (len, null, PROMPT_MULTI), null, 1);
 			}
 		}
-		else if (py_metatype == 'OUTPUT') {
-			var text = '#~ ' + text;
+		else if (__eq__ (py_metatype, 'OUTPUT')) {
+			var text = __add__ ('#~ ', text);
 		}
-		else if (py_metatype == 'ERROR') {
-			var text = '#! ' + text;
+		else if (__eq__ (py_metatype, 'ERROR')) {
+			var text = __add__ ('#! ', text);
 		}
-		lines.append (text);
+		(function () {
+			var __accu0__ = lines;
+			return __call__ (__accu0__.append, __accu0__, text);
+		}) ();
 	}
-	context.window_manager.clipboard = '\n'.join (lines);
+	context.window_manager.clipboard = (function () {
+		var __accu0__ = '\n';
+		return __call__ (__accu0__.join, __accu0__, lines);
+	}) ();
 	return new set (['FINISHED']);
 };
 export var banner = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -496,10 +625,22 @@ export var banner = function (context) {
 	else {
 	}
 	var sc = context.space_data;
-	var version_string = sys.version.strip ().py_replace ('\n', ' ');
-	var message = tuple (['PYTHON INTERACTIVE CONSOLE {:s}'.format (version_string), '', 'Builtin Modules:       bpy, bpy.data, bpy.ops, bpy.props, bpy.types, bpy.context, bpy.utils, gpu, blf, mathutils', 'Convenience Imports:   from mathutils import *; from math import *', 'Convenience Variables: C = bpy.context, D = bpy.data', '']);
-	for (var line of message) {
-		add_scrollback (line, 'INFO');
+	var version_string = (function () {
+		var __accu0__ = (function () {
+			var __accu1__ = sys.version;
+			return __call__ (__accu1__.strip, __accu1__);
+		}) ();
+		return __call__ (__accu0__.py_replace, __accu0__, '\n', ' ');
+	}) ();
+	var message = tuple ([(function () {
+		var __accu0__ = 'PYTHON INTERACTIVE CONSOLE {:s}';
+		return __call__ (__accu0__.format, __accu0__, version_string);
+	}) (), '', 'Builtin Modules:       bpy, bpy.data, bpy.ops, bpy.props, bpy.types, bpy.context, bpy.utils, gpu, blf, mathutils', 'Convenience Imports:   from mathutils import *; from math import *', 'Convenience Variables: C = bpy.context, D = bpy.data', '']);
+	var __iterable0__ = message;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var line = __getitem__ (__iterable0__, __index0__);
+		__call__ (add_scrollback, null, line, 'INFO');
 	}
 	sc.prompt = PROMPT;
 	return new set (['FINISHED']);
@@ -507,3 +648,21 @@ export var banner = function (context) {
 
 //# sourceMappingURL=_console_python.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'language_id': language_id = value; break;
+		case '_TempModuleOverride': _TempModuleOverride = value; break;
+		case 'add_scrollback': add_scrollback = value; break;
+		case 'replace_help': replace_help = value; break;
+		case 'get_console': get_console = value; break;
+		case 'PROMPT': PROMPT = value; break;
+		case 'PROMPT_MULTI': PROMPT_MULTI = value; break;
+		case 'execute': execute = value; break;
+		case 'autocomplete': autocomplete = value; break;
+		case 'copy_as_script': copy_as_script = value; break;
+		case 'banner': banner = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

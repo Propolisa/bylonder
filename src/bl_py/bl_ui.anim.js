@@ -8,7 +8,7 @@ var __name__ = 'bl_ui.anim';
 export var draw_action_and_slot_selector_for_id = function (layout, animated_id) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -20,13 +20,22 @@ export var draw_action_and_slot_selector_for_id = function (layout, animated_id)
 	}
 	else {
 	}
-	layout.template_action (animated_id, __kwargtrans__ ({py_new: 'action.new', unlink: 'action.unlink'}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.template_action, __accu0__, animated_id, __kwargtrans__ ({py_new: 'action.new', unlink: 'action.unlink'}));
+	}) ();
 	var adt = animated_id.animation_data;
 	if (!(adt) || !(adt.action)) {
 		return ;
 	}
-	layout.context_pointer_set ('animated_id', animated_id);
-	layout.template_search (adt, 'action_slot', adt, 'action_suitable_slots', __kwargtrans__ ({py_new: 'anim.slot_new_for_id', unlink: 'anim.slot_unassign_from_id'}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.context_pointer_set, __accu0__, 'animated_id', animated_id);
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.template_search, __accu0__, adt, 'action_slot', adt, 'action_suitable_slots', __kwargtrans__ ({py_new: 'anim.slot_new_for_id', unlink: 'anim.slot_unassign_from_id'}));
+	}) ();
 };
 export var ANIM_MT_keyframe_insert_pie =  __class__ ('ANIM_MT_keyframe_insert_pie', [Menu], {
 	__module__: __name__,
@@ -34,7 +43,7 @@ export var ANIM_MT_keyframe_insert_pie =  __class__ ('ANIM_MT_keyframe_insert_pi
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -47,23 +56,50 @@ export var ANIM_MT_keyframe_insert_pie =  __class__ ('ANIM_MT_keyframe_insert_pi
 		else {
 		}
 		var layout = self.layout;
-		var pie = layout.menu_pie ();
-		var prop = pie.operator ('anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Location'}));
+		var pie = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu_pie, __accu0__);
+		}) ();
+		var prop = (function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Location'}));
+		}) ();
 		prop.py_metatype = 'Location';
-		var prop = pie.operator ('anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Scale'}));
+		var prop = (function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Scale'}));
+		}) ();
 		prop.py_metatype = 'Scaling';
-		var prop = pie.operator ('anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Available'}));
+		var prop = (function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Available'}));
+		}) ();
 		prop.py_metatype = 'Available';
-		var prop = pie.operator ('anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Rotation'}));
+		var prop = (function () {
+			var __accu0__ = pie;
+			return __call__ (__accu0__.operator, __accu0__, 'anim.keyframe_insert_by_name', __kwargtrans__ ({text: 'Rotation'}));
+		}) ();
 		prop.py_metatype = 'Rotation';
 	});}
 });
 export var classes = tuple ([ANIM_MT_keyframe_insert_pie]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.anim.map
 export {Menu, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'draw_action_and_slot_selector_for_id': draw_action_and_slot_selector_for_id = value; break;
+		case 'ANIM_MT_keyframe_insert_pie': ANIM_MT_keyframe_insert_pie = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -18,7 +18,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -31,7 +31,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 		else {
 		}
 		var engine = context.scene.render.engine;
-		return hasattr (context, 'curves') && context.curves && __in__ (engine, cls.COMPAT_ENGINES);
+		return __call__ (hasattr, null, context, 'curves') && context.curves && __in__ (engine, cls.COMPAT_ENGINES);
 	});}
 });
 export var DATA_PT_context_curves =  __class__ ('DATA_PT_context_curves', [DataButtonsPanel, Panel], {
@@ -42,7 +42,7 @@ export var DATA_PT_context_curves =  __class__ ('DATA_PT_context_curves', [DataB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -59,10 +59,16 @@ export var DATA_PT_context_curves =  __class__ ('DATA_PT_context_curves', [DataB
 		var curves = context.curves;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (curves) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -73,7 +79,7 @@ export var DATA_PT_curves_surface =  __class__ ('DATA_PT_curves_surface', [DataB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -88,14 +94,26 @@ export var DATA_PT_curves_surface =  __class__ ('DATA_PT_curves_surface', [DataB
 		var layout = self.layout;
 		var ob = context.object;
 		layout.use_property_split = true;
-		layout.prop (ob.data, 'surface');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, ob.data, 'surface');
+		}) ();
 		var has_surface = ob.data.surface !== null;
 		if (has_surface) {
-			layout.prop_search (ob.data, 'surface_uv_map', ob.data.surface.data, 'uv_layers', __kwargtrans__ ({text: 'UV Map', icon: 'GROUP_UVS'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop_search, __accu0__, ob.data, 'surface_uv_map', ob.data.surface.data, 'uv_layers', __kwargtrans__ ({text: 'UV Map', icon: 'GROUP_UVS'}));
+			}) ();
 		}
 		else {
-			var row = layout.row ();
-			row.prop (ob.data, 'surface_uv_map', __kwargtrans__ ({text: 'UV Map'}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, ob.data, 'surface_uv_map', __kwargtrans__ ({text: 'UV Map'}));
+			}) ();
 			row.active = has_surface;
 		}
 	});}
@@ -106,7 +124,7 @@ export var CURVES_MT_attribute_context_menu =  __class__ ('CURVES_MT_attribute_c
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -119,7 +137,10 @@ export var CURVES_MT_attribute_context_menu =  __class__ ('CURVES_MT_attribute_c
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('geometry.attribute_convert');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_convert');
+		}) ();
 	});}
 });
 export var CURVES_MT_add_attribute =  __class__ ('CURVES_MT_add_attribute', [Menu], {
@@ -128,7 +149,7 @@ export var CURVES_MT_add_attribute =  __class__ ('CURVES_MT_add_attribute', [Men
 	get add_standard_attribute () {return function (layout, curves, py_name, data_type, domain) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -143,11 +164,20 @@ export var CURVES_MT_add_attribute =  __class__ ('CURVES_MT_add_attribute', [Men
 		}
 		else {
 		}
-		var exists = curves.attributes.py_get (py_name) !== null;
-		var col = layout.column ();
+		var exists = (function () {
+			var __accu0__ = curves.attributes;
+			return __call__ (__accu0__.py_get, __accu0__, py_name);
+		}) () !== null;
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.enabled = !(exists);
 		col.operator_context = 'EXEC_DEFAULT';
-		var props = col.operator ('geometry.attribute_add', __kwargtrans__ ({text: py_name}));
+		var props = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_add', __kwargtrans__ ({text: py_name}));
+		}) ();
 		props.py_name = py_name;
 		props.data_type = data_type;
 		props.domain = domain;
@@ -155,7 +185,7 @@ export var CURVES_MT_add_attribute =  __class__ ('CURVES_MT_add_attribute', [Men
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -169,11 +199,23 @@ export var CURVES_MT_add_attribute =  __class__ ('CURVES_MT_add_attribute', [Men
 		}
 		var layout = self.layout;
 		var curves = context.curves;
-		self.add_standard_attribute (layout, curves, 'radius', 'FLOAT', 'POINT');
-		self.add_standard_attribute (layout, curves, 'color', 'FLOAT_COLOR', 'POINT');
-		layout.separator ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.add_standard_attribute, __accu0__, layout, curves, 'radius', 'FLOAT', 'POINT');
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.add_standard_attribute, __accu0__, layout, curves, 'color', 'FLOAT_COLOR', 'POINT');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 		layout.operator_context = 'INVOKE_DEFAULT';
-		layout.operator ('geometry.attribute_add', __kwargtrans__ ({text: 'Custom...'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_add', __kwargtrans__ ({text: 'Custom...'}));
+		}) ();
 	});}
 });
 export var CURVES_UL_attributes =  __class__ ('CURVES_UL_attributes', [UIList], {
@@ -181,7 +223,7 @@ export var CURVES_UL_attributes =  __class__ ('CURVES_UL_attributes', [UIList], 
 	get filter_items () {return __get__ (this, function (self, _context, data, property) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -195,33 +237,50 @@ export var CURVES_UL_attributes =  __class__ ('CURVES_UL_attributes', [UIList], 
 		}
 		else {
 		}
-		var attributes = getattr (data, property);
+		var attributes = __call__ (getattr, null, data, property);
 		var flags = [];
 		var indices = (function () {
 			var __accu0__ = [];
-			for (var i of list (range (len (attributes)))) {
-				__accu0__.append (i);
+			var __iterable0__ = __call__ (list, null, __call__ (range, null, __call__ (len, null, attributes)));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var i = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, i);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		if (self.filter_name) {
-			var flags = bpy.types.UI_UL_list.filter_items_by_name (self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			var flags = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.filter_items_by_name, __accu0__, self.filter_name, self.bitflag_filter_item, attributes, 'name', __kwargtrans__ ({reverse: self.use_filter_invert}));
+			}) ();
 		}
 		if (!(flags)) {
-			var flags = [self.bitflag_filter_item] * len (attributes);
+			var flags = __mul__ ([self.bitflag_filter_item], __call__ (len, null, attributes));
 		}
-		for (var [idx, item] of py_enumerate (attributes)) {
-			flags [idx] = (item.is_internal ? 0 : flags [idx]);
+		var __iterable0__ = __call__ (py_enumerate, null, attributes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var idx = __left0__ [0];
+			var item = __left0__ [1];
+			__setitem__ (flags, idx, (item.is_internal ? 0 : __getitem__ (flags, idx)));
 		}
 		if (self.use_filter_sort_alpha) {
-			var indices = bpy.types.UI_UL_list.sort_items_by_name (attributes, 'name');
+			var indices = (function () {
+				var __accu0__ = bpy.types.UI_UL_list;
+				return __call__ (__accu0__.sort_items_by_name, __accu0__, attributes, 'name');
+			}) ();
 		}
 		return tuple ([flags, indices]);
 	});},
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, attribute, _icon, _active_data, _active_propname, _index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -240,17 +299,35 @@ export var CURVES_UL_attributes =  __class__ ('CURVES_UL_attributes', [UIList], 
 		}
 		else {
 		}
-		var data_type = attribute.bl_rna.properties ['data_type'].enum_items [attribute.data_type];
-		var domain = attribute.bl_rna.properties ['domain'].enum_items [attribute.domain];
-		var py_split = layout.py_split (__kwargtrans__ ({factor: 0.5}));
+		var data_type = __getitem__ (__getitem__ (attribute.bl_rna.properties, 'data_type').enum_items, attribute.data_type);
+		var domain = __getitem__ (__getitem__ (attribute.bl_rna.properties, 'domain').enum_items, attribute.domain);
+		var py_split = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.5}));
+		}) ();
 		py_split.emboss = 'NONE';
-		var row = py_split.row ();
-		row.prop (attribute, 'name', __kwargtrans__ ({text: ''}));
-		var sub = py_split.py_split ();
+		var row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, attribute, 'name', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.py_split, __accu0__);
+		}) ();
 		sub.alignment = 'RIGHT';
 		sub.active = false;
-		sub.label (__kwargtrans__ ({text: domain.py_name}));
-		sub.label (__kwargtrans__ ({text: data_type.py_name}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: domain.py_name}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: data_type.py_name}));
+		}) ();
 	});}
 });
 export var DATA_PT_CURVES_attributes =  __class__ ('DATA_PT_CURVES_attributes', [DataButtonsPanel, Panel], {
@@ -260,7 +337,7 @@ export var DATA_PT_CURVES_attributes =  __class__ ('DATA_PT_CURVES_attributes', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -274,14 +351,38 @@ export var DATA_PT_CURVES_attributes =  __class__ ('DATA_PT_CURVES_attributes', 
 		}
 		var curves = context.curves;
 		var layout = self.layout;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('CURVES_UL_attributes', 'attributes', curves, 'attributes', curves.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
-		var col = row.column (__kwargtrans__ ({align: true}));
-		col.menu ('CURVES_MT_add_attribute', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		col.operator ('geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		col.separator ();
-		col.menu ('CURVES_MT_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'CURVES_UL_attributes', 'attributes', curves, 'attributes', curves.attributes, 'active_index', __kwargtrans__ ({rows: 3}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'CURVES_MT_add_attribute', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.operator, __accu0__, 'geometry.attribute_remove', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'CURVES_MT_attribute_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
 	});}
 });
 export var DATA_PT_curves_animation =  __class__ ('DATA_PT_curves_animation', [DataButtonsPanel, PropertiesAnimationMixin, PropertyPanel, Panel], {
@@ -293,14 +394,33 @@ export var DATA_PT_custom_props_curves =  __class__ ('DATA_PT_custom_props_curve
 	__module__: __name__,
 	COMPAT_ENGINES: new set (['BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH']),
 	_context_path: 'object.data',
-	_property_type: (hasattr (bpy.types, 'Curves') ? bpy.types.Curves : null)
+	_property_type: (__call__ (hasattr, null, bpy.types, 'Curves') ? bpy.types.Curves : null)
 });
 export var classes = tuple ([DATA_PT_context_curves, DATA_PT_CURVES_attributes, DATA_PT_curves_surface, DATA_PT_curves_animation, DATA_PT_custom_props_curves, CURVES_MT_add_attribute, CURVES_MT_attribute_context_menu, CURVES_UL_attributes]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_curves.map
 export {Menu, Panel, PropertiesAnimationMixin, PropertyPanel, UIList, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_context_curves': DATA_PT_context_curves = value; break;
+		case 'DATA_PT_curves_surface': DATA_PT_curves_surface = value; break;
+		case 'CURVES_MT_attribute_context_menu': CURVES_MT_attribute_context_menu = value; break;
+		case 'CURVES_MT_add_attribute': CURVES_MT_add_attribute = value; break;
+		case 'CURVES_UL_attributes': CURVES_UL_attributes = value; break;
+		case 'DATA_PT_CURVES_attributes': DATA_PT_CURVES_attributes = value; break;
+		case 'DATA_PT_curves_animation': DATA_PT_curves_animation = value; break;
+		case 'DATA_PT_custom_props_curves': DATA_PT_custom_props_curves = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

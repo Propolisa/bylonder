@@ -1,0 +1,145 @@
+// Blender's animation data in the module's Blender world (anim-api.cc): AnimData, layered Actions and F-Curves on the
+// IDs of a BlenderMain, read and written in place as Blender's DNA (FCurve, BezTriple), and evaluated by Blender's
+// evaluate_fcurve. Animation editors' areas (AnimArea) live here too: see editors/animation/anim-area.js.
+import { blenderModule } from '../../bmesh/bmesh-wasm.js';
+import rnaAnimated from '../../makesrna/rna-animated.json' with { type: 'json' };
+
+const { exports: x, withArrays, withString, cString } = blenderModule;
+
+// Blender's enums by identifier (rna_enum_text): event types, event values and property subtypes.
+const enumTable = (which) => new Map(cString(x.rna_enum_text(which)).split('\n').filter(Boolean).map((line) => {
+  const [identifier, value] = line.split('\t');
+  return [identifier, Number(value)];
+}));
+export const EVENT_TYPES = enumTable(0), EVENT_VALUES = enumTable(1), PROPERTY_SUBTYPES = enumTable(2);
+export const PROPERTY_TYPES = { BOOLEAN: 0, INT: 1, FLOAT: 2, STRING: 3, ENUM: 4, POINTER: 5, COLLECTION: 6 };
+const ID_CODES = { OB: 0x424f, SC: 0x4353, WO: 0x4f57, MA: 0x414d, LA: 0x414c, CA: 0x4143 };
+
+// Blender's RNA of the animatable properties (rna-animated.json), defined once in the module's RNA, which resolves and
+// names F-Curve paths from it as Blender's does.
+for (const { code, properties } of Object.values(rnaAnimated)) {
+  for (const [identifier, { type, subtype, length, name }] of Object.entries(properties)) {
+    withString(identifier, (id) => withString(name, (n) => x.rna_id_property_define(ID_CODES[code], id, PROPERTY_TYPES[type], PROPERTY_SUBTYPES.get(subtype) ?? 0, length, n)));
+  }
+}
+export const animatedProperty = (struct, identifier) => rnaAnimated[struct]?.properties[identifier];
+// A custom property path (`["name"]`) Bylonder animates, with its PropertyType and UI name, as an ID property is in
+// Blender: the editors name its channel and Blender's keying treats it by type.
+const customProperties = new Set();
+export function defineCustomProperty(path, type, name) {
+  if (customProperties.has(path)) return;
+  customProperties.add(path);
+  withString(path, (p) => withString(name, (n) => x.rna_custom_property_define(p, PROPERTY_TYPES[type], n)));
+}
+
+// FCurve and BezTriple field offsets (anim_layout).
+const L = Array.from(new Int32Array(x.memory.buffer, x.anim_layout() >>> 0, 24));
+const [, FC_BEZT, FC_TOTVERT, FC_FLAG, FC_RNA_PATH, FC_ARRAY_INDEX, FC_COLOR, FC_EXTEND, , ,
+  BEZT_SIZE, B_VEC, B_IPO, B_H1, B_H2, B_F1, B_F2, B_F3, B_EASING, B_BACK, B_AMPLITUDE, B_PERIOD, , B_HIDE] = L;
+
+// Blender's enum identifiers for BezTriple's and FCurve's values (rna_curve.cc, rna_fcurve.cc), in value order.
+export const INTERPOLATIONS = ['CONSTANT', 'LINEAR', 'BEZIER', 'BACK', 'BOUNCE', 'CIRC', 'CUBIC', 'ELASTIC', 'EXPO', 'QUAD', 'QUART', 'QUINT', 'SINE'];
+export const HANDLE_TYPES = ['FREE', 'AUTO', 'VECTOR', 'ALIGNED', 'AUTO_CLAMPED'];
+export const EASINGS = ['AUTO', 'EASE_IN', 'EASE_OUT', 'EASE_IN_OUT'];
+export const KEYFRAME_TYPES = ['KEYFRAME', 'EXTREME', 'BREAKDOWN', 'JITTER', 'MOVING_HOLD', 'GENERATED'];
+export const EXTRAPOLATIONS = ['CONSTANT', 'LINEAR'];
+const SELECT = 1;
+// eFCurve_Flags.
+export const FCURVE = { VISIBLE: 1 << 0, SELECTED: 1 << 1, ACTIVE: 1 << 2, PROTECTED: 1 << 3, MUTED: 1 << 4, DISABLED: 1 << 10 };
+
+const view = () => new DataView(x.memory.buffer);
+const pointerList = (count, fill) => {
+  if (!count) return [];
+  return withArrays([new Uint32Array(count)], ([p]) => { fill(p); return Array.from(new Uint32Array(x.memory.buffer, p, count)); });
+};
+
+// A BezTriple's fields as Blender's RNA names them (Keyframe), values in the F-Curve's own units.
+function readKey(dv, p) {
+  const f = (i) => dv.getFloat32(p + B_VEC + i * 4, true);
+  return {
+    co: [f(3), f(4)], handle_left: [f(0), f(1)], handle_right: [f(6), f(7)],
+    interpolation: INTERPOLATIONS[dv.getInt8(p + B_IPO)], handle_left_type: HANDLE_TYPES[dv.getUint8(p + B_H1)],
+    handle_right_type: HANDLE_TYPES[dv.getUint8(p + B_H2)], easing: EASINGS[dv.getInt8(p + B_EASING)],
+    type: KEYFRAME_TYPES[dv.getInt8(p + B_HIDE)], back: dv.getFloat32(p + B_BACK, true), amplitude: dv.getFloat32(p + B_AMPLITUDE, true),
+    period: dv.getFloat32(p + B_PERIOD, true),
+    select: [B_F1, B_F2, B_F3].map((o) => !!(dv.getUint8(p + o) & SELECT)),
+  };
+}
+
+function writeKey(dv, p, key) {
+  const set = (i, v) => dv.setFloat32(p + B_VEC + i * 4, v, true);
+  const [left, co, right] = [key.handle_left ?? key.co, key.co, key.handle_right ?? key.co];
+  [left, co, right].forEach(([fx, fy], i) => { set(i * 3, fx); set(i * 3 + 1, fy); set(i * 3 + 2, 0); });
+  dv.setInt8(p + B_IPO, Math.max(0, INTERPOLATIONS.indexOf(key.interpolation ?? 'BEZIER')));
+  dv.setUint8(p + B_H1, Math.max(0, HANDLE_TYPES.indexOf(key.handle_left_type ?? 'AUTO_CLAMPED')));
+  dv.setUint8(p + B_H2, Math.max(0, HANDLE_TYPES.indexOf(key.handle_right_type ?? 'AUTO_CLAMPED')));
+  dv.setInt8(p + B_EASING, Math.max(0, EASINGS.indexOf(key.easing ?? 'AUTO')));
+  dv.setInt8(p + B_HIDE, Math.max(0, KEYFRAME_TYPES.indexOf(key.type ?? 'KEYFRAME')));
+  dv.setFloat32(p + B_BACK, key.back ?? 1.70158, true);
+  dv.setFloat32(p + B_AMPLITUDE, key.amplitude ?? 0.8, true);
+  dv.setFloat32(p + B_PERIOD, key.period ?? 4.1, true);
+  const select = key.select ?? [false, false, false];
+  [B_F1, B_F2, B_F3].forEach((o, i) => dv.setUint8(p + o, select[i] ? SELECT : 0));
+}
+
+// One F-Curve, by its address.
+export class FCurve {
+  constructor(pointer) { this.pointer = pointer; }
+  get #dv() { return view(); }
+  get rna_path() { return cString(this.#dv.getUint32(this.pointer + FC_RNA_PATH, true)); }
+  get array_index() { return this.#dv.getInt32(this.pointer + FC_ARRAY_INDEX, true); }
+  get group() { return cString(x.anim_fcurve_group(this.pointer)); }
+  get flag() { return this.#dv.getInt16(this.pointer + FC_FLAG, true); }
+  set flag(value) { this.#dv.setInt16(this.pointer + FC_FLAG, value, true); }
+  get color() { return [0, 1, 2].map((i) => this.#dv.getFloat32(this.pointer + FC_COLOR + i * 4, true)); }
+  get extrapolation() { return EXTRAPOLATIONS[this.#dv.getInt8(this.pointer + FC_EXTEND)]; }
+  set extrapolation(value) { this.#dv.setInt8(this.pointer + FC_EXTEND, EXTRAPOLATIONS.indexOf(value)); }
+  get length() { return this.#dv.getInt32(this.pointer + FC_TOTVERT, true); }
+  get #bezt() { return this.#dv.getUint32(this.pointer + FC_BEZT, true); }
+  // Its keyframe points (Keyframe), copied out.
+  get keys() {
+    const dv = this.#dv, bezt = this.#bezt;
+    return Array.from({ length: this.length }, (_, i) => readKey(dv, bezt + i * BEZT_SIZE));
+  }
+  // Replaces its keys, sorted and with handles recalculated as after an edit.
+  set keys(keys) {
+    const bytes = new Uint8Array(keys.length * BEZT_SIZE), dv = new DataView(bytes.buffer);
+    keys.forEach((key, i) => writeKey(dv, i * BEZT_SIZE, key));
+    withArrays([bytes], ([p]) => x.anim_fcurve_keys_set(this.pointer, p, keys.length));
+  }
+  evaluate(frame) { return x.anim_fcurve_evaluate(this.pointer, frame); }
+  // Values at count frames from start, step apart.
+  sample(start, step, count) {
+    return withArrays([new Float32Array(count)], ([p]) => { x.anim_fcurve_sample(this.pointer, start, step, count, p); return Float32Array.from(new Float32Array(x.memory.buffer, p, count)); });
+  }
+}
+
+// eInsertKeyFlags: none, as keying with Blender's default Preferences inserts.
+export const INSERTKEY_NOFLAGS = 0;
+
+// The animation of a BlenderMain's IDs (an object's address, or the scene's).
+export class BlenderAnimation {
+  constructor(main) {
+    this.main = main;
+  }
+  // The F-Curve of an ID's property, made as keying makes it when missing (a channel group, PropertyType and subtype
+  // decide its flags and color).
+  fcurve(id, rnaPath, index, { group = '', type = 'FLOAT', subtype = 'NONE' } = {}) {
+    return new FCurve(withString(rnaPath, (p) => withString(group, (g) =>
+      x.anim_fcurve_ensure(this.main.bmain, id, p, index, g, PROPERTY_TYPES[type], PROPERTY_SUBTYPES.get(subtype) ?? 0))) >>> 0);
+  }
+  fcurves(id) { return pointerList(x.anim_fcurves(id, 0), (p) => x.anim_fcurves(id, p)).map((p) => new FCurve(p)); }
+  remove(id, fcurve) { x.anim_fcurve_remove(id, fcurve.pointer); }
+  // Inserts a key as Blender's keying does.
+  insert(fcurve, frame, value, flags = INSERTKEY_NOFLAGS) { return x.anim_keyframe_insert(this.main.scene, fcurve.pointer, frame, value, flags); }
+  // The scene's time and keying settings the editors read.
+  setTime({ frame, start, end, previewStart, previewEnd, preview, fps, keyframeType = 'KEYFRAME', autoKey = false }) {
+    const cfra = Math.floor(frame);
+    x.anim_scene_time_set(this.main.scene, cfra, frame - cfra, start, end, previewStart, previewEnd, preview, fps, KEYFRAME_TYPES.indexOf(keyframeType), autoKey);
+  }
+  get frame() { return x.anim_scene_frame(this.main.scene); }
+  get range() {
+    const [start, end, previewStart, previewEnd, preview] = new Int32Array(x.memory.buffer, x.anim_scene_range(this.main.scene) >>> 0, 5);
+    return { start, end, previewStart, previewEnd, preview: !!preview };
+  }
+}

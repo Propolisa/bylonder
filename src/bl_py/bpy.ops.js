@@ -10,7 +10,7 @@ export var _ModuleType = py_typeof (_ops_module);
 export var _bpy_ops_submodule__getattr__ = function (module, func) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -22,17 +22,20 @@ export var _bpy_ops_submodule__getattr__ = function (module, func) {
 	}
 	else {
 	}
-	if (func.startswith ('__')) {
-		var __except0__ = AttributeError (func);
+	if ((function () {
+		var __accu0__ = func;
+		return __call__ (__accu0__.startswith, __accu0__, '__');
+	}) ()) {
+		var __except0__ = __call__ (AttributeError, null, func);
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	return _op_create_function (module, func);
+	return __call__ (_op_create_function, null, module, func);
 };
 export var _bpy_ops_submodule__dir__ = function (module) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -43,20 +46,32 @@ export var _bpy_ops_submodule__dir__ = function (module) {
 	}
 	else {
 	}
-	var functions = set ();
-	var module_upper = module.upper ();
-	for (var id_name of _op_dir ()) {
-		var id_split = id_name.py_split ('_OT_', 1);
-		if (len (id_split) == 2 && module_upper == id_split [0]) {
-			functions.add (id_split [1]);
+	var functions = __call__ (set, null);
+	var module_upper = (function () {
+		var __accu0__ = module;
+		return __call__ (__accu0__.upper, __accu0__);
+	}) ();
+	var __iterable0__ = __call__ (_op_dir, null);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var id_name = __getitem__ (__iterable0__, __index0__);
+		var id_split = (function () {
+			var __accu0__ = id_name;
+			return __call__ (__accu0__.py_split, __accu0__, '_OT_', 1);
+		}) ();
+		if (__eq__ (__call__ (len, null, id_split), 2) && __eq__ (module_upper, __getitem__ (id_split, 0))) {
+			(function () {
+				var __accu0__ = functions;
+				return __call__ (__accu0__.add, __accu0__, __getitem__ (id_split, 1));
+			}) ();
 		}
 	}
-	return list (functions);
+	return __call__ (list, null, functions);
 };
 export var _bpy_ops_submodule = function (module) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -67,11 +82,11 @@ export var _bpy_ops_submodule = function (module) {
 	}
 	else {
 	}
-	var result = _ModuleType ('bpy.ops.' + module);
+	var result = __call__ (_ModuleType, null, __add__ ('bpy.ops.', module));
 	result.__getattr__ = (function __lambda__ (func) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -82,12 +97,12 @@ export var _bpy_ops_submodule = function (module) {
 		}
 		else {
 		}
-		return _bpy_ops_submodule__getattr__ (module, func);
+		return __call__ (_bpy_ops_submodule__getattr__, null, module, func);
 	});
 	result.__dir__ = (function __lambda__ () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -95,14 +110,14 @@ export var _bpy_ops_submodule = function (module) {
 		}
 		else {
 		}
-		return _bpy_ops_submodule__dir__ (module);
+		return __call__ (_bpy_ops_submodule__dir__, null, module);
 	});
 	return result;
 };
 export var __getattr__ = function (module) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -113,17 +128,20 @@ export var __getattr__ = function (module) {
 	}
 	else {
 	}
-	if (module.startswith ('__')) {
-		var __except0__ = AttributeError (module);
+	if ((function () {
+		var __accu0__ = module;
+		return __call__ (__accu0__.startswith, __accu0__, '__');
+	}) ()) {
+		var __except0__ = __call__ (AttributeError, null, module);
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	return _bpy_ops_submodule (module);
+	return __call__ (_bpy_ops_submodule, null, module);
 };
 export var __dir__ = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -131,17 +149,45 @@ export var __dir__ = function () {
 	}
 	else {
 	}
-	var submodules = set ();
-	for (var id_name of _op_dir ()) {
-		var id_split = id_name.py_split ('_OT_', 1);
-		if (len (id_split) == 2) {
-			submodules.add (id_split [0].lower ());
+	var submodules = __call__ (set, null);
+	var __iterable0__ = __call__ (_op_dir, null);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var id_name = __getitem__ (__iterable0__, __index0__);
+		var id_split = (function () {
+			var __accu0__ = id_name;
+			return __call__ (__accu0__.py_split, __accu0__, '_OT_', 1);
+		}) ();
+		if (__eq__ (__call__ (len, null, id_split), 2)) {
+			(function () {
+				var __accu0__ = submodules;
+				return __call__ (__accu0__.add, __accu0__, (function () {
+					var __accu1__ = __getitem__ (id_split, 0);
+					return __call__ (__accu1__.lower, __accu1__);
+				}) ());
+			}) ();
 		}
 		else {
-			submodules.add (id_split [0]);
+			(function () {
+				var __accu0__ = submodules;
+				return __call__ (__accu0__.add, __accu0__, __getitem__ (id_split, 0));
+			}) ();
 		}
 	}
-	return list (submodules);
+	return __call__ (list, null, submodules);
 };
 
 //# sourceMappingURL=bpy.ops.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_op_dir': _op_dir = value; break;
+		case '_op_create_function': _op_create_function = value; break;
+		case '_ModuleType': _ModuleType = value; break;
+		case '_bpy_ops_submodule__getattr__': _bpy_ops_submodule__getattr__ = value; break;
+		case '_bpy_ops_submodule__dir__': _bpy_ops_submodule__dir__ = value; break;
+		case '_bpy_ops_submodule': _bpy_ops_submodule = value; break;
+		case '__getattr__': __getattr__ = value; break;
+		case '__dir__': __dir__ = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

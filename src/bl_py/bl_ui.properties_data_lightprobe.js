@@ -15,7 +15,7 @@ export var DataButtonsPanel =  __class__ ('DataButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -39,7 +39,7 @@ export var DATA_PT_context_lightprobe =  __class__ ('DATA_PT_context_lightprobe'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -56,10 +56,16 @@ export var DATA_PT_context_lightprobe =  __class__ ('DATA_PT_context_lightprobe'
 		var probe = context.lightprobe;
 		var space = context.space_data;
 		if (ob) {
-			layout.template_ID (ob, 'data');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, ob, 'data');
+			}) ();
 		}
 		else if (probe) {
-			layout.template_ID (space, 'pin_id');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_ID, __accu0__, space, 'pin_id');
+			}) ();
 		}
 	});}
 });
@@ -70,7 +76,7 @@ export var DATA_PT_lightprobe =  __class__ ('DATA_PT_lightprobe', [DataButtonsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -85,40 +91,103 @@ export var DATA_PT_lightprobe =  __class__ ('DATA_PT_lightprobe', [DataButtonsPa
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var probe = context.lightprobe;
-		if (probe.py_metatype == 'VOLUME') {
-			var col = layout.column ();
-			col.prop (probe, 'influence_distance', __kwargtrans__ ({text: 'Distance'}));
-			col.prop (probe, 'falloff');
-			col.prop (probe, 'intensity');
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (probe, 'resolution_x', __kwargtrans__ ({text: 'Resolution X'}));
-			sub.prop (probe, 'resolution_y', __kwargtrans__ ({text: 'Y'}));
-			sub.prop (probe, 'resolution_z', __kwargtrans__ ({text: 'Z'}));
+		if (__eq__ (probe.py_metatype, 'VOLUME')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'influence_distance', __kwargtrans__ ({text: 'Distance'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'falloff');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'intensity');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'resolution_x', __kwargtrans__ ({text: 'Resolution X'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'resolution_y', __kwargtrans__ ({text: 'Y'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'resolution_z', __kwargtrans__ ({text: 'Z'}));
+			}) ();
 		}
-		else if (probe.py_metatype == 'PLANE') {
-			var col = layout.column ();
-			col.prop (probe, 'influence_distance', __kwargtrans__ ({text: 'Distance'}));
-			col.prop (probe, 'falloff');
+		else if (__eq__ (probe.py_metatype, 'PLANE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'influence_distance', __kwargtrans__ ({text: 'Distance'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'falloff');
+			}) ();
 		}
 		else {
-			var col = layout.column ();
-			col.prop (probe, 'influence_type');
-			if (probe.influence_type == 'ELIPSOID') {
-				col.prop (probe, 'influence_distance', __kwargtrans__ ({text: 'Radius'}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'influence_type');
+			}) ();
+			if (__eq__ (probe.influence_type, 'ELIPSOID')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, probe, 'influence_distance', __kwargtrans__ ({text: 'Radius'}));
+				}) ();
 			}
 			else {
-				col.prop (probe, 'influence_distance', __kwargtrans__ ({text: 'Size'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, probe, 'influence_distance', __kwargtrans__ ({text: 'Size'}));
+				}) ();
 			}
-			col.prop (probe, 'falloff');
-			col.prop (probe, 'intensity');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'falloff');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'intensity');
+			}) ();
 		}
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		if (probe.py_metatype == 'PLANE') {
-			sub.prop (probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Offset'}));
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		if (__eq__ (probe.py_metatype, 'PLANE')) {
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Offset'}));
+			}) ();
 		}
 		else {
-			sub.prop (probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Start'}));
-			sub.prop (probe, 'clip_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_camera}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'clip_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_camera}));
+			}) ();
 		}
 	});}
 });
@@ -129,7 +198,7 @@ export var DATA_PT_lightprobe_eevee =  __class__ ('DATA_PT_lightprobe_eevee', [D
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -144,37 +213,97 @@ export var DATA_PT_lightprobe_eevee =  __class__ ('DATA_PT_lightprobe_eevee', [D
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var probe = context.lightprobe;
-		if (probe.py_metatype == 'VOLUME') {
-			var col = layout.column ();
-			col.prop (probe, 'intensity');
-			col.separator ();
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (probe, 'normal_bias');
-			sub.prop (probe, 'view_bias');
-			sub.prop (probe, 'facing_bias');
-			col.separator ();
-			col.prop (probe, 'validity_threshold');
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (probe, 'dilation_threshold');
-			sub.prop (probe, 'dilation_radius', __kwargtrans__ ({text: 'Radius'}));
-			col.separator ();
+		if (__eq__ (probe.py_metatype, 'VOLUME')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'intensity');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'normal_bias');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'view_bias');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'facing_bias');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'validity_threshold');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'dilation_threshold');
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'dilation_radius', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		else if (probe.py_metatype == 'SPHERE') {
-			var col = layout.column ();
-			col.prop (probe, 'influence_type');
-			if (probe.influence_type == 'ELIPSOID') {
+		else if (__eq__ (probe.py_metatype, 'SPHERE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'influence_type');
+			}) ();
+			if (__eq__ (probe.influence_type, 'ELIPSOID')) {
 				var influence_text = 'Radius';
 			}
 			else {
 				var influence_text = 'Size';
 			}
-			col.prop (probe, 'influence_distance', __kwargtrans__ ({text: influence_text}));
-			col.prop (probe, 'falloff');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'influence_distance', __kwargtrans__ ({text: influence_text}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'falloff');
+			}) ();
 		}
-		else if (probe.py_metatype == 'PLANE') {
-			var col = layout.column ();
-			col.prop (probe, 'influence_distance', __kwargtrans__ ({text: 'Distance'}));
-			col.prop (probe, 'parallax_distance', __kwargtrans__ ({text: 'Parallax'}));
+		else if (__eq__ (probe.py_metatype, 'PLANE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'influence_distance', __kwargtrans__ ({text: 'Distance'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'parallax_distance', __kwargtrans__ ({text: 'Parallax'}));
+			}) ();
 			// pass;
 		}
 		else {
@@ -190,7 +319,7 @@ export var DATA_PT_lightprobe_visibility =  __class__ ('DATA_PT_lightprobe_visib
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -205,15 +334,36 @@ export var DATA_PT_lightprobe_visibility =  __class__ ('DATA_PT_lightprobe_visib
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var probe = context.lightprobe;
-		var col = layout.column ();
-		if (probe.py_metatype == 'VOLUME') {
-			col.prop (probe, 'visibility_buffer_bias', __kwargtrans__ ({text: 'Bias'}));
-			col.prop (probe, 'visibility_bleed_bias', __kwargtrans__ ({text: 'Bleed Bias'}));
-			col.prop (probe, 'visibility_blur', __kwargtrans__ ({text: 'Blur'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (probe.py_metatype, 'VOLUME')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'visibility_buffer_bias', __kwargtrans__ ({text: 'Bias'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'visibility_bleed_bias', __kwargtrans__ ({text: 'Bleed Bias'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'visibility_blur', __kwargtrans__ ({text: 'Blur'}));
+			}) ();
 		}
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.prop (probe, 'visibility_collection');
-		row.prop (probe, 'invert_visibility_collection', __kwargtrans__ ({text: '', icon: 'ARROW_LEFTRIGHT'}));
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'visibility_collection');
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'invert_visibility_collection', __kwargtrans__ ({text: '', icon: 'ARROW_LEFTRIGHT'}));
+		}) ();
 	});}
 });
 export var DATA_PT_lightprobe_capture =  __class__ ('DATA_PT_lightprobe_capture', [DataButtonsPanel, Panel], {
@@ -223,7 +373,7 @@ export var DATA_PT_lightprobe_capture =  __class__ ('DATA_PT_lightprobe_capture'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -241,7 +391,7 @@ export var DATA_PT_lightprobe_capture =  __class__ ('DATA_PT_lightprobe_capture'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -256,14 +406,29 @@ export var DATA_PT_lightprobe_capture =  __class__ ('DATA_PT_lightprobe_capture'
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var probe = context.lightprobe;
-		var col = layout.column ();
-		if (probe.py_metatype == 'SPHERE') {
-			var sub = col.column (__kwargtrans__ ({align: true}));
-			sub.prop (probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Start'}));
-			sub.prop (probe, 'clip_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_camera}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (probe.py_metatype, 'SPHERE')) {
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Start'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'clip_end', __kwargtrans__ ({text: 'End', text_ctxt: i18n_contexts.id_camera}));
+			}) ();
 		}
-		else if (probe.py_metatype == 'PLANE') {
-			col.prop (probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Offset'}));
+		else if (__eq__ (probe.py_metatype, 'PLANE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'clip_start', __kwargtrans__ ({text: 'Clipping Offset'}));
+			}) ();
 		}
 	});}
 });
@@ -274,7 +439,7 @@ export var DATA_PT_lightprobe_bake =  __class__ ('DATA_PT_lightprobe_bake', [Dat
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -287,12 +452,12 @@ export var DATA_PT_lightprobe_bake =  __class__ ('DATA_PT_lightprobe_bake', [Dat
 		else {
 		}
 		var engine = context.engine;
-		return context.lightprobe && context.lightprobe.py_metatype == 'VOLUME' && __in__ (engine, cls.COMPAT_ENGINES);
+		return context.lightprobe && __eq__ (context.lightprobe.py_metatype, 'VOLUME') && __in__ (engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -307,10 +472,22 @@ export var DATA_PT_lightprobe_bake =  __class__ ('DATA_PT_lightprobe_bake', [Dat
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column ();
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.operator ('object.lightprobe_cache_bake').subset = 'ACTIVE';
-		row.operator ('object.lightprobe_cache_free', __kwargtrans__ ({text: '', icon: 'TRASH'})).subset = 'ACTIVE';
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.lightprobe_cache_bake');
+		}) ().subset = 'ACTIVE';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.lightprobe_cache_free', __kwargtrans__ ({text: '', icon: 'TRASH'}));
+		}) ().subset = 'ACTIVE';
 	});}
 });
 export var DATA_PT_lightprobe_bake_resolution =  __class__ ('DATA_PT_lightprobe_bake_resolution', [DataButtonsPanel, Panel], {
@@ -321,7 +498,7 @@ export var DATA_PT_lightprobe_bake_resolution =  __class__ ('DATA_PT_lightprobe_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -337,13 +514,34 @@ export var DATA_PT_lightprobe_bake_resolution =  __class__ ('DATA_PT_lightprobe_
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var probe = context.lightprobe;
-		var col = layout.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (probe, 'resolution_x', __kwargtrans__ ({text: 'Resolution X'}));
-		sub.prop (probe, 'resolution_y', __kwargtrans__ ({text: 'Y'}));
-		sub.prop (probe, 'resolution_z', __kwargtrans__ ({text: 'Z'}));
-		col.prop (probe, 'bake_samples');
-		col.prop (probe, 'surfel_density');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'resolution_x', __kwargtrans__ ({text: 'Resolution X'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'resolution_y', __kwargtrans__ ({text: 'Y'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'resolution_z', __kwargtrans__ ({text: 'Z'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'bake_samples');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'surfel_density');
+		}) ();
 	});}
 });
 export var DATA_PT_lightprobe_bake_capture =  __class__ ('DATA_PT_lightprobe_bake_capture', [DataButtonsPanel, Panel], {
@@ -354,7 +552,7 @@ export var DATA_PT_lightprobe_bake_capture =  __class__ ('DATA_PT_lightprobe_bak
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -370,12 +568,30 @@ export var DATA_PT_lightprobe_bake_capture =  __class__ ('DATA_PT_lightprobe_bak
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var probe = context.lightprobe;
-		var col = layout.column ();
-		col.prop (probe, 'capture_distance', __kwargtrans__ ({text: 'Distance'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Contributions', align: true}));
-		col.prop (probe, 'capture_world', __kwargtrans__ ({text: 'World'}));
-		col.prop (probe, 'capture_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
-		col.prop (probe, 'capture_emission', __kwargtrans__ ({text: 'Emission'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'capture_distance', __kwargtrans__ ({text: 'Distance'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Contributions', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'capture_world', __kwargtrans__ ({text: 'World'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'capture_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'capture_emission', __kwargtrans__ ({text: 'Emission'}));
+		}) ();
 	});}
 });
 export var DATA_PT_lightprobe_bake_offset =  __class__ ('DATA_PT_lightprobe_bake_offset', [DataButtonsPanel, Panel], {
@@ -387,7 +603,7 @@ export var DATA_PT_lightprobe_bake_offset =  __class__ ('DATA_PT_lightprobe_bake
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -403,9 +619,18 @@ export var DATA_PT_lightprobe_bake_offset =  __class__ ('DATA_PT_lightprobe_bake
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var probe = context.lightprobe;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (probe, 'surface_bias');
-		col.prop (probe, 'escape_bias');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'surface_bias');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'escape_bias');
+		}) ();
 	});}
 });
 export var DATA_PT_lightprobe_bake_clamping =  __class__ ('DATA_PT_lightprobe_bake_clamping', [DataButtonsPanel, Panel], {
@@ -417,7 +642,7 @@ export var DATA_PT_lightprobe_bake_clamping =  __class__ ('DATA_PT_lightprobe_ba
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -433,9 +658,18 @@ export var DATA_PT_lightprobe_bake_clamping =  __class__ ('DATA_PT_lightprobe_ba
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var probe = context.lightprobe;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (probe, 'clamp_direct', __kwargtrans__ ({text: 'Direct Light'}));
-		col.prop (probe, 'clamp_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'clamp_direct', __kwargtrans__ ({text: 'Direct Light'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'clamp_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
+		}) ();
 	});}
 });
 export var DATA_PT_lightprobe_parallax =  __class__ ('DATA_PT_lightprobe_parallax', [DataButtonsPanel, Panel], {
@@ -446,7 +680,7 @@ export var DATA_PT_lightprobe_parallax =  __class__ ('DATA_PT_lightprobe_paralla
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -459,12 +693,12 @@ export var DATA_PT_lightprobe_parallax =  __class__ ('DATA_PT_lightprobe_paralla
 		else {
 		}
 		var engine = context.engine;
-		return context.lightprobe && context.lightprobe.py_metatype == 'SPHERE' && __in__ (engine, cls.COMPAT_ENGINES);
+		return context.lightprobe && __eq__ (context.lightprobe.py_metatype, 'SPHERE') && __in__ (engine, cls.COMPAT_ENGINES);
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -477,12 +711,15 @@ export var DATA_PT_lightprobe_parallax =  __class__ ('DATA_PT_lightprobe_paralla
 		else {
 		}
 		var probe = context.lightprobe;
-		self.layout.prop (probe, 'use_custom_parallax', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'use_custom_parallax', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -497,14 +734,26 @@ export var DATA_PT_lightprobe_parallax =  __class__ ('DATA_PT_lightprobe_paralla
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var probe = context.lightprobe;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = probe.use_custom_parallax;
-		col.prop (probe, 'parallax_type');
-		if (probe.parallax_type == 'ELIPSOID') {
-			col.prop (probe, 'parallax_distance', __kwargtrans__ ({text: 'Radius'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, probe, 'parallax_type');
+		}) ();
+		if (__eq__ (probe.parallax_type, 'ELIPSOID')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'parallax_distance', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
 		}
 		else {
-			col.prop (probe, 'parallax_distance', __kwargtrans__ ({text: 'Size'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'parallax_distance', __kwargtrans__ ({text: 'Size'}));
+			}) ();
 		}
 	});}
 });
@@ -516,7 +765,7 @@ export var DATA_PT_lightprobe_display =  __class__ ('DATA_PT_lightprobe_display'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -533,19 +782,40 @@ export var DATA_PT_lightprobe_display =  __class__ ('DATA_PT_lightprobe_display'
 		layout.use_property_decorate = false;
 		var ob = context.object;
 		var probe = context.lightprobe;
-		var col = layout.column ();
-		if (probe.py_metatype == 'PLANE') {
-			col.prop (ob, 'empty_display_size', __kwargtrans__ ({text: 'Arrow Size'}));
-			col.prop (probe, 'show_influence');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (probe.py_metatype, 'PLANE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'empty_display_size', __kwargtrans__ ({text: 'Arrow Size'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_influence');
+			}) ();
 		}
 		if (__in__ (probe.py_metatype, new set (['VOLUME', 'SPHERE']))) {
-			col.prop (probe, 'show_influence');
-			col.prop (probe, 'show_clip');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_influence');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_clip');
+			}) ();
 		}
-		if (probe.py_metatype == 'SPHERE') {
-			var sub = col.column ();
+		if (__eq__ (probe.py_metatype, 'SPHERE')) {
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			sub.active = probe.use_custom_parallax;
-			sub.prop (probe, 'show_parallax');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_parallax');
+			}) ();
 		}
 	});}
 });
@@ -557,7 +827,7 @@ export var DATA_PT_lightprobe_display_eevee =  __class__ ('DATA_PT_lightprobe_di
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -574,25 +844,61 @@ export var DATA_PT_lightprobe_display_eevee =  __class__ ('DATA_PT_lightprobe_di
 		layout.use_property_decorate = false;
 		var ob = context.object;
 		var probe = context.lightprobe;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		if (__in__ (probe.py_metatype, new set (['VOLUME', 'SPHERE']))) {
-			var row = col.row (__kwargtrans__ ({heading: 'Data'}));
-			row.prop (probe, 'use_data_display', __kwargtrans__ ({text: ''}));
-			var subrow = row.row ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Data'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'use_data_display', __kwargtrans__ ({text: ''}));
+			}) ();
+			var subrow = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
 			subrow.active = probe.use_data_display;
-			subrow.prop (probe, 'data_display_size', __kwargtrans__ ({text: 'Size', slider: true}));
-			col.prop (probe, 'show_clip');
-			col.prop (probe, 'show_influence');
+			(function () {
+				var __accu0__ = subrow;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'data_display_size', __kwargtrans__ ({text: 'Size', slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_clip');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_influence');
+			}) ();
 		}
-		if (probe.py_metatype == 'SPHERE') {
-			var sub = col.column ();
+		if (__eq__ (probe.py_metatype, 'SPHERE')) {
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			sub.active = probe.use_custom_parallax;
-			sub.prop (probe, 'show_parallax');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_parallax');
+			}) ();
 		}
-		if (probe.py_metatype == 'PLANE') {
-			col.prop (ob, 'empty_display_size', __kwargtrans__ ({text: 'Arrow Size'}));
-			col.prop (probe, 'use_data_display', __kwargtrans__ ({text: 'Capture'}));
-			col.prop (probe, 'show_influence');
+		if (__eq__ (probe.py_metatype, 'PLANE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, ob, 'empty_display_size', __kwargtrans__ ({text: 'Arrow Size'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'use_data_display', __kwargtrans__ ({text: 'Capture'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, probe, 'show_influence');
+			}) ();
 		}
 	});}
 });
@@ -602,11 +908,36 @@ export var DATA_PT_lightprobe_animation =  __class__ ('DATA_PT_lightprobe_animat
 	_animated_id_context_property: 'lightprobe'
 });
 export var classes = tuple ([DATA_PT_context_lightprobe, DATA_PT_lightprobe, DATA_PT_lightprobe_eevee, DATA_PT_lightprobe_capture, DATA_PT_lightprobe_bake, DATA_PT_lightprobe_bake_resolution, DATA_PT_lightprobe_bake_capture, DATA_PT_lightprobe_bake_clamping, DATA_PT_lightprobe_bake_offset, DATA_PT_lightprobe_visibility, DATA_PT_lightprobe_parallax, DATA_PT_lightprobe_display, DATA_PT_lightprobe_display_eevee, DATA_PT_lightprobe_animation]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_data_lightprobe.map
 export {Panel, PropertiesAnimationMixin, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DataButtonsPanel': DataButtonsPanel = value; break;
+		case 'DATA_PT_context_lightprobe': DATA_PT_context_lightprobe = value; break;
+		case 'DATA_PT_lightprobe': DATA_PT_lightprobe = value; break;
+		case 'DATA_PT_lightprobe_eevee': DATA_PT_lightprobe_eevee = value; break;
+		case 'DATA_PT_lightprobe_visibility': DATA_PT_lightprobe_visibility = value; break;
+		case 'DATA_PT_lightprobe_capture': DATA_PT_lightprobe_capture = value; break;
+		case 'DATA_PT_lightprobe_bake': DATA_PT_lightprobe_bake = value; break;
+		case 'DATA_PT_lightprobe_bake_resolution': DATA_PT_lightprobe_bake_resolution = value; break;
+		case 'DATA_PT_lightprobe_bake_capture': DATA_PT_lightprobe_bake_capture = value; break;
+		case 'DATA_PT_lightprobe_bake_offset': DATA_PT_lightprobe_bake_offset = value; break;
+		case 'DATA_PT_lightprobe_bake_clamping': DATA_PT_lightprobe_bake_clamping = value; break;
+		case 'DATA_PT_lightprobe_parallax': DATA_PT_lightprobe_parallax = value; break;
+		case 'DATA_PT_lightprobe_display': DATA_PT_lightprobe_display = value; break;
+		case 'DATA_PT_lightprobe_display_eevee': DATA_PT_lightprobe_display_eevee = value; break;
+		case 'DATA_PT_lightprobe_animation': DATA_PT_lightprobe_animation = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

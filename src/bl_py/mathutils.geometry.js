@@ -9,3 +9,12 @@ export var intersect_point_line = null;
 export var tessellate_polygon = null;
 
 //# sourceMappingURL=mathutils.geometry.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'barycentric_transform': barycentric_transform = value; break;
+		case 'intersect_line_plane': intersect_line_plane = value; break;
+		case 'intersect_point_line': intersect_point_line = value; break;
+		case 'tessellate_polygon': tessellate_polygon = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -12,7 +12,7 @@ var __name__ = 'bl_operators.view3d';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -23,8 +23,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -32,7 +38,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -57,7 +63,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -76,7 +82,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -89,18 +95,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -111,12 +120,39 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
 };
-export var bl_file_extensions_image_and_movie = ';'.join (_joined (bpy.path.extensions_image, bpy.path.extensions_movie));
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
+export var bl_file_extensions_image_and_movie = (function () {
+	var __accu0__ = ';';
+	return __call__ (__accu0__.join, __accu0__, __call__ (_joined, null, bpy.path.extensions_image, bpy.path.extensions_movie));
+}) ();
 export var VIEW3D_OT_edit_mesh_extrude_individual_move =  __class__ ('VIEW3D_OT_edit_mesh_extrude_individual_move', [Operator], {
 	__module__: __name__,
 	bl_label: 'Extrude Individual and Move',
@@ -124,7 +160,7 @@ export var VIEW3D_OT_edit_mesh_extrude_individual_move =  __class__ ('VIEW3D_OT_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -136,12 +172,12 @@ export var VIEW3D_OT_edit_mesh_extrude_individual_move =  __class__ ('VIEW3D_OT_
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -153,33 +189,45 @@ export var VIEW3D_OT_edit_mesh_extrude_individual_move =  __class__ ('VIEW3D_OT_
 		}
 		else {
 		}
-		var object_report_if_active_shape_key_is_locked = _member ('bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
+		var object_report_if_active_shape_key_is_locked = __call__ (_member, null, 'bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
 		var ob = context.object;
-		if (object_report_if_active_shape_key_is_locked (ob, self)) {
+		if (__call__ (object_report_if_active_shape_key_is_locked, null, ob, self)) {
 			return new set (['CANCELLED']);
 		}
 		var mesh = ob.data;
 		var select_mode = context.tool_settings.mesh_select_mode;
 		var totface = mesh.total_face_sel;
 		var totedge = mesh.total_edge_sel;
-		if (select_mode [2] && totface == 1) {
-			bpy.ops.mesh.extrude_region_move ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+		if (__getitem__ (select_mode, 2) && __eq__ (totface, 1)) {
+			(function () {
+				var __accu0__ = bpy.ops.mesh;
+				return __call__ (__accu0__.extrude_region_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+			}) ();
 		}
-		else if (select_mode [2] && totface > 1) {
-			bpy.ops.mesh.extrude_faces_move ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_shrink_fatten: dict ({'release_confirm': false})}));
+		else if (__getitem__ (select_mode, 2) && __gt__ (totface, 1)) {
+			(function () {
+				var __accu0__ = bpy.ops.mesh;
+				return __call__ (__accu0__.extrude_faces_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_shrink_fatten: dict ({'release_confirm': false})}));
+			}) ();
 		}
-		else if (select_mode [1] && totedge >= 1) {
-			bpy.ops.mesh.extrude_edges_move ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'release_confirm': false})}));
+		else if (__getitem__ (select_mode, 1) && __ge__ (totedge, 1)) {
+			(function () {
+				var __accu0__ = bpy.ops.mesh;
+				return __call__ (__accu0__.extrude_edges_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'release_confirm': false})}));
+			}) ();
 		}
 		else {
-			bpy.ops.mesh.extrude_vertices_move ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'release_confirm': false})}));
+			(function () {
+				var __accu0__ = bpy.ops.mesh;
+				return __call__ (__accu0__.extrude_vertices_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'release_confirm': false})}));
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -192,7 +240,10 @@ export var VIEW3D_OT_edit_mesh_extrude_individual_move =  __class__ ('VIEW3D_OT_
 		}
 		else {
 		}
-		return self.execute (context);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 	});}
 });
 export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_extrude_move', [Operator], {
@@ -202,7 +253,7 @@ export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_e
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -214,12 +265,12 @@ export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_e
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get extrude_region () {return function (operator, context, use_vert_normals, dissolve_and_intersect) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -233,37 +284,52 @@ export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_e
 		}
 		else {
 		}
-		var object_report_if_active_shape_key_is_locked = _member ('bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
+		var object_report_if_active_shape_key_is_locked = __call__ (_member, null, 'bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
 		var ob = context.object;
-		if (object_report_if_active_shape_key_is_locked (ob, operator)) {
+		if (__call__ (object_report_if_active_shape_key_is_locked, null, ob, operator)) {
 			return new set (['CANCELLED']);
 		}
 		var mesh = ob.data;
 		var totface = mesh.total_face_sel;
 		var totedge = mesh.total_edge_sel;
-		if (totface >= 1) {
+		if (__ge__ (totface, 1)) {
 			if (use_vert_normals) {
-				bpy.ops.mesh.extrude_region_shrink_fatten ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_shrink_fatten: dict ({'release_confirm': false})}));
+				(function () {
+					var __accu0__ = bpy.ops.mesh;
+					return __call__ (__accu0__.extrude_region_shrink_fatten, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_shrink_fatten: dict ({'release_confirm': false})}));
+				}) ();
 			}
 			else if (dissolve_and_intersect) {
-				bpy.ops.mesh.extrude_manifold ('INVOKE_REGION_WIN', __kwargtrans__ ({MESH_OT_extrude_region: dict ({'use_dissolve_ortho_edges': true}), TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+				(function () {
+					var __accu0__ = bpy.ops.mesh;
+					return __call__ (__accu0__.extrude_manifold, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({MESH_OT_extrude_region: dict ({'use_dissolve_ortho_edges': true}), TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+				}) ();
 			}
 			else {
-				bpy.ops.mesh.extrude_region_move ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+				(function () {
+					var __accu0__ = bpy.ops.mesh;
+					return __call__ (__accu0__.extrude_region_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+				}) ();
 			}
 		}
-		else if (totedge == 1) {
-			bpy.ops.mesh.extrude_region_move ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'constraint_axis': tuple ([false, false, false]), 'release_confirm': false})}));
+		else if (__eq__ (totedge, 1)) {
+			(function () {
+				var __accu0__ = bpy.ops.mesh;
+				return __call__ (__accu0__.extrude_region_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'constraint_axis': tuple ([false, false, false]), 'release_confirm': false})}));
+			}) ();
 		}
 		else {
-			bpy.ops.mesh.extrude_region_move ('INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'release_confirm': false})}));
+			(function () {
+				var __accu0__ = bpy.ops.mesh;
+				return __call__ (__accu0__.extrude_region_move, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({TRANSFORM_OT_translate: dict ({'release_confirm': false})}));
+			}) ();
 		}
 		return new set (['FINISHED']);
 	};},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -275,12 +341,15 @@ export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_e
 		}
 		else {
 		}
-		return VIEW3D_OT_edit_mesh_extrude_move.extrude_region (self, context, false, self.dissolve_and_intersect);
+		return (function () {
+			var __accu0__ = VIEW3D_OT_edit_mesh_extrude_move;
+			return __call__ (__accu0__.extrude_region, __accu0__, self, context, false, self.dissolve_and_intersect);
+		}) ();
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -293,10 +362,13 @@ export var VIEW3D_OT_edit_mesh_extrude_move =  __class__ ('VIEW3D_OT_edit_mesh_e
 		}
 		else {
 		}
-		return self.execute (context);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 	});}
 });
-VIEW3D_OT_edit_mesh_extrude_move.__annotations__ = dict ({'dissolve_and_intersect': BoolProperty (__kwargtrans__ ({py_name: 'Dissolve and Intersect', py_default: false, description: 'Dissolves adjacent faces and intersects new geometry'}))});
+VIEW3D_OT_edit_mesh_extrude_move.__annotations__ = dict ({'dissolve_and_intersect': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Dissolve and Intersect', py_default: false, description: 'Dissolves adjacent faces and intersects new geometry'}))});
 export var VIEW3D_OT_edit_mesh_extrude_shrink_fatten =  __class__ ('VIEW3D_OT_edit_mesh_extrude_shrink_fatten', [Operator], {
 	__module__: __name__,
 	bl_label: 'Extrude and Move on Individual Normals',
@@ -304,7 +376,7 @@ export var VIEW3D_OT_edit_mesh_extrude_shrink_fatten =  __class__ ('VIEW3D_OT_ed
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -316,12 +388,12 @@ export var VIEW3D_OT_edit_mesh_extrude_shrink_fatten =  __class__ ('VIEW3D_OT_ed
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -333,12 +405,15 @@ export var VIEW3D_OT_edit_mesh_extrude_shrink_fatten =  __class__ ('VIEW3D_OT_ed
 		}
 		else {
 		}
-		return VIEW3D_OT_edit_mesh_extrude_move.extrude_region (self, context, true, false);
+		return (function () {
+			var __accu0__ = VIEW3D_OT_edit_mesh_extrude_move;
+			return __call__ (__accu0__.extrude_region, __accu0__, self, context, true, false);
+		}) ();
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -351,7 +426,10 @@ export var VIEW3D_OT_edit_mesh_extrude_shrink_fatten =  __class__ ('VIEW3D_OT_ed
 		}
 		else {
 		}
-		return self.execute (context);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 	});}
 });
 export var VIEW3D_OT_edit_mesh_extrude_manifold_normal =  __class__ ('VIEW3D_OT_edit_mesh_extrude_manifold_normal', [Operator], {
@@ -361,7 +439,7 @@ export var VIEW3D_OT_edit_mesh_extrude_manifold_normal =  __class__ ('VIEW3D_OT_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -373,12 +451,12 @@ export var VIEW3D_OT_edit_mesh_extrude_manifold_normal =  __class__ ('VIEW3D_OT_
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -390,17 +468,20 @@ export var VIEW3D_OT_edit_mesh_extrude_manifold_normal =  __class__ ('VIEW3D_OT_
 		}
 		else {
 		}
-		var object_report_if_active_shape_key_is_locked = _member ('bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
-		if (object_report_if_active_shape_key_is_locked (context.object, self)) {
+		var object_report_if_active_shape_key_is_locked = __call__ (_member, null, 'bpy_extras.object_utils', 'object_report_if_active_shape_key_is_locked');
+		if (__call__ (object_report_if_active_shape_key_is_locked, null, context.object, self)) {
 			return new set (['CANCELLED']);
 		}
-		bpy.ops.mesh.extrude_manifold ('INVOKE_REGION_WIN', __kwargtrans__ ({MESH_OT_extrude_region: dict ({'use_dissolve_ortho_edges': true}), TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+		(function () {
+			var __accu0__ = bpy.ops.mesh;
+			return __call__ (__accu0__.extrude_manifold, __accu0__, 'INVOKE_REGION_WIN', __kwargtrans__ ({MESH_OT_extrude_region: dict ({'use_dissolve_ortho_edges': true}), TRANSFORM_OT_translate: dict ({'orient_type': 'NORMAL', 'constraint_axis': tuple ([false, false, true]), 'release_confirm': false})}));
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -413,7 +494,10 @@ export var VIEW3D_OT_edit_mesh_extrude_manifold_normal =  __class__ ('VIEW3D_OT_
 		}
 		else {
 		}
-		return self.execute (context);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 	});}
 });
 export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizmo_set', [Operator], {
@@ -424,7 +508,7 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -437,12 +521,12 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 		else {
 		}
 		var area = context.area;
-		return area && area.py_metatype == 'VIEW_3D';
+		return area && __eq__ (area.py_metatype, 'VIEW_3D');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -457,23 +541,38 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 		var space_data = context.space_data;
 		space_data.show_gizmo = true;
 		var attrs = tuple (['show_gizmo_object_translate', 'show_gizmo_object_rotate', 'show_gizmo_object_scale']);
-		var attr_active = tuple ((function () {
+		var attr_active = __call__ (tuple, null, (function () {
 			var __accu0__ = [];
-			for (var t of self.py_metatype) {
-				__accu0__.append (attrs [tuple (['TRANSLATE', 'ROTATE', 'SCALE']).index (t)]);
+			var __iterable0__ = self.py_metatype;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var t = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __getitem__ (attrs, (function () {
+						var __accu2__ = tuple (['TRANSLATE', 'ROTATE', 'SCALE']);
+						return __call__ (__accu2__.index, __accu2__, t);
+					}) ()));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
 		if (self.extend) {
-			for (var attr of attrs) {
+			var __iterable0__ = attrs;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var attr = __getitem__ (__iterable0__, __index0__);
 				if (__in__ (attr, attr_active)) {
-					setattr (space_data, attr, true);
+					__call__ (setattr, null, space_data, attr, true);
 				}
 			}
 		}
 		else {
-			for (var attr of attrs) {
-				setattr (space_data, attr, __in__ (attr, attr_active));
+			var __iterable0__ = attrs;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var attr = __getitem__ (__iterable0__, __index0__);
+				__call__ (setattr, null, space_data, attr, __in__ (attr, attr_active));
 			}
 		}
 		return new set (['FINISHED']);
@@ -481,7 +580,7 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 	get invoke () {return __get__ (this, function (self, context, event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -494,13 +593,19 @@ export var VIEW3D_OT_transform_gizmo_set =  __class__ ('VIEW3D_OT_transform_gizm
 		}
 		else {
 		}
-		if (!(self.properties.is_property_set ('extend'))) {
+		if (!((function () {
+			var __accu0__ = self.properties;
+			return __call__ (__accu0__.is_property_set, __accu0__, 'extend');
+		}) ())) {
 			self.extend = event.shift;
 		}
-		return self.execute (context);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 	});}
 });
-VIEW3D_OT_transform_gizmo_set.__annotations__ = dict ({'extend': BoolProperty (__kwargtrans__ ({py_name: 'Extend', py_default: false})), 'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TRANSLATE', 'Move', '']), tuple (['ROTATE', 'Rotate', '']), tuple (['SCALE', 'Scale', ''])]), options: new set (['ENUM_FLAG'])}))});
+VIEW3D_OT_transform_gizmo_set.__annotations__ = dict ({'extend': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Extend', py_default: false})), 'type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['TRANSLATE', 'Move', '']), tuple (['ROTATE', 'Rotate', '']), tuple (['SCALE', 'Scale', ''])]), options: new set (['ENUM_FLAG'])}))});
 export var VIEW3D_FH_empty_image =  __class__ ('VIEW3D_FH_empty_image', [FileHandler], {
 	__module__: __name__,
 	bl_idname: 'VIEW3D_FH_empty_image',
@@ -510,7 +615,7 @@ export var VIEW3D_FH_empty_image =  __class__ ('VIEW3D_FH_empty_image', [FileHan
 	get poll_drop () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -522,11 +627,11 @@ export var VIEW3D_FH_empty_image =  __class__ ('VIEW3D_FH_empty_image', [FileHan
 		}
 		else {
 		}
-		if (!(context.space_data) || context.space_data.py_metatype != 'VIEW_3D') {
+		if (!(context.space_data) || __ne__ (context.space_data.py_metatype, 'VIEW_3D')) {
 			return false;
 		}
 		var rv3d = context.space_data.region_3d;
-		return rv3d.view_perspective == 'PERSP' || rv3d.view_perspective == 'ORTHO';
+		return __eq__ (rv3d.view_perspective, 'PERSP') || __eq__ (rv3d.view_perspective, 'ORTHO');
 	});}
 });
 export var VIEW3D_FH_camera_background_image =  __class__ ('VIEW3D_FH_camera_background_image', [FileHandler], {
@@ -538,7 +643,7 @@ export var VIEW3D_FH_camera_background_image =  __class__ ('VIEW3D_FH_camera_bac
 	get poll_drop () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -550,11 +655,11 @@ export var VIEW3D_FH_camera_background_image =  __class__ ('VIEW3D_FH_camera_bac
 		}
 		else {
 		}
-		if (!(context.space_data) || context.space_data.py_metatype != 'VIEW_3D') {
+		if (!(context.space_data) || __ne__ (context.space_data.py_metatype, 'VIEW_3D')) {
 			return false;
 		}
 		var rv3d = context.space_data.region_3d;
-		return rv3d.view_perspective == 'CAMERA';
+		return __eq__ (rv3d.view_perspective, 'CAMERA');
 	});}
 });
 export var VIEW3D_FH_vdb_volume =  __class__ ('VIEW3D_FH_vdb_volume', [FileHandler], {
@@ -566,7 +671,7 @@ export var VIEW3D_FH_vdb_volume =  __class__ ('VIEW3D_FH_vdb_volume', [FileHandl
 	get poll_drop () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -578,10 +683,33 @@ export var VIEW3D_FH_vdb_volume =  __class__ ('VIEW3D_FH_vdb_volume', [FileHandl
 		}
 		else {
 		}
-		return context.space_data && context.space_data.py_metatype == 'VIEW_3D';
+		return context.space_data && __eq__ (context.space_data.py_metatype, 'VIEW_3D');
 	});}
 });
 export var classes = tuple ([VIEW3D_OT_edit_mesh_extrude_individual_move, VIEW3D_OT_edit_mesh_extrude_move, VIEW3D_OT_edit_mesh_extrude_shrink_fatten, VIEW3D_OT_edit_mesh_extrude_manifold_normal, VIEW3D_OT_transform_gizmo_set, VIEW3D_FH_camera_background_image, VIEW3D_FH_empty_image, VIEW3D_FH_vdb_volume]);
 
 //# sourceMappingURL=bl_operators.view3d.map
 export {BoolProperty, EnumProperty, FileHandler, Operator, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case 'bl_file_extensions_image_and_movie': bl_file_extensions_image_and_movie = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_individual_move': VIEW3D_OT_edit_mesh_extrude_individual_move = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_move': VIEW3D_OT_edit_mesh_extrude_move = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_shrink_fatten': VIEW3D_OT_edit_mesh_extrude_shrink_fatten = value; break;
+		case 'VIEW3D_OT_edit_mesh_extrude_manifold_normal': VIEW3D_OT_edit_mesh_extrude_manifold_normal = value; break;
+		case 'VIEW3D_OT_transform_gizmo_set': VIEW3D_OT_transform_gizmo_set = value; break;
+		case 'VIEW3D_FH_empty_image': VIEW3D_FH_empty_image = value; break;
+		case 'VIEW3D_FH_camera_background_image': VIEW3D_FH_camera_background_image = value; break;
+		case 'VIEW3D_FH_vdb_volume': VIEW3D_FH_vdb_volume = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

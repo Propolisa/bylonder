@@ -13,7 +13,7 @@ var __name__ = 'bl_operators.sequencer';
 export var _animated_properties_get = function (strip) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -25,11 +25,17 @@ export var _animated_properties_get = function (strip) {
 	else {
 	}
 	var animated_properties = [];
-	if (hasattr (strip, 'volume')) {
-		animated_properties.append ('volume');
+	if (__call__ (hasattr, null, strip, 'volume')) {
+		(function () {
+			var __accu0__ = animated_properties;
+			return __call__ (__accu0__.append, __accu0__, 'volume');
+		}) ();
 	}
-	if (hasattr (strip, 'blend_alpha')) {
-		animated_properties.append ('blend_alpha');
+	if (__call__ (hasattr, null, strip, 'blend_alpha')) {
+		(function () {
+			var __accu0__ = animated_properties;
+			return __call__ (__accu0__.append, __accu0__, 'blend_alpha');
+		}) ();
 	}
 	return animated_properties;
 };
@@ -41,7 +47,7 @@ export var SequencerCrossfadeSounds =  __class__ ('SequencerCrossfadeSounds', [O
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -58,12 +64,12 @@ export var SequencerCrossfadeSounds =  __class__ ('SequencerCrossfadeSounds', [O
 			return false;
 		}
 		var strip = context.active_strip;
-		return strip && strip.py_metatype == 'SOUND';
+		return strip && __eq__ (strip.py_metatype, 'SOUND');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -78,8 +84,11 @@ export var SequencerCrossfadeSounds =  __class__ ('SequencerCrossfadeSounds', [O
 		var scene = context.sequencer_scene;
 		var strip1 = null;
 		var strip2 = null;
-		for (var strip of scene.sequence_editor.strips) {
-			if (strip.select && strip.py_metatype == 'SOUND') {
+		var __iterable0__ = scene.sequence_editor.strips;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var strip = __getitem__ (__iterable0__, __index0__);
+			if (strip.select && __eq__ (strip.py_metatype, 'SOUND')) {
 				if (strip1 === null) {
 					var strip1 = strip;
 				}
@@ -93,24 +102,42 @@ export var SequencerCrossfadeSounds =  __class__ ('SequencerCrossfadeSounds', [O
 			}
 		}
 		if (strip2 === null) {
-			self.report (new set (['ERROR']), 'Select 2 sound strips');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Select 2 sound strips');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (strip1.left_handle > strip2.left_handle) {
+		if (__gt__ (strip1.left_handle, strip2.left_handle)) {
 			var __left0__ = tuple ([strip2, strip1]);
 			var strip1 = __left0__ [0];
 			var strip2 = __left0__ [1];
 		}
-		if (strip1.right_handle > strip2.left_handle) {
-			strip1.keyframe_insert ('volume', __kwargtrans__ ({frame: strip2.left_handle}));
+		if (__gt__ (strip1.right_handle, strip2.left_handle)) {
+			(function () {
+				var __accu0__ = strip1;
+				return __call__ (__accu0__.keyframe_insert, __accu0__, 'volume', __kwargtrans__ ({frame: strip2.left_handle}));
+			}) ();
 			strip1.volume = 0;
-			strip1.keyframe_insert ('volume', __kwargtrans__ ({frame: strip1.right_handle}));
-			strip2.keyframe_insert ('volume', __kwargtrans__ ({frame: strip1.right_handle}));
+			(function () {
+				var __accu0__ = strip1;
+				return __call__ (__accu0__.keyframe_insert, __accu0__, 'volume', __kwargtrans__ ({frame: strip1.right_handle}));
+			}) ();
+			(function () {
+				var __accu0__ = strip2;
+				return __call__ (__accu0__.keyframe_insert, __accu0__, 'volume', __kwargtrans__ ({frame: strip1.right_handle}));
+			}) ();
 			strip2.volume = 0;
-			strip2.keyframe_insert ('volume', __kwargtrans__ ({frame: strip2.left_handle}));
+			(function () {
+				var __accu0__ = strip2;
+				return __call__ (__accu0__.keyframe_insert, __accu0__, 'volume', __kwargtrans__ ({frame: strip2.left_handle}));
+			}) ();
 			return new set (['FINISHED']);
 		}
-		self.report (new set (['ERROR']), "The selected strips don't overlap");
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), "The selected strips don't overlap");
+		}) ();
 		return new set (['CANCELLED']);
 	});}
 });
@@ -122,7 +149,7 @@ export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Opera
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -139,12 +166,12 @@ export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Opera
 			return false;
 		}
 		var strip = context.active_strip;
-		return strip && strip.py_metatype == 'MULTICAM';
+		return strip && __eq__ (strip.py_metatype, 'MULTICAM');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -159,11 +186,14 @@ export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Opera
 		var scene = context.sequencer_scene;
 		var camera = self.camera;
 		var strip = context.active_strip;
-		if (strip.multicam_source == camera || camera >= strip.channel) {
+		if (__eq__ (strip.multicam_source, camera) || __ge__ (camera, strip.channel)) {
 			return new set (['FINISHED']);
 		}
 		var cfra = scene.frame_current;
-		var right_strip = strip.py_split (__kwargtrans__ ({frame: cfra, split_method: 'SOFT'}));
+		var right_strip = (function () {
+			var __accu0__ = strip;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({frame: cfra, split_method: 'SOFT'}));
+		}) ();
 		if (right_strip) {
 			strip.select = false;
 			right_strip.select = true;
@@ -173,7 +203,7 @@ export var SequencerSplitMulticam =  __class__ ('SequencerSplitMulticam', [Opera
 		return new set (['FINISHED']);
 	});}
 });
-SequencerSplitMulticam.__annotations__ = dict ({'camera': IntProperty (__kwargtrans__ ({py_name: 'Camera', min: 1, max: 32, soft_min: 1, soft_max: 32, py_default: 1}))});
+SequencerSplitMulticam.__annotations__ = dict ({'camera': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Camera', min: 1, max: 32, soft_min: 1, soft_max: 32, py_default: 1}))});
 export var SequencerDeinterlaceSelectedMovies =  __class__ ('SequencerDeinterlaceSelectedMovies', [Operator], {
 	__module__: __name__,
 	bl_idname: 'sequencer.deinterlace_selected_movies',
@@ -182,7 +212,7 @@ export var SequencerDeinterlaceSelectedMovies =  __class__ ('SequencerDeinterlac
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -200,7 +230,7 @@ export var SequencerDeinterlaceSelectedMovies =  __class__ ('SequencerDeinterlac
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -213,8 +243,11 @@ export var SequencerDeinterlaceSelectedMovies =  __class__ ('SequencerDeinterlac
 		else {
 		}
 		var scene = context.sequencer_scene;
-		for (var strip of scene.sequence_editor.strips) {
-			if (strip.select && strip.py_metatype == 'MOVIE') {
+		var __iterable0__ = scene.sequence_editor.strips;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var strip = __getitem__ (__iterable0__, __index0__);
+			if (strip.select && __eq__ (strip.py_metatype, 'MOVIE')) {
 				strip.use_deinterlace = true;
 			}
 		}
@@ -229,7 +262,7 @@ export var SequencerFadesClear =  __class__ ('SequencerFadesClear', [Operator], 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -251,7 +284,7 @@ export var SequencerFadesClear =  __class__ ('SequencerFadesClear', [Operator], 
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -263,36 +296,66 @@ export var SequencerFadesClear =  __class__ ('SequencerFadesClear', [Operator], 
 		}
 		else {
 		}
-		var anim_utils = _member ('bpy_extras', 'anim_utils');
+		var anim_utils = __call__ (_member, null, 'bpy_extras', 'anim_utils');
 		var scene = context.sequencer_scene;
 		var animation_data = scene.animation_data;
 		if (animation_data === null) {
 			return new set (['CANCELLED']);
 		}
-		var channelbag = anim_utils.action_get_channelbag_for_slot (animation_data.action, animation_data.action_slot);
+		var channelbag = (function () {
+			var __accu0__ = anim_utils;
+			return __call__ (__accu0__.action_get_channelbag_for_slot, __accu0__, animation_data.action, animation_data.action_slot);
+		}) ();
 		if (channelbag === null) {
 			return new set (['CANCELLED']);
 		}
 		var fcurves = channelbag.fcurves;
 		var fcurve_map = (function () {
 			var __accu0__ = [];
-			for (var curve of fcurves) {
-				if (curve.data_path.startswith ('sequence_editor.strips')) {
-					__accu0__.append ([curve.data_path, curve]);
+			var __iterable0__ = fcurves;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var curve = __getitem__ (__iterable0__, __index0__);
+				if ((function () {
+					var __accu1__ = curve.data_path;
+					return __call__ (__accu1__.startswith, __accu1__, 'sequence_editor.strips');
+				}) ()) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, [curve.data_path, curve]);
+					}) ();
 				}
 			}
 			return dict (__accu0__);
 		}) ();
-		for (var strip of context.selected_strips) {
-			for (var animated_property of _animated_properties_get (strip)) {
-				var data_path = (strip.path_from_id () + '.') + animated_property;
-				var curve = fcurve_map.py_get (data_path);
+		var __iterable0__ = context.selected_strips;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var strip = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = __call__ (_animated_properties_get, null, strip);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var animated_property = __getitem__ (__iterable1__, __index1__);
+				var data_path = __add__ (__add__ ((function () {
+					var __accu0__ = strip;
+					return __call__ (__accu0__.path_from_id, __accu0__);
+				}) (), '.'), animated_property);
+				var curve = (function () {
+					var __accu0__ = fcurve_map;
+					return __call__ (__accu0__.py_get, __accu0__, data_path);
+				}) ();
 				if (curve) {
-					fcurves.remove (curve);
+					(function () {
+						var __accu0__ = fcurves;
+						return __call__ (__accu0__.remove, __accu0__, curve);
+					}) ();
 				}
-				setattr (strip, animated_property, 1.0);
+				__call__ (setattr, null, strip, animated_property, 1.0);
 			}
-			strip.invalidate_cache ('COMPOSITE');
+			(function () {
+				var __accu0__ = strip;
+				return __call__ (__accu0__.invalidate_cache, __accu0__, 'COMPOSITE');
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
@@ -305,7 +368,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -327,7 +390,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -339,39 +402,57 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		}
 		else {
 		}
-		var floor = _member ('math', 'floor');
+		var floor = __call__ (_member, null, 'math', 'floor');
 		var scene = context.sequencer_scene;
 		if (!(scene.animation_data)) {
-			scene.animation_data_create ();
+			(function () {
+				var __accu0__ = scene;
+				return __call__ (__accu0__.animation_data_create, __accu0__);
+			}) ();
 		}
 		if (!(scene.animation_data.action)) {
-			var action = bpy.data.actions.py_new (scene.py_name + 'Action');
+			var action = (function () {
+				var __accu0__ = bpy.data.actions;
+				return __call__ (__accu0__.py_new, __accu0__, __add__ (scene.py_name, 'Action'));
+			}) ();
 			scene.animation_data.action = action;
 		}
 		var strips = context.selected_strips;
 		if (!(strips)) {
-			self.report (new set (['ERROR']), 'No strips selected');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No strips selected');
+			}) ();
 			return new set (['CANCELLED']);
 		}
 		if (__in__ (self.py_metatype, new set (['CURSOR_TO', 'CURSOR_FROM']))) {
 			var strips = (function () {
 				var __accu0__ = [];
-				for (var strip of strips) {
-					if ((strip.left_handle < scene.frame_current && scene.frame_current < strip.right_handle)) {
-						__accu0__.append (strip);
+				var __iterable0__ = strips;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var strip = __getitem__ (__iterable0__, __index0__);
+					if ((__lt__ (strip.left_handle, scene.frame_current) && __lt__ (scene.frame_current, strip.right_handle))) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, strip);
+						}) ();
 					}
 				}
 				return __accu0__;
 			}) ();
 			if (!(strips)) {
-				self.report (new set (['ERROR']), 'Current frame not within strip framerange');
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Current frame not within strip framerange');
+				}) ();
 				return new set (['CANCELLED']);
 			}
 		}
-		var max_duration = min (strips, __kwargtrans__ ({key: (function __lambda__ (strip) {
+		var max_duration = __call__ (min, null, strips, __kwargtrans__ ({key: (function __lambda__ (strip) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -384,31 +465,67 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 			}
 			return strip.duration;
 		})})).duration;
-		var max_duration = (self.py_metatype == 'IN_OUT' ? floor (max_duration / 2.0) : max_duration);
+		var max_duration = (__eq__ (self.py_metatype, 'IN_OUT') ? __call__ (floor, null, __truediv__ (max_duration, 2.0)) : max_duration);
 		var faded_strips = [];
-		for (var strip of strips) {
-			var duration = self.calculate_fade_duration (context, strip);
-			var duration = min (duration, max_duration);
-			if (!(self.is_long_enough (strip, duration))) {
+		var __iterable0__ = strips;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var strip = __getitem__ (__iterable0__, __index0__);
+			var duration = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.calculate_fade_duration, __accu0__, context, strip);
+			}) ();
+			var duration = __call__ (min, null, duration, max_duration);
+			if (!((function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.is_long_enough, __accu0__, strip, duration);
+			}) ())) {
 				continue;
 			}
-			for (var animated_property of _animated_properties_get (strip)) {
-				var fade_fcurve = self.fade_find_or_create_fcurve (context, strip, animated_property);
-				var fades = self.calculate_fades (strip, fade_fcurve, animated_property, duration);
-				self.fade_animation_clear (fade_fcurve, fades);
-				self.fade_animation_create (fade_fcurve, fades);
+			var __iterable1__ = __call__ (_animated_properties_get, null, strip);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var animated_property = __getitem__ (__iterable1__, __index1__);
+				var fade_fcurve = (function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.fade_find_or_create_fcurve, __accu0__, context, strip, animated_property);
+				}) ();
+				var fades = (function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.calculate_fades, __accu0__, strip, fade_fcurve, animated_property, duration);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.fade_animation_clear, __accu0__, fade_fcurve, fades);
+				}) ();
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.fade_animation_create, __accu0__, fade_fcurve, fades);
+				}) ();
 			}
-			faded_strips.append (strip);
-			strip.invalidate_cache ('COMPOSITE');
+			(function () {
+				var __accu0__ = faded_strips;
+				return __call__ (__accu0__.append, __accu0__, strip);
+			}) ();
+			(function () {
+				var __accu0__ = strip;
+				return __call__ (__accu0__.invalidate_cache, __accu0__, 'COMPOSITE');
+			}) ();
 		}
-		var strip_string = (len (faded_strips) == 1 ? 'strip' : 'strips');
-		self.report (new set (['INFO']), rpt_ ('Added fade animation to {:d} {:s}').format (len (faded_strips), strip_string));
+		var strip_string = (__eq__ (__call__ (len, null, faded_strips), 1) ? 'strip' : 'strips');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), (function () {
+				var __accu1__ = __call__ (rpt_, null, 'Added fade animation to {:d} {:s}');
+				return __call__ (__accu1__.format, __accu1__, __call__ (len, null, faded_strips), strip_string);
+			}) ());
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get calculate_fade_duration () {return __get__ (this, function (self, context, strip) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -424,16 +541,16 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		var scene = context.sequencer_scene;
 		var frame_current = scene.frame_current;
 		var duration = 0.0;
-		if (self.py_metatype == 'CURSOR_TO') {
-			var duration = abs (frame_current - strip.left_handle);
+		if (__eq__ (self.py_metatype, 'CURSOR_TO')) {
+			var duration = __call__ (abs, null, __sub__ (frame_current, strip.left_handle));
 		}
-		else if (self.py_metatype == 'CURSOR_FROM') {
-			var duration = abs (strip.right_handle - frame_current);
+		else if (__eq__ (self.py_metatype, 'CURSOR_FROM')) {
+			var duration = __call__ (abs, null, __sub__ (strip.right_handle, frame_current));
 		}
 		else {
-			var duration = calculate_duration_frames (scene, self.duration_seconds);
+			var duration = __call__ (calculate_duration_frames, null, scene, self.duration_seconds);
 		}
-		return max (1, duration);
+		return __call__ (max, null, 1, duration);
 	});},
 	get is_long_enough () {return __get__ (this, function (self, strip, duration) {
 		if (typeof duration == 'undefined' || (duration != null && duration.hasOwnProperty ("__kwargtrans__"))) {;
@@ -441,7 +558,7 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -454,13 +571,13 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		}
 		else {
 		}
-		var minimum_duration = (self.py_metatype == 'IN_OUT' ? duration * 2 : duration);
-		return strip.duration >= minimum_duration;
+		var minimum_duration = (__eq__ (self.py_metatype, 'IN_OUT') ? __mul__ (duration, 2) : duration);
+		return __ge__ (strip.duration, minimum_duration);
 	});},
 	get calculate_fades () {return __get__ (this, function (self, strip, fade_fcurve, animated_property, duration) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -477,19 +594,25 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		}
 		var fades = [];
 		if (__in__ (self.py_metatype, new set (['IN', 'IN_OUT', 'CURSOR_TO']))) {
-			var fade = Fade (strip, fade_fcurve, 'IN', animated_property, duration);
-			fades.append (fade);
+			var fade = __call__ (Fade, null, strip, fade_fcurve, 'IN', animated_property, duration);
+			(function () {
+				var __accu0__ = fades;
+				return __call__ (__accu0__.append, __accu0__, fade);
+			}) ();
 		}
 		if (__in__ (self.py_metatype, new set (['OUT', 'IN_OUT', 'CURSOR_FROM']))) {
-			var fade = Fade (strip, fade_fcurve, 'OUT', animated_property, duration);
-			fades.append (fade);
+			var fade = __call__ (Fade, null, strip, fade_fcurve, 'OUT', animated_property, duration);
+			(function () {
+				var __accu0__ = fades;
+				return __call__ (__accu0__.append, __accu0__, fade);
+			}) ();
 		}
 		return fades;
 	});},
 	get fade_find_or_create_fcurve () {return __get__ (this, function (self, context, strip, animated_property) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -505,13 +628,19 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		}
 		var scene = context.sequencer_scene;
 		var action = scene.animation_data.action;
-		var searched_data_path = strip.path_from_id (animated_property);
-		return action.fcurve_ensure_for_datablock (scene, searched_data_path);
+		var searched_data_path = (function () {
+			var __accu0__ = strip;
+			return __call__ (__accu0__.path_from_id, __accu0__, animated_property);
+		}) ();
+		return (function () {
+			var __accu0__ = action;
+			return __call__ (__accu0__.fcurve_ensure_for_datablock, __accu0__, scene, searched_data_path);
+		}) ();
 	});},
 	get fade_animation_clear () {return __get__ (this, function (self, fade_fcurve, fades) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -525,11 +654,20 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		else {
 		}
 		var keyframe_points = fade_fcurve.keyframe_points;
-		for (var fade of fades) {
-			for (var keyframe of keyframe_points) {
+		var __iterable0__ = fades;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var fade = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = keyframe_points;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var keyframe = __getitem__ (__iterable1__, __index1__);
 				try {
-					if ((fade.start.x < keyframe.co [0] && keyframe.co [0] <= fade.end.x)) {
-						keyframe_points.remove (keyframe, __kwargtrans__ ({fast: true}));
+					if ((__lt__ (fade.start.x, __getitem__ (keyframe.co, 0)) && __le__ (__getitem__ (keyframe.co, 0), fade.end.x))) {
+						(function () {
+							var __accu0__ = keyframe_points;
+							return __call__ (__accu0__.remove, __accu0__, keyframe, __kwargtrans__ ({fast: true}));
+						}) ();
 					}
 				}
 				catch (__except0__) {
@@ -541,13 +679,16 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 					}
 				}
 			}
-			fade_fcurve.py_update ();
+			(function () {
+				var __accu0__ = fade_fcurve;
+				return __call__ (__accu0__.py_update, __accu0__);
+			}) ();
 		}
 	});},
 	get fade_animation_create () {return __get__ (this, function (self, fade_fcurve, fades) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -561,23 +702,35 @@ export var SequencerFadesAdd =  __class__ ('SequencerFadesAdd', [Operator], {
 		else {
 		}
 		var keyframe_points = fade_fcurve.keyframe_points;
-		for (var fade of fades) {
-			for (var point of tuple ([fade.start, fade.end])) {
-				keyframe_points.insert (__kwargtrans__ ({frame: point.x, value: point.y, options: new set (['FAST'])}));
+		var __iterable0__ = fades;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var fade = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = tuple ([fade.start, fade.end]);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var point = __getitem__ (__iterable1__, __index1__);
+				(function () {
+					var __accu0__ = keyframe_points;
+					return __call__ (__accu0__.insert, __accu0__, __kwargtrans__ ({frame: point.x, value: point.y, options: new set (['FAST'])}));
+				}) ();
 			}
 		}
-		fade_fcurve.py_update ();
-		keyframe_points [-(1)].co = keyframe_points [-(1)].co;
+		(function () {
+			var __accu0__ = fade_fcurve;
+			return __call__ (__accu0__.py_update, __accu0__);
+		}) ();
+		__getitem__ (keyframe_points, __neg__ (1)).co = __getitem__ (keyframe_points, __neg__ (1)).co;
 	});}
 });
-SequencerFadesAdd.__annotations__ = dict ({'duration_seconds': FloatProperty (__kwargtrans__ ({py_name: 'Fade Duration', description: 'Duration of the fade in seconds', py_default: 1.0, min: 0.01})), 'type': EnumProperty (__kwargtrans__ ({py_items: tuple ([tuple (['IN_OUT', 'Fade In and Out', 'Fade selected strips in and out']), tuple (['IN', 'Fade In', 'Fade in selected strips']), tuple (['OUT', 'Fade Out', 'Fade out selected strips']), tuple (['CURSOR_FROM', 'From Current Frame', 'Fade from the time cursor to the end of overlapping strips']), tuple (['CURSOR_TO', 'To Current Frame', 'Fade from the start of strips under the time cursor to the current frame'])]), py_name: 'Fade Type', description: 'Fade in, out, both in and out, to, or from the current frame. Default is both in and out', py_default: 'IN_OUT'}))});
+SequencerFadesAdd.__annotations__ = dict ({'duration_seconds': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Fade Duration', description: 'Duration of the fade in seconds', py_default: 1.0, min: 0.01})), 'type': __call__ (EnumProperty, null, __kwargtrans__ ({py_items: tuple ([tuple (['IN_OUT', 'Fade In and Out', 'Fade selected strips in and out']), tuple (['IN', 'Fade In', 'Fade in selected strips']), tuple (['OUT', 'Fade Out', 'Fade out selected strips']), tuple (['CURSOR_FROM', 'From Current Frame', 'Fade from the time cursor to the end of overlapping strips']), tuple (['CURSOR_TO', 'To Current Frame', 'Fade from the start of strips under the time cursor to the current frame'])]), py_name: 'Fade Type', description: 'Fade in, out, both in and out, to, or from the current frame. Default is both in and out', py_default: 'IN_OUT'}))});
 export var Fade =  __class__ ('Fade', [object], {
 	__module__: __name__,
 	__slots__: tuple (['type', 'animated_property', 'duration', 'max_value', 'start', 'end']),
 	get __init__ () {return __get__ (this, function (self, strip, fade_fcurve, ty, animated_property, duration) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -593,24 +746,27 @@ export var Fade =  __class__ ('Fade', [object], {
 		}
 		else {
 		}
-		var Vector = _member ('mathutils', 'Vector');
+		var Vector = __call__ (_member, null, 'mathutils', 'Vector');
 		self.py_metatype = ty;
 		self.animated_property = animated_property;
 		self.duration = duration;
-		self.max_value = self.calculate_max_value (strip, fade_fcurve);
-		if (ty == 'IN') {
-			self.start = Vector (tuple ([strip.left_handle, 0.0]));
-			self.end = Vector (tuple ([strip.left_handle + self.duration, self.max_value]));
+		self.max_value = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.calculate_max_value, __accu0__, strip, fade_fcurve);
+		}) ();
+		if (__eq__ (ty, 'IN')) {
+			self.start = __call__ (Vector, null, tuple ([strip.left_handle, 0.0]));
+			self.end = __call__ (Vector, null, tuple ([__add__ (strip.left_handle, self.duration), self.max_value]));
 		}
-		else if (ty == 'OUT') {
-			self.start = Vector (tuple ([strip.right_handle - self.duration, self.max_value]));
-			self.end = Vector (tuple ([strip.right_handle, 0.0]));
+		else if (__eq__ (ty, 'OUT')) {
+			self.start = __call__ (Vector, null, tuple ([__sub__ (strip.right_handle, self.duration), self.max_value]));
+			self.end = __call__ (Vector, null, tuple ([strip.right_handle, 0.0]));
 		}
 	});},
 	get calculate_max_value () {return __get__ (this, function (self, strip, fade_fcurve) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -625,35 +781,47 @@ export var Fade =  __class__ ('Fade', [object], {
 		}
 		var max_value = 0.0;
 		if (!(fade_fcurve.keyframe_points)) {
-			var max_value = getattr (strip, self.animated_property, 1.0);
+			var max_value = __call__ (getattr, null, strip, self.animated_property, 1.0);
 		}
 		else {
-			if (self.py_metatype == 'IN') {
-				var fade_end = strip.left_handle + self.duration;
+			if (__eq__ (self.py_metatype, 'IN')) {
+				var fade_end = __add__ (strip.left_handle, self.duration);
 				var keyframes = (function () {
 					var __accu0__ = [];
-					for (var k of fade_fcurve.keyframe_points) {
-						if (k.co [0] >= fade_end) {
-							__accu0__.append (k);
+					var __iterable0__ = fade_fcurve.keyframe_points;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var k = __getitem__ (__iterable0__, __index0__);
+						if (__ge__ (__getitem__ (k.co, 0), fade_end)) {
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, k);
+							}) ();
 						}
 					}
 					return __accu0__;
 				}) ();
 			}
-			if (self.py_metatype == 'OUT') {
-				var fade_start = strip.right_handle - self.duration;
+			if (__eq__ (self.py_metatype, 'OUT')) {
+				var fade_start = __sub__ (strip.right_handle, self.duration);
 				var keyframes = (function () {
 					var __accu0__ = [];
-					for (var k of list (py_reversed (fade_fcurve.keyframe_points))) {
-						if (k.co [0] <= fade_start) {
-							__accu0__.append (k);
+					var __iterable0__ = __call__ (list, null, __call__ (py_reversed, null, fade_fcurve.keyframe_points));
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var k = __getitem__ (__iterable0__, __index0__);
+						if (__le__ (__getitem__ (k.co, 0), fade_start)) {
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, k);
+							}) ();
 						}
 					}
 					return __accu0__;
 				}) ();
 			}
 			try {
-				var max_value = py_next (keyframes).co [1];
+				var max_value = __getitem__ (__call__ (py_next, null, keyframes).co, 1);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, StopIteration)) {
@@ -664,12 +832,12 @@ export var Fade =  __class__ ('Fade', [object], {
 				}
 			}
 		}
-		return (max_value > 0.0 ? max_value : 1.0);
+		return (__gt__ (max_value, 0.0) ? max_value : 1.0);
 	});},
 	get __repr__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -680,13 +848,16 @@ export var Fade =  __class__ ('Fade', [object], {
 		}
 		else {
 		}
-		return 'Fade {!r}: {!r} to {!r}'.format (self.py_metatype, self.start, self.end);
+		return (function () {
+			var __accu0__ = 'Fade {!r}: {!r} to {!r}';
+			return __call__ (__accu0__.format, __accu0__, self.py_metatype, self.start, self.end);
+		}) ();
 	});}
 });
 export var calculate_duration_frames = function (scene, duration_seconds) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -698,14 +869,14 @@ export var calculate_duration_frames = function (scene, duration_seconds) {
 	}
 	else {
 	}
-	return round ((duration_seconds * scene.render.fps) / scene.render.fps_base);
+	return __call__ (round, null, __truediv__ (__mul__ (duration_seconds, scene.render.fps), scene.render.fps_base));
 };
 export var SequencerFileHandlerBase =  __class__ ('SequencerFileHandlerBase', [object], {
 	__module__: __name__,
 	get poll_drop () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -717,7 +888,7 @@ export var SequencerFileHandlerBase =  __class__ ('SequencerFileHandlerBase', [o
 		}
 		else {
 		}
-		return context.region !== null && __in__ (context.region.py_metatype, new set (['WINDOW', 'PREVIEW'])) && context.area !== null && context.area.ui_type == 'SEQUENCE_EDITOR';
+		return context.region !== null && __in__ (context.region.py_metatype, new set (['WINDOW', 'PREVIEW'])) && context.area !== null && __eq__ (context.area.ui_type, 'SEQUENCE_EDITOR');
 	});}
 });
 export var SEQUENCER_FH_image_strip =  __class__ ('SEQUENCER_FH_image_strip', [FileHandler, SequencerFileHandlerBase], {
@@ -725,23 +896,51 @@ export var SEQUENCER_FH_image_strip =  __class__ ('SEQUENCER_FH_image_strip', [F
 	bl_idname: 'SEQUENCER_FH_image_strip',
 	bl_label: 'Image strip',
 	bl_import_operator: 'SEQUENCER_OT_image_strip_add',
-	bl_file_extensions: ';'.join (bpy.path.extensions_image)
+	bl_file_extensions: (function () {
+		var __accu0__ = ';';
+		return __call__ (__accu0__.join, __accu0__, bpy.path.extensions_image);
+	}) ()
 });
 export var SEQUENCER_FH_movie_strip =  __class__ ('SEQUENCER_FH_movie_strip', [FileHandler, SequencerFileHandlerBase], {
 	__module__: __name__,
 	bl_idname: 'SEQUENCER_FH_movie_strip',
 	bl_label: 'Movie strip',
 	bl_import_operator: 'SEQUENCER_OT_movie_strip_add',
-	bl_file_extensions: ';'.join (bpy.path.extensions_movie)
+	bl_file_extensions: (function () {
+		var __accu0__ = ';';
+		return __call__ (__accu0__.join, __accu0__, bpy.path.extensions_movie);
+	}) ()
 });
 export var SEQUENCER_FH_sound_strip =  __class__ ('SEQUENCER_FH_sound_strip', [FileHandler, SequencerFileHandlerBase], {
 	__module__: __name__,
 	bl_idname: 'SEQUENCER_FH_sound_strip',
 	bl_label: 'Sound strip',
 	bl_import_operator: 'SEQUENCER_OT_sound_strip_add',
-	bl_file_extensions: ';'.join (bpy.path.extensions_audio)
+	bl_file_extensions: (function () {
+		var __accu0__ = ';';
+		return __call__ (__accu0__.join, __accu0__, bpy.path.extensions_audio);
+	}) ()
 });
 export var classes = tuple ([SequencerCrossfadeSounds, SequencerSplitMulticam, SequencerDeinterlaceSelectedMovies, SequencerFadesClear, SequencerFadesAdd, SEQUENCER_FH_image_strip, SEQUENCER_FH_movie_strip, SEQUENCER_FH_sound_strip]);
 
 //# sourceMappingURL=bl_operators.sequencer.map
 export {EnumProperty, FileHandler, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module, rpt_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_animated_properties_get': _animated_properties_get = value; break;
+		case 'SequencerCrossfadeSounds': SequencerCrossfadeSounds = value; break;
+		case 'SequencerSplitMulticam': SequencerSplitMulticam = value; break;
+		case 'SequencerDeinterlaceSelectedMovies': SequencerDeinterlaceSelectedMovies = value; break;
+		case 'SequencerFadesClear': SequencerFadesClear = value; break;
+		case 'SequencerFadesAdd': SequencerFadesAdd = value; break;
+		case 'Fade': Fade = value; break;
+		case 'calculate_duration_frames': calculate_duration_frames = value; break;
+		case 'SequencerFileHandlerBase': SequencerFileHandlerBase = value; break;
+		case 'SEQUENCER_FH_image_strip': SEQUENCER_FH_image_strip = value; break;
+		case 'SEQUENCER_FH_movie_strip': SEQUENCER_FH_movie_strip = value; break;
+		case 'SEQUENCER_FH_sound_strip': SEQUENCER_FH_sound_strip = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

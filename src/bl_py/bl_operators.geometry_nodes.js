@@ -13,7 +13,7 @@ var __name__ = 'bl_operators.geometry_nodes';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -24,8 +24,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -33,7 +39,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -58,7 +64,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -77,7 +83,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -90,18 +96,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -112,10 +121,34 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var add_empty_geometry_node_group = function (py_name, add_geometry_input) {
 	if (typeof add_geometry_input == 'undefined' || (add_geometry_input != null && add_geometry_input.hasOwnProperty ("__kwargtrans__"))) {;
@@ -123,7 +156,7 @@ export var add_empty_geometry_node_group = function (py_name, add_geometry_input
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -135,15 +168,30 @@ export var add_empty_geometry_node_group = function (py_name, add_geometry_input
 	}
 	else {
 	}
-	var group = bpy.data.node_groups.py_new (py_name, 'GeometryNodeTree');
+	var group = (function () {
+		var __accu0__ = bpy.data.node_groups;
+		return __call__ (__accu0__.py_new, __accu0__, py_name, 'GeometryNodeTree');
+	}) ();
 	if (add_geometry_input) {
-		group.interface.new_socket (data_ ('Geometry'), __kwargtrans__ ({in_out: 'INPUT', socket_type: 'NodeSocketGeometry'}));
+		(function () {
+			var __accu0__ = group.interface;
+			return __call__ (__accu0__.new_socket, __accu0__, __call__ (data_, null, 'Geometry'), __kwargtrans__ ({in_out: 'INPUT', socket_type: 'NodeSocketGeometry'}));
+		}) ();
 	}
-	var input_node = group.nodes.py_new ('NodeGroupInput');
+	var input_node = (function () {
+		var __accu0__ = group.nodes;
+		return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupInput');
+	}) ();
 	input_node.select = false;
-	input_node.location.x = -(200) - input_node.width;
-	group.interface.new_socket (data_ ('Geometry'), __kwargtrans__ ({in_out: 'OUTPUT', socket_type: 'NodeSocketGeometry'}));
-	var output_node = group.nodes.py_new ('NodeGroupOutput');
+	input_node.location.x = __sub__ (__neg__ (200), input_node.width);
+	(function () {
+		var __accu0__ = group.interface;
+		return __call__ (__accu0__.new_socket, __accu0__, __call__ (data_, null, 'Geometry'), __kwargtrans__ ({in_out: 'OUTPUT', socket_type: 'NodeSocketGeometry'}));
+	}) ();
+	var output_node = (function () {
+		var __accu0__ = group.nodes;
+		return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupOutput');
+	}) ();
 	output_node.is_active_output = true;
 	output_node.select = false;
 	output_node.location.x = 200;
@@ -155,7 +203,7 @@ export var geometry_node_group_empty_new = function (py_name, add_geometry_input
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -167,9 +215,12 @@ export var geometry_node_group_empty_new = function (py_name, add_geometry_input
 	}
 	else {
 	}
-	var group = add_empty_geometry_node_group (py_name, add_geometry_input);
+	var group = __call__ (add_empty_geometry_node_group, null, py_name, add_geometry_input);
 	if (add_geometry_input) {
-		group.links.py_new (group.nodes [data_ ('Group Input')].outputs [0], group.nodes [data_ ('Group Output')].inputs [0]);
+		(function () {
+			var __accu0__ = group.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (__getitem__ (group.nodes, __call__ (data_, null, 'Group Input')).outputs, 0), __getitem__ (__getitem__ (group.nodes, __call__ (data_, null, 'Group Output')).inputs, 0));
+		}) ();
 	}
 	return group;
 };
@@ -179,7 +230,7 @@ export var geometry_node_group_empty_modifier_new = function (py_name, add_geome
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -191,14 +242,14 @@ export var geometry_node_group_empty_modifier_new = function (py_name, add_geome
 	}
 	else {
 	}
-	var group = geometry_node_group_empty_new (py_name, add_geometry_input);
+	var group = __call__ (geometry_node_group_empty_new, null, py_name, add_geometry_input);
 	group.is_modifier = true;
 	return group;
 };
 export var geometry_node_group_empty_tool_new = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -209,20 +260,29 @@ export var geometry_node_group_empty_tool_new = function (context) {
 	}
 	else {
 	}
-	var re = _module ('re');
-	var group = geometry_node_group_empty_new (data_ ('Tool'));
+	var re = __call__ (_module, null, 're');
+	var group = __call__ (geometry_node_group_empty_new, null, __call__ (data_, null, 'Tool'));
 	group.use_fake_user = true;
 	group.is_tool = true;
-	group.node_tool_idname = 'geometry.' + re.sub ('[^0-9a-z]+', '_', group.py_name.strip ().lower ());
+	group.node_tool_idname = __add__ ('geometry.', (function () {
+		var __accu0__ = re;
+		return __call__ (__accu0__.sub, __accu0__, '[^0-9a-z]+', '_', (function () {
+			var __accu1__ = (function () {
+				var __accu2__ = group.py_name;
+				return __call__ (__accu2__.strip, __accu2__);
+			}) ();
+			return __call__ (__accu1__.lower, __accu1__);
+		}) ());
+	}) ());
 	var ob = context.object;
 	var ob_type = (ob ? ob.py_metatype : 'MESH');
-	if (ob_type == 'CURVES') {
+	if (__eq__ (ob_type, 'CURVES')) {
 		group.is_type_curve = true;
 	}
-	else if (ob_type == 'POINTCLOUD') {
+	else if (__eq__ (ob_type, 'POINTCLOUD')) {
 		group.is_type_pointcloud = true;
 	}
-	else if (ob_type == 'GREASEPENCIL') {
+	else if (__eq__ (ob_type, 'GREASEPENCIL')) {
 		group.is_type_grease_pencil = true;
 	}
 	else {
@@ -232,10 +292,10 @@ export var geometry_node_group_empty_tool_new = function (context) {
 	if (__in__ (mode, new set (['SCULPT', 'SCULPT_CURVES', 'SCULPT_GREASE_PENCIL']))) {
 		group.is_mode_sculpt = true;
 	}
-	else if (mode == 'PAINT_GREASE_PENCIL') {
+	else if (__eq__ (mode, 'PAINT_GREASE_PENCIL')) {
 		group.is_mode_paint = true;
 	}
-	else if (mode == 'EDIT') {
+	else if (__eq__ (mode, 'EDIT')) {
 		group.is_mode_edit = true;
 	}
 	else {
@@ -246,7 +306,7 @@ export var geometry_node_group_empty_tool_new = function (context) {
 export var geometry_modifier_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -266,7 +326,7 @@ export var geometry_modifier_poll = function (context) {
 export var get_context_modifier = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -277,7 +337,7 @@ export var get_context_modifier = function (context) {
 	}
 	else {
 	}
-	var modifier = getattr (context, 'modifier', _ellipsis);
+	var modifier = __call__ (getattr, null, context, 'modifier', _ellipsis);
 	if (modifier === _ellipsis) {
 		var ob = context.object;
 		if (ob === null) {
@@ -285,7 +345,7 @@ export var get_context_modifier = function (context) {
 		}
 		var modifier = ob.modifiers.active;
 	}
-	if (modifier === null || modifier.py_metatype != 'NODES') {
+	if (modifier === null || __ne__ (modifier.py_metatype, 'NODES')) {
 		return null;
 	}
 	return modifier;
@@ -293,7 +353,7 @@ export var get_context_modifier = function (context) {
 export var edit_geometry_nodes_modifier_poll = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -304,7 +364,7 @@ export var edit_geometry_nodes_modifier_poll = function (context) {
 	}
 	else {
 	}
-	var modifier = get_context_modifier (context);
+	var modifier = __call__ (get_context_modifier, null, context);
 	if (modifier === null) {
 		return false;
 	}
@@ -313,7 +373,7 @@ export var edit_geometry_nodes_modifier_poll = function (context) {
 export var socket_idname_to_attribute_type = function (idname) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -324,29 +384,44 @@ export var socket_idname_to_attribute_type = function (idname) {
 	}
 	else {
 	}
-	if (idname.startswith ('NodeSocketInt')) {
+	if ((function () {
+		var __accu0__ = idname;
+		return __call__ (__accu0__.startswith, __accu0__, 'NodeSocketInt');
+	}) ()) {
 		return 'INT';
 	}
-	else if (idname.startswith ('NodeSocketColor')) {
+	else if ((function () {
+		var __accu0__ = idname;
+		return __call__ (__accu0__.startswith, __accu0__, 'NodeSocketColor');
+	}) ()) {
 		return 'FLOAT_COLOR';
 	}
-	else if (idname.startswith ('NodeSocketVector')) {
+	else if ((function () {
+		var __accu0__ = idname;
+		return __call__ (__accu0__.startswith, __accu0__, 'NodeSocketVector');
+	}) ()) {
 		return 'FLOAT_VECTOR';
 	}
-	else if (idname.startswith ('NodeSocketBool')) {
+	else if ((function () {
+		var __accu0__ = idname;
+		return __call__ (__accu0__.startswith, __accu0__, 'NodeSocketBool');
+	}) ()) {
 		return 'BOOLEAN';
 	}
-	else if (idname.startswith ('NodeSocketFloat')) {
+	else if ((function () {
+		var __accu0__ = idname;
+		return __call__ (__accu0__.startswith, __accu0__, 'NodeSocketFloat');
+	}) ()) {
 		return 'FLOAT';
 	}
-	var __except0__ = ValueError ('Unsupported socket type');
+	var __except0__ = __call__ (ValueError, null, 'Unsupported socket type');
 	__except0__.__cause__ = null;
 	throw __except0__;
 };
 export var get_socket_with_identifier = function (sockets, identifier) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -358,8 +433,11 @@ export var get_socket_with_identifier = function (sockets, identifier) {
 	}
 	else {
 	}
-	for (var socket of sockets) {
-		if (socket.identifier == identifier) {
+	var __iterable0__ = sockets;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var socket = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (socket.identifier, identifier)) {
 			return socket;
 		}
 	}
@@ -368,7 +446,7 @@ export var get_socket_with_identifier = function (sockets, identifier) {
 export var get_enabled_socket_with_name = function (sockets, py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -380,8 +458,11 @@ export var get_enabled_socket_with_name = function (sockets, py_name) {
 	}
 	else {
 	}
-	for (var socket of sockets) {
-		if (socket.py_name == py_name && socket.enabled) {
+	var __iterable0__ = sockets;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var socket = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (socket.py_name, py_name) && socket.enabled) {
 			return socket;
 		}
 	}
@@ -390,7 +471,7 @@ export var get_enabled_socket_with_name = function (sockets, py_name) {
 export var create_wrapper_group = function (operator, modifier, old_group) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -403,105 +484,184 @@ export var create_wrapper_group = function (operator, modifier, old_group) {
 	}
 	else {
 	}
-	var wrapper_name = old_group.py_name + '.wrapper';
-	var group = bpy.data.node_groups.py_new (wrapper_name, 'GeometryNodeTree');
-	group.interface.new_socket (data_ ('Geometry'), __kwargtrans__ ({in_out: 'OUTPUT', socket_type: 'NodeSocketGeometry'}));
+	var wrapper_name = __add__ (old_group.py_name, '.wrapper');
+	var group = (function () {
+		var __accu0__ = bpy.data.node_groups;
+		return __call__ (__accu0__.py_new, __accu0__, wrapper_name, 'GeometryNodeTree');
+	}) ();
+	(function () {
+		var __accu0__ = group.interface;
+		return __call__ (__accu0__.new_socket, __accu0__, __call__ (data_, null, 'Geometry'), __kwargtrans__ ({in_out: 'OUTPUT', socket_type: 'NodeSocketGeometry'}));
+	}) ();
 	group.is_modifier = true;
-	var first_geometry_input = py_next ((function () {
+	var first_geometry_input = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 		var __accu0__ = [];
-		for (var item of old_group.interface.items_tree) {
-			if (item.item_type == 'SOCKET' && item.in_out == 'INPUT' && item.bl_socket_idname == 'NodeSocketGeometry') {
-				__accu0__.append (item);
+		var __iterable0__ = old_group.interface.items_tree;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var item = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (item.item_type, 'SOCKET') && __eq__ (item.in_out, 'INPUT') && __eq__ (item.bl_socket_idname, 'NodeSocketGeometry')) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, item);
+				}) ();
 			}
 		}
 		return __accu0__;
-	}) (), null);
+	}) ()), null);
 	if (first_geometry_input) {
-		group.interface.new_socket (data_ ('Geometry'), __kwargtrans__ ({in_out: 'INPUT', socket_type: 'NodeSocketGeometry'}));
-		var group_input_node = group.nodes.py_new ('NodeGroupInput');
-		group_input_node.location.x = -(200) - group_input_node.width;
+		(function () {
+			var __accu0__ = group.interface;
+			return __call__ (__accu0__.new_socket, __accu0__, __call__ (data_, null, 'Geometry'), __kwargtrans__ ({in_out: 'INPUT', socket_type: 'NodeSocketGeometry'}));
+		}) ();
+		var group_input_node = (function () {
+			var __accu0__ = group.nodes;
+			return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupInput');
+		}) ();
+		group_input_node.location.x = __sub__ (__neg__ (200), group_input_node.width);
 		group_input_node.select = false;
 	}
-	var group_output_node = group.nodes.py_new ('NodeGroupOutput');
+	var group_output_node = (function () {
+		var __accu0__ = group.nodes;
+		return __call__ (__accu0__.py_new, __accu0__, 'NodeGroupOutput');
+	}) ();
 	group_output_node.is_active_output = true;
 	group_output_node.location.x = 200;
 	group_output_node.select = false;
-	var group_node = group.nodes.py_new ('GeometryNodeGroup');
+	var group_node = (function () {
+		var __accu0__ = group.nodes;
+		return __call__ (__accu0__.py_new, __accu0__, 'GeometryNodeGroup');
+	}) ();
 	group_node.node_tree = old_group;
-	group_node.py_update ();
+	(function () {
+		var __accu0__ = group_node;
+		return __call__ (__accu0__.py_update, __accu0__);
+	}) ();
 	var input_nodes = [];
-	for (var input_socket of old_group.interface.items_tree) {
-		if (input_socket.item_type != 'SOCKET' || !__in__ (input_socket.in_out, new set (['INPUT', 'BOTH']))) {
+	var __iterable0__ = old_group.interface.items_tree;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var input_socket = __getitem__ (__iterable0__, __index0__);
+		if (__ne__ (input_socket.item_type, 'SOCKET') || !__in__ (input_socket.in_out, new set (['INPUT', 'BOTH']))) {
 			continue;
 		}
 		var identifier = input_socket.identifier;
-		var group_node_input = get_socket_with_identifier (group_node.inputs, identifier);
-		var prop = getattr (modifier.properties.inputs, identifier);
-		if (hasattr (prop, 'type') && prop.py_metatype == 'ATTRIBUTE') {
-			var input_node = group.nodes.py_new ('GeometryNodeInputNamedAttribute');
-			input_nodes.append (input_node);
-			input_node.data_type = socket_idname_to_attribute_type (input_socket.bl_socket_idname);
+		var group_node_input = __call__ (get_socket_with_identifier, null, group_node.inputs, identifier);
+		var prop = __call__ (getattr, null, modifier.properties.inputs, identifier);
+		if (__call__ (hasattr, null, prop, 'type') && __eq__ (prop.py_metatype, 'ATTRIBUTE')) {
+			var input_node = (function () {
+				var __accu0__ = group.nodes;
+				return __call__ (__accu0__.py_new, __accu0__, 'GeometryNodeInputNamedAttribute');
+			}) ();
+			(function () {
+				var __accu0__ = input_nodes;
+				return __call__ (__accu0__.append, __accu0__, input_node);
+			}) ();
+			input_node.data_type = __call__ (socket_idname_to_attribute_type, null, input_socket.bl_socket_idname);
 			var attribute_name = prop.attribute_name;
-			input_node.inputs ['Name'].default_value = attribute_name;
-			var output_socket = get_enabled_socket_with_name (input_node.outputs, 'Attribute');
-			group.links.py_new (output_socket, group_node_input);
+			__getitem__ (input_node.inputs, 'Name').default_value = attribute_name;
+			var output_socket = __call__ (get_enabled_socket_with_name, null, input_node.outputs, 'Attribute');
+			(function () {
+				var __accu0__ = group.links;
+				return __call__ (__accu0__.py_new, __accu0__, output_socket, group_node_input);
+			}) ();
 		}
-		else if (hasattr (input_socket, 'default_value')) {
+		else if (__call__ (hasattr, null, input_socket, 'default_value')) {
 			group_node_input.default_value = prop.value;
 		}
 	}
 	if (first_geometry_input) {
-		group.links.py_new (group_input_node.outputs [0], get_socket_with_identifier (group_node.inputs, first_geometry_input.identifier));
+		(function () {
+			var __accu0__ = group.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (group_input_node.outputs, 0), __call__ (get_socket_with_identifier, null, group_node.inputs, first_geometry_input.identifier));
+		}) ();
 		if (input_nodes) {
-			for (var [i, node] of py_enumerate (input_nodes)) {
-				node.location.x = -(175);
-				node.location.y = i * -(50);
+			var __iterable0__ = __call__ (py_enumerate, null, input_nodes);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var i = __left0__ [0];
+				var node = __left0__ [1];
+				node.location.x = __neg__ (175);
+				node.location.y = __mul__ (i, __neg__ (50));
 			}
-			group_input_node.location.x = -(350);
+			group_input_node.location.x = __neg__ (350);
 		}
 	}
 	var store_nodes = [];
 	var first_geometry_output = null;
-	for (var output_socket of old_group.interface.items_tree) {
-		if (output_socket.item_type != 'SOCKET' || !__in__ (output_socket.in_out, new set (['OUTPUT', 'BOTH']))) {
+	var __iterable0__ = old_group.interface.items_tree;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var output_socket = __getitem__ (__iterable0__, __index0__);
+		if (__ne__ (output_socket.item_type, 'SOCKET') || !__in__ (output_socket.in_out, new set (['OUTPUT', 'BOTH']))) {
 			continue;
 		}
 		var identifier = output_socket.identifier;
-		var group_node_output = get_socket_with_identifier (group_node.outputs, identifier);
-		var attribute_name = getattr (group_node_output, 'attribute_name', null);
+		var group_node_output = __call__ (get_socket_with_identifier, null, group_node.outputs, identifier);
+		var attribute_name = __call__ (getattr, null, group_node_output, 'attribute_name', null);
 		if (attribute_name) {
-			var store_node = group.nodes.py_new ('GeometryNodeStoreNamedAttribute');
-			store_nodes.append (store_node);
-			store_node.data_type = socket_idname_to_attribute_type (output_socket.bl_socket_idname);
+			var store_node = (function () {
+				var __accu0__ = group.nodes;
+				return __call__ (__accu0__.py_new, __accu0__, 'GeometryNodeStoreNamedAttribute');
+			}) ();
+			(function () {
+				var __accu0__ = store_nodes;
+				return __call__ (__accu0__.append, __accu0__, store_node);
+			}) ();
+			store_node.data_type = __call__ (socket_idname_to_attribute_type, null, output_socket.bl_socket_idname);
 			store_node.domain = output_socket.attribute_domain;
-			store_node.inputs ['Name'].default_value = attribute_name;
-			var input_socket = get_enabled_socket_with_name (store_node.inputs, 'Value');
-			group.links.py_new (group_node_output, input_socket);
+			__getitem__ (store_node.inputs, 'Name').default_value = attribute_name;
+			var input_socket = __call__ (get_enabled_socket_with_name, null, store_node.inputs, 'Value');
+			(function () {
+				var __accu0__ = group.links;
+				return __call__ (__accu0__.py_new, __accu0__, group_node_output, input_socket);
+			}) ();
 		}
-		else if (output_socket.bl_socket_idname == 'NodeSocketGeometry') {
+		else if (__eq__ (output_socket.bl_socket_idname, 'NodeSocketGeometry')) {
 			if (!(first_geometry_output)) {
 				var first_geometry_output = group_node_output;
 			}
 		}
 	}
 	if (store_nodes) {
-		for (var [i, node] of py_enumerate (store_nodes)) {
-			node.location.x = (i + 1) * 175;
+		var __iterable0__ = __call__ (py_enumerate, null, store_nodes);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var node = __left0__ [1];
+			node.location.x = __mul__ (__add__ (i, 1), 175);
 			node.location.y = 0;
 		}
-		group_output_node.location.x = (len (store_nodes) + 1) * 175;
-		group.links.py_new (first_geometry_output, store_nodes [0].inputs ['Geometry']);
-		for (var i = 0; i < len (store_nodes) - 1; i++) {
-			group.links.py_new (store_nodes [i].outputs ['Geometry'], store_nodes [i + 1].inputs ['Geometry']);
+		group_output_node.location.x = __mul__ (__add__ (__call__ (len, null, store_nodes), 1), 175);
+		(function () {
+			var __accu0__ = group.links;
+			return __call__ (__accu0__.py_new, __accu0__, first_geometry_output, __getitem__ (__getitem__ (store_nodes, 0).inputs, 'Geometry'));
+		}) ();
+		for (var i = 0; i < __sub__ (__call__ (len, null, store_nodes), 1); i++) {
+			(function () {
+				var __accu0__ = group.links;
+				return __call__ (__accu0__.py_new, __accu0__, __getitem__ (__getitem__ (store_nodes, i).outputs, 'Geometry'), __getitem__ (__getitem__ (store_nodes, __add__ (i, 1)).inputs, 'Geometry'));
+			}) ();
 		}
-		group.links.py_new (store_nodes [-(1)].outputs ['Geometry'], group_output_node.inputs [data_ ('Geometry')]);
+		(function () {
+			var __accu0__ = group.links;
+			return __call__ (__accu0__.py_new, __accu0__, __getitem__ (__getitem__ (store_nodes, __neg__ (1)).outputs, 'Geometry'), __getitem__ (group_output_node.inputs, __call__ (data_, null, 'Geometry')));
+		}) ();
 	}
 	else {
 		if (!(first_geometry_output)) {
-			operator.report (new set (['WARNING']), 'Node group must have a geometry output');
+			(function () {
+				var __accu0__ = operator;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'Node group must have a geometry output');
+			}) ();
 			return null;
 		}
-		group.links.py_new (first_geometry_output, group_output_node.inputs [data_ ('Geometry')]);
+		(function () {
+			var __accu0__ = group.links;
+			return __call__ (__accu0__.py_new, __accu0__, first_geometry_output, __getitem__ (group_output_node.inputs, __call__ (data_, null, 'Geometry')));
+		}) ();
 	}
 	return group;
 };
@@ -513,7 +673,7 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -525,12 +685,12 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 		}
 		else {
 		}
-		return edit_geometry_nodes_modifier_poll (context);
+		return __call__ (edit_geometry_nodes_modifier_poll, null, context);
 	});},
 	get invoke () {return __get__ (this, function (self, context, event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -546,12 +706,15 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 		if (event.alt) {
 			self.use_selected_objects = true;
 		}
-		return self.execute (context);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -563,7 +726,7 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 		}
 		else {
 		}
-		var active_modifier = get_context_modifier (context);
+		var active_modifier = __call__ (get_context_modifier, null, context);
 		if (!(active_modifier)) {
 			return new set (['CANCELLED']);
 		}
@@ -575,8 +738,11 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 		else {
 			var objects = [context.object];
 		}
-		for (var ob of objects) {
-			var modifier = ob.modifiers [modifier_name];
+		var __iterable0__ = objects;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var ob = __getitem__ (__iterable0__, __index0__);
+			var modifier = __getitem__ (ob.modifiers, modifier_name);
 			if (!(modifier)) {
 				continue;
 			}
@@ -584,7 +750,7 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 			if (!(old_group)) {
 				continue;
 			}
-			var new_group = create_wrapper_group (self, modifier, old_group);
+			var new_group = __call__ (create_wrapper_group, null, self, modifier, old_group);
 			if (new_group) {
 				modifier.node_group = new_group;
 			}
@@ -592,7 +758,7 @@ export var MoveModifierToNodes =  __class__ ('MoveModifierToNodes', [Operator], 
 		return new set (['FINISHED']);
 	});}
 });
-MoveModifierToNodes.__annotations__ = dict ({'use_selected_objects': BoolProperty (__kwargtrans__ ({py_name: 'Selected Objects', description: 'Affect all selected objects instead of just the active object'}))});
+MoveModifierToNodes.__annotations__ = dict ({'use_selected_objects': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Selected Objects', description: 'Affect all selected objects instead of just the active object'}))});
 export var NewGeometryNodesModifier =  __class__ ('NewGeometryNodesModifier', [Operator], {
 	__module__: __name__,
 	bl_idname: 'node.new_geometry_nodes_modifier',
@@ -601,7 +767,7 @@ export var NewGeometryNodesModifier =  __class__ ('NewGeometryNodesModifier', [O
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -613,12 +779,12 @@ export var NewGeometryNodesModifier =  __class__ ('NewGeometryNodesModifier', [O
 		}
 		else {
 		}
-		return geometry_modifier_poll (context);
+		return __call__ (geometry_modifier_poll, null, context);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -631,13 +797,16 @@ export var NewGeometryNodesModifier =  __class__ ('NewGeometryNodesModifier', [O
 		else {
 		}
 		var ob = context.object;
-		var modifier = ob.modifiers.py_new (data_ ('GeometryNodes'), 'NODES');
+		var modifier = (function () {
+			var __accu0__ = ob.modifiers;
+			return __call__ (__accu0__.py_new, __accu0__, __call__ (data_, null, 'GeometryNodes'), 'NODES');
+		}) ();
 		if (!(modifier)) {
 			return new set (['CANCELLED']);
 		}
-		var is_first_modifier = ob.modifiers [0] == modifier;
-		var add_geometry_input = !(ob.py_metatype == 'EMPTY' && ob.instance_collection === null && is_first_modifier);
-		var group = geometry_node_group_empty_modifier_new (data_ ('Geometry Nodes'), add_geometry_input);
+		var is_first_modifier = __eq__ (__getitem__ (ob.modifiers, 0), modifier);
+		var add_geometry_input = !(__eq__ (ob.py_metatype, 'EMPTY') && ob.instance_collection === null && is_first_modifier);
+		var group = __call__ (geometry_node_group_empty_modifier_new, null, __call__ (data_, null, 'Geometry Nodes'), add_geometry_input);
 		modifier.node_group = group;
 		return new set (['FINISHED']);
 	});}
@@ -650,7 +819,7 @@ export var NewGeometryNodeTreeAssign =  __class__ ('NewGeometryNodeTreeAssign', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -662,12 +831,12 @@ export var NewGeometryNodeTreeAssign =  __class__ ('NewGeometryNodeTreeAssign', 
 		}
 		else {
 		}
-		return geometry_modifier_poll (context);
+		return __call__ (geometry_modifier_poll, null, context);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -679,14 +848,14 @@ export var NewGeometryNodeTreeAssign =  __class__ ('NewGeometryNodeTreeAssign', 
 		}
 		else {
 		}
-		var modifier = get_context_modifier (context);
+		var modifier = __call__ (get_context_modifier, null, context);
 		if (!(modifier)) {
 			return new set (['CANCELLED']);
 		}
 		var ob = context.object;
-		var is_first_modifier = ob.modifiers [0] == modifier;
-		var add_geometry_input = !(ob.py_metatype == 'EMPTY' && ob.instance_collection === null && is_first_modifier);
-		var group = geometry_node_group_empty_modifier_new (data_ ('Geometry Nodes'), add_geometry_input);
+		var is_first_modifier = __eq__ (__getitem__ (ob.modifiers, 0), modifier);
+		var add_geometry_input = !(__eq__ (ob.py_metatype, 'EMPTY') && ob.instance_collection === null && is_first_modifier);
+		var group = __call__ (geometry_node_group_empty_modifier_new, null, __call__ (data_, null, 'Geometry Nodes'), add_geometry_input);
 		modifier.node_group = group;
 		return new set (['FINISHED']);
 	});}
@@ -699,7 +868,7 @@ export var NewGeometryNodeGroupTool =  __class__ ('NewGeometryNodeGroupTool', [O
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -712,12 +881,12 @@ export var NewGeometryNodeGroupTool =  __class__ ('NewGeometryNodeGroupTool', [O
 		else {
 		}
 		var space = context.space_data;
-		return space && space.py_metatype == 'NODE_EDITOR' && space.node_tree_sub_type == 'TOOL';
+		return space && __eq__ (space.py_metatype, 'NODE_EDITOR') && __eq__ (space.node_tree_sub_type, 'TOOL');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -729,7 +898,7 @@ export var NewGeometryNodeGroupTool =  __class__ ('NewGeometryNodeGroupTool', [O
 		}
 		else {
 		}
-		var group = geometry_node_group_empty_tool_new (context);
+		var group = __call__ (geometry_node_group_empty_tool_new, null, context);
 		context.space_data.selected_node_group = group;
 		return new set (['FINISHED']);
 	});}
@@ -739,7 +908,7 @@ export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 	get get_node () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -755,17 +924,17 @@ export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 		if (node === null) {
 			return null;
 		}
-		if (node.bl_idname == cls.output_node_type) {
+		if (__eq__ (node.bl_idname, cls.output_node_type)) {
 			return node;
 		}
-		if (node.bl_idname == cls.input_node_type) {
+		if (__eq__ (node.bl_idname, cls.input_node_type)) {
 			return node.paired_output;
 		}
 	});},
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -778,10 +947,13 @@ export var ZoneOperator =  __class__ ('ZoneOperator', [object], {
 		else {
 		}
 		var space = context.space_data;
-		if (!(space) || space.py_metatype != 'NODE_EDITOR' || !(space.edit_tree) || !(space.edit_tree.is_editable)) {
+		if (!(space) || __ne__ (space.py_metatype, 'NODE_EDITOR') || !(space.edit_tree) || !(space.edit_tree.is_editable)) {
 			return false;
 		}
-		if (cls.get_node (context) === null) {
+		if ((function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.get_node, __accu0__, context);
+		}) () === null) {
 			return false;
 		}
 		return true;
@@ -791,3 +963,33 @@ export var classes = tuple ([NewGeometryNodesModifier, NewGeometryNodeTreeAssign
 
 //# sourceMappingURL=bl_operators.geometry_nodes.map
 export {BoolProperty, Operator, _globals, _import, _lazy, _member, _module, data_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case 'add_empty_geometry_node_group': add_empty_geometry_node_group = value; break;
+		case 'geometry_node_group_empty_new': geometry_node_group_empty_new = value; break;
+		case 'geometry_node_group_empty_modifier_new': geometry_node_group_empty_modifier_new = value; break;
+		case 'geometry_node_group_empty_tool_new': geometry_node_group_empty_tool_new = value; break;
+		case 'geometry_modifier_poll': geometry_modifier_poll = value; break;
+		case 'get_context_modifier': get_context_modifier = value; break;
+		case 'edit_geometry_nodes_modifier_poll': edit_geometry_nodes_modifier_poll = value; break;
+		case 'socket_idname_to_attribute_type': socket_idname_to_attribute_type = value; break;
+		case 'get_socket_with_identifier': get_socket_with_identifier = value; break;
+		case 'get_enabled_socket_with_name': get_enabled_socket_with_name = value; break;
+		case 'create_wrapper_group': create_wrapper_group = value; break;
+		case 'MoveModifierToNodes': MoveModifierToNodes = value; break;
+		case 'NewGeometryNodesModifier': NewGeometryNodesModifier = value; break;
+		case 'NewGeometryNodeTreeAssign': NewGeometryNodeTreeAssign = value; break;
+		case 'NewGeometryNodeGroupTool': NewGeometryNodeGroupTool = value; break;
+		case 'ZoneOperator': ZoneOperator = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -6,3 +6,9 @@ var __name__ = 'pathlib';
 export var Path = null;
 
 //# sourceMappingURL=pathlib.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'Path': Path = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

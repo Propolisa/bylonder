@@ -15,7 +15,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 	get poll_force_field () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -27,12 +27,12 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		else {
 		}
 		var ob = context.object;
-		return ob && ob.field && ob.field.py_metatype != 'NONE';
+		return ob && ob.field && __ne__ (ob.field.py_metatype, 'NONE');
 	};},
 	get poll_collision () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -44,7 +44,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 		else {
 		}
 		var ob = context.object;
-		return (ob && ob.py_metatype == 'MESH') && context.collision;
+		return (ob && __eq__ (ob.py_metatype, 'MESH')) && context.collision;
 	};}
 });
 export var PHYSICS_PT_field =  __class__ ('PHYSICS_PT_field', [PhysicButtonsPanel, Panel], {
@@ -54,7 +54,7 @@ export var PHYSICS_PT_field =  __class__ ('PHYSICS_PT_field', [PhysicButtonsPane
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -66,7 +66,10 @@ export var PHYSICS_PT_field =  __class__ ('PHYSICS_PT_field', [PhysicButtonsPane
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_force_field (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_force_field, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -74,7 +77,7 @@ export var PHYSICS_PT_field =  __class__ ('PHYSICS_PT_field', [PhysicButtonsPane
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -90,7 +93,10 @@ export var PHYSICS_PT_field =  __class__ ('PHYSICS_PT_field', [PhysicButtonsPane
 		layout.use_property_split = true;
 		var ob = context.object;
 		var field = ob.field;
-		layout.prop (field, 'type');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, field, 'type');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_field_settings =  __class__ ('PHYSICS_PT_field_settings', [PhysicButtonsPanel, Panel], {
@@ -101,7 +107,7 @@ export var PHYSICS_PT_field_settings =  __class__ ('PHYSICS_PT_field_settings', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -113,7 +119,10 @@ export var PHYSICS_PT_field_settings =  __class__ ('PHYSICS_PT_field_settings', 
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_force_field (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_force_field, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -121,7 +130,7 @@ export var PHYSICS_PT_field_settings =  __class__ ('PHYSICS_PT_field_settings', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -138,59 +147,177 @@ export var PHYSICS_PT_field_settings =  __class__ ('PHYSICS_PT_field_settings', 
 		var ob = context.object;
 		var field = ob.field;
 		if (!__in__ (field.py_metatype, new set (['NONE', 'GUIDE', 'TEXTURE']))) {
-			layout.prop (field, 'shape', __kwargtrans__ ({text: 'Shape'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, field, 'shape', __kwargtrans__ ({text: 'Shape'}));
+			}) ();
 		}
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		if (field.py_metatype == 'NONE') {
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		if (__eq__ (field.py_metatype, 'NONE')) {
 			return ;
 		}
-		else if (field.py_metatype == 'GUIDE') {
-			var col = flow.column ();
-			col.prop (field, 'guide_free');
-			col.prop (field, 'falloff_power');
-			col.prop (field, 'use_guide_path_add');
-			col.prop (field, 'use_guide_path_weight');
-			col.separator ();
-			var col = flow.column ();
-			col.prop (field, 'guide_clump_amount', __kwargtrans__ ({text: 'Clumping Amount'}));
-			col.prop (field, 'guide_clump_shape');
-			col.separator ();
-			col.prop (field, 'guide_minimum', __kwargtrans__ ({text: 'Min Distance'}));
-			var col = layout.column (__kwargtrans__ ({align: false, heading: 'Max Distance'}));
+		else if (__eq__ (field.py_metatype, 'GUIDE')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_free');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'falloff_power');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'use_guide_path_add');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'use_guide_path_weight');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_clump_amount', __kwargtrans__ ({text: 'Clumping Amount'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_clump_shape');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_minimum', __kwargtrans__ ({text: 'Min Distance'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Max Distance'}));
+			}) ();
 			col.use_property_decorate = false;
-			var row = col.row (__kwargtrans__ ({align: true}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
-			sub.prop (field, 'use_max_distance', __kwargtrans__ ({text: ''}));
-			var sub = sub.row (__kwargtrans__ ({align: true}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, field, 'use_max_distance', __kwargtrans__ ({text: ''}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = field.use_max_distance;
-			sub.prop (field, 'distance_max', __kwargtrans__ ({text: ''}));
-			row.prop_decorator (field, 'distance_max');
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, field, 'distance_max', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_decorator, __accu0__, field, 'distance_max');
+			}) ();
 		}
-		else if (field.py_metatype == 'TEXTURE') {
-			var col = flow.column ();
-			col.prop (field, 'texture_mode');
-			col.separator ();
-			col.prop (field, 'strength');
-			var sub = col.column (__kwargtrans__ ({heading: 'Affect'}));
-			sub.prop (field, 'apply_to_location', __kwargtrans__ ({text: 'Location'}));
-			var col = flow.column ();
-			col.prop (field, 'texture_nabla');
-			col.prop (field, 'use_object_coords');
-			col.prop (field, 'use_2d_force');
+		else if (__eq__ (field.py_metatype, 'TEXTURE')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'texture_mode');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'strength');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Affect'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, field, 'apply_to_location', __kwargtrans__ ({text: 'Location'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'texture_nabla');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'use_object_coords');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'use_2d_force');
+			}) ();
 		}
-		else if (field.py_metatype == 'FLUID_FLOW') {
-			var col = flow.column ();
-			col.prop (field, 'strength');
-			col.prop (field, 'flow');
-			var sub = col.column (__kwargtrans__ ({heading: 'Affect'}));
-			sub.prop (field, 'apply_to_location', __kwargtrans__ ({text: 'Location'}));
-			sub.prop (field, 'apply_to_rotation', __kwargtrans__ ({text: 'Rotation'}));
-			var col = flow.column ();
-			col.prop (field, 'source_object');
-			col.prop (field, 'use_smoke_density');
+		else if (__eq__ (field.py_metatype, 'FLUID_FLOW')) {
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'strength');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'flow');
+			}) ();
+			var sub = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Affect'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, field, 'apply_to_location', __kwargtrans__ ({text: 'Location'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.prop, __accu0__, field, 'apply_to_rotation', __kwargtrans__ ({text: 'Rotation'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'source_object');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'use_smoke_density');
+			}) ();
 		}
 		else {
-			basic_force_field_settings_ui (self, field);
+			// pass;
+			__call__ (basic_force_field_settings_ui, null, self, field);
 		}
 	});}
 });
@@ -202,7 +329,7 @@ export var PHYSICS_PT_field_settings_kink =  __class__ ('PHYSICS_PT_field_settin
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -214,16 +341,19 @@ export var PHYSICS_PT_field_settings_kink =  __class__ ('PHYSICS_PT_field_settin
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_force_field (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_force_field, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var ob = context.object;
-		return ob.field.py_metatype == 'GUIDE' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return __eq__ (ob.field.py_metatype, 'GUIDE') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -239,15 +369,39 @@ export var PHYSICS_PT_field_settings_kink =  __class__ ('PHYSICS_PT_field_settin
 		layout.use_property_split = true;
 		var ob = context.object;
 		var field = ob.field;
-		layout.prop (field, 'guide_kink_type', __kwargtrans__ ({text: 'Type'}));
-		if (field.guide_kink_type != 'NONE') {
-			var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-			var col = flow.column ();
-			col.prop (field, 'guide_kink_axis');
-			col.prop (field, 'guide_kink_frequency');
-			var col = flow.column ();
-			col.prop (field, 'guide_kink_shape');
-			col.prop (field, 'guide_kink_amplitude');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, field, 'guide_kink_type', __kwargtrans__ ({text: 'Type'}));
+		}) ();
+		if (__ne__ (field.guide_kink_type, 'NONE')) {
+			var flow = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_kink_axis');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_kink_frequency');
+			}) ();
+			var col = (function () {
+				var __accu0__ = flow;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_kink_shape');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, field, 'guide_kink_amplitude');
+			}) ();
 		}
 	});}
 });
@@ -259,7 +413,7 @@ export var PHYSICS_PT_field_settings_texture_select =  __class__ ('PHYSICS_PT_fi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -271,16 +425,19 @@ export var PHYSICS_PT_field_settings_texture_select =  __class__ ('PHYSICS_PT_fi
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_force_field (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_force_field, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var ob = context.object;
-		return ob.field.py_metatype == 'TEXTURE' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return __eq__ (ob.field.py_metatype, 'TEXTURE') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -295,7 +452,13 @@ export var PHYSICS_PT_field_settings_texture_select =  __class__ ('PHYSICS_PT_fi
 		var layout = self.layout;
 		var ob = context.object;
 		var field = ob.field;
-		layout.row ().template_ID (field, 'texture', __kwargtrans__ ({py_new: 'texture.new'}));
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.template_ID, __accu0__, field, 'texture', __kwargtrans__ ({py_new: 'texture.new'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_field_falloff =  __class__ ('PHYSICS_PT_field_falloff', [PhysicButtonsPanel, Panel], {
@@ -306,7 +469,7 @@ export var PHYSICS_PT_field_falloff =  __class__ ('PHYSICS_PT_field_falloff', [P
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -318,7 +481,10 @@ export var PHYSICS_PT_field_falloff =  __class__ ('PHYSICS_PT_field_falloff', [P
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_force_field (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_force_field, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var ob = context.object;
@@ -327,7 +493,7 @@ export var PHYSICS_PT_field_falloff =  __class__ ('PHYSICS_PT_field_falloff', [P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -343,8 +509,11 @@ export var PHYSICS_PT_field_falloff =  __class__ ('PHYSICS_PT_field_falloff', [P
 		layout.use_property_split = true;
 		var ob = context.object;
 		var field = ob.field;
-		layout.prop (field, 'falloff_type', __kwargtrans__ ({text: 'Shape'}));
-		basic_force_field_falloff_ui (self, field);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, field, 'falloff_type', __kwargtrans__ ({text: 'Shape'}));
+		}) ();
+		__call__ (basic_force_field_falloff_ui, null, self, field);
 	});}
 });
 export var PHYSICS_PT_field_falloff_angular =  __class__ ('PHYSICS_PT_field_falloff_angular', [PhysicButtonsPanel, Panel], {
@@ -355,7 +524,7 @@ export var PHYSICS_PT_field_falloff_angular =  __class__ ('PHYSICS_PT_field_fall
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -367,16 +536,19 @@ export var PHYSICS_PT_field_falloff_angular =  __class__ ('PHYSICS_PT_field_fall
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_force_field (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_force_field, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var ob = context.object;
-		return ob.field.falloff_type == 'CONE' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return __eq__ (ob.field.falloff_type, 'CONE') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -390,21 +562,54 @@ export var PHYSICS_PT_field_falloff_angular =  __class__ ('PHYSICS_PT_field_fall
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var ob = context.object;
 		var field = ob.field;
-		var col = flow.column ();
-		col.prop (field, 'radial_falloff', __kwargtrans__ ({text: 'Power', text_ctxt: i18n_contexts.id_particlesettings}));
-		var col = flow.column ();
-		col.prop (field, 'use_radial_min', __kwargtrans__ ({text: 'Use Min Angle'}));
-		var sub = col.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'radial_falloff', __kwargtrans__ ({text: 'Power', text_ctxt: i18n_contexts.id_particlesettings}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'use_radial_min', __kwargtrans__ ({text: 'Use Min Angle'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = field.use_radial_min;
-		sub.prop (field, 'radial_min', __kwargtrans__ ({text: 'Min Angle'}));
-		var col = flow.column ();
-		col.prop (field, 'use_radial_max', __kwargtrans__ ({text: 'Use Max Angle'}));
-		var sub = col.column ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, field, 'radial_min', __kwargtrans__ ({text: 'Min Angle'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'use_radial_max', __kwargtrans__ ({text: 'Use Max Angle'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = field.use_radial_max;
-		sub.prop (field, 'radial_max', __kwargtrans__ ({text: 'Max Angle'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, field, 'radial_max', __kwargtrans__ ({text: 'Max Angle'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_field_falloff_radial =  __class__ ('PHYSICS_PT_field_falloff_radial', [PhysicButtonsPanel, Panel], {
@@ -415,7 +620,7 @@ export var PHYSICS_PT_field_falloff_radial =  __class__ ('PHYSICS_PT_field_fallo
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -427,16 +632,19 @@ export var PHYSICS_PT_field_falloff_radial =  __class__ ('PHYSICS_PT_field_fallo
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_force_field (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_force_field, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		var ob = context.object;
-		return ob.field.falloff_type == 'TUBE' && __in__ (context.engine, cls.COMPAT_ENGINES);
+		return __eq__ (ob.field.falloff_type, 'TUBE') && __in__ (context.engine, cls.COMPAT_ENGINES);
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -450,27 +658,60 @@ export var PHYSICS_PT_field_falloff_radial =  __class__ ('PHYSICS_PT_field_fallo
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var ob = context.object;
 		var field = ob.field;
-		var col = flow.column ();
-		col.prop (field, 'radial_falloff', __kwargtrans__ ({text: 'Power', text_ctxt: i18n_contexts.id_particlesettings}));
-		var col = flow.column ();
-		col.prop (field, 'use_radial_min', __kwargtrans__ ({text: 'Use Minimum'}));
-		var sub = col.column ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'radial_falloff', __kwargtrans__ ({text: 'Power', text_ctxt: i18n_contexts.id_particlesettings}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'use_radial_min', __kwargtrans__ ({text: 'Use Minimum'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = field.use_radial_min;
-		sub.prop (field, 'radial_min', __kwargtrans__ ({text: 'Min Distance'}));
-		var col = flow.column ();
-		col.prop (field, 'use_radial_max', __kwargtrans__ ({text: 'Use Maximum'}));
-		var sub = col.column ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, field, 'radial_min', __kwargtrans__ ({text: 'Min Distance'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, field, 'use_radial_max', __kwargtrans__ ({text: 'Use Maximum'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = field.use_radial_max;
-		sub.prop (field, 'radial_max', __kwargtrans__ ({text: 'Max Distance'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, field, 'radial_max', __kwargtrans__ ({text: 'Max Distance'}));
+		}) ();
 	});}
 });
 export var collision_warning = function (layout) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -481,9 +722,15 @@ export var collision_warning = function (layout) {
 	}
 	else {
 	}
-	var row = layout.row (__kwargtrans__ ({align: true}));
+	var row = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	row.alignment = 'RIGHT';
-	row.label (__kwargtrans__ ({text: 'No collision settings available'}));
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'No collision settings available'}));
+	}) ();
 };
 export var PHYSICS_PT_collision =  __class__ ('PHYSICS_PT_collision', [PhysicButtonsPanel, Panel], {
 	__module__: __name__,
@@ -492,7 +739,7 @@ export var PHYSICS_PT_collision =  __class__ ('PHYSICS_PT_collision', [PhysicBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -504,7 +751,10 @@ export var PHYSICS_PT_collision =  __class__ ('PHYSICS_PT_collision', [PhysicBut
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_collision (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_collision, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -512,7 +762,7 @@ export var PHYSICS_PT_collision =  __class__ ('PHYSICS_PT_collision', [PhysicBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -529,13 +779,19 @@ export var PHYSICS_PT_collision =  __class__ ('PHYSICS_PT_collision', [PhysicBut
 		var md = context.collision;
 		var coll = md.settings;
 		if (!(coll)) {
-			collision_warning (layout);
+			__call__ (collision_warning, null, layout);
 			return ;
 		}
 		var settings = context.object.collision;
 		layout.active = settings.use;
-		var col = layout.column ();
-		col.prop (settings, 'absorption', __kwargtrans__ ({text: 'Field Absorption'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'absorption', __kwargtrans__ ({text: 'Field Absorption'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_collision_particle =  __class__ ('PHYSICS_PT_collision_particle', [PhysicButtonsPanel, Panel], {
@@ -546,7 +802,7 @@ export var PHYSICS_PT_collision_particle =  __class__ ('PHYSICS_PT_collision_par
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -558,7 +814,10 @@ export var PHYSICS_PT_collision_particle =  __class__ ('PHYSICS_PT_collision_par
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_collision (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_collision, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -566,7 +825,7 @@ export var PHYSICS_PT_collision_particle =  __class__ ('PHYSICS_PT_collision_par
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -581,26 +840,65 @@ export var PHYSICS_PT_collision_particle =  __class__ ('PHYSICS_PT_collision_par
 		var layout = self.layout;
 		var md = context.collision;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var coll = md.settings;
 		if (!(coll)) {
-			collision_warning (layout);
+			__call__ (collision_warning, null, layout);
 			return ;
 		}
 		var settings = context.object.collision;
 		layout.active = settings.use;
-		var col = flow.column ();
-		col.prop (settings, 'permeability', __kwargtrans__ ({slider: true}));
-		col.prop (settings, 'stickiness');
-		col.prop (settings, 'use_particle_kill');
-		var col = flow.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (settings, 'damping_factor', __kwargtrans__ ({text: 'Damping', slider: true}));
-		sub.prop (settings, 'damping_random', __kwargtrans__ ({text: 'Randomize', slider: true}));
-		var col = flow.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (settings, 'friction_factor', __kwargtrans__ ({text: 'Friction', slider: true}));
-		sub.prop (settings, 'friction_random', __kwargtrans__ ({text: 'Randomize', slider: true}));
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'permeability', __kwargtrans__ ({slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'stickiness');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'use_particle_kill');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'damping_factor', __kwargtrans__ ({text: 'Damping', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'damping_random', __kwargtrans__ ({text: 'Randomize', slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'friction_factor', __kwargtrans__ ({text: 'Friction', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'friction_random', __kwargtrans__ ({text: 'Randomize', slider: true}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_softbody', [PhysicButtonsPanel, Panel], {
@@ -611,7 +909,7 @@ export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_sof
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -623,7 +921,10 @@ export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_sof
 		}
 		else {
 		}
-		if (!(PhysicButtonsPanel.poll_collision (context))) {
+		if (!((function () {
+			var __accu0__ = PhysicButtonsPanel;
+			return __call__ (__accu0__.poll_collision, __accu0__, context);
+		}) ())) {
 			return false;
 		}
 		return __in__ (context.engine, cls.COMPAT_ENGINES);
@@ -631,7 +932,7 @@ export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_sof
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -645,35 +946,96 @@ export var PHYSICS_PT_collision_softbody =  __class__ ('PHYSICS_PT_collision_sof
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: false}));
+		}) ();
 		var md = context.collision;
 		var coll = md.settings;
 		if (!(coll)) {
-			collision_warning (layout);
+			__call__ (collision_warning, null, layout);
 			return ;
 		}
 		var settings = context.object.collision;
 		layout.active = settings.use;
-		var col = flow.column ();
-		col.prop (settings, 'damping', __kwargtrans__ ({text: 'Damping', slider: true}));
-		var col = flow.column ();
-		col.prop (settings, 'thickness_outer', __kwargtrans__ ({text: 'Thickness Outer', slider: true}));
-		var col = flow.column ();
-		col.prop (settings, 'thickness_inner', __kwargtrans__ ({text: 'Inner', slider: true}));
-		var col = flow.column ();
-		col.prop (settings, 'cloth_friction');
-		var col = flow.column ();
-		col.prop (settings, 'use_culling');
-		var col = flow.column ();
-		col.prop (settings, 'use_normal');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'damping', __kwargtrans__ ({text: 'Damping', slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'thickness_outer', __kwargtrans__ ({text: 'Thickness Outer', slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'thickness_inner', __kwargtrans__ ({text: 'Inner', slider: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'cloth_friction');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'use_culling');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'use_normal');
+		}) ();
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_field, PHYSICS_PT_field_settings, PHYSICS_PT_field_settings_kink, PHYSICS_PT_field_settings_texture_select, PHYSICS_PT_field_falloff, PHYSICS_PT_field_falloff_angular, PHYSICS_PT_field_falloff_radial, PHYSICS_PT_collision, PHYSICS_PT_collision_particle, PHYSICS_PT_collision_softbody]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_field.map
 export {Panel, basic_force_field_falloff_ui, basic_force_field_settings_ui, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'PhysicButtonsPanel': PhysicButtonsPanel = value; break;
+		case 'PHYSICS_PT_field': PHYSICS_PT_field = value; break;
+		case 'PHYSICS_PT_field_settings': PHYSICS_PT_field_settings = value; break;
+		case 'PHYSICS_PT_field_settings_kink': PHYSICS_PT_field_settings_kink = value; break;
+		case 'PHYSICS_PT_field_settings_texture_select': PHYSICS_PT_field_settings_texture_select = value; break;
+		case 'PHYSICS_PT_field_falloff': PHYSICS_PT_field_falloff = value; break;
+		case 'PHYSICS_PT_field_falloff_angular': PHYSICS_PT_field_falloff_angular = value; break;
+		case 'PHYSICS_PT_field_falloff_radial': PHYSICS_PT_field_falloff_radial = value; break;
+		case 'collision_warning': collision_warning = value; break;
+		case 'PHYSICS_PT_collision': PHYSICS_PT_collision = value; break;
+		case 'PHYSICS_PT_collision_particle': PHYSICS_PT_collision_particle = value; break;
+		case 'PHYSICS_PT_collision_softbody': PHYSICS_PT_collision_softbody = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -3,13 +3,13 @@ import { menuButton } from '../interface/menu.js';
 import { iconEl, iconButton, iconUrl } from '../interface/icon.js';
 import { createNavigation } from './navigation.js';
 import { drawMenu } from '../interface/ui-layout.js';
-import { menuUI, menuClasses, kw } from '../../windowmanager/wm-operators.js';
+import { menuUI } from '../../windowmanager/wm-operators.js';
 import { propBinding } from '../../makesrna/rna-bylonder.js';
-import * as spaceView3d from '../../bl_ui/space_view3d.js';
+import { menus } from '../../python/bpy_interface.js';
 import { view_3d, user_interface, cssColor } from '../interface/userdef-default-theme.js';
 import { createToolbar } from './view3d-toolbar.js';
 import { createRegions } from './view3d-regions.js';
-import { propertyName } from './region-layout.js';
+import { rnaProperty } from '../../makesrna/rna.js';
 import { blenderKeys } from '../../windowmanager/keyconfig.js';
 // Blender's axes as Babylon directions (Babylon's (x, y, z) is Blender's (x, z, y)) and the view each axis's ball
 // aligns to (the opposite view for its negative ball).
@@ -24,19 +24,6 @@ const mixColor = (a, b, t) => cssColor([0, 1, 2].map((i) => a[i] + (b[i] - a[i])
 // The keymaps an Object Mode 3D View's handlers run, in order.
 const KEYMAPS = ['Object Mode', 'Object Non-modal', '3D View', '3D View Generic', 'Frames', 'Screen', 'Window'];
 
-// The Area menu, which Blender defines in C (screen_ops.cc).
-const INFO_MT_area = Object.assign(() => ({
-  draw() {
-    const { layout } = this;
-    layout.operator('screen.area_split', kw({ text: 'Horizontal Split' })).direction = 'HORIZONTAL';
-    layout.operator('screen.area_split', kw({ text: 'Vertical Split' })).direction = 'VERTICAL';
-    layout.separator();
-    layout.operator('screen.screen_full_area', kw({ text: 'Toggle Maximize Area' }));
-    layout.operator('screen.screen_full_area', kw({ text: 'Toggle Fullscreen Area' })).use_hide_panels = true;
-    layout.separator();
-    layout.operator('screen.area_close', kw({ text: 'Close Area' }));
-  },
-}), { bl_label: 'Area' });
 const background = new Color4(...view_3d.background);
 // Blender's startup 3D View (startup.blend: region_3d view_rotation, view_distance and view_location) as an orbit
 // around its location, and its lens: View3D.lens 50 mm on the 36 mm viewport sensor at the viewport's zoom of 2
@@ -46,7 +33,7 @@ const LENS_HALF_TAN = (36 / 2 / 50) * 2;
 // A bound property's check item, named as Blender's RNA names it (Toolbar for show_region_toolbar) once loaded.
 const namedBinding = (binding) => (data, name) => {
   const bound = binding(data, name);
-  return bound && { ...bound, label: propertyName(data, name) ?? bound.label, keys: blenderKeys(KEYMAPS, 'wm.context_toggle', { data_path: dataPath(data, name) }) };
+  return bound && { ...bound, label: rnaProperty(data.bl_rna?.identifier, name)?.name ?? bound.label, keys: blenderKeys(KEYMAPS, 'wm.context_toggle', { data_path: dataPath(data, name) }) };
 };
 // A property's path from the context, for the keymap items toggling it (wm.context_toggle's data_path).
 const dataPath = (data, name) => ({ SpaceView3D: 'space_data.', ToolSettings: 'tool_settings.', View3DOverlay: 'space_data.overlay.' })[data.bl_rna?.identifier] + name;
@@ -121,7 +108,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   selectModes.append(...selectModeButtons);
   // Blender's Object Mode menus, from its own scripts over this view's context.
   // Its operators act on this view, as Blender runs a menu's operators in the menu's area.
-  const blender = menuUI({ menus: { ...menuClasses(spaceView3d), INFO_MT_area }, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
+  const blender = menuUI({ menus, context: () => world.blenderContext(view), prop: namedBinding(propBinding(ctx.rna.host)), keymaps: () => KEYMAPS });
   const run = blender.run;
   blender.run = (idname, props) => { views.setInput(view); run(idname, props); };
   const blenderMenu = (idname) => () => drawMenu(idname, blender);
@@ -139,7 +126,7 @@ export function createView3D(ctx, { section, canvas = null, headerId, cameraName
   // The tool settings, the header's transform settings and the sidebar, Blender's.
   const regions = createRegions({
     view, context: (region) => world.blenderContext(view, region), changed: () => sync(), undoPush: (name) => ctx.rna.host.undoPush?.(name),
-    ui: { run: blender.run, supported: blender.supported, menuItems: (idname) => drawMenu(idname, blender) },
+    ui: blender,
   });
   section.append(regions.toolHeader, regions.sidebar);
   view.regions = regions;

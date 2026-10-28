@@ -7,7 +7,7 @@ var __name__ = 'bl_keymap_utils.versioning';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -18,8 +18,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -27,7 +33,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -52,7 +58,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -71,7 +77,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,18 +90,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -106,16 +115,40 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var __all__ = tuple (['keyconfig_update']);
 export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -127,17 +160,17 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 	}
 	else {
 	}
-	var re = _module ('re');
-	var blender_version = _member ('_bpy.app', 'version_file');
-	if (keyconfig_version >= blender_version) {
+	var re = __call__ (_module, null, 're');
+	var blender_version = __call__ (_member, null, '_bpy.app', 'version_file');
+	if (__ge__ (keyconfig_version, blender_version)) {
 		return keyconfig_data;
 	}
-	var py_copy = _module ('copy');
+	var py_copy = __call__ (_module, null, 'copy');
 	var has_copy = false;
 	var get_transform_modal_map = function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -145,8 +178,14 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 		else {
 		}
-		for (var [km_name, _km_params, km_items_data] of keyconfig_data) {
-			if (km_name == 'Transform Modal Map') {
+		var __iterable0__ = keyconfig_data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var km_name = __left0__ [0];
+			var _km_params = __left0__ [1];
+			var km_items_data = __left0__ [2];
+			if (__eq__ (km_name, 'Transform Modal Map')) {
 				return km_items_data;
 			}
 		}
@@ -155,7 +194,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 	var get_ui_keymap = function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 				}
@@ -163,8 +202,14 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 		else {
 		}
-		for (var [km_name, _km_params, km_items_data] of keyconfig_data) {
-			if (km_name == 'User Interface') {
+		var __iterable0__ = keyconfig_data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var km_name = __left0__ [0];
+			var _km_params = __left0__ [1];
+			var km_items_data = __left0__ [2];
+			if (__eq__ (km_name, 'User Interface')) {
 				return km_items_data;
 			}
 		}
@@ -173,7 +218,7 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 	var remove_properties = function (op_prop_map) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -185,21 +230,50 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		else {
 		}
 		var changed_items = [];
-		for (var [km_index, [_km_name, _km_parms, km_items_data]] of py_enumerate (keyconfig_data)) {
-			for (var [kmi_item_index, [item_op, item_event, item_prop]] of py_enumerate (km_items_data ['items'])) {
+		var __iterable0__ = __call__ (py_enumerate, null, keyconfig_data);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var km_index = __left0__ [0];
+			var _km_name = __left0__ [1][0];
+			var _km_parms = __left0__ [1][1];
+			var km_items_data = __left0__ [1][2];
+			var __iterable1__ = __call__ (py_enumerate, null, __getitem__ (km_items_data, 'items'));
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var kmi_item_index = __left0__ [0];
+				var item_op = __left0__ [1][0];
+				var item_event = __left0__ [1][1];
+				var item_prop = __left0__ [1][2];
 				if (item_prop && __in__ (item_op, op_prop_map)) {
-					var properties = item_prop.py_get ('properties', []);
+					var properties = (function () {
+						var __accu0__ = item_prop;
+						return __call__ (__accu0__.py_get, __accu0__, 'properties', []);
+					}) ();
 					var filtered_properties = (function () {
 						var __accu0__ = [];
-						for (var prop of properties) {
-							if (!(any ((function () {
+						var __iterable2__ = properties;
+						__iterable2__ = __i__ (__iterable2__);
+						for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+							var prop = __getitem__ (__iterable2__, __index2__);
+							if (!(__call__ (any, null, (function () {
 								var __accu1__ = [];
-								for (var key of op_prop_map [item_op]) {
-									__accu1__.append (__in__ (key, prop));
+								var __iterable3__ = __getitem__ (op_prop_map, item_op);
+								__iterable3__ = __i__ (__iterable3__);
+								for (var __index3__ = 0; __index3__ < len (__iterable3__); __index3__++) {
+									var key = __getitem__ (__iterable3__, __index3__);
+									(function () {
+										var __accu2__ = __accu1__;
+										return __call__ (__accu2__.append, __accu2__, __in__ (key, prop));
+									}) ();
 								}
 								return __accu1__;
 							}) ()))) {
-								__accu0__.append (prop);
+								(function () {
+									var __accu1__ = __accu0__;
+									return __call__ (__accu1__.append, __accu1__, prop);
+								}) ();
 							}
 						}
 						return __accu0__;
@@ -207,31 +281,43 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 					if (!(filtered_properties)) {
 						var filtered_properties = null;
 					}
-					if (filtered_properties === null || len (filtered_properties) < len (properties)) {
-						changed_items.append (tuple ([km_index, kmi_item_index, filtered_properties]));
+					if (filtered_properties === null || __lt__ (__call__ (len, null, filtered_properties), __call__ (len, null, properties))) {
+						(function () {
+							var __accu0__ = changed_items;
+							return __call__ (__accu0__.append, __accu0__, tuple ([km_index, kmi_item_index, filtered_properties]));
+						}) ();
 					}
 				}
 			}
 		}
 		if (changed_items) {
 			if (!(has_copy)) {
-				keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+				keyconfig_data = (function () {
+					var __accu0__ = py_copy;
+					return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+				}) ();
 				has_copy = true;
 			}
-			for (var [km_index, kmi_item_index, filtered_properties] of changed_items) {
-				var __left0__ = keyconfig_data [km_index] [2] ['items'] [kmi_item_index];
+			var __iterable0__ = changed_items;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var km_index = __left0__ [0];
+				var kmi_item_index = __left0__ [1];
+				var filtered_properties = __left0__ [2];
+				var __left0__ = __getitem__ (__getitem__ (__getitem__ (__getitem__ (keyconfig_data, km_index), 2), 'items'), kmi_item_index);
 				var item_op = __left0__ [0];
 				var item_event = __left0__ [1];
 				var item_prop = __left0__ [2];
-				item_prop ['properties'] = filtered_properties;
-				keyconfig_data [km_index] [2] ['items'] [kmi_item_index] = tuple ([item_op, item_event, item_prop]);
+				__setitem__ (item_prop, 'properties', filtered_properties);
+				__setitem__ (__getitem__ (__getitem__ (__getitem__ (keyconfig_data, km_index), 2), 'items'), kmi_item_index, tuple ([item_op, item_event, item_prop]));
 			}
 		}
 	};
 	var rename_keymap = function (km_name_map) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -242,102 +328,202 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 		}
 		else {
 		}
-		for (var [km_index, [km_name, km_parms, km_items_data]] of py_enumerate (keyconfig_data)) {
-			var km_name_dst = km_name_map.py_get (km_name);
+		var __iterable0__ = __call__ (py_enumerate, null, keyconfig_data);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var km_index = __left0__ [0];
+			var km_name = __left0__ [1][0];
+			var km_parms = __left0__ [1][1];
+			var km_items_data = __left0__ [1][2];
+			var km_name_dst = (function () {
+				var __accu0__ = km_name_map;
+				return __call__ (__accu0__.py_get, __accu0__, km_name);
+			}) ();
 			if (km_name_dst === null) {
 				continue;
 			}
 			if (!(has_copy)) {
-				keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+				keyconfig_data = (function () {
+					var __accu0__ = py_copy;
+					return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+				}) ();
 				has_copy = true;
 			}
-			keyconfig_data [km_index] = tuple ([km_name_dst, km_parms, km_items_data]);
+			__setitem__ (keyconfig_data, km_index, tuple ([km_name_dst, km_parms, km_items_data]));
 		}
 	};
-	if (keyconfig_version <= tuple ([2, 92, 0])) {
+	if (__le__ (keyconfig_version, tuple ([2, 92, 0]))) {
 		if (!(has_copy)) {
-			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+			var keyconfig_data = (function () {
+				var __accu0__ = py_copy;
+				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+			}) ();
 			var has_copy = true;
 		}
-		for (var [_km_name, _km_parms, km_items_data] of keyconfig_data) {
-			for (var [_item_op, item_event, _item_prop] of km_items_data ['items']) {
-				if (item_event.py_get ('value') == 'PRESS') {
-					item_event ['repeat'] = true;
+		var __iterable0__ = keyconfig_data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var _km_name = __left0__ [0];
+			var _km_parms = __left0__ [1];
+			var km_items_data = __left0__ [2];
+			var __iterable1__ = __getitem__ (km_items_data, 'items');
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var _item_op = __left0__ [0];
+				var item_event = __left0__ [1];
+				var _item_prop = __left0__ [2];
+				if (__eq__ ((function () {
+					var __accu0__ = item_event;
+					return __call__ (__accu0__.py_get, __accu0__, 'value');
+				}) (), 'PRESS')) {
+					__setitem__ (item_event, 'repeat', true);
 				}
 			}
 		}
 	}
-	if (keyconfig_version <= tuple ([3, 2, 5])) {
+	if (__le__ (keyconfig_version, tuple ([3, 2, 5]))) {
 		if (!(has_copy)) {
-			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+			var keyconfig_data = (function () {
+				var __accu0__ = py_copy;
+				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+			}) ();
 			var has_copy = true;
 		}
-		for (var [_km_name, _km_parms, km_items_data] of keyconfig_data) {
-			for (var [_item_op, item_event, _item_prop] of km_items_data ['items']) {
-				var ty_new = dict ({'EVT_TWEAK_L': 'LEFTMOUSE', 'EVT_TWEAK_M': 'MIDDLEMOUSE', 'EVT_TWEAK_R': 'RIGHTMOUSE'}).py_get (item_event.py_get ('type'));
+		var __iterable0__ = keyconfig_data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var _km_name = __left0__ [0];
+			var _km_parms = __left0__ [1];
+			var km_items_data = __left0__ [2];
+			var __iterable1__ = __getitem__ (km_items_data, 'items');
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var _item_op = __left0__ [0];
+				var item_event = __left0__ [1];
+				var _item_prop = __left0__ [2];
+				var ty_new = (function () {
+					var __accu0__ = dict ({'EVT_TWEAK_L': 'LEFTMOUSE', 'EVT_TWEAK_M': 'MIDDLEMOUSE', 'EVT_TWEAK_R': 'RIGHTMOUSE'});
+					return __call__ (__accu0__.py_get, __accu0__, (function () {
+						var __accu1__ = item_event;
+						return __call__ (__accu1__.py_get, __accu1__, 'type');
+					}) ());
+				}) ();
 				if (ty_new) {
-					item_event ['type'] = ty_new;
-					var value = item_event ['value'];
-					if (value != 'ANY') {
-						item_event ['direction'] = value;
+					__setitem__ (item_event, 'type', ty_new);
+					var value = __getitem__ (item_event, 'value');
+					if (__ne__ (value, 'ANY')) {
+						__setitem__ (item_event, 'direction', value);
 					}
-					item_event ['value'] = 'CLICK_DRAG';
+					__setitem__ (item_event, 'value', 'CLICK_DRAG');
 				}
 			}
 		}
 	}
-	if (keyconfig_version <= tuple ([3, 2, 6])) {
+	if (__le__ (keyconfig_version, tuple ([3, 2, 6]))) {
 		if (!(has_copy)) {
-			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+			var keyconfig_data = (function () {
+				var __accu0__ = py_copy;
+				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+			}) ();
 			var has_copy = true;
 		}
-		for (var [_km_name, _km_parms, km_items_data] of keyconfig_data) {
-			for (var [_item_op, item_event, _item_prop] of km_items_data ['items']) {
-				var ty_new = dict ({'NDOF_BUTTON_ESC': 'ESC', 'NDOF_BUTTON_ALT': 'LEFT_ALT', 'NDOF_BUTTON_SHIFT': 'LEFT_SHIFT', 'NDOF_BUTTON_CTRL': 'LEFT_CTRL'}).py_get (item_event.py_get ('type'));
+		var __iterable0__ = keyconfig_data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var _km_name = __left0__ [0];
+			var _km_parms = __left0__ [1];
+			var km_items_data = __left0__ [2];
+			var __iterable1__ = __getitem__ (km_items_data, 'items');
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var _item_op = __left0__ [0];
+				var item_event = __left0__ [1];
+				var _item_prop = __left0__ [2];
+				var ty_new = (function () {
+					var __accu0__ = dict ({'NDOF_BUTTON_ESC': 'ESC', 'NDOF_BUTTON_ALT': 'LEFT_ALT', 'NDOF_BUTTON_SHIFT': 'LEFT_SHIFT', 'NDOF_BUTTON_CTRL': 'LEFT_CTRL'});
+					return __call__ (__accu0__.py_get, __accu0__, (function () {
+						var __accu1__ = item_event;
+						return __call__ (__accu1__.py_get, __accu1__, 'type');
+					}) ());
+				}) ();
 				if (ty_new) {
-					item_event ['type'] = ty_new;
+					__setitem__ (item_event, 'type', ty_new);
 				}
 			}
 		}
 	}
-	if (keyconfig_version <= tuple ([3, 6, 0])) {
+	if (__le__ (keyconfig_version, tuple ([3, 6, 0]))) {
 		if (!(has_copy)) {
-			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+			var keyconfig_data = (function () {
+				var __accu0__ = py_copy;
+				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+			}) ();
 			var has_copy = true;
 		}
-		var km_items_data = get_transform_modal_map ();
+		var km_items_data = __call__ (get_transform_modal_map, null);
 		if (km_items_data) {
-			var km_items = km_items_data ['items'];
-			for (var [item_modal, item_event, _item_prop] of km_items) {
-				if (item_modal == 'TRANSLATE') {
-					km_items.append (tuple (['VERT_EDGE_SLIDE', item_event, null]));
+			var km_items = __getitem__ (km_items_data, 'items');
+			var __iterable0__ = km_items;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var item_modal = __left0__ [0];
+				var item_event = __left0__ [1];
+				var _item_prop = __left0__ [2];
+				if (__eq__ (item_modal, 'TRANSLATE')) {
+					(function () {
+						var __accu0__ = km_items;
+						return __call__ (__accu0__.append, __accu0__, tuple (['VERT_EDGE_SLIDE', item_event, null]));
+					}) ();
 				}
-				else if (item_modal == 'ROTATE') {
-					km_items.append (tuple (['TRACKBALL', item_event, null]));
+				else if (__eq__ (item_modal, 'ROTATE')) {
+					(function () {
+						var __accu0__ = km_items;
+						return __call__ (__accu0__.append, __accu0__, tuple (['TRACKBALL', item_event, null]));
+					}) ();
 				}
 			}
-			km_items.append (tuple (['ROTATE_NORMALS', dict ({'type': 'N', 'value': 'PRESS'}), null]));
+			(function () {
+				var __accu0__ = km_items;
+				return __call__ (__accu0__.append, __accu0__, tuple (['ROTATE_NORMALS', dict ({'type': 'N', 'value': 'PRESS'}), null]));
+			}) ();
 		}
 	}
-	if (keyconfig_version <= tuple ([4, 0, 3])) {
+	if (__le__ (keyconfig_version, tuple ([4, 0, 3]))) {
 		if (!(has_copy)) {
-			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+			var keyconfig_data = (function () {
+				var __accu0__ = py_copy;
+				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+			}) ();
 			var has_copy = true;
 		}
-		var km_items_data = get_transform_modal_map ();
+		var km_items_data = __call__ (get_transform_modal_map, null);
 		if (km_items_data) {
-			km_items_data ['items'].append (tuple (['EDIT_SNAP_SOURCE_ON', dict ({'type': 'B', 'value': 'PRESS'}), null]));
-			km_items_data ['items'].append (tuple (['EDIT_SNAP_SOURCE_OFF', dict ({'type': 'B', 'value': 'PRESS'}), null]));
+			(function () {
+				var __accu0__ = __getitem__ (km_items_data, 'items');
+				return __call__ (__accu0__.append, __accu0__, tuple (['EDIT_SNAP_SOURCE_ON', dict ({'type': 'B', 'value': 'PRESS'}), null]));
+			}) ();
+			(function () {
+				var __accu0__ = __getitem__ (km_items_data, 'items');
+				return __call__ (__accu0__.append, __accu0__, tuple (['EDIT_SNAP_SOURCE_OFF', dict ({'type': 'B', 'value': 'PRESS'}), null]));
+			}) ();
 		}
 	}
-	if (keyconfig_version <= tuple ([4, 1, 5])) {
-		remove_properties (dict ({'transform.edge_slide': ['alt_navigation'], 'transform.resize': ['alt_navigation'], 'transform.rotate': ['alt_navigation'], 'transform.shrink_fatten': ['alt_navigation'], 'transform.transform': ['alt_navigation'], 'transform.translate': ['alt_navigation'], 'transform.vert_slide': ['alt_navigation'], 'view3d.edit_mesh_extrude_move_normal': ['alt_navigation'], 'armature.extrude_move': ['TRANSFORM_OT_translate'], 'curve.extrude_move': ['TRANSFORM_OT_translate'], 'gpencil.extrude_move': ['TRANSFORM_OT_translate'], 'mesh.rip_edge_move': ['TRANSFORM_OT_translate'], 'mesh.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move_linked': ['TRANSFORM_OT_translate']}));
-		var km_items_data = get_transform_modal_map ();
+	if (__le__ (keyconfig_version, tuple ([4, 1, 5]))) {
+		__call__ (remove_properties, null, dict ({'transform.edge_slide': ['alt_navigation'], 'transform.resize': ['alt_navigation'], 'transform.rotate': ['alt_navigation'], 'transform.shrink_fatten': ['alt_navigation'], 'transform.transform': ['alt_navigation'], 'transform.translate': ['alt_navigation'], 'transform.vert_slide': ['alt_navigation'], 'view3d.edit_mesh_extrude_move_normal': ['alt_navigation'], 'armature.extrude_move': ['TRANSFORM_OT_translate'], 'curve.extrude_move': ['TRANSFORM_OT_translate'], 'gpencil.extrude_move': ['TRANSFORM_OT_translate'], 'mesh.rip_edge_move': ['TRANSFORM_OT_translate'], 'mesh.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move': ['TRANSFORM_OT_translate'], 'object.duplicate_move_linked': ['TRANSFORM_OT_translate']}));
+		var km_items_data = __call__ (get_transform_modal_map, null);
 		if (km_items_data) {
 			var use_alt_navigate = function () {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 						}
@@ -345,148 +531,261 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 				}
 				else {
 				}
-				var km_item = py_next ((function () {
+				var km_item = __call__ (py_next, null, __call__ (py_iter, null, (function () {
 					var __accu0__ = [];
-					for (var i of km_items_data ['items']) {
-						if (i [0] == 'PROPORTIONAL_SIZE' && i [1] ['type'] == 'TRACKPADPAN') {
-							__accu0__.append (i);
+					var __iterable0__ = __getitem__ (km_items_data, 'items');
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var i = __getitem__ (__iterable0__, __index0__);
+						if (__eq__ (__getitem__ (i, 0), 'PROPORTIONAL_SIZE') && __eq__ (__getitem__ (__getitem__ (i, 1), 'type'), 'TRACKPADPAN')) {
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, i);
+							}) ();
 						}
 					}
 					return __accu0__;
-				}) (), null);
+				}) ()), null);
 				if (km_item) {
-					return !__in__ ('alt', km_item [1]) || km_item [1] ['alt'] === false;
+					return !__in__ ('alt', __getitem__ (km_item, 1)) || __getitem__ (__getitem__ (km_item, 1), 'alt') === false;
 				}
-				var bpy = _module ('bpy');
-				return getattr (bpy.context.window_manager.keyconfigs.active.preferences, 'use_alt_navigation', false);
+				var bpy = __call__ (_module, null, 'bpy');
+				return __call__ (getattr, null, bpy.context.window_manager.keyconfigs.active.preferences, 'use_alt_navigation', false);
 			};
-			if (use_alt_navigate ()) {
+			if (__call__ (use_alt_navigate, null)) {
 				if (!(has_copy)) {
-					var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+					var keyconfig_data = (function () {
+						var __accu0__ = py_copy;
+						return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+					}) ();
 					var has_copy = true;
-					var km_items_data = get_transform_modal_map ();
+					var km_items_data = __call__ (get_transform_modal_map, null);
 				}
-				km_items_data ['items'].append (tuple (['PASSTHROUGH_NAVIGATE', dict ({'type': 'LEFT_ALT', 'value': 'ANY', 'any': true}), null]));
+				(function () {
+					var __accu0__ = __getitem__ (km_items_data, 'items');
+					return __call__ (__accu0__.append, __accu0__, tuple (['PASSTHROUGH_NAVIGATE', dict ({'type': 'LEFT_ALT', 'value': 'ANY', 'any': true}), null]));
+				}) ();
 			}
 		}
 	}
-	if (keyconfig_version <= tuple ([4, 1, 21])) {
-		rename_keymap (dict ({'NLA Channels': 'NLA Tracks'}));
+	if (__le__ (keyconfig_version, tuple ([4, 1, 21]))) {
+		__call__ (rename_keymap, null, dict ({'NLA Channels': 'NLA Tracks'}));
 	}
-	if (keyconfig_version <= tuple ([4, 5, 10])) {
-		rename_keymap (dict ({'SequencerCommon': 'Video Sequence Editor'}));
-		rename_keymap (dict ({'SequencerPreview': 'Preview'}));
+	if (__le__ (keyconfig_version, tuple ([4, 5, 10]))) {
+		__call__ (rename_keymap, null, dict ({'SequencerCommon': 'Video Sequence Editor'}));
+		__call__ (rename_keymap, null, dict ({'SequencerPreview': 'Preview'}));
 		var mappings = [tuple (['Sequencer Timeline Tool: Select Box', 'Sequencer Tool: Select Box']), tuple (['Sequencer Preview Tool: Tweak', 'Preview Tool: Tweak']), tuple (['Sequencer Preview Tool: Select Box', 'Preview Tool: Select Box'])];
-		for (var [old, py_new] of mappings) {
-			rename_keymap (dict ([[old, py_new]]));
-			rename_keymap (dict ([[''.join ([_formatted (old, '', ''), ' (fallback)']), ''.join ([_formatted (py_new, '', ''), ' (fallback)'])]]));
+		var __iterable0__ = mappings;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var old = __left0__ [0];
+			var py_new = __left0__ [1];
+			__call__ (rename_keymap, null, dict ([[old, py_new]]));
+			__call__ (rename_keymap, null, dict ([[(function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, old, '', ''), ' (fallback)']);
+			}) (), (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, py_new, '', ''), ' (fallback)']);
+			}) ()]]));
 		}
-		rename_keymap (dict ({'Sequencer Tool: Cursor': 'Preview Tool: Cursor'}));
-		rename_keymap (dict ({'Sequencer Tool: Sample': 'Preview Tool: Sample'}));
-		rename_keymap (dict ({'Sequencer Tool: Move': 'Preview Tool: Move'}));
-		rename_keymap (dict ({'Sequencer Tool: Rotate': 'Preview Tool: Rotate'}));
-		rename_keymap (dict ({'Sequencer Tool: Scale': 'Preview Tool: Scale'}));
+		__call__ (rename_keymap, null, dict ({'Sequencer Tool: Cursor': 'Preview Tool: Cursor'}));
+		__call__ (rename_keymap, null, dict ({'Sequencer Tool: Sample': 'Preview Tool: Sample'}));
+		__call__ (rename_keymap, null, dict ({'Sequencer Tool: Move': 'Preview Tool: Move'}));
+		__call__ (rename_keymap, null, dict ({'Sequencer Tool: Rotate': 'Preview Tool: Rotate'}));
+		__call__ (rename_keymap, null, dict ({'Sequencer Tool: Scale': 'Preview Tool: Scale'}));
 	}
-	if (keyconfig_version < tuple ([5, 0, 53])) {
+	if (__lt__ (keyconfig_version, tuple ([5, 0, 53]))) {
 		if (!(has_copy)) {
-			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+			var keyconfig_data = (function () {
+				var __accu0__ = py_copy;
+				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+			}) ();
 			var has_copy = true;
 		}
-		var re_toolsetting_brush = re.compile ('^(tool_settings)\\.([a-z_]+)\\.(brush)\\.(.*)');
-		for (var [_km_name, _km_parms, km_items_data] of keyconfig_data) {
-			for (var [item_op, _item_event, item_prop] of km_items_data ['items']) {
-				if (item_op == 'wm.radial_control') {
+		var re_toolsetting_brush = (function () {
+			var __accu0__ = re;
+			return __call__ (__accu0__.compile, __accu0__, '^(tool_settings)\\.([a-z_]+)\\.(brush)\\.(.*)');
+		}) ();
+		var __iterable0__ = keyconfig_data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var _km_name = __left0__ [0];
+			var _km_parms = __left0__ [1];
+			var km_items_data = __left0__ [2];
+			var __iterable1__ = __getitem__ (km_items_data, 'items');
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var item_op = __left0__ [0];
+				var _item_event = __left0__ [1];
+				var item_prop = __left0__ [2];
+				if (__eq__ (item_op, 'wm.radial_control')) {
 					var updated_path_elements = [];
-					var secondary_path_index = -(1);
+					var secondary_path_index = __neg__ (1);
 					var secondary_path_identifier = '';
-					var toggle_path_index = -(1);
+					var toggle_path_index = __neg__ (1);
 					var toggle_path_identifier = '';
-					for (var [prop_index, [prop_id, prop_path]] of py_enumerate (item_prop ['properties'])) {
-						if (prop_id == 'data_path_primary') {
-							if (re_toolsetting_brush.fullmatch (prop_path)) {
-								var updated_path_elements = prop_path.py_split ('.').__getslice__ (0, 2, 1);
-								updated_path_elements.append ('unified_paint_settings');
+					var __iterable2__ = __call__ (py_enumerate, null, __getitem__ (item_prop, 'properties'));
+					__iterable2__ = __i__ (__iterable2__);
+					for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+						var __left0__ = __getitem__ (__iterable2__, __index2__);
+						var prop_index = __left0__ [0];
+						var prop_id = __left0__ [1][0];
+						var prop_path = __left0__ [1][1];
+						if (__eq__ (prop_id, 'data_path_primary')) {
+							if ((function () {
+								var __accu0__ = re_toolsetting_brush;
+								return __call__ (__accu0__.fullmatch, __accu0__, prop_path);
+							}) ()) {
+								var updated_path_elements = __getslice__ ((function () {
+									var __accu0__ = prop_path;
+									return __call__ (__accu0__.py_split, __accu0__, '.');
+								}) (), 0, 2, 1);
+								(function () {
+									var __accu0__ = updated_path_elements;
+									return __call__ (__accu0__.append, __accu0__, 'unified_paint_settings');
+								}) ();
 							}
 						}
-						else if (prop_id == 'data_path_secondary') {
-							if (prop_path.startswith ('tool_settings.unified_paint_settings.')) {
+						else if (__eq__ (prop_id, 'data_path_secondary')) {
+							if ((function () {
+								var __accu0__ = prop_path;
+								return __call__ (__accu0__.startswith, __accu0__, 'tool_settings.unified_paint_settings.');
+							}) ()) {
 								var secondary_path_index = prop_index;
-								var secondary_path_identifier = prop_path.py_split ('.', 2) [-(1)];
+								var secondary_path_identifier = __getitem__ ((function () {
+									var __accu0__ = prop_path;
+									return __call__ (__accu0__.py_split, __accu0__, '.', 2);
+								}) (), __neg__ (1));
 							}
 						}
-						else if (prop_id == 'use_secondary') {
-							if (prop_path.startswith ('tool_settings.unified_paint_settings.')) {
+						else if (__eq__ (prop_id, 'use_secondary')) {
+							if ((function () {
+								var __accu0__ = prop_path;
+								return __call__ (__accu0__.startswith, __accu0__, 'tool_settings.unified_paint_settings.');
+							}) ()) {
 								var toggle_path_index = prop_index;
-								var toggle_path_identifier = prop_path.py_split ('.', 2) [-(1)];
+								var toggle_path_identifier = __getitem__ ((function () {
+									var __accu0__ = prop_path;
+									return __call__ (__accu0__.py_split, __accu0__, '.', 2);
+								}) (), __neg__ (1));
 							}
 						}
 					}
-					if (updated_path_elements && secondary_path_index != -(1) && toggle_path_index != -(1)) {
-						item_prop ['properties'] [secondary_path_index] = tuple (['data_path_secondary', '.'.join (_joined (updated_path_elements, [secondary_path_identifier]))]);
-						item_prop ['properties'] [toggle_path_index] = tuple (['use_secondary', '.'.join (_joined (updated_path_elements, [toggle_path_identifier]))]);
+					if (updated_path_elements && __ne__ (secondary_path_index, __neg__ (1)) && __ne__ (toggle_path_index, __neg__ (1))) {
+						__setitem__ (__getitem__ (item_prop, 'properties'), secondary_path_index, tuple (['data_path_secondary', (function () {
+							var __accu0__ = '.';
+							return __call__ (__accu0__.join, __accu0__, __call__ (_joined, null, updated_path_elements, [secondary_path_identifier]));
+						}) ()]));
+						__setitem__ (__getitem__ (item_prop, 'properties'), toggle_path_index, tuple (['use_secondary', (function () {
+							var __accu0__ = '.';
+							return __call__ (__accu0__.join, __accu0__, __call__ (_joined, null, updated_path_elements, [toggle_path_identifier]));
+						}) ()]));
 					}
 				}
 			}
 		}
 	}
-	if (keyconfig_version < tuple ([5, 1, 6])) {
+	if (__lt__ (keyconfig_version, tuple ([5, 1, 6]))) {
 		var has_view_select = false;
 		var has_view_scroll = false;
-		var km_ui_items_data = get_ui_keymap ();
+		var km_ui_items_data = __call__ (get_ui_keymap, null);
 		if (km_ui_items_data) {
-			for (var [item_op, _item_event, _item_prop] of km_ui_items_data ['items']) {
-				if (item_op == 'ui.view_item_select') {
+			var __iterable0__ = __getitem__ (km_ui_items_data, 'items');
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var item_op = __left0__ [0];
+				var _item_event = __left0__ [1];
+				var _item_prop = __left0__ [2];
+				if (__eq__ (item_op, 'ui.view_item_select')) {
 					var has_view_select = true;
 				}
-				if (item_op == 'ui.view_scroll') {
+				if (__eq__ (item_op, 'ui.view_scroll')) {
 					var has_view_scroll = true;
 				}
 			}
 			if (!(has_view_select)) {
 				if (!(has_copy)) {
-					var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+					var keyconfig_data = (function () {
+						var __accu0__ = py_copy;
+						return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+					}) ();
 					var has_copy = true;
-					var km_ui_items_data = get_ui_keymap ();
+					var km_ui_items_data = __call__ (get_ui_keymap, null);
 				}
 				var select_items = [tuple (['ui.view_item_select', dict ({'type': 'LEFTMOUSE', 'value': 'PRESS'}), null]), tuple (['ui.view_item_select', dict ({'type': 'LEFTMOUSE', 'value': 'PRESS', 'ctrl': true}), dict ({'properties': [tuple (['extend', true])]})]), tuple (['ui.view_item_select', dict ({'type': 'LEFTMOUSE', 'value': 'PRESS', 'shift': true}), dict ({'properties': [tuple (['range_select', true])]})])];
-				km_ui_items_data ['items'].extend (select_items);
+				(function () {
+					var __accu0__ = __getitem__ (km_ui_items_data, 'items');
+					return __call__ (__accu0__.extend, __accu0__, select_items);
+				}) ();
 			}
 			if (!(has_view_scroll)) {
 				if (!(has_copy)) {
-					var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+					var keyconfig_data = (function () {
+						var __accu0__ = py_copy;
+						return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+					}) ();
 					var has_copy = true;
-					var km_ui_items_data = get_ui_keymap ();
+					var km_ui_items_data = __call__ (get_ui_keymap, null);
 				}
 				var scroll_items = [tuple (['ui.view_scroll', dict ({'type': 'WHEELUPMOUSE', 'value': 'ANY'}), null]), tuple (['ui.view_scroll', dict ({'type': 'WHEELDOWNMOUSE', 'value': 'ANY'}), null]), tuple (['ui.view_scroll', dict ({'type': 'TRACKPADPAN', 'value': 'ANY'}), null])];
-				km_ui_items_data ['items'].extend (scroll_items);
+				(function () {
+					var __accu0__ = __getitem__ (km_ui_items_data, 'items');
+					return __call__ (__accu0__.extend, __accu0__, scroll_items);
+				}) ();
 			}
 		}
 		else {
-			print ('Error versioning keymap: Missing "User Interface" keymap');
+			__call__ (print, null, 'Error versioning keymap: Missing "User Interface" keymap');
 		}
 	}
-	if (keyconfig_version < tuple ([5, 1, 11])) {
-		rename_keymap (dict ({'Grease Pencil Paint Mode': 'Grease Pencil Draw Mode'}));
+	if (__lt__ (keyconfig_version, tuple ([5, 1, 11]))) {
+		__call__ (rename_keymap, null, dict ({'Grease Pencil Paint Mode': 'Grease Pencil Draw Mode'}));
 	}
-	if (keyconfig_version < tuple ([5, 2, 21])) {
+	if (__lt__ (keyconfig_version, tuple ([5, 2, 21]))) {
 		if (!(has_copy)) {
-			var keyconfig_data = py_copy.py_deepcopy (keyconfig_data);
+			var keyconfig_data = (function () {
+				var __accu0__ = py_copy;
+				return __call__ (__accu0__.py_deepcopy, __accu0__, keyconfig_data);
+			}) ();
 			var has_copy = true;
 		}
-		for (var [_km_name, _km_parms, km_items_data] of keyconfig_data) {
-			for (var [item_op, _item_event, item_prop] of km_items_data ['items']) {
+		var __iterable0__ = keyconfig_data;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var _km_name = __left0__ [0];
+			var _km_parms = __left0__ [1];
+			var km_items_data = __left0__ [2];
+			var __iterable1__ = __getitem__ (km_items_data, 'items');
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var item_op = __left0__ [0];
+				var _item_event = __left0__ [1];
+				var item_prop = __left0__ [2];
 				if (__in__ (item_op, new set (['grease_pencil.brush_stroke', 'grease_pencil.sculpt_paint', 'paint.image_paint', 'paint.vertex_paint', 'paint.weight_paint', 'sculpt.brush_stroke', 'sculpt_curves.brush_stroke'])) && item_prop) {
-					var index_to_fix = -(1);
+					var index_to_fix = __neg__ (1);
 					var value_to_copy = null;
-					for (var [prop_index, [prop_id, prop_value]] of py_enumerate (item_prop ['properties'])) {
-						if (prop_id == 'mode' && prop_value != 'INVERT') {
+					var __iterable2__ = __call__ (py_enumerate, null, __getitem__ (item_prop, 'properties'));
+					__iterable2__ = __i__ (__iterable2__);
+					for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+						var __left0__ = __getitem__ (__iterable2__, __index2__);
+						var prop_index = __left0__ [0];
+						var prop_id = __left0__ [1][0];
+						var prop_value = __left0__ [1][1];
+						if (__eq__ (prop_id, 'mode') && __ne__ (prop_value, 'INVERT')) {
 							var index_to_fix = prop_index;
 							var value_to_copy = prop_value;
 							break;
 						}
 					}
-					if (index_to_fix != -(1)) {
-						item_prop ['properties'] [index_to_fix] = tuple (['brush_toggle', value_to_copy]);
+					if (__ne__ (index_to_fix, __neg__ (1))) {
+						__setitem__ (__getitem__ (item_prop, 'properties'), index_to_fix, tuple (['brush_toggle', value_to_copy]));
 					}
 				}
 			}
@@ -497,3 +796,18 @@ export var keyconfig_update = function (keyconfig_data, keyconfig_version) {
 
 //# sourceMappingURL=bl_keymap_utils.versioning.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '__all__': __all__ = value; break;
+		case 'keyconfig_update': keyconfig_update = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

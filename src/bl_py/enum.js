@@ -20,7 +20,7 @@ export var _counter = [0];
 export var auto = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -28,8 +28,20 @@ export var auto = function () {
 	}
 	else {
 	}
-	_counter [0]++;
-	return _counter [0];
+	__setitem__ (_counter, 0, __call__ (__iadd__, null, __getitem__ (_counter, 0), 1));
+	return __getitem__ (_counter, 0);
 };
 
 //# sourceMappingURL=enum.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'Enum': Enum = value; break;
+		case 'IntEnum': IntEnum = value; break;
+		case 'StrEnum': StrEnum = value; break;
+		case 'Flag': Flag = value; break;
+		case 'IntFlag': IntFlag = value; break;
+		case '_counter': _counter = value; break;
+		case 'auto': auto = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

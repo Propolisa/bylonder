@@ -15,7 +15,7 @@ export var listdir = function (directory) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -26,15 +26,103 @@ export var listdir = function (directory) {
 	}
 	else {
 	}
-	return [];
+	var prefix = __add__ ((function () {
+		var __accu0__ = path;
+		return __call__ (__accu0__.normpath, __accu0__, directory);
+	}) (), '/');
+	return __call__ (sorted, null, (function () {
+		var __accu0__ = [];
+		var __iterable0__ = __add__ (path.files, __call__ (sorted, null, path._directories));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var entry = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu1__ = entry;
+				return __call__ (__accu1__.startswith, __accu1__, prefix);
+			}) ()) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __getitem__ ((function () {
+						var __accu2__ = __getslice__ (entry, __call__ (len, null, prefix), null, 1);
+						return __call__ (__accu2__.py_split, __accu2__, '/');
+					}) (), 0));
+				}) ();
+			}
+		}
+		return set (__accu0__);
+	}) ());
 };
+export var DirEntry =  __class__ ('DirEntry', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, directory, py_name) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'directory': var directory = __allkwargs0__ [__attrib0__]; break;
+						case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __left0__ = tuple ([py_name, (function () {
+			var __accu0__ = path;
+			return __call__ (__accu0__.join, __accu0__, directory, py_name);
+		}) ()]);
+		self.py_name = __left0__ [0];
+		self.path = __left0__ [1];
+	});},
+	get is_dir () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return (function () {
+			var __accu0__ = path;
+			return __call__ (__accu0__.isdir, __accu0__, self.path);
+		}) ();
+	});},
+	get is_file () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return (function () {
+			var __accu0__ = path;
+			return __call__ (__accu0__.isfile, __accu0__, self.path);
+		}) ();
+	});}
+});
 export var scandir = function (directory) {
 	if (typeof directory == 'undefined' || (directory != null && directory.hasOwnProperty ("__kwargtrans__"))) {;
 		var directory = '.';
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -45,12 +133,24 @@ export var scandir = function (directory) {
 	}
 	else {
 	}
-	return [];
+	return (function () {
+		var __accu0__ = [];
+		var __iterable0__ = __call__ (list, null, __call__ (listdir, null, directory));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var py_name = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, __call__ (DirEntry, null, directory, py_name));
+			}) ();
+		}
+		return __accu0__;
+	}) ();
 };
 export var getcwd = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -63,7 +163,7 @@ export var getcwd = function () {
 export var fspath = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -82,7 +182,7 @@ export var getenv = function (key, py_default) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -94,7 +194,25 @@ export var getenv = function (key, py_default) {
 	}
 	else {
 	}
-	return environ.py_get (key, py_default);
+	return (function () {
+		var __accu0__ = environ;
+		return __call__ (__accu0__.py_get, __accu0__, key, py_default);
+	}) ();
 };
 
 //# sourceMappingURL=os.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'sep': sep = value; break;
+		case 'pathsep': pathsep = value; break;
+		case 'curdir': curdir = value; break;
+		case 'environ': environ = value; break;
+		case 'listdir': listdir = value; break;
+		case 'DirEntry': DirEntry = value; break;
+		case 'scandir': scandir = value; break;
+		case 'getcwd': getcwd = value; break;
+		case 'fspath': fspath = value; break;
+		case 'getenv': getenv = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

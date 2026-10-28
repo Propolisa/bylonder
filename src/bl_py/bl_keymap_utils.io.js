@@ -7,7 +7,7 @@ var __name__ = 'bl_keymap_utils.io';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -18,8 +18,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -27,7 +33,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -52,7 +58,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -71,7 +77,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,18 +90,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -106,16 +115,40 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var __all__ = tuple (['_init_properties_from_data', 'keyconfig_export_as_data', 'keyconfig_import_from_data', 'keyconfig_init_from_data', 'keyconfig_merge', 'keymap_init_from_data']);
 export var indent = function (levels) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -126,12 +159,12 @@ export var indent = function (levels) {
 	}
 	else {
 	}
-	return levels * ' ';
+	return __mul__ (levels, ' ');
 };
 export var round_float_32 = function (f) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -142,14 +175,14 @@ export var round_float_32 = function (f) {
 	}
 	else {
 	}
-	var pack = _member ('struct', 'pack');
-	var unpack = _member ('struct', 'unpack');
-	return unpack ('f', pack ('f', f)) [0];
+	var pack = __call__ (_member, null, 'struct', 'pack');
+	var unpack = __call__ (_member, null, 'struct', 'unpack');
+	return __getitem__ (__call__ (unpack, null, 'f', __call__ (pack, null, 'f', f)), 0);
 };
 export var repr_f32 = function (f) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -160,17 +193,23 @@ export var repr_f32 = function (f) {
 	}
 	else {
 	}
-	var f_round = round_float_32 (f);
-	var f_str = repr (f);
-	var f_str_frac = f_str.partition ('.') [2];
+	var f_round = __call__ (round_float_32, null, f);
+	var f_str = __call__ (repr, null, f);
+	var f_str_frac = __getitem__ ((function () {
+		var __accu0__ = f_str;
+		return __call__ (__accu0__.partition, __accu0__, '.');
+	}) (), 2);
 	if (!(f_str_frac)) {
 		return f_str;
 	}
-	for (var i = 1; i < len (f_str_frac); i++) {
-		var f_test = round (f, i);
-		var f_test_round = round_float_32 (f_test);
-		if (f_test_round == f_round) {
-			return '{:.{:d}f}'.format (f_test, i);
+	for (var i = 1; i < __call__ (len, null, f_str_frac); i++) {
+		var f_test = __call__ (round, null, f, i);
+		var f_test_round = __call__ (round_float_32, null, f_test);
+		if (__eq__ (f_test_round, f_round)) {
+			return (function () {
+				var __accu0__ = '{:.{:d}f}';
+				return __call__ (__accu0__.format, __accu0__, f_test, i);
+			}) ();
 		}
 	}
 	return f_str;
@@ -178,7 +217,7 @@ export var repr_f32 = function (f) {
 export var kmi_args_as_data = function (kmi) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -189,37 +228,82 @@ export var kmi_args_as_data = function (kmi) {
 	}
 	else {
 	}
-	var s = [''.join (['"type": \'', _formatted (kmi.py_metatype, '', ''), "'"]), ''.join (['"value": \'', _formatted (kmi.value, '', ''), "'"])];
+	var s = [(function () {
+		var __accu0__ = '';
+		return __call__ (__accu0__.join, __accu0__, ['"type": \'', __call__ (_formatted, null, kmi.py_metatype, '', ''), "'"]);
+	}) (), (function () {
+		var __accu0__ = '';
+		return __call__ (__accu0__.join, __accu0__, ['"value": \'', __call__ (_formatted, null, kmi.value, '', ''), "'"]);
+	}) ()];
 	if (kmi.any) {
-		s.append ('"any": True');
+		(function () {
+			var __accu0__ = s;
+			return __call__ (__accu0__.append, __accu0__, '"any": True');
+		}) ();
 	}
 	else {
-		for (var attr of tuple (['shift', 'ctrl', 'alt', 'oskey', 'hyper'])) {
-			var mod = getattr (kmi, attr);
+		var __iterable0__ = tuple (['shift', 'ctrl', 'alt', 'oskey', 'hyper']);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var attr = __getitem__ (__iterable0__, __index0__);
+			var mod = __call__ (getattr, null, kmi, attr);
 			if (mod) {
-				s.append (''.join (['"', _formatted (attr, '', ''.join (['s'])), '": ']) + (mod == -(1) ? '-1' : 'True'));
+				(function () {
+					var __accu0__ = s;
+					return __call__ (__accu0__.append, __accu0__, __add__ ((function () {
+						var __accu1__ = '';
+						return __call__ (__accu1__.join, __accu1__, ['"', __call__ (_formatted, null, attr, '', (function () {
+							var __accu2__ = '';
+							return __call__ (__accu2__.join, __accu2__, ['s']);
+						}) ()), '": ']);
+					}) (), (__eq__ (mod, __neg__ (1)) ? '-1' : 'True')));
+				}) ();
 			}
 		}
 	}
 	var mod = kmi.key_modifier;
-	if (mod && mod != 'NONE') {
-		s.append (''.join (['"key_modifier": \'', _formatted (mod, '', ''.join (['s'])), "'"]));
+	if (mod && __ne__ (mod, 'NONE')) {
+		(function () {
+			var __accu0__ = s;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = '';
+				return __call__ (__accu1__.join, __accu1__, ['"key_modifier": \'', __call__ (_formatted, null, mod, '', (function () {
+					var __accu2__ = '';
+					return __call__ (__accu2__.join, __accu2__, ['s']);
+				}) ()), "'"]);
+			}) ());
+		}) ();
 	}
 	var direction = kmi.direction;
-	if (direction && direction != 'ANY') {
-		s.append (''.join (['"direction": \'', _formatted (direction, '', ''.join (['s'])), "'"]));
+	if (direction && __ne__ (direction, 'ANY')) {
+		(function () {
+			var __accu0__ = s;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = '';
+				return __call__ (__accu1__.join, __accu1__, ['"direction": \'', __call__ (_formatted, null, direction, '', (function () {
+					var __accu2__ = '';
+					return __call__ (__accu2__.join, __accu2__, ['s']);
+				}) ()), "'"]);
+			}) ());
+		}) ();
 	}
 	if (kmi.repeat) {
-		if (kmi.map_type == 'KEYBOARD' && __in__ (kmi.value, new set (['PRESS', 'ANY'])) || kmi.map_type == 'TEXTINPUT') {
-			s.append ('"repeat": True');
+		if (__eq__ (kmi.map_type, 'KEYBOARD') && __in__ (kmi.value, new set (['PRESS', 'ANY'])) || __eq__ (kmi.map_type, 'TEXTINPUT')) {
+			(function () {
+				var __accu0__ = s;
+				return __call__ (__accu0__.append, __accu0__, '"repeat": True');
+			}) ();
 		}
 	}
-	return ('{' + ', '.join (s)) + '}';
+	return __add__ (__add__ ('{', (function () {
+		var __accu0__ = ', ';
+		return __call__ (__accu0__.join, __accu0__, s);
+	}) ()), '}');
 };
 export var _kmi_properties_to_lines_recursive = function (level, properties, lines) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -232,11 +316,11 @@ export var _kmi_properties_to_lines_recursive = function (level, properties, lin
 	}
 	else {
 	}
-	var OperatorProperties = _member ('_bpy.types', 'OperatorProperties');
+	var OperatorProperties = __call__ (_member, null, '_bpy.types', 'OperatorProperties');
 	var string_value = function (value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -247,37 +331,86 @@ export var _kmi_properties_to_lines_recursive = function (level, properties, lin
 		}
 		else {
 		}
-		if (isinstance (value, tuple ([str, bool, int, set]))) {
-			return repr (value);
+		if (__call__ (isinstance, null, value, tuple ([str, bool, int, set]))) {
+			return __call__ (repr, null, value);
 		}
-		else if (isinstance (value, float)) {
-			return repr_f32 (value);
+		else if (__call__ (isinstance, null, value, float)) {
+			return __call__ (repr_f32, null, value);
 		}
-		else if (getattr (value, '__len__', false)) {
-			return repr (tuple (value));
+		else if (__call__ (getattr, null, value, '__len__', false)) {
+			return __call__ (repr, null, __call__ (tuple, null, value));
 		}
-		var __except0__ = Exception (''.join (['Export key configuration: cannot write ', _formatted (value, 'r', '')]));
+		var __except0__ = __call__ (Exception, null, (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, ['Export key configuration: cannot write ', __call__ (_formatted, null, value, 'r', '')]);
+		}) ());
 		__except0__.__cause__ = null;
 		throw __except0__;
 	};
-	for (var pname of properties.bl_rna.properties.py_keys ()) {
-		if (pname != 'rna_type') {
-			var value = getattr (properties, pname);
-			if (isinstance (value, OperatorProperties)) {
+	var __iterable0__ = (function () {
+		var __accu0__ = properties.bl_rna.properties;
+		return __call__ (__accu0__.py_keys, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var pname = __getitem__ (__iterable0__, __index0__);
+		if (__ne__ (pname, 'rna_type')) {
+			var value = __call__ (getattr, null, properties, pname);
+			if (__call__ (isinstance, null, value, OperatorProperties)) {
 				var lines_test = [];
-				_kmi_properties_to_lines_recursive (level + 2, value, lines_test);
+				__call__ (_kmi_properties_to_lines_recursive, null, __add__ (level, 2), value, lines_test);
 				if (lines_test) {
-					lines.append ('(');
-					lines.append (''.join (['"', _formatted (pname, '', ''), '",\n']));
-					lines.append (''.join ([_formatted (indent (level + 3), '', ''), '[']));
-					lines.extend (lines_test);
-					lines.append ('],\n');
-					lines.append (''.join ([_formatted (indent (level + 3), '', ''), '),\n', _formatted (indent (level + 2), '', '')]));
+					(function () {
+						var __accu0__ = lines;
+						return __call__ (__accu0__.append, __accu0__, '(');
+					}) ();
+					(function () {
+						var __accu0__ = lines;
+						return __call__ (__accu0__.append, __accu0__, (function () {
+							var __accu1__ = '';
+							return __call__ (__accu1__.join, __accu1__, ['"', __call__ (_formatted, null, pname, '', ''), '",\n']);
+						}) ());
+					}) ();
+					(function () {
+						var __accu0__ = lines;
+						return __call__ (__accu0__.append, __accu0__, (function () {
+							var __accu1__ = '';
+							return __call__ (__accu1__.join, __accu1__, [__call__ (_formatted, null, __call__ (indent, null, __add__ (level, 3)), '', ''), '[']);
+						}) ());
+					}) ();
+					(function () {
+						var __accu0__ = lines;
+						return __call__ (__accu0__.extend, __accu0__, lines_test);
+					}) ();
+					(function () {
+						var __accu0__ = lines;
+						return __call__ (__accu0__.append, __accu0__, '],\n');
+					}) ();
+					(function () {
+						var __accu0__ = lines;
+						return __call__ (__accu0__.append, __accu0__, (function () {
+							var __accu1__ = '';
+							return __call__ (__accu1__.join, __accu1__, [__call__ (_formatted, null, __call__ (indent, null, __add__ (level, 3)), '', ''), '),\n', __call__ (_formatted, null, __call__ (indent, null, __add__ (level, 2)), '', '')]);
+						}) ());
+					}) ();
 				}
+				// pass;
 			}
-			else if (properties.is_property_set (pname)) {
-				var value = string_value (value);
-				lines.append (''.join (['("', _formatted (pname, '', ''), '", ', _formatted (value, '', ''.join (['s'])), '),\n', _formatted (indent (level + 2), '', '')]));
+			else if ((function () {
+				var __accu0__ = properties;
+				return __call__ (__accu0__.is_property_set, __accu0__, pname);
+			}) ()) {
+				var value = __call__ (string_value, null, value);
+				(function () {
+					var __accu0__ = lines;
+					return __call__ (__accu0__.append, __accu0__, (function () {
+						var __accu1__ = '';
+						return __call__ (__accu1__.join, __accu1__, ['("', __call__ (_formatted, null, pname, '', ''), '", ', __call__ (_formatted, null, value, '', (function () {
+							var __accu2__ = '';
+							return __call__ (__accu2__.join, __accu2__, ['s']);
+						}) ()), '),\n', __call__ (_formatted, null, __call__ (indent, null, __add__ (level, 2)), '', '')]);
+					}) ());
+				}) ();
 			}
 		}
 	}
@@ -285,7 +418,7 @@ export var _kmi_properties_to_lines_recursive = function (level, properties, lin
 export var _kmi_properties_to_lines = function (level, kmi_props, lines) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -301,17 +434,26 @@ export var _kmi_properties_to_lines = function (level, kmi_props, lines) {
 	if (kmi_props === null) {
 		return ;
 	}
-	var lines_test = [''.join (['"properties":\n', _formatted (indent (level + 1), '', ''), '['])];
-	_kmi_properties_to_lines_recursive (level, kmi_props, lines_test);
-	if (len (lines_test) > 1) {
-		lines_test.append ('],\n');
-		lines.extend (lines_test);
+	var lines_test = [(function () {
+		var __accu0__ = '';
+		return __call__ (__accu0__.join, __accu0__, ['"properties":\n', __call__ (_formatted, null, __call__ (indent, null, __add__ (level, 1)), '', ''), '[']);
+	}) ()];
+	__call__ (_kmi_properties_to_lines_recursive, null, level, kmi_props, lines_test);
+	if (__gt__ (__call__ (len, null, lines_test), 1)) {
+		(function () {
+			var __accu0__ = lines_test;
+			return __call__ (__accu0__.append, __accu0__, '],\n');
+		}) ();
+		(function () {
+			var __accu0__ = lines;
+			return __call__ (__accu0__.extend, __accu0__, lines_test);
+		}) ();
 	}
 };
 export var _kmi_attrs_or_none = function (level, kmi) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -324,20 +466,29 @@ export var _kmi_attrs_or_none = function (level, kmi) {
 	else {
 	}
 	var lines = [];
-	_kmi_properties_to_lines (level + 1, kmi.properties, lines);
+	__call__ (_kmi_properties_to_lines, null, __add__ (level, 1), kmi.properties, lines);
 	if (kmi.active === false) {
-		lines.append (''.join ([_formatted (indent (level), '', ''), '"active":False,\n']));
+		(function () {
+			var __accu0__ = lines;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = '';
+				return __call__ (__accu1__.join, __accu1__, [__call__ (_formatted, null, __call__ (indent, null, level), '', ''), '"active":False,\n']);
+			}) ());
+		}) ();
 	}
 	if (!(lines)) {
 		return null;
 	}
-	return ''.join (lines);
+	return (function () {
+		var __accu0__ = '';
+		return __call__ (__accu0__.join, __accu0__, lines);
+	}) ();
 };
 export var keyconfig_export_as_data = function (wm, kc, filepath) {
 	var all_keymaps = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -355,106 +506,187 @@ export var keyconfig_export_as_data = function (wm, kc, filepath) {
 		__module__: __name__,
 		keymaps: []
 	});
-	var edited_kc = FakeKeyConfig ();
-	for (var km of wm.keyconfigs.user.keymaps) {
+	var edited_kc = __call__ (FakeKeyConfig, null);
+	var __iterable0__ = wm.keyconfigs.user.keymaps;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var km = __getitem__ (__iterable0__, __index0__);
 		if (all_keymaps || km.is_user_modified) {
-			edited_kc.keymaps.append (km);
+			(function () {
+				var __accu0__ = edited_kc.keymaps;
+				return __call__ (__accu0__.append, __accu0__, km);
+			}) ();
 		}
 	}
-	if (kc != wm.keyconfigs.py_default) {
-		var export_keymaps = keyconfig_merge (edited_kc, kc);
+	if (__ne__ (kc, wm.keyconfigs.py_default)) {
+		var export_keymaps = __call__ (keyconfig_merge, null, edited_kc, kc);
 	}
 	else {
-		var export_keymaps = keyconfig_merge (edited_kc, edited_kc);
+		var export_keymaps = __call__ (keyconfig_merge, null, edited_kc, edited_kc);
 	}
-	export_keymaps.py_sort (__kwargtrans__ ({key: (function __lambda__ (k) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'k': var k = __allkwargs0__ [__attrib0__]; break;
+	(function () {
+		var __accu0__ = export_keymaps;
+		return __call__ (__accu0__.py_sort, __accu0__, __kwargtrans__ ({key: (function __lambda__ (k) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'k': var k = __allkwargs0__ [__attrib0__]; break;
+						}
 					}
 				}
 			}
-		}
-		else {
-		}
-		return k [0].py_name;
-	})}));
-	var fh = open (filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
+			else {
+			}
+			return __getitem__ (k, 0).py_name;
+		})}));
+	}) ();
+	var fh = __call__ (open, null, filepath, 'w', __kwargtrans__ ({encoding: 'utf-8'}));
 	try {
 		fh.__enter__ ();
 		var fw = fh.write;
-		var version_file = _member ('_bpy.app', 'version_file');
-		fw (''.join (['keyconfig_version = ', _formatted (version_file, 'r', ''), '\n']));
-		fw ('keyconfig_data = \\\n[');
-		for (var [km, _kc_x] of export_keymaps) {
-			var km = km.active ();
-			fw ('(');
-			fw (''.join (['"', _formatted (km.py_name, '', ''.join (['s'])), '",\n']));
-			fw (''.join ([_formatted (indent (2), '', ''), '{']));
-			fw (''.join (['"space_type": \'', _formatted (km.space_type, '', ''.join (['s'])), "'"]));
-			fw (''.join ([', "region_type": \'', _formatted (km.region_type, '', ''.join (['s'])), "'"]));
+		var version_file = __call__ (_member, null, '_bpy.app', 'version_file');
+		__call__ (fw, null, (function () {
+			var __accu0__ = '';
+			return __call__ (__accu0__.join, __accu0__, ['keyconfig_version = ', __call__ (_formatted, null, version_file, 'r', ''), '\n']);
+		}) ());
+		// pass;
+		__call__ (fw, null, 'keyconfig_data = \\\n[');
+		var __iterable0__ = export_keymaps;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var km = __left0__ [0];
+			var _kc_x = __left0__ [1];
+			var km = (function () {
+				var __accu0__ = km;
+				return __call__ (__accu0__.active, __accu0__);
+			}) ();
+			__call__ (fw, null, '(');
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, ['"', __call__ (_formatted, null, km.py_name, '', (function () {
+					var __accu1__ = '';
+					return __call__ (__accu1__.join, __accu1__, ['s']);
+				}) ()), '",\n']);
+			}) ());
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, __call__ (indent, null, 2), '', ''), '{']);
+			}) ());
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, ['"space_type": \'', __call__ (_formatted, null, km.space_type, '', (function () {
+					var __accu1__ = '';
+					return __call__ (__accu1__.join, __accu1__, ['s']);
+				}) ()), "'"]);
+			}) ());
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, [', "region_type": \'', __call__ (_formatted, null, km.region_type, '', (function () {
+					var __accu1__ = '';
+					return __call__ (__accu1__.join, __accu1__, ['s']);
+				}) ()), "'"]);
+			}) ());
 			if (km.is_modal) {
-				fw (', "modal": True');
+				__call__ (fw, null, ', "modal": True');
 			}
-			fw ('},\n');
-			fw (''.join ([_formatted (indent (2), '', ''), '{']));
+			__call__ (fw, null, '},\n');
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, __call__ (indent, null, 2), '', ''), '{']);
+			}) ());
 			var is_modal = km.is_modal;
-			fw ('"items":\n');
-			fw (''.join ([_formatted (indent (3), '', ''), '[']));
-			for (var kmi of km.keymap_items) {
+			__call__ (fw, null, '"items":\n');
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, __call__ (indent, null, 3), '', ''), '[']);
+			}) ());
+			var __iterable1__ = km.keymap_items;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var kmi = __getitem__ (__iterable1__, __index1__);
 				if (is_modal) {
 					var kmi_id = kmi.propvalue;
 				}
 				else {
 					var kmi_id = kmi.idname;
 				}
-				fw ('(');
-				var kmi_args = kmi_args_as_data (kmi);
-				var kmi_data = _kmi_attrs_or_none (4, kmi);
-				fw (''.join (['"', _formatted (kmi_id, '', ''.join (['s'])), '"']));
+				__call__ (fw, null, '(');
+				var kmi_args = __call__ (kmi_args_as_data, null, kmi);
+				var kmi_data = __call__ (_kmi_attrs_or_none, null, 4, kmi);
+				__call__ (fw, null, (function () {
+					var __accu0__ = '';
+					return __call__ (__accu0__.join, __accu0__, ['"', __call__ (_formatted, null, kmi_id, '', (function () {
+						var __accu1__ = '';
+						return __call__ (__accu1__.join, __accu1__, ['s']);
+					}) ()), '"']);
+				}) ());
 				if (kmi_data === null) {
-					fw (', ');
+					__call__ (fw, null, ', ');
 				}
 				else {
-					fw (''.join ([',\n', _formatted (indent (5), '', '')]));
+					__call__ (fw, null, (function () {
+						var __accu0__ = '';
+						return __call__ (__accu0__.join, __accu0__, [',\n', __call__ (_formatted, null, __call__ (indent, null, 5), '', '')]);
+					}) ());
 				}
-				fw (kmi_args);
+				__call__ (fw, null, kmi_args);
 				if (kmi_data === null) {
-					fw (', None),\n');
+					__call__ (fw, null, ', None),\n');
 				}
 				else {
-					fw (',\n');
-					fw (''.join ([_formatted (indent (5), '', ''), '{']));
-					fw (kmi_data);
-					fw (''.join ([_formatted (indent (6), '', '')]));
-					fw (''.join (['},\n', _formatted (indent (5), '', '')]));
-					fw ('),\n');
+					__call__ (fw, null, ',\n');
+					__call__ (fw, null, (function () {
+						var __accu0__ = '';
+						return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, __call__ (indent, null, 5), '', ''), '{']);
+					}) ());
+					__call__ (fw, null, kmi_data);
+					__call__ (fw, null, (function () {
+						var __accu0__ = '';
+						return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, __call__ (indent, null, 6), '', '')]);
+					}) ());
+					__call__ (fw, null, (function () {
+						var __accu0__ = '';
+						return __call__ (__accu0__.join, __accu0__, ['},\n', __call__ (_formatted, null, __call__ (indent, null, 5), '', '')]);
+					}) ());
+					__call__ (fw, null, '),\n');
 				}
-				fw (''.join ([_formatted (indent (4), '', '')]));
+				__call__ (fw, null, (function () {
+					var __accu0__ = '';
+					return __call__ (__accu0__.join, __accu0__, [__call__ (_formatted, null, __call__ (indent, null, 4), '', '')]);
+				}) ());
 			}
-			fw (''.join (['],\n', _formatted (indent (3), '', '')]));
-			fw (''.join (['},\n', _formatted (indent (2), '', '')]));
-			fw (''.join (['),\n', _formatted (indent (1), '', '')]));
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, ['],\n', __call__ (_formatted, null, __call__ (indent, null, 3), '', '')]);
+			}) ());
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, ['},\n', __call__ (_formatted, null, __call__ (indent, null, 2), '', '')]);
+			}) ());
+			__call__ (fw, null, (function () {
+				var __accu0__ = '';
+				return __call__ (__accu0__.join, __accu0__, ['),\n', __call__ (_formatted, null, __call__ (indent, null, 1), '', '')]);
+			}) ());
 		}
-		fw (']\n');
-		fw ('\n\n');
-		fw ('if __name__ == "__main__":\n');
-		fw ('    # Only add keywords that are supported.\n');
-		fw ('    from bpy.app import version as blender_version\n');
-		fw ('    keywords = {}\n');
-		fw ('    if blender_version >= (2, 92, 0):\n');
-		fw ('        keywords["keyconfig_version"] = keyconfig_version\n');
-		fw ('    import os\n');
-		fw ('    from bl_keymap_utils.io import keyconfig_import_from_data\n');
-		fw ('    keyconfig_import_from_data(\n');
-		fw ('        os.path.splitext(os.path.basename(__file__))[0],\n');
-		fw ('        keyconfig_data,\n');
-		fw ('        **keywords,\n');
-		fw ('    )\n');
+		__call__ (fw, null, ']\n');
+		__call__ (fw, null, '\n\n');
+		__call__ (fw, null, 'if __name__ == "__main__":\n');
+		__call__ (fw, null, '    # Only add keywords that are supported.\n');
+		__call__ (fw, null, '    from bpy.app import version as blender_version\n');
+		__call__ (fw, null, '    keywords = {}\n');
+		__call__ (fw, null, '    if blender_version >= (2, 92, 0):\n');
+		__call__ (fw, null, '        keywords["keyconfig_version"] = keyconfig_version\n');
+		__call__ (fw, null, '    import os\n');
+		__call__ (fw, null, '    from bl_keymap_utils.io import keyconfig_import_from_data\n');
+		__call__ (fw, null, '    keyconfig_import_from_data(\n');
+		__call__ (fw, null, '        os.path.splitext(os.path.basename(__file__))[0],\n');
+		__call__ (fw, null, '        keyconfig_data,\n');
+		__call__ (fw, null, '        **keywords,\n');
+		__call__ (fw, null, '    )\n');
 		fh.__exit__ ();
 	}
 	catch (__except0__) {
@@ -466,7 +698,7 @@ export var keyconfig_export_as_data = function (wm, kc, filepath) {
 export var _init_properties_from_data = function (base_props, base_value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -478,23 +710,37 @@ export var _init_properties_from_data = function (base_props, base_value) {
 	}
 	else {
 	}
-	for (var [attr, value] of base_value) {
+	var __iterable0__ = base_value;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var attr = __left0__ [0];
+		var value = __left0__ [1];
 		if (py_typeof (value) === list) {
-			base_props.property_unset (attr);
-			var props = getattr (base_props, attr);
-			_init_properties_from_data (props, value);
+			(function () {
+				var __accu0__ = base_props;
+				return __call__ (__accu0__.property_unset, __accu0__, attr);
+			}) ();
+			var props = __call__ (getattr, null, base_props, attr);
+			__call__ (_init_properties_from_data, null, props, value);
 		}
 		else {
 			try {
-				setattr (base_props, attr, value);
+				__call__ (setattr, null, base_props, attr, value);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, AttributeError)) {
-					print (''.join (["Warning: property '", _formatted (attr, '', ''), "' not found in item '", _formatted (base_props.__class__.__name__, '', ''), "'"]));
+					__call__ (print, null, (function () {
+						var __accu0__ = '';
+						return __call__ (__accu0__.join, __accu0__, ["Warning: property '", __call__ (_formatted, null, attr, '', ''), "' not found in item '", __call__ (_formatted, null, base_props.__class__.__name__, '', ''), "'"]);
+					}) ());
 				}
 				else if (isinstance (__except0__, Exception)) {
 					var ex = __except0__;
-					print (''.join (['Warning: ', _formatted (ex, 'r', '')]));
+					__call__ (print, null, (function () {
+						var __accu0__ = '';
+						return __call__ (__accu0__.join, __accu0__, ['Warning: ', __call__ (_formatted, null, ex, 'r', '')]);
+					}) ());
 				}
 				else {
 					throw __except0__;
@@ -509,7 +755,7 @@ export var keymap_init_from_data = function (km, km_items, is_modal) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -522,17 +768,29 @@ export var keymap_init_from_data = function (km, km_items, is_modal) {
 	}
 	else {
 	}
-	var new_fn = getattr (km.keymap_items, (is_modal ? 'new_modal' : 'new'));
-	for (var [kmi_idname, kmi_args, kmi_data] of km_items) {
-		var kmi = new_fn (kmi_idname, __kwargtrans__ (_merged (kmi_args)));
+	var new_fn = __call__ (getattr, null, km.keymap_items, (is_modal ? 'new_modal' : 'new'));
+	var __iterable0__ = km_items;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var kmi_idname = __left0__ [0];
+		var kmi_args = __left0__ [1];
+		var kmi_data = __left0__ [2];
+		var kmi = __call__ (new_fn, null, kmi_idname, __kwargtrans__ (__call__ (_merged, null, kmi_args)));
 		if (kmi_data !== null) {
-			if (!(kmi_data.py_get ('active', true))) {
+			if (!((function () {
+				var __accu0__ = kmi_data;
+				return __call__ (__accu0__.py_get, __accu0__, 'active', true);
+			}) ())) {
 				kmi.active = false;
 			}
-			var kmi_props_data = kmi_data.py_get ('properties', null);
+			var kmi_props_data = (function () {
+				var __accu0__ = kmi_data;
+				return __call__ (__accu0__.py_get, __accu0__, 'properties', null);
+			}) ();
 			if (kmi_props_data !== null) {
 				var kmi_props = kmi.properties;
-				_init_properties_from_data (kmi_props, kmi_props_data);
+				__call__ (_init_properties_from_data, null, kmi_props, kmi_props_data);
 			}
 		}
 	}
@@ -540,7 +798,7 @@ export var keymap_init_from_data = function (km, km_items, is_modal) {
 export var keyconfig_init_from_data = function (kc, keyconfig_data) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -552,17 +810,29 @@ export var keyconfig_init_from_data = function (kc, keyconfig_data) {
 	}
 	else {
 	}
-	for (var [km_name, km_args, km_content] of keyconfig_data) {
-		var km = kc.keymaps.py_new (km_name, __kwargtrans__ (_merged (km_args)));
-		var km_items = km_content ['items'];
-		keymap_init_from_data (km, km_items, __kwargtrans__ ({is_modal: km_args.py_get ('modal', false)}));
+	var __iterable0__ = keyconfig_data;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var km_name = __left0__ [0];
+		var km_args = __left0__ [1];
+		var km_content = __left0__ [2];
+		var km = (function () {
+			var __accu0__ = kc.keymaps;
+			return __call__ (__accu0__.py_new, __accu0__, km_name, __kwargtrans__ (__call__ (_merged, null, km_args)));
+		}) ();
+		var km_items = __getitem__ (km_content, 'items');
+		__call__ (keymap_init_from_data, null, km, km_items, __kwargtrans__ ({is_modal: (function () {
+			var __accu0__ = km_args;
+			return __call__ (__accu0__.py_get, __accu0__, 'modal', false);
+		}) ()}));
 	}
 };
 export var keyconfig_import_from_data = function (py_name, keyconfig_data) {
 	var keyconfig_version = tuple ([0, 0, 0]);
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -575,20 +845,23 @@ export var keyconfig_import_from_data = function (py_name, keyconfig_data) {
 	}
 	else {
 	}
-	var bpy = _module ('bpy');
+	var bpy = __call__ (_module, null, 'bpy');
 	var wm = bpy.context.window_manager;
-	var kc = wm.keyconfigs.py_new (py_name);
+	var kc = (function () {
+		var __accu0__ = wm.keyconfigs;
+		return __call__ (__accu0__.py_new, __accu0__, py_name);
+	}) ();
 	if (keyconfig_version !== null) {
-		var keyconfig_update = _member ('bl_keymap_utils.versioning', 'keyconfig_update');
-		var keyconfig_data = keyconfig_update (keyconfig_data, keyconfig_version);
+		var keyconfig_update = __call__ (_member, null, 'bl_keymap_utils.versioning', 'keyconfig_update');
+		var keyconfig_data = __call__ (keyconfig_update, null, keyconfig_data, keyconfig_version);
 	}
-	keyconfig_init_from_data (kc, keyconfig_data);
+	__call__ (keyconfig_init_from_data, null, kc, keyconfig_data);
 	return kc;
 };
 export var keyconfig_merge = function (kc1, kc2) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -602,31 +875,79 @@ export var keyconfig_merge = function (kc1, kc2) {
 	}
 	var kc1_names = (function () {
 		var __accu0__ = [];
-		for (var km of kc1.keymaps) {
-			__accu0__.append (km.py_name);
+		var __iterable0__ = kc1.keymaps;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var km = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, km.py_name);
+			}) ();
 		}
 		return set (__accu0__);
 	}) ();
 	var merged_keymaps = (function () {
 		var __accu0__ = [];
-		for (var km of kc1.keymaps) {
-			__accu0__.append (tuple ([km, kc1]));
+		var __iterable0__ = kc1.keymaps;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var km = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, tuple ([km, kc1]));
+			}) ();
 		}
 		return __accu0__;
 	}) ();
-	if (kc1 != kc2) {
-		merged_keymaps.extend ((function () {
-			var __accu0__ = [];
-			for (var km of kc2.keymaps) {
-				if (!__in__ (km.py_name, kc1_names)) {
-					__accu0__.append (tuple ([km, kc2]));
+	if (__ne__ (kc1, kc2)) {
+		(function () {
+			var __accu0__ = merged_keymaps;
+			return __call__ (__accu0__.extend, __accu0__, (function () {
+				var __accu1__ = [];
+				var __iterable0__ = kc2.keymaps;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var km = __getitem__ (__iterable0__, __index0__);
+					if (!__in__ (km.py_name, kc1_names)) {
+						(function () {
+							var __accu2__ = __accu1__;
+							return __call__ (__accu2__.append, __accu2__, tuple ([km, kc2]));
+						}) ();
+					}
 				}
-			}
-			return __accu0__;
-		}) ());
+				return __accu1__;
+			}) ());
+		}) ();
 	}
 	return merged_keymaps;
 };
 
 //# sourceMappingURL=bl_keymap_utils.io.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '__all__': __all__ = value; break;
+		case 'indent': indent = value; break;
+		case 'round_float_32': round_float_32 = value; break;
+		case 'repr_f32': repr_f32 = value; break;
+		case 'kmi_args_as_data': kmi_args_as_data = value; break;
+		case '_kmi_properties_to_lines_recursive': _kmi_properties_to_lines_recursive = value; break;
+		case '_kmi_properties_to_lines': _kmi_properties_to_lines = value; break;
+		case '_kmi_attrs_or_none': _kmi_attrs_or_none = value; break;
+		case 'keyconfig_export_as_data': keyconfig_export_as_data = value; break;
+		case '_init_properties_from_data': _init_properties_from_data = value; break;
+		case 'keymap_init_from_data': keymap_init_from_data = value; break;
+		case 'keyconfig_init_from_data': keyconfig_init_from_data = value; break;
+		case 'keyconfig_import_from_data': keyconfig_import_from_data = value; break;
+		case 'keyconfig_merge': keyconfig_merge = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

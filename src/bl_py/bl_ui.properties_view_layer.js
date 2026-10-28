@@ -12,7 +12,7 @@ export var VIEWLAYER_UL_aov =  __class__ ('VIEWLAYER_UL_aov', [UIList], {
 	get aov_icon () {return function (item) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -27,14 +27,14 @@ export var VIEWLAYER_UL_aov =  __class__ ('VIEWLAYER_UL_aov', [UIList], {
 			return 'ERROR';
 		}
 		var aov_type = item.py_metatype;
-		if (aov_type == 'VALUE') {
+		if (__eq__ (aov_type, 'VALUE')) {
 			return 'NODE_SOCKET_FLOAT';
 		}
-		else if (aov_type == 'COLOR') {
+		else if (__eq__ (aov_type, 'COLOR')) {
 			return 'NODE_SOCKET_RGBA';
 		}
 		else {
-			var __except0__ = ValueError ('Unrecognized AOV type: ' + aov_type);
+			var __except0__ = __call__ (ValueError, null, __add__ ('Unrecognized AOV type: ', aov_type));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -42,7 +42,7 @@ export var VIEWLAYER_UL_aov =  __class__ ('VIEWLAYER_UL_aov', [UIList], {
 	get draw_item () {return __get__ (this, function (self, _context, layout, _data, item, icon, _active_data, _active_propname) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -60,10 +60,32 @@ export var VIEWLAYER_UL_aov =  __class__ ('VIEWLAYER_UL_aov', [UIList], {
 		}
 		else {
 		}
-		var row = layout.row ();
-		var py_split = row.py_split (__kwargtrans__ ({factor: 0.65}));
-		py_split.row ().prop (item, 'name', __kwargtrans__ ({text: '', icon: self.aov_icon (item), emboss: false}));
-		py_split.row ().prop (item, 'type', __kwargtrans__ ({text: '', emboss: false}));
+		// pass;
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var py_split = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.65}));
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = py_split;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, item, 'name', __kwargtrans__ ({text: '', icon: (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__.aov_icon, __accu1__, item);
+			}) (), emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = py_split;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, item, 'type', __kwargtrans__ ({text: '', emboss: false}));
+		}) ();
 	});}
 });
 export var ViewLayerButtonsPanel =  __class__ ('ViewLayerButtonsPanel', [object], {
@@ -74,7 +96,7 @@ export var ViewLayerButtonsPanel =  __class__ ('ViewLayerButtonsPanel', [object]
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -97,7 +119,7 @@ export var VIEWLAYER_PT_context_layer =  __class__ ('VIEWLAYER_PT_context_layer'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -114,7 +136,7 @@ export var VIEWLAYER_PT_context_layer =  __class__ ('VIEWLAYER_PT_context_layer'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -129,7 +151,10 @@ export var VIEWLAYER_PT_context_layer =  __class__ ('VIEWLAYER_PT_context_layer'
 		var layout = self.layout;
 		var window = context.window;
 		var scene = context.scene;
-		layout.template_search (window, 'view_layer', scene, 'view_layers', __kwargtrans__ ({py_new: 'scene.view_layer_add', unlink: 'scene.view_layer_remove'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_search, __accu0__, window, 'view_layer', scene, 'view_layers', __kwargtrans__ ({py_new: 'scene.view_layer_add', unlink: 'scene.view_layer_remove'}));
+		}) ();
 	});}
 });
 export var VIEWLAYER_PT_layer =  __class__ ('VIEWLAYER_PT_layer', [ViewLayerButtonsPanel, Panel], {
@@ -139,7 +164,7 @@ export var VIEWLAYER_PT_layer =  __class__ ('VIEWLAYER_PT_layer', [ViewLayerButt
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -156,9 +181,18 @@ export var VIEWLAYER_PT_layer =  __class__ ('VIEWLAYER_PT_layer', [ViewLayerButt
 		var scene = context.scene;
 		var rd = scene.render;
 		var layer = context.view_layer;
-		var col = layout.column ();
-		col.prop (layer, 'use', __kwargtrans__ ({text: 'Use for Rendering'}));
-		col.prop (rd, 'use_single_layer', __kwargtrans__ ({text: 'Render Single Layer'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, layer, 'use', __kwargtrans__ ({text: 'Use for Rendering'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'use_single_layer', __kwargtrans__ ({text: 'Render Single Layer'}));
+		}) ();
 	});}
 });
 export var VIEWLAYER_PT_layer_passes =  __class__ ('VIEWLAYER_PT_layer_passes', [ViewLayerButtonsPanel, Panel], {
@@ -168,7 +202,7 @@ export var VIEWLAYER_PT_layer_passes =  __class__ ('VIEWLAYER_PT_layer_passes', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -191,7 +225,7 @@ export var VIEWLAYER_PT_eevee_layer_passes_data =  __class__ ('VIEWLAYER_PT_eeve
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -208,16 +242,43 @@ export var VIEWLAYER_PT_eevee_layer_passes_data =  __class__ ('VIEWLAYER_PT_eeve
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var view_layer = context.view_layer;
-		var col = layout.column ();
-		col.prop (view_layer, 'use_pass_combined');
-		col.prop (view_layer, 'use_pass_z');
-		col.prop (view_layer, 'use_pass_mist');
-		col.prop (view_layer, 'use_pass_normal');
-		col.prop (view_layer, 'use_pass_position');
-		var sub = col.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_combined');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_z');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_mist');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_normal');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_position');
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		sub.active = !(scene.render.use_motion_blur);
-		sub.prop (view_layer, 'use_pass_vector');
-		col.prop (view_layer, 'use_pass_grease_pencil', __kwargtrans__ ({text: 'Grease Pencil'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_vector');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_grease_pencil', __kwargtrans__ ({text: 'Grease Pencil'}));
+		}) ();
 	});}
 });
 export var VIEWLAYER_PT_workbench_layer_passes_data =  __class__ ('VIEWLAYER_PT_workbench_layer_passes_data', [ViewLayerButtonsPanel, Panel], {
@@ -228,7 +289,7 @@ export var VIEWLAYER_PT_workbench_layer_passes_data =  __class__ ('VIEWLAYER_PT_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -244,10 +305,22 @@ export var VIEWLAYER_PT_workbench_layer_passes_data =  __class__ ('VIEWLAYER_PT_
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var view_layer = context.view_layer;
-		var col = layout.column ();
-		col.prop (view_layer, 'use_pass_combined');
-		col.prop (view_layer, 'use_pass_z');
-		col.prop (view_layer, 'use_pass_grease_pencil', __kwargtrans__ ({text: 'Grease Pencil'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_combined');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_z');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_grease_pencil', __kwargtrans__ ({text: 'Grease Pencil'}));
+		}) ();
 	});}
 });
 export var VIEWLAYER_PT_eevee_layer_passes_light =  __class__ ('VIEWLAYER_PT_eevee_layer_passes_light', [ViewLayerButtonsPanel, Panel], {
@@ -259,7 +332,7 @@ export var VIEWLAYER_PT_eevee_layer_passes_light =  __class__ ('VIEWLAYER_PT_eev
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -276,23 +349,71 @@ export var VIEWLAYER_PT_eevee_layer_passes_light =  __class__ ('VIEWLAYER_PT_eev
 		layout.use_property_decorate = false;
 		var view_layer = context.view_layer;
 		var view_layer_eevee = view_layer.eevee;
-		var col = layout.column (__kwargtrans__ ({heading: 'Diffuse', align: true}));
-		col.prop (view_layer, 'use_pass_diffuse_direct', __kwargtrans__ ({text: 'Light', text_ctxt: i18n_contexts.render_layer}));
-		col.prop (view_layer, 'use_pass_diffuse_color', __kwargtrans__ ({text: 'Color'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Specular', align: true}));
-		col.prop (view_layer, 'use_pass_glossy_direct', __kwargtrans__ ({text: 'Light', text_ctxt: i18n_contexts.render_layer}));
-		col.prop (view_layer, 'use_pass_glossy_color', __kwargtrans__ ({text: 'Color'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Volume', heading_ctxt: i18n_contexts.id_id, align: true}));
-		col.prop (view_layer_eevee, 'use_pass_volume_direct', __kwargtrans__ ({text: 'Light', text_ctxt: i18n_contexts.render_layer}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Other', align: true}));
-		col.prop (view_layer, 'use_pass_emit', __kwargtrans__ ({text: 'Emission'}));
-		col.prop (view_layer, 'use_pass_environment');
-		col.prop (view_layer, 'use_pass_shadow');
-		col.prop (view_layer, 'use_pass_ambient_occlusion', __kwargtrans__ ({text: 'Ambient Occlusion'}));
-		col.prop (view_layer_eevee, 'use_pass_transparent', __kwargtrans__ ({text: 'Transparent'}));
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Diffuse', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_diffuse_direct', __kwargtrans__ ({text: 'Light', text_ctxt: i18n_contexts.render_layer}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_diffuse_color', __kwargtrans__ ({text: 'Color'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Specular', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_glossy_direct', __kwargtrans__ ({text: 'Light', text_ctxt: i18n_contexts.render_layer}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_glossy_color', __kwargtrans__ ({text: 'Color'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Volume', heading_ctxt: i18n_contexts.id_id, align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer_eevee, 'use_pass_volume_direct', __kwargtrans__ ({text: 'Light', text_ctxt: i18n_contexts.render_layer}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Other', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_emit', __kwargtrans__ ({text: 'Emission'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_environment');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_shadow');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_ambient_occlusion', __kwargtrans__ ({text: 'Ambient Occlusion'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer_eevee, 'use_pass_transparent', __kwargtrans__ ({text: 'Transparent'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = view_layer.use_pass_ambient_occlusion;
-		col.prop (view_layer_eevee, 'ambient_occlusion_distance', __kwargtrans__ ({text: 'Occlusion Distance'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer_eevee, 'ambient_occlusion_distance', __kwargtrans__ ({text: 'Occlusion Distance'}));
+		}) ();
 	});}
 });
 export var ViewLayerAOVPanelHelper =  __class__ ('ViewLayerAOVPanelHelper', [ViewLayerButtonsPanel], {
@@ -301,7 +422,7 @@ export var ViewLayerAOVPanelHelper =  __class__ ('ViewLayerAOVPanelHelper', [Vie
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -317,16 +438,40 @@ export var ViewLayerAOVPanelHelper =  __class__ ('ViewLayerAOVPanelHelper', [Vie
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var view_layer = context.view_layer;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('VIEWLAYER_UL_aov', 'aovs', view_layer, 'aovs', view_layer, 'active_aov_index', __kwargtrans__ ({rows: 3}));
-		var col = row.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.operator ('scene.view_layer_add_aov', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		sub.operator ('scene.view_layer_remove_aov', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'VIEWLAYER_UL_aov', 'aovs', view_layer, 'aovs', view_layer, 'active_aov_index', __kwargtrans__ ({rows: 3}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'scene.view_layer_add_aov', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'scene.view_layer_remove_aov', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
 		var aov = view_layer.active_aov;
 		if (aov && !(aov.is_valid)) {
-			layout.label (__kwargtrans__ ({text: 'Conflicts with another render pass with the same name', icon: 'ERROR'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Conflicts with another render pass with the same name', icon: 'ERROR'}));
+			}) ();
 		}
 	});}
 });
@@ -341,7 +486,7 @@ export var ViewLayerCryptomattePanelHelper =  __class__ ('ViewLayerCryptomattePa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -357,13 +502,31 @@ export var ViewLayerCryptomattePanelHelper =  __class__ ('ViewLayerCryptomattePa
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var view_layer = context.view_layer;
-		var col = layout.column ();
-		col.prop (view_layer, 'use_pass_cryptomatte_object', __kwargtrans__ ({text: 'Object'}));
-		col.prop (view_layer, 'use_pass_cryptomatte_material', __kwargtrans__ ({text: 'Material'}));
-		col.prop (view_layer, 'use_pass_cryptomatte_asset', __kwargtrans__ ({text: 'Asset'}));
-		var col = layout.column ();
-		col.active = any (tuple ([view_layer.use_pass_cryptomatte_object, view_layer.use_pass_cryptomatte_material, view_layer.use_pass_cryptomatte_asset]));
-		col.prop (view_layer, 'pass_cryptomatte_depth', __kwargtrans__ ({text: 'Levels'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_cryptomatte_object', __kwargtrans__ ({text: 'Object'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_cryptomatte_material', __kwargtrans__ ({text: 'Material'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_pass_cryptomatte_asset', __kwargtrans__ ({text: 'Asset'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		col.active = __call__ (any, null, tuple ([view_layer.use_pass_cryptomatte_object, view_layer.use_pass_cryptomatte_material, view_layer.use_pass_cryptomatte_asset]));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'pass_cryptomatte_depth', __kwargtrans__ ({text: 'Levels'}));
+		}) ();
 	});}
 });
 export var VIEWLAYER_PT_layer_passes_cryptomatte =  __class__ ('VIEWLAYER_PT_layer_passes_cryptomatte', [ViewLayerCryptomattePanelHelper, Panel], {
@@ -377,7 +540,7 @@ export var VIEWLAYER_MT_lightgroup_sync =  __class__ ('VIEWLAYER_MT_lightgroup_s
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -390,8 +553,14 @@ export var VIEWLAYER_MT_lightgroup_sync =  __class__ ('VIEWLAYER_MT_lightgroup_s
 		else {
 		}
 		var layout = self.layout;
-		layout.operator ('scene.view_layer_add_used_lightgroups', __kwargtrans__ ({icon: 'ADD'}));
-		layout.operator ('scene.view_layer_remove_unused_lightgroups', __kwargtrans__ ({icon: 'REMOVE'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'scene.view_layer_add_used_lightgroups', __kwargtrans__ ({icon: 'ADD'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'scene.view_layer_remove_unused_lightgroups', __kwargtrans__ ({icon: 'REMOVE'}));
+		}) ();
 	});}
 });
 export var ViewLayerLightgroupsPanelHelper =  __class__ ('ViewLayerLightgroupsPanelHelper', [ViewLayerButtonsPanel], {
@@ -400,7 +569,7 @@ export var ViewLayerLightgroupsPanelHelper =  __class__ ('ViewLayerLightgroupsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -416,15 +585,42 @@ export var ViewLayerLightgroupsPanelHelper =  __class__ ('ViewLayerLightgroupsPa
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var view_layer = context.view_layer;
-		var row = layout.row ();
-		var col = row.column ();
-		col.template_list ('UI_UL_list', 'lightgroups', view_layer, 'lightgroups', view_layer, 'active_lightgroup_index', __kwargtrans__ ({rows: 3}));
-		var col = row.column ();
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.operator ('scene.view_layer_add_lightgroup', __kwargtrans__ ({icon: 'ADD', text: ''}));
-		sub.operator ('scene.view_layer_remove_lightgroup', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
-		sub.separator ();
-		sub.menu ('VIEWLAYER_MT_lightgroup_sync', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_list, __accu0__, 'UI_UL_list', 'lightgroups', view_layer, 'lightgroups', view_layer, 'active_lightgroup_index', __kwargtrans__ ({rows: 3}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'scene.view_layer_add_lightgroup', __kwargtrans__ ({icon: 'ADD', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.operator, __accu0__, 'scene.view_layer_remove_lightgroup', __kwargtrans__ ({icon: 'REMOVE', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.menu, __accu0__, 'VIEWLAYER_MT_lightgroup_sync', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
 	});}
 });
 export var VIEWLAYER_PT_layer_passes_lightgroups =  __class__ ('VIEWLAYER_PT_layer_passes_lightgroups', [ViewLayerLightgroupsPanelHelper, Panel], {
@@ -440,7 +636,7 @@ export var VIEWLAYER_PT_filter =  __class__ ('VIEWLAYER_PT_filter', [ViewLayerBu
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -457,15 +653,42 @@ export var VIEWLAYER_PT_filter =  __class__ ('VIEWLAYER_PT_filter', [ViewLayerBu
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var view_layer = context.view_layer;
-		var col = layout.column (__kwargtrans__ ({heading: 'Include'}));
-		col.prop (view_layer, 'use_sky', __kwargtrans__ ({text: 'Environment'}));
-		col.prop (view_layer, 'use_solid', __kwargtrans__ ({text: 'Surfaces'}));
-		col.prop (view_layer, 'use_strand', __kwargtrans__ ({text: 'Curves'}));
-		col.prop (view_layer, 'use_volumes', __kwargtrans__ ({text: 'Volumes'}));
-		col.prop (view_layer, 'use_grease_pencil', __kwargtrans__ ({text: 'Grease Pencil'}));
-		var col = layout.column (__kwargtrans__ ({heading: 'Use'}));
-		var sub = col.row ();
-		sub.prop (view_layer, 'use_motion_blur', __kwargtrans__ ({text: 'Motion Blur'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Include'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_sky', __kwargtrans__ ({text: 'Environment'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_solid', __kwargtrans__ ({text: 'Surfaces'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_strand', __kwargtrans__ ({text: 'Curves'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_volumes', __kwargtrans__ ({text: 'Volumes'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_grease_pencil', __kwargtrans__ ({text: 'Grease Pencil'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Use'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'use_motion_blur', __kwargtrans__ ({text: 'Motion Blur'}));
+		}) ();
 		sub.active = scene.render.use_motion_blur;
 	});}
 });
@@ -477,7 +700,7 @@ export var VIEWLAYER_PT_override =  __class__ ('VIEWLAYER_PT_override', [ViewLay
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -493,9 +716,18 @@ export var VIEWLAYER_PT_override =  __class__ ('VIEWLAYER_PT_override', [ViewLay
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var view_layer = context.view_layer;
-		layout.prop (view_layer, 'material_override');
-		layout.prop (view_layer, 'world_override');
-		layout.prop (view_layer, 'samples');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'material_override');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'world_override');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, view_layer, 'samples');
+		}) ();
 	});}
 });
 export var VIEWLAYER_PT_layer_custom_props =  __class__ ('VIEWLAYER_PT_layer_custom_props', [PropertyPanel, Panel], {
@@ -507,11 +739,39 @@ export var VIEWLAYER_PT_layer_custom_props =  __class__ ('VIEWLAYER_PT_layer_cus
 	_property_type: ViewLayer
 });
 export var classes = tuple ([VIEWLAYER_MT_lightgroup_sync, VIEWLAYER_PT_context_layer, VIEWLAYER_PT_layer, VIEWLAYER_PT_layer_passes, VIEWLAYER_PT_workbench_layer_passes_data, VIEWLAYER_PT_eevee_layer_passes_data, VIEWLAYER_PT_eevee_layer_passes_light, VIEWLAYER_PT_layer_passes_cryptomatte, VIEWLAYER_PT_layer_passes_aov, VIEWLAYER_PT_layer_passes_lightgroups, VIEWLAYER_PT_filter, VIEWLAYER_PT_override, VIEWLAYER_PT_layer_custom_props, VIEWLAYER_UL_aov]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_view_layer.map
 export {Menu, Panel, PropertyPanel, UIList, ViewLayer, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'VIEWLAYER_UL_aov': VIEWLAYER_UL_aov = value; break;
+		case 'ViewLayerButtonsPanel': ViewLayerButtonsPanel = value; break;
+		case 'VIEWLAYER_PT_context_layer': VIEWLAYER_PT_context_layer = value; break;
+		case 'VIEWLAYER_PT_layer': VIEWLAYER_PT_layer = value; break;
+		case 'VIEWLAYER_PT_layer_passes': VIEWLAYER_PT_layer_passes = value; break;
+		case 'VIEWLAYER_PT_eevee_layer_passes_data': VIEWLAYER_PT_eevee_layer_passes_data = value; break;
+		case 'VIEWLAYER_PT_workbench_layer_passes_data': VIEWLAYER_PT_workbench_layer_passes_data = value; break;
+		case 'VIEWLAYER_PT_eevee_layer_passes_light': VIEWLAYER_PT_eevee_layer_passes_light = value; break;
+		case 'ViewLayerAOVPanelHelper': ViewLayerAOVPanelHelper = value; break;
+		case 'VIEWLAYER_PT_layer_passes_aov': VIEWLAYER_PT_layer_passes_aov = value; break;
+		case 'ViewLayerCryptomattePanelHelper': ViewLayerCryptomattePanelHelper = value; break;
+		case 'VIEWLAYER_PT_layer_passes_cryptomatte': VIEWLAYER_PT_layer_passes_cryptomatte = value; break;
+		case 'VIEWLAYER_MT_lightgroup_sync': VIEWLAYER_MT_lightgroup_sync = value; break;
+		case 'ViewLayerLightgroupsPanelHelper': ViewLayerLightgroupsPanelHelper = value; break;
+		case 'VIEWLAYER_PT_layer_passes_lightgroups': VIEWLAYER_PT_layer_passes_lightgroups = value; break;
+		case 'VIEWLAYER_PT_filter': VIEWLAYER_PT_filter = value; break;
+		case 'VIEWLAYER_PT_override': VIEWLAYER_PT_override = value; break;
+		case 'VIEWLAYER_PT_layer_custom_props': VIEWLAYER_PT_layer_custom_props = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

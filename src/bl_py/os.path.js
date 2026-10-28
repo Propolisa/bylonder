@@ -2,12 +2,33 @@
 import * as __self__ from './os.path.js';
 (globalThis.__py_modules ??= {})['os.path'] = __self__;
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, _sort, abs, all, any, assert, bin, bool, bytearray, bytes, callable, chr, delattr, dict, dir, divmod, filter, float, getattr, hasattr, hex, input, int, isinstance, issubclass, len, list, map, max, min, object, oct, ord, pow, print, property, py_TypeError, py_enumerate, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {files} from './_files.js';
 var __name__ = 'os.path';
+export var _directories = __call__ (set, null);
+var __iterable0__ = files;
+__iterable0__ = __i__ (__iterable0__);
+for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+	var _file = __getitem__ (__iterable0__, __index0__);
+	var _parts = (function () {
+		var __accu0__ = _file;
+		return __call__ (__accu0__.py_split, __accu0__, '/');
+	}) ();
+	for (var _end = 2; _end < __call__ (len, null, _parts); _end++) {
+		(function () {
+			var __accu0__ = _directories;
+			return __call__ (__accu0__.add, __accu0__, (function () {
+				var __accu1__ = '/';
+				return __call__ (__accu1__.join, __accu1__, __getslice__ (_parts, null, _end, 1));
+			}) ());
+		}) ();
+	}
+}
+export var _files_set = __call__ (set, null, files);
 export var sep = '/';
 export var join = function (first) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -21,15 +42,24 @@ export var join = function (first) {
 		var rest = tuple ();
 	}
 	var out = first;
-	for (var part of rest) {
-		var out = (part.startswith ('/') ? part : (out == '' || out.endswith ('/') ? out + part : (out + '/') + part));
+	var __iterable0__ = rest;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var part = __getitem__ (__iterable0__, __index0__);
+		var out = ((function () {
+			var __accu0__ = part;
+			return __call__ (__accu0__.startswith, __accu0__, '/');
+		}) () ? part : (__eq__ (out, '') || (function () {
+			var __accu0__ = out;
+			return __call__ (__accu0__.endswith, __accu0__, '/');
+		}) () ? __add__ (out, part) : __add__ (__add__ (out, '/'), part)));
 	}
 	return out;
 };
 export var py_split = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -40,16 +70,19 @@ export var py_split = function (py_name) {
 	}
 	else {
 	}
-	var i = py_name.rfind ('/');
-	if (i < 0) {
+	var i = (function () {
+		var __accu0__ = py_name;
+		return __call__ (__accu0__.rfind, __accu0__, '/');
+	}) ();
+	if (__lt__ (i, 0)) {
 		return tuple (['', py_name]);
 	}
-	return tuple ([py_name.__getslice__ (null, i, 1) || '/', py_name.__getslice__ (i + 1, null, 1)]);
+	return tuple ([__getslice__ (py_name, null, i, 1) || '/', __getslice__ (py_name, __add__ (i, 1), null, 1)]);
 };
 export var basename = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -60,12 +93,12 @@ export var basename = function (py_name) {
 	}
 	else {
 	}
-	return py_split (py_name) [1];
+	return __getitem__ (__call__ (py_split, null, py_name), 1);
 };
 export var dirname = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -76,12 +109,12 @@ export var dirname = function (py_name) {
 	}
 	else {
 	}
-	return py_split (py_name) [0];
+	return __getitem__ (__call__ (py_split, null, py_name), 0);
 };
 export var splitext = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -92,14 +125,17 @@ export var splitext = function (py_name) {
 	}
 	else {
 	}
-	var base = basename (py_name);
-	var dot = base.rfind ('.');
-	return (dot <= 0 ? tuple ([py_name, '']) : tuple ([py_name.__getslice__ (null, (len (py_name) - len (base)) + dot, 1), base.__getslice__ (dot, null, 1)]));
+	var base = __call__ (basename, null, py_name);
+	var dot = (function () {
+		var __accu0__ = base;
+		return __call__ (__accu0__.rfind, __accu0__, '.');
+	}) ();
+	return (__le__ (dot, 0) ? tuple ([py_name, '']) : tuple ([__getslice__ (py_name, null, __add__ (__sub__ (__call__ (len, null, py_name), __call__ (len, null, base)), dot), 1), __getslice__ (base, dot, null, 1)]));
 };
 export var normpath = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -111,20 +147,38 @@ export var normpath = function (py_name) {
 	else {
 	}
 	var parts = [];
-	for (var part of py_name.py_split ('/')) {
-		if (part == '..' && parts && parts [-(1)] != '..') {
-			parts.py_pop ();
+	var __iterable0__ = (function () {
+		var __accu0__ = py_name;
+		return __call__ (__accu0__.py_split, __accu0__, '/');
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var part = __getitem__ (__iterable0__, __index0__);
+		if (__eq__ (part, '..') && parts && __ne__ (__getitem__ (parts, __neg__ (1)), '..')) {
+			(function () {
+				var __accu0__ = parts;
+				return __call__ (__accu0__.py_pop, __accu0__);
+			}) ();
 		}
 		else if (!__in__ (part, tuple (['', '.']))) {
-			parts.append (part);
+			(function () {
+				var __accu0__ = parts;
+				return __call__ (__accu0__.append, __accu0__, part);
+			}) ();
 		}
 	}
-	return (py_name.startswith ('/') ? '/' : '') + '/'.join (parts) || '.';
+	return __add__ (((function () {
+		var __accu0__ = py_name;
+		return __call__ (__accu0__.startswith, __accu0__, '/');
+	}) () ? '/' : ''), (function () {
+		var __accu0__ = '/';
+		return __call__ (__accu0__.join, __accu0__, parts);
+	}) ()) || '.';
 };
 export var abspath = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -135,12 +189,15 @@ export var abspath = function (py_name) {
 	}
 	else {
 	}
-	return normpath ((py_name.startswith ('/') ? py_name : '/' + py_name));
+	return __call__ (normpath, null, ((function () {
+		var __accu0__ = py_name;
+		return __call__ (__accu0__.startswith, __accu0__, '/');
+	}) () ? py_name : __add__ ('/', py_name)));
 };
 export var expanduser = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -156,7 +213,7 @@ export var expanduser = function (py_name) {
 export var isabs = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -167,12 +224,63 @@ export var isabs = function (py_name) {
 	}
 	else {
 	}
-	return py_name.startswith ('/');
+	return (function () {
+		var __accu0__ = py_name;
+		return __call__ (__accu0__.startswith, __accu0__, '/');
+	}) ();
+};
+export var isfile = function (py_name) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return __in__ (__call__ (normpath, null, py_name), _files_set);
+};
+export var isdir = function (py_name) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return __in__ (__call__ (normpath, null, py_name), _directories);
 };
 export var exists = function (py_name) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'name': case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return __call__ (isfile, null, py_name) || __call__ (isdir, null, py_name);
+};
+export var islink = function (py_name) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -185,9 +293,28 @@ export var exists = function (py_name) {
 	}
 	return false;
 };
-var __left0__ = exists;
-export var isdir = __left0__;
-export var isfile = __left0__;
-export var islink = __left0__;
 
 //# sourceMappingURL=os.path.map
+export {files};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_directories': _directories = value; break;
+		case '_files_set': _files_set = value; break;
+		case 'sep': sep = value; break;
+		case 'join': join = value; break;
+		case 'py_split': py_split = value; break;
+		case 'basename': basename = value; break;
+		case 'dirname': dirname = value; break;
+		case 'splitext': splitext = value; break;
+		case 'normpath': normpath = value; break;
+		case 'abspath': abspath = value; break;
+		case 'expanduser': expanduser = value; break;
+		case 'isabs': isabs = value; break;
+		case 'isfile': isfile = value; break;
+		case 'isdir': isdir = value; break;
+		case 'exists': exists = value; break;
+		case 'islink': islink = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -126,6 +126,8 @@ StructRNA *ID_code_to_RNA_type(short idcode)
       return RNA_Light;
     case ID_GR:
       return RNA_Collection;
+    case ID_AC:
+      return RNA_Action;
     default:
       return RNA_ID;
   }
@@ -160,6 +162,93 @@ PropertyRNA *RNA_struct_type_find_property(StructRNA *srna, const char *identifi
 PropertyRNA *RNA_struct_find_property(PointerRNA *ptr, const char *identifier)
 {
   return RNA_struct_type_find_property(ptr->type, identifier);
+}
+
+/* An ID type's property as Blender's RNA defines it, for the animation editors to name and resolve F-Curve paths
+ * (given from JS, from Blender's RNA: rna-animated.json). */
+extern "C" __attribute__((export_name("rna_id_property_define"))) void rna_id_property_define(
+    short idcode, const char *identifier, int type, int subtype, int length, const char *name)
+{
+  StructRNA *srna = ID_code_to_RNA_type(idcode);
+  /* A property with a DNA field (dna-outliner.json) is that one, given the subtype the field lacks. */
+  PropertyRNA *prop = RNA_struct_type_find_property(srna, identifier);
+  if (prop) {
+    prop->subtype = PropertySubType(subtype);
+  }
+  else {
+    prop = RNA_def_property(srna, identifier, type, subtype);
+  }
+  RNA_def_property_array(prop, length);
+  prop->name = name;
+}
+
+/* Custom properties (`["name"]` paths, ID properties in Blender) Bylonder animates, by path, with their UI names. */
+static std::map<std::string, std::unique_ptr<PropertyRNA>> &custom_properties()
+{
+  static std::map<std::string, std::unique_ptr<PropertyRNA>> properties;
+  return properties;
+}
+
+extern "C" __attribute__((export_name("rna_custom_property_define"))) void rna_custom_property_define(const char *path, int type,
+                                                                                                    const char *name)
+{
+  std::unique_ptr<PropertyRNA> &prop = custom_properties()[path];
+  prop = std::make_unique<PropertyRNA>();
+  prop->identifier = path;
+  prop->type = PropertyType(type);
+  prop->name = name;
+}
+
+/* As rna_path.cc resolves a path of one property of the ID: `name`, `name[index]`, or a custom property `["name"]`. */
+bool RNA_path_resolve_property(const PointerRNA *ptr, const char *path, PointerRNA *r_ptr, PropertyRNA **r_prop)
+{
+  if (STRPREFIX(path, "[\"")) {
+    auto custom = custom_properties().find(path);
+    if (custom == custom_properties().end()) {
+      return false;
+    }
+    *r_ptr = *ptr;
+    *r_prop = custom->second.get();
+    return true;
+  }
+  const char *end = strchr(path, '[');
+  const std::string identifier = end ? std::string(path, end) : std::string(path);
+  PropertyRNA *prop = identifier.empty() ? nullptr : RNA_struct_type_find_property(ptr->type, identifier.c_str());
+  if (!prop) {
+    return false;
+  }
+  *r_ptr = *ptr;
+  *r_prop = prop;
+  return true;
+}
+
+const char *RNA_property_ui_name(const PropertyRNA *prop) { return prop->name.empty() ? prop->identifier.c_str() : prop->name.c_str(); }
+
+/* As rna_access.cc gives the letter of an array item by the property's subtype. */
+char RNA_property_array_item_char(PropertyRNA *prop, int index)
+{
+  const char *vectoritem = "XYZW", *quatitem = "WXYZ", *coloritem = "RGBA";
+  if (index < 4) {
+    switch (prop->subtype) {
+      case PROP_QUATERNION:
+        return quatitem[index];
+      case PROP_TRANSLATION:
+      case PROP_DIRECTION:
+      case PROP_XYZ:
+      case PROP_XYZ_LENGTH:
+      case PROP_EULER:
+      case PROP_VELOCITY:
+      case PROP_ACCELERATION:
+      case PROP_COORDS:
+        return vectoritem[index];
+      case PROP_COLOR:
+      case PROP_COLOR_GAMMA:
+        return coloritem[index];
+      default:
+        break;
+    }
+  }
+  return 0;
 }
 
 /* The property of a name, reported as Blender's RNA reports a lookup of one the operator does not have. */
@@ -260,9 +349,11 @@ static void set_values(PointerRNA *ptr, const PropertyRNA *prop, std::vector<dou
 
 /* Definitions. */
 
-PropertyRNA *RNA_def_property(StructOrFunctionRNA *cont, const char *identifier, int type, int /*subtype*/)
+PropertyRNA *RNA_def_property(StructOrFunctionRNA *cont, const char *identifier, int type, int subtype)
 {
-  return define(cont, identifier, PropertyType(type), {});
+  PropertyRNA *prop = define(cont, identifier, PropertyType(type), {});
+  prop->subtype = PropertySubType(subtype);
+  return prop;
 }
 PropertyRNA *RNA_def_boolean(StructOrFunctionRNA *cont, const char *identifier, bool default_value, const char *, const char *)
 {
@@ -313,6 +404,29 @@ PropertyRNA *RNA_def_string(StructOrFunctionRNA *cont, const char *identifier, c
 {
   return define(cont, identifier, PROP_STRING, {});
 }
+PropertyRNA *RNA_def_string_file_path(StructOrFunctionRNA *cont, const char *identifier, const char *, int, const char *, const char *)
+{
+  return define(cont, identifier, PROP_STRING, {});
+}
+PropertyRNA *RNA_def_string_dir_path(StructOrFunctionRNA *cont, const char *identifier, const char *, int, const char *, const char *)
+{
+  return define(cont, identifier, PROP_STRING, {});
+}
+PropertyRNA *RNA_def_string_file_name(StructOrFunctionRNA *cont, const char *identifier, const char *, int, const char *, const char *)
+{
+  return define(cont, identifier, PROP_STRING, {});
+}
+PropertyRNA *RNA_def_int_array(StructOrFunctionRNA *cont, const char *identifier, int len, const int *default_value, int, int, const char *,
+                               const char *, int, int)
+{
+  return define(cont, identifier, PROP_INT, array(default_value, len));
+}
+/* A collection (a lasso's path): its items cross from JS another way (gesture_lasso_path_set). */
+PropertyRNA *RNA_def_collection_runtime(StructOrFunctionRNA *cont, const char *identifier, StructRNA *, const char *, const char *)
+{
+  return define(cont, identifier, PROP_COLLECTION, {});
+}
+void RNA_def_property_string_search_func_runtime(PropertyRNA *, StringPropertySearchFunc, eStringPropertySearchFlag) {}
 void RNA_def_property_array(PropertyRNA *prop, int length)
 {
   prop->length = length;
@@ -360,7 +474,6 @@ void RNA_def_property_range(PropertyRNA *, double, double) {}
 void RNA_def_property_subtype(PropertyRNA *prop, PropertySubType subtype) { prop->subtype = subtype; }
 void RNA_def_property_translation_context(PropertyRNA *, const char *) {}
 void RNA_def_property_ui_range(PropertyRNA *, double, double, double, int) {}
-void RNA_def_property_ui_text(PropertyRNA *, const char *, const char *) {}
 /* As rna_define.cc defines it. */
 void RNA_def_property_ui_icon(PropertyRNA *prop, int icon, int consecutive)
 {
@@ -386,6 +499,7 @@ void rna_property_update_set(StructRNA *srna, const char *identifier, void (*upd
 {
   RNA_struct_type_find_property(srna, identifier)->update = update;
 }
+void RNA_def_property_ui_text(PropertyRNA *prop, const char *name, const char *) { prop->name = name; }
 /* Operator properties are set from JS, after which nothing updates them, so update functions never run. */
 void RNA_def_property_update_runtime(PropertyRNA *, RNAPropertyUpdateFunc) {}
 

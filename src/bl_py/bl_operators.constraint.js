@@ -13,7 +13,7 @@ export var CONSTRAINT_OT_add_target =  __class__ ('CONSTRAINT_OT_add_target', [O
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -25,13 +25,13 @@ export var CONSTRAINT_OT_add_target =  __class__ ('CONSTRAINT_OT_add_target', [O
 		}
 		else {
 		}
-		var constraint = getattr (context, 'constraint', null);
+		var constraint = __call__ (getattr, null, context, 'constraint', null);
 		return constraint;
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -43,7 +43,10 @@ export var CONSTRAINT_OT_add_target =  __class__ ('CONSTRAINT_OT_add_target', [O
 		}
 		else {
 		}
-		context.constraint.targets.py_new ();
+		(function () {
+			var __accu0__ = context.constraint.targets;
+			return __call__ (__accu0__.py_new, __accu0__);
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -55,7 +58,7 @@ export var CONSTRAINT_OT_remove_target =  __class__ ('CONSTRAINT_OT_remove_targe
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -67,13 +70,13 @@ export var CONSTRAINT_OT_remove_target =  __class__ ('CONSTRAINT_OT_remove_targe
 		}
 		else {
 		}
-		var constraint = getattr (context, 'constraint', null);
+		var constraint = __call__ (getattr, null, context, 'constraint', null);
 		return constraint;
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -86,11 +89,14 @@ export var CONSTRAINT_OT_remove_target =  __class__ ('CONSTRAINT_OT_remove_targe
 		else {
 		}
 		var tgts = context.constraint.targets;
-		tgts.remove (tgts [self.index]);
+		(function () {
+			var __accu0__ = tgts;
+			return __call__ (__accu0__.remove, __accu0__, __getitem__ (tgts, self.index));
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
-CONSTRAINT_OT_remove_target.__annotations__ = dict ({'index': IntProperty ()});
+CONSTRAINT_OT_remove_target.__annotations__ = dict ({'index': __call__ (IntProperty, null)});
 export var CONSTRAINT_OT_normalize_target_weights =  __class__ ('CONSTRAINT_OT_normalize_target_weights', [Operator], {
 	__module__: __name__,
 	bl_idname: 'constraint.normalize_target_weights',
@@ -99,7 +105,7 @@ export var CONSTRAINT_OT_normalize_target_weights =  __class__ ('CONSTRAINT_OT_n
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -111,13 +117,13 @@ export var CONSTRAINT_OT_normalize_target_weights =  __class__ ('CONSTRAINT_OT_n
 		}
 		else {
 		}
-		var constraint = getattr (context, 'constraint', null);
+		var constraint = __call__ (getattr, null, context, 'constraint', null);
 		return constraint;
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -130,16 +136,25 @@ export var CONSTRAINT_OT_normalize_target_weights =  __class__ ('CONSTRAINT_OT_n
 		else {
 		}
 		var tgts = context.constraint.targets;
-		var total = sum ((function () {
+		var total = __call__ (sum, null, (function () {
 			var __accu0__ = [];
-			for (var t of tgts) {
-				__accu0__.append (t.weight);
+			var __iterable0__ = tgts;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var t = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, t.weight);
+				}) ();
 			}
 			return __accu0__;
 		}) ());
-		if (total > 0) {
-			for (var t of tgts) {
-				t.weight = t.weight / total;
+		if (__gt__ (total, 0)) {
+			var __iterable0__ = tgts;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var t = __getitem__ (__iterable0__, __index0__);
+				t.weight = __truediv__ (t.weight, total);
 			}
 		}
 		return new set (['FINISHED']);
@@ -153,7 +168,7 @@ export var CONSTRAINT_OT_disable_keep_transform =  __class__ ('CONSTRAINT_OT_dis
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -165,13 +180,13 @@ export var CONSTRAINT_OT_disable_keep_transform =  __class__ ('CONSTRAINT_OT_dis
 		}
 		else {
 		}
-		var constraint = getattr (context, 'constraint', null);
-		return constraint && constraint.influence > 0.0;
+		var constraint = __call__ (getattr, null, context, 'constraint', null);
+		return constraint && __gt__ (constraint.influence, 0.0);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -183,7 +198,7 @@ export var CONSTRAINT_OT_disable_keep_transform =  __class__ ('CONSTRAINT_OT_dis
 		}
 		else {
 		}
-		var is_bone_constraint = context.space_data.context == 'BONE_CONSTRAINT';
+		var is_bone_constraint = __eq__ (context.space_data.context, 'BONE_CONSTRAINT');
 		var ob = context.object;
 		if (is_bone_constraint) {
 			var bone = context.pose_bone;
@@ -194,7 +209,10 @@ export var CONSTRAINT_OT_disable_keep_transform =  __class__ ('CONSTRAINT_OT_dis
 		}
 		context.constraint.influence = 0.0;
 		if (is_bone_constraint) {
-			bone.matrix = __matmul__ (ob.matrix_world.inverted (), mat);
+			bone.matrix = __matmul__ ((function () {
+				var __accu0__ = ob.matrix_world;
+				return __call__ (__accu0__.inverted, __accu0__);
+			}) (), mat);
 		}
 		else {
 			ob.matrix_world = mat;
@@ -206,3 +224,14 @@ export var classes = tuple ([CONSTRAINT_OT_add_target, CONSTRAINT_OT_remove_targ
 
 //# sourceMappingURL=bl_operators.constraint.map
 export {IntProperty, Operator};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'CONSTRAINT_OT_add_target': CONSTRAINT_OT_add_target = value; break;
+		case 'CONSTRAINT_OT_remove_target': CONSTRAINT_OT_remove_target = value; break;
+		case 'CONSTRAINT_OT_normalize_target_weights': CONSTRAINT_OT_normalize_target_weights = value; break;
+		case 'CONSTRAINT_OT_disable_keep_transform': CONSTRAINT_OT_disable_keep_transform = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

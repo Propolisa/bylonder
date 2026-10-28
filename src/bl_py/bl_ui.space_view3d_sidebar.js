@@ -22,7 +22,7 @@ export var VIEW3D_PT_copy_global_transform =  __class__ ('VIEW3D_PT_copy_global_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -36,24 +36,54 @@ export var VIEW3D_PT_copy_global_transform =  __class__ ('VIEW3D_PT_copy_global_
 		}
 		var layout = self.layout;
 		var scene = context.scene;
-		layout.operator ('object.copy_global_transform', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
-		var paste_col = layout.column (__kwargtrans__ ({align: true}));
-		var paste_row = paste_col.row (__kwargtrans__ ({align: true}));
-		var paste_props = paste_row.operator ('object.paste_transform', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'object.copy_global_transform', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
+		}) ();
+		var paste_col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var paste_row = (function () {
+			var __accu0__ = paste_col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var paste_props = (function () {
+			var __accu0__ = paste_row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.paste_transform', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		}) ();
 		paste_props.method = 'CURRENT';
 		paste_props.use_mirror = false;
-		var paste_props = paste_row.operator ('object.paste_transform', __kwargtrans__ ({text: 'Mirrored', icon: 'PASTEFLIPDOWN'}));
+		var paste_props = (function () {
+			var __accu0__ = paste_row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.paste_transform', __kwargtrans__ ({text: 'Mirrored', icon: 'PASTEFLIPDOWN'}));
+		}) ();
 		paste_props.method = 'CURRENT';
 		paste_props.use_mirror = true;
-		var wants_autokey_col = paste_col.column (__kwargtrans__ ({align: false}));
+		var wants_autokey_col = (function () {
+			var __accu0__ = paste_col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false}));
+		}) ();
 		var has_autokey = scene.tool_settings.use_keyframe_insert_auto;
 		wants_autokey_col.enabled = has_autokey;
 		if (!(has_autokey)) {
-			wants_autokey_col.label (__kwargtrans__ ({text: 'These require auto-key:'}));
+			(function () {
+				var __accu0__ = wants_autokey_col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'These require auto-key:'}));
+			}) ();
 		}
-		var paste_col = wants_autokey_col.column (__kwargtrans__ ({align: true}));
-		paste_col.operator ('object.paste_transform', __kwargtrans__ ({text: 'Paste to Selected Keys', icon: 'PASTEDOWN'})).method = 'EXISTING_KEYS';
-		paste_col.operator ('object.paste_transform', __kwargtrans__ ({text: 'Paste and Bake', icon: 'PASTEDOWN'})).method = 'BAKE';
+		var paste_col = (function () {
+			var __accu0__ = wants_autokey_col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = paste_col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.paste_transform', __kwargtrans__ ({text: 'Paste to Selected Keys', icon: 'PASTEDOWN'}));
+		}) ().method = 'EXISTING_KEYS';
+		(function () {
+			var __accu0__ = paste_col;
+			return __call__ (__accu0__.operator, __accu0__, 'object.paste_transform', __kwargtrans__ ({text: 'Paste and Bake', icon: 'PASTEDOWN'}));
+		}) ().method = 'BAKE';
 	});}
 });
 export var VIEW3D_PT_copy_global_transform_fix_to_camera =  __class__ ('VIEW3D_PT_copy_global_transform_fix_to_camera', [GlobalTransformPanelMixin, Panel], {
@@ -64,7 +94,7 @@ export var VIEW3D_PT_copy_global_transform_fix_to_camera =  __class__ ('VIEW3D_P
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -76,25 +106,55 @@ export var VIEW3D_PT_copy_global_transform_fix_to_camera =  __class__ ('VIEW3D_P
 		}
 		else {
 		}
-		var AutoKeying = _member ('bpy_extras.anim_utils', 'AutoKeying');
+		var AutoKeying = __call__ (_member, null, 'bpy_extras.anim_utils', 'AutoKeying');
 		var layout = self.layout;
 		var scene = context.scene;
 		layout.use_property_split = true;
-		var props_box = layout.column (__kwargtrans__ ({heading: 'Fix', heading_ctxt: i18n_contexts.id_camera, align: true}));
-		props_box.prop (scene.tool_settings, 'anim_fix_to_cam_use_loc', __kwargtrans__ ({text: 'Location'}));
-		props_box.prop (scene.tool_settings, 'anim_fix_to_cam_use_rot', __kwargtrans__ ({text: 'Rotation'}));
-		props_box.prop (scene.tool_settings, 'anim_fix_to_cam_use_scale', __kwargtrans__ ({text: 'Scale'}));
-		var keyingset = AutoKeying.active_keyingset (context);
+		var props_box = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Fix', heading_ctxt: i18n_contexts.id_camera, align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = props_box;
+			return __call__ (__accu0__.prop, __accu0__, scene.tool_settings, 'anim_fix_to_cam_use_loc', __kwargtrans__ ({text: 'Location'}));
+		}) ();
+		(function () {
+			var __accu0__ = props_box;
+			return __call__ (__accu0__.prop, __accu0__, scene.tool_settings, 'anim_fix_to_cam_use_rot', __kwargtrans__ ({text: 'Rotation'}));
+		}) ();
+		(function () {
+			var __accu0__ = props_box;
+			return __call__ (__accu0__.prop, __accu0__, scene.tool_settings, 'anim_fix_to_cam_use_scale', __kwargtrans__ ({text: 'Scale'}));
+		}) ();
+		var keyingset = (function () {
+			var __accu0__ = AutoKeying;
+			return __call__ (__accu0__.active_keyingset, __accu0__, context);
+		}) ();
 		if (keyingset) {
-			props_box.label (__kwargtrans__ ({text: 'Keying set is active, which may'}));
-			props_box.label (__kwargtrans__ ({text: 'reduce the effect of the above options'}));
+			(function () {
+				var __accu0__ = props_box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Keying set is active, which may'}));
+			}) ();
+			(function () {
+				var __accu0__ = props_box;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'reduce the effect of the above options'}));
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		var props = row.operator ('object.fix_to_camera');
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var props = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.fix_to_camera');
+		}) ();
 		props.use_location = scene.tool_settings.anim_fix_to_cam_use_loc;
 		props.use_rotation = scene.tool_settings.anim_fix_to_cam_use_rot;
 		props.use_scale = scene.tool_settings.anim_fix_to_cam_use_scale;
-		row.operator ('object.delete_fix_to_camera_keys', __kwargtrans__ ({text: '', icon: 'TRASH'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'object.delete_fix_to_camera_keys', __kwargtrans__ ({text: '', icon: 'TRASH'}));
+		}) ();
 	});}
 });
 export var VIEW3D_PT_copy_global_transform_mirror =  __class__ ('VIEW3D_PT_copy_global_transform_mirror', [GlobalTransformPanelMixin, Panel], {
@@ -105,7 +165,7 @@ export var VIEW3D_PT_copy_global_transform_mirror =  __class__ ('VIEW3D_PT_copy_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -121,25 +181,40 @@ export var VIEW3D_PT_copy_global_transform_mirror =  __class__ ('VIEW3D_PT_copy_
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var scene = context.scene;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (scene.tool_settings, 'anim_mirror_object', __kwargtrans__ ({text: 'Object'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene.tool_settings, 'anim_mirror_object', __kwargtrans__ ({text: 'Object'}));
+		}) ();
 		var mirror_ob = scene.tool_settings.anim_mirror_object;
 		if (mirror_ob === null) {
-			if (context.object && context.object.py_metatype == 'ARMATURE') {
-				self._bone_search (col, scene, context.object);
+			if (context.object && __eq__ (context.object.py_metatype, 'ARMATURE')) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__._bone_search, __accu0__, col, scene, context.object);
+				}) ();
 			}
 			else {
-				self._bone_entry (layout, scene);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__._bone_entry, __accu0__, layout, scene);
+				}) ();
 			}
 		}
-		else if (mirror_ob.py_metatype == 'ARMATURE') {
-			self._bone_search (col, scene, mirror_ob);
+		else if (__eq__ (mirror_ob.py_metatype, 'ARMATURE')) {
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._bone_search, __accu0__, col, scene, mirror_ob);
+			}) ();
 		}
 	});},
 	get _bone_search () {return __get__ (this, function (self, layout, scene, armature_ob) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -153,12 +228,15 @@ export var VIEW3D_PT_copy_global_transform_mirror =  __class__ ('VIEW3D_PT_copy_
 		}
 		else {
 		}
-		layout.prop_search (scene.tool_settings, 'anim_mirror_bone', armature_ob.data, (armature_ob.mode == 'EDIT' ? 'edit_bones' : 'bones'), __kwargtrans__ ({text: 'Bone'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop_search, __accu0__, scene.tool_settings, 'anim_mirror_bone', armature_ob.data, (__eq__ (armature_ob.mode, 'EDIT') ? 'edit_bones' : 'bones'), __kwargtrans__ ({text: 'Bone'}));
+		}) ();
 	});},
 	get _bone_entry () {return __get__ (this, function (self, layout, scene) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -171,7 +249,10 @@ export var VIEW3D_PT_copy_global_transform_mirror =  __class__ ('VIEW3D_PT_copy_
 		}
 		else {
 		}
-		layout.prop (scene.tool_settings, 'anim_mirror_bone', __kwargtrans__ ({text: 'Bone'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, scene.tool_settings, 'anim_mirror_bone', __kwargtrans__ ({text: 'Bone'}));
+		}) ();
 	});}
 });
 export var VIEW3D_PT_copy_global_transform_relative =  __class__ ('VIEW3D_PT_copy_global_transform_relative', [GlobalTransformPanelMixin, Panel], {
@@ -182,7 +263,7 @@ export var VIEW3D_PT_copy_global_transform_relative =  __class__ ('VIEW3D_PT_cop
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -194,32 +275,65 @@ export var VIEW3D_PT_copy_global_transform_relative =  __class__ ('VIEW3D_PT_cop
 		}
 		else {
 		}
-		var get_relative_ob = _member ('bl_operators.copy_global_transform', 'get_relative_ob');
+		var get_relative_ob = __call__ (_member, null, 'bl_operators.copy_global_transform', 'get_relative_ob');
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var scene = context.scene;
-		var copy_paste_sub = layout.column (__kwargtrans__ ({align: false}));
-		var has_relative_ob = bool (get_relative_ob (context));
-		copy_paste_sub.prop (scene.tool_settings, 'anim_relative_object', __kwargtrans__ ({text: 'Object'}));
+		var copy_paste_sub = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false}));
+		}) ();
+		var has_relative_ob = __call__ (bool, null, __call__ (get_relative_ob, null, context));
+		(function () {
+			var __accu0__ = copy_paste_sub;
+			return __call__ (__accu0__.prop, __accu0__, scene.tool_settings, 'anim_relative_object', __kwargtrans__ ({text: 'Object'}));
+		}) ();
 		if (!(scene.tool_settings.anim_relative_object)) {
-			copy_paste_sub.label (__kwargtrans__ ({text: 'Using Active Scene Camera'}));
+			(function () {
+				var __accu0__ = copy_paste_sub;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Using Active Scene Camera'}));
+			}) ();
 		}
-		var button_sub = copy_paste_sub.row (__kwargtrans__ ({align: true}));
+		var button_sub = (function () {
+			var __accu0__ = copy_paste_sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		button_sub.enabled = has_relative_ob;
-		button_sub.operator ('object.copy_relative_transform', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
-		var paste_props = button_sub.operator ('object.paste_transform', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		(function () {
+			var __accu0__ = button_sub;
+			return __call__ (__accu0__.operator, __accu0__, 'object.copy_relative_transform', __kwargtrans__ ({text: 'Copy', icon: 'COPYDOWN'}));
+		}) ();
+		var paste_props = (function () {
+			var __accu0__ = button_sub;
+			return __call__ (__accu0__.operator, __accu0__, 'object.paste_transform', __kwargtrans__ ({text: 'Paste', icon: 'PASTEDOWN'}));
+		}) ();
 		paste_props.method = 'CURRENT';
 		paste_props.use_mirror = false;
 		paste_props.use_relative = true;
 	});}
 });
 export var classes = tuple ([VIEW3D_PT_copy_global_transform, VIEW3D_PT_copy_global_transform_mirror, VIEW3D_PT_copy_global_transform_relative, VIEW3D_PT_copy_global_transform_fix_to_camera]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.space_view3d_sidebar.map
 export {Context, Panel, UILayout, _globals, _import, _lazy, _member, _module, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'GlobalTransformPanelMixin': GlobalTransformPanelMixin = value; break;
+		case 'VIEW3D_PT_copy_global_transform': VIEW3D_PT_copy_global_transform = value; break;
+		case 'VIEW3D_PT_copy_global_transform_fix_to_camera': VIEW3D_PT_copy_global_transform_fix_to_camera = value; break;
+		case 'VIEW3D_PT_copy_global_transform_mirror': VIEW3D_PT_copy_global_transform_mirror = value; break;
+		case 'VIEW3D_PT_copy_global_transform_relative': VIEW3D_PT_copy_global_transform_relative = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

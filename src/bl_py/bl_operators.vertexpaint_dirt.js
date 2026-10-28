@@ -10,7 +10,7 @@ var __name__ = 'bl_operators.vertexpaint_dirt';
 export var ensure_active_color_attribute = function (me) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -24,12 +24,15 @@ export var ensure_active_color_attribute = function (me) {
 	if (me.attributes.active_color) {
 		return me.attributes.active_color;
 	}
-	return me.color_attributes.py_new ('Color', 'BYTE_COLOR', 'CORNER');
+	return (function () {
+		var __accu0__ = me.color_attributes;
+		return __call__ (__accu0__.py_new, __accu0__, 'Color', 'BYTE_COLOR', 'CORNER');
+	}) ();
 };
 export var applyVertexDirt = function (me, blur_iterations, blur_strength, clamp_dirt, clamp_clean, dirt_only, normalize) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -46,95 +49,147 @@ export var applyVertexDirt = function (me, blur_iterations, blur_strength, clamp
 	}
 	else {
 	}
-	var Vector = _member ('mathutils', 'Vector');
-	var acos = _member ('math', 'acos');
-	var array = _module ('array');
-	var vert_tone = array.array ('f', [0.0]) * len (me.vertices);
+	var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+	var acos = __call__ (_member, null, 'math', 'acos');
+	var array = __call__ (_module, null, 'array');
+	var vert_tone = __mul__ ((function () {
+		var __accu0__ = array;
+		return __call__ (__accu0__.array, __accu0__, 'f', [0.0]);
+	}) (), __call__ (len, null, me.vertices));
 	var con = (function () {
 		var __accu0__ = [];
-		for (var i of list (range (len (me.vertices)))) {
-			__accu0__.append ([]);
+		var __iterable0__ = __call__ (list, null, __call__ (range, null, __call__ (len, null, me.vertices)));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var i = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, []);
+			}) ();
 		}
 		return __accu0__;
 	}) ();
-	for (var e of me.edges) {
-		con [e.vertices [0]].append (e.vertices [1]);
-		con [e.vertices [1]].append (e.vertices [0]);
+	var __iterable0__ = me.edges;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var e = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = __getitem__ (con, __getitem__ (e.vertices, 0));
+			return __call__ (__accu0__.append, __accu0__, __getitem__ (e.vertices, 1));
+		}) ();
+		(function () {
+			var __accu0__ = __getitem__ (con, __getitem__ (e.vertices, 1));
+			return __call__ (__accu0__.append, __accu0__, __getitem__ (e.vertices, 0));
+		}) ();
 	}
-	for (var [i, v] of py_enumerate (me.vertices)) {
-		var vec = Vector ();
+	var __iterable0__ = __call__ (py_enumerate, null, me.vertices);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var i = __left0__ [0];
+		var v = __left0__ [1];
+		var vec = __call__ (Vector, null);
 		var no = v.normal;
 		var co = v.co;
-		for (var c of con [i]) {
-			vec += (me.vertices [c].co - co).normalized ();
+		var __iterable1__ = __getitem__ (con, i);
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var c = __getitem__ (__iterable1__, __index1__);
+			var vec = __call__ (__iadd__, null, vec, (function () {
+				var __accu0__ = __sub__ (__getitem__ (me.vertices, c).co, co);
+				return __call__ (__accu0__.normalized, __accu0__);
+			}) ());
 		}
-		var tot_con = len (con [i]);
-		if (tot_con == 0) {
-			var ang = pi / 2.0;
+		var tot_con = __call__ (len, null, __getitem__ (con, i));
+		if (__eq__ (tot_con, 0)) {
+			var ang = __truediv__ (pi, 2.0);
 		}
 		else {
-			vec /= tot_con;
-			var ang = acos (no.dot (vec));
+			var vec = __call__ (__idiv__, null, vec, tot_con);
+			var ang = __call__ (acos, null, (function () {
+				var __accu0__ = no;
+				return __call__ (__accu0__.dot, __accu0__, vec);
+			}) ());
 		}
-		var ang = max (clamp_dirt, ang);
+		var ang = __call__ (max, null, clamp_dirt, ang);
 		if (!(dirt_only)) {
-			var ang = min (clamp_clean, ang);
+			var ang = __call__ (min, null, clamp_clean, ang);
 		}
-		vert_tone [i] = ang;
+		__setitem__ (vert_tone, i, ang);
 	}
 	for (var i = 0; i < blur_iterations; i++) {
-		var orig_vert_tone = vert_tone.__getslice__ (null, null, 1);
-		for (var [j, c] of py_enumerate (con)) {
-			for (var v of c) {
-				vert_tone [j] += blur_strength * orig_vert_tone [v];
+		var orig_vert_tone = __getslice__ (vert_tone, null, null, 1);
+		var __iterable0__ = __call__ (py_enumerate, null, con);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var j = __left0__ [0];
+			var c = __left0__ [1];
+			var __iterable1__ = c;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var v = __getitem__ (__iterable1__, __index1__);
+				__setitem__ (vert_tone, j, __call__ (__iadd__, null, __getitem__ (vert_tone, j), __mul__ (blur_strength, __getitem__ (orig_vert_tone, v))));
 			}
-			vert_tone [j] /= len (c) * blur_strength + 1;
+			__setitem__ (vert_tone, j, __call__ (__idiv__, null, __getitem__ (vert_tone, j), __add__ (__mul__ (__call__ (len, null, c), blur_strength), 1)));
 		}
+		// pass;
 	}
 	if (normalize) {
-		var min_tone = min (vert_tone);
-		var max_tone = max (vert_tone);
+		var min_tone = __call__ (min, null, vert_tone);
+		var max_tone = __call__ (max, null, vert_tone);
 	}
 	else {
 		var min_tone = clamp_dirt;
 		var max_tone = clamp_clean;
 	}
-	var tone_range = max_tone - min_tone;
-	if (tone_range < 0.0001) {
+	var tone_range = __sub__ (max_tone, min_tone);
+	if (__lt__ (tone_range, 0.0001)) {
 		var tone_range = 0.0;
 	}
 	else {
-		var tone_range = 1.0 / tone_range;
+		var tone_range = __truediv__ (1.0, tone_range);
 	}
-	var active_color_attribute = ensure_active_color_attribute (me);
+	var active_color_attribute = __call__ (ensure_active_color_attribute, null, me);
 	if (!(active_color_attribute)) {
 		return new set (['CANCELLED']);
 	}
-	var point_domain = active_color_attribute.domain == 'POINT';
+	var point_domain = __eq__ (active_color_attribute.domain, 'POINT');
 	var attribute_data = active_color_attribute.data;
 	var use_paint_mask = me.use_paint_mask;
-	for (var [i, p] of py_enumerate (me.polygons)) {
+	var __iterable0__ = __call__ (py_enumerate, null, me.polygons);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var i = __left0__ [0];
+		var p = __left0__ [1];
 		if (p.hide) {
 			continue;
 		}
 		if (use_paint_mask && !(p.select)) {
 			continue;
 		}
-		for (var loop_index of p.loop_indices) {
-			var loop = me.loops [loop_index];
+		var __iterable1__ = p.loop_indices;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var loop_index = __getitem__ (__iterable1__, __index1__);
+			var loop = __getitem__ (me.loops, loop_index);
 			var v = loop.vertex_index;
-			var col = attribute_data [(point_domain ? v : loop_index)].color;
-			var tone = vert_tone [v];
-			var tone = (tone - min_tone) * tone_range;
+			var col = __getitem__ (attribute_data, (point_domain ? v : loop_index)).color;
+			var tone = __getitem__ (vert_tone, v);
+			var tone = __mul__ (__sub__ (tone, min_tone), tone_range);
 			if (dirt_only) {
-				var tone = min (tone, 0.5) * 2.0;
+				var tone = __mul__ (__call__ (min, null, tone, 0.5), 2.0);
 			}
-			col [0] = tone * col [0];
-			col [1] = tone * col [1];
-			col [2] = tone * col [2];
+			__setitem__ (col, 0, __mul__ (tone, __getitem__ (col, 0)));
+			__setitem__ (col, 1, __mul__ (tone, __getitem__ (col, 1)));
+			__setitem__ (col, 2, __mul__ (tone, __getitem__ (col, 2)));
 		}
 	}
-	me.py_update ();
+	(function () {
+		var __accu0__ = me;
+		return __call__ (__accu0__.py_update, __accu0__);
+	}) ();
 	return new set (['FINISHED']);
 };
 export var VertexPaintDirt =  __class__ ('VertexPaintDirt', [Operator], {
@@ -145,7 +200,7 @@ export var VertexPaintDirt =  __class__ ('VertexPaintDirt', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -158,12 +213,12 @@ export var VertexPaintDirt =  __class__ ('VertexPaintDirt', [Operator], {
 		else {
 		}
 		var obj = context.object;
-		return obj && obj.py_metatype == 'MESH';
+		return obj && __eq__ (obj.py_metatype, 'MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -177,12 +232,22 @@ export var VertexPaintDirt =  __class__ ('VertexPaintDirt', [Operator], {
 		}
 		var obj = context.object;
 		var mesh = obj.data;
-		var ret = applyVertexDirt (mesh, self.blur_iterations, self.blur_strength, self.dirt_angle, self.clean_angle, self.dirt_only, self.normalize);
+		var ret = __call__ (applyVertexDirt, null, mesh, self.blur_iterations, self.blur_strength, self.dirt_angle, self.clean_angle, self.dirt_only, self.normalize);
 		return ret;
 	});}
 });
-VertexPaintDirt.__annotations__ = dict ({'blur_strength': FloatProperty (__kwargtrans__ ({py_name: 'Blur Strength', description: 'Blur strength per iteration', min: 0.01, max: 1.0, py_default: 1.0})), 'blur_iterations': IntProperty (__kwargtrans__ ({py_name: 'Blur Iterations', description: 'Number of times to blur the colors (higher blurs more)', min: 0, max: 40, py_default: 1})), 'clean_angle': FloatProperty (__kwargtrans__ ({py_name: 'Highlight Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: pi, unit: 'ROTATION'})), 'dirt_angle': FloatProperty (__kwargtrans__ ({py_name: 'Dirt Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: 0.0, unit: 'ROTATION'})), 'dirt_only': BoolProperty (__kwargtrans__ ({py_name: 'Dirt Only', description: "Don't calculate cleans for convex areas", py_default: false})), 'normalize': BoolProperty (__kwargtrans__ ({py_name: 'Normalize', description: 'Normalize the colors, increasing the contrast', py_default: true}))});
+VertexPaintDirt.__annotations__ = dict ({'blur_strength': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Blur Strength', description: 'Blur strength per iteration', min: 0.01, max: 1.0, py_default: 1.0})), 'blur_iterations': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Blur Iterations', description: 'Number of times to blur the colors (higher blurs more)', min: 0, max: 40, py_default: 1})), 'clean_angle': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Highlight Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: pi, unit: 'ROTATION'})), 'dirt_angle': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Dirt Angle', description: 'Less than 90 limits the angle used in the tonal range', min: 0.0, max: pi, py_default: 0.0, unit: 'ROTATION'})), 'dirt_only': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Dirt Only', description: "Don't calculate cleans for convex areas", py_default: false})), 'normalize': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Normalize', description: 'Normalize the colors, increasing the contrast', py_default: true}))});
 export var classes = tuple ([VertexPaintDirt]);
 
 //# sourceMappingURL=bl_operators.vertexpaint_dirt.map
 export {BoolProperty, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module, pi};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'ensure_active_color_attribute': ensure_active_color_attribute = value; break;
+		case 'applyVertexDirt': applyVertexDirt = value; break;
+		case 'VertexPaintDirt': VertexPaintDirt = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

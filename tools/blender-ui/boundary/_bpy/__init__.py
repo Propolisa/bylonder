@@ -2,32 +2,51 @@
 # are kept in `registered` by name, for Bylonder to draw and run; the scripts' paths are Blender's layout, with no
 # files behind them.
 import _bpy.app as app
-import _bpy.data as data
 import _bpy.msgbus as msgbus
 import _bpy.props as props
 import _bpy.types as types
 import _bpy.ops as ops
 import _bpy._utils_previews as _utils_previews
 import _bpy._utils_units as _utils_units
+from _bpy._keyconfigs import KeyConfigs
 
 registered = {}
 
-# bpy.context: the context Bylonder sets for the editor drawing or running (blenkernel/context.js), as Blender sets
-# the window manager's; with none set, Blender's empty preferences.
-_contexts = [{'preferences': {'filepaths': {'script_directories': []}, 'addons': {}, 'view': {}, 'experimental': {}}}]
-context = None
-__pragma__('js', '{}', '''context = new Proxy({}, {
-    get: (target, key) => _contexts.at(-1)[key] ?? null,
-    set: (target, key, value) => { _contexts.at(-1)[key] = value; return true; },
+# bpy.context and bpy.data: what Bylonder sets for the editor drawing or running (blenkernel/context.js), as Blender
+# sets the window manager's context; with none set, Blender's defaults for its RNA (makesrna/rna.js). Variables:
+# _bpy_restrict_state swaps them while scripts load.
+__pragma__('js', '{}', '/* js-import {rna, collection} from ../makesrna/rna.js */')
+_contexts = []
+_datas = []
+__pragma__('js', '{}', '''
+const window_manager = rna('WindowManager', { keyconfigs: KeyConfigs () });
+_datas.push(rna('BlendData', { window_managers: collection([window_manager]) }));
+_contexts.push(rna('Context', { window_manager, preferences: rna('Preferences', {}), blend_data: _datas[0] }));
+const top = (stack) => new Proxy({}, {
+    get: (target, key) => stack.at(-1)[key],
+    set: (target, key, value) => { stack.at(-1)[key] = value; return true; },
+    has: (target, key) => key in stack.at(-1),
 });''')
+context = None
+data = None
+__pragma__('js', '{}', 'context = top(_contexts); data = top(_datas);')
 
 
-def _context_push(context):
+def _context_set(context, data=None):
+    """The context Bylonder draws or runs with, in place of the one it set before (Blender's defaults stay below)."""
+    if len(_contexts) > 1:
+        _context_pop()
+    _context_push(context, data)
+
+
+def _context_push(context, data=None):
     _contexts.append(context)
+    _datas.append(data or _datas[-1])
 
 
 def _context_pop():
     _contexts.pop()
+    _datas.pop()
 
 
 def register_class(cls):
@@ -63,7 +82,8 @@ def system_resource(resource_type, path=''):
 
 
 def script_paths():
-    return ['/blender/scripts']
+    """(system, user): Blender's scripts; the browser has no user scripts folder."""
+    return ('/blender/scripts', '')
 
 
 def blend_paths(absolute=False, packed=False, local=False):

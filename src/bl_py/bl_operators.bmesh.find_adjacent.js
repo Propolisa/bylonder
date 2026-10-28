@@ -11,7 +11,7 @@ export var __all__ = tuple (['select_prev', 'select_next']);
 export var other_edges_over_face = function* (e) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -22,7 +22,10 @@ export var other_edges_over_face = function* (e) {
 	}
 	else {
 	}
-	for (var l of e.link_loops) {
+	var __iterable0__ = e.link_loops;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var l = __getitem__ (__iterable0__, __index0__);
 		yield l.link_loop_next.edge;
 		yield l.link_loop_prev.edge;
 	}
@@ -30,7 +33,7 @@ export var other_edges_over_face = function* (e) {
 export var other_edges_over_edge = function* (e) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -41,8 +44,14 @@ export var other_edges_over_edge = function* (e) {
 	}
 	else {
 	}
-	for (var v of e.verts) {
-		for (var e_other of v.link_edges) {
+	var __iterable0__ = e.verts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var v = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = v.link_edges;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var e_other = __getitem__ (__iterable1__, __index1__);
 			if (e_other !== e) {
 				if (!(e.is_wire)) {
 					yield e_other;
@@ -54,7 +63,7 @@ export var other_edges_over_edge = function* (e) {
 export var verts_from_elem = function (ele) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -69,8 +78,14 @@ export var verts_from_elem = function (ele) {
 	if (ele_type === bmesh.types.BMFace) {
 		return (function () {
 			var __accu0__ = [];
-			for (var l of ele.loops) {
-				__accu0__.append (l.vert);
+			var __iterable0__ = ele.loops;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var l = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, l.vert);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -78,8 +93,14 @@ export var verts_from_elem = function (ele) {
 	else if (ele_type === bmesh.types.BMEdge) {
 		return (function () {
 			var __accu0__ = [];
-			for (var v of ele.verts) {
-				__accu0__.append (v);
+			var __iterable0__ = ele.verts;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var v = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, v);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -88,7 +109,7 @@ export var verts_from_elem = function (ele) {
 		return [ele];
 	}
 	else {
-		var __except0__ = py_TypeError ('wrong type');
+		var __except0__ = __call__ (py_TypeError, null, 'wrong type');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
@@ -96,7 +117,7 @@ export var verts_from_elem = function (ele) {
 export var edges_from_elem = function (ele) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -111,8 +132,14 @@ export var edges_from_elem = function (ele) {
 	if (ele_type === bmesh.types.BMFace) {
 		return (function () {
 			var __accu0__ = [];
-			for (var l of ele.loops) {
-				__accu0__.append (l.edge);
+			var __iterable0__ = ele.loops;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var l = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, l.edge);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -123,14 +150,20 @@ export var edges_from_elem = function (ele) {
 	else if (ele_type === bmesh.types.BMVert) {
 		return (function () {
 			var __accu0__ = [];
-			for (var e of ele.link_edges) {
-				__accu0__.append (e);
+			var __iterable0__ = ele.link_edges;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var e = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, e);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 	}
 	else {
-		var __except0__ = py_TypeError ('wrong type');
+		var __except0__ = __call__ (py_TypeError, null, 'wrong type');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
@@ -141,7 +174,7 @@ export var elems_depth_search = function (ele_init, depths, other_edges_over_cb,
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -155,41 +188,70 @@ export var elems_depth_search = function (ele_init, depths, other_edges_over_cb,
 	}
 	else {
 	}
-	var depth_max = max (depths);
-	var depth_min = min (depths);
-	var depths_sorted = tuple (sorted (depths));
-	var stack_old = edges_from_elem (ele_init);
+	var depth_max = __call__ (max, null, depths);
+	var depth_min = __call__ (min, null, depths);
+	var depths_sorted = __call__ (tuple, null, __call__ (sorted, null, depths));
+	var stack_old = __call__ (edges_from_elem, null, ele_init);
 	var stack_new = [];
-	var stack_visit = set (stack_old);
+	var stack_visit = __call__ (set, null, stack_old);
 	var vert_depths = dict ({});
 	var vert_depths_setdefault = vert_depths.py_setdefault;
 	var depth = 0;
-	while (stack_old && depth <= depth_max) {
-		for (var ele of stack_old) {
-			for (var v of verts_from_elem (ele)) {
-				vert_depths_setdefault (v, depth);
+	while (stack_old && __le__ (depth, depth_max)) {
+		var __iterable0__ = stack_old;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var ele = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = __call__ (verts_from_elem, null, ele);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var v = __getitem__ (__iterable1__, __index1__);
+				__call__ (vert_depths_setdefault, null, v, depth);
 			}
-			for (var ele_other of other_edges_over_cb (ele)) {
-				var stack_visit_len = len (stack_visit);
-				stack_visit.add (ele_other);
-				if (stack_visit_len != len (stack_visit)) {
-					stack_new.append (ele_other);
+			var __iterable1__ = __call__ (other_edges_over_cb, null, ele);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var ele_other = __getitem__ (__iterable1__, __index1__);
+				var stack_visit_len = __call__ (len, null, stack_visit);
+				(function () {
+					var __accu0__ = stack_visit;
+					return __call__ (__accu0__.add, __accu0__, ele_other);
+				}) ();
+				if (__ne__ (stack_visit_len, __call__ (len, null, stack_visit))) {
+					(function () {
+						var __accu0__ = stack_new;
+						return __call__ (__accu0__.append, __accu0__, ele_other);
+					}) ();
 				}
 			}
 		}
 		var __left0__ = tuple ([stack_old, stack_new]);
 		var stack_new = __left0__ [0];
 		var stack_old = __left0__ [1];
-		stack_new.__setslice__ (0, null, null, []);
-		depth++;
+		__setslice__ (stack_new, 0, null, null, []);
+		var depth = __call__ (__iadd__, null, depth, 1);
 	}
 	if (py_typeof (ele_init) === bmesh.types.BMFace) {
 		var test_ele = (function () {
 			var __accu0__ = [];
-			for (var [v, depth] of list (vert_depths.py_items ())) {
-				if (depth >= depth_min) {
-					for (var l of v.link_loops) {
-						__accu0__.append (l.face);
+			var __iterable0__ = __call__ (list, null, (function () {
+				var __accu1__ = vert_depths;
+				return __call__ (__accu1__.py_items, __accu1__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var v = __left0__ [0];
+				var depth = __left0__ [1];
+				if (__ge__ (depth, depth_min)) {
+					var __iterable1__ = v.link_loops;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var l = __getitem__ (__iterable1__, __index1__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, l.face);
+						}) ();
 					}
 				}
 			}
@@ -199,11 +261,25 @@ export var elems_depth_search = function (ele_init, depths, other_edges_over_cb,
 	else if (py_typeof (ele_init) === bmesh.types.BMEdge) {
 		var test_ele = (function () {
 			var __accu0__ = [];
-			for (var [v, depth] of list (vert_depths.py_items ())) {
-				if (depth >= depth_min) {
-					for (var e of v.link_edges) {
+			var __iterable0__ = __call__ (list, null, (function () {
+				var __accu1__ = vert_depths;
+				return __call__ (__accu1__.py_items, __accu1__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var v = __left0__ [0];
+				var depth = __left0__ [1];
+				if (__ge__ (depth, depth_min)) {
+					var __iterable1__ = v.link_edges;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var e = __getitem__ (__iterable1__, __index1__);
 						if (!(e.is_wire)) {
-							__accu0__.append (e);
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, e);
+							}) ();
 						}
 					}
 				}
@@ -214,20 +290,34 @@ export var elems_depth_search = function (ele_init, depths, other_edges_over_cb,
 	else {
 		var test_ele = (function () {
 			var __accu0__ = [];
-			for (var [v, depth] of list (vert_depths.py_items ())) {
-				if (depth >= depth_min) {
-					__accu0__.append (v);
+			var __iterable0__ = __call__ (list, null, (function () {
+				var __accu1__ = vert_depths;
+				return __call__ (__accu1__.py_items, __accu1__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var v = __left0__ [0];
+				var depth = __left0__ [1];
+				if (__ge__ (depth, depth_min)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, v);
+					}) ();
 				}
 			}
 			return set (__accu0__);
 		}) ();
 	}
-	var result_ele = set ();
+	var result_ele = __call__ (set, null);
 	var vert_depths_get = vert_depths.py_get;
-	var depths_test = [null] * len (depths);
-	for (var ele of test_ele) {
-		var verts_test = verts_from_elem (ele);
-		if (len (verts_test) != len (depths)) {
+	var depths_test = __mul__ ([null], __call__ (len, null, depths));
+	var __iterable0__ = test_ele;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var ele = __getitem__ (__iterable0__, __index0__);
+		var verts_test = __call__ (verts_from_elem, null, ele);
+		if (__ne__ (__call__ (len, null, verts_test), __call__ (len, null, depths))) {
 			continue;
 		}
 		if (results_init !== null && !__in__ (ele, results_init)) {
@@ -237,10 +327,15 @@ export var elems_depth_search = function (ele_init, depths, other_edges_over_cb,
 			continue;
 		}
 		var ok = true;
-		for (var [i, v] of py_enumerate (verts_test)) {
-			var depth = vert_depths_get (v);
+		var __iterable1__ = __call__ (py_enumerate, null, verts_test);
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var __left0__ = __getitem__ (__iterable1__, __index1__);
+			var i = __left0__ [0];
+			var v = __left0__ [1];
+			var depth = __call__ (vert_depths_get, null, v);
 			if (depth !== null) {
-				depths_test [i] = depth;
+				__setitem__ (depths_test, i, depth);
 			}
 			else {
 				var ok = false;
@@ -248,8 +343,11 @@ export var elems_depth_search = function (ele_init, depths, other_edges_over_cb,
 			}
 		}
 		if (ok) {
-			if (depths_sorted == tuple (sorted (depths_test))) {
-				result_ele.add (ele);
+			if (__eq__ (depths_sorted, __call__ (tuple, null, __call__ (sorted, null, depths_test)))) {
+				(function () {
+					var __accu0__ = result_ele;
+					return __call__ (__accu0__.add, __accu0__, ele);
+				}) ();
 			}
 		}
 	}
@@ -258,7 +356,7 @@ export var elems_depth_search = function (ele_init, depths, other_edges_over_cb,
 export var elems_depth_measure = function (ele_dst, ele_src, other_edges_over_cb) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -271,42 +369,63 @@ export var elems_depth_measure = function (ele_dst, ele_src, other_edges_over_cb
 	}
 	else {
 	}
-	var stack_old = edges_from_elem (ele_src);
+	var stack_old = __call__ (edges_from_elem, null, ele_src);
 	var stack_new = [];
-	var stack_visit = set (stack_old);
-	var ele_dst_verts = verts_from_elem (ele_dst);
-	var all_dst = set (ele_dst_verts);
+	var stack_visit = __call__ (set, null, stack_old);
+	var ele_dst_verts = __call__ (verts_from_elem, null, ele_dst);
+	var all_dst = __call__ (set, null, ele_dst_verts);
 	var all_dst_discard = all_dst.discard;
 	var vert_depths = dict ({});
 	var depth = 0;
 	while (stack_old && all_dst) {
-		for (var ele of stack_old) {
-			for (var v of verts_from_elem (ele)) {
-				var len_prev = len (all_dst);
-				all_dst_discard (v);
-				if (len_prev != len (all_dst)) {
-					vert_depths [v] = depth;
+		var __iterable0__ = stack_old;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var ele = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = __call__ (verts_from_elem, null, ele);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var v = __getitem__ (__iterable1__, __index1__);
+				var len_prev = __call__ (len, null, all_dst);
+				__call__ (all_dst_discard, null, v);
+				if (__ne__ (len_prev, __call__ (len, null, all_dst))) {
+					__setitem__ (vert_depths, v, depth);
 				}
 			}
-			for (var ele_other of other_edges_over_cb (ele)) {
-				var stack_visit_len = len (stack_visit);
-				stack_visit.add (ele_other);
-				if (stack_visit_len != len (stack_visit)) {
-					stack_new.append (ele_other);
+			var __iterable1__ = __call__ (other_edges_over_cb, null, ele);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var ele_other = __getitem__ (__iterable1__, __index1__);
+				var stack_visit_len = __call__ (len, null, stack_visit);
+				(function () {
+					var __accu0__ = stack_visit;
+					return __call__ (__accu0__.add, __accu0__, ele_other);
+				}) ();
+				if (__ne__ (stack_visit_len, __call__ (len, null, stack_visit))) {
+					(function () {
+						var __accu0__ = stack_new;
+						return __call__ (__accu0__.append, __accu0__, ele_other);
+					}) ();
 				}
 			}
 		}
 		var __left0__ = tuple ([stack_old, stack_new]);
 		var stack_new = __left0__ [0];
 		var stack_old = __left0__ [1];
-		stack_new.__setslice__ (0, null, null, []);
-		depth++;
+		__setslice__ (stack_new, 0, null, null, []);
+		var depth = __call__ (__iadd__, null, depth, 1);
 	}
 	if (!(all_dst)) {
 		return (function () {
 			var __accu0__ = [];
-			for (var v of ele_dst_verts) {
-				__accu0__.append (vert_depths [v]);
+			var __iterable0__ = ele_dst_verts;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var v = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __getitem__ (vert_depths, v));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -318,7 +437,7 @@ export var elems_depth_measure = function (ele_dst, ele_src, other_edges_over_cb
 export var find_next = function (ele_dst, ele_src) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -330,66 +449,92 @@ export var find_next = function (ele_dst, ele_src) {
 	}
 	else {
 	}
-	var depth_src_a = elems_depth_measure (ele_dst, ele_src, other_edges_over_edge);
-	var depth_src_b = elems_depth_measure (ele_dst, ele_src, other_edges_over_face);
+	var depth_src_a = __call__ (elems_depth_measure, null, ele_dst, ele_src, other_edges_over_edge);
+	var depth_src_b = __call__ (elems_depth_measure, null, ele_dst, ele_src, other_edges_over_face);
 	if (depth_src_a === null || depth_src_b === null) {
 		return [];
 	}
-	var depth_src = tuple (zip (depth_src_a, depth_src_b));
-	var candidates = elems_depth_search (ele_dst, depth_src_a, other_edges_over_edge);
-	var candidates = elems_depth_search (ele_dst, depth_src_b, other_edges_over_face, candidates);
-	candidates.discard (ele_src);
-	candidates.discard (ele_dst);
+	var depth_src = __call__ (tuple, null, __call__ (zip, null, depth_src_a, depth_src_b));
+	var candidates = __call__ (elems_depth_search, null, ele_dst, depth_src_a, other_edges_over_edge);
+	var candidates = __call__ (elems_depth_search, null, ele_dst, depth_src_b, other_edges_over_face, candidates);
+	(function () {
+		var __accu0__ = candidates;
+		return __call__ (__accu0__.discard, __accu0__, ele_src);
+	}) ();
+	(function () {
+		var __accu0__ = candidates;
+		return __call__ (__accu0__.discard, __accu0__, ele_dst);
+	}) ();
 	if (!(candidates)) {
 		return [];
 	}
 	var diff_best = 0;
 	var ele_best = null;
 	var ele_best_ls = [];
-	for (var ele_test of candidates) {
-		var depth_test_a = elems_depth_measure (ele_dst, ele_test, other_edges_over_edge);
-		var depth_test_b = elems_depth_measure (ele_dst, ele_test, other_edges_over_face);
+	var __iterable0__ = candidates;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var ele_test = __getitem__ (__iterable0__, __index0__);
+		var depth_test_a = __call__ (elems_depth_measure, null, ele_dst, ele_test, other_edges_over_edge);
+		var depth_test_b = __call__ (elems_depth_measure, null, ele_dst, ele_test, other_edges_over_face);
 		if (depth_test_a === null || depth_test_b === null) {
 			continue;
 		}
-		var depth_test = tuple (zip (depth_test_a, depth_test_b));
-		var diff_test = sum ((function () {
+		var depth_test = __call__ (tuple, null, __call__ (zip, null, depth_test_a, depth_test_b));
+		var diff_test = __call__ (sum, null, (function () {
 			var __accu0__ = [];
-			for (var [a, b] of list (zip (depth_src, depth_test))) {
-				__accu0__.append (Math.pow (abs (a [0] - b [0]), 2) + Math.pow (abs (a [1] - b [1]), 2));
+			var __iterable1__ = __call__ (list, null, __call__ (zip, null, depth_src, depth_test));
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var __left0__ = __getitem__ (__iterable1__, __index1__);
+				var a = __left0__ [0];
+				var b = __left0__ [1];
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __add__ (__pow__ (__call__ (abs, null, __sub__ (__getitem__ (a, 0), __getitem__ (b, 0))), 2), __pow__ (__call__ (abs, null, __sub__ (__getitem__ (a, 1), __getitem__ (b, 1))), 2)));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
-		if (diff_test > diff_best) {
+		if (__gt__ (diff_test, diff_best)) {
 			var diff_best = diff_test;
 			var ele_best = ele_test;
-			ele_best_ls.__setslice__ (0, null, null, [ele_best]);
+			__setslice__ (ele_best_ls, 0, null, null, [ele_best]);
 		}
-		else if (diff_test == diff_best) {
+		else if (__eq__ (diff_test, diff_best)) {
 			if (ele_best === null) {
 				var ele_best = ele_test;
 			}
-			ele_best_ls.append (ele_test);
+			(function () {
+				var __accu0__ = ele_best_ls;
+				return __call__ (__accu0__.append, __accu0__, ele_test);
+			}) ();
 		}
 	}
-	if (len (ele_best_ls) > 1) {
+	if (__gt__ (__call__ (len, null, ele_best_ls), 1)) {
 		var ele_best_ls_init = ele_best_ls;
 		var ele_best_ls = [];
-		var depth_accum_max = -(1);
-		for (var ele_test of ele_best_ls_init) {
-			var depth_test_a = elems_depth_measure (ele_src, ele_test, other_edges_over_edge);
-			var depth_test_b = elems_depth_measure (ele_src, ele_test, other_edges_over_face);
+		var depth_accum_max = __neg__ (1);
+		var __iterable0__ = ele_best_ls_init;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var ele_test = __getitem__ (__iterable0__, __index0__);
+			var depth_test_a = __call__ (elems_depth_measure, null, ele_src, ele_test, other_edges_over_edge);
+			var depth_test_b = __call__ (elems_depth_measure, null, ele_src, ele_test, other_edges_over_face);
 			if (depth_test_a === null || depth_test_b === null) {
 				continue;
 			}
-			var depth_accum_test = sum (depth_test_a) + sum (depth_test_b);
-			if (depth_accum_test > depth_accum_max) {
+			var depth_accum_test = __add__ (__call__ (sum, null, depth_test_a), __call__ (sum, null, depth_test_b));
+			if (__gt__ (depth_accum_test, depth_accum_max)) {
 				var depth_accum_max = depth_accum_test;
 				var ele_best = ele_test;
-				ele_best_ls.__setslice__ (0, null, null, [ele_best]);
+				__setslice__ (ele_best_ls, 0, null, null, [ele_best]);
 			}
-			else if (depth_accum_test == depth_accum_max) {
-				ele_best_ls.append (ele_test);
+			else if (__eq__ (depth_accum_test, depth_accum_max)) {
+				(function () {
+					var __accu0__ = ele_best_ls;
+					return __call__ (__accu0__.append, __accu0__, ele_test);
+				}) ();
 			}
 		}
 	}
@@ -398,7 +543,7 @@ export var find_next = function (ele_dst, ele_src) {
 export var select_next = function (bm, report) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -411,22 +556,27 @@ export var select_next = function (bm, report) {
 	else {
 	}
 	var ele_pair = [null, null];
-	for (var [i, ele] of py_enumerate (py_reversed (bm.select_history))) {
-		ele_pair [i] = ele;
-		if (i == 1) {
+	var __iterable0__ = __call__ (py_enumerate, null, __call__ (py_reversed, null, bm.select_history));
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var i = __left0__ [0];
+		var ele = __left0__ [1];
+		__setitem__ (ele_pair, i, ele);
+		if (__eq__ (i, 1)) {
 			break;
 		}
 	}
-	if (ele_pair [-(1)] === null) {
-		report (new set (['INFO']), 'Selection pair not found');
+	if (__getitem__ (ele_pair, __neg__ (1)) === null) {
+		__call__ (report, null, new set (['INFO']), 'Selection pair not found');
 		return false;
 	}
-	var ele_pair_next = find_next (...ele_pair);
-	if (len (ele_pair_next) > 1) {
+	var ele_pair_next = __call__ (find_next, null, ...ele_pair);
+	if (__gt__ (__call__ (len, null, ele_pair_next), 1)) {
 		var ele_uuid = function (ele) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -441,10 +591,19 @@ export var select_next = function (bm, report) {
 			if (ele_type === bmesh.types.BMFace) {
 				var ret = (function () {
 					var __accu0__ = [];
-					for (var l of ele.loops) {
-						for (var f of l.edge.link_faces) {
+					var __iterable0__ = ele.loops;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var l = __getitem__ (__iterable0__, __index0__);
+						var __iterable1__ = l.edge.link_faces;
+						__iterable1__ = __i__ (__iterable1__);
+						for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+							var f = __getitem__ (__iterable1__, __index1__);
 							if (f !== ele) {
-								__accu0__.append (len (f.verts));
+								(function () {
+									var __accu1__ = __accu0__;
+									return __call__ (__accu1__.append, __accu1__, __call__ (len, null, f.verts));
+								}) ();
 							}
 						}
 					}
@@ -454,8 +613,14 @@ export var select_next = function (bm, report) {
 			else if (ele_type === bmesh.types.BMEdge) {
 				var ret = (function () {
 					var __accu0__ = [];
-					for (var l of ele.link_loops) {
-						__accu0__.append (len (l.face.verts));
+					var __iterable0__ = ele.link_loops;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var l = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __call__ (len, null, l.face.verts));
+						}) ();
 					}
 					return __accu0__;
 				}) ();
@@ -463,23 +628,29 @@ export var select_next = function (bm, report) {
 			else if (ele_type === bmesh.types.BMVert) {
 				var ret = (function () {
 					var __accu0__ = [];
-					for (var l of ele.link_loops) {
-						__accu0__.append (len (l.face.verts));
+					var __iterable0__ = ele.link_loops;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var l = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, __call__ (len, null, l.face.verts));
+						}) ();
 					}
 					return __accu0__;
 				}) ();
 			}
 			else {
-				var __except0__ = py_TypeError ('wrong type');
+				var __except0__ = __call__ (py_TypeError, null, 'wrong type');
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			return tuple (sorted (ret));
+			return __call__ (tuple, null, __call__ (sorted, null, ret));
 		};
 		var ele_uuid_filter = function () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 					}
@@ -490,7 +661,7 @@ export var select_next = function (bm, report) {
 			var pass_fn = function (seq) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -506,7 +677,7 @@ export var select_next = function (bm, report) {
 			var sum_set = function (seq) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -517,35 +688,60 @@ export var select_next = function (bm, report) {
 				}
 				else {
 				}
-				return sum (set (seq));
+				return __call__ (sum, null, __call__ (set, null, seq));
 			};
-			var uuid_cmp = ele_uuid (ele_pair [0]);
+			var uuid_cmp = __call__ (ele_uuid, null, __getitem__ (ele_pair, 0));
 			var ele_pair_next_uuid = (function () {
 				var __accu0__ = [];
-				for (var ele of ele_pair_next) {
-					__accu0__.append (tuple ([ele, ele_uuid (ele)]));
+				var __iterable0__ = ele_pair_next;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var ele = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, tuple ([ele, __call__ (ele_uuid, null, ele)]));
+					}) ();
 				}
 				return __accu0__;
 			}) ();
-			for (var fn of tuple ([pass_fn, set, sum_set, len])) {
-				var uuid_cmp_test = fn (uuid_cmp);
+			var __iterable0__ = tuple ([pass_fn, set, sum_set, len]);
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var fn = __getitem__ (__iterable0__, __index0__);
+				var uuid_cmp_test = __call__ (fn, null, uuid_cmp);
 				var ele_pair_next_uuid_test = (function () {
 					var __accu0__ = [];
-					for (var [ele, uuid] of ele_pair_next_uuid) {
-						if (uuid_cmp_test == fn (uuid)) {
-							__accu0__.append (tuple ([ele, uuid]));
+					var __iterable1__ = ele_pair_next_uuid;
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var __left0__ = __getitem__ (__iterable1__, __index1__);
+						var ele = __left0__ [0];
+						var uuid = __left0__ [1];
+						if (__eq__ (uuid_cmp_test, __call__ (fn, null, uuid))) {
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, tuple ([ele, uuid]));
+							}) ();
 						}
 					}
 					return __accu0__;
 				}) ();
-				if (len (ele_pair_next_uuid_test) > 1) {
+				if (__gt__ (__call__ (len, null, ele_pair_next_uuid_test), 1)) {
 					var ele_pair_next_uuid = ele_pair_next_uuid_test;
 				}
-				else if (len (ele_pair_next_uuid_test) == 1) {
+				else if (__eq__ (__call__ (len, null, ele_pair_next_uuid_test), 1)) {
 					return (function () {
 						var __accu0__ = [];
-						for (var [ele, uuid] of ele_pair_next_uuid_test) {
-							__accu0__.append (ele);
+						var __iterable1__ = ele_pair_next_uuid_test;
+						__iterable1__ = __i__ (__iterable1__);
+						for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+							var __left0__ = __getitem__ (__iterable1__, __index1__);
+							var ele = __left0__ [0];
+							var uuid = __left0__ [1];
+							(function () {
+								var __accu1__ = __accu0__;
+								return __call__ (__accu1__.append, __accu1__, ele);
+							}) ();
 						}
 						return __accu0__;
 					}) ();
@@ -553,21 +749,34 @@ export var select_next = function (bm, report) {
 			}
 			return [];
 		};
-		ele_pair_next.__setslice__ (0, null, null, ele_uuid_filter ());
+		__setslice__ (ele_pair_next, 0, null, null, __call__ (ele_uuid_filter, null));
+		// pass;
 	}
-	if (len (ele_pair_next) != 1) {
-		report (new set (['INFO']), 'No single next item found');
+	if (__ne__ (__call__ (len, null, ele_pair_next), 1)) {
+		__call__ (report, null, new set (['INFO']), 'No single next item found');
 		return false;
 	}
-	var ele = ele_pair_next [0];
+	var ele = __getitem__ (ele_pair_next, 0);
 	if (ele.hide) {
-		report (new set (['INFO']), 'Next element is hidden');
+		__call__ (report, null, new set (['INFO']), 'Next element is hidden');
 		return false;
 	}
-	ele.select_set (false);
-	ele.select_set (true);
-	bm.select_history.discard (ele);
-	bm.select_history.add (ele);
+	(function () {
+		var __accu0__ = ele;
+		return __call__ (__accu0__.select_set, __accu0__, false);
+	}) ();
+	(function () {
+		var __accu0__ = ele;
+		return __call__ (__accu0__.select_set, __accu0__, true);
+	}) ();
+	(function () {
+		var __accu0__ = bm.select_history;
+		return __call__ (__accu0__.discard, __accu0__, ele);
+	}) ();
+	(function () {
+		var __accu0__ = bm.select_history;
+		return __call__ (__accu0__.add, __accu0__, ele);
+	}) ();
 	if (py_typeof (ele) === bmesh.types.BMFace) {
 		bm.faces.active = ele;
 	}
@@ -576,7 +785,7 @@ export var select_next = function (bm, report) {
 export var select_prev = function (bm, report) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -588,19 +797,30 @@ export var select_prev = function (bm, report) {
 	}
 	else {
 	}
-	var bmesh = _module ('bmesh');
+	var bmesh = __call__ (_module, null, 'bmesh');
 	var __break0__ = false;
-	for (var ele of py_reversed (bm.select_history)) {
+	var __iterable0__ = __call__ (py_reversed, null, bm.select_history);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var ele = __getitem__ (__iterable0__, __index0__);
 		__break0__ = true;
 		break;
 	}
 	if (!__break0__) {
-		report (new set (['INFO']), 'Last selected not found');
+		__call__ (report, null, new set (['INFO']), 'Last selected not found');
 		return false;
 	}
-	ele.select_set (false);
-	for (var [i, ele] of py_enumerate (py_reversed (bm.select_history))) {
-		if (i == 1) {
+	(function () {
+		var __accu0__ = ele;
+		return __call__ (__accu0__.select_set, __accu0__, false);
+	}) ();
+	var __iterable0__ = __call__ (py_enumerate, null, __call__ (py_reversed, null, bm.select_history));
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var __left0__ = __getitem__ (__iterable0__, __index0__);
+		var i = __left0__ [0];
+		var ele = __left0__ [1];
+		if (__eq__ (i, 1)) {
 			if (py_typeof (ele) === bmesh.types.BMFace) {
 				bm.faces.active = ele;
 			}
@@ -612,3 +832,19 @@ export var select_prev = function (bm, report) {
 
 //# sourceMappingURL=bl_operators.bmesh.find_adjacent.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'other_edges_over_face': other_edges_over_face = value; break;
+		case 'other_edges_over_edge': other_edges_over_edge = value; break;
+		case 'verts_from_elem': verts_from_elem = value; break;
+		case 'edges_from_elem': edges_from_elem = value; break;
+		case 'elems_depth_search': elems_depth_search = value; break;
+		case 'elems_depth_measure': elems_depth_measure = value; break;
+		case 'find_next': find_next = value; break;
+		case 'select_next': select_next = value; break;
+		case 'select_prev': select_prev = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

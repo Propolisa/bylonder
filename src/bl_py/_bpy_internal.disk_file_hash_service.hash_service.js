@@ -9,14 +9,14 @@ import {Path} from './pathlib.js';
 import * as __module_hashlib__ from './hashlib.js';
 __nest__ (hashlib, '', __module_hashlib__);
 var __name__ = '_bpy_internal.disk_file_hash_service.hash_service';
-export var HASH_BLOCK_SIZE = 1024 * 1024;
+export var HASH_BLOCK_SIZE = __mul__ (1024, 1024);
 export var HASH_RETAIN_AGE_DAYS = 180;
 export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, backend) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -34,7 +34,7 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 	get open () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -45,13 +45,16 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		}
 		else {
 		}
-		self.backend.open ();
+		(function () {
+			var __accu0__ = self.backend;
+			return __call__ (__accu0__.open, __accu0__);
+		}) ();
 		self._is_open = true;
 	});},
 	get close () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -65,14 +68,20 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		if (!(self._is_open)) {
 			return ;
 		}
-		self.backend.remove_older_than (__kwargtrans__ ({days: HASH_RETAIN_AGE_DAYS}));
-		self.backend.close ();
+		(function () {
+			var __accu0__ = self.backend;
+			return __call__ (__accu0__.remove_older_than, __accu0__, __kwargtrans__ ({days: HASH_RETAIN_AGE_DAYS}));
+		}) ();
+		(function () {
+			var __accu0__ = self.backend;
+			return __call__ (__accu0__.close, __accu0__);
+		}) ();
 		self._is_open = false;
 	});},
 	get get_hash () {return __get__ (this, function (self, filepath, hash_algorithm) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -85,15 +94,30 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		}
 		else {
 		}
-		var cached_info = self.backend.fetch_hash (filepath, hash_algorithm);
+		var cached_info = (function () {
+			var __accu0__ = self.backend;
+			return __call__ (__accu0__.fetch_hash, __accu0__, filepath, hash_algorithm);
+		}) ();
 		if (cached_info) {
-			if (self._file_stat_matches (filepath, cached_info.file_size_bytes, cached_info.file_stat_mtime)) {
-				self.backend.mark_hash_as_fresh (filepath, hash_algorithm);
+			if ((function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._file_stat_matches, __accu0__, filepath, cached_info.file_size_bytes, cached_info.file_stat_mtime);
+			}) ()) {
+				(function () {
+					var __accu0__ = self.backend;
+					return __call__ (__accu0__.mark_hash_as_fresh, __accu0__, filepath, hash_algorithm);
+				}) ();
 				return cached_info.hexhash;
 			}
 		}
-		var fresh_info = self._hash_file (filepath, hash_algorithm);
-		self.backend.store_hash (filepath, hash_algorithm, fresh_info);
+		var fresh_info = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._hash_file, __accu0__, filepath, hash_algorithm);
+		}) ();
+		(function () {
+			var __accu0__ = self.backend;
+			return __call__ (__accu0__.store_hash, __accu0__, filepath, hash_algorithm, fresh_info);
+		}) ();
 		return fresh_info.hexhash;
 	});},
 	get store_hash () {return __get__ (this, function (self, filepath, hash_algorithm, hash_info, pre_write_callback) {
@@ -102,7 +126,7 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -117,17 +141,23 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		}
 		else {
 		}
-		if (pre_write_callback === null && !(self._file_stat_matches (filepath, hash_info.file_size_bytes, hash_info.file_stat_mtime))) {
-			var __except0__ = ValueError ('to store a hash that does NOT match the file on disk, a pre_write_callback function ' + 'that ensures the file matches the to-be-stored info, MUST be passed');
+		if (pre_write_callback === null && !((function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._file_stat_matches, __accu0__, filepath, hash_info.file_size_bytes, hash_info.file_stat_mtime);
+		}) ())) {
+			var __except0__ = __call__ (ValueError, null, __add__ ('to store a hash that does NOT match the file on disk, a pre_write_callback function ', 'that ensures the file matches the to-be-stored info, MUST be passed'));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self.backend.store_hash (filepath, hash_algorithm, hash_info, pre_write_callback);
+		(function () {
+			var __accu0__ = self.backend;
+			return __call__ (__accu0__.store_hash, __accu0__, filepath, hash_algorithm, hash_info, pre_write_callback);
+		}) ();
 	});},
 	get file_matches () {return __get__ (this, function (self, filepath, hash_algorithm, hexhash, size_in_byes) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -142,17 +172,29 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		}
 		else {
 		}
-		var stat = filepath.stat ();
-		if (stat.st_size != size_in_byes) {
+		var stat = (function () {
+			var __accu0__ = filepath;
+			return __call__ (__accu0__.stat, __accu0__);
+		}) ();
+		if (__ne__ (stat.st_size, size_in_byes)) {
 			return false;
 		}
-		var actual_hash = self.get_hash (filepath, hash_algorithm);
-		return actual_hash.lower () == hexhash.lower ();
+		var actual_hash = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_hash, __accu0__, filepath, hash_algorithm);
+		}) ();
+		return __eq__ ((function () {
+			var __accu0__ = actual_hash;
+			return __call__ (__accu0__.lower, __accu0__);
+		}) (), (function () {
+			var __accu0__ = hexhash;
+			return __call__ (__accu0__.lower, __accu0__);
+		}) ());
 	});},
 	get _file_stat_matches () {return __get__ (this, function (self, filepath, size_in_bytes, file_stat_mtime) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -167,7 +209,10 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		else {
 		}
 		try {
-			var stat = filepath.stat ();
+			var stat = (function () {
+				var __accu0__ = filepath;
+				return __call__ (__accu0__.stat, __accu0__);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, FileNotFoundError)) {
@@ -177,12 +222,12 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 				throw __except0__;
 			}
 		}
-		return stat.st_size == size_in_bytes && stat.st_mtime == file_stat_mtime;
+		return __eq__ (stat.st_size, size_in_bytes) && __eq__ (stat.st_mtime, file_stat_mtime);
 	});},
 	get _hash_file () {return __get__ (this, function (self, filepath, hash_algorithm) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -195,17 +240,32 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		}
 		else {
 		}
-		var stat = filepath.stat ();
-		var hasher = self._get_hasher (hash_algorithm);
-		var infile = filepath.open (__kwargtrans__ ({mode: 'rb'}));
+		var stat = (function () {
+			var __accu0__ = filepath;
+			return __call__ (__accu0__.stat, __accu0__);
+		}) ();
+		var hasher = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._get_hasher, __accu0__, hash_algorithm);
+		}) ();
+		var infile = (function () {
+			var __accu0__ = filepath;
+			return __call__ (__accu0__.open, __accu0__, __kwargtrans__ ({mode: 'rb'}));
+		}) ();
 		try {
 			infile.__enter__ ();
 			while (true) {
-				var block = infile.read (HASH_BLOCK_SIZE);
+				var block = (function () {
+					var __accu0__ = infile;
+					return __call__ (__accu0__.read, __accu0__, HASH_BLOCK_SIZE);
+				}) ();
 				if (!(block)) {
 					break;
 				}
-				hasher.py_update (block);
+				(function () {
+					var __accu0__ = hasher;
+					return __call__ (__accu0__.py_update, __accu0__, block);
+				}) ();
 			}
 			infile.__exit__ ();
 		}
@@ -214,12 +274,18 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 				throw __except0__;
 			}
 		}
-		return types.FileHashInfo (__kwargtrans__ ({hexhash: hasher.hexdigest (), file_size_bytes: stat.st_size, file_stat_mtime: stat.st_mtime}));
+		return (function () {
+			var __accu0__ = types;
+			return __call__ (__accu0__.FileHashInfo, __accu0__, __kwargtrans__ ({hexhash: (function () {
+				var __accu1__ = hasher;
+				return __call__ (__accu1__.hexdigest, __accu1__);
+			}) (), file_size_bytes: stat.st_size, file_stat_mtime: stat.st_mtime}));
+		}) ();
 	});},
 	get _get_hasher () {return __get__ (this, function (self, algorithm) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -232,14 +298,32 @@ export var DiskFileHashService =  __class__ ('DiskFileHashService', [object], {
 		else {
 		}
 		if (!__in__ (algorithm, hashlib.algorithms_available)) {
-			var available = ', '.join (sorted (hashlib.algorithms_available));
-			var __except0__ = ValueError ('Hash algorithm {!r} not available ({!r})'.format (algorithm, available));
+			var available = (function () {
+				var __accu0__ = ', ';
+				return __call__ (__accu0__.join, __accu0__, __call__ (sorted, null, hashlib.algorithms_available));
+			}) ();
+			var __except0__ = __call__ (ValueError, null, (function () {
+				var __accu0__ = 'Hash algorithm {!r} not available ({!r})';
+				return __call__ (__accu0__.format, __accu0__, algorithm, available);
+			}) ());
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return hashlib.py_new (algorithm, __kwargtrans__ ({usedforsecurity: false}));
+		return (function () {
+			var __accu0__ = hashlib;
+			return __call__ (__accu0__.py_new, __accu0__, algorithm, __kwargtrans__ ({usedforsecurity: false}));
+		}) ();
 	});}
 });
 
 //# sourceMappingURL=_bpy_internal.disk_file_hash_service.hash_service.map
 export {Callable, Path};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'HASH_BLOCK_SIZE': HASH_BLOCK_SIZE = value; break;
+		case 'HASH_RETAIN_AGE_DAYS': HASH_RETAIN_AGE_DAYS = value; break;
+		case 'DiskFileHashService': DiskFileHashService = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

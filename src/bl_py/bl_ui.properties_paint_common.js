@@ -10,6 +10,146 @@ import * as __module_bpy__ from './bpy.js';
 __nest__ (bpy, '', __module_bpy__);
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_ui.properties_paint_common';
+export var _merged = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var dicts = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var dicts = tuple ();
+	}
+	var result = dict ({});
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
+	}
+	return result;
+};
+export var _ellipsis = Symbol ("Ellipsis")
+export var _new_object = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return {}
+};
+export var _property = function (fget, fset, fdel, doc) {
+	if (typeof fget == 'undefined' || (fget != null && fget.hasOwnProperty ("__kwargtrans__"))) {;
+		var fget = null;
+	};
+	if (typeof fset == 'undefined' || (fset != null && fset.hasOwnProperty ("__kwargtrans__"))) {;
+		var fset = null;
+	};
+	if (typeof fdel == 'undefined' || (fdel != null && fdel.hasOwnProperty ("__kwargtrans__"))) {;
+		var fdel = null;
+	};
+	if (typeof doc == 'undefined' || (doc != null && doc.hasOwnProperty ("__kwargtrans__"))) {;
+		var doc = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'fget': var fget = __allkwargs0__ [__attrib0__]; break;
+					case 'fset': var fset = __allkwargs0__ [__attrib0__]; break;
+					case 'fdel': var fdel = __allkwargs0__ [__attrib0__]; break;
+					case 'doc': var doc = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return property(fget, fset)
+};
+export var _formatted = function (value, conversion, spec) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					case 'conversion': var conversion = __allkwargs0__ [__attrib0__]; break;
+					case 'spec': var spec = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
+	}
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
+	}
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
+};
+export var _joined = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var lists = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var lists = tuple ();
+	}
+	var result = [];
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
+	}
+	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
+};
 export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 	__module__: __name__,
 	bl_options: new set (['DEFAULT_VISIBLE', 'NO_ASSET_DRAG', 'STORE_ENABLED_CATALOGS_IN_PREFERENCES', 'ACTIVATE_FOR_CONTEXT_MENU']),
@@ -20,7 +160,7 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -32,13 +172,13 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		var ob = getattr (context, 'object', null);
-		return ob !== null && ob.mode == cls.mode;
+		var ob = __call__ (getattr, null, context, 'object', null);
+		return ob !== null && __eq__ (ob.mode, cls.mode);
 	});},
 	get has_tool_with_brush_type () {return __getcm__ (this, function (cls, context, brush_type) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -51,11 +191,23 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
 		var space_type = context.space_data.py_metatype;
-		var brush_type_items = bpy.types.Brush.bl_rna.properties [cls.brush_type_prop].enum_items;
-		var tool_helper_cls = ToolSelectPanelHelper._tool_class_from_space_type (space_type);
-		for (var item of ToolSelectPanelHelper._tools_flatten (tool_helper_cls.tools_from_context (context, __kwargtrans__ ({mode: context.mode})))) {
+		var brush_type_items = __getitem__ (bpy.types.Brush.bl_rna.properties, cls.brush_type_prop).enum_items;
+		var tool_helper_cls = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__._tool_class_from_space_type, __accu0__, space_type);
+		}) ();
+		var __iterable0__ = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__._tools_flatten, __accu0__, (function () {
+				var __accu1__ = tool_helper_cls;
+				return __call__ (__accu1__.tools_from_context, __accu1__, context, __kwargtrans__ ({mode: context.mode}));
+			}) ());
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var item = __getitem__ (__iterable0__, __index0__);
 			if (item === null) {
 				continue;
 			}
@@ -66,7 +218,7 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 				continue;
 			}
 			if (item.brush_type !== null) {
-				if (brush_type_items [item.brush_type].value == brush_type) {
+				if (__eq__ (__getitem__ (brush_type_items, item.brush_type).value, brush_type)) {
 					return true;
 				}
 			}
@@ -76,7 +228,7 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 	get brush_type_poll () {return __getcm__ (this, function (cls, context, asset) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -89,28 +241,37 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
-		var tool = ToolSelectPanelHelper.tool_active_from_context (context);
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var tool = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__.tool_active_from_context, __accu0__, context);
+		}) ();
 		if (!(tool)) {
 			return true;
 		}
 		if (!(cls.brush_type_prop)) {
 			return true;
 		}
-		var asset_brush_type = asset.metadata.py_get (cls.brush_type_prop);
+		var asset_brush_type = (function () {
+			var __accu0__ = asset.metadata;
+			return __call__ (__accu0__.py_get, __accu0__, cls.brush_type_prop);
+		}) ();
 		if (asset_brush_type === null) {
 			return false;
 		}
-		if (tool.brush_type == 'ANY') {
-			return !(cls.has_tool_with_brush_type (context, asset_brush_type));
+		if (__eq__ (tool.brush_type, 'ANY')) {
+			return !((function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.has_tool_with_brush_type, __accu0__, context, asset_brush_type);
+			}) ());
 		}
-		var brush_type_items = bpy.types.Brush.bl_rna.properties [cls.brush_type_prop].enum_items;
-		return brush_type_items [tool.brush_type].value == asset_brush_type;
+		var brush_type_items = __getitem__ (bpy.types.Brush.bl_rna.properties, cls.brush_type_prop).enum_items;
+		return __eq__ (__getitem__ (brush_type_items, tool.brush_type).value, asset_brush_type);
 	});},
 	get asset_poll () {return __getcm__ (this, function (cls, asset) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -122,24 +283,30 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		if (asset.id_type != 'BRUSH') {
+		if (__ne__ (asset.id_type, 'BRUSH')) {
 			return false;
 		}
-		if (cls.mode_prop && !(asset.metadata.py_get (cls.mode_prop, false))) {
+		if (cls.mode_prop && !((function () {
+			var __accu0__ = asset.metadata;
+			return __call__ (__accu0__.py_get, __accu0__, cls.mode_prop, false);
+		}) ())) {
 			return false;
 		}
 		var context = bpy.context;
 		var prefs = context.preferences;
-		var is_asset_shelf_region = context.region && context.region.py_metatype == 'ASSET_SHELF';
+		var is_asset_shelf_region = context.region && __eq__ (context.region.py_metatype, 'ASSET_SHELF');
 		if (is_asset_shelf_region && prefs.view.use_filter_brushes_by_tool) {
-			return cls.brush_type_poll (context, asset);
+			return (function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.brush_type_poll, __accu0__, context, asset);
+			}) ();
 		}
 		return true;
 	});},
 	get get_active_asset () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -150,18 +317,24 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
-		var tool = ToolSelectPanelHelper.tool_active_from_context (bpy.context);
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var tool = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__.tool_active_from_context, __accu0__, bpy.context);
+		}) ();
 		if (!(tool) || !(tool.use_brushes)) {
 			return null;
 		}
-		var paint_settings = UnifiedPaintPanel.paint_settings (bpy.context);
+		var paint_settings = (function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.paint_settings, __accu0__, bpy.context);
+		}) ();
 		return (paint_settings ? paint_settings.brush_asset_reference : null);
 	});},
 	get draw_context_menu () {return __getcm__ (this, function (self, context, asset, layout) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -175,12 +348,16 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		}
 		else {
 		}
-		layout.menu_contents ('VIEW3D_MT_brush_context_menu');
+		// pass;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.menu_contents, __accu0__, 'VIEW3D_MT_brush_context_menu');
+		}) ();
 	});},
 	get get_shelf_name_from_context () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -192,11 +369,14 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		else {
 		}
 		var mode_map = dict ({'SCULPT': 'VIEW3D_AST_brush_sculpt', 'PAINT_VERTEX': 'VIEW3D_AST_brush_vertex_paint', 'PAINT_WEIGHT': 'VIEW3D_AST_brush_weight_paint', 'PAINT_TEXTURE': 'VIEW3D_AST_brush_texture_paint', 'PAINT_2D': 'IMAGE_AST_brush_paint', 'PAINT_GREASE_PENCIL': 'VIEW3D_AST_brush_gpencil_paint', 'SCULPT_GREASE_PENCIL': 'VIEW3D_AST_brush_gpencil_sculpt', 'WEIGHT_GREASE_PENCIL': 'VIEW3D_AST_brush_gpencil_weight', 'VERTEX_GREASE_PENCIL': 'VIEW3D_AST_brush_gpencil_vertex', 'SCULPT_CURVES': 'VIEW3D_AST_brush_sculpt_curves'});
-		var mode = UnifiedPaintPanel.get_brush_mode (context);
+		var mode = (function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) ();
 		if (!(mode)) {
 			return null;
 		}
-		return mode_map [mode];
+		return __getitem__ (mode_map, mode);
 	};},
 	get draw_popup_selector () {return function (layout, context, brush, show_name) {
 		if (typeof show_name == 'undefined' || (show_name != null && show_name.hasOwnProperty ("__kwargtrans__"))) {;
@@ -204,7 +384,7 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -219,21 +399,27 @@ export var BrushAssetShelf =  __class__ ('BrushAssetShelf', [object], {
 		else {
 		}
 		var preview_icon_id = (brush && brush.preview ? brush.preview.icon_id : 0);
-		var shelf_name = BrushAssetShelf.get_shelf_name_from_context (context);
+		var shelf_name = (function () {
+			var __accu0__ = BrushAssetShelf;
+			return __call__ (__accu0__.get_shelf_name_from_context, __accu0__, context);
+		}) ();
 		if (!(shelf_name)) {
 			return ;
 		}
 		var display_name = (brush && show_name ? brush.py_name : null);
 		if (display_name && brush.has_unsaved_changes) {
-			var display_name = '* ' + display_name;
+			var display_name = __add__ ('* ', display_name);
 		}
-		layout.template_asset_shelf_popover (shelf_name, __kwargtrans__ ({py_name: display_name, icon: (!(preview_icon_id) ? 'BRUSH_DATA' : 'NONE'), icon_value: preview_icon_id}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_asset_shelf_popover, __accu0__, shelf_name, __kwargtrans__ ({py_name: display_name, icon: (!(preview_icon_id) ? 'BRUSH_DATA' : 'NONE'), icon_value: preview_icon_id}));
+		}) ();
 	};}
 });
 export var brush_asset_shelf_filter_draw = function (panel, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -245,19 +431,25 @@ export var brush_asset_shelf_filter_draw = function (panel, context) {
 	}
 	else {
 	}
-	if (context.asset_shelf.bl_idname != BrushAssetShelf.get_shelf_name_from_context (context)) {
+	if (__ne__ (context.asset_shelf.bl_idname, (function () {
+		var __accu0__ = BrushAssetShelf;
+		return __call__ (__accu0__.get_shelf_name_from_context, __accu0__, context);
+	}) ())) {
 		return ;
 	}
 	var layout = panel.layout;
 	var prefs = context.preferences;
-	layout.prop (prefs.view, 'use_filter_brushes_by_tool', __kwargtrans__ ({text: 'By Active Tool'}));
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, prefs.view, 'use_filter_brushes_by_tool', __kwargtrans__ ({text: 'By Active Tool'}));
+	}) ();
 };
 export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 	__module__: __name__,
 	get get_brush_mode () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -269,11 +461,14 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		else {
 		}
 		var mode = context.mode;
-		if (mode == 'PARTICLE') {
+		if (__eq__ (mode, 'PARTICLE')) {
 			return null;
 		}
-		var ToolSelectPanelHelper = _member ('bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
-		var tool = ToolSelectPanelHelper.tool_active_from_context (context);
+		var ToolSelectPanelHelper = __call__ (_member, null, 'bl_ui.space_toolsystem_common', 'ToolSelectPanelHelper');
+		var tool = (function () {
+			var __accu0__ = ToolSelectPanelHelper;
+			return __call__ (__accu0__.tool_active_from_context, __accu0__, context);
+		}) ();
 		if (!(tool)) {
 			return null;
 		}
@@ -284,11 +479,11 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		var tool_settings = context.tool_settings;
 		if (space_data) {
 			var space_type = space_data.py_metatype;
-			if (space_type == 'IMAGE_EDITOR') {
+			if (__eq__ (space_type, 'IMAGE_EDITOR')) {
 				return 'PAINT_2D';
 			}
 			else if (__in__ (space_type, new set (['VIEW_3D', 'PROPERTIES']))) {
-				if (mode == 'PAINT_TEXTURE') {
+				if (__eq__ (mode, 'PAINT_TEXTURE')) {
 					if (tool_settings.image_paint) {
 						return mode;
 					}
@@ -304,7 +499,7 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 	get paint_settings () {return function (context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -316,38 +511,41 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		else {
 		}
 		var tool_settings = context.tool_settings;
-		var mode = UnifiedPaintPanel.get_brush_mode (context);
-		if (mode == 'SCULPT') {
+		var mode = (function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) ();
+		if (__eq__ (mode, 'SCULPT')) {
 			return tool_settings.sculpt;
 		}
-		else if (mode == 'PAINT_VERTEX') {
+		else if (__eq__ (mode, 'PAINT_VERTEX')) {
 			return tool_settings.vertex_paint;
 		}
-		else if (mode == 'PAINT_WEIGHT') {
+		else if (__eq__ (mode, 'PAINT_WEIGHT')) {
 			return tool_settings.weight_paint;
 		}
-		else if (mode == 'PAINT_TEXTURE') {
+		else if (__eq__ (mode, 'PAINT_TEXTURE')) {
 			return tool_settings.image_paint;
 		}
-		else if (mode == 'PARTICLE') {
+		else if (__eq__ (mode, 'PARTICLE')) {
 			return tool_settings.particle_edit;
 		}
-		else if (mode == 'PAINT_2D') {
+		else if (__eq__ (mode, 'PAINT_2D')) {
 			return tool_settings.image_paint;
 		}
-		else if (mode == 'SCULPT_CURVES') {
+		else if (__eq__ (mode, 'SCULPT_CURVES')) {
 			return tool_settings.curves_sculpt;
 		}
-		else if (mode == 'PAINT_GREASE_PENCIL') {
+		else if (__eq__ (mode, 'PAINT_GREASE_PENCIL')) {
 			return tool_settings.gpencil_paint;
 		}
-		else if (mode == 'SCULPT_GREASE_PENCIL') {
+		else if (__eq__ (mode, 'SCULPT_GREASE_PENCIL')) {
 			return tool_settings.gpencil_sculpt_paint;
 		}
-		else if (mode == 'WEIGHT_GREASE_PENCIL') {
+		else if (__eq__ (mode, 'WEIGHT_GREASE_PENCIL')) {
 			return tool_settings.gpencil_weight_paint;
 		}
-		else if (mode == 'VERTEX_GREASE_PENCIL') {
+		else if (__eq__ (mode, 'VERTEX_GREASE_PENCIL')) {
 			return tool_settings.gpencil_vertex_paint;
 		}
 		return null;
@@ -373,7 +571,7 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -393,30 +591,45 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		}
 		else {
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (unified_paint_settings_override) {
 			var ups = unified_paint_settings_override;
 		}
 		else {
-			var ups = UnifiedPaintPanel.paint_settings (context).unified_paint_settings;
+			var ups = (function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.paint_settings, __accu0__, context);
+			}) ().unified_paint_settings;
 		}
 		var prop_owner = brush;
-		if (unified_name && getattr (ups, unified_name)) {
+		if (unified_name && __call__ (getattr, null, ups, unified_name)) {
 			var prop_owner = ups;
 		}
-		row.prop (prop_owner, prop_name, __kwargtrans__ ({icon: 'NONE', text: text, slider: slider}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, prop_name, __kwargtrans__ ({icon: 'NONE', text: text, slider: slider}));
+		}) ();
 		if (unified_name && !(header)) {
-			row.prop (ups, unified_name, __kwargtrans__ ({text: '', icon: 'BRUSHES_ALL'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, ups, unified_name, __kwargtrans__ ({text: '', icon: 'BRUSHES_ALL'}));
+			}) ();
 		}
 		if (pressure_name) {
-			row.prop (brush, pressure_name, __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, pressure_name, __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		return row;
 	};},
 	get prop_custom_pressure () {return function (layout, context, parent_row, brush) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -433,20 +646,32 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		}
 		else {
 		}
-		var paint = UnifiedPaintPanel.paint_settings (context);
-		var is_active = getattr (paint, curve_visibility_name);
-		parent_row.prop (paint, curve_visibility_name, __kwargtrans__ ({text: '', icon: (is_active ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
+		var paint = (function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
+		var is_active = __call__ (getattr, null, paint, curve_visibility_name);
+		(function () {
+			var __accu0__ = parent_row;
+			return __call__ (__accu0__.prop, __accu0__, paint, curve_visibility_name, __kwargtrans__ ({text: '', icon: (is_active ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
+		}) ();
 		if (is_active) {
-			var subcol = layout.column ();
-			subcol.active = getattr (brush, pressure_name);
-			subcol.template_curve_mapping (brush, custom_curve_name, __kwargtrans__ ({brush: true, show_presets: true}));
+			var subcol = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			subcol.active = __call__ (getattr, null, brush, pressure_name);
+			(function () {
+				var __accu0__ = subcol;
+				return __call__ (__accu0__.template_curve_mapping, __accu0__, brush, custom_curve_name, __kwargtrans__ ({brush: true, show_presets: true}));
+			}) ();
 		}
 	};},
 	get prop_unified_color () {return function (parent, context, brush, prop_name) {
 		var text = null;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -461,9 +686,15 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		}
 		else {
 		}
-		var ups = UnifiedPaintPanel.paint_settings (context).unified_paint_settings;
+		var ups = (function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ().unified_paint_settings;
 		var prop_owner = (ups.use_unified_color ? ups : brush);
-		parent.prop (prop_owner, prop_name, __kwargtrans__ ({text: text}));
+		(function () {
+			var __accu0__ = parent;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, prop_name, __kwargtrans__ ({text: text}));
+		}) ();
 	};},
 	get prop_unified_color_picker () {return function (parent, context, brush, prop_name, value_slider) {
 		if (typeof value_slider == 'undefined' || (value_slider != null && value_slider.hasOwnProperty ("__kwargtrans__"))) {;
@@ -471,7 +702,7 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -486,9 +717,15 @@ export var UnifiedPaintPanel =  __class__ ('UnifiedPaintPanel', [object], {
 		}
 		else {
 		}
-		var ups = UnifiedPaintPanel.paint_settings (context).unified_paint_settings;
+		var ups = (function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ().unified_paint_settings;
 		var prop_owner = (ups.use_unified_color ? ups : brush);
-		parent.template_color_picker (prop_owner, prop_name, __kwargtrans__ ({value_slider: value_slider}));
+		(function () {
+			var __accu0__ = parent;
+			return __call__ (__accu0__.template_color_picker, __accu0__, prop_owner, prop_name, __kwargtrans__ ({value_slider: value_slider}));
+		}) ();
 	};}
 });
 export var BrushPanel =  __class__ ('BrushPanel', [UnifiedPaintPanel], {
@@ -496,7 +733,7 @@ export var BrushPanel =  __class__ ('BrushPanel', [UnifiedPaintPanel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -508,7 +745,10 @@ export var BrushPanel =  __class__ ('BrushPanel', [UnifiedPaintPanel], {
 		}
 		else {
 		}
-		return cls.get_brush_mode (context) !== null;
+		return (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) () !== null;
 	});}
 });
 export var BrushSelectPanel =  __class__ ('BrushSelectPanel', [BrushPanel], {
@@ -517,7 +757,7 @@ export var BrushSelectPanel =  __class__ ('BrushSelectPanel', [BrushPanel], {
 	get draw_header_preset () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -529,7 +769,10 @@ export var BrushSelectPanel =  __class__ ('BrushSelectPanel', [BrushPanel], {
 		}
 		else {
 		}
-		var settings = self.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		if (settings === null) {
 			return ;
 		}
@@ -538,16 +781,16 @@ export var BrushSelectPanel =  __class__ ('BrushSelectPanel', [BrushPanel], {
 			return ;
 		}
 		if (brush.has_unsaved_changes) {
-			self.bl_label = n_ ('Brush Asset (Unsaved)');
+			self.bl_label = __call__ (n_, null, 'Brush Asset (Unsaved)');
 		}
 		else {
-			self.bl_label = n_ ('Brush Asset');
+			self.bl_label = __call__ (n_, null, 'Brush Asset');
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -560,22 +803,43 @@ export var BrushSelectPanel =  __class__ ('BrushSelectPanel', [BrushPanel], {
 		else {
 		}
 		var layout = self.layout;
-		var settings = self.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		if (settings === null) {
 			return ;
 		}
 		var brush = settings.brush;
-		var row = layout.row ();
-		var col = row.column (__kwargtrans__ ({align: true}));
-		BrushAssetShelf.draw_popup_selector (col, context, brush, __kwargtrans__ ({show_name: false}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = BrushAssetShelf;
+			return __call__ (__accu0__.draw_popup_selector, __accu0__, col, context, brush, __kwargtrans__ ({show_name: false}));
+		}) ();
 		if (brush) {
-			col.prop (brush, 'name', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'name', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 		if (brush === null) {
 			return ;
 		}
-		var col = row.column ();
-		col.menu ('VIEW3D_MT_brush_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		var col = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, 'VIEW3D_MT_brush_context_menu', __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
 	});}
 });
 export var ColorPalettePanel =  __class__ ('ColorPalettePanel', [BrushPanel], {
@@ -585,7 +849,7 @@ export var ColorPalettePanel =  __class__ ('ColorPalettePanel', [BrushPanel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -597,15 +861,18 @@ export var ColorPalettePanel =  __class__ ('ColorPalettePanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (!(__super__ (ColorPalettePanel, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, ColorPalettePanel, cls, 'poll'), null, context))) {
 			return false;
 		}
-		var settings = cls.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		var brush = settings.brush;
 		if (brush === null) {
 			return false;
 		}
-		if (context.space_data.py_metatype == 'IMAGE_EDITOR' || context.image_paint_object) {
+		if (__eq__ (context.space_data.py_metatype, 'IMAGE_EDITOR') || context.image_paint_object) {
 			var capabilities = brush.image_paint_capabilities;
 			return capabilities.has_color;
 		}
@@ -622,7 +889,7 @@ export var ColorPalettePanel =  __class__ ('ColorPalettePanel', [BrushPanel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -635,10 +902,19 @@ export var ColorPalettePanel =  __class__ ('ColorPalettePanel', [BrushPanel], {
 		else {
 		}
 		var layout = self.layout;
-		var settings = self.paint_settings (context);
-		layout.template_ID (settings, 'palette', __kwargtrans__ ({py_new: 'palette.new'}));
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_ID, __accu0__, settings, 'palette', __kwargtrans__ ({py_new: 'palette.new'}));
+		}) ();
 		if (settings.palette) {
-			layout.template_palette (settings, 'palette');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_palette, __accu0__, settings, 'palette');
+			}) ();
 		}
 	});}
 });
@@ -649,7 +925,7 @@ export var ClonePanel =  __class__ ('ClonePanel', [BrushPanel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -661,21 +937,27 @@ export var ClonePanel =  __class__ ('ClonePanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (!(__super__ (ClonePanel, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, ClonePanel, cls, 'poll'), null, context))) {
 			return false;
 		}
-		var settings = cls.paint_settings (context);
-		var mode = cls.get_brush_mode (context);
-		if (mode == 'PAINT_TEXTURE') {
+		var settings = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
+		var mode = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) ();
+		if (__eq__ (mode, 'PAINT_TEXTURE')) {
 			var brush = settings.brush;
-			return brush.image_brush_type == 'CLONE';
+			return __eq__ (brush.image_brush_type, 'CLONE');
 		}
 		return false;
 	});},
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -687,13 +969,19 @@ export var ClonePanel =  __class__ ('ClonePanel', [BrushPanel], {
 		}
 		else {
 		}
-		var settings = self.paint_settings (context);
-		self.layout.prop (settings, 'use_clone_layer', __kwargtrans__ ({text: ''}));
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, settings, 'use_clone_layer', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -706,28 +994,58 @@ export var ClonePanel =  __class__ ('ClonePanel', [BrushPanel], {
 		else {
 		}
 		var layout = self.layout;
-		var settings = self.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		layout.active = settings.use_clone_layer;
 		var ob = context.active_object;
-		var col = layout.column ();
-		if (settings.mode == 'MATERIAL') {
-			if (len (ob.material_slots) > 1) {
-				col.label (__kwargtrans__ ({text: 'Materials'}));
-				col.template_list ('MATERIAL_UL_matslots', '', ob, 'material_slots', ob, 'active_material_index', __kwargtrans__ ({rows: 2}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (settings.mode, 'MATERIAL')) {
+			if (__gt__ (__call__ (len, null, ob.material_slots), 1)) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Materials'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_list, __accu0__, 'MATERIAL_UL_matslots', '', ob, 'material_slots', ob, 'active_material_index', __kwargtrans__ ({rows: 2}));
+				}) ();
 			}
 			var mat = ob.active_material;
 			if (mat) {
-				col.label (__kwargtrans__ ({text: 'Source Clone Slot'}));
-				col.template_list ('TEXTURE_UL_texpaintslots', '', mat, 'texture_paint_slots', mat, 'paint_clone_slot', __kwargtrans__ ({rows: 2}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Source Clone Slot'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_list, __accu0__, 'TEXTURE_UL_texpaintslots', '', mat, 'texture_paint_slots', mat, 'paint_clone_slot', __kwargtrans__ ({rows: 2}));
+				}) ();
 			}
 		}
-		else if (settings.mode == 'IMAGE') {
+		else if (__eq__ (settings.mode, 'IMAGE')) {
 			var mesh = ob.data;
 			var clone_text = (mesh.uv_layer_clone ? mesh.uv_layer_clone.py_name : '');
-			col.label (__kwargtrans__ ({text: 'Source Clone Image'}));
-			col.template_ID (settings, 'clone_image');
-			col.label (__kwargtrans__ ({text: 'Source Clone UV Map'}));
-			col.menu ('VIEW3D_MT_tools_projectpaint_clone', __kwargtrans__ ({text: clone_text, translate: false}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Source Clone Image'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_ID, __accu0__, settings, 'clone_image');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Source Clone UV Map'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.menu, __accu0__, 'VIEW3D_MT_tools_projectpaint_clone', __kwargtrans__ ({text: clone_text, translate: false}));
+			}) ();
 		}
 	});}
 });
@@ -738,7 +1056,7 @@ export var TextureMaskPanel =  __class__ ('TextureMaskPanel', [BrushPanel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -755,32 +1073,77 @@ export var TextureMaskPanel =  __class__ ('TextureMaskPanel', [BrushPanel], {
 		layout.use_property_decorate = false;
 		var brush = context.tool_settings.image_paint.brush;
 		var mask_tex_slot = brush.mask_texture_slot;
-		var col = layout.column ();
-		col.template_ID_preview (mask_tex_slot, 'texture', __kwargtrans__ ({py_new: 'texture.new', rows: 3, cols: 8}));
-		layout.row ().prop (mask_tex_slot, 'mask_map_mode', __kwargtrans__ ({text: 'Mask Mapping'}));
-		if (mask_tex_slot.map_mode == 'STENCIL') {
-			if (brush.mask_texture && brush.mask_texture.py_metatype == 'IMAGE') {
-				layout.operator ('brush.stencil_fit_image_aspect').mask = true;
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_ID_preview, __accu0__, mask_tex_slot, 'texture', __kwargtrans__ ({py_new: 'texture.new', rows: 3, cols: 8}));
+		}) ();
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'mask_map_mode', __kwargtrans__ ({text: 'Mask Mapping'}));
+		}) ();
+		if (__eq__ (mask_tex_slot.map_mode, 'STENCIL')) {
+			if (brush.mask_texture && __eq__ (brush.mask_texture.py_metatype, 'IMAGE')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.operator, __accu0__, 'brush.stencil_fit_image_aspect');
+				}) ().mask = true;
 			}
-			layout.operator ('brush.stencil_reset_transform').mask = true;
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'brush.stencil_reset_transform');
+			}) ().mask = true;
 		}
-		var col = layout.column ();
-		col.prop (brush, 'use_pressure_masking', __kwargtrans__ ({text: 'Pressure Masking'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_pressure_masking', __kwargtrans__ ({text: 'Pressure Masking'}));
+		}) ();
 		if (mask_tex_slot.has_texture_angle) {
-			var col = layout.column ();
-			col.prop (mask_tex_slot, 'angle', __kwargtrans__ ({text: 'Angle'}));
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'angle', __kwargtrans__ ({text: 'Angle'}));
+			}) ();
 			if (mask_tex_slot.has_texture_angle_source) {
-				col.prop (mask_tex_slot, 'use_rake', __kwargtrans__ ({text: 'Rake'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'use_rake', __kwargtrans__ ({text: 'Rake'}));
+				}) ();
 				if (brush.brush_capabilities.has_random_texture_angle && mask_tex_slot.has_random_texture_angle) {
-					col.prop (mask_tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+					}) ();
 					if (mask_tex_slot.use_random) {
-						col.prop (mask_tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+						}) ();
 					}
 				}
 			}
 		}
-		col.prop (mask_tex_slot, 'offset');
-		col.prop (mask_tex_slot, 'scale');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'offset');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'scale');
+		}) ();
 	});}
 });
 export var StrokePanel =  __class__ ('StrokePanel', [BrushPanel], {
@@ -791,7 +1154,7 @@ export var StrokePanel =  __class__ ('StrokePanel', [BrushPanel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -806,69 +1169,174 @@ export var StrokePanel =  __class__ ('StrokePanel', [BrushPanel], {
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var mode = self.get_brush_mode (context);
-		var settings = self.paint_settings (context);
+		var mode = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) ();
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		var brush = settings.brush;
-		var col = layout.column ();
-		col.prop (brush, 'stroke_method');
-		col.separator ();
-		if (brush.stroke_method == 'ANCHORED') {
-			col.prop (brush, 'use_edge_to_edge', __kwargtrans__ ({text: 'Edge to Edge'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'stroke_method');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		if (__eq__ (brush.stroke_method, 'ANCHORED')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_edge_to_edge', __kwargtrans__ ({text: 'Edge to Edge'}));
+			}) ();
 		}
-		if (brush.stroke_method == 'AIRBRUSH') {
-			col.prop (brush, 'rate', __kwargtrans__ ({text: 'Rate', slider: true}));
+		if (__eq__ (brush.stroke_method, 'AIRBRUSH')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'rate', __kwargtrans__ ({text: 'Rate', slider: true}));
+			}) ();
 		}
-		if (brush.stroke_method == 'SPACE') {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'spacing', __kwargtrans__ ({text: 'Spacing'}));
-			row.prop (brush, 'use_pressure_spacing', __kwargtrans__ ({toggle: true, text: ''}));
+		if (__eq__ (brush.stroke_method, 'SPACE')) {
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'spacing', __kwargtrans__ ({text: 'Spacing'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_pressure_spacing', __kwargtrans__ ({toggle: true, text: ''}));
+			}) ();
 		}
 		if (__in__ (brush.stroke_method, new set (['LINE', 'CURVE']))) {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'spacing', __kwargtrans__ ({text: 'Spacing'}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'spacing', __kwargtrans__ ({text: 'Spacing'}));
+			}) ();
 		}
-		if (mode == 'SCULPT') {
-			col.row ().prop (brush, 'use_scene_spacing', __kwargtrans__ ({text: 'Spacing Distance', expand: true}));
+		if (__eq__ (mode, 'SCULPT')) {
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_scene_spacing', __kwargtrans__ ({text: 'Spacing Distance', expand: true}));
+			}) ();
 		}
 		if (__in__ (mode, new set (['PAINT_TEXTURE', 'PAINT_2D', 'SCULPT']))) {
 			if (brush.image_paint_capabilities.has_space_attenuation || brush.sculpt_capabilities.has_space_attenuation) {
-				col.prop (brush, 'use_space_attenuation');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_space_attenuation');
+				}) ();
 			}
 		}
-		if (brush.stroke_method == 'CURVE') {
-			col.separator ();
-			col.template_ID (brush, 'paint_curve', __kwargtrans__ ({py_new: 'paintcurve.new'}));
-			col.operator ('paintcurve.draw');
-			col.separator ();
+		if (__eq__ (brush.stroke_method, 'CURVE')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_ID, __accu0__, brush, 'paint_curve', __kwargtrans__ ({py_new: 'paintcurve.new'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'paintcurve.draw');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		if (__in__ (brush.stroke_method, new set (['SPACE', 'LINE', 'CURVE']))) {
-			col.separator ();
-			var row = col.row (__kwargtrans__ ({align: true}));
-			col.prop (brush, 'dash_ratio', __kwargtrans__ ({text: 'Dash Ratio'}));
-			col.prop (brush, 'dash_samples', __kwargtrans__ ({text: 'Dash Length'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'dash_ratio', __kwargtrans__ ({text: 'Dash Ratio'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'dash_samples', __kwargtrans__ ({text: 'Dash Length'}));
+			}) ();
 		}
-		if (mode == 'SCULPT' && brush.sculpt_capabilities.has_jitter || mode != 'SCULPT') {
-			col.separator ();
-			var row = col.row (__kwargtrans__ ({align: true}));
-			if (brush.jitter_unit == 'BRUSH') {
-				row.prop (brush, 'jitter', __kwargtrans__ ({slider: true}));
+		if (__eq__ (mode, 'SCULPT') && brush.sculpt_capabilities.has_jitter || __ne__ (mode, 'SCULPT')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			if (__eq__ (brush.jitter_unit, 'BRUSH')) {
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'jitter', __kwargtrans__ ({slider: true}));
+				}) ();
 			}
 			else {
-				row.prop (brush, 'jitter_absolute');
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'jitter_absolute');
+				}) ();
 			}
-			row.prop (brush, 'use_pressure_jitter', __kwargtrans__ ({toggle: true, text: ''}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_pressure_jitter', __kwargtrans__ ({toggle: true, text: ''}));
+			}) ();
 			if (self.is_popover === false) {
-				row.prop (settings, 'show_jitter_curve', __kwargtrans__ ({icon: (settings.show_jitter_curve ? 'DOWNARROW_HLT' : 'RIGHTARROW'), text: '', emboss: false}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, settings, 'show_jitter_curve', __kwargtrans__ ({icon: (settings.show_jitter_curve ? 'DOWNARROW_HLT' : 'RIGHTARROW'), text: '', emboss: false}));
+				}) ();
 			}
 			if (settings.show_jitter_curve && self.is_popover === false) {
-				var subcol = col.column ();
+				var subcol = (function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				subcol.active = brush.use_pressure_jitter;
-				subcol.template_curve_mapping (brush, 'curve_jitter', __kwargtrans__ ({brush: true, show_presets: true}));
+				(function () {
+					var __accu0__ = subcol;
+					return __call__ (__accu0__.template_curve_mapping, __accu0__, brush, 'curve_jitter', __kwargtrans__ ({brush: true, show_presets: true}));
+				}) ();
 			}
-			col.row ().prop (brush, 'jitter_unit', __kwargtrans__ ({expand: true}));
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = col;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, brush, 'jitter_unit', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
-		col.separator ();
-		UnifiedPaintPanel.prop_unified (layout, context, brush, 'input_samples', __kwargtrans__ ({unified_name: 'use_unified_input_samples', slider: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'input_samples', __kwargtrans__ ({unified_name: 'use_unified_input_samples', slider: true}));
+		}) ();
 	});}
 });
 export var SmoothStrokePanel =  __class__ ('SmoothStrokePanel', [BrushPanel], {
@@ -878,7 +1346,7 @@ export var SmoothStrokePanel =  __class__ ('SmoothStrokePanel', [BrushPanel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -890,10 +1358,13 @@ export var SmoothStrokePanel =  __class__ ('SmoothStrokePanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (!(__super__ (SmoothStrokePanel, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, SmoothStrokePanel, cls, 'poll'), null, context))) {
 			return false;
 		}
-		var settings = cls.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		var brush = settings.brush;
 		if (brush.brush_capabilities.has_smooth_stroke) {
 			return true;
@@ -903,7 +1374,7 @@ export var SmoothStrokePanel =  __class__ ('SmoothStrokePanel', [BrushPanel], {
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -915,15 +1386,21 @@ export var SmoothStrokePanel =  __class__ ('SmoothStrokePanel', [BrushPanel], {
 		}
 		else {
 		}
-		var settings = self.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		var brush = settings.brush;
 		self.layout.use_property_split = false;
-		self.layout.prop (brush, 'use_smooth_stroke', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_smooth_stroke', __kwargtrans__ ({text: (self.is_popover ? self.bl_label : '')}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -938,12 +1415,24 @@ export var SmoothStrokePanel =  __class__ ('SmoothStrokePanel', [BrushPanel], {
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var settings = self.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		var brush = settings.brush;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = brush.use_smooth_stroke;
-		col.prop (brush, 'smooth_stroke_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
-		col.prop (brush, 'smooth_stroke_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'smooth_stroke_radius', __kwargtrans__ ({text: 'Radius', slider: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'smooth_stroke_factor', __kwargtrans__ ({text: 'Factor', slider: true}));
+		}) ();
 	});}
 });
 export var FalloffPanel =  __class__ ('FalloffPanel', [BrushPanel], {
@@ -953,7 +1442,7 @@ export var FalloffPanel =  __class__ ('FalloffPanel', [BrushPanel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -965,14 +1454,20 @@ export var FalloffPanel =  __class__ ('FalloffPanel', [BrushPanel], {
 		}
 		else {
 		}
-		if (!(__super__ (FalloffPanel, 'poll') (self, context))) {
+		if (!(__call__ (__call__ (_super_classmethod, null, FalloffPanel, cls, 'poll'), null, context))) {
 			return false;
 		}
-		var settings = cls.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		if (!(settings && settings.brush && settings.brush.curve_distance_falloff)) {
 			return false;
 		}
-		if (cls.get_brush_mode (context) == 'SCULPT_CURVES') {
+		if (__eq__ ((function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) (), 'SCULPT_CURVES')) {
 			var brush = settings.brush;
 			if (__in__ (brush.curves_sculpt_brush_type, new set (['ADD', 'DELETE']))) {
 				return false;
@@ -983,7 +1478,7 @@ export var FalloffPanel =  __class__ ('FalloffPanel', [BrushPanel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -996,38 +1491,74 @@ export var FalloffPanel =  __class__ ('FalloffPanel', [BrushPanel], {
 		else {
 		}
 		var layout = self.layout;
-		var settings = self.paint_settings (context);
-		var mode = self.get_brush_mode (context);
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
+		var mode = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) ();
 		var brush = settings.brush;
 		if (brush === null) {
 			return ;
 		}
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		if (context.region.py_metatype == 'TOOL_HEADER') {
-			col.prop (brush, 'curve_distance_falloff_preset', __kwargtrans__ ({expand: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		if (__eq__ (context.region.py_metatype, 'TOOL_HEADER')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'curve_distance_falloff_preset', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 		else {
-			var row = col.row (__kwargtrans__ ({align: true}));
-			col.prop (brush, 'curve_distance_falloff_preset', __kwargtrans__ ({text: ''}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'curve_distance_falloff_preset', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
-		if (brush.curve_distance_falloff_preset == 'CUSTOM') {
-			layout.template_curve_mapping (brush, 'curve_distance_falloff', __kwargtrans__ ({brush: true, use_negative_slope: true, show_presets: true}));
-			var col = layout.column (__kwargtrans__ ({align: true}));
-			var row = col.row (__kwargtrans__ ({align: true}));
+		if (__eq__ (brush.curve_distance_falloff_preset, 'CUSTOM')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.template_curve_mapping, __accu0__, brush, 'curve_distance_falloff', __kwargtrans__ ({brush: true, use_negative_slope: true, show_presets: true}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 		}
 		var show_falloff_shape = false;
-		if (__in__ (mode, new set (['SCULPT', 'PAINT_VERTEX', 'PAINT_WEIGHT'])) && brush.sculpt_brush_type != 'POSE') {
+		if (__in__ (mode, new set (['SCULPT', 'PAINT_VERTEX', 'PAINT_WEIGHT'])) && __ne__ (brush.sculpt_brush_type, 'POSE')) {
 			var show_falloff_shape = true;
 		}
-		if (!(show_falloff_shape) && mode == 'SCULPT_CURVES' && context.space_data.py_metatype == 'PROPERTIES') {
+		if (!(show_falloff_shape) && __eq__ (mode, 'SCULPT_CURVES') && __eq__ (context.space_data.py_metatype, 'PROPERTIES')) {
 			var show_falloff_shape = true;
 		}
 		if (show_falloff_shape) {
-			col.separator ();
-			var row = col.row (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.use_property_split = true;
 			row.use_property_decorate = false;
-			row.prop (brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'falloff_shape', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 	});}
 });
@@ -1038,7 +1569,7 @@ export var DisplayPanel =  __class__ ('DisplayPanel', [BrushPanel], {
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1050,15 +1581,21 @@ export var DisplayPanel =  __class__ ('DisplayPanel', [BrushPanel], {
 		}
 		else {
 		}
-		var settings = self.paint_settings (context);
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		if (settings && !(self.is_popover)) {
-			self.layout.prop (settings, 'show_brush', __kwargtrans__ ({text: ''}));
+			(function () {
+				var __accu0__ = self.layout;
+				return __call__ (__accu0__.prop, __accu0__, settings, 'show_brush', __kwargtrans__ ({text: ''}));
+			}) ();
 		}
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1073,45 +1610,105 @@ export var DisplayPanel =  __class__ ('DisplayPanel', [BrushPanel], {
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var mode = self.get_brush_mode (context);
-		var settings = self.paint_settings (context);
+		var mode = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+		}) ();
+		var settings = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.paint_settings, __accu0__, context);
+		}) ();
 		var brush = settings.brush;
 		var tex_slot = brush.texture_slot;
 		var tex_slot_mask = brush.mask_texture_slot;
 		if (self.is_popover) {
-			var row = layout.row (__kwargtrans__ ({align: true}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.use_property_split = false;
-			row.prop (settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, settings, 'show_brush', __kwargtrans__ ({text: 'Display Cursor'}));
+			}) ();
 		}
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = settings.show_brush;
-		col.prop (brush, 'cursor_color_add', __kwargtrans__ ({text: 'Cursor Color'}));
-		if (mode == 'SCULPT' && brush.sculpt_capabilities.has_secondary_color) {
-			col.prop (brush, 'cursor_color_subtract', __kwargtrans__ ({text: 'Inverse Color'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'cursor_color_add', __kwargtrans__ ({text: 'Cursor Color'}));
+		}) ();
+		if (__eq__ (mode, 'SCULPT') && brush.sculpt_capabilities.has_secondary_color) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cursor_color_subtract', __kwargtrans__ ({text: 'Inverse Color'}));
+			}) ();
 		}
-		col.separator ();
-		var row = col.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.active = settings.show_brush;
-		row.prop (brush, 'cursor_overlay_alpha', __kwargtrans__ ({text: 'Falloff Opacity'}));
-		row.prop (brush, 'use_cursor_overlay_override', __kwargtrans__ ({toggle: true, text: '', icon: 'BRUSH_DATA'}));
-		row.prop (brush, 'use_cursor_overlay', __kwargtrans__ ({text: '', toggle: true, icon: (brush.use_cursor_overlay ? 'HIDE_OFF' : 'HIDE_ON')}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'cursor_overlay_alpha', __kwargtrans__ ({text: 'Falloff Opacity'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_cursor_overlay_override', __kwargtrans__ ({toggle: true, text: '', icon: 'BRUSH_DATA'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_cursor_overlay', __kwargtrans__ ({text: '', toggle: true, icon: (brush.use_cursor_overlay ? 'HIDE_OFF' : 'HIDE_ON')}));
+		}) ();
 		var texture_overlay_settings_active = brush.brush_capabilities.has_overlay && settings.show_brush;
 		if (__in__ (mode, new set (['PAINT_2D', 'PAINT_TEXTURE', 'PAINT_VERTEX', 'SCULPT']))) {
-			var row = col.row (__kwargtrans__ ({align: true}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.active = texture_overlay_settings_active;
-			row.prop (brush, 'texture_overlay_alpha', __kwargtrans__ ({text: 'Texture Opacity'}));
-			row.prop (brush, 'use_primary_overlay_override', __kwargtrans__ ({toggle: true, text: '', icon: 'BRUSH_DATA'}));
-			if (tex_slot.map_mode != 'STENCIL') {
-				row.prop (brush, 'use_primary_overlay', __kwargtrans__ ({text: '', toggle: true, icon: (brush.use_primary_overlay ? 'HIDE_OFF' : 'HIDE_ON')}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'texture_overlay_alpha', __kwargtrans__ ({text: 'Texture Opacity'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_primary_overlay_override', __kwargtrans__ ({toggle: true, text: '', icon: 'BRUSH_DATA'}));
+			}) ();
+			if (__ne__ (tex_slot.map_mode, 'STENCIL')) {
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_primary_overlay', __kwargtrans__ ({text: '', toggle: true, icon: (brush.use_primary_overlay ? 'HIDE_OFF' : 'HIDE_ON')}));
+				}) ();
 			}
 		}
 		if (__in__ (mode, new set (['PAINT_TEXTURE', 'PAINT_2D']))) {
-			var row = col.row (__kwargtrans__ ({align: true}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			row.active = texture_overlay_settings_active;
-			row.prop (brush, 'mask_overlay_alpha', __kwargtrans__ ({text: 'Mask Texture Opacity'}));
-			row.prop (brush, 'use_secondary_overlay_override', __kwargtrans__ ({toggle: true, text: '', icon: 'BRUSH_DATA'}));
-			if (tex_slot_mask.map_mode != 'STENCIL') {
-				row.prop (brush, 'use_secondary_overlay', __kwargtrans__ ({text: '', toggle: true, icon: (brush.use_secondary_overlay ? 'HIDE_OFF' : 'HIDE_ON')}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'mask_overlay_alpha', __kwargtrans__ ({text: 'Mask Texture Opacity'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_secondary_overlay_override', __kwargtrans__ ({toggle: true, text: '', icon: 'BRUSH_DATA'}));
+			}) ();
+			if (__ne__ (tex_slot_mask.map_mode, 'STENCIL')) {
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_secondary_overlay', __kwargtrans__ ({text: '', toggle: true, icon: (brush.use_secondary_overlay ? 'HIDE_OFF' : 'HIDE_ON')}));
+				}) ();
 			}
 		}
 	});}
@@ -1122,7 +1719,7 @@ export var VIEW3D_MT_tools_projectpaint_clone =  __class__ ('VIEW3D_MT_tools_pro
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1135,8 +1732,16 @@ export var VIEW3D_MT_tools_projectpaint_clone =  __class__ ('VIEW3D_MT_tools_pro
 		else {
 		}
 		var layout = self.layout;
-		for (var [i, uv_layer] of py_enumerate (context.active_object.data.uv_layers)) {
-			var props = layout.operator ('wm.context_set_int', __kwargtrans__ ({text: uv_layer.py_name, translate: false}));
+		var __iterable0__ = __call__ (py_enumerate, null, context.active_object.data.uv_layers);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var i = __left0__ [0];
+			var uv_layer = __left0__ [1];
+			var props = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'wm.context_set_int', __kwargtrans__ ({text: uv_layer.py_name, translate: false}));
+			}) ();
 			props.data_path = 'active_object.data.uv_layer_clone_index';
 			props.value = i;
 		}
@@ -1148,7 +1753,7 @@ export var brush_settings = function (layout, context, brush, popover) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1162,278 +1767,767 @@ export var brush_settings = function (layout, context, brush, popover) {
 	}
 	else {
 	}
-	var mode = UnifiedPaintPanel.get_brush_mode (context);
-	brush_shared_settings (layout, context, brush, popover);
-	if (mode == 'SCULPT') {
+	var mode = (function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+	}) ();
+	__call__ (brush_shared_settings, null, layout, context, brush, popover);
+	if (__eq__ (mode, 'SCULPT')) {
 		var capabilities = brush.sculpt_capabilities;
 		var sculpt_brush_type = brush.sculpt_brush_type;
 		if (capabilities.has_normal_radius) {
-			layout.prop (brush, 'normal_radius_factor', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'normal_radius_factor', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 		if (capabilities.has_tilt) {
-			layout.prop (brush, 'tilt_strength_factor', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'tilt_strength_factor', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (capabilities.has_hardness) {
-			row.prop (brush, 'hardness', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'hardness', __kwargtrans__ ({slider: true}));
+			}) ();
 			if (capabilities.has_hardness_pressure) {
-				row.prop (brush, 'invert_hardness_pressure', __kwargtrans__ ({text: ''}));
-				row.prop (brush, 'use_hardness_pressure', __kwargtrans__ ({text: ''}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'invert_hardness_pressure', __kwargtrans__ ({text: ''}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_hardness_pressure', __kwargtrans__ ({text: ''}));
+				}) ();
 			}
 		}
 		if (capabilities.has_auto_smooth) {
 			var pressure_name = (capabilities.has_auto_smooth_pressure ? 'use_inverse_smooth_pressure' : null);
-			UnifiedPaintPanel.prop_unified (layout, context, brush, 'auto_smooth_factor', __kwargtrans__ ({pressure_name: pressure_name, slider: true}));
+			(function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'auto_smooth_factor', __kwargtrans__ ({pressure_name: pressure_name, slider: true}));
+			}) ();
 		}
 		if (capabilities.has_topology_rake && context.sculpt_object.use_dynamic_topology_sculpting) {
-			layout.prop (brush, 'topology_rake_factor', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'topology_rake_factor', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 		if (capabilities.has_normal_weight) {
-			layout.prop (brush, 'normal_weight', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'normal_weight', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 		if (capabilities.has_pinch_factor) {
-			var text = iface_ ('Pinch');
+			var text = __call__ (iface_, null, 'Pinch');
 			if (__in__ (sculpt_brush_type, new set (['BLOB', 'SNAKE_HOOK']))) {
-				var text = iface_ ('Magnify');
+				var text = __call__ (iface_, null, 'Magnify');
 			}
-			layout.prop (brush, 'crease_pinch_factor', __kwargtrans__ ({slider: true, text: text, translate: false}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'crease_pinch_factor', __kwargtrans__ ({slider: true, text: text, translate: false}));
+			}) ();
 		}
 		if (capabilities.has_rake_factor) {
-			layout.prop (brush, 'rake_factor', __kwargtrans__ ({slider: true}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'rake_factor', __kwargtrans__ ({slider: true}));
+			}) ();
 		}
 		if (capabilities.has_plane_offset) {
-			layout.separator ();
-			UnifiedPaintPanel.prop_unified (layout, context, brush, 'plane_offset', __kwargtrans__ ({pressure_name: 'use_offset_pressure', slider: true}));
-			if (sculpt_brush_type != 'PLANE') {
-				var row = layout.row (__kwargtrans__ ({heading: 'Plane Trim'}));
-				row.prop (brush, 'use_plane_trim', __kwargtrans__ ({text: ''}));
-				var sub = row.row ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'plane_offset', __kwargtrans__ ({pressure_name: 'use_offset_pressure', slider: true}));
+			}) ();
+			if (__ne__ (sculpt_brush_type, 'PLANE')) {
+				var row = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({heading: 'Plane Trim'}));
+				}) ();
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_plane_trim', __kwargtrans__ ({text: ''}));
+				}) ();
+				var sub = (function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.row, __accu0__);
+				}) ();
 				sub.active = brush.use_plane_trim;
-				sub.prop (brush, 'plane_trim', __kwargtrans__ ({slider: true, text: ''}));
+				(function () {
+					var __accu0__ = sub;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'plane_trim', __kwargtrans__ ({slider: true, text: ''}));
+				}) ();
 			}
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		if (capabilities.has_height) {
-			layout.prop (brush, 'height', __kwargtrans__ ({slider: true, text: 'Height'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'height', __kwargtrans__ ({slider: true, text: 'Height'}));
+			}) ();
 		}
 		if (capabilities.has_plane_height) {
-			layout.prop (brush, 'plane_height', __kwargtrans__ ({slider: true, text: 'Height'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'plane_height', __kwargtrans__ ({slider: true, text: 'Height'}));
+			}) ();
 		}
 		if (capabilities.has_plane_depth) {
-			layout.prop (brush, 'plane_depth', __kwargtrans__ ({slider: true, text: 'Depth'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'plane_depth', __kwargtrans__ ({slider: true, text: 'Depth'}));
+			}) ();
 		}
 		if (capabilities.has_persistence) {
-			layout.separator ();
-			var col = layout.column ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			if (context.sculpt_object && context.sculpt_object.use_dynamic_topology_sculpting) {
 				col.enabled = false;
 			}
-			col.prop (brush, 'use_persistent');
-			col.operator ('sculpt.set_persistent_base');
-			layout.separator ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_persistent');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.operator, __accu0__, 'sculpt.set_persistent_base');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 		if (capabilities.has_color) {
-			var ups = UnifiedPaintPanel.paint_settings (context).unified_paint_settings;
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			UnifiedPaintPanel.prop_unified_color (row, context, brush, 'color', __kwargtrans__ ({text: ''}));
-			UnifiedPaintPanel.prop_unified_color (row, context, brush, 'secondary_color', __kwargtrans__ ({text: ''}));
-			row.separator ();
-			row.operator ('paint.brush_colors_flip', __kwargtrans__ ({icon: 'FILE_REFRESH', text: '', emboss: false}));
-			row.prop (ups, 'use_unified_color', __kwargtrans__ ({text: '', icon: 'BRUSHES_ALL'}));
-			layout.prop (brush, 'blend', __kwargtrans__ ({text: 'Blend Mode'}));
+			var ups = (function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.paint_settings, __accu0__, context);
+			}) ().unified_paint_settings;
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.prop_unified_color, __accu0__, row, context, brush, 'color', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.prop_unified_color, __accu0__, row, context, brush, 'secondary_color', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.operator, __accu0__, 'paint.brush_colors_flip', __kwargtrans__ ({icon: 'FILE_REFRESH', text: '', emboss: false}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, ups, 'use_unified_color', __kwargtrans__ ({text: '', icon: 'BRUSHES_ALL'}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'blend', __kwargtrans__ ({text: 'Blend Mode'}));
+			}) ();
 		}
-		if (sculpt_brush_type == 'CLAY_STRIPS') {
-			var row = layout.row ();
-			row.prop (brush, 'tip_roundness');
-			var row = layout.row ();
-			row.prop (brush, 'tip_scale_x');
+		if (__eq__ (sculpt_brush_type, 'CLAY_STRIPS')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'tip_roundness');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'tip_scale_x');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'ELASTIC_DEFORM') {
-			layout.separator ();
-			layout.prop (brush, 'elastic_deform_type');
-			layout.prop (brush, 'elastic_deform_volume_preservation', __kwargtrans__ ({slider: true}));
-			layout.separator ();
+		else if (__eq__ (sculpt_brush_type, 'ELASTIC_DEFORM')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'elastic_deform_type');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'elastic_deform_volume_preservation', __kwargtrans__ ({slider: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		else if (sculpt_brush_type == 'SNAKE_HOOK') {
-			layout.separator ();
-			layout.prop (brush, 'snake_hook_deform_type');
-			layout.separator ();
+		else if (__eq__ (sculpt_brush_type, 'SNAKE_HOOK')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'snake_hook_deform_type');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		else if (sculpt_brush_type == 'POSE') {
-			layout.separator ();
-			layout.prop (brush, 'deform_target');
-			layout.separator ();
-			layout.prop (brush, 'pose_deform_type');
-			layout.prop (brush, 'pose_origin_type');
-			layout.prop (brush, 'pose_offset');
-			layout.prop (brush, 'pose_smooth_iterations');
-			if (brush.pose_deform_type == 'ROTATE_TWIST' && __in__ (brush.pose_origin_type, new set (['TOPOLOGY', 'FACE_SETS']))) {
-				layout.prop (brush, 'pose_ik_segments');
+		else if (__eq__ (sculpt_brush_type, 'POSE')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'deform_target');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'pose_deform_type');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'pose_origin_type');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'pose_offset');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'pose_smooth_iterations');
+			}) ();
+			if (__eq__ (brush.pose_deform_type, 'ROTATE_TWIST') && __in__ (brush.pose_origin_type, new set (['TOPOLOGY', 'FACE_SETS']))) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'pose_ik_segments');
+				}) ();
 			}
-			if (brush.pose_deform_type == 'SCALE_TRANSLATE') {
-				layout.prop (brush, 'use_pose_lock_rotation');
+			if (__eq__ (brush.pose_deform_type, 'SCALE_TRANSLATE')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_pose_lock_rotation');
+				}) ();
 			}
-			layout.prop (brush, 'use_pose_ik_anchored');
-			layout.prop (brush, 'use_connected_only');
-			layout.prop (brush, 'disconnected_distance_max');
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_pose_ik_anchored');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_connected_only');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'disconnected_distance_max');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		else if (sculpt_brush_type == 'CLOTH') {
-			layout.separator ();
-			layout.prop (brush, 'cloth_simulation_area_type');
-			if (brush.cloth_simulation_area_type != 'GLOBAL') {
-				layout.prop (brush, 'cloth_sim_limit');
-				layout.prop (brush, 'cloth_sim_falloff');
+		else if (__eq__ (sculpt_brush_type, 'CLOTH')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_simulation_area_type');
+			}) ();
+			if (__ne__ (brush.cloth_simulation_area_type, 'GLOBAL')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_sim_limit');
+				}) ();
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_sim_falloff');
+				}) ();
 			}
-			if (brush.cloth_simulation_area_type == 'LOCAL') {
-				layout.prop (brush, 'use_cloth_pin_simulation_boundary');
+			if (__eq__ (brush.cloth_simulation_area_type, 'LOCAL')) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_cloth_pin_simulation_boundary');
+				}) ();
 			}
-			layout.separator ();
-			layout.prop (brush, 'cloth_deform_type');
-			layout.prop (brush, 'cloth_force_falloff_type');
-			layout.separator ();
-			layout.prop (brush, 'cloth_mass');
-			layout.prop (brush, 'cloth_damping');
-			layout.prop (brush, 'cloth_constraint_softbody_strength');
-			layout.separator ();
-			layout.prop (brush, 'use_cloth_collision');
-			layout.separator ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_deform_type');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_force_falloff_type');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_mass');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_damping');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'cloth_constraint_softbody_strength');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_cloth_collision');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
-		else if (sculpt_brush_type == 'PLANE') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'area_radius_factor');
-			row.prop (brush, 'use_pressure_area_radius', __kwargtrans__ ({text: ''}));
-			layout.separator ();
-			layout.prop (brush, 'plane_inversion_mode');
-			layout.separator ();
-			layout.prop (brush, 'stabilize_normal');
-			layout.prop (brush, 'stabilize_plane');
+		else if (__eq__ (sculpt_brush_type, 'PLANE')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'area_radius_factor');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_pressure_area_radius', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'plane_inversion_mode');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'stabilize_normal');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'stabilize_plane');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'GRAB') {
-			layout.prop (brush, 'use_grab_active_vertex');
-			layout.prop (brush, 'use_grab_silhouette');
+		else if (__eq__ (sculpt_brush_type, 'GRAB')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_grab_active_vertex');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_grab_silhouette');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'SCENE_PROJECT') {
-			layout.separator ();
-			layout.prop (brush, 'project_ray_direction_type');
-			layout.prop (brush, 'minimum_distance');
-			layout.prop (brush, 'use_bidirectional');
+		else if (__eq__ (sculpt_brush_type, 'SCENE_PROJECT')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'project_ray_direction_type');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'minimum_distance');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_bidirectional');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'PAINT') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'flow');
-			row.prop (brush, 'invert_flow_pressure', __kwargtrans__ ({text: ''}));
-			row.prop (brush, 'use_flow_pressure', __kwargtrans__ ({text: ''}));
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'wet_mix');
-			row.prop (brush, 'invert_wet_mix_pressure', __kwargtrans__ ({text: ''}));
-			row.prop (brush, 'use_wet_mix_pressure', __kwargtrans__ ({text: ''}));
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'wet_persistence');
-			row.prop (brush, 'invert_wet_persistence_pressure', __kwargtrans__ ({text: ''}));
-			row.prop (brush, 'use_wet_persistence_pressure', __kwargtrans__ ({text: ''}));
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'wet_paint_radius_factor');
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'density');
-			row.prop (brush, 'invert_density_pressure', __kwargtrans__ ({text: ''}));
-			row.prop (brush, 'use_density_pressure', __kwargtrans__ ({text: ''}));
-			var row = layout.row ();
-			row.prop (brush, 'tip_roundness');
-			var row = layout.row ();
-			row.prop (brush, 'tip_scale_x');
+		else if (__eq__ (sculpt_brush_type, 'PAINT')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'flow');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'invert_flow_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_flow_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'wet_mix');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'invert_wet_mix_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_wet_mix_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'wet_persistence');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'invert_wet_persistence_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_wet_persistence_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'wet_paint_radius_factor');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'density');
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'invert_density_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_density_pressure', __kwargtrans__ ({text: ''}));
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'tip_roundness');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'tip_scale_x');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'SMEAR') {
-			var col = layout.column ();
-			col.prop (brush, 'smear_deform_type');
+		else if (__eq__ (sculpt_brush_type, 'SMEAR')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'smear_deform_type');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'BOUNDARY') {
-			layout.prop (brush, 'deform_target');
-			layout.separator ();
-			var col = layout.column ();
-			col.prop (brush, 'boundary_deform_type');
-			col.prop (brush, 'boundary_falloff_type');
-			col.prop (brush, 'boundary_offset');
+		else if (__eq__ (sculpt_brush_type, 'BOUNDARY')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'deform_target');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'boundary_deform_type');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'boundary_falloff_type');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'boundary_offset');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'TOPOLOGY') {
-			var col = layout.column ();
-			col.prop (brush, 'slide_deform_type');
+		else if (__eq__ (sculpt_brush_type, 'TOPOLOGY')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'slide_deform_type');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'MULTIPLANE_SCRAPE') {
-			var col = layout.column ();
-			col.prop (brush, 'multiplane_scrape_angle');
-			col.prop (brush, 'use_multiplane_scrape_dynamic');
-			col.prop (brush, 'show_multiplane_scrape_planes_preview');
+		else if (__eq__ (sculpt_brush_type, 'MULTIPLANE_SCRAPE')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'multiplane_scrape_angle');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_multiplane_scrape_dynamic');
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'show_multiplane_scrape_planes_preview');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'SMOOTH') {
-			var col = layout.column ();
-			col.prop (brush, 'smooth_deform_type');
-			if (brush.smooth_deform_type == 'SURFACE') {
-				col.prop (brush, 'surface_smooth_shape_preservation');
-				col.prop (brush, 'surface_smooth_current_vertex');
-				col.prop (brush, 'surface_smooth_iterations');
+		else if (__eq__ (sculpt_brush_type, 'SMOOTH')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'smooth_deform_type');
+			}) ();
+			if (__eq__ (brush.smooth_deform_type, 'SURFACE')) {
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'surface_smooth_shape_preservation');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'surface_smooth_current_vertex');
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'surface_smooth_iterations');
+				}) ();
 			}
 		}
-		else if (sculpt_brush_type == 'DISPLACEMENT_SMEAR') {
-			var col = layout.column ();
-			col.prop (brush, 'smear_deform_type');
+		else if (__eq__ (sculpt_brush_type, 'DISPLACEMENT_SMEAR')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'smear_deform_type');
+			}) ();
 		}
-		else if (sculpt_brush_type == 'MASK') {
-			layout.row ().prop (brush, 'mask_tool', __kwargtrans__ ({expand: true}));
+		else if (__eq__ (sculpt_brush_type, 'MASK')) {
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, brush, 'mask_tool', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
 	}
 	else if (__in__ (mode, new set (['PAINT_TEXTURE', 'PAINT_2D']))) {
 		var capabilities = brush.image_paint_capabilities;
-		if (brush.image_brush_type == 'FILL') {
-			if (brush.color_type == 'COLOR') {
-				if (mode == 'PAINT_2D') {
-					layout.prop (brush, 'fill_threshold', __kwargtrans__ ({text: 'Fill Threshold', slider: true}));
+		if (__eq__ (brush.image_brush_type, 'FILL')) {
+			if (__eq__ (brush.color_type, 'COLOR')) {
+				if (__eq__ (mode, 'PAINT_2D')) {
+					(function () {
+						var __accu0__ = layout;
+						return __call__ (__accu0__.prop, __accu0__, brush, 'fill_threshold', __kwargtrans__ ({text: 'Fill Threshold', slider: true}));
+					}) ();
 				}
 			}
-			else if (brush.color_type == 'GRADIENT') {
-				layout.row ().prop (brush, 'gradient_fill_mode', __kwargtrans__ ({expand: true}));
+			else if (__eq__ (brush.color_type, 'GRADIENT')) {
+				(function () {
+					var __accu0__ = (function () {
+						var __accu1__ = layout;
+						return __call__ (__accu1__.row, __accu1__);
+					}) ();
+					return __call__ (__accu0__.prop, __accu0__, brush, 'gradient_fill_mode', __kwargtrans__ ({expand: true}));
+				}) ();
 			}
 		}
 	}
-	else if (mode == 'SCULPT_CURVES') {
-		if (brush.curves_sculpt_brush_type == 'ADD') {
-			layout.prop (brush.curves_sculpt_settings, 'add_amount');
-			var col = layout.column (__kwargtrans__ ({heading: 'Interpolate', align: true}));
-			col.prop (brush.curves_sculpt_settings, 'use_length_interpolate', __kwargtrans__ ({text: 'Length'}));
-			col.prop (brush.curves_sculpt_settings, 'use_radius_interpolate', __kwargtrans__ ({text: 'Radius'}));
-			col.prop (brush.curves_sculpt_settings, 'use_shape_interpolate', __kwargtrans__ ({text: 'Shape'}));
-			col.prop (brush.curves_sculpt_settings, 'use_point_count_interpolate', __kwargtrans__ ({text: 'Point Count'}));
-			var col = layout.column ();
+	else if (__eq__ (mode, 'SCULPT_CURVES')) {
+		if (__eq__ (brush.curves_sculpt_brush_type, 'ADD')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'add_amount');
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Interpolate', align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_length_interpolate', __kwargtrans__ ({text: 'Length'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_radius_interpolate', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_shape_interpolate', __kwargtrans__ ({text: 'Shape'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_point_count_interpolate', __kwargtrans__ ({text: 'Point Count'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.active = !(brush.curves_sculpt_settings.use_length_interpolate);
-			col.prop (brush.curves_sculpt_settings, 'curve_length', __kwargtrans__ ({text: 'Length'}));
-			var col = layout.column ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'curve_length', __kwargtrans__ ({text: 'Length'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.active = !(brush.curves_sculpt_settings.use_radius_interpolate);
-			col.prop (brush.curves_sculpt_settings, 'curve_radius', __kwargtrans__ ({text: 'Radius'}));
-			var col = layout.column ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'curve_radius', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.active = !(brush.curves_sculpt_settings.use_point_count_interpolate);
-			col.prop (brush.curves_sculpt_settings, 'points_per_curve', __kwargtrans__ ({text: 'Points'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'points_per_curve', __kwargtrans__ ({text: 'Points'}));
+			}) ();
 		}
-		if (brush.curves_sculpt_brush_type == 'DENSITY') {
-			var col = layout.column ();
-			col.prop (brush.curves_sculpt_settings, 'density_add_attempts', __kwargtrans__ ({text: 'Count Max'}));
-			var col = layout.column (__kwargtrans__ ({heading: 'Interpolate', align: true}));
-			col.prop (brush.curves_sculpt_settings, 'use_length_interpolate', __kwargtrans__ ({text: 'Length'}));
-			col.prop (brush.curves_sculpt_settings, 'use_radius_interpolate', __kwargtrans__ ({text: 'Radius'}));
-			col.prop (brush.curves_sculpt_settings, 'use_shape_interpolate', __kwargtrans__ ({text: 'Shape'}));
-			col.prop (brush.curves_sculpt_settings, 'use_point_count_interpolate', __kwargtrans__ ({text: 'Point Count'}));
-			var col = layout.column ();
+		if (__eq__ (brush.curves_sculpt_brush_type, 'DENSITY')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'density_add_attempts', __kwargtrans__ ({text: 'Count Max'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Interpolate', align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_length_interpolate', __kwargtrans__ ({text: 'Length'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_radius_interpolate', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_shape_interpolate', __kwargtrans__ ({text: 'Shape'}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_point_count_interpolate', __kwargtrans__ ({text: 'Point Count'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.active = !(brush.curves_sculpt_settings.use_length_interpolate);
-			col.prop (brush.curves_sculpt_settings, 'curve_length', __kwargtrans__ ({text: 'Length'}));
-			var col = layout.column ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'curve_length', __kwargtrans__ ({text: 'Length'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.active = !(brush.curves_sculpt_settings.use_radius_interpolate);
-			col.prop (brush.curves_sculpt_settings, 'curve_radius', __kwargtrans__ ({text: 'Radius'}));
-			var col = layout.column ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'curve_radius', __kwargtrans__ ({text: 'Radius'}));
+			}) ();
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
 			col.active = !(brush.curves_sculpt_settings.use_point_count_interpolate);
-			col.prop (brush.curves_sculpt_settings, 'points_per_curve', __kwargtrans__ ({text: 'Points'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'points_per_curve', __kwargtrans__ ({text: 'Points'}));
+			}) ();
 		}
-		else if (brush.curves_sculpt_brush_type == 'GROW_SHRINK') {
-			layout.prop (brush.curves_sculpt_settings, 'use_uniform_scale');
-			layout.prop (brush.curves_sculpt_settings, 'minimum_length');
+		else if (__eq__ (brush.curves_sculpt_brush_type, 'GROW_SHRINK')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'use_uniform_scale');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, brush.curves_sculpt_settings, 'minimum_length');
+			}) ();
 		}
 	}
 };
@@ -1443,7 +2537,7 @@ export var brush_shared_settings = function (layout, context, brush, popover) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1457,7 +2551,10 @@ export var brush_shared_settings = function (layout, context, brush, popover) {
 	}
 	else {
 	}
-	var mode = UnifiedPaintPanel.get_brush_mode (context);
+	var mode = (function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+	}) ();
 	var blend_mode = false;
 	var size = false;
 	var size_mode = false;
@@ -1477,7 +2574,7 @@ export var brush_shared_settings = function (layout, context, brush, popover) {
 			var size_pressure = true;
 		}
 	}
-	if (mode == 'SCULPT') {
+	if (__eq__ (mode, 'SCULPT')) {
 		var size_mode = true;
 		if (!(popover)) {
 			var size = true;
@@ -1487,7 +2584,7 @@ export var brush_shared_settings = function (layout, context, brush, popover) {
 			var size_pressure = brush.sculpt_capabilities.has_size_pressure;
 		}
 	}
-	if (mode == 'PAINT_VERTEX') {
+	if (__eq__ (mode, 'PAINT_VERTEX')) {
 		if (!(popover)) {
 			var blend_mode = true;
 			var size = true;
@@ -1496,7 +2593,7 @@ export var brush_shared_settings = function (layout, context, brush, popover) {
 			var size_pressure = true;
 		}
 	}
-	if (mode == 'PAINT_WEIGHT') {
+	if (__eq__ (mode, 'PAINT_WEIGHT')) {
 		if (!(popover)) {
 			var size = true;
 			var weight = brush.weight_paint_capabilities.has_weight;
@@ -1505,11 +2602,11 @@ export var brush_shared_settings = function (layout, context, brush, popover) {
 			var strength_pressure = __left0__;
 			var size_pressure = true;
 		}
-		if (brush.weight_brush_type == 'DRAW') {
+		if (__eq__ (brush.weight_brush_type, 'DRAW')) {
 			var blend_mode = true;
 		}
 	}
-	if (mode == 'SCULPT_CURVES') {
+	if (__eq__ (mode, 'SCULPT_CURVES')) {
 		var tool = brush.curves_sculpt_brush_type;
 		var size = true;
 		var strength = !__in__ (tool, new set (['ADD', 'DELETE']));
@@ -1517,58 +2614,100 @@ export var brush_shared_settings = function (layout, context, brush, popover) {
 		var strength_pressure = !__in__ (tool, new set (['SLIDE', 'ADD', 'DELETE']));
 		var size_pressure = true;
 	}
-	if (mode == 'PAINT_GREASE_PENCIL') {
+	if (__eq__ (mode, 'PAINT_GREASE_PENCIL')) {
 		var size_mode = true;
 		var size = true;
 		var strength = true;
 	}
-	if (mode == 'SCULPT_GREASE_PENCIL') {
+	if (__eq__ (mode, 'SCULPT_GREASE_PENCIL')) {
 		var size = true;
 		var strength = true;
 		var size_pressure = true;
 	}
-	var ups = UnifiedPaintPanel.paint_settings (context).unified_paint_settings;
+	var ups = (function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.paint_settings, __accu0__, context);
+	}) ().unified_paint_settings;
 	if (blend_mode) {
-		layout.prop (brush, 'blend', __kwargtrans__ ({text: 'Blend'}));
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'blend', __kwargtrans__ ({text: 'Blend'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
 	if (weight) {
-		UnifiedPaintPanel.prop_unified (layout, context, brush, 'weight', __kwargtrans__ ({unified_name: 'use_unified_weight', slider: true}));
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'weight', __kwargtrans__ ({unified_name: 'use_unified_weight', slider: true}));
+		}) ();
 	}
 	var size_owner = (ups.use_unified_size ? ups : brush);
 	var size_prop = 'size';
-	if (size_mode && size_owner.use_locked_size == 'SCENE') {
+	if (size_mode && __eq__ (size_owner.use_locked_size, 'SCENE')) {
 		var size_prop = 'unprojected_size';
 	}
 	if (size || size_mode) {
 		if (size) {
 			var pressure_name = (size_pressure ? 'use_pressure_size' : null);
-			var unified_row = UnifiedPaintPanel.prop_unified (layout, context, brush, size_prop, __kwargtrans__ ({unified_name: 'use_unified_size', pressure_name: pressure_name, text: 'Size', slider: true}));
+			var unified_row = (function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, size_prop, __kwargtrans__ ({unified_name: 'use_unified_size', pressure_name: pressure_name, text: 'Size', slider: true}));
+			}) ();
 			if (!(popover) && size_pressure && __in__ (mode, new set (['PAINT_TEXTURE', 'PAINT_2D', 'SCULPT', 'PAINT_VERTEX', 'PAINT_WEIGHT', 'SCULPT_CURVES']))) {
-				UnifiedPaintPanel.prop_custom_pressure (layout, context, unified_row, brush, __kwargtrans__ ({pressure_name: pressure_name, curve_visibility_name: 'show_size_curve', custom_curve_name: 'curve_size'}));
+				(function () {
+					var __accu0__ = UnifiedPaintPanel;
+					return __call__ (__accu0__.prop_custom_pressure, __accu0__, layout, context, unified_row, brush, __kwargtrans__ ({pressure_name: pressure_name, curve_visibility_name: 'show_size_curve', custom_curve_name: 'curve_size'}));
+				}) ();
 			}
 		}
 		if (size_mode) {
-			layout.row ().prop (size_owner, 'use_locked_size', __kwargtrans__ ({expand: true}));
-			layout.separator ();
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = layout;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, size_owner, 'use_locked_size', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.separator, __accu0__);
+			}) ();
 		}
 	}
 	if (strength) {
 		var pressure_name = (strength_pressure ? 'use_pressure_strength' : null);
-		var unified_row = UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({unified_name: 'use_unified_strength', pressure_name: pressure_name, slider: true}));
+		var unified_row = (function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'strength', __kwargtrans__ ({unified_name: 'use_unified_strength', pressure_name: pressure_name, slider: true}));
+		}) ();
 		if (!(popover) && strength_pressure && __in__ (mode, new set (['PAINT_TEXTURE', 'PAINT_2D', 'SCULPT', 'PAINT_VERTEX', 'PAINT_WEIGHT', 'SCULPT_CURVES']))) {
-			UnifiedPaintPanel.prop_custom_pressure (layout, context, unified_row, brush, __kwargtrans__ ({pressure_name: pressure_name, curve_visibility_name: 'show_strength_curve', custom_curve_name: 'curve_strength'}));
+			(function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.prop_custom_pressure, __accu0__, layout, context, unified_row, brush, __kwargtrans__ ({pressure_name: pressure_name, curve_visibility_name: 'show_strength_curve', custom_curve_name: 'curve_strength'}));
+			}) ();
 		}
-		layout.separator ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
 	if (direction) {
-		layout.row ().prop (brush, 'direction', __kwargtrans__ ({expand: true}));
+		(function () {
+			var __accu0__ = (function () {
+				var __accu1__ = layout;
+				return __call__ (__accu1__.row, __accu1__);
+			}) ();
+			return __call__ (__accu0__.prop, __accu0__, brush, 'direction', __kwargtrans__ ({expand: true}));
+		}) ();
 	}
 };
 export var draw_color_jitter_panel = function (layout, context, brush) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1581,33 +2720,81 @@ export var draw_color_jitter_panel = function (layout, context, brush) {
 	}
 	else {
 	}
-	var ups = UnifiedPaintPanel.paint_settings (context).unified_paint_settings;
+	var ups = (function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.paint_settings, __accu0__, context);
+	}) ().unified_paint_settings;
 	var prop_owner = (ups.use_unified_color ? ups : brush);
 	layout.use_property_split = false;
-	var __left0__ = layout.panel ('color_jitter_panel', __kwargtrans__ ({default_closed: true}));
+	var __left0__ = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.panel, __accu0__, 'color_jitter_panel', __kwargtrans__ ({default_closed: true}));
+	}) ();
 	var header = __left0__ [0];
 	var panel = __left0__ [1];
-	header.prop (prop_owner, 'use_color_jitter', __kwargtrans__ ({text: 'Randomize Color'}));
+	(function () {
+		var __accu0__ = header;
+		return __call__ (__accu0__.prop, __accu0__, prop_owner, 'use_color_jitter', __kwargtrans__ ({text: 'Randomize Color'}));
+	}) ();
 	if (panel) {
 		panel.use_property_split = true;
 		panel.use_property_decorate = false;
-		var col = panel.column (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = panel;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		col.use_property_split = true;
-		var row = col.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.enabled = prop_owner.use_color_jitter;
-		row.prop (prop_owner, 'hue_jitter', __kwargtrans__ ({slider: true, text: 'Hue'}));
-		row.prop (prop_owner, 'use_stroke_random_hue', __kwargtrans__ ({text: '', icon: 'GP_SELECT_STROKES'}));
-		row.prop (prop_owner, 'use_random_press_hue', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'hue_jitter', __kwargtrans__ ({slider: true, text: 'Hue'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'use_stroke_random_hue', __kwargtrans__ ({text: '', icon: 'GP_SELECT_STROKES'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'use_random_press_hue', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.enabled = prop_owner.use_color_jitter;
-		row.prop (prop_owner, 'saturation_jitter', __kwargtrans__ ({slider: true, text: 'Saturation'}));
-		row.prop (prop_owner, 'use_stroke_random_sat', __kwargtrans__ ({text: '', icon: 'GP_SELECT_STROKES'}));
-		row.prop (prop_owner, 'use_random_press_sat', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'saturation_jitter', __kwargtrans__ ({slider: true, text: 'Saturation'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'use_stroke_random_sat', __kwargtrans__ ({text: '', icon: 'GP_SELECT_STROKES'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'use_random_press_sat', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.enabled = prop_owner.use_color_jitter;
-		row.prop (prop_owner, 'value_jitter', __kwargtrans__ ({slider: true, text: 'Value', text_ctxt: i18n_contexts.color}));
-		row.prop (prop_owner, 'use_stroke_random_val', __kwargtrans__ ({text: '', icon: 'GP_SELECT_STROKES'}));
-		row.prop (prop_owner, 'use_random_press_val', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'value_jitter', __kwargtrans__ ({slider: true, text: 'Value', text_ctxt: i18n_contexts.color}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'use_stroke_random_val', __kwargtrans__ ({text: '', icon: 'GP_SELECT_STROKES'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, prop_owner, 'use_random_press_val', __kwargtrans__ ({text: '', icon: 'STYLUS_PRESSURE'}));
+		}) ();
 	}
 };
 export var brush_settings_advanced = function (layout, context, settings, brush, popover) {
@@ -1616,7 +2803,7 @@ export var brush_settings_advanced = function (layout, context, settings, brush,
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1631,108 +2818,216 @@ export var brush_settings_advanced = function (layout, context, settings, brush,
 	}
 	else {
 	}
-	var mode = UnifiedPaintPanel.get_brush_mode (context);
+	var mode = (function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.get_brush_mode, __accu0__, context);
+	}) ();
 	var container = layout;
 	if (popover) {
-		brush_settings (layout, context, brush, __kwargtrans__ ({popover: true}));
-		layout.separator ();
-		var __left0__ = layout.panel ('advanced_panel', __kwargtrans__ ({default_closed: false}));
+		__call__ (brush_settings, null, layout, context, brush, __kwargtrans__ ({popover: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var __left0__ = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.panel, __accu0__, 'advanced_panel', __kwargtrans__ ({default_closed: false}));
+		}) ();
 		var header = __left0__ [0];
 		var panel = __left0__ [1];
-		header.label (__kwargtrans__ ({text: 'Advanced'}));
+		(function () {
+			var __accu0__ = header;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Advanced'}));
+		}) ();
 		var container = panel;
 		if (panel === null) {
 			return ;
 		}
 	}
-	if (mode == 'SCULPT') {
-		container.prop (brush, 'sculpt_brush_type');
+	if (__eq__ (mode, 'SCULPT')) {
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'sculpt_brush_type');
+		}) ();
 		var capabilities = brush.sculpt_capabilities;
 		if (capabilities.has_accumulate) {
-			container.prop (brush, 'use_accumulate');
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_accumulate');
+			}) ();
 		}
-		container.prop (brush, 'use_frontface', __kwargtrans__ ({text: 'Front Faces Only'}));
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_frontface', __kwargtrans__ ({text: 'Front Faces Only'}));
+		}) ();
 		if (capabilities.has_sculpt_plane) {
-			container.prop (brush, 'sculpt_plane');
-			if (brush.sculpt_brush_type != 'PLANE') {
-				var col = container.column (__kwargtrans__ ({heading: 'Original', align: true}));
-				col.prop (brush, 'use_original_normal', __kwargtrans__ ({text: 'Normal'}));
-				col.prop (brush, 'use_original_plane', __kwargtrans__ ({text: 'Plane'}));
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'sculpt_plane');
+			}) ();
+			if (__ne__ (brush.sculpt_brush_type, 'PLANE')) {
+				var col = (function () {
+					var __accu0__ = container;
+					return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Original', align: true}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_original_normal', __kwargtrans__ ({text: 'Normal'}));
+				}) ();
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'use_original_plane', __kwargtrans__ ({text: 'Plane'}));
+				}) ();
 			}
 		}
-		draw_auto_masking_panel (container, brush);
+		__call__ (draw_auto_masking_panel, null, container, brush);
 		if (capabilities.has_color && popover) {
-			draw_color_jitter_panel (container, context, brush);
+			__call__ (draw_color_jitter_panel, null, container, context, brush);
 		}
 	}
-	else if (mode == 'SCULPT_GREASE_PENCIL') {
+	else if (__eq__ (mode, 'SCULPT_GREASE_PENCIL')) {
 		var gp_settings = brush.gpencil_settings;
-		var col = container.column (__kwargtrans__ ({heading: 'Affect', align: true}));
-		col.prop (gp_settings, 'use_edit_position', __kwargtrans__ ({text: 'Position'}));
-		col.prop (gp_settings, 'use_edit_strength', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.id_gpencil}));
-		col.prop (gp_settings, 'use_edit_thickness', __kwargtrans__ ({text: 'Thickness'}));
-		col.prop (gp_settings, 'use_edit_uv', __kwargtrans__ ({text: 'UV'}));
+		var col = (function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Affect', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_position', __kwargtrans__ ({text: 'Position'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_strength', __kwargtrans__ ({text: 'Strength', text_ctxt: i18n_contexts.id_gpencil}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_thickness', __kwargtrans__ ({text: 'Thickness'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_edit_uv', __kwargtrans__ ({text: 'UV'}));
+		}) ();
 	}
 	else if (__in__ (mode, new set (['PAINT_TEXTURE', 'PAINT_2D']))) {
-		container.prop (brush, 'image_brush_type');
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'image_brush_type');
+		}) ();
 		var capabilities = brush.image_paint_capabilities;
 		var use_accumulate = capabilities.has_accumulate;
-		if (mode == 'PAINT_2D') {
-			container.prop (brush, 'use_paint_antialiasing');
+		if (__eq__ (mode, 'PAINT_2D')) {
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_paint_antialiasing');
+			}) ();
 		}
 		else {
-			container.prop (brush, 'use_alpha');
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_alpha');
+			}) ();
 		}
 		if (capabilities.has_accumulate) {
-			container.prop (brush, 'use_accumulate');
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_accumulate');
+			}) ();
 		}
-		if (brush.image_brush_type == 'SOFTEN') {
-			container.row ().prop (brush, 'direction', __kwargtrans__ ({expand: true}));
-			container.prop (brush, 'sharp_threshold');
-			if (mode == 'PAINT_2D') {
-				container.prop (brush, 'blur_kernel_radius');
+		if (__eq__ (brush.image_brush_type, 'SOFTEN')) {
+			(function () {
+				var __accu0__ = (function () {
+					var __accu1__ = container;
+					return __call__ (__accu1__.row, __accu1__);
+				}) ();
+				return __call__ (__accu0__.prop, __accu0__, brush, 'direction', __kwargtrans__ ({expand: true}));
+			}) ();
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'sharp_threshold');
+			}) ();
+			if (__eq__ (mode, 'PAINT_2D')) {
+				(function () {
+					var __accu0__ = container;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'blur_kernel_radius');
+				}) ();
 			}
-			container.prop (brush, 'blur_mode');
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'blur_mode');
+			}) ();
 		}
-		else if (brush.image_brush_type == 'MASK') {
-			container.prop (brush, 'weight', __kwargtrans__ ({text: 'Mask Value', slider: true}));
+		else if (__eq__ (brush.image_brush_type, 'MASK')) {
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'weight', __kwargtrans__ ({text: 'Mask Value', slider: true}));
+			}) ();
 		}
-		else if (brush.image_brush_type == 'CLONE') {
-			if (mode == 'PAINT_2D') {
-				container.prop (settings, 'clone_image', __kwargtrans__ ({text: 'Image'}));
-				container.prop (settings, 'clone_alpha', __kwargtrans__ ({text: 'Alpha'}));
+		else if (__eq__ (brush.image_brush_type, 'CLONE')) {
+			if (__eq__ (mode, 'PAINT_2D')) {
+				(function () {
+					var __accu0__ = container;
+					return __call__ (__accu0__.prop, __accu0__, settings, 'clone_image', __kwargtrans__ ({text: 'Image'}));
+				}) ();
+				(function () {
+					var __accu0__ = container;
+					return __call__ (__accu0__.prop, __accu0__, settings, 'clone_alpha', __kwargtrans__ ({text: 'Alpha'}));
+				}) ();
 			}
 		}
 		if (popover) {
-			draw_color_jitter_panel (container, context, brush);
+			__call__ (draw_color_jitter_panel, null, container, context, brush);
 		}
 	}
-	else if (mode == 'PAINT_VERTEX') {
-		container.prop (brush, 'vertex_brush_type');
-		container.prop (brush, 'use_alpha');
-		if (brush.vertex_brush_type != 'SMEAR') {
-			container.prop (brush, 'use_accumulate');
+	else if (__eq__ (mode, 'PAINT_VERTEX')) {
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'vertex_brush_type');
+		}) ();
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_alpha');
+		}) ();
+		if (__ne__ (brush.vertex_brush_type, 'SMEAR')) {
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_accumulate');
+			}) ();
 		}
-		container.prop (brush, 'use_frontface', __kwargtrans__ ({text: 'Front Faces Only'}));
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_frontface', __kwargtrans__ ({text: 'Front Faces Only'}));
+		}) ();
 		if (popover) {
-			draw_color_jitter_panel (container, context, brush);
+			__call__ (draw_color_jitter_panel, null, container, context, brush);
 		}
 	}
-	else if (mode == 'PAINT_WEIGHT') {
-		container.prop (brush, 'weight_brush_type');
-		if (brush.weight_brush_type != 'SMEAR') {
-			container.prop (brush, 'use_accumulate');
+	else if (__eq__ (mode, 'PAINT_WEIGHT')) {
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'weight_brush_type');
+		}) ();
+		if (__ne__ (brush.weight_brush_type, 'SMEAR')) {
+			(function () {
+				var __accu0__ = container;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_accumulate');
+			}) ();
 		}
-		container.prop (brush, 'use_frontface', __kwargtrans__ ({text: 'Front Faces Only'}));
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_frontface', __kwargtrans__ ({text: 'Front Faces Only'}));
+		}) ();
 	}
-	else if (mode == 'SCULPT_CURVES') {
-		container.prop (brush, 'curves_sculpt_brush_type');
+	else if (__eq__ (mode, 'SCULPT_CURVES')) {
+		(function () {
+			var __accu0__ = container;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'curves_sculpt_brush_type');
+		}) ();
 	}
 };
 export var draw_auto_masking_panel = function (layout, brush) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1744,77 +3039,200 @@ export var draw_auto_masking_panel = function (layout, brush) {
 	}
 	else {
 	}
-	var __left0__ = layout.panel ('auto_masking_panel', __kwargtrans__ ({default_closed: true}));
+	var __left0__ = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.panel, __accu0__, 'auto_masking_panel', __kwargtrans__ ({default_closed: true}));
+	}) ();
 	var header = __left0__ [0];
 	var panel = __left0__ [1];
-	header.label (__kwargtrans__ ({text: 'Auto-Masking'}));
+	(function () {
+		var __accu0__ = header;
+		return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Auto-Masking'}));
+	}) ();
 	if (panel === null) {
 		return ;
 	}
 	var parent = panel;
 	var automasking = brush.mesh_automasking_settings;
-	var col = parent.column (__kwargtrans__ ({align: true}));
-	col.prop (automasking, 'use_automasking_topology', __kwargtrans__ ({text: 'Topology'}));
-	col.prop (automasking, 'use_automasking_face_sets', __kwargtrans__ ({text: 'Face Sets'}));
-	parent.separator ();
-	var col = parent.column (__kwargtrans__ ({align: true}));
-	var row = col.row ();
-	row.prop (automasking, 'use_automasking_boundary_edges', __kwargtrans__ ({text: 'Mesh Boundary'}));
+	var col = (function () {
+		var __accu0__ = parent;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_topology', __kwargtrans__ ({text: 'Topology'}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_face_sets', __kwargtrans__ ({text: 'Face Sets'}));
+	}) ();
+	(function () {
+		var __accu0__ = parent;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	var col = (function () {
+		var __accu0__ = parent;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	var row = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.row, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_boundary_edges', __kwargtrans__ ({text: 'Mesh Boundary'}));
+	}) ();
 	if (automasking.use_automasking_boundary_edges) {
-		var props = row.operator ('sculpt.mask_from_boundary', __kwargtrans__ ({text: 'Create Mask'}));
+		var props = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'sculpt.mask_from_boundary', __kwargtrans__ ({text: 'Create Mask'}));
+		}) ();
 		props.settings_source = 'BRUSH';
 		props.boundary_mode = 'MESH';
 	}
-	var row = col.row ();
-	row.prop (automasking, 'use_automasking_boundary_face_sets', __kwargtrans__ ({text: 'Face Sets Boundary'}));
+	var row = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.row, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_boundary_face_sets', __kwargtrans__ ({text: 'Face Sets Boundary'}));
+	}) ();
 	if (automasking.use_automasking_boundary_face_sets) {
-		var props = row.operator ('sculpt.mask_from_boundary', __kwargtrans__ ({text: 'Create Mask'}));
+		var props = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'sculpt.mask_from_boundary', __kwargtrans__ ({text: 'Create Mask'}));
+		}) ();
 		props.settings_source = 'BRUSH';
 		props.boundary_mode = 'FACE_SETS';
 	}
 	if (automasking.use_automasking_boundary_edges || automasking.use_automasking_boundary_face_sets) {
-		var col = parent.column ();
+		var col = (function () {
+			var __accu0__ = parent;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.use_property_split = false;
-		var py_split = col.py_split (__kwargtrans__ ({factor: 0.4}));
-		var col = py_split.column ();
-		py_split.prop (automasking, 'boundary_edges_propagation_steps');
+		var py_split = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.4}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'boundary_edges_propagation_steps');
+		}) ();
 	}
-	col.separator ();
-	var col = parent.column (__kwargtrans__ ({align: true}));
-	var row = col.row ();
-	row.prop (automasking, 'use_automasking_cavity', __kwargtrans__ ({text: 'Cavity'}));
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	var col = (function () {
+		var __accu0__ = parent;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	var row = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.row, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_cavity', __kwargtrans__ ({text: 'Cavity'}));
+	}) ();
 	var is_cavity_active = automasking.use_automasking_cavity || automasking.use_automasking_cavity_inverted;
 	if (is_cavity_active) {
-		var props = row.operator ('sculpt.mask_from_cavity', __kwargtrans__ ({text: 'Create Mask'}));
+		var props = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'sculpt.mask_from_cavity', __kwargtrans__ ({text: 'Create Mask'}));
+		}) ();
 		props.settings_source = 'BRUSH';
 	}
-	col.prop (automasking, 'use_automasking_cavity_inverted', __kwargtrans__ ({text: 'Cavity (inverted)'}));
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_cavity_inverted', __kwargtrans__ ({text: 'Cavity (inverted)'}));
+	}) ();
 	if (is_cavity_active) {
-		var col = parent.column (__kwargtrans__ ({align: true}));
-		col.prop (automasking, 'cavity_factor', __kwargtrans__ ({text: 'Factor'}));
-		col.prop (automasking, 'cavity_blur_steps', __kwargtrans__ ({text: 'Blur'}));
-		var col = parent.column ();
-		col.prop (automasking, 'use_automasking_custom_cavity_curve', __kwargtrans__ ({text: 'Custom Curve'}));
+		var col = (function () {
+			var __accu0__ = parent;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'cavity_factor', __kwargtrans__ ({text: 'Factor'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'cavity_blur_steps', __kwargtrans__ ({text: 'Blur'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = parent;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_custom_cavity_curve', __kwargtrans__ ({text: 'Custom Curve'}));
+		}) ();
 		if (automasking.use_automasking_custom_cavity_curve) {
-			col.template_curve_mapping (automasking, 'cavity_curve', __kwargtrans__ ({brush: true}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.template_curve_mapping, __accu0__, automasking, 'cavity_curve', __kwargtrans__ ({brush: true}));
+			}) ();
 		}
 	}
-	col.separator ();
-	var col = parent.column (__kwargtrans__ ({align: true}));
-	col.prop (automasking, 'use_automasking_view_normal', __kwargtrans__ ({text: 'View Normal'}));
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	var col = (function () {
+		var __accu0__ = parent;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_view_normal', __kwargtrans__ ({text: 'View Normal'}));
+	}) ();
 	if (automasking.use_automasking_view_normal) {
-		col.prop (automasking, 'use_automasking_view_occlusion', __kwargtrans__ ({text: 'Occlusion'}));
-		var subcol = col.column (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_view_occlusion', __kwargtrans__ ({text: 'Occlusion'}));
+		}) ();
+		var subcol = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		subcol.active = !(automasking.use_automasking_view_occlusion);
-		subcol.prop (automasking, 'view_normal_limit', __kwargtrans__ ({text: 'Limit'}));
-		subcol.prop (automasking, 'view_normal_falloff', __kwargtrans__ ({text: 'Falloff'}));
+		(function () {
+			var __accu0__ = subcol;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'view_normal_limit', __kwargtrans__ ({text: 'Limit'}));
+		}) ();
+		(function () {
+			var __accu0__ = subcol;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'view_normal_falloff', __kwargtrans__ ({text: 'Falloff'}));
+		}) ();
 	}
-	var col = parent.column ();
-	col.prop (automasking, 'use_automasking_start_normal', __kwargtrans__ ({text: 'Area Normal'}));
+	var col = (function () {
+		var __accu0__ = parent;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, automasking, 'use_automasking_start_normal', __kwargtrans__ ({text: 'Area Normal'}));
+	}) ();
 	if (automasking.use_automasking_start_normal) {
-		var col = parent.column (__kwargtrans__ ({align: true}));
-		col.prop (automasking, 'start_normal_limit', __kwargtrans__ ({text: 'Limit'}));
-		col.prop (automasking, 'start_normal_falloff', __kwargtrans__ ({text: 'Falloff'}));
+		var col = (function () {
+			var __accu0__ = parent;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'start_normal_limit', __kwargtrans__ ({text: 'Limit'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, automasking, 'start_normal_falloff', __kwargtrans__ ({text: 'Falloff'}));
+		}) ();
 	}
 };
 export var draw_color_settings = function (context, layout, brush, color_type) {
@@ -1823,7 +3241,7 @@ export var draw_color_settings = function (context, layout, brush, color_type) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1837,31 +3255,76 @@ export var draw_color_settings = function (context, layout, brush, color_type) {
 	}
 	else {
 	}
-	var ups = UnifiedPaintPanel.paint_settings (context).unified_paint_settings;
+	var ups = (function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.paint_settings, __accu0__, context);
+	}) ().unified_paint_settings;
 	if (color_type) {
-		var row = layout.row ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.use_property_split = false;
-		row.prop (brush, 'color_type', __kwargtrans__ ({expand: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'color_type', __kwargtrans__ ({expand: true}));
+		}) ();
 	}
-	if (brush.color_type == 'COLOR') {
-		UnifiedPaintPanel.prop_unified_color_picker (layout, context, brush, 'color', __kwargtrans__ ({value_slider: true}));
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		UnifiedPaintPanel.prop_unified_color (row, context, brush, 'color', __kwargtrans__ ({text: ''}));
-		UnifiedPaintPanel.prop_unified_color (row, context, brush, 'secondary_color', __kwargtrans__ ({text: ''}));
-		row.separator ();
-		row.operator ('paint.brush_colors_flip', __kwargtrans__ ({icon: 'FILE_REFRESH', text: '', emboss: false}));
-		row.prop (ups, 'use_unified_color', __kwargtrans__ ({text: '', icon: 'BRUSHES_ALL'}));
-		draw_color_jitter_panel (layout, context, brush);
+	if (__eq__ (brush.color_type, 'COLOR')) {
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified_color_picker, __accu0__, layout, context, brush, 'color', __kwargtrans__ ({value_slider: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified_color, __accu0__, row, context, brush, 'color', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified_color, __accu0__, row, context, brush, 'secondary_color', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'paint.brush_colors_flip', __kwargtrans__ ({icon: 'FILE_REFRESH', text: '', emboss: false}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, ups, 'use_unified_color', __kwargtrans__ ({text: '', icon: 'BRUSHES_ALL'}));
+		}) ();
+		__call__ (draw_color_jitter_panel, null, layout, context, brush);
 	}
-	else if (brush.color_type == 'GRADIENT') {
-		layout.template_color_ramp (brush, 'gradient', __kwargtrans__ ({expand: true}));
+	else if (__eq__ (brush.color_type, 'GRADIENT')) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_color_ramp, __accu0__, brush, 'gradient', __kwargtrans__ ({expand: true}));
+		}) ();
 		layout.use_property_split = true;
-		var col = layout.column ();
-		if (brush.image_brush_type == 'DRAW') {
-			UnifiedPaintPanel.prop_unified (col, context, brush, 'secondary_color', __kwargtrans__ ({unified_name: 'use_unified_color', text: 'Background Color', header: true}));
-			col.prop (brush, 'gradient_stroke_mode', __kwargtrans__ ({text: 'Gradient Mapping'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		if (__eq__ (brush.image_brush_type, 'DRAW')) {
+			(function () {
+				var __accu0__ = UnifiedPaintPanel;
+				return __call__ (__accu0__.prop_unified, __accu0__, col, context, brush, 'secondary_color', __kwargtrans__ ({unified_name: 'use_unified_color', text: 'Background Color', header: true}));
+			}) ();
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'gradient_stroke_mode', __kwargtrans__ ({text: 'Gradient Mapping'}));
+			}) ();
 			if (__in__ (brush.gradient_stroke_mode, new set (['SPACING_REPEAT', 'SPACING_CLAMP']))) {
-				col.prop (brush, 'grad_spacing');
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, brush, 'grad_spacing');
+				}) ();
 			}
 		}
 	}
@@ -1869,7 +3332,7 @@ export var draw_color_settings = function (context, layout, brush, color_type) {
 export var brush_texture_settings = function (layout, brush, sculpt) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1885,52 +3348,100 @@ export var brush_texture_settings = function (layout, brush, sculpt) {
 	var tex_slot = brush.texture_slot;
 	layout.use_property_split = true;
 	layout.use_property_decorate = false;
-	layout.prop (tex_slot, 'map_mode', __kwargtrans__ ({text: 'Mapping'}));
-	layout.separator ();
-	if (tex_slot.map_mode == 'STENCIL') {
-		if (brush.texture && brush.texture.py_metatype == 'IMAGE') {
-			layout.operator ('brush.stencil_fit_image_aspect').mask = false;
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, tex_slot, 'map_mode', __kwargtrans__ ({text: 'Mapping'}));
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.separator, __accu0__);
+	}) ();
+	if (__eq__ (tex_slot.map_mode, 'STENCIL')) {
+		if (brush.texture && __eq__ (brush.texture.py_metatype, 'IMAGE')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'brush.stencil_fit_image_aspect');
+			}) ().mask = false;
 		}
-		layout.operator ('brush.stencil_reset_transform').mask = false;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'brush.stencil_reset_transform');
+		}) ().mask = false;
 	}
 	if (tex_slot.has_texture_angle) {
-		var col = layout.column ();
-		col.prop (tex_slot, 'angle', __kwargtrans__ ({text: 'Angle'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, tex_slot, 'angle', __kwargtrans__ ({text: 'Angle'}));
+		}) ();
 		if (tex_slot.has_texture_angle_source) {
-			col.prop (tex_slot, 'use_rake', __kwargtrans__ ({text: 'Rake'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, tex_slot, 'use_rake', __kwargtrans__ ({text: 'Rake'}));
+			}) ();
 			if (brush.brush_capabilities.has_random_texture_angle && tex_slot.has_random_texture_angle) {
 				if (sculpt) {
 					if (brush.sculpt_capabilities.has_random_texture_angle) {
-						col.prop (tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop, __accu0__, tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+						}) ();
 						if (tex_slot.use_random) {
-							col.prop (tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+							(function () {
+								var __accu0__ = col;
+								return __call__ (__accu0__.prop, __accu0__, tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+							}) ();
 						}
 					}
 				}
 				else {
-					col.prop (tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+					}) ();
 					if (tex_slot.use_random) {
-						col.prop (tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+						(function () {
+							var __accu0__ = col;
+							return __call__ (__accu0__.prop, __accu0__, tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+						}) ();
 					}
 				}
 			}
 		}
 	}
-	layout.prop (tex_slot, 'offset');
-	layout.prop (tex_slot, 'scale');
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, tex_slot, 'offset');
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, tex_slot, 'scale');
+	}) ();
 	if (sculpt) {
-		layout.prop (brush, 'texture_sample_bias', __kwargtrans__ ({slider: true, text: 'Sample Bias'}));
-		if (brush.sculpt_brush_type == 'DRAW') {
-			var col = layout.column ();
-			col.active = tex_slot.map_mode == 'AREA_PLANE';
-			col.prop (brush, 'use_color_as_displacement', __kwargtrans__ ({text: 'Vector Displacement'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'texture_sample_bias', __kwargtrans__ ({slider: true, text: 'Sample Bias'}));
+		}) ();
+		if (__eq__ (brush.sculpt_brush_type, 'DRAW')) {
+			var col = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.column, __accu0__);
+			}) ();
+			col.active = __eq__ (tex_slot.map_mode, 'AREA_PLANE');
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'use_color_as_displacement', __kwargtrans__ ({text: 'Vector Displacement'}));
+			}) ();
 		}
 	}
 };
 export var brush_mask_texture_settings = function (layout, brush) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1945,36 +3456,75 @@ export var brush_mask_texture_settings = function (layout, brush) {
 	var mask_tex_slot = brush.mask_texture_slot;
 	layout.use_property_split = true;
 	layout.use_property_decorate = false;
-	layout.row ().prop (mask_tex_slot, 'mask_map_mode', __kwargtrans__ ({text: 'Mask Mapping'}));
-	if (mask_tex_slot.map_mode == 'STENCIL') {
-		if (brush.mask_texture && brush.mask_texture.py_metatype == 'IMAGE') {
-			layout.operator ('brush.stencil_fit_image_aspect').mask = true;
+	(function () {
+		var __accu0__ = (function () {
+			var __accu1__ = layout;
+			return __call__ (__accu1__.row, __accu1__);
+		}) ();
+		return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'mask_map_mode', __kwargtrans__ ({text: 'Mask Mapping'}));
+	}) ();
+	if (__eq__ (mask_tex_slot.map_mode, 'STENCIL')) {
+		if (brush.mask_texture && __eq__ (brush.mask_texture.py_metatype, 'IMAGE')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.operator, __accu0__, 'brush.stencil_fit_image_aspect');
+			}) ().mask = true;
 		}
-		layout.operator ('brush.stencil_reset_transform').mask = true;
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'brush.stencil_reset_transform');
+		}) ().mask = true;
 	}
-	var col = layout.column ();
-	col.prop (brush, 'use_pressure_masking', __kwargtrans__ ({text: 'Pressure Masking'}));
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__);
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, brush, 'use_pressure_masking', __kwargtrans__ ({text: 'Pressure Masking'}));
+	}) ();
 	if (mask_tex_slot.has_texture_angle) {
-		var col = layout.column ();
-		col.prop (mask_tex_slot, 'angle', __kwargtrans__ ({text: 'Angle'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'angle', __kwargtrans__ ({text: 'Angle'}));
+		}) ();
 		if (mask_tex_slot.has_texture_angle_source) {
-			col.prop (mask_tex_slot, 'use_rake', __kwargtrans__ ({text: 'Rake'}));
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'use_rake', __kwargtrans__ ({text: 'Rake'}));
+			}) ();
 			if (brush.brush_capabilities.has_random_texture_angle && mask_tex_slot.has_random_texture_angle) {
-				col.prop (mask_tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'use_random', __kwargtrans__ ({text: 'Random'}));
+				}) ();
 				if (mask_tex_slot.use_random) {
-					col.prop (mask_tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+					(function () {
+						var __accu0__ = col;
+						return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'random_angle', __kwargtrans__ ({text: 'Random Angle'}));
+					}) ();
 				}
 			}
 		}
 	}
-	col.prop (mask_tex_slot, 'offset');
-	col.prop (mask_tex_slot, 'scale');
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'offset');
+	}) ();
+	(function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.prop, __accu0__, mask_tex_slot, 'scale');
+	}) ();
 };
 export var brush_basic_texpaint_settings = function (layout, context, brush) {
 	var compact = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1990,20 +3540,41 @@ export var brush_basic_texpaint_settings = function (layout, context, brush) {
 	}
 	var capabilities = brush.image_paint_capabilities;
 	if (capabilities.has_color) {
-		var row = layout.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		row.ui_units_x = 4;
-		UnifiedPaintPanel.prop_unified_color (row, context, brush, 'color', __kwargtrans__ ({text: ''}));
-		UnifiedPaintPanel.prop_unified_color (row, context, brush, 'secondary_color', __kwargtrans__ ({text: ''}));
-		row.separator ();
-		layout.prop (brush, 'blend', __kwargtrans__ ({text: (compact ? '' : iface_ ('Blend')), translate: false}));
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified_color, __accu0__, row, context, brush, 'color', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified_color, __accu0__, row, context, brush, 'secondary_color', __kwargtrans__ ({text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'blend', __kwargtrans__ ({text: (compact ? '' : __call__ (iface_, null, 'Blend')), translate: false}));
+		}) ();
 	}
-	UnifiedPaintPanel.prop_unified (layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', slider: true, text: 'Size', header: true}));
-	UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: 'use_pressure_strength', unified_name: 'use_unified_strength', header: true}));
+	(function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', slider: true, text: 'Size', header: true}));
+	}) ();
+	(function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: 'use_pressure_strength', unified_name: 'use_unified_strength', header: true}));
+	}) ();
 };
 export var brush_basic__draw_color_selector = function (context, layout, brush, gp_settings) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2020,56 +3591,98 @@ export var brush_basic__draw_color_selector = function (context, layout, brush, 
 	var tool_settings = context.scene.tool_settings;
 	var settings = tool_settings.gpencil_paint;
 	var ma = gp_settings.material;
-	var row = layout.row (__kwargtrans__ ({align: true}));
+	var row = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	if (!(gp_settings.use_material_pin)) {
 		var ma = context.object.active_material;
 	}
 	var icon_id = 0;
 	var txt_ma = '';
 	if (ma) {
-		ma.id_data.preview_ensure ();
+		(function () {
+			var __accu0__ = ma.id_data;
+			return __call__ (__accu0__.preview_ensure, __accu0__);
+		}) ();
 		if (ma.id_data.preview) {
 			var icon_id = ma.id_data.preview.icon_id;
 			var txt_ma = ma.py_name;
 			var maxw = 25;
-			if (len (txt_ma) > maxw) {
-				var txt_ma = (txt_ma.__getslice__ (null, maxw - 5, 1) + '..') + txt_ma.__getslice__ (-(3), null, 1);
+			if (__gt__ (__call__ (len, null, txt_ma), maxw)) {
+				var txt_ma = __add__ (__add__ (__getslice__ (txt_ma, null, __sub__ (maxw, 5), 1), '..'), __getslice__ (txt_ma, __neg__ (3), null, 1));
 			}
 		}
 	}
-	var sub = row.row (__kwargtrans__ ({align: true}));
+	var sub = (function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	sub.enabled = !(gp_settings.use_material_pin);
 	sub.ui_units_x = 8;
-	sub.popover (__kwargtrans__ ({panel: 'TOPBAR_PT_grease_pencil_materials', text: txt_ma, translate: false, icon_value: icon_id}));
-	row.prop (gp_settings, 'use_material_pin', __kwargtrans__ ({text: ''}));
+	(function () {
+		var __accu0__ = sub;
+		return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TOPBAR_PT_grease_pencil_materials', text: txt_ma, translate: false, icon_value: icon_id}));
+	}) ();
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_material_pin', __kwargtrans__ ({text: ''}));
+	}) ();
 	if (__in__ (brush.gpencil_brush_type, new set (['DRAW', 'FILL']))) {
-		row.separator (__kwargtrans__ ({factor: 1.0}));
-		var sub_row = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.separator, __accu0__, __kwargtrans__ ({factor: 1.0}));
+		}) ();
+		var sub_row = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		var pin_draw_mode = gp_settings.pin_draw_mode;
 		sub_row.enabled = !(pin_draw_mode);
 		if (pin_draw_mode) {
-			sub_row.prop_enum (gp_settings, 'brush_draw_mode', 'MATERIAL', __kwargtrans__ ({text: '', icon: 'MATERIAL'}));
-			sub_row.prop_enum (gp_settings, 'brush_draw_mode', 'VERTEXCOLOR', __kwargtrans__ ({text: '', icon: 'VPAINT_HLT'}));
+			(function () {
+				var __accu0__ = sub_row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'brush_draw_mode', 'MATERIAL', __kwargtrans__ ({text: '', icon: 'MATERIAL'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub_row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'brush_draw_mode', 'VERTEXCOLOR', __kwargtrans__ ({text: '', icon: 'VPAINT_HLT'}));
+			}) ();
 		}
 		else {
-			sub_row.prop_enum (settings, 'color_mode', 'MATERIAL', __kwargtrans__ ({text: '', icon: 'MATERIAL'}));
-			sub_row.prop_enum (settings, 'color_mode', 'VERTEXCOLOR', __kwargtrans__ ({text: '', icon: 'VPAINT_HLT'}));
+			(function () {
+				var __accu0__ = sub_row;
+				return __call__ (__accu0__.prop_enum, __accu0__, settings, 'color_mode', 'MATERIAL', __kwargtrans__ ({text: '', icon: 'MATERIAL'}));
+			}) ();
+			(function () {
+				var __accu0__ = sub_row;
+				return __call__ (__accu0__.prop_enum, __accu0__, settings, 'color_mode', 'VERTEXCOLOR', __kwargtrans__ ({text: '', icon: 'VPAINT_HLT'}));
+			}) ();
 		}
-		var show_vertex_color = !(pin_draw_mode) && settings.color_mode == 'VERTEXCOLOR' || pin_draw_mode && gp_settings.brush_draw_mode == 'VERTEXCOLOR';
+		var show_vertex_color = !(pin_draw_mode) && __eq__ (settings.color_mode, 'VERTEXCOLOR') || pin_draw_mode && __eq__ (gp_settings.brush_draw_mode, 'VERTEXCOLOR');
 		if (show_vertex_color) {
-			var sub_row = row.row (__kwargtrans__ ({align: true}));
+			var sub_row = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub_row.enabled = show_vertex_color;
 			sub_row.scale_x = 0.8;
-			sub_row.prop_with_popover (brush, 'color', __kwargtrans__ ({text: '', panel: 'TOPBAR_PT_grease_pencil_vertex_color'}));
+			(function () {
+				var __accu0__ = sub_row;
+				return __call__ (__accu0__.prop_with_popover, __accu0__, brush, 'color', __kwargtrans__ ({text: '', panel: 'TOPBAR_PT_grease_pencil_vertex_color'}));
+			}) ();
 		}
-		row.prop (gp_settings, 'pin_draw_mode', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'pin_draw_mode', __kwargtrans__ ({text: ''}));
+		}) ();
 	}
 };
 export var brush_basic_grease_pencil_paint_settings = function (layout, context, brush, props) {
 	var compact = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2086,7 +3699,10 @@ export var brush_basic_grease_pencil_paint_settings = function (layout, context,
 	}
 	var gp_settings = brush.gpencil_settings;
 	var paint = context.tool_settings.gpencil_paint;
-	var tool = context.workspace.tools.from_space_view3d_mode (context.mode, __kwargtrans__ ({create: false}));
+	var tool = (function () {
+		var __accu0__ = context.workspace.tools;
+		return __call__ (__accu0__.from_space_view3d_mode, __accu0__, context.mode, __kwargtrans__ ({create: false}));
+	}) ();
 	if (gp_settings === null) {
 		return ;
 	}
@@ -2094,142 +3710,319 @@ export var brush_basic_grease_pencil_paint_settings = function (layout, context,
 	var grease_pencil_brush_type = brush.gpencil_brush_type;
 	if (__in__ (grease_pencil_brush_type, new set (['DRAW', 'ERASE', 'TINT'])) || is_primitive_tool) {
 		var size = 'size';
-		if (brush.use_locked_size == 'SCENE' && (grease_pencil_brush_type == 'DRAW' || is_primitive_tool)) {
+		if (__eq__ (brush.use_locked_size, 'SCENE') && (__eq__ (grease_pencil_brush_type, 'DRAW') || is_primitive_tool)) {
 			var size = 'unprojected_size';
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (brush, size, __kwargtrans__ ({slider: true, text: 'Size'}));
-		row.prop (brush, 'use_pressure_size', __kwargtrans__ ({text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, size, __kwargtrans__ ({slider: true, text: 'Size'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_pressure_size', __kwargtrans__ ({text: ''}));
+		}) ();
 		if (!(compact)) {
-			row.prop (paint, 'show_size_curve', __kwargtrans__ ({text: '', icon: (paint.show_size_curve ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, paint, 'show_size_curve', __kwargtrans__ ({text: '', icon: (paint.show_size_curve ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
+			}) ();
 			if (paint.show_size_curve) {
-				var col = layout.column ();
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				col.active = brush.use_pressure_size;
-				col.template_curve_mapping (gp_settings, 'curve_sensitivity', __kwargtrans__ ({brush: true, show_presets: true}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_curve_mapping, __accu0__, gp_settings, 'curve_sensitivity', __kwargtrans__ ({brush: true, show_presets: true}));
+				}) ();
 			}
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		row.prop (brush, 'strength', __kwargtrans__ ({slider: true, text: 'Strength'}));
-		row.prop (brush, 'use_pressure_strength', __kwargtrans__ ({text: ''}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'strength', __kwargtrans__ ({slider: true, text: 'Strength'}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'use_pressure_strength', __kwargtrans__ ({text: ''}));
+		}) ();
 		if (!(compact)) {
-			row.prop (paint, 'show_strength_curve', __kwargtrans__ ({text: '', icon: (paint.show_strength_curve ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, paint, 'show_strength_curve', __kwargtrans__ ({text: '', icon: (paint.show_strength_curve ? 'DOWNARROW_HLT' : 'RIGHTARROW'), emboss: false}));
+			}) ();
 			if (paint.show_strength_curve) {
-				var col = layout.column ();
+				var col = (function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.column, __accu0__);
+				}) ();
 				col.active = brush.use_pressure_strength;
-				col.template_curve_mapping (gp_settings, 'curve_strength', __kwargtrans__ ({brush: true, show_presets: true}));
+				(function () {
+					var __accu0__ = col;
+					return __call__ (__accu0__.template_curve_mapping, __accu0__, gp_settings, 'curve_strength', __kwargtrans__ ({brush: true, show_presets: true}));
+				}) ();
 			}
 		}
 	}
 	if (props) {
-		layout.prop (props, 'subdivision');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'subdivision');
+		}) ();
 	}
 	if (is_primitive_tool) {
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		if (context.region.py_metatype == 'TOOL_HEADER') {
-			row.prop_enum (brush.gpencil_settings, 'stroke_type', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
-			row.prop_enum (brush.gpencil_settings, 'stroke_type', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
-			row.prop_enum (brush.gpencil_settings, 'stroke_type', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		if (__eq__ (context.region.py_metatype, 'TOOL_HEADER')) {
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, brush.gpencil_settings, 'stroke_type', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, brush.gpencil_settings, 'stroke_type', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, brush.gpencil_settings, 'stroke_type', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+			}) ();
 		}
 		else {
-			row.prop (brush.gpencil_settings, 'stroke_type');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush.gpencil_settings, 'stroke_type');
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		if (context.region.py_metatype == 'TOOL_HEADER') {
-			row.prop (gp_settings, 'caps_type', __kwargtrans__ ({text: '', expand: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		if (__eq__ (context.region.py_metatype, 'TOOL_HEADER')) {
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'caps_type', __kwargtrans__ ({text: '', expand: true}));
+			}) ();
 		}
 		else {
-			row.prop (gp_settings, 'caps_type', __kwargtrans__ ({text: 'Caps Type'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'caps_type', __kwargtrans__ ({text: 'Caps Type'}));
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		var settings = context.tool_settings.gpencil_sculpt;
 		if (compact) {
-			row.prop (settings, 'use_thickness_curve', __kwargtrans__ ({text: '', icon: 'SPHERECURVE'}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, settings, 'use_thickness_curve', __kwargtrans__ ({text: '', icon: 'SPHERECURVE'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			sub.active = settings.use_thickness_curve;
-			sub.popover (__kwargtrans__ ({panel: 'TOPBAR_PT_gpencil_primitive', text: 'Thickness Profile'}));
+			(function () {
+				var __accu0__ = sub;
+				return __call__ (__accu0__.popover, __accu0__, __kwargtrans__ ({panel: 'TOPBAR_PT_gpencil_primitive', text: 'Thickness Profile'}));
+			}) ();
 		}
 		else {
-			row.prop (settings, 'use_thickness_curve', __kwargtrans__ ({text: 'Use Thickness Profile'}));
-			var sub = row.row (__kwargtrans__ ({align: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, settings, 'use_thickness_curve', __kwargtrans__ ({text: 'Use Thickness Profile'}));
+			}) ();
+			var sub = (function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
 			if (settings.use_thickness_curve) {
-				layout.template_curve_mapping (settings, 'thickness_primitive_curve', __kwargtrans__ ({brush: true}));
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.template_curve_mapping, __accu0__, settings, 'thickness_primitive_curve', __kwargtrans__ ({brush: true}));
+				}) ();
 			}
 		}
 	}
-	else if (grease_pencil_brush_type == 'DRAW') {
-		var row = layout.row (__kwargtrans__ ({align: true}));
+	else if (__eq__ (grease_pencil_brush_type, 'DRAW')) {
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (compact) {
-			row.prop_enum (brush.gpencil_settings, 'stroke_type', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
-			row.prop_enum (brush.gpencil_settings, 'stroke_type', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
-			row.prop_enum (brush.gpencil_settings, 'stroke_type', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, brush.gpencil_settings, 'stroke_type', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, brush.gpencil_settings, 'stroke_type', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, brush.gpencil_settings, 'stroke_type', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+			}) ();
 		}
 		else {
-			row.prop (brush.gpencil_settings, 'stroke_type');
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush.gpencil_settings, 'stroke_type');
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		if (compact) {
-			row.prop (gp_settings, 'caps_type', __kwargtrans__ ({text: '', expand: true}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'caps_type', __kwargtrans__ ({text: '', expand: true}));
+			}) ();
 		}
 		else {
-			row.prop (gp_settings, 'caps_type', __kwargtrans__ ({text: 'Caps Type'}));
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'caps_type', __kwargtrans__ ({text: 'Caps Type'}));
+			}) ();
 		}
 	}
-	else if (brush.gpencil_brush_type == 'FILL') {
+	else if (__eq__ (brush.gpencil_brush_type, 'FILL')) {
 		var use_property_split_prev = layout.use_property_split;
 		if (compact) {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (gp_settings, 'fill_direction', __kwargtrans__ ({text: '', expand: true}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'fill_direction', __kwargtrans__ ({text: '', expand: true}));
+			}) ();
 		}
 		else {
 			layout.use_property_split = false;
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (gp_settings, 'fill_direction', __kwargtrans__ ({expand: true}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'fill_direction', __kwargtrans__ ({expand: true}));
+			}) ();
 		}
-		var row = layout.row (__kwargtrans__ ({align: true}));
-		if (gp_settings.fill_solver == 'PIXEL') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (gp_settings, 'fill_factor');
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (gp_settings, 'dilate');
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, 'size', __kwargtrans__ ({text: 'Thickness'}));
+		var row = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		if (__eq__ (gp_settings.fill_solver, 'PIXEL')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'fill_factor');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'dilate');
+			}) ();
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, 'size', __kwargtrans__ ({text: 'Thickness'}));
+			}) ();
 			layout.use_property_split = use_property_split_prev;
 		}
 		else {
 			var size = 'size';
-			if (brush.use_locked_size == 'SCENE') {
+			if (__eq__ (brush.use_locked_size, 'SCENE')) {
 				var size = 'unprojected_size';
 			}
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop (brush, size, __kwargtrans__ ({slider: true, text: 'Size'}));
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop, __accu0__, brush, size, __kwargtrans__ ({slider: true, text: 'Size'}));
+			}) ();
 		}
 	}
-	else if (grease_pencil_brush_type == 'ERASE') {
-		layout.prop (gp_settings, 'eraser_mode', __kwargtrans__ ({expand: true}));
-		layout.prop (gp_settings, 'use_active_layer_only');
+	else if (__eq__ (grease_pencil_brush_type, 'ERASE')) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'eraser_mode', __kwargtrans__ ({expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_active_layer_only');
+		}) ();
 		if (__in__ (gp_settings.eraser_mode, new set (['HARD', 'SOFT']))) {
-			layout.prop (gp_settings, 'use_keep_caps_eraser');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_keep_caps_eraser');
+			}) ();
 		}
 	}
-	else if (grease_pencil_brush_type == 'TINT') {
-		if (context.region.py_metatype == 'TOOL_HEADER') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop_enum (gp_settings, 'vertex_mode', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
-			row.prop_enum (gp_settings, 'vertex_mode', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
-			row.prop_enum (gp_settings, 'vertex_mode', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+	else if (__eq__ (grease_pencil_brush_type, 'TINT')) {
+		if (__eq__ (context.region.py_metatype, 'TOOL_HEADER')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'vertex_mode', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'vertex_mode', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'vertex_mode', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+			}) ();
 		}
 		else {
-			layout.prop (gp_settings, 'vertex_mode', __kwargtrans__ ({text: 'Stroke Mode'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'vertex_mode', __kwargtrans__ ({text: 'Stroke Mode'}));
+			}) ();
 		}
-		layout.popover ('VIEW3D_PT_tools_brush_falloff');
-		layout.prop (gp_settings, 'use_active_layer_only');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.popover, __accu0__, 'VIEW3D_PT_tools_brush_falloff');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, gp_settings, 'use_active_layer_only');
+		}) ();
 	}
 };
 export var brush_basic_grease_pencil_weight_settings = function (layout, context, brush) {
 	var compact = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2243,20 +4036,32 @@ export var brush_basic_grease_pencil_weight_settings = function (layout, context
 	}
 	else {
 	}
-	UnifiedPaintPanel.prop_unified (layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', text: 'Size', slider: true, header: compact}));
+	(function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', text: 'Size', slider: true, header: compact}));
+	}) ();
 	var capabilities = brush.sculpt_capabilities;
 	var pressure_name = (capabilities.has_strength_pressure ? 'use_pressure_strength' : null);
-	UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: pressure_name, unified_name: 'use_unified_strength', text: 'Strength', header: compact}));
+	(function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: pressure_name, unified_name: 'use_unified_strength', text: 'Strength', header: compact}));
+	}) ();
 	if (__in__ (brush.gpencil_weight_brush_type, new set (['WEIGHT']))) {
-		UnifiedPaintPanel.prop_unified (layout, context, brush, 'weight', __kwargtrans__ ({unified_name: 'use_unified_weight', text: 'Weight', slider: true, header: compact}));
-		layout.prop (brush, 'direction', __kwargtrans__ ({expand: true, text: (compact ? '' : 'Direction')}));
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'weight', __kwargtrans__ ({unified_name: 'use_unified_weight', text: 'Weight', slider: true, header: compact}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'direction', __kwargtrans__ ({expand: true, text: (compact ? '' : 'Direction')}));
+		}) ();
 	}
 };
 export var brush_basic_grease_pencil_vertex_settings = function (layout, context, brush) {
 	var compact = false;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -2270,24 +4075,51 @@ export var brush_basic_grease_pencil_vertex_settings = function (layout, context
 	}
 	else {
 	}
-	if (brush.gpencil_vertex_brush_type == 'DRAW') {
-		layout.prop (brush, 'blend', __kwargtrans__ ({text: 'Blend'}));
-		layout.separator ();
+	if (__eq__ (brush.gpencil_vertex_brush_type, 'DRAW')) {
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, brush, 'blend', __kwargtrans__ ({text: 'Blend'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
-	UnifiedPaintPanel.prop_unified (layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', text: 'Size', slider: true, header: compact}));
+	(function () {
+		var __accu0__ = UnifiedPaintPanel;
+		return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'size', __kwargtrans__ ({pressure_name: 'use_pressure_size', unified_name: 'use_unified_size', text: 'Size', slider: true, header: compact}));
+	}) ();
 	if (__in__ (brush.gpencil_vertex_brush_type, new set (['DRAW', 'BLUR', 'SMEAR']))) {
-		UnifiedPaintPanel.prop_unified (layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: 'use_pressure_strength', unified_name: 'use_unified_strength', text: 'Strength', header: compact}));
+		(function () {
+			var __accu0__ = UnifiedPaintPanel;
+			return __call__ (__accu0__.prop_unified, __accu0__, layout, context, brush, 'strength', __kwargtrans__ ({pressure_name: 'use_pressure_strength', unified_name: 'use_unified_strength', text: 'Strength', header: compact}));
+		}) ();
 	}
 	var gp_settings = brush.gpencil_settings;
 	if (__in__ (brush.gpencil_vertex_brush_type, new set (['DRAW', 'REPLACE']))) {
-		if (context.region.py_metatype == 'TOOL_HEADER') {
-			var row = layout.row (__kwargtrans__ ({align: true}));
-			row.prop_enum (gp_settings, 'vertex_mode', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
-			row.prop_enum (gp_settings, 'vertex_mode', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
-			row.prop_enum (gp_settings, 'vertex_mode', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+		if (__eq__ (context.region.py_metatype, 'TOOL_HEADER')) {
+			var row = (function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'vertex_mode', 'STROKE', __kwargtrans__ ({text: '', icon: 'GP_DRAW_STROKE'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'vertex_mode', 'FILL', __kwargtrans__ ({text: '', icon: 'GP_DRAW_FILL'}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.prop_enum, __accu0__, gp_settings, 'vertex_mode', 'BOTH', __kwargtrans__ ({text: '', icon: 'GP_DRAW_BOTH'}));
+			}) ();
 		}
 		else {
-			layout.prop (gp_settings, 'vertex_mode', __kwargtrans__ ({text: 'Stroke Mode'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, gp_settings, 'vertex_mode', __kwargtrans__ ({text: 'Stroke Mode'}));
+			}) ();
 		}
 	}
 };
@@ -2295,7 +4127,7 @@ export var classes = tuple ([VIEW3D_MT_tools_projectpaint_clone]);
 export var register = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2303,12 +4135,15 @@ export var register = function () {
 	}
 	else {
 	}
-	bpy.types.ASSETSHELF_PT_filter.append (brush_asset_shelf_filter_draw);
+	(function () {
+		var __accu0__ = bpy.types.ASSETSHELF_PT_filter;
+		return __call__ (__accu0__.append, __accu0__, brush_asset_shelf_filter_draw);
+	}) ();
 };
 export var unregister = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -2316,13 +4151,61 @@ export var unregister = function () {
 	}
 	else {
 	}
-	bpy.types.ASSETSHELF_PT_filter.remove (brush_asset_shelf_filter_draw);
+	(function () {
+		var __accu0__ = bpy.types.ASSETSHELF_PT_filter;
+		return __call__ (__accu0__.remove, __accu0__, brush_asset_shelf_filter_draw);
+	}) ();
 };
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_paint_common.map
 export {Menu, _globals, _import, _lazy, _member, _module, i18n_contexts, iface_, n_, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case 'BrushAssetShelf': BrushAssetShelf = value; break;
+		case 'brush_asset_shelf_filter_draw': brush_asset_shelf_filter_draw = value; break;
+		case 'UnifiedPaintPanel': UnifiedPaintPanel = value; break;
+		case 'BrushPanel': BrushPanel = value; break;
+		case 'BrushSelectPanel': BrushSelectPanel = value; break;
+		case 'ColorPalettePanel': ColorPalettePanel = value; break;
+		case 'ClonePanel': ClonePanel = value; break;
+		case 'TextureMaskPanel': TextureMaskPanel = value; break;
+		case 'StrokePanel': StrokePanel = value; break;
+		case 'SmoothStrokePanel': SmoothStrokePanel = value; break;
+		case 'FalloffPanel': FalloffPanel = value; break;
+		case 'DisplayPanel': DisplayPanel = value; break;
+		case 'VIEW3D_MT_tools_projectpaint_clone': VIEW3D_MT_tools_projectpaint_clone = value; break;
+		case 'brush_settings': brush_settings = value; break;
+		case 'brush_shared_settings': brush_shared_settings = value; break;
+		case 'draw_color_jitter_panel': draw_color_jitter_panel = value; break;
+		case 'brush_settings_advanced': brush_settings_advanced = value; break;
+		case 'draw_auto_masking_panel': draw_auto_masking_panel = value; break;
+		case 'draw_color_settings': draw_color_settings = value; break;
+		case 'brush_texture_settings': brush_texture_settings = value; break;
+		case 'brush_mask_texture_settings': brush_mask_texture_settings = value; break;
+		case 'brush_basic_texpaint_settings': brush_basic_texpaint_settings = value; break;
+		case 'brush_basic__draw_color_selector': brush_basic__draw_color_selector = value; break;
+		case 'brush_basic_grease_pencil_paint_settings': brush_basic_grease_pencil_paint_settings = value; break;
+		case 'brush_basic_grease_pencil_weight_settings': brush_basic_grease_pencil_weight_settings = value; break;
+		case 'brush_basic_grease_pencil_vertex_settings': brush_basic_grease_pencil_vertex_settings = value; break;
+		case 'classes': classes = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -52,7 +52,7 @@ export var _Library =  __class__ ('_Library', [object], {
 	get __init__ () {return __get__ (this, function (self, supported, version) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -68,23 +68,35 @@ export var _Library =  __class__ ('_Library', [object], {
 		var __left0__ = tuple ([supported, version]);
 		self.supported = __left0__ [0];
 		self.version = __left0__ [1];
-		self.version_string = ', '.join ((function () {
-			var __accu0__ = [];
-			for (var v of version) {
-				__accu0__.append (str (v).rjust (2));
-			}
-			return __accu0__;
-		}) ());
+		self.version_string = (function () {
+			var __accu0__ = ', ';
+			return __call__ (__accu0__.join, __accu0__, (function () {
+				var __accu1__ = [];
+				var __iterable0__ = version;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var v = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu2__ = __accu1__;
+						return __call__ (__accu2__.append, __accu2__, (function () {
+							var __accu3__ = __call__ (str, null, v);
+							return __call__ (__accu3__.rjust, __accu3__, 2);
+						}) ());
+					}) ();
+				}
+				return __accu1__;
+			}) ());
+		}) ();
 	});}
 });
-export var alembic = _Library (true, tuple ([1, 8, 3]));
-export var ocio = _Library (true, tuple ([2, 5, 0]));
-export var oiio = _Library (true, tuple ([3, 1, 13]));
-export var opensubdiv = _Library (true, tuple ([3, 7, 0]));
-export var openvdb = _Library (true, tuple ([13, 0, 0]));
-export var usd = _Library (true, tuple ([0, 26, 3]));
-export var sdl = _Library (false, tuple ([0, 0, 0]));
-export var ffmpeg = _Library (true, tuple ([62, 28, 100]));
+export var alembic = __call__ (_Library, null, true, tuple ([1, 8, 3]));
+export var ocio = __call__ (_Library, null, true, tuple ([2, 5, 0]));
+export var oiio = __call__ (_Library, null, true, tuple ([3, 1, 13]));
+export var opensubdiv = __call__ (_Library, null, true, tuple ([3, 7, 0]));
+export var openvdb = __call__ (_Library, null, true, tuple ([13, 0, 0]));
+export var usd = __call__ (_Library, null, true, tuple ([0, 26, 3]));
+export var sdl = __call__ (_Library, null, false, tuple ([0, 0, 0]));
+export var ffmpeg = __call__ (_Library, null, true, tuple ([62, 28, 100]));
 export var build_options =  __class__ ('build_options', [object], {
 	__module__: __name__,
 	bullet: true,
@@ -135,7 +147,7 @@ export var build_options =  __class__ ('build_options', [object], {
 export var is_job_running = function (job_type) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -154,7 +166,7 @@ export var help_text = function (all) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -169,3 +181,56 @@ export var help_text = function (all) {
 };
 
 //# sourceMappingURL=_bpy.app.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'version': version = value; break;
+		case 'version_file': version_file = value; break;
+		case 'version_string': version_string = value; break;
+		case 'version_cycle': version_cycle = value; break;
+		case 'background': background = value; break;
+		case 'factory_startup': factory_startup = value; break;
+		case 'portable': portable = value; break;
+		case 'online_access': online_access = value; break;
+		case 'online_access_override': online_access_override = value; break;
+		case 'debug': debug = value; break;
+		case 'debug_python': debug_python = value; break;
+		case 'debug_events': debug_events = value; break;
+		case 'debug_handlers': debug_handlers = value; break;
+		case 'debug_wm': debug_wm = value; break;
+		case 'debug_io': debug_io = value; break;
+		case 'debug_freestyle': debug_freestyle = value; break;
+		case 'debug_simdata': debug_simdata = value; break;
+		case 'debug_depsgraph': debug_depsgraph = value; break;
+		case 'debug_depsgraph_build': debug_depsgraph_build = value; break;
+		case 'debug_depsgraph_eval': debug_depsgraph_eval = value; break;
+		case 'debug_depsgraph_pretty': debug_depsgraph_pretty = value; break;
+		case 'debug_depsgraph_tag': debug_depsgraph_tag = value; break;
+		case 'debug_depsgraph_time': debug_depsgraph_time = value; break;
+		case 'debug_value': debug_value = value; break;
+		case 'autoexec_fail': autoexec_fail = value; break;
+		case 'autoexec_fail_quiet': autoexec_fail_quiet = value; break;
+		case 'autoexec_fail_message': autoexec_fail_message = value; break;
+		case 'binary_path': binary_path = value; break;
+		case 'tempdir': tempdir = value; break;
+		case 'cachedir': cachedir = value; break;
+		case 'render_icon_size': render_icon_size = value; break;
+		case 'render_preview_size': render_preview_size = value; break;
+		case 'use_event_simulate': use_event_simulate = value; break;
+		case 'use_userpref_skip_save_on_exit': use_userpref_skip_save_on_exit = value; break;
+		case 'python_args': python_args = value; break;
+		case 'driver_namespace': driver_namespace = value; break;
+		case '_Library': _Library = value; break;
+		case 'alembic': alembic = value; break;
+		case 'ocio': ocio = value; break;
+		case 'oiio': oiio = value; break;
+		case 'opensubdiv': opensubdiv = value; break;
+		case 'openvdb': openvdb = value; break;
+		case 'usd': usd = value; break;
+		case 'sdl': sdl = value; break;
+		case 'ffmpeg': ffmpeg = value; break;
+		case 'build_options': build_options = value; break;
+		case 'is_job_running': is_job_running = value; break;
+		case 'help_text': help_text = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

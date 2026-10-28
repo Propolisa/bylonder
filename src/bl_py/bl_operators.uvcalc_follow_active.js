@@ -7,16 +7,16 @@ import {Operator} from './_bpy.types.js';
 import {_globals, _import, _lazy, _member, _module} from './_modules.js';
 var __name__ = 'bl_operators.uvcalc_follow_active';
 export var __all__ = tuple (['classes']);
-export var STATUS_OK = 1 << 0;
-export var STATUS_ERR_ACTIVE_FACE = 1 << 1;
-export var STATUS_ERR_NOT_SELECTED = 1 << 2;
-export var STATUS_ERR_NOT_QUAD = 1 << 3;
-export var STATUS_ERR_MISSING_UV_LAYER = 1 << 4;
-export var STATUS_ERR_NO_FACES_SELECTED = 1 << 5;
+export var STATUS_OK = __lshift__ (1, 0);
+export var STATUS_ERR_ACTIVE_FACE = __lshift__ (1, 1);
+export var STATUS_ERR_NOT_SELECTED = __lshift__ (1, 2);
+export var STATUS_ERR_NOT_QUAD = __lshift__ (1, 3);
+export var STATUS_ERR_MISSING_UV_LAYER = __lshift__ (1, 4);
+export var STATUS_ERR_NO_FACES_SELECTED = __lshift__ (1, 5);
 export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -30,10 +30,13 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	}
 	else {
 	}
-	var bmesh = _module ('bmesh');
-	var is_face_uv_selected_fn_from_context = _member ('bl_operators.uvcalc_transform', 'is_face_uv_selected_fn_from_context');
+	var bmesh = __call__ (_module, null, 'bmesh');
+	var is_face_uv_selected_fn_from_context = __call__ (_member, null, 'bl_operators.uvcalc_transform', 'is_face_uv_selected_fn_from_context');
 	var me = obj.data;
-	var bm = bmesh.from_edit_mesh (me);
+	var bm = (function () {
+		var __accu0__ = bmesh;
+		return __call__ (__accu0__.from_edit_mesh, __accu0__, me);
+	}) ();
 	var f_act = bm.faces.active;
 	if (f_act === null) {
 		return STATUS_ERR_ACTIVE_FACE;
@@ -41,7 +44,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	if (!(f_act.select)) {
 		return STATUS_ERR_NOT_SELECTED;
 	}
-	if (len (f_act.verts) != 4) {
+	if (__ne__ (__call__ (len, null, f_act.verts), 4)) {
 		return STATUS_ERR_NOT_QUAD;
 	}
 	var uv_act = bm.loops.layers.uv.active;
@@ -49,12 +52,18 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		return STATUS_ERR_MISSING_UV_LAYER;
 	}
 	if (use_uv_selection) {
-		var face_select_test_fn = is_face_uv_selected_fn_from_context (scene, bm);
+		var face_select_test_fn = __call__ (is_face_uv_selected_fn_from_context, null, scene, bm);
 		var faces = (function () {
 			var __accu0__ = [];
-			for (var f of bm.faces) {
-				if (f.select && len (f.verts) == 4 && face_select_test_fn (f, false)) {
-					__accu0__.append (f);
+			var __iterable0__ = bm.faces;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var f = __getitem__ (__iterable0__, __index0__);
+				if (f.select && __eq__ (__call__ (len, null, f.verts), 4) && __call__ (face_select_test_fn, null, f, false)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, f);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -63,9 +72,15 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	else {
 		var faces = (function () {
 			var __accu0__ = [];
-			for (var f of bm.faces) {
-				if (f.select && len (f.verts) == 4) {
-					__accu0__.append (f);
+			var __iterable0__ = bm.faces;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var f = __getitem__ (__iterable0__, __index0__);
+				if (f.select && __eq__ (__call__ (len, null, f.verts), 4)) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, f);
+					}) ();
 				}
 			}
 			return __accu0__;
@@ -77,7 +92,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	var walk_face_init = function (faces, f_act) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -89,10 +104,16 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		}
 		else {
 		}
-		for (var f of bm.faces) {
+		var __iterable0__ = bm.faces;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var f = __getitem__ (__iterable0__, __index0__);
 			f.tag = true;
 		}
-		for (var f of faces) {
+		var __iterable0__ = faces;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var f = __getitem__ (__iterable0__, __index0__);
 			f.tag = false;
 		}
 		f_act.tag = true;
@@ -100,7 +121,7 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 	var walk_face = function* (f) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -115,8 +136,14 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		var faces_a = [f];
 		var faces_b = [];
 		while (faces_a) {
-			for (var f of faces_a) {
-				for (var l of f.loops) {
+			var __iterable0__ = faces_a;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var f = __getitem__ (__iterable0__, __index0__);
+				var __iterable1__ = f.loops;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var l = __getitem__ (__iterable1__, __index1__);
 					var l_edge = l.edge;
 					if (l_edge.is_manifold === true && l_edge.seam === false) {
 						var l_other = l.link_loop_radial_next;
@@ -124,7 +151,10 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 						if (!(f_other.tag)) {
 							yield tuple ([f, l, f_other]);
 							f_other.tag = true;
-							faces_b.append (f_other);
+							(function () {
+								var __accu0__ = faces_b;
+								return __call__ (__accu0__.append, __accu0__, f_other);
+							}) ();
 						}
 					}
 				}
@@ -132,13 +162,16 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 			var __left0__ = tuple ([faces_b, faces_a]);
 			var faces_a = __left0__ [0];
 			var faces_b = __left0__ [1];
-			faces_b.py_clear ();
+			(function () {
+				var __accu0__ = faces_b;
+				return __call__ (__accu0__.py_clear, __accu0__);
+			}) ();
 		}
 		};
 	var walk_edgeloop_all_impl_loop = function* (loop_stack, edges_visited, l) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -154,17 +187,23 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		var l_other = l.link_loop_next.link_loop_next;
 		var l_other_edge = l_other.edge;
 		if (!__in__ (l_other_edge, edges_visited)) {
-			edges_visited.add (l_other_edge);
+			(function () {
+				var __accu0__ = edges_visited;
+				return __call__ (__accu0__.add, __accu0__, l_other_edge);
+			}) ();
 			yield l_other_edge;
 			if (!(l_other_edge.is_boundary)) {
-				loop_stack.append (l_other);
+				(function () {
+					var __accu0__ = loop_stack;
+					return __call__ (__accu0__.append, __accu0__, l_other);
+				}) ();
 			}
 		}
 		};
 	var walk_edgeloop_all = function* (e) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -178,16 +217,22 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		var loop_stack = [];
 		var edges_visited = new set ([e]);
 		yield e;
-		for (var l of e.link_loops) {
-			if (len (l.face.verts) != 4) {
+		var __iterable0__ = e.link_loops;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var l = __getitem__ (__iterable0__, __index0__);
+			if (__ne__ (__call__ (len, null, l.face.verts), 4)) {
 				continue;
 			}
-			yield* walk_edgeloop_all_impl_loop (loop_stack, edges_visited, l);
+			yield* __call__ (walk_edgeloop_all_impl_loop, null, loop_stack, edges_visited, l);
 		}
 		while (true) {
 			var _walrus1 = loop_stack;
 			if (_walrus1) {
-				var l_test = loop_stack.py_pop ();
+				var l_test = (function () {
+					var __accu0__ = loop_stack;
+					return __call__ (__accu0__.py_pop, __accu0__);
+				}) ();
 				var _walrus1 = l_test;
 			}
 			if (!(_walrus1)) {
@@ -199,17 +244,17 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 				if (!(l !== l_test)) {
 					break;
 				}
-				if (len (l.face.verts) != 4) {
+				if (__ne__ (__call__ (len, null, l.face.verts), 4)) {
 					continue;
 				}
-				yield* walk_edgeloop_all_impl_loop (loop_stack, edges_visited, l);
+				yield* __call__ (walk_edgeloop_all_impl_loop, null, loop_stack, edges_visited, l);
 			}
 		}
 		};
 	var extrapolate_uv = function (fac, l_a_outer, l_a_inner, l_b_outer, l_b_inner) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -224,13 +269,13 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		}
 		else {
 		}
-		l_b_inner.__setslice__ (0, null, null, l_a_inner);
-		l_b_outer.__setslice__ (0, null, null, l_a_inner + (l_a_inner - l_a_outer) * fac);
+		__setslice__ (l_b_inner, 0, null, null, l_a_inner);
+		__setslice__ (l_b_outer, 0, null, null, __add__ (l_a_inner, __mul__ (__sub__ (l_a_inner, l_a_outer), fac)));
 	};
 	var apply_uv = function (_f_prev, l_prev, _f_next) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -245,42 +290,54 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		}
 		var l_a = [null, null, null, null];
 		var l_b = [null, null, null, null];
-		l_a [0] = l_prev;
-		l_a [1] = l_a [0].link_loop_next;
-		l_a [2] = l_a [1].link_loop_next;
-		l_a [3] = l_a [2].link_loop_next;
+		__setitem__ (l_a, 0, l_prev);
+		__setitem__ (l_a, 1, __getitem__ (l_a, 0).link_loop_next);
+		__setitem__ (l_a, 2, __getitem__ (l_a, 1).link_loop_next);
+		__setitem__ (l_a, 3, __getitem__ (l_a, 2).link_loop_next);
 		var l_next = l_prev.link_loop_radial_next;
-		if (l_next.vert != l_prev.vert) {
-			l_b [1] = l_next;
-			l_b [0] = l_b [1].link_loop_next;
-			l_b [3] = l_b [0].link_loop_next;
-			l_b [2] = l_b [3].link_loop_next;
+		if (__ne__ (l_next.vert, l_prev.vert)) {
+			__setitem__ (l_b, 1, l_next);
+			__setitem__ (l_b, 0, __getitem__ (l_b, 1).link_loop_next);
+			__setitem__ (l_b, 3, __getitem__ (l_b, 0).link_loop_next);
+			__setitem__ (l_b, 2, __getitem__ (l_b, 3).link_loop_next);
 		}
 		else {
-			l_b [0] = l_next;
-			l_b [1] = l_b [0].link_loop_next;
-			l_b [2] = l_b [1].link_loop_next;
-			l_b [3] = l_b [2].link_loop_next;
+			__setitem__ (l_b, 0, l_next);
+			__setitem__ (l_b, 1, __getitem__ (l_b, 0).link_loop_next);
+			__setitem__ (l_b, 2, __getitem__ (l_b, 1).link_loop_next);
+			__setitem__ (l_b, 3, __getitem__ (l_b, 2).link_loop_next);
 		}
 		var l_a_uv = (function () {
 			var __accu0__ = [];
-			for (var l of l_a) {
-				__accu0__.append (l [uv_act].uv);
+			var __iterable0__ = l_a;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var l = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __getitem__ (l, uv_act).uv);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		var l_b_uv = (function () {
 			var __accu0__ = [];
-			for (var l of l_b) {
-				__accu0__.append (l [uv_act].uv);
+			var __iterable0__ = l_b;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var l = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __getitem__ (l, uv_act).uv);
+				}) ();
 			}
 			return __accu0__;
 		}) ();
-		if (EXTEND_MODE == 'LENGTH_AVERAGE') {
-			var d1 = edge_lengths [l_a [1].edge.index] [0];
-			var d2 = edge_lengths [l_b [2].edge.index] [0];
+		if (__eq__ (EXTEND_MODE, 'LENGTH_AVERAGE')) {
+			var d1 = __getitem__ (__getitem__ (edge_lengths, __getitem__ (l_a, 1).edge.index), 0);
+			var d2 = __getitem__ (__getitem__ (edge_lengths, __getitem__ (l_b, 2).edge.index), 0);
 			try {
-				var fac = d2 / d1;
+				var fac = __truediv__ (d2, d1);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, ZeroDivisionError)) {
@@ -291,19 +348,19 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 				}
 			}
 		}
-		else if (EXTEND_MODE == 'LENGTH') {
-			var __left0__ = tuple ([l_a [3].vert.co, l_a [0].vert.co, l_b [3].vert.co]);
+		else if (__eq__ (EXTEND_MODE, 'LENGTH')) {
+			var __left0__ = tuple ([__getitem__ (l_a, 3).vert.co, __getitem__ (l_a, 0).vert.co, __getitem__ (l_b, 3).vert.co]);
 			var a0 = __left0__ [0];
 			var b0 = __left0__ [1];
 			var c0 = __left0__ [2];
-			var __left0__ = tuple ([l_a [2].vert.co, l_a [1].vert.co, l_b [2].vert.co]);
+			var __left0__ = tuple ([__getitem__ (l_a, 2).vert.co, __getitem__ (l_a, 1).vert.co, __getitem__ (l_b, 2).vert.co]);
 			var a1 = __left0__ [0];
 			var b1 = __left0__ [1];
 			var c1 = __left0__ [2];
-			var d1 = (a0 - b0).length + (a1 - b1).length;
-			var d2 = (b0 - c0).length + (b1 - c1).length;
+			var d1 = __add__ ((__sub__ (a0, b0)).length, (__sub__ (a1, b1)).length);
+			var d2 = __add__ ((__sub__ (b0, c0)).length, (__sub__ (b1, c1)).length);
 			try {
-				var fac = d2 / d1;
+				var fac = __truediv__ (d2, d1);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, ZeroDivisionError)) {
@@ -317,42 +374,63 @@ export var extend = function (scene, obj, EXTEND_MODE, use_uv_selection) {
 		else {
 			var fac = 1.0;
 		}
-		extrapolate_uv (fac, l_a_uv [3], l_a_uv [0], l_b_uv [3], l_b_uv [0]);
-		extrapolate_uv (fac, l_a_uv [2], l_a_uv [1], l_b_uv [2], l_b_uv [1]);
+		__call__ (extrapolate_uv, null, fac, __getitem__ (l_a_uv, 3), __getitem__ (l_a_uv, 0), __getitem__ (l_b_uv, 3), __getitem__ (l_b_uv, 0));
+		__call__ (extrapolate_uv, null, fac, __getitem__ (l_a_uv, 2), __getitem__ (l_a_uv, 1), __getitem__ (l_b_uv, 2), __getitem__ (l_b_uv, 1));
 	};
-	if (EXTEND_MODE == 'LENGTH_AVERAGE') {
-		bm.edges.index_update ();
-		var edge_lengths = [null] * len (bm.edges);
-		for (var f of faces) {
-			var l_quad = f.loops.__getslice__ (null, null, 1);
-			for (var l_init of tuple ([l_quad [0], l_quad [1]])) {
+	if (__eq__ (EXTEND_MODE, 'LENGTH_AVERAGE')) {
+		(function () {
+			var __accu0__ = bm.edges;
+			return __call__ (__accu0__.index_update, __accu0__);
+		}) ();
+		var edge_lengths = __mul__ ([null], __call__ (len, null, bm.edges));
+		var __iterable0__ = faces;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var f = __getitem__ (__iterable0__, __index0__);
+			var l_quad = __getslice__ (f.loops, null, null, 1);
+			var __iterable1__ = tuple ([__getitem__ (l_quad, 0), __getitem__ (l_quad, 1)]);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var l_init = __getitem__ (__iterable1__, __index1__);
 				var l_init_edge = l_init.edge;
-				if (edge_lengths [l_init_edge.index] !== null) {
+				if (__getitem__ (edge_lengths, l_init_edge.index) !== null) {
 					continue;
 				}
-				var edge_length_store = [-(1.0)];
+				var edge_length_store = [__neg__ (1.0)];
 				var edge_length_accum = 0.0;
 				var edge_length_total = 0;
-				for (var e of walk_edgeloop_all (l_init_edge)) {
-					edge_lengths [e.index] = edge_length_store;
-					edge_length_accum += e.calc_length ();
-					edge_length_total++;
+				var __iterable2__ = __call__ (walk_edgeloop_all, null, l_init_edge);
+				__iterable2__ = __i__ (__iterable2__);
+				for (var __index2__ = 0; __index2__ < len (__iterable2__); __index2__++) {
+					var e = __getitem__ (__iterable2__, __index2__);
+					__setitem__ (edge_lengths, e.index, edge_length_store);
+					var edge_length_accum = __call__ (__iadd__, null, edge_length_accum, (function () {
+						var __accu0__ = e;
+						return __call__ (__accu0__.calc_length, __accu0__);
+					}) ());
+					var edge_length_total = __call__ (__iadd__, null, edge_length_total, 1);
 				}
-				edge_length_store [0] = edge_length_accum / edge_length_total;
+				__setitem__ (edge_length_store, 0, __truediv__ (edge_length_accum, edge_length_total));
 			}
 		}
 	}
-	walk_face_init (faces, f_act);
-	for (var f_triple of walk_face (f_act)) {
-		apply_uv (...f_triple);
+	__call__ (walk_face_init, null, faces, f_act);
+	var __iterable0__ = __call__ (walk_face, null, f_act);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var f_triple = __getitem__ (__iterable0__, __index0__);
+		__call__ (apply_uv, null, ...f_triple);
 	}
-	bmesh.update_edit_mesh (me, __kwargtrans__ ({loop_triangles: false}));
+	(function () {
+		var __accu0__ = bmesh;
+		return __call__ (__accu0__.update_edit_mesh, __accu0__, me, __kwargtrans__ ({loop_triangles: false}));
+	}) ();
 	return STATUS_OK;
 };
 export var main = function (context, operator) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -366,36 +444,54 @@ export var main = function (context, operator) {
 	}
 	var scene = context.scene;
 	var use_uv_selection = true;
-	if (context.space_data && context.space_data.py_metatype == 'VIEW_3D') {
+	if (context.space_data && __eq__ (context.space_data.py_metatype, 'VIEW_3D')) {
 		var use_uv_selection = false;
 	}
 	var num_meshes = 0;
 	var num_errors = 0;
 	var status = 0;
 	var ob_list = context.objects_in_mode_unique_data;
-	for (var ob of ob_list) {
-		num_meshes++;
-		var ret = extend (scene, ob, operator.properties.mode, use_uv_selection);
-		if (ret != STATUS_OK) {
-			num_errors++;
-			status |= ret;
+	var __iterable0__ = ob_list;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var ob = __getitem__ (__iterable0__, __index0__);
+		var num_meshes = __call__ (__iadd__, null, num_meshes, 1);
+		var ret = __call__ (extend, null, scene, ob, operator.properties.mode, use_uv_selection);
+		if (__ne__ (ret, STATUS_OK)) {
+			var num_errors = __call__ (__iadd__, null, num_errors, 1);
+			var status = __call__ (__ior__, null, status, ret);
 		}
 	}
-	if (num_errors == num_meshes) {
-		if (status & STATUS_ERR_NOT_QUAD) {
-			operator.report (new set (['ERROR']), 'Active face must be a quad');
+	if (__eq__ (num_errors, num_meshes)) {
+		if (__and__ (status, STATUS_ERR_NOT_QUAD)) {
+			(function () {
+				var __accu0__ = operator;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Active face must be a quad');
+			}) ();
 		}
-		else if (status & STATUS_ERR_NOT_SELECTED) {
-			operator.report (new set (['ERROR']), 'Active face not selected');
+		else if (__and__ (status, STATUS_ERR_NOT_SELECTED)) {
+			(function () {
+				var __accu0__ = operator;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Active face not selected');
+			}) ();
 		}
-		else if (status & STATUS_ERR_NO_FACES_SELECTED) {
-			operator.report (new set (['ERROR']), 'No selected faces');
+		else if (__and__ (status, STATUS_ERR_NO_FACES_SELECTED)) {
+			(function () {
+				var __accu0__ = operator;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No selected faces');
+			}) ();
 		}
-		else if (status & STATUS_ERR_MISSING_UV_LAYER) {
-			operator.report (new set (['ERROR']), 'No UV layers');
+		else if (__and__ (status, STATUS_ERR_MISSING_UV_LAYER)) {
+			(function () {
+				var __accu0__ = operator;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No UV layers');
+			}) ();
 		}
 		else {
-			operator.report (new set (['ERROR']), 'No active face');
+			(function () {
+				var __accu0__ = operator;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'No active face');
+			}) ();
 		}
 	}
 };
@@ -407,7 +503,7 @@ export var FollowActiveQuads =  __class__ ('FollowActiveQuads', [Operator], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -419,12 +515,12 @@ export var FollowActiveQuads =  __class__ ('FollowActiveQuads', [Operator], {
 		}
 		else {
 		}
-		return context.mode == 'EDIT_MESH';
+		return __eq__ (context.mode, 'EDIT_MESH');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -436,13 +532,13 @@ export var FollowActiveQuads =  __class__ ('FollowActiveQuads', [Operator], {
 		}
 		else {
 		}
-		main (context, self);
+		__call__ (main, null, context, self);
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -456,11 +552,31 @@ export var FollowActiveQuads =  __class__ ('FollowActiveQuads', [Operator], {
 		else {
 		}
 		var wm = context.window_manager;
-		return wm.invoke_props_dialog (self);
+		return (function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.invoke_props_dialog, __accu0__, self);
+		}) ();
 	});}
 });
-FollowActiveQuads.__annotations__ = dict ({'mode': EnumProperty (__kwargtrans__ ({py_name: 'Edge Length Mode', description: 'Method to space UV edge loops', py_items: tuple ([tuple (['EVEN', 'Even', 'Space all UVs evenly']), tuple (['LENGTH', 'Length', 'Average space UVs edge length of each loop']), tuple (['LENGTH_AVERAGE', 'Length Average', 'Average space UVs edge length of each loop'])]), py_default: 'LENGTH_AVERAGE'}))});
+FollowActiveQuads.__annotations__ = dict ({'mode': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Edge Length Mode', description: 'Method to space UV edge loops', py_items: tuple ([tuple (['EVEN', 'Even', 'Space all UVs evenly']), tuple (['LENGTH', 'Length', 'Average space UVs edge length of each loop']), tuple (['LENGTH_AVERAGE', 'Length Average', 'Average space UVs edge length of each loop'])]), py_default: 'LENGTH_AVERAGE'}))});
 export var classes = tuple ([FollowActiveQuads]);
 
 //# sourceMappingURL=bl_operators.uvcalc_follow_active.map
 export {EnumProperty, Operator, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'STATUS_OK': STATUS_OK = value; break;
+		case 'STATUS_ERR_ACTIVE_FACE': STATUS_ERR_ACTIVE_FACE = value; break;
+		case 'STATUS_ERR_NOT_SELECTED': STATUS_ERR_NOT_SELECTED = value; break;
+		case 'STATUS_ERR_NOT_QUAD': STATUS_ERR_NOT_QUAD = value; break;
+		case 'STATUS_ERR_MISSING_UV_LAYER': STATUS_ERR_MISSING_UV_LAYER = value; break;
+		case 'STATUS_ERR_NO_FACES_SELECTED': STATUS_ERR_NO_FACES_SELECTED = value; break;
+		case 'extend': extend = value; break;
+		case 'main': main = value; break;
+		case 'FollowActiveQuads': FollowActiveQuads = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

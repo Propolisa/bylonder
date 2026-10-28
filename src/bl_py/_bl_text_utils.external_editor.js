@@ -7,7 +7,7 @@ var __name__ = '_bl_text_utils.external_editor';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -18,8 +18,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -27,7 +33,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -52,7 +58,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -71,7 +77,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -84,18 +90,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -106,16 +115,40 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var __all__ = tuple (['open_external_editor']);
 export var open_external_editor = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -123,46 +156,70 @@ export var open_external_editor = function () {
 	}
 	else {
 	}
-	var shlex = _module ('shlex');
-	var subprocess = _module ('subprocess');
-	var Template = _member ('string', 'Template');
-	var context = _member ('_bpy', 'context');
-	var rpt_ = _member ('_bpy.app.translations', 'pgettext_rpt');
+	var shlex = __call__ (_module, null, 'shlex');
+	var subprocess = __call__ (_module, null, 'subprocess');
+	var Template = __call__ (_member, null, 'string', 'Template');
+	var context = __call__ (_member, null, '_bpy', 'context');
+	var rpt_ = __call__ (_member, null, '_bpy.app.translations', 'pgettext_rpt');
 	var text_editor = context.preferences.filepaths.text_editor;
 	var text_editor_args = context.preferences.filepaths.text_editor_args;
 	if (!(text_editor_args)) {
-		return rpt_ ('Provide text editor argument format in File Paths/Applications Preferences, see input field tool-tip for more information');
+		return __call__ (rpt_, null, 'Provide text editor argument format in File Paths/Applications Preferences, see input field tool-tip for more information');
 	}
 	if (!__in__ ('$filepath', text_editor_args)) {
-		return rpt_ ('Text Editor Args Format must contain $filepath');
+		return __call__ (rpt_, null, 'Text Editor Args Format must contain $filepath');
 	}
 	var args = [text_editor];
-	var template_vars = dict ({'filepath': filepath, 'line': line + 1, 'column': column + 1, 'line0': line, 'column0': column});
+	var template_vars = dict ({'filepath': filepath, 'line': __add__ (line, 1), 'column': __add__ (column, 1), 'line0': line, 'column0': column});
 	try {
-		args.extend ((function () {
-			var __accu0__ = [];
-			for (var arg of list (shlex.py_split (text_editor_args))) {
-				__accu0__.append (Template (arg).substitute (__kwargtrans__ (_merged (template_vars))));
-			}
-			return __accu0__;
-		}) ());
+		(function () {
+			var __accu0__ = args;
+			return __call__ (__accu0__.extend, __accu0__, (function () {
+				var __accu1__ = [];
+				var __iterable0__ = __call__ (list, null, (function () {
+					var __accu2__ = shlex;
+					return __call__ (__accu2__.py_split, __accu2__, text_editor_args);
+				}) ());
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var arg = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu2__ = __accu1__;
+						return __call__ (__accu2__.append, __accu2__, (function () {
+							var __accu3__ = __call__ (Template, null, arg);
+							return __call__ (__accu3__.substitute, __accu3__, __kwargtrans__ (__call__ (_merged, null, template_vars)));
+						}) ());
+					}) ();
+				}
+				return __accu1__;
+			}) ());
+		}) ();
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var ex = __except0__;
-			return rpt_ ('Exception parsing template: {!r}').format (ex);
+			return (function () {
+				var __accu0__ = __call__ (rpt_, null, 'Exception parsing template: {!r}');
+				return __call__ (__accu0__.format, __accu0__, ex);
+			}) ();
 		}
 		else {
 			throw __except0__;
 		}
 	}
 	try {
-		subprocess.run (args, __kwargtrans__ ({check: true}));
+		(function () {
+			var __accu0__ = subprocess;
+			return __call__ (__accu0__.run, __accu0__, args, __kwargtrans__ ({check: true}));
+		}) ();
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var ex = __except0__;
-			return rpt_ ('Exception running external editor: {!r}').format (ex);
+			return (function () {
+				var __accu0__ = __call__ (rpt_, null, 'Exception running external editor: {!r}');
+				return __call__ (__accu0__.format, __accu0__, ex);
+			}) ();
 		}
 		else {
 			throw __except0__;
@@ -173,3 +230,18 @@ export var open_external_editor = function () {
 
 //# sourceMappingURL=_bl_text_utils.external_editor.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '__all__': __all__ = value; break;
+		case 'open_external_editor': open_external_editor = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

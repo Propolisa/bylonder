@@ -6,7 +6,7 @@ var __name__ = 'shlex';
 export var quote = function (text) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -17,7 +17,10 @@ export var quote = function (text) {
 	}
 	else {
 	}
-	return ("'" + text.py_replace ("'", '\'"\'"\'')) + "'";
+	return __add__ (__add__ ("'", (function () {
+		var __accu0__ = text;
+		return __call__ (__accu0__.py_replace, __accu0__, "'", '\'"\'"\'');
+	}) ()), "'");
 };
 export var py_split = function (text, comments, posix) {
 	if (typeof comments == 'undefined' || (comments != null && comments.hasOwnProperty ("__kwargtrans__"))) {;
@@ -28,7 +31,7 @@ export var py_split = function (text, comments, posix) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -41,7 +44,17 @@ export var py_split = function (text, comments, posix) {
 	}
 	else {
 	}
-	return text.py_split ();
+	return (function () {
+		var __accu0__ = text;
+		return __call__ (__accu0__.py_split, __accu0__);
+	}) ();
 };
 
 //# sourceMappingURL=shlex.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'quote': quote = value; break;
+		case 'py_split': py_split = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -10,7 +10,7 @@ export var COMPAT_OB_TYPES = new set (['MESH', 'LATTICE', 'CURVE', 'SURFACE', 'F
 export var softbody_panel_enabled = function (md) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -31,7 +31,7 @@ export var PhysicButtonsPanel =  __class__ ('PhysicButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -54,7 +54,7 @@ export var PHYSICS_PT_softbody =  __class__ ('PHYSICS_PT_softbody', [PhysicButto
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -70,7 +70,10 @@ export var PHYSICS_PT_softbody =  __class__ ('PHYSICS_PT_softbody', [PhysicButto
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.prop (softbody, 'collision_collection');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'collision_collection');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_object =  __class__ ('PHYSICS_PT_softbody_object', [PhysicButtonsPanel, Panel], {
@@ -82,7 +85,7 @@ export var PHYSICS_PT_softbody_object =  __class__ ('PHYSICS_PT_softbody_object'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -99,14 +102,35 @@ export var PHYSICS_PT_softbody_object =  __class__ ('PHYSICS_PT_softbody_object'
 		var md = context.soft_body;
 		var softbody = md.settings;
 		var ob = context.object;
-		layout.enabled = softbody_panel_enabled (md);
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (softbody, 'friction');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (softbody, 'mass');
-		col.prop_search (softbody, 'vertex_group_mass', ob, 'vertex_groups', __kwargtrans__ ({text: 'Control Point'}));
+		layout.enabled = __call__ (softbody_panel_enabled, null, md);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'friction');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'mass');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop_search, __accu0__, softbody, 'vertex_group_mass', ob, 'vertex_groups', __kwargtrans__ ({text: 'Control Point'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_simulation =  __class__ ('PHYSICS_PT_softbody_simulation', [PhysicButtonsPanel, Panel], {
@@ -118,7 +142,7 @@ export var PHYSICS_PT_softbody_simulation =  __class__ ('PHYSICS_PT_softbody_sim
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -134,8 +158,11 @@ export var PHYSICS_PT_softbody_simulation =  __class__ ('PHYSICS_PT_softbody_sim
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.enabled = softbody_panel_enabled (md);
-		layout.prop (softbody, 'speed');
+		layout.enabled = __call__ (softbody_panel_enabled, null, md);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'speed');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_cache =  __class__ ('PHYSICS_PT_softbody_cache', [PhysicButtonsPanel, Panel], {
@@ -147,7 +174,7 @@ export var PHYSICS_PT_softbody_cache =  __class__ ('PHYSICS_PT_softbody_cache', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -160,7 +187,7 @@ export var PHYSICS_PT_softbody_cache =  __class__ ('PHYSICS_PT_softbody_cache', 
 		else {
 		}
 		var md = context.soft_body;
-		point_cache_ui (self, md.point_cache, softbody_panel_enabled (md), 'SOFTBODY');
+		__call__ (point_cache_ui, null, self, md.point_cache, __call__ (softbody_panel_enabled, null, md), 'SOFTBODY');
 	});}
 });
 export var PHYSICS_PT_softbody_goal =  __class__ ('PHYSICS_PT_softbody_goal', [PhysicButtonsPanel, Panel], {
@@ -172,7 +199,7 @@ export var PHYSICS_PT_softbody_goal =  __class__ ('PHYSICS_PT_softbody_goal', [P
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -185,13 +212,16 @@ export var PHYSICS_PT_softbody_goal =  __class__ ('PHYSICS_PT_softbody_goal', [P
 		else {
 		}
 		var softbody = context.soft_body.settings;
-		self.layout.active = softbody_panel_enabled (context.soft_body);
-		self.layout.prop (softbody, 'use_goal', __kwargtrans__ ({text: ''}));
+		self.layout.active = __call__ (softbody_panel_enabled, null, context.soft_body);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_goal', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -208,8 +238,11 @@ export var PHYSICS_PT_softbody_goal =  __class__ ('PHYSICS_PT_softbody_goal', [P
 		var md = context.soft_body;
 		var softbody = md.settings;
 		var ob = context.object;
-		layout.active = softbody.use_goal && softbody_panel_enabled (md);
-		layout.prop_search (softbody, 'vertex_group_goal', ob, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+		layout.active = softbody.use_goal && __call__ (softbody_panel_enabled, null, md);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop_search, __accu0__, softbody, 'vertex_group_goal', ob, 'vertex_groups', __kwargtrans__ ({text: 'Vertex Group'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_goal_strengths =  __class__ ('PHYSICS_PT_softbody_goal_strengths', [PhysicButtonsPanel, Panel], {
@@ -221,7 +254,7 @@ export var PHYSICS_PT_softbody_goal_strengths =  __class__ ('PHYSICS_PT_softbody
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -237,14 +270,35 @@ export var PHYSICS_PT_softbody_goal_strengths =  __class__ ('PHYSICS_PT_softbody
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.active = softbody.use_goal && softbody_panel_enabled (md);
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (softbody, 'goal_default', __kwargtrans__ ({text: 'Default'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (softbody, 'goal_min', __kwargtrans__ ({text: 'Min'}));
-		col.prop (softbody, 'goal_max', __kwargtrans__ ({text: 'Max'}));
+		layout.active = softbody.use_goal && __call__ (softbody_panel_enabled, null, md);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'goal_default', __kwargtrans__ ({text: 'Default'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'goal_min', __kwargtrans__ ({text: 'Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'goal_max', __kwargtrans__ ({text: 'Max'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_goal_settings =  __class__ ('PHYSICS_PT_softbody_goal_settings', [PhysicButtonsPanel, Panel], {
@@ -256,7 +310,7 @@ export var PHYSICS_PT_softbody_goal_settings =  __class__ ('PHYSICS_PT_softbody_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -272,12 +326,27 @@ export var PHYSICS_PT_softbody_goal_settings =  __class__ ('PHYSICS_PT_softbody_
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.active = softbody.use_goal && softbody_panel_enabled (md);
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (softbody, 'goal_spring', __kwargtrans__ ({text: 'Stiffness'}));
-		var col = flow.column ();
-		col.prop (softbody, 'goal_friction', __kwargtrans__ ({text: 'Damping'}));
+		layout.active = softbody.use_goal && __call__ (softbody_panel_enabled, null, md);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'goal_spring', __kwargtrans__ ({text: 'Stiffness'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'goal_friction', __kwargtrans__ ({text: 'Damping'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_edge =  __class__ ('PHYSICS_PT_softbody_edge', [PhysicButtonsPanel, Panel], {
@@ -289,7 +358,7 @@ export var PHYSICS_PT_softbody_edge =  __class__ ('PHYSICS_PT_softbody_edge', [P
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -302,13 +371,16 @@ export var PHYSICS_PT_softbody_edge =  __class__ ('PHYSICS_PT_softbody_edge', [P
 		else {
 		}
 		var softbody = context.soft_body.settings;
-		self.layout.active = softbody_panel_enabled (context.soft_body);
-		self.layout.prop (softbody, 'use_edges', __kwargtrans__ ({text: ''}));
+		self.layout.active = __call__ (softbody_panel_enabled, null, context.soft_body);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_edges', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -325,25 +397,79 @@ export var PHYSICS_PT_softbody_edge =  __class__ ('PHYSICS_PT_softbody_edge', [P
 		var md = context.soft_body;
 		var softbody = md.settings;
 		var ob = context.object;
-		layout.active = softbody.use_edges && softbody_panel_enabled (md);
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop_search (softbody, 'vertex_group_spring', ob, 'vertex_groups', __kwargtrans__ ({text: 'Springs'}));
-		col.separator ();
-		col.prop (softbody, 'pull');
-		col.prop (softbody, 'push');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (softbody, 'damping');
-		col.prop (softbody, 'plastic');
-		col.prop (softbody, 'bend');
-		col.separator ();
-		var col = flow.column ();
-		col.prop (softbody, 'spring_length', __kwargtrans__ ({text: 'Length'}));
-		col.separator ();
-		var col = flow.column (__kwargtrans__ ({align: true, heading: 'Collision'}));
-		col.prop (softbody, 'use_edge_collision', __kwargtrans__ ({text: 'Edge', toggle: false}));
-		col.prop (softbody, 'use_face_collision', __kwargtrans__ ({text: 'Face', toggle: false}));
+		layout.active = softbody.use_edges && __call__ (softbody_panel_enabled, null, md);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop_search, __accu0__, softbody, 'vertex_group_spring', ob, 'vertex_groups', __kwargtrans__ ({text: 'Springs'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'pull');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'push');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'damping');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'plastic');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'bend');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'spring_length', __kwargtrans__ ({text: 'Length'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true, heading: 'Collision'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_edge_collision', __kwargtrans__ ({text: 'Edge', toggle: false}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_face_collision', __kwargtrans__ ({text: 'Face', toggle: false}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_edge_aerodynamics =  __class__ ('PHYSICS_PT_softbody_edge_aerodynamics', [PhysicButtonsPanel, Panel], {
@@ -355,7 +481,7 @@ export var PHYSICS_PT_softbody_edge_aerodynamics =  __class__ ('PHYSICS_PT_softb
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -369,14 +495,29 @@ export var PHYSICS_PT_softbody_edge_aerodynamics =  __class__ ('PHYSICS_PT_softb
 		}
 		var layout = self.layout;
 		layout.use_property_split = true;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
 		var md = context.soft_body;
 		var softbody = md.settings;
-		flow.active = softbody.use_edges && softbody_panel_enabled (md);
-		var col = flow.column ();
-		col.prop (softbody, 'aerodynamics_type', __kwargtrans__ ({text: 'Type'}));
-		var col = flow.column ();
-		col.prop (softbody, 'aero', __kwargtrans__ ({text: 'Factor'}));
+		flow.active = softbody.use_edges && __call__ (softbody_panel_enabled, null, md);
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'aerodynamics_type', __kwargtrans__ ({text: 'Type'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'aero', __kwargtrans__ ({text: 'Factor'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_edge_stiffness =  __class__ ('PHYSICS_PT_softbody_edge_stiffness', [PhysicButtonsPanel, Panel], {
@@ -388,7 +529,7 @@ export var PHYSICS_PT_softbody_edge_stiffness =  __class__ ('PHYSICS_PT_softbody
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -401,13 +542,16 @@ export var PHYSICS_PT_softbody_edge_stiffness =  __class__ ('PHYSICS_PT_softbody
 		else {
 		}
 		var softbody = context.soft_body.settings;
-		self.layout.active = softbody_panel_enabled (context.soft_body);
-		self.layout.prop (softbody, 'use_stiff_quads', __kwargtrans__ ({text: ''}));
+		self.layout.active = __call__ (softbody_panel_enabled, null, context.soft_body);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_stiff_quads', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -423,8 +567,11 @@ export var PHYSICS_PT_softbody_edge_stiffness =  __class__ ('PHYSICS_PT_softbody
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.active = softbody.use_edges && softbody.use_stiff_quads && softbody_panel_enabled (md);
-		layout.prop (softbody, 'shear');
+		layout.active = softbody.use_edges && softbody.use_stiff_quads && __call__ (softbody_panel_enabled, null, md);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'shear');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_collision =  __class__ ('PHYSICS_PT_softbody_collision', [PhysicButtonsPanel, Panel], {
@@ -436,7 +583,7 @@ export var PHYSICS_PT_softbody_collision =  __class__ ('PHYSICS_PT_softbody_coll
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -449,13 +596,16 @@ export var PHYSICS_PT_softbody_collision =  __class__ ('PHYSICS_PT_softbody_coll
 		else {
 		}
 		var softbody = context.soft_body.settings;
-		self.layout.active = softbody_panel_enabled (context.soft_body);
-		self.layout.prop (softbody, 'use_self_collision', __kwargtrans__ ({text: ''}));
+		self.layout.active = __call__ (softbody_panel_enabled, null, context.soft_body);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_self_collision', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -471,15 +621,39 @@ export var PHYSICS_PT_softbody_collision =  __class__ ('PHYSICS_PT_softbody_coll
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.active = softbody.use_self_collision && softbody_panel_enabled (md);
-		layout.prop (softbody, 'collision_type', __kwargtrans__ ({text: 'Calculation Type'}));
-		layout.separator ();
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (softbody, 'ball_size', __kwargtrans__ ({text: 'Ball Size'}));
-		var col = flow.column ();
-		col.prop (softbody, 'ball_stiff', __kwargtrans__ ({text: 'Stiffness'}));
-		col.prop (softbody, 'ball_damp', __kwargtrans__ ({text: 'Dampening'}));
+		layout.active = softbody.use_self_collision && __call__ (softbody_panel_enabled, null, md);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'collision_type', __kwargtrans__ ({text: 'Calculation Type'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'ball_size', __kwargtrans__ ({text: 'Ball Size'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'ball_stiff', __kwargtrans__ ({text: 'Stiffness'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'ball_damp', __kwargtrans__ ({text: 'Dampening'}));
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_solver =  __class__ ('PHYSICS_PT_softbody_solver', [PhysicButtonsPanel, Panel], {
@@ -491,7 +665,7 @@ export var PHYSICS_PT_softbody_solver =  __class__ ('PHYSICS_PT_softbody_solver'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -507,14 +681,35 @@ export var PHYSICS_PT_softbody_solver =  __class__ ('PHYSICS_PT_softbody_solver'
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.active = softbody_panel_enabled (md);
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column (__kwargtrans__ ({align: true}));
-		col.prop (softbody, 'step_min', __kwargtrans__ ({text: 'Step Size Min'}));
-		col.prop (softbody, 'step_max', __kwargtrans__ ({text: 'Max'}));
-		var col = flow.column ();
-		col.prop (softbody, 'use_auto_step', __kwargtrans__ ({text: 'Auto-Step'}));
-		col.prop (softbody, 'error_threshold');
+		layout.active = __call__ (softbody_panel_enabled, null, md);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'step_min', __kwargtrans__ ({text: 'Step Size Min'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'step_max', __kwargtrans__ ({text: 'Max'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_auto_step', __kwargtrans__ ({text: 'Auto-Step'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'error_threshold');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_solver_diagnostics =  __class__ ('PHYSICS_PT_softbody_solver_diagnostics', [PhysicButtonsPanel, Panel], {
@@ -526,7 +721,7 @@ export var PHYSICS_PT_softbody_solver_diagnostics =  __class__ ('PHYSICS_PT_soft
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -542,9 +737,15 @@ export var PHYSICS_PT_softbody_solver_diagnostics =  __class__ ('PHYSICS_PT_soft
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.active = softbody_panel_enabled (md);
-		layout.prop (softbody, 'use_diagnose');
-		layout.prop (softbody, 'use_estimate_matrix');
+		layout.active = __call__ (softbody_panel_enabled, null, md);
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_diagnose');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'use_estimate_matrix');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_solver_helpers =  __class__ ('PHYSICS_PT_softbody_solver_helpers', [PhysicButtonsPanel, Panel], {
@@ -556,7 +757,7 @@ export var PHYSICS_PT_softbody_solver_helpers =  __class__ ('PHYSICS_PT_softbody
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -572,12 +773,27 @@ export var PHYSICS_PT_softbody_solver_helpers =  __class__ ('PHYSICS_PT_softbody
 		layout.use_property_split = true;
 		var md = context.soft_body;
 		var softbody = md.settings;
-		layout.active = softbody_panel_enabled (md);
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (softbody, 'choke');
-		var col = flow.column ();
-		col.prop (softbody, 'fuzzy');
+		layout.active = __call__ (softbody_panel_enabled, null, md);
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: true, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'choke');
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, softbody, 'fuzzy');
+		}) ();
 	});}
 });
 export var PHYSICS_PT_softbody_field_weights =  __class__ ('PHYSICS_PT_softbody_field_weights', [PhysicButtonsPanel, Panel], {
@@ -589,7 +805,7 @@ export var PHYSICS_PT_softbody_field_weights =  __class__ ('PHYSICS_PT_softbody_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -603,15 +819,43 @@ export var PHYSICS_PT_softbody_field_weights =  __class__ ('PHYSICS_PT_softbody_
 		}
 		var md = context.soft_body;
 		var softbody = md.settings;
-		effector_weights_ui (self, softbody.effector_weights, 'SOFTBODY');
+		__call__ (effector_weights_ui, null, self, softbody.effector_weights, 'SOFTBODY');
 	});}
 });
 export var classes = tuple ([PHYSICS_PT_softbody, PHYSICS_PT_softbody_object, PHYSICS_PT_softbody_simulation, PHYSICS_PT_softbody_cache, PHYSICS_PT_softbody_goal, PHYSICS_PT_softbody_goal_settings, PHYSICS_PT_softbody_goal_strengths, PHYSICS_PT_softbody_edge, PHYSICS_PT_softbody_edge_aerodynamics, PHYSICS_PT_softbody_edge_stiffness, PHYSICS_PT_softbody_collision, PHYSICS_PT_softbody_solver, PHYSICS_PT_softbody_solver_diagnostics, PHYSICS_PT_softbody_solver_helpers, PHYSICS_PT_softbody_field_weights]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_physics_softbody.map
 export {Panel, effector_weights_ui, point_cache_ui, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'COMPAT_OB_TYPES': COMPAT_OB_TYPES = value; break;
+		case 'softbody_panel_enabled': softbody_panel_enabled = value; break;
+		case 'PhysicButtonsPanel': PhysicButtonsPanel = value; break;
+		case 'PHYSICS_PT_softbody': PHYSICS_PT_softbody = value; break;
+		case 'PHYSICS_PT_softbody_object': PHYSICS_PT_softbody_object = value; break;
+		case 'PHYSICS_PT_softbody_simulation': PHYSICS_PT_softbody_simulation = value; break;
+		case 'PHYSICS_PT_softbody_cache': PHYSICS_PT_softbody_cache = value; break;
+		case 'PHYSICS_PT_softbody_goal': PHYSICS_PT_softbody_goal = value; break;
+		case 'PHYSICS_PT_softbody_goal_strengths': PHYSICS_PT_softbody_goal_strengths = value; break;
+		case 'PHYSICS_PT_softbody_goal_settings': PHYSICS_PT_softbody_goal_settings = value; break;
+		case 'PHYSICS_PT_softbody_edge': PHYSICS_PT_softbody_edge = value; break;
+		case 'PHYSICS_PT_softbody_edge_aerodynamics': PHYSICS_PT_softbody_edge_aerodynamics = value; break;
+		case 'PHYSICS_PT_softbody_edge_stiffness': PHYSICS_PT_softbody_edge_stiffness = value; break;
+		case 'PHYSICS_PT_softbody_collision': PHYSICS_PT_softbody_collision = value; break;
+		case 'PHYSICS_PT_softbody_solver': PHYSICS_PT_softbody_solver = value; break;
+		case 'PHYSICS_PT_softbody_solver_diagnostics': PHYSICS_PT_softbody_solver_diagnostics = value; break;
+		case 'PHYSICS_PT_softbody_solver_helpers': PHYSICS_PT_softbody_solver_helpers = value; break;
+		case 'PHYSICS_PT_softbody_field_weights': PHYSICS_PT_softbody_field_weights = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

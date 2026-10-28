@@ -295,6 +295,7 @@ struct OperatorDefinition {
 };
 
 void outliner_operatortypes_ensure();
+void anim_operatortypes();
 namespace blender::ed::transform {
 void keymap_transform(wmKeyConfig *keyconf);
 }
@@ -325,6 +326,7 @@ static Vector<OperatorDefinition> &operators()
     };
     ed::transform::transform_operatortypes();
     outliner_operatortypes_ensure();
+    anim_operatortypes();
     table.extend(appended_operators());
     return table;
   }();
@@ -507,28 +509,6 @@ EXPORT(operator_modal_item) int operator_modal_item(wmOperator *op, const char *
   return -1;
 }
 
-/* Blender's enums JS names values by, as "identifier\tvalue" lines: event types, event values, property subtypes. */
-EXPORT(rna_enum_text) const char *rna_enum_text(int which)
-{
-  static const EnumPropertyItem *tables[] = {rna_enum_event_type_items, rna_enum_event_value_items, rna_enum_property_subtype_items};
-  static std::string text;
-  text.clear();
-  for (const EnumPropertyItem *item = tables[which]; item->identifier; item++) {
-    if (item->identifier[0]) {
-      text += std::string(item->identifier) + '\t' + std::to_string(item->value) + '\n';
-    }
-  }
-  return text.c_str();
-}
-
-/* Gestures (wm_gesture_ops.cc): an operator's invoke starts one, and Bylonder's window manager draws and runs it,
- * then sets the operator's properties and runs its exec, as the gesture's modal does when it ends. */
-enum Gesture { GESTURE_NONE, GESTURE_BOX, GESTURE_CIRCLE, GESTURE_LASSO };
-static Gesture gesture_started = GESTURE_NONE;
-
-/* The gesture the last invoke started (Gesture), cleared by asking. */
-EXPORT(operator_gesture) int operator_gesture() { return std::exchange(gesture_started, GESTURE_NONE); }
-
 /* The menu the last operator called (WM_menu_name_call), which Bylonder's window manager opens, cleared by asking. */
 static std::string menu_called;
 EXPORT(operator_menu_called) const char *operator_menu_called()
@@ -542,15 +522,6 @@ EXPORT(operator_menu_called) const char *operator_menu_called()
 
 namespace blender {
 
-static wmOperatorStatus gesture_start(bContext *C, wmOperator *op, Gesture gesture)
-{
-  gesture_started = gesture;
-  WM_event_add_modal_handler(C, op);
-  return OPERATOR_RUNNING_MODAL;
-}
-wmOperatorStatus WM_gesture_box_invoke(bContext *C, wmOperator *op, const wmEvent * /*event*/) { return gesture_start(C, op, GESTURE_BOX); }
-wmOperatorStatus WM_gesture_box_modal(bContext * /*C*/, wmOperator * /*op*/, const wmEvent * /*event*/) { return OPERATOR_PASS_THROUGH; }
-void WM_gesture_box_cancel(bContext * /*C*/, wmOperator * /*op*/) {}
 /* port-override: Blender's menus are drawn by Bylonder's window manager (JS), which opens the menu named here. */
 void WM_menu_name_call(bContext * /*C*/, const char *menu_name, wm::OpCallContext /*context*/) { menu_called = menu_name; }
 
@@ -662,10 +633,6 @@ float ED_scene_grid_scale(const Scene *scene, const char **r_grid_unit)
   return 1.0f;
 }
 
-
-/* As area.cc defines it for no area, as when transform runs in Blender's background mode; the editor shows the
- * header text itself. */
-void ED_area_status_text(ScrArea * /*area*/, const char * /*str*/) {}
 
 /* port-override: the editor draws its own status bar for its tools, so what operators put there goes nowhere. */
 WorkspaceStatus::WorkspaceStatus(bContext * /*C*/) : workspace_(nullptr), wm_(nullptr) {}
@@ -834,8 +801,6 @@ void WM_operator_type_modal_from_exec_for_object_edit_coords(wmOperatorType * /*
 /* No window or view to update. */
 void ED_workspace_status_text(bContext * /*C*/, const char * /*str*/) {}
 void ED_region_tag_redraw(ARegion * /*region*/) {}
-void ED_region_tag_redraw_no_rebuild(ARegion * /*region*/) {}
-void ED_area_tag_redraw(ScrArea * /*area*/) {}
 /* port-override: no depsgraph to flush tags through, so they stay on the ID (`recalc`), where the editor reads what an
  * operator changed. */
 void DEG_id_tag_update(ID *id, unsigned int flags)

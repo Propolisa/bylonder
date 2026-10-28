@@ -25,6 +25,8 @@ struct DnaField {
 
 struct PropertyRNA {
   std::string identifier;
+  /* Its name in Blender's UI (RNA_def_property_ui_text). */
+  std::string name;
   PropertyType type;
   int length = 0;
   /* Set for a DNA struct's property, whose values are read from and written to PointerRNA.data. */

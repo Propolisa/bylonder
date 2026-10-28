@@ -13,7 +13,7 @@ var __name__ = 'bl_operators.userpref';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -24,8 +24,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -33,7 +39,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -58,7 +64,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -77,7 +83,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -90,18 +96,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -112,15 +121,39 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var _zipfile_root_namelist = function (file_to_extract) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -131,12 +164,24 @@ export var _zipfile_root_namelist = function (file_to_extract) {
 	}
 	else {
 	}
-	var os = _module ('os');
+	var os = __call__ (_module, null, 'os');
 	var root_paths = [];
-	for (var f of file_to_extract.namelist ()) {
-		var f = os.path.normpath (f);
+	var __iterable0__ = (function () {
+		var __accu0__ = file_to_extract;
+		return __call__ (__accu0__.namelist, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var f = __getitem__ (__iterable0__, __index0__);
+		var f = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.normpath, __accu0__, f);
+		}) ();
 		if (!__in__ (os.sep, f)) {
-			root_paths.append (f);
+			(function () {
+				var __accu0__ = root_paths;
+				return __call__ (__accu0__.append, __accu0__, f);
+			}) ();
 		}
 	}
 	return root_paths;
@@ -144,7 +189,7 @@ export var _zipfile_root_namelist = function (file_to_extract) {
 export var _module_filesystem_remove = function (path_base, filenames) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -156,30 +201,69 @@ export var _module_filesystem_remove = function (path_base, filenames) {
 	}
 	else {
 	}
-	var os = _module ('os');
-	var shutil = _module ('shutil');
+	var os = __call__ (_module, null, 'os');
+	var shutil = __call__ (_module, null, 'shutil');
 	var module_names = (function () {
 		var __accu0__ = [];
-		for (var filename of filenames) {
-			for (var filename_only of [os.path.splitext (filename) [0]]) {
-				if (filename_only.isidentifier ()) {
-					__accu0__.append (filename_only);
+		var __iterable0__ = filenames;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var filename = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = [__getitem__ ((function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.splitext, __accu1__, filename);
+			}) (), 0)];
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var filename_only = __getitem__ (__iterable1__, __index1__);
+				if ((function () {
+					var __accu1__ = filename_only;
+					return __call__ (__accu1__.isidentifier, __accu1__);
+				}) ()) {
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, filename_only);
+					}) ();
 				}
 			}
 		}
 		return set (__accu0__);
 	}) ();
 	var paths_stale = [];
-	for (var f of os.listdir (path_base)) {
-		var f_base = os.path.splitext (f) [0];
+	var __iterable0__ = (function () {
+		var __accu0__ = os;
+		return __call__ (__accu0__.listdir, __accu0__, path_base);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var f = __getitem__ (__iterable0__, __index0__);
+		var f_base = __getitem__ ((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.splitext, __accu0__, f);
+		}) (), 0);
 		if (__in__ (f_base, module_names)) {
-			var f_full = os.path.join (path_base, f);
-			if (os.path.isdir (f_full) && !(os.path.islink (f_full))) {
-				shutil.rmtree (f_full, __kwargtrans__ ({ignore_errors: true}));
+			var f_full = (function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.join, __accu0__, path_base, f);
+			}) ();
+			if ((function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.isdir, __accu0__, f_full);
+			}) () && !((function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.islink, __accu0__, f_full);
+			}) ())) {
+				(function () {
+					var __accu0__ = shutil;
+					return __call__ (__accu0__.rmtree, __accu0__, f_full, __kwargtrans__ ({ignore_errors: true}));
+				}) ();
 			}
 			else {
 				try {
-					os.remove (f_full);
+					(function () {
+						var __accu0__ = os;
+						return __call__ (__accu0__.remove, __accu0__, f_full);
+					}) ();
 				}
 				catch (__except0__) {
 					if (isinstance (__except0__, Exception)) {
@@ -190,20 +274,29 @@ export var _module_filesystem_remove = function (path_base, filenames) {
 					}
 				}
 			}
-			if (os.path.exists (f_full)) {
-				paths_stale.append (f_full);
+			if ((function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.exists, __accu0__, f_full);
+			}) ()) {
+				(function () {
+					var __accu0__ = paths_stale;
+					return __call__ (__accu0__.append, __accu0__, f_full);
+				}) ();
 			}
 		}
 	}
 	if (paths_stale) {
-		var addon_utils = _module ('addon_utils');
-		addon_utils.stale_pending_stage_paths (path_base, paths_stale);
+		var addon_utils = __call__ (_module, null, 'addon_utils');
+		(function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.stale_pending_stage_paths, __accu0__, path_base, paths_stale);
+		}) ();
 	}
 };
 export var _wm_wait_cursor = function (value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -214,13 +307,25 @@ export var _wm_wait_cursor = function (value) {
 	}
 	else {
 	}
-	for (var wm of bpy.data.window_managers) {
-		for (var window of wm.windows) {
+	var __iterable0__ = bpy.data.window_managers;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var wm = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = wm.windows;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var window = __getitem__ (__iterable1__, __index1__);
 			if (value) {
-				window.cursor_modal_set ('WAIT');
+				(function () {
+					var __accu0__ = window;
+					return __call__ (__accu0__.cursor_modal_set, __accu0__, 'WAIT');
+				}) ();
 			}
 			else {
-				window.cursor_modal_restore ();
+				(function () {
+					var __accu0__ = window;
+					return __call__ (__accu0__.cursor_modal_restore, __accu0__);
+				}) ();
 			}
 		}
 	}
@@ -232,7 +337,7 @@ export var PREFERENCES_OT_keyconfig_activate =  __class__ ('PREFERENCES_OT_keyco
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -244,7 +349,10 @@ export var PREFERENCES_OT_keyconfig_activate =  __class__ ('PREFERENCES_OT_keyco
 		}
 		else {
 		}
-		if (bpy.utils.keyconfig_set (self.filepath, __kwargtrans__ ({report: self.report}))) {
+		if ((function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.keyconfig_set, __accu0__, self.filepath, __kwargtrans__ ({report: self.report}));
+		}) ()) {
 			return new set (['FINISHED']);
 		}
 		else {
@@ -252,7 +360,7 @@ export var PREFERENCES_OT_keyconfig_activate =  __class__ ('PREFERENCES_OT_keyco
 		}
 	});}
 });
-PREFERENCES_OT_keyconfig_activate.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'}))});
+PREFERENCES_OT_keyconfig_activate.__annotations__ = dict ({'filepath': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'FILE_PATH'}))});
 export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.copy_prev',
@@ -260,7 +368,7 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 	get _old_version_path () {return __getcm__ (this, function (cls, version) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -272,12 +380,15 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		}
 		else {
 		}
-		return bpy.utils.resource_path ('USER', __kwargtrans__ ({major: version [0], minor: version [1]}));
+		return (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.resource_path, __accu0__, 'USER', __kwargtrans__ ({major: __getitem__ (version, 0), minor: __getitem__ (version, 1)}));
+		}) ();
 	});},
 	get previous_version () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -288,20 +399,26 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		}
 		else {
 		}
-		var os = _module ('os');
+		var os = __call__ (_module, null, 'os');
 		var MAX_MINOR_VERSION_FOR_PREVIOUS_MAJOR_LOOKUP = 10;
-		var version_new = bpy.app.version.__getslice__ (null, 2, 1);
-		var version_old = [version_new [0], version_new [1] - 1];
+		var version_new = __getslice__ (bpy.app.version, null, 2, 1);
+		var version_old = [__getitem__ (version_new, 0), __sub__ (__getitem__ (version_new, 1), 1)];
 		while (true) {
-			while (version_old [1] >= 0) {
-				if (os.path.isdir (cls._old_version_path (version_old))) {
-					return tuple (version_old);
+			while (__ge__ (__getitem__ (version_old, 1), 0)) {
+				if ((function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.isdir, __accu0__, (function () {
+						var __accu1__ = cls;
+						return __call__ (__accu1__._old_version_path, __accu1__, version_old);
+					}) ());
+				}) ()) {
+					return __call__ (tuple, null, version_old);
 				}
-				version_old [1]--;
+				__setitem__ (version_old, 1, __call__ (__isub__, null, __getitem__ (version_old, 1), 1));
 			}
-			if (version_new [0] == version_old [0]) {
-				version_old [0]--;
-				version_old [1] = MAX_MINOR_VERSION_FOR_PREVIOUS_MAJOR_LOOKUP;
+			if (__eq__ (__getitem__ (version_new, 0), __getitem__ (version_old, 0))) {
+				__setitem__ (version_old, 0, __call__ (__isub__, null, __getitem__ (version_old, 0), 1));
+				__setitem__ (version_old, 1, MAX_MINOR_VERSION_FOR_PREVIOUS_MAJOR_LOOKUP);
 			}
 			else {
 				break;
@@ -312,7 +429,7 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 	get _old_path () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -323,13 +440,19 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		}
 		else {
 		}
-		var version_old = cls.previous_version ();
-		return (version_old ? cls._old_version_path (version_old) : null);
+		var version_old = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__.previous_version, __accu0__);
+		}) ();
+		return (version_old ? (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._old_version_path, __accu0__, version_old);
+		}) () : null);
 	});},
 	get _new_path () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -340,12 +463,15 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		}
 		else {
 		}
-		return bpy.utils.resource_path ('USER');
+		return (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.resource_path, __accu0__, 'USER');
+		}) ();
 	});},
 	get poll () {return __getcm__ (this, function (cls, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -357,28 +483,64 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		}
 		else {
 		}
-		var os = _module ('os');
-		var old = cls._old_path ();
-		var py_new = cls._new_path ();
+		var os = __call__ (_module, null, 'os');
+		var old = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._old_path, __accu0__);
+		}) ();
+		var py_new = (function () {
+			var __accu0__ = cls;
+			return __call__ (__accu0__._new_path, __accu0__);
+		}) ();
 		if (!(old)) {
 			return false;
 		}
-		var userconfig_path = os.path.normpath (bpy.utils.user_resource ('CONFIG'));
-		var new_userconfig_path = os.path.normpath (os.path.join (py_new, 'config'));
-		if (userconfig_path != new_userconfig_path) {
+		var userconfig_path = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.normpath, __accu0__, (function () {
+				var __accu1__ = bpy.utils;
+				return __call__ (__accu1__.user_resource, __accu1__, 'CONFIG');
+			}) ());
+		}) ();
+		var new_userconfig_path = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.normpath, __accu0__, (function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.join, __accu1__, py_new, 'config');
+			}) ());
+		}) ();
+		if (__ne__ (userconfig_path, new_userconfig_path)) {
 			return false;
 		}
-		if (os.path.isdir (old) && !(os.path.isdir (py_new))) {
+		if ((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isdir, __accu0__, old);
+		}) () && !((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isdir, __accu0__, py_new);
+		}) ())) {
 			return true;
 		}
-		var old_userpref = os.path.join (old, 'config', 'userpref.blend');
-		var new_userpref = os.path.join (py_new, 'config', 'userpref.blend');
-		return os.path.isfile (old_userpref) && !(os.path.isfile (new_userpref));
+		var old_userpref = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, old, 'config', 'userpref.blend');
+		}) ();
+		var new_userpref = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, py_new, 'config', 'userpref.blend');
+		}) ();
+		return (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isfile, __accu0__, old_userpref);
+		}) () && !((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isfile, __accu0__, new_userpref);
+		}) ());
 	});},
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -390,16 +552,40 @@ export var PREFERENCES_OT_copy_prev =  __class__ ('PREFERENCES_OT_copy_prev', [O
 		}
 		else {
 		}
-		var shutil = _module ('shutil');
-		shutil.copytree (self._old_path (), self._new_path (), __kwargtrans__ ({dirs_exist_ok: true, symlinks: true}));
-		bpy.ops.wm.read_userpref ();
-		bpy.ops.wm.read_history ();
-		bpy.ops.wm.operator_presets_cleanup ();
+		var shutil = __call__ (_module, null, 'shutil');
+		(function () {
+			var __accu0__ = shutil;
+			return __call__ (__accu0__.copytree, __accu0__, (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__._old_path, __accu1__);
+			}) (), (function () {
+				var __accu1__ = self;
+				return __call__ (__accu1__._new_path, __accu1__);
+			}) (), __kwargtrans__ ({dirs_exist_ok: true, symlinks: true}));
+		}) ();
+		(function () {
+			var __accu0__ = bpy.ops.wm;
+			return __call__ (__accu0__.read_userpref, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = bpy.ops.wm;
+			return __call__ (__accu0__.read_history, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = bpy.ops.wm;
+			return __call__ (__accu0__.operator_presets_cleanup, __accu0__);
+		}) ();
 		if ((bpy.data.is_saved === bpy.data.is_dirty && bpy.data.is_dirty === false)) {
-			bpy.ops.wm.read_homefile ();
+			(function () {
+				var __accu0__ = bpy.ops.wm;
+				return __call__ (__accu0__.read_homefile, __accu0__);
+			}) ();
 		}
 		else {
-			self.report (new set (['INFO']), 'Reload Start-Up file to restore settings');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), 'Reload Start-Up file to restore settings');
+			}) ();
 		}
 		return new set (['FINISHED']);
 	});}
@@ -411,7 +597,7 @@ export var PREFERENCES_OT_keyconfig_test =  __class__ ('PREFERENCES_OT_keyconfig
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -423,11 +609,14 @@ export var PREFERENCES_OT_keyconfig_test =  __class__ ('PREFERENCES_OT_keyconfig
 		}
 		else {
 		}
-		var keyconfig_utils = _member ('bpy_extras', 'keyconfig_utils');
+		var keyconfig_utils = __call__ (_member, null, 'bpy_extras', 'keyconfig_utils');
 		var wm = context.window_manager;
 		var kc = wm.keyconfigs.py_default;
-		if (keyconfig_utils.keyconfig_test (kc)) {
-			print ('CONFLICT');
+		if ((function () {
+			var __accu0__ = keyconfig_utils;
+			return __call__ (__accu0__.keyconfig_test, __accu0__, kc);
+		}) ()) {
+			__call__ (print, null, 'CONFLICT');
 		}
 		return new set (['FINISHED']);
 	});}
@@ -439,7 +628,7 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 	get _preset_prevent_name_collision () {return __getcm__ (this, function (cls, config_name) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -451,23 +640,41 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 		}
 		else {
 		}
-		var os = _module ('os');
-		var is_path_builtin = _member ('bpy.utils', 'is_path_builtin');
-		var path = bpy.utils.user_resource ('SCRIPTS', __kwargtrans__ ({path: os.path.join ('presets', 'keyconfig'), create: true}));
+		var os = __call__ (_module, null, 'os');
+		var is_path_builtin = __call__ (_member, null, 'bpy.utils', 'is_path_builtin');
+		var path = (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.user_resource, __accu0__, 'SCRIPTS', __kwargtrans__ ({path: (function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.join, __accu1__, 'presets', 'keyconfig');
+			}) (), create: true}));
+		}) ();
 		var config_name_final = config_name;
-		var __left0__ = os.path.splitext (config_name);
+		var __left0__ = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.splitext, __accu0__, config_name);
+		}) ();
 		var config_name_noext = __left0__ [0];
 		var config_name_ext = __left0__ [1];
-		var preset_path = bpy.utils.preset_find (config_name_noext, 'keyconfig', __kwargtrans__ ({ext: '.py'}));
-		if (preset_path !== null && is_path_builtin (preset_path)) {
-			var config_name_final = '{:s} (User){:s}'.format (config_name_noext, config_name_ext);
+		var preset_path = (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.preset_find, __accu0__, config_name_noext, 'keyconfig', __kwargtrans__ ({ext: '.py'}));
+		}) ();
+		if (preset_path !== null && __call__ (is_path_builtin, null, preset_path)) {
+			var config_name_final = (function () {
+				var __accu0__ = '{:s} (User){:s}';
+				return __call__ (__accu0__.format, __accu0__, config_name_noext, config_name_ext);
+			}) ();
 		}
-		return os.path.join (path, config_name_final);
+		return (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, path, config_name_final);
+		}) ();
 	});},
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -479,33 +686,54 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 		}
 		else {
 		}
-		var shutil = _module ('shutil');
-		var basename = _member ('os.path', 'basename');
+		var shutil = __call__ (_module, null, 'shutil');
+		var basename = __call__ (_member, null, 'os.path', 'basename');
 		if (!(self.filepath)) {
-			self.report (new set (['ERROR']), 'Filepath not set');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Filepath not set');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var config_name = basename (self.filepath);
-		var path = self._preset_prevent_name_collision (config_name);
+		var config_name = __call__ (basename, null, self.filepath);
+		var path = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._preset_prevent_name_collision, __accu0__, config_name);
+		}) ();
 		try {
 			if (self.keep_original) {
-				shutil.py_copy (self.filepath, path);
+				(function () {
+					var __accu0__ = shutil;
+					return __call__ (__accu0__.py_copy, __accu0__, self.filepath, path);
+				}) ();
 			}
 			else {
-				shutil.move (self.filepath, path);
+				(function () {
+					var __accu0__ = shutil;
+					return __call__ (__accu0__.move, __accu0__, self.filepath, path);
+				}) ();
 			}
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
 				var ex = __except0__;
-				self.report (new set (['ERROR']), rpt_ ('Installing keymap failed: {:s}').format (str (ex)));
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
+						var __accu1__ = __call__ (rpt_, null, 'Installing keymap failed: {:s}');
+						return __call__ (__accu1__.format, __accu1__, __call__ (str, null, ex));
+					}) ());
+				}) ();
 				return new set (['CANCELLED']);
 			}
 			else {
 				throw __except0__;
 			}
 		}
-		if (bpy.utils.keyconfig_set (path, __kwargtrans__ ({report: self.report}))) {
+		if ((function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.keyconfig_set, __accu0__, path, __kwargtrans__ ({report: self.report}));
+		}) ()) {
 			return new set (['FINISHED']);
 		}
 		else {
@@ -515,7 +743,7 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -529,11 +757,14 @@ export var PREFERENCES_OT_keyconfig_import =  __class__ ('PREFERENCES_OT_keyconf
 		else {
 		}
 		var wm = context.window_manager;
-		wm.fileselect_add (self);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.fileselect_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});}
 });
-PREFERENCES_OT_keyconfig_import.__annotations__ = dict ({'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', py_default: 'keymap.py'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'keep_original': BoolProperty (__kwargtrans__ ({py_name: 'Keep Original', description: 'Keep original file after copying to configuration folder', py_default: true}))});
+PREFERENCES_OT_keyconfig_import.__annotations__ = dict ({'filepath': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'FILE_PATH', py_default: 'keymap.py'})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'keep_original': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Keep Original', description: 'Keep original file after copying to configuration folder', py_default: true}))});
 export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconfig_export', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.keyconfig_export',
@@ -541,7 +772,7 @@ export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconf
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -553,23 +784,26 @@ export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconf
 		}
 		else {
 		}
-		var keyconfig_export_as_data = _member ('bl_keymap_utils.io', 'keyconfig_export_as_data');
+		var keyconfig_export_as_data = __call__ (_member, null, 'bl_keymap_utils.io', 'keyconfig_export_as_data');
 		if (!(self.filepath)) {
-			var __except0__ = Exception ('Filepath not set');
+			var __except0__ = __call__ (Exception, null, 'Filepath not set');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (!(self.filepath.endswith ('.py'))) {
-			self.filepath += '.py';
+		if (!((function () {
+			var __accu0__ = self.filepath;
+			return __call__ (__accu0__.endswith, __accu0__, '.py');
+		}) ())) {
+			self.filepath = __call__ (__iadd__, null, self.filepath, '.py');
 		}
 		var wm = context.window_manager;
-		keyconfig_export_as_data (wm, wm.keyconfigs.active, self.filepath, __kwargtrans__ ({all_keymaps: self.all}));
+		__call__ (keyconfig_export_as_data, null, wm, wm.keyconfigs.active, self.filepath, __kwargtrans__ ({all_keymaps: self.all}));
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -582,16 +816,28 @@ export var PREFERENCES_OT_keyconfig_export =  __class__ ('PREFERENCES_OT_keyconf
 		}
 		else {
 		}
-		var os = _module ('os');
+		var os = __call__ (_module, null, 'os');
 		var wm = context.window_manager;
 		if (!(self.filepath)) {
-			self.filepath = os.path.join (os.path.expanduser ('~'), bpy.path.display_name_to_filepath (wm.keyconfigs.active.py_name) + '.py');
+			self.filepath = (function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.join, __accu0__, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.expanduser, __accu1__, '~');
+				}) (), __add__ ((function () {
+					var __accu1__ = bpy.path;
+					return __call__ (__accu1__.display_name_to_filepath, __accu1__, wm.keyconfigs.active.py_name);
+				}) (), '.py'));
+			}) ();
 		}
-		wm.fileselect_add (self);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.fileselect_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});}
 });
-PREFERENCES_OT_keyconfig_export.__annotations__ = dict ({'all': BoolProperty (__kwargtrans__ ({py_name: 'All Keymaps', py_default: false, description: 'Write all keymaps (not just user modified)'})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH', py_default: ''})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': BoolProperty (__kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])}))});
+PREFERENCES_OT_keyconfig_export.__annotations__ = dict ({'all': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'All Keymaps', py_default: false, description: 'Write all keymaps (not just user modified)'})), 'filepath': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'FILE_PATH', py_default: ''})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_text': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter text', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_keymap_restore =  __class__ ('PREFERENCES_OT_keymap_restore', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.keymap_restore',
@@ -599,7 +845,7 @@ export var PREFERENCES_OT_keymap_restore =  __class__ ('PREFERENCES_OT_keymap_re
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -613,19 +859,28 @@ export var PREFERENCES_OT_keymap_restore =  __class__ ('PREFERENCES_OT_keymap_re
 		}
 		var wm = context.window_manager;
 		if (self.all) {
-			for (var km of wm.keyconfigs.user.keymaps) {
-				km.restore_to_default ();
+			var __iterable0__ = wm.keyconfigs.user.keymaps;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var km = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = km;
+					return __call__ (__accu0__.restore_to_default, __accu0__);
+				}) ();
 			}
 		}
 		else {
 			var km = context.keymap;
-			km.restore_to_default ();
+			(function () {
+				var __accu0__ = km;
+				return __call__ (__accu0__.restore_to_default, __accu0__);
+			}) ();
 		}
 		context.preferences.is_dirty = true;
 		return new set (['FINISHED']);
 	});}
 });
-PREFERENCES_OT_keymap_restore.__annotations__ = dict ({'all': BoolProperty (__kwargtrans__ ({py_name: 'All Keymaps', description: 'Restore all keymaps to default'}))});
+PREFERENCES_OT_keymap_restore.__annotations__ = dict ({'all': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'All Keymaps', description: 'Restore all keymaps to default'}))});
 export var PREFERENCES_OT_keyitem_restore =  __class__ ('PREFERENCES_OT_keyitem_restore', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.keyitem_restore',
@@ -633,7 +888,7 @@ export var PREFERENCES_OT_keyitem_restore =  __class__ ('PREFERENCES_OT_keyitem_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -645,13 +900,13 @@ export var PREFERENCES_OT_keyitem_restore =  __class__ ('PREFERENCES_OT_keyitem_
 		}
 		else {
 		}
-		var keymap = getattr (context, 'keymap', null);
+		var keymap = __call__ (getattr, null, context, 'keymap', null);
 		return keymap;
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -664,15 +919,21 @@ export var PREFERENCES_OT_keyitem_restore =  __class__ ('PREFERENCES_OT_keyitem_
 		else {
 		}
 		var km = context.keymap;
-		var kmi = km.keymap_items.from_id (self.item_id);
+		var kmi = (function () {
+			var __accu0__ = km.keymap_items;
+			return __call__ (__accu0__.from_id, __accu0__, self.item_id);
+		}) ();
 		if (!(kmi.is_user_defined) && kmi.is_user_modified) {
-			km.restore_item_to_default (kmi);
+			(function () {
+				var __accu0__ = km;
+				return __call__ (__accu0__.restore_item_to_default, __accu0__, kmi);
+			}) ();
 			context.preferences.is_dirty = true;
 		}
 		return new set (['FINISHED']);
 	});}
 });
-PREFERENCES_OT_keyitem_restore.__annotations__ = dict ({'item_id': IntProperty (__kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to restore'}))});
+PREFERENCES_OT_keyitem_restore.__annotations__ = dict ({'item_id': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to restore'}))});
 export var PREFERENCES_OT_keyitem_add =  __class__ ('PREFERENCES_OT_keyitem_add', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.keyitem_add',
@@ -680,7 +941,7 @@ export var PREFERENCES_OT_keyitem_add =  __class__ ('PREFERENCES_OT_keyitem_add'
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -694,12 +955,18 @@ export var PREFERENCES_OT_keyitem_add =  __class__ ('PREFERENCES_OT_keyitem_add'
 		}
 		var km = context.keymap;
 		if (km.is_modal) {
-			km.keymap_items.new_modal ('', 'A', 'PRESS');
+			(function () {
+				var __accu0__ = km.keymap_items;
+				return __call__ (__accu0__.new_modal, __accu0__, '', 'A', 'PRESS');
+			}) ();
 		}
 		else {
-			km.keymap_items.py_new ('none', 'A', 'PRESS');
+			(function () {
+				var __accu0__ = km.keymap_items;
+				return __call__ (__accu0__.py_new, __accu0__, 'none', 'A', 'PRESS');
+			}) ();
 		}
-		if (context.space_data.filter_text != '') {
+		if (__ne__ (context.space_data.filter_text, '')) {
 			context.space_data.filter_text = '';
 			km.show_expanded_items = true;
 			km.show_expanded_children = true;
@@ -715,7 +982,7 @@ export var PREFERENCES_OT_keyitem_remove =  __class__ ('PREFERENCES_OT_keyitem_r
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -727,12 +994,12 @@ export var PREFERENCES_OT_keyitem_remove =  __class__ ('PREFERENCES_OT_keyitem_r
 		}
 		else {
 		}
-		return hasattr (context, 'keymap');
+		return __call__ (hasattr, null, context, 'keymap');
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -745,13 +1012,19 @@ export var PREFERENCES_OT_keyitem_remove =  __class__ ('PREFERENCES_OT_keyitem_r
 		else {
 		}
 		var km = context.keymap;
-		var kmi = km.keymap_items.from_id (self.item_id);
-		km.keymap_items.remove (kmi);
+		var kmi = (function () {
+			var __accu0__ = km.keymap_items;
+			return __call__ (__accu0__.from_id, __accu0__, self.item_id);
+		}) ();
+		(function () {
+			var __accu0__ = km.keymap_items;
+			return __call__ (__accu0__.remove, __accu0__, kmi);
+		}) ();
 		context.preferences.is_dirty = true;
 		return new set (['FINISHED']);
 	});}
 });
-PREFERENCES_OT_keyitem_remove.__annotations__ = dict ({'item_id': IntProperty (__kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to remove'}))});
+PREFERENCES_OT_keyitem_remove.__annotations__ = dict ({'item_id': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Item Identifier', description: 'Identifier of the item to remove'}))});
 export var PREFERENCES_OT_keyconfig_remove =  __class__ ('PREFERENCES_OT_keyconfig_remove', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.keyconfig_remove',
@@ -759,7 +1032,7 @@ export var PREFERENCES_OT_keyconfig_remove =  __class__ ('PREFERENCES_OT_keyconf
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -778,7 +1051,7 @@ export var PREFERENCES_OT_keyconfig_remove =  __class__ ('PREFERENCES_OT_keyconf
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -792,7 +1065,10 @@ export var PREFERENCES_OT_keyconfig_remove =  __class__ ('PREFERENCES_OT_keyconf
 		}
 		var wm = context.window_manager;
 		var keyconfig = wm.keyconfigs.active;
-		wm.keyconfigs.remove (keyconfig);
+		(function () {
+			var __accu0__ = wm.keyconfigs;
+			return __call__ (__accu0__.remove, __accu0__, keyconfig);
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -803,7 +1079,7 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -815,12 +1091,12 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 		}
 		else {
 		}
-		var addon_utils = _module ('addon_utils');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
 		var err_str = '';
 		var err_cb = function (ex) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -831,37 +1107,58 @@ export var PREFERENCES_OT_addon_enable =  __class__ ('PREFERENCES_OT_addon_enabl
 			}
 			else {
 			}
-			var traceback = _module ('traceback');
-			traceback.print_exc ();
-			err_str = str (ex);
+			var traceback = __call__ (_module, null, 'traceback');
+			(function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.print_exc, __accu0__);
+			}) ();
+			err_str = __call__ (str, null, ex);
 		};
 		var cursor_set = self.options.is_invoke;
 		if (cursor_set) {
-			_wm_wait_cursor (true);
+			__call__ (_wm_wait_cursor, null, true);
 		}
 		var module_name = self.module;
-		var mod = addon_utils.enable (module_name, __kwargtrans__ ({default_set: true, handle_error: err_cb}));
+		var mod = (function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.enable, __accu0__, module_name, __kwargtrans__ ({default_set: true, handle_error: err_cb}));
+		}) ();
 		if (mod) {
-			var bl_info = addon_utils.module_bl_info (mod);
-			var info_ver = bl_info.py_get ('blender', tuple ([0, 0, 0]));
-			if (info_ver > bpy.app.version) {
-				self.report (new set (['WARNING']), rpt_ ('This script was written for Blender version {:d}.{:d}.{:d} and might not function (correctly), though it is enabled').format (...info_ver));
+			var bl_info = (function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.module_bl_info, __accu0__, mod);
+			}) ();
+			var info_ver = (function () {
+				var __accu0__ = bl_info;
+				return __call__ (__accu0__.py_get, __accu0__, 'blender', tuple ([0, 0, 0]));
+			}) ();
+			if (__gt__ (info_ver, bpy.app.version)) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+						var __accu1__ = __call__ (rpt_, null, 'This script was written for Blender version {:d}.{:d}.{:d} and might not function (correctly), though it is enabled');
+						return __call__ (__accu1__.format, __accu1__, ...info_ver);
+					}) ());
+				}) ();
 			}
 			var result = new set (['FINISHED']);
 		}
 		else {
 			if (err_str) {
-				self.report (new set (['ERROR']), err_str);
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), err_str);
+				}) ();
 			}
 			var result = new set (['CANCELLED']);
 		}
 		if (cursor_set) {
-			_wm_wait_cursor (false);
+			__call__ (_wm_wait_cursor, null, false);
 		}
 		return result;
 	});}
 });
-PREFERENCES_OT_addon_enable.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to enable'}))});
+PREFERENCES_OT_addon_enable.__annotations__ = dict ({'module': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to enable'}))});
 export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disable', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.addon_disable',
@@ -869,7 +1166,7 @@ export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disa
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -881,12 +1178,12 @@ export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disa
 		}
 		else {
 		}
-		var addon_utils = _module ('addon_utils');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
 		var err_str = '';
 		var err_cb = function (ex) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
@@ -897,26 +1194,35 @@ export var PREFERENCES_OT_addon_disable =  __class__ ('PREFERENCES_OT_addon_disa
 			}
 			else {
 			}
-			var traceback = _module ('traceback');
-			err_str = traceback.format_exc ();
-			print (err_str);
+			var traceback = __call__ (_module, null, 'traceback');
+			err_str = (function () {
+				var __accu0__ = traceback;
+				return __call__ (__accu0__.format_exc, __accu0__);
+			}) ();
+			__call__ (print, null, err_str);
 		};
 		var cursor_set = self.options.is_invoke;
 		if (cursor_set) {
-			_wm_wait_cursor (true);
+			__call__ (_wm_wait_cursor, null, true);
 		}
 		var module_name = self.module;
-		addon_utils.disable (module_name, __kwargtrans__ ({default_set: true, handle_error: err_cb}));
+		(function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.disable, __accu0__, module_name, __kwargtrans__ ({default_set: true, handle_error: err_cb}));
+		}) ();
 		if (err_str) {
-			self.report (new set (['ERROR']), err_str);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), err_str);
+			}) ();
 		}
 		if (cursor_set) {
-			_wm_wait_cursor (false);
+			__call__ (_wm_wait_cursor, null, false);
 		}
 		return new set (['FINISHED']);
 	});}
 });
-PREFERENCES_OT_addon_disable.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to disable'}))});
+PREFERENCES_OT_addon_disable.__annotations__ = dict ({'module': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to disable'}))});
 export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_install', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.theme_install',
@@ -924,7 +1230,7 @@ export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_inst
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -936,29 +1242,62 @@ export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_inst
 		}
 		else {
 		}
-		var os = _module ('os');
-		var shutil = _module ('shutil');
-		var traceback = _module ('traceback');
+		var os = __call__ (_module, null, 'os');
+		var shutil = __call__ (_module, null, 'shutil');
+		var traceback = __call__ (_module, null, 'traceback');
 		var xmlfile = self.filepath;
-		var path_themes = bpy.utils.user_resource ('SCRIPTS', __kwargtrans__ ({path: os.path.join ('presets', 'interface_theme'), create: true}));
+		var path_themes = (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.user_resource, __accu0__, 'SCRIPTS', __kwargtrans__ ({path: (function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.join, __accu1__, 'presets', 'interface_theme');
+			}) (), create: true}));
+		}) ();
 		if (!(path_themes)) {
-			self.report (new set (['ERROR']), 'Failed to get themes path');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get themes path');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var path_dest = os.path.join (path_themes, os.path.basename (xmlfile));
+		var path_dest = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, path_themes, (function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.basename, __accu1__, xmlfile);
+			}) ());
+		}) ();
 		if (!(self.overwrite)) {
-			if (os.path.exists (path_dest)) {
-				self.report (new set (['WARNING']), rpt_ ('File already installed to {!r}').format (path_dest));
+			if ((function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.exists, __accu0__, path_dest);
+			}) ()) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+						var __accu1__ = __call__ (rpt_, null, 'File already installed to {!r}');
+						return __call__ (__accu1__.format, __accu1__, path_dest);
+					}) ());
+				}) ();
 				return new set (['CANCELLED']);
 			}
 		}
 		try {
-			shutil.copyfile (xmlfile, path_dest);
-			bpy.ops.script.execute_preset (__kwargtrans__ ({filepath: path_dest, menu_idname: 'USERPREF_MT_interface_theme_presets'}));
+			(function () {
+				var __accu0__ = shutil;
+				return __call__ (__accu0__.copyfile, __accu0__, xmlfile, path_dest);
+			}) ();
+			(function () {
+				var __accu0__ = bpy.ops.script;
+				return __call__ (__accu0__.execute_preset, __accu0__, __kwargtrans__ ({filepath: path_dest, menu_idname: 'USERPREF_MT_interface_theme_presets'}));
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
-				traceback.print_exc ();
+				(function () {
+					var __accu0__ = traceback;
+					return __call__ (__accu0__.print_exc, __accu0__);
+				}) ();
 				return new set (['CANCELLED']);
 			}
 			else {
@@ -970,7 +1309,7 @@ export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_inst
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -984,11 +1323,14 @@ export var PREFERENCES_OT_theme_install =  __class__ ('PREFERENCES_OT_theme_inst
 		else {
 		}
 		var wm = context.window_manager;
-		wm.fileselect_add (self);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.fileselect_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});}
 });
-PREFERENCES_OT_theme_install.__annotations__ = dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing theme file if exists', py_default: true})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.xml', options: new set (['HIDDEN'])}))});
+PREFERENCES_OT_theme_install.__annotations__ = dict ({'overwrite': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing theme file if exists', py_default: true})), 'filepath': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': __call__ (StringProperty, null, __kwargtrans__ ({py_default: '*.xml', options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_addon_refresh =  __class__ ('PREFERENCES_OT_addon_refresh', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.addon_refresh',
@@ -996,7 +1338,7 @@ export var PREFERENCES_OT_addon_refresh =  __class__ ('PREFERENCES_OT_addon_refr
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1008,50 +1350,62 @@ export var PREFERENCES_OT_addon_refresh =  __class__ ('PREFERENCES_OT_addon_refr
 		}
 		else {
 		}
-		var addon_utils = _module ('addon_utils');
-		addon_utils.modules_refresh ();
+		var addon_utils = __call__ (_module, null, 'addon_utils');
+		(function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.modules_refresh, __accu0__);
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
+export var _PREFERENCES_OT_addon_install__target_path_items = function (_self, context) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case '_self': var _self = __allkwargs0__ [__attrib0__]; break;
+					case 'context': var context = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var default_item = tuple (['DEFAULT', 'Default', '']);
+	if (context === null) {
+		return tuple ([default_item]);
+	}
+	var paths = context.preferences.filepaths;
+	var script_directories_items = (function () {
+		var __accu0__ = [];
+		var __iterable0__ = __call__ (list, null, __call__ (py_enumerate, null, paths.script_directories));
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var index = __left0__ [0];
+			var item = __left0__ [1];
+			if (item.directory) {
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, tuple ([item.py_name, item.py_name, '']));
+				}) ();
+			}
+		}
+		return __accu0__;
+	}) ();
+	return (script_directories_items ? __call__ (_joined, null, [default_item, null], script_directories_items) : tuple ([default_item]));
+};
 export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_install', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.addon_install',
 	bl_label: 'Install Add-on',
-	get _target_path_items () {return __get__ (this, function (_self, context) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case '_self': var _self = __allkwargs0__ [__attrib0__]; break;
-						case 'context': var context = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var default_item = tuple (['DEFAULT', 'Default', '']);
-		if (context === null) {
-			return tuple ([default_item]);
-		}
-		var paths = context.preferences.filepaths;
-		var script_directories_items = (function () {
-			var __accu0__ = [];
-			for (var [index, item] of list (py_enumerate (paths.script_directories))) {
-				if (item.directory) {
-					__accu0__.append (tuple ([item.py_name, item.py_name, '']));
-				}
-			}
-			return __accu0__;
-		}) ();
-		return (script_directories_items ? _joined ([default_item, null], script_directories_items) : tuple ([default_item]));
-	});},
+	_target_path_items: _PREFERENCES_OT_addon_install__target_path_items,
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1063,35 +1417,56 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 		}
 		else {
 		}
-		var addon_utils = _module ('addon_utils');
-		var traceback = _module ('traceback');
-		var zipfile = _module ('zipfile');
-		var shutil = _module ('shutil');
-		var os = _module ('os');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
+		var traceback = __call__ (_module, null, 'traceback');
+		var zipfile = __call__ (_module, null, 'zipfile');
+		var shutil = __call__ (_module, null, 'shutil');
+		var os = __call__ (_module, null, 'os');
 		var pyfile = self.filepath;
-		if (self.target == 'DEFAULT') {
-			var path_addons = bpy.utils.user_resource ('SCRIPTS', __kwargtrans__ ({path: 'addons', create: true}));
+		if (__eq__ (self.target, 'DEFAULT')) {
+			var path_addons = (function () {
+				var __accu0__ = bpy.utils;
+				return __call__ (__accu0__.user_resource, __accu0__, 'SCRIPTS', __kwargtrans__ ({path: 'addons', create: true}));
+			}) ();
 		}
 		else {
 			var paths = context.preferences.filepaths;
-			for (var script_directory of paths.script_directories) {
-				if (script_directory.py_name == self.target) {
-					var path_addons = os.path.join (script_directory.directory, 'addons');
+			var __iterable0__ = paths.script_directories;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var script_directory = __getitem__ (__iterable0__, __index0__);
+				if (__eq__ (script_directory.py_name, self.target)) {
+					var path_addons = (function () {
+						var __accu0__ = os.path;
+						return __call__ (__accu0__.join, __accu0__, script_directory.directory, 'addons');
+					}) ();
 					break;
 				}
 			}
 		}
 		if (!(path_addons)) {
-			self.report (new set (['ERROR']), 'Failed to get add-ons path');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get add-ons path');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (!(os.path.isdir (path_addons))) {
+		if (!((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isdir, __accu0__, path_addons);
+		}) ())) {
 			try {
-				os.makedirs (path_addons, __kwargtrans__ ({exist_ok: true}));
+				(function () {
+					var __accu0__ = os;
+					return __call__ (__accu0__.makedirs, __accu0__, path_addons, __kwargtrans__ ({exist_ok: true}));
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					traceback.print_exc ();
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 				}
 				else {
 					throw __except0__;
@@ -1099,56 +1474,121 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 			}
 		}
 		var addon_path = '';
-		var pyfile_dir = os.path.dirname (pyfile);
-		for (var addon_path of addon_utils.paths ()) {
-			if (os.path.samefile (pyfile_dir, addon_path)) {
-				self.report (new set (['ERROR']), rpt_ ('Source file is in the add-on search path: {!r}').format (addon_path));
+		var pyfile_dir = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.dirname, __accu0__, pyfile);
+		}) ();
+		var __iterable0__ = (function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.paths, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var addon_path = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.samefile, __accu0__, pyfile_dir, addon_path);
+			}) ()) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
+						var __accu1__ = __call__ (rpt_, null, 'Source file is in the add-on search path: {!r}');
+						return __call__ (__accu1__.format, __accu1__, addon_path);
+					}) ());
+				}) ();
 				return new set (['CANCELLED']);
 			}
 		}
+		// pass;
+		// pass;
 		var addons_old = (function () {
 			var __accu0__ = [];
-			for (var mod of list (addon_utils.modules ())) {
-				__accu0__.append (mod.__name__);
+			var __iterable0__ = __call__ (list, null, (function () {
+				var __accu1__ = addon_utils;
+				return __call__ (__accu1__.modules, __accu1__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var mod = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, mod.__name__);
+				}) ();
 			}
 			return set (__accu0__);
 		}) ();
-		if (zipfile.is_zipfile (pyfile)) {
+		if ((function () {
+			var __accu0__ = zipfile;
+			return __call__ (__accu0__.is_zipfile, __accu0__, pyfile);
+		}) ()) {
 			try {
-				var file_to_extract = zipfile.ZipFile (pyfile, 'r');
+				var file_to_extract = (function () {
+					var __accu0__ = zipfile;
+					return __call__ (__accu0__.ZipFile, __accu0__, pyfile, 'r');
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					traceback.print_exc ();
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 					return new set (['CANCELLED']);
 				}
 				else {
 					throw __except0__;
 				}
 			}
-			var file_to_extract_root = _zipfile_root_namelist (file_to_extract);
+			var file_to_extract_root = __call__ (_zipfile_root_namelist, null, file_to_extract);
 			if (__in__ ('__init__.py', file_to_extract_root)) {
-				self.report (new set (['ERROR']), rpt_ ('ZIP packaged incorrectly; __init__.py should be in a directory, not at top-level'));
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), __call__ (rpt_, null, 'ZIP packaged incorrectly; __init__.py should be in a directory, not at top-level'));
+				}) ();
 				return new set (['CANCELLED']);
 			}
 			if (self.overwrite) {
-				_module_filesystem_remove (path_addons, file_to_extract_root);
+				__call__ (_module_filesystem_remove, null, path_addons, file_to_extract_root);
 			}
 			else {
-				for (var f of file_to_extract_root) {
-					var path_dest = os.path.join (path_addons, os.path.basename (f));
-					if (os.path.exists (path_dest)) {
-						self.report (new set (['WARNING']), rpt_ ('File already installed to {!r}').format (path_dest));
+				var __iterable0__ = file_to_extract_root;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var f = __getitem__ (__iterable0__, __index0__);
+					var path_dest = (function () {
+						var __accu0__ = os.path;
+						return __call__ (__accu0__.join, __accu0__, path_addons, (function () {
+							var __accu1__ = os.path;
+							return __call__ (__accu1__.basename, __accu1__, f);
+						}) ());
+					}) ();
+					if ((function () {
+						var __accu0__ = os.path;
+						return __call__ (__accu0__.exists, __accu0__, path_dest);
+					}) ()) {
+						(function () {
+							var __accu0__ = self;
+							return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+								var __accu1__ = __call__ (rpt_, null, 'File already installed to {!r}');
+								return __call__ (__accu1__.format, __accu1__, path_dest);
+							}) ());
+						}) ();
 						return new set (['CANCELLED']);
 					}
 				}
 			}
 			try {
-				file_to_extract.extractall (path_addons);
+				(function () {
+					var __accu0__ = file_to_extract;
+					return __call__ (__accu0__.extractall, __accu0__, path_addons);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					traceback.print_exc ();
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 					return new set (['CANCELLED']);
 				}
 				else {
@@ -1157,20 +1597,44 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 			}
 		}
 		else {
-			var path_dest = os.path.join (path_addons, os.path.basename (pyfile));
+			var path_dest = (function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.join, __accu0__, path_addons, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.basename, __accu1__, pyfile);
+				}) ());
+			}) ();
 			if (self.overwrite) {
-				_module_filesystem_remove (path_addons, [os.path.basename (pyfile)]);
+				__call__ (_module_filesystem_remove, null, path_addons, [(function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.basename, __accu0__, pyfile);
+				}) ()]);
 			}
-			else if (os.path.exists (path_dest)) {
-				self.report (new set (['WARNING']), rpt_ ('File already installed to {!r}').format (path_dest));
+			else if ((function () {
+				var __accu0__ = os.path;
+				return __call__ (__accu0__.exists, __accu0__, path_dest);
+			}) ()) {
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+						var __accu1__ = __call__ (rpt_, null, 'File already installed to {!r}');
+						return __call__ (__accu1__.format, __accu1__, path_dest);
+					}) ());
+				}) ();
 				return new set (['CANCELLED']);
 			}
 			try {
-				shutil.copyfile (pyfile, path_dest);
+				(function () {
+					var __accu0__ = shutil;
+					return __call__ (__accu0__.copyfile, __accu0__, pyfile, path_dest);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					traceback.print_exc ();
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 					return new set (['CANCELLED']);
 				}
 				else {
@@ -1178,43 +1642,91 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 				}
 			}
 		}
-		var addons_new = (function () {
+		var addons_new = __sub__ ((function () {
 			var __accu0__ = [];
-			for (var mod of list (addon_utils.modules ())) {
-				__accu0__.append (mod.__name__);
+			var __iterable0__ = __call__ (list, null, (function () {
+				var __accu1__ = addon_utils;
+				return __call__ (__accu1__.modules, __accu1__);
+			}) ());
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var mod = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, mod.__name__);
+				}) ();
 			}
 			return set (__accu0__);
-		}) () - addons_old;
-		addons_new.discard ('modules');
-		for (var new_addon of addons_new) {
-			addon_utils.disable (new_addon, __kwargtrans__ ({default_set: true}));
+		}) (), addons_old);
+		(function () {
+			var __accu0__ = addons_new;
+			return __call__ (__accu0__.discard, __accu0__, 'modules');
+		}) ();
+		var __iterable0__ = addons_new;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var new_addon = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.disable, __accu0__, new_addon, __kwargtrans__ ({default_set: true}));
+			}) ();
 		}
-		for (var mod of addon_utils.modules (__kwargtrans__ ({refresh: false}))) {
+		var __iterable0__ = (function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.modules, __accu0__, __kwargtrans__ ({refresh: false}));
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var mod = __getitem__ (__iterable0__, __index0__);
 			if (__in__ (mod.__name__, addons_new)) {
-				var bl_info = addon_utils.module_bl_info (mod);
+				var bl_info = (function () {
+					var __accu0__ = addon_utils;
+					return __call__ (__accu0__.module_bl_info, __accu0__, mod);
+				}) ();
 				context.preferences.view.show_addons_enabled_only = false;
 				context.window_manager.addon_filter = 'All';
-				context.window_manager.addon_search = bl_info ['name'];
+				context.window_manager.addon_search = __getitem__ (bl_info, 'name');
 				break;
 			}
 		}
-		bpy.utils.refresh_script_paths ();
+		(function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.refresh_script_paths, __accu0__);
+		}) ();
 		if (self.enable_on_install) {
-			for (var mod of addon_utils.modules (__kwargtrans__ ({refresh: false}))) {
+			var __iterable0__ = (function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.modules, __accu0__, __kwargtrans__ ({refresh: false}));
+			}) ();
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var mod = __getitem__ (__iterable0__, __index0__);
 				if (__in__ (mod.__name__, addons_new)) {
-					bpy.ops.preferences.addon_enable (__kwargtrans__ ({module: mod.__name__}));
+					(function () {
+						var __accu0__ = bpy.ops.preferences;
+						return __call__ (__accu0__.addon_enable, __accu0__, __kwargtrans__ ({module: mod.__name__}));
+					}) ();
 				}
 			}
 		}
-		var msg = rpt_ ('Modules Installed ({:s}) from {!r} into {!r}').format (', '.join (sorted (addons_new)), pyfile, path_addons);
-		print (msg);
-		self.report (new set (['INFO']), msg);
+		var msg = (function () {
+			var __accu0__ = __call__ (rpt_, null, 'Modules Installed ({:s}) from {!r} into {!r}');
+			return __call__ (__accu0__.format, __accu0__, (function () {
+				var __accu1__ = ', ';
+				return __call__ (__accu1__.join, __accu1__, __call__ (sorted, null, addons_new));
+			}) (), pyfile, path_addons);
+		}) ();
+		__call__ (print, null, msg);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), msg);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1228,11 +1740,14 @@ export var PREFERENCES_OT_addon_install =  __class__ ('PREFERENCES_OT_addon_inst
 		else {
 		}
 		var wm = context.window_manager;
-		wm.fileselect_add (self);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.fileselect_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});}
 });
-PREFERENCES_OT_addon_install.__annotations__ = dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing add-ons with the same ID', py_default: true})), 'enable_on_install': BoolProperty (__kwargtrans__ ({py_name: 'Enable on Install', description: 'Enable after installing', py_default: false})), 'target': EnumProperty (__kwargtrans__ ({py_name: 'Target Path', py_items: PREFERENCES_OT_addon_install._target_path_items})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': BoolProperty (__kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.py;*.zip', options: new set (['HIDDEN'])}))});
+PREFERENCES_OT_addon_install.__annotations__ = dict ({'overwrite': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing add-ons with the same ID', py_default: true})), 'enable_on_install': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Enable on Install', description: 'Enable after installing', py_default: false})), 'target': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Target Path', py_items: _PREFERENCES_OT_addon_install__target_path_items})), 'filepath': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_python': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter Python', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': __call__ (StringProperty, null, __kwargtrans__ ({py_default: '*.py;*.zip', options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remove', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.addon_remove',
@@ -1240,7 +1755,7 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 	get path_from_addon () {return function (module) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1251,14 +1766,32 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 		}
 		else {
 		}
-		var os = _module ('os');
-		var addon_utils = _module ('addon_utils');
-		for (var mod of addon_utils.modules ()) {
-			if (mod.__name__ == module) {
+		var os = __call__ (_module, null, 'os');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
+		var __iterable0__ = (function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.modules, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var mod = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (mod.__name__, module)) {
 				var filepath = mod.__file__;
-				if (os.path.exists (filepath)) {
-					if (os.path.splitext (os.path.basename (filepath)) [0] == '__init__') {
-						return tuple ([os.path.dirname (filepath), true]);
+				if ((function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.exists, __accu0__, filepath);
+				}) ()) {
+					if (__eq__ (__getitem__ ((function () {
+						var __accu0__ = os.path;
+						return __call__ (__accu0__.splitext, __accu0__, (function () {
+							var __accu1__ = os.path;
+							return __call__ (__accu1__.basename, __accu1__, filepath);
+						}) ());
+					}) (), 0), '__init__')) {
+						return tuple ([(function () {
+							var __accu0__ = os.path;
+							return __call__ (__accu0__.dirname, __accu0__, filepath);
+						}) (), true]);
 					}
 					else {
 						return tuple ([filepath, false]);
@@ -1271,7 +1804,7 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1283,23 +1816,44 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 		}
 		else {
 		}
-		var addon_utils = _module ('addon_utils');
-		var os = _module ('os');
-		var __left0__ = PREFERENCES_OT_addon_remove.path_from_addon (self.module);
+		var addon_utils = __call__ (_module, null, 'addon_utils');
+		var os = __call__ (_module, null, 'os');
+		var __left0__ = (function () {
+			var __accu0__ = PREFERENCES_OT_addon_remove;
+			return __call__ (__accu0__.path_from_addon, __accu0__, self.module);
+		}) ();
 		var path = __left0__ [0];
 		var isdir = __left0__ [1];
 		if (path === null) {
-			self.report (new set (['WARNING']), rpt_ ('Add-on path {!r} could not be found').format (path));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Add-on path {!r} could not be found');
+					return __call__ (__accu1__.format, __accu1__, path);
+				}) ());
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		addon_utils.disable (self.module, __kwargtrans__ ({default_set: true}));
-		var shutil = _module ('shutil');
-		if (isdir && !(os.path.islink (path))) {
-			shutil.rmtree (path, __kwargtrans__ ({ignore_errors: true}));
+		(function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.disable, __accu0__, self.module, __kwargtrans__ ({default_set: true}));
+		}) ();
+		var shutil = __call__ (_module, null, 'shutil');
+		if (isdir && !((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.islink, __accu0__, path);
+		}) ())) {
+			(function () {
+				var __accu0__ = shutil;
+				return __call__ (__accu0__.rmtree, __accu0__, path, __kwargtrans__ ({ignore_errors: true}));
+			}) ();
 		}
 		else {
 			try {
-				os.remove (path);
+				(function () {
+					var __accu0__ = os;
+					return __call__ (__accu0__.remove, __accu0__, path);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -1310,17 +1864,32 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 				}
 			}
 		}
-		if (os.path.exists (path)) {
-			addon_utils.stale_pending_stage_paths (os.path.dirname (path), [path]);
+		if ((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.exists, __accu0__, path);
+		}) ()) {
+			(function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.stale_pending_stage_paths, __accu0__, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.dirname, __accu1__, path);
+				}) (), [path]);
+			}) ();
 		}
-		addon_utils.modules_refresh ();
-		context.area.tag_redraw ();
+		(function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.modules_refresh, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = context.area;
+			return __call__ (__accu0__.tag_redraw, __accu0__);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1332,16 +1901,31 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 		}
 		else {
 		}
-		self.layout.label (__kwargtrans__ ({text: iface_ ('Remove Add-on: {!r}?').format (self.module), translate: false}));
-		var __left0__ = PREFERENCES_OT_addon_remove.path_from_addon (self.module);
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+				var __accu1__ = __call__ (iface_, null, 'Remove Add-on: {!r}?');
+				return __call__ (__accu1__.format, __accu1__, self.module);
+			}) (), translate: false}));
+		}) ();
+		var __left0__ = (function () {
+			var __accu0__ = PREFERENCES_OT_addon_remove;
+			return __call__ (__accu0__.path_from_addon, __accu0__, self.module);
+		}) ();
 		var path = __left0__ [0];
 		var _isdir = __left0__ [1];
-		self.layout.label (__kwargtrans__ ({text: iface_ ('Path: {!r}').format (path), translate: false}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: (function () {
+				var __accu1__ = __call__ (iface_, null, 'Path: {!r}');
+				return __call__ (__accu1__.format, __accu1__, path);
+			}) (), translate: false}));
+		}) ();
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1355,10 +1939,13 @@ export var PREFERENCES_OT_addon_remove =  __class__ ('PREFERENCES_OT_addon_remov
 		else {
 		}
 		var wm = context.window_manager;
-		return wm.invoke_props_dialog (self, __kwargtrans__ ({width: 600}));
+		return (function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.invoke_props_dialog, __accu0__, self, __kwargtrans__ ({width: 600}));
+		}) ();
 	});}
 });
-PREFERENCES_OT_addon_remove.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to remove'}))});
+PREFERENCES_OT_addon_remove.__annotations__ = dict ({'module': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to remove'}))});
 export var PREFERENCES_OT_addon_expand =  __class__ ('PREFERENCES_OT_addon_expand', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.addon_expand',
@@ -1367,7 +1954,7 @@ export var PREFERENCES_OT_addon_expand =  __class__ ('PREFERENCES_OT_addon_expan
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1379,18 +1966,27 @@ export var PREFERENCES_OT_addon_expand =  __class__ ('PREFERENCES_OT_addon_expan
 		}
 		else {
 		}
-		var addon_utils = _module ('addon_utils');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
 		var addon_module_name = self.module;
-		var _modules = addon_utils.modules (__kwargtrans__ ({refresh: false}));
-		var mod = addon_utils.addons_fake_modules.py_get (addon_module_name);
+		var _modules = (function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.modules, __accu0__, __kwargtrans__ ({refresh: false}));
+		}) ();
+		var mod = (function () {
+			var __accu0__ = addon_utils.addons_fake_modules;
+			return __call__ (__accu0__.py_get, __accu0__, addon_module_name);
+		}) ();
 		if (mod !== null) {
-			var bl_info = addon_utils.module_bl_info (mod);
-			bl_info ['show_expanded'] = !(bl_info ['show_expanded']);
+			var bl_info = (function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.module_bl_info, __accu0__, mod);
+			}) ();
+			__setitem__ (bl_info, 'show_expanded', !(__getitem__ (bl_info, 'show_expanded')));
 		}
 		return new set (['FINISHED']);
 	});}
 });
-PREFERENCES_OT_addon_expand.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))});
+PREFERENCES_OT_addon_expand.__annotations__ = dict ({'module': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))});
 export var PREFERENCES_OT_addon_show =  __class__ ('PREFERENCES_OT_addon_show', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.addon_show',
@@ -1399,7 +1995,7 @@ export var PREFERENCES_OT_addon_show =  __class__ ('PREFERENCES_OT_addon_show', 
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1411,31 +2007,49 @@ export var PREFERENCES_OT_addon_show =  __class__ ('PREFERENCES_OT_addon_show', 
 		}
 		else {
 		}
-		var addon_utils = _module ('addon_utils');
+		var addon_utils = __call__ (_module, null, 'addon_utils');
 		var addon_module_name = self.module;
-		var _modules = addon_utils.modules (__kwargtrans__ ({refresh: false}));
-		var mod = addon_utils.addons_fake_modules.py_get (addon_module_name);
+		var _modules = (function () {
+			var __accu0__ = addon_utils;
+			return __call__ (__accu0__.modules, __accu0__, __kwargtrans__ ({refresh: false}));
+		}) ();
+		var mod = (function () {
+			var __accu0__ = addon_utils.addons_fake_modules;
+			return __call__ (__accu0__.py_get, __accu0__, addon_module_name);
+		}) ();
 		if (mod !== null) {
-			var bl_info = addon_utils.module_bl_info (mod);
-			bl_info ['show_expanded'] = true;
+			var bl_info = (function () {
+				var __accu0__ = addon_utils;
+				return __call__ (__accu0__.module_bl_info, __accu0__, mod);
+			}) ();
+			__setitem__ (bl_info, 'show_expanded', true);
 			context.preferences.active_section = 'ADDONS';
 			context.preferences.view.show_addons_enabled_only = false;
 			context.window_manager.addon_filter = 'All';
-			context.window_manager.addon_search = bl_info ['name'];
+			context.window_manager.addon_search = __getitem__ (bl_info, 'name');
 			if (!__in__ ('PREFERENCES', (function () {
 				var __accu0__ = [];
-				for (var area of context.screen.areas) {
-					__accu0__.append (area.py_metatype);
+				var __iterable0__ = context.screen.areas;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var area = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, area.py_metatype);
+					}) ();
 				}
 				return __accu0__;
 			}) ())) {
-				bpy.ops.screen.userpref_show ('INVOKE_DEFAULT');
+				(function () {
+					var __accu0__ = bpy.ops.screen;
+					return __call__ (__accu0__.userpref_show, __accu0__, 'INVOKE_DEFAULT');
+				}) ();
 			}
 		}
 		return new set (['FINISHED']);
 	});}
 });
-PREFERENCES_OT_addon_show.__annotations__ = dict ({'module': StringProperty (__kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))});
+PREFERENCES_OT_addon_show.__annotations__ = dict ({'module': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Module', description: 'Module name of the add-on to expand'}))});
 export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app_template_install', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.app_template_install',
@@ -1443,7 +2057,7 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 	get execute () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1455,61 +2069,115 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 		}
 		else {
 		}
-		var traceback = _module ('traceback');
-		var zipfile = _module ('zipfile');
-		var os = _module ('os');
+		var traceback = __call__ (_module, null, 'traceback');
+		var zipfile = __call__ (_module, null, 'zipfile');
+		var os = __call__ (_module, null, 'os');
 		var filepath = self.filepath;
-		var path_app_templates = bpy.utils.user_resource ('SCRIPTS', __kwargtrans__ ({path: os.path.join ('startup', 'bl_app_templates_user'), create: true}));
+		var path_app_templates = (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.user_resource, __accu0__, 'SCRIPTS', __kwargtrans__ ({path: (function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.join, __accu1__, 'startup', 'bl_app_templates_user');
+			}) (), create: true}));
+		}) ();
 		if (!(path_app_templates)) {
-			self.report (new set (['ERROR']), 'Failed to get add-ons path');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get add-ons path');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		if (!(os.path.isdir (path_app_templates))) {
+		if (!((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isdir, __accu0__, path_app_templates);
+		}) ())) {
 			try {
-				os.makedirs (path_app_templates, __kwargtrans__ ({exist_ok: true}));
+				(function () {
+					var __accu0__ = os;
+					return __call__ (__accu0__.makedirs, __accu0__, path_app_templates, __kwargtrans__ ({exist_ok: true}));
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					traceback.print_exc ();
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 				}
 				else {
 					throw __except0__;
 				}
 			}
 		}
-		var app_templates_old = set (os.listdir (path_app_templates));
-		if (zipfile.is_zipfile (filepath)) {
+		var app_templates_old = __call__ (set, null, (function () {
+			var __accu0__ = os;
+			return __call__ (__accu0__.listdir, __accu0__, path_app_templates);
+		}) ());
+		if ((function () {
+			var __accu0__ = zipfile;
+			return __call__ (__accu0__.is_zipfile, __accu0__, filepath);
+		}) ()) {
 			try {
-				var file_to_extract = zipfile.ZipFile (filepath, 'r');
+				var file_to_extract = (function () {
+					var __accu0__ = zipfile;
+					return __call__ (__accu0__.ZipFile, __accu0__, filepath, 'r');
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					traceback.print_exc ();
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 					return new set (['CANCELLED']);
 				}
 				else {
 					throw __except0__;
 				}
 			}
-			var file_to_extract_root = _zipfile_root_namelist (file_to_extract);
+			var file_to_extract_root = __call__ (_zipfile_root_namelist, null, file_to_extract);
 			if (self.overwrite) {
-				_module_filesystem_remove (path_app_templates, file_to_extract_root);
+				__call__ (_module_filesystem_remove, null, path_app_templates, file_to_extract_root);
 			}
 			else {
-				for (var f of file_to_extract_root) {
-					var path_dest = os.path.join (path_app_templates, os.path.basename (f));
-					if (os.path.exists (path_dest)) {
-						self.report (new set (['WARNING']), rpt_ ('File already installed to {!r}').format (path_dest));
+				var __iterable0__ = file_to_extract_root;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var f = __getitem__ (__iterable0__, __index0__);
+					var path_dest = (function () {
+						var __accu0__ = os.path;
+						return __call__ (__accu0__.join, __accu0__, path_app_templates, (function () {
+							var __accu1__ = os.path;
+							return __call__ (__accu1__.basename, __accu1__, f);
+						}) ());
+					}) ();
+					if ((function () {
+						var __accu0__ = os.path;
+						return __call__ (__accu0__.exists, __accu0__, path_dest);
+					}) ()) {
+						(function () {
+							var __accu0__ = self;
+							return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+								var __accu1__ = __call__ (rpt_, null, 'File already installed to {!r}');
+								return __call__ (__accu1__.format, __accu1__, path_dest);
+							}) ());
+						}) ();
 						return new set (['CANCELLED']);
 					}
 				}
 			}
 			try {
-				file_to_extract.extractall (path_app_templates);
+				(function () {
+					var __accu0__ = file_to_extract;
+					return __call__ (__accu0__.extractall, __accu0__, path_app_templates);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
-					traceback.print_exc ();
+					(function () {
+						var __accu0__ = traceback;
+						return __call__ (__accu0__.print_exc, __accu0__);
+					}) ();
 					return new set (['CANCELLED']);
 				}
 				else {
@@ -1518,20 +2186,41 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 			}
 		}
 		else {
-			self.report (new set (['WARNING']), rpt_ ('Expected a zip-file {!r}').format (filepath));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), (function () {
+					var __accu1__ = __call__ (rpt_, null, 'Expected a zip-file {!r}');
+					return __call__ (__accu1__.format, __accu1__, filepath);
+				}) ());
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var app_templates_new = set (os.listdir (path_app_templates)) - app_templates_old;
-		bpy.utils.refresh_script_paths ();
-		var msg = rpt_ ('Template Installed ({:s}) from {!r} into {!r}').format (', '.join (sorted (app_templates_new)), filepath, path_app_templates);
-		print (msg);
-		self.report (new set (['INFO']), msg);
+		var app_templates_new = __sub__ (__call__ (set, null, (function () {
+			var __accu0__ = os;
+			return __call__ (__accu0__.listdir, __accu0__, path_app_templates);
+		}) ()), app_templates_old);
+		(function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.refresh_script_paths, __accu0__);
+		}) ();
+		var msg = (function () {
+			var __accu0__ = __call__ (rpt_, null, 'Template Installed ({:s}) from {!r} into {!r}');
+			return __call__ (__accu0__.format, __accu0__, (function () {
+				var __accu1__ = ', ';
+				return __call__ (__accu1__.join, __accu1__, __call__ (sorted, null, app_templates_new));
+			}) (), filepath, path_app_templates);
+		}) ();
+		__call__ (print, null, msg);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), msg);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1545,11 +2234,14 @@ export var PREFERENCES_OT_app_template_install =  __class__ ('PREFERENCES_OT_app
 		else {
 		}
 		var wm = context.window_manager;
-		wm.fileselect_add (self);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.fileselect_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});}
 });
-PREFERENCES_OT_app_template_install.__annotations__ = dict ({'overwrite': BoolProperty (__kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing template with the same ID', py_default: true})), 'filepath': StringProperty (__kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.zip', options: new set (['HIDDEN'])}))});
+PREFERENCES_OT_app_template_install.__annotations__ = dict ({'overwrite': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Overwrite', description: 'Remove existing template with the same ID', py_default: true})), 'filepath': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'FILE_PATH'})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': __call__ (StringProperty, null, __kwargtrans__ ({py_default: '*.zip', options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_studiolight_install =  __class__ ('PREFERENCES_OT_studiolight_install', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.studiolight_install',
@@ -1557,7 +2249,7 @@ export var PREFERENCES_OT_studiolight_install =  __class__ ('PREFERENCES_OT_stud
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1569,34 +2261,76 @@ export var PREFERENCES_OT_studiolight_install =  __class__ ('PREFERENCES_OT_stud
 		}
 		else {
 		}
-		var os = _module ('os');
-		var shutil = _module ('shutil');
+		var os = __call__ (_module, null, 'os');
+		var shutil = __call__ (_module, null, 'shutil');
 		var prefs = context.preferences;
-		var path_studiolights = os.path.join ('studiolights', self.py_metatype.lower ());
-		var path_studiolights = bpy.utils.user_resource ('DATAFILES', __kwargtrans__ ({path: path_studiolights, create: true}));
+		var path_studiolights = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, 'studiolights', (function () {
+				var __accu1__ = self.py_metatype;
+				return __call__ (__accu1__.lower, __accu1__);
+			}) ());
+		}) ();
+		var path_studiolights = (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.user_resource, __accu0__, 'DATAFILES', __kwargtrans__ ({path: path_studiolights, create: true}));
+		}) ();
 		if (!(path_studiolights)) {
-			self.report (new set (['ERROR']), 'Failed to create Studio Light path');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to create Studio Light path');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		for (var e of self.files) {
-			shutil.py_copy (os.path.join (self.directory, e.py_name), path_studiolights);
-			prefs.studio_lights.load (os.path.join (path_studiolights, e.py_name), self.py_metatype);
+		var __iterable0__ = self.files;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var e = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = shutil;
+				return __call__ (__accu0__.py_copy, __accu0__, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.join, __accu1__, self.directory, e.py_name);
+				}) (), path_studiolights);
+			}) ();
+			(function () {
+				var __accu0__ = prefs.studio_lights;
+				return __call__ (__accu0__.load, __accu0__, (function () {
+					var __accu1__ = os.path;
+					return __call__ (__accu1__.join, __accu1__, path_studiolights, e.py_name);
+				}) (), self.py_metatype);
+			}) ();
 		}
-		var msg = rpt_ ('StudioLight Installed {!r} into {!r}').format (', '.join ((function () {
-			var __accu0__ = [];
-			for (var e of self.files) {
-				__accu0__.append (e.py_name);
-			}
-			return __accu0__;
-		}) ()), path_studiolights);
-		print (msg);
-		self.report (new set (['INFO']), msg);
+		var msg = (function () {
+			var __accu0__ = __call__ (rpt_, null, 'StudioLight Installed {!r} into {!r}');
+			return __call__ (__accu0__.format, __accu0__, (function () {
+				var __accu1__ = ', ';
+				return __call__ (__accu1__.join, __accu1__, (function () {
+					var __accu2__ = [];
+					var __iterable0__ = self.files;
+					__iterable0__ = __i__ (__iterable0__);
+					for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+						var e = __getitem__ (__iterable0__, __index0__);
+						(function () {
+							var __accu3__ = __accu2__;
+							return __call__ (__accu3__.append, __accu3__, e.py_name);
+						}) ();
+					}
+					return __accu2__;
+				}) ());
+			}) (), path_studiolights);
+		}) ();
+		__call__ (print, null, msg);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), msg);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1610,14 +2344,17 @@ export var PREFERENCES_OT_studiolight_install =  __class__ ('PREFERENCES_OT_stud
 		else {
 		}
 		var wm = context.window_manager;
-		if (self.py_metatype == 'STUDIO') {
+		if (__eq__ (self.py_metatype, 'STUDIO')) {
 			self.filter_glob = '*.sl';
 		}
-		wm.fileselect_add (self);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.fileselect_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});}
 });
-PREFERENCES_OT_studiolight_install.__annotations__ = dict ({'files': CollectionProperty (__kwargtrans__ ({py_name: 'File Path', py_metatype: OperatorFileListElement})), 'directory': StringProperty (__kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': StringProperty (__kwargtrans__ ({py_default: '*.png;*.jpg;*.hdr;*.exr', options: new set (['HIDDEN'])})), 'type': EnumProperty (__kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['MATCAP', 'MatCap', 'Install custom MatCaps']), tuple (['WORLD', 'World', 'Install custom HDRIs']), tuple (['STUDIO', 'Studio', 'Install custom Studio Lights'])])}))});
+PREFERENCES_OT_studiolight_install.__annotations__ = dict ({'files': __call__ (CollectionProperty, null, __kwargtrans__ ({py_name: 'File Path', py_metatype: OperatorFileListElement})), 'directory': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])})), 'filter_glob': __call__ (StringProperty, null, __kwargtrans__ ({py_default: '*.png;*.jpg;*.hdr;*.exr', options: new set (['HIDDEN'])})), 'type': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Type', py_items: tuple ([tuple (['MATCAP', 'MatCap', 'Install custom MatCaps']), tuple (['WORLD', 'World', 'Install custom HDRIs']), tuple (['STUDIO', 'Studio', 'Install custom Studio Lights'])])}))});
 export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studiolight_new', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.studiolight_new',
@@ -1626,7 +2363,7 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1638,39 +2375,75 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 		}
 		else {
 		}
-		var os = _module ('os');
+		var os = __call__ (_module, null, 'os');
 		var prefs = context.preferences;
 		var wm = context.window_manager;
-		var filename = bpy.path.ensure_ext (self.filename, '.sl');
-		var path_studiolights = bpy.utils.user_resource ('DATAFILES', __kwargtrans__ ({path: os.path.join ('studiolights', 'studio'), create: true}));
+		var filename = (function () {
+			var __accu0__ = bpy.path;
+			return __call__ (__accu0__.ensure_ext, __accu0__, self.filename, '.sl');
+		}) ();
+		var path_studiolights = (function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.user_resource, __accu0__, 'DATAFILES', __kwargtrans__ ({path: (function () {
+				var __accu1__ = os.path;
+				return __call__ (__accu1__.join, __accu1__, 'studiolights', 'studio');
+			}) (), create: true}));
+		}) ();
 		if (!(path_studiolights)) {
-			self.report (new set (['ERROR']), 'Failed to get Studio Light path');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Failed to get Studio Light path');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var filepath_final = os.path.join (path_studiolights, filename);
-		if (os.path.isfile (filepath_final)) {
+		var filepath_final = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.join, __accu0__, path_studiolights, filename);
+		}) ();
+		if ((function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.isfile, __accu0__, filepath_final);
+		}) ()) {
 			if (!(self.ask_override)) {
 				self.ask_override = true;
-				return wm.invoke_props_dialog (self, __kwargtrans__ ({width: 320}));
+				return (function () {
+					var __accu0__ = wm;
+					return __call__ (__accu0__.invoke_props_dialog, __accu0__, self, __kwargtrans__ ({width: 320}));
+				}) ();
 			}
 			else {
-				for (var studio_light of prefs.studio_lights) {
-					if (studio_light.py_name == filename) {
-						bpy.ops.preferences.studiolight_uninstall (__kwargtrans__ ({index: studio_light.index}));
+				var __iterable0__ = prefs.studio_lights;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var studio_light = __getitem__ (__iterable0__, __index0__);
+					if (__eq__ (studio_light.py_name, filename)) {
+						(function () {
+							var __accu0__ = bpy.ops.preferences;
+							return __call__ (__accu0__.studiolight_uninstall, __accu0__, __kwargtrans__ ({index: studio_light.index}));
+						}) ();
 					}
 				}
 			}
 		}
-		prefs.studio_lights.py_new (__kwargtrans__ ({path: filepath_final}));
-		var msg = rpt_ ('StudioLight Installed {!r} into {!r}').format (self.filename, str (path_studiolights));
-		print (msg);
-		self.report (new set (['INFO']), msg);
+		(function () {
+			var __accu0__ = prefs.studio_lights;
+			return __call__ (__accu0__.py_new, __accu0__, __kwargtrans__ ({path: filepath_final}));
+		}) ();
+		var msg = (function () {
+			var __accu0__ = __call__ (rpt_, null, 'StudioLight Installed {!r} into {!r}');
+			return __call__ (__accu0__.format, __accu0__, self.filename, __call__ (str, null, path_studiolights));
+		}) ();
+		__call__ (print, null, msg);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), msg);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1684,16 +2457,22 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 		}
 		var layout = self.layout;
 		if (self.ask_override) {
-			layout.label (__kwargtrans__ ({text: 'Warning, file already exists. Overwrite existing file?'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'Warning, file already exists. Overwrite existing file?'}));
+			}) ();
 		}
 		else {
-			layout.prop (self, 'filename');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, self, 'filename');
+			}) ();
 		}
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1707,10 +2486,13 @@ export var PREFERENCES_OT_studiolight_new =  __class__ ('PREFERENCES_OT_studioli
 		else {
 		}
 		var wm = context.window_manager;
-		return wm.invoke_props_dialog (self, __kwargtrans__ ({width: 320}));
+		return (function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.invoke_props_dialog, __accu0__, self, __kwargtrans__ ({width: 320}));
+		}) ();
 	});}
 });
-PREFERENCES_OT_studiolight_new.__annotations__ = dict ({'filename': StringProperty (__kwargtrans__ ({py_name: 'Name', py_default: 'StudioLight', subtype: 'FILE_NAME'}))});
+PREFERENCES_OT_studiolight_new.__annotations__ = dict ({'filename': __call__ (StringProperty, null, __kwargtrans__ ({py_name: 'Name', py_default: 'StudioLight', subtype: 'FILE_NAME'}))});
 export var PREFERENCES_OT_studiolight_uninstall =  __class__ ('PREFERENCES_OT_studiolight_uninstall', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.studiolight_uninstall',
@@ -1718,7 +2500,7 @@ export var PREFERENCES_OT_studiolight_uninstall =  __class__ ('PREFERENCES_OT_st
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1730,22 +2512,34 @@ export var PREFERENCES_OT_studiolight_uninstall =  __class__ ('PREFERENCES_OT_st
 		}
 		else {
 		}
-		var os = _module ('os');
+		var os = __call__ (_module, null, 'os');
 		var prefs = context.preferences;
-		for (var studio_light of prefs.studio_lights) {
-			if (studio_light.index == self.index) {
+		var __iterable0__ = prefs.studio_lights;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var studio_light = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (studio_light.index, self.index)) {
 				var filepath = studio_light.path;
-				if (filepath && os.path.exists (filepath)) {
-					os.unlink (filepath);
+				if (filepath && (function () {
+					var __accu0__ = os.path;
+					return __call__ (__accu0__.exists, __accu0__, filepath);
+				}) ()) {
+					(function () {
+						var __accu0__ = os;
+						return __call__ (__accu0__.unlink, __accu0__, filepath);
+					}) ();
 				}
-				prefs.studio_lights.remove (studio_light);
+				(function () {
+					var __accu0__ = prefs.studio_lights;
+					return __call__ (__accu0__.remove, __accu0__, studio_light);
+				}) ();
 				return new set (['FINISHED']);
 			}
 		}
 		return new set (['CANCELLED']);
 	});}
 });
-PREFERENCES_OT_studiolight_uninstall.__annotations__ = dict ({'index': IntProperty ()});
+PREFERENCES_OT_studiolight_uninstall.__annotations__ = dict ({'index': __call__ (IntProperty, null)});
 export var PREFERENCES_OT_studiolight_copy_settings =  __class__ ('PREFERENCES_OT_studiolight_copy_settings', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.studiolight_copy_settings',
@@ -1753,7 +2547,7 @@ export var PREFERENCES_OT_studiolight_copy_settings =  __class__ ('PREFERENCES_O
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1767,10 +2561,18 @@ export var PREFERENCES_OT_studiolight_copy_settings =  __class__ ('PREFERENCES_O
 		}
 		var prefs = context.preferences;
 		var system = prefs.system;
-		for (var studio_light of prefs.studio_lights) {
-			if (studio_light.index == self.index) {
+		var __iterable0__ = prefs.studio_lights;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var studio_light = __getitem__ (__iterable0__, __index0__);
+			if (__eq__ (studio_light.index, self.index)) {
 				system.light_ambient = studio_light.light_ambient;
-				for (var [sys_light, light] of zip (system.solid_lights, studio_light.solid_lights)) {
+				var __iterable1__ = __call__ (zip, null, system.solid_lights, studio_light.solid_lights);
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var __left0__ = __getitem__ (__iterable1__, __index1__);
+					var sys_light = __left0__ [0];
+					var light = __left0__ [1];
 					sys_light.use = light.use;
 					sys_light.diffuse_color = light.diffuse_color;
 					sys_light.specular_color = light.specular_color;
@@ -1783,7 +2585,7 @@ export var PREFERENCES_OT_studiolight_copy_settings =  __class__ ('PREFERENCES_O
 		return new set (['CANCELLED']);
 	});}
 });
-PREFERENCES_OT_studiolight_copy_settings.__annotations__ = dict ({'index': IntProperty ()});
+PREFERENCES_OT_studiolight_copy_settings.__annotations__ = dict ({'index': __call__ (IntProperty, null)});
 export var PREFERENCES_OT_script_directory_new =  __class__ ('PREFERENCES_OT_script_directory_new', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.script_directory_add',
@@ -1791,7 +2593,7 @@ export var PREFERENCES_OT_script_directory_new =  __class__ ('PREFERENCES_OT_scr
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1803,17 +2605,26 @@ export var PREFERENCES_OT_script_directory_new =  __class__ ('PREFERENCES_OT_scr
 		}
 		else {
 		}
-		var os = _module ('os');
+		var os = __call__ (_module, null, 'os');
 		var script_directories = context.preferences.filepaths.script_directories;
-		var new_dir = script_directories.py_new ();
+		var new_dir = (function () {
+			var __accu0__ = script_directories;
+			return __call__ (__accu0__.py_new, __accu0__);
+		}) ();
 		new_dir.directory = self.directory;
-		new_dir.py_name = os.path.basename (self.directory.rstrip (os.sep));
+		new_dir.py_name = (function () {
+			var __accu0__ = os.path;
+			return __call__ (__accu0__.basename, __accu0__, (function () {
+				var __accu1__ = self.directory;
+				return __call__ (__accu1__.rstrip, __accu1__, os.sep);
+			}) ());
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1827,11 +2638,14 @@ export var PREFERENCES_OT_script_directory_new =  __class__ ('PREFERENCES_OT_scr
 		else {
 		}
 		var wm = context.window_manager;
-		wm.fileselect_add (self);
+		(function () {
+			var __accu0__ = wm;
+			return __call__ (__accu0__.fileselect_add, __accu0__, self);
+		}) ();
 		return new set (['RUNNING_MODAL']);
 	});}
 });
-PREFERENCES_OT_script_directory_new.__annotations__ = dict ({'directory': StringProperty (__kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': BoolProperty (__kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])}))});
+PREFERENCES_OT_script_directory_new.__annotations__ = dict ({'directory': __call__ (StringProperty, null, __kwargtrans__ ({subtype: 'DIR_PATH'})), 'filter_folder': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Filter Folders', py_default: true, options: new set (['HIDDEN'])}))});
 export var PREFERENCES_OT_script_directory_remove =  __class__ ('PREFERENCES_OT_script_directory_remove', [Operator], {
 	__module__: __name__,
 	bl_idname: 'preferences.script_directory_remove',
@@ -1839,7 +2653,7 @@ export var PREFERENCES_OT_script_directory_remove =  __class__ ('PREFERENCES_OT_
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1852,17 +2666,68 @@ export var PREFERENCES_OT_script_directory_remove =  __class__ ('PREFERENCES_OT_
 		else {
 		}
 		var script_directories = context.preferences.filepaths.script_directories;
-		for (var [search_index, script_directory] of py_enumerate (script_directories)) {
-			if (search_index == self.index) {
-				script_directories.remove (script_directory);
+		var __iterable0__ = __call__ (py_enumerate, null, script_directories);
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var __left0__ = __getitem__ (__iterable0__, __index0__);
+			var search_index = __left0__ [0];
+			var script_directory = __left0__ [1];
+			if (__eq__ (search_index, self.index)) {
+				(function () {
+					var __accu0__ = script_directories;
+					return __call__ (__accu0__.remove, __accu0__, script_directory);
+				}) ();
 				break;
 			}
 		}
 		return new set (['FINISHED']);
 	});}
 });
-PREFERENCES_OT_script_directory_remove.__annotations__ = dict ({'index': IntProperty (__kwargtrans__ ({py_name: 'Index', description: 'Index of the script directory to remove'}))});
+PREFERENCES_OT_script_directory_remove.__annotations__ = dict ({'index': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Index', description: 'Index of the script directory to remove'}))});
 export var classes = tuple ([PREFERENCES_OT_addon_disable, PREFERENCES_OT_addon_enable, PREFERENCES_OT_addon_expand, PREFERENCES_OT_addon_install, PREFERENCES_OT_addon_refresh, PREFERENCES_OT_addon_remove, PREFERENCES_OT_addon_show, PREFERENCES_OT_app_template_install, PREFERENCES_OT_copy_prev, PREFERENCES_OT_keyconfig_activate, PREFERENCES_OT_keyconfig_export, PREFERENCES_OT_keyconfig_import, PREFERENCES_OT_keyconfig_remove, PREFERENCES_OT_keyconfig_test, PREFERENCES_OT_keyitem_add, PREFERENCES_OT_keyitem_remove, PREFERENCES_OT_keyitem_restore, PREFERENCES_OT_keymap_restore, PREFERENCES_OT_theme_install, PREFERENCES_OT_studiolight_install, PREFERENCES_OT_studiolight_new, PREFERENCES_OT_studiolight_uninstall, PREFERENCES_OT_studiolight_copy_settings, PREFERENCES_OT_script_directory_new, PREFERENCES_OT_script_directory_remove]);
 
 //# sourceMappingURL=bl_operators.userpref.map
 export {BoolProperty, CollectionProperty, EnumProperty, IntProperty, Operator, OperatorFileListElement, StringProperty, _globals, _import, _lazy, _member, _module, iface_, rpt_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '_zipfile_root_namelist': _zipfile_root_namelist = value; break;
+		case '_module_filesystem_remove': _module_filesystem_remove = value; break;
+		case '_wm_wait_cursor': _wm_wait_cursor = value; break;
+		case 'PREFERENCES_OT_keyconfig_activate': PREFERENCES_OT_keyconfig_activate = value; break;
+		case 'PREFERENCES_OT_copy_prev': PREFERENCES_OT_copy_prev = value; break;
+		case 'PREFERENCES_OT_keyconfig_test': PREFERENCES_OT_keyconfig_test = value; break;
+		case 'PREFERENCES_OT_keyconfig_import': PREFERENCES_OT_keyconfig_import = value; break;
+		case 'PREFERENCES_OT_keyconfig_export': PREFERENCES_OT_keyconfig_export = value; break;
+		case 'PREFERENCES_OT_keymap_restore': PREFERENCES_OT_keymap_restore = value; break;
+		case 'PREFERENCES_OT_keyitem_restore': PREFERENCES_OT_keyitem_restore = value; break;
+		case 'PREFERENCES_OT_keyitem_add': PREFERENCES_OT_keyitem_add = value; break;
+		case 'PREFERENCES_OT_keyitem_remove': PREFERENCES_OT_keyitem_remove = value; break;
+		case 'PREFERENCES_OT_keyconfig_remove': PREFERENCES_OT_keyconfig_remove = value; break;
+		case 'PREFERENCES_OT_addon_enable': PREFERENCES_OT_addon_enable = value; break;
+		case 'PREFERENCES_OT_addon_disable': PREFERENCES_OT_addon_disable = value; break;
+		case 'PREFERENCES_OT_theme_install': PREFERENCES_OT_theme_install = value; break;
+		case 'PREFERENCES_OT_addon_refresh': PREFERENCES_OT_addon_refresh = value; break;
+		case '_PREFERENCES_OT_addon_install__target_path_items': _PREFERENCES_OT_addon_install__target_path_items = value; break;
+		case 'PREFERENCES_OT_addon_install': PREFERENCES_OT_addon_install = value; break;
+		case 'PREFERENCES_OT_addon_remove': PREFERENCES_OT_addon_remove = value; break;
+		case 'PREFERENCES_OT_addon_expand': PREFERENCES_OT_addon_expand = value; break;
+		case 'PREFERENCES_OT_addon_show': PREFERENCES_OT_addon_show = value; break;
+		case 'PREFERENCES_OT_app_template_install': PREFERENCES_OT_app_template_install = value; break;
+		case 'PREFERENCES_OT_studiolight_install': PREFERENCES_OT_studiolight_install = value; break;
+		case 'PREFERENCES_OT_studiolight_new': PREFERENCES_OT_studiolight_new = value; break;
+		case 'PREFERENCES_OT_studiolight_uninstall': PREFERENCES_OT_studiolight_uninstall = value; break;
+		case 'PREFERENCES_OT_studiolight_copy_settings': PREFERENCES_OT_studiolight_copy_settings = value; break;
+		case 'PREFERENCES_OT_script_directory_new': PREFERENCES_OT_script_directory_new = value; break;
+		case 'PREFERENCES_OT_script_directory_remove': PREFERENCES_OT_script_directory_remove = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

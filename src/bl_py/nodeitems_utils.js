@@ -12,7 +12,7 @@ export var NodeCategory =  __class__ ('NodeCategory', [object], {
 	get poll () {return __getcm__ (this, function (cls, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -31,7 +31,7 @@ export var NodeCategory =  __class__ ('NodeCategory', [object], {
 		var py_items = null;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -53,7 +53,7 @@ export var NodeCategory =  __class__ ('NodeCategory', [object], {
 			self.py_items = (function __lambda__ (context) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -67,14 +67,14 @@ export var NodeCategory =  __class__ ('NodeCategory', [object], {
 				return [];
 			});
 		}
-		else if (callable (py_items)) {
+		else if (__call__ (callable, null, py_items)) {
 			self.py_items = py_items;
 		}
 		else {
 			var items_gen = function* (context) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
@@ -85,8 +85,14 @@ export var NodeCategory =  __class__ ('NodeCategory', [object], {
 				}
 				else {
 				}
-				for (var item of py_items) {
-					if (item.poll === null || context === null || item.poll (context)) {
+				var __iterable0__ = py_items;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var item = __getitem__ (__iterable0__, __index0__);
+					if (item.poll === null || context === null || (function () {
+						var __accu0__ = item;
+						return __call__ (__accu0__.poll, __accu0__, context);
+					}) ()) {
 						yield item;
 					}
 				}
@@ -103,7 +109,7 @@ export var NodeItem =  __class__ ('NodeItem', [object], {
 		var poll = null;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -129,7 +135,7 @@ export var NodeItem =  __class__ ('NodeItem', [object], {
 	get _get_label () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -144,7 +150,10 @@ export var NodeItem =  __class__ ('NodeItem', [object], {
 			return self._label;
 		}
 		else {
-			var bl_rna = bpy.types.Node.bl_rna_get_subclass (self.nodetype);
+			var bl_rna = (function () {
+				var __accu0__ = bpy.types.Node;
+				return __call__ (__accu0__.bl_rna_get_subclass, __accu0__, self.nodetype);
+			}) ();
 			if (bl_rna !== null) {
 				return bl_rna.py_name;
 			}
@@ -156,7 +165,7 @@ export var NodeItem =  __class__ ('NodeItem', [object], {
 	get _get_translation_context () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -171,7 +180,10 @@ export var NodeItem =  __class__ ('NodeItem', [object], {
 			return bpy.app.translations.contexts.py_default;
 		}
 		else {
-			var bl_rna = bpy.types.Node.bl_rna_get_subclass (self.nodetype);
+			var bl_rna = (function () {
+				var __accu0__ = bpy.types.Node;
+				return __call__ (__accu0__.bl_rna_get_subclass, __accu0__, self.nodetype);
+			}) ();
 			if (bl_rna !== null) {
 				return bl_rna.translation_context;
 			}
@@ -183,7 +195,7 @@ export var NodeItem =  __class__ ('NodeItem', [object], {
 	get draw () {return function (self, layout, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -196,13 +208,25 @@ export var NodeItem =  __class__ ('NodeItem', [object], {
 		}
 		else {
 		}
-		var props = layout.operator ('node.add_node', __kwargtrans__ ({text: self.label, text_ctxt: self.translation_context}));
+		var props = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'node.add_node', __kwargtrans__ ({text: self.label, text_ctxt: self.translation_context}));
+		}) ();
 		props.py_metatype = self.nodetype;
 		props.use_transform = true;
-		for (var setting of self.settings.py_items ()) {
-			var ops = props.settings.add ();
-			ops.py_name = setting [0];
-			ops.value = setting [1];
+		var __iterable0__ = (function () {
+			var __accu0__ = self.settings;
+			return __call__ (__accu0__.py_items, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var setting = __getitem__ (__iterable0__, __index0__);
+			var ops = (function () {
+				var __accu0__ = props.settings;
+				return __call__ (__accu0__.add, __accu0__);
+			}) ();
+			ops.py_name = __getitem__ (setting, 0);
+			ops.value = __getitem__ (setting, 1);
 		}
 	};}
 });
@@ -215,7 +239,7 @@ export var NodeItemCustom =  __class__ ('NodeItemCustom', [object], {
 		var draw = null;
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -236,7 +260,7 @@ export var _node_categories = dict ({});
 export var register_node_categories = function (identifier, cat_list) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -249,14 +273,17 @@ export var register_node_categories = function (identifier, cat_list) {
 	else {
 	}
 	if (__in__ (identifier, _node_categories)) {
-		var __except0__ = KeyError ("Node categories list '{:s}' already registered".format (identifier));
+		var __except0__ = __call__ (KeyError, null, (function () {
+			var __accu0__ = "Node categories list '{:s}' already registered";
+			return __call__ (__accu0__.format, __accu0__, identifier);
+		}) ());
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
 	var draw_node_item = function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -269,21 +296,45 @@ export var register_node_categories = function (identifier, cat_list) {
 		else {
 		}
 		var layout = self.layout;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		for (var item of self.category.py_items (context)) {
-			item.draw (item, col, context);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var __iterable0__ = (function () {
+			var __accu0__ = self.category;
+			return __call__ (__accu0__.py_items, __accu0__, context);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var item = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = item;
+				return __call__ (__accu0__.draw, __accu0__, item, col, context);
+			}) ();
 		}
 	};
 	var menu_types = [];
-	for (var cat of cat_list) {
-		var menu_type = py_metatype.__new__ (py_metatype, 'NODE_MT_category_' + cat.identifier, tuple ([bpy.types.Menu]), dict ({'bl_space_type': 'NODE_EDITOR', 'bl_label': cat.py_name, 'category': cat, 'poll': cat.poll, 'draw': draw_node_item}));
-		menu_types.append (menu_type);
-		bpy.utils.register_class (menu_type);
+	var __iterable0__ = cat_list;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cat = __getitem__ (__iterable0__, __index0__);
+		var menu_type = (function () {
+			var __accu0__ = py_metatype;
+			return __call__ (__accu0__.__new__, __accu0__, py_metatype, __add__ ('NODE_MT_category_', cat.identifier), tuple ([bpy.types.Menu]), dict ({'bl_space_type': 'NODE_EDITOR', 'bl_label': cat.py_name, 'category': cat, 'poll': cat.poll, 'draw': draw_node_item}));
+		}) ();
+		(function () {
+			var __accu0__ = menu_types;
+			return __call__ (__accu0__.append, __accu0__, menu_type);
+		}) ();
+		(function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.register_class, __accu0__, menu_type);
+		}) ();
 	}
 	var draw_add_menu = function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -296,18 +347,27 @@ export var register_node_categories = function (identifier, cat_list) {
 		else {
 		}
 		var layout = self.layout;
-		for (var cat of cat_list) {
-			if (cat.poll (context)) {
-				layout.menu ('NODE_MT_category_' + cat.identifier);
+		var __iterable0__ = cat_list;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var cat = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu0__ = cat;
+				return __call__ (__accu0__.poll, __accu0__, context);
+			}) ()) {
+				(function () {
+					var __accu0__ = layout;
+					return __call__ (__accu0__.menu, __accu0__, __add__ ('NODE_MT_category_', cat.identifier));
+				}) ();
 			}
 		}
 	};
-	_node_categories [identifier] = tuple ([cat_list, draw_add_menu, menu_types]);
+	__setitem__ (_node_categories, identifier, tuple ([cat_list, draw_add_menu, menu_types]));
 };
 export var node_categories_iter = function* (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -318,9 +378,21 @@ export var node_categories_iter = function* (context) {
 	}
 	else {
 	}
-	for (var cat_type of _node_categories.py_values ()) {
-		for (var cat of cat_type [0]) {
-			if (cat.poll && (context === null || cat.poll (context))) {
+	var __iterable0__ = (function () {
+		var __accu0__ = _node_categories;
+		return __call__ (__accu0__.py_values, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cat_type = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = __getitem__ (cat_type, 0);
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var cat = __getitem__ (__iterable1__, __index1__);
+			if (cat.poll && (context === null || (function () {
+				var __accu0__ = cat;
+				return __call__ (__accu0__.poll, __accu0__, context);
+			}) ())) {
 				yield cat;
 			}
 		}
@@ -329,7 +401,7 @@ export var node_categories_iter = function* (context) {
 export var has_node_categories = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -340,9 +412,21 @@ export var has_node_categories = function (context) {
 	}
 	else {
 	}
-	for (var cat_type of _node_categories.py_values ()) {
-		for (var cat of cat_type [0]) {
-			if (cat.poll && (context === null || cat.poll (context))) {
+	var __iterable0__ = (function () {
+		var __accu0__ = _node_categories;
+		return __call__ (__accu0__.py_values, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cat_type = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = __getitem__ (cat_type, 0);
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var cat = __getitem__ (__iterable1__, __index1__);
+			if (cat.poll && (context === null || (function () {
+				var __accu0__ = cat;
+				return __call__ (__accu0__.poll, __accu0__, context);
+			}) ())) {
 				return true;
 			}
 		}
@@ -352,7 +436,7 @@ export var has_node_categories = function (context) {
 export var node_items_iter = function* (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -363,8 +447,17 @@ export var node_items_iter = function* (context) {
 	}
 	else {
 	}
-	for (var cat of node_categories_iter (context)) {
-		for (var item of cat.py_items (context)) {
+	var __iterable0__ = __call__ (node_categories_iter, null, context);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cat = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = (function () {
+			var __accu0__ = cat;
+			return __call__ (__accu0__.py_items, __accu0__, context);
+		}) ();
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var item = __getitem__ (__iterable1__, __index1__);
 			yield item;
 		}
 	}
@@ -372,7 +465,7 @@ export var node_items_iter = function* (context) {
 export var unregister_node_cat_types = function (cats) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -383,8 +476,14 @@ export var unregister_node_cat_types = function (cats) {
 	}
 	else {
 	}
-	for (var mt of cats [2]) {
-		bpy.utils.unregister_class (mt);
+	var __iterable0__ = __getitem__ (cats, 2);
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var mt = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = bpy.utils;
+			return __call__ (__accu0__.unregister_class, __accu0__, mt);
+		}) ();
 	}
 };
 export var unregister_node_categories = function (identifier) {
@@ -393,7 +492,7 @@ export var unregister_node_categories = function (identifier) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -405,23 +504,38 @@ export var unregister_node_categories = function (identifier) {
 	else {
 	}
 	if (identifier) {
-		var cat_types = _node_categories.py_get (identifier, null);
+		var cat_types = (function () {
+			var __accu0__ = _node_categories;
+			return __call__ (__accu0__.py_get, __accu0__, identifier, null);
+		}) ();
 		if (cat_types) {
-			unregister_node_cat_types (cat_types);
+			__call__ (unregister_node_cat_types, null, cat_types);
 		}
-		_node_categories.py_pop (identifier);
+		(function () {
+			var __accu0__ = _node_categories;
+			return __call__ (__accu0__.py_pop, __accu0__, identifier);
+		}) ();
 	}
 	else {
-		for (var cat_types of _node_categories.py_values ()) {
-			unregister_node_cat_types (cat_types);
+		var __iterable0__ = (function () {
+			var __accu0__ = _node_categories;
+			return __call__ (__accu0__.py_values, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var cat_types = __getitem__ (__iterable0__, __index0__);
+			__call__ (unregister_node_cat_types, null, cat_types);
 		}
-		_node_categories.py_clear ();
+		(function () {
+			var __accu0__ = _node_categories;
+			return __call__ (__accu0__.py_clear, __accu0__);
+		}) ();
 	}
 };
 export var draw_node_categories_menu = function (self, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -433,9 +547,32 @@ export var draw_node_categories_menu = function (self, context) {
 	}
 	else {
 	}
-	for (var cats of _node_categories.py_values ()) {
-		cats [1] (self, context);
+	var __iterable0__ = (function () {
+		var __accu0__ = _node_categories;
+		return __call__ (__accu0__.py_values, __accu0__);
+	}) ();
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cats = __getitem__ (__iterable0__, __index0__);
+		__call__ (__getitem__ (cats, 1), null, self, context);
 	}
 };
 
 //# sourceMappingURL=nodeitems_utils.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'NodeCategory': NodeCategory = value; break;
+		case 'NodeItem': NodeItem = value; break;
+		case 'NodeItemCustom': NodeItemCustom = value; break;
+		case '_node_categories': _node_categories = value; break;
+		case 'register_node_categories': register_node_categories = value; break;
+		case 'node_categories_iter': node_categories_iter = value; break;
+		case 'has_node_categories': has_node_categories = value; break;
+		case 'node_items_iter': node_items_iter = value; break;
+		case 'unregister_node_cat_types': unregister_node_cat_types = value; break;
+		case 'unregister_node_categories': unregister_node_categories = value; break;
+		case 'draw_node_categories_menu': draw_node_categories_menu = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

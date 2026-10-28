@@ -18,7 +18,7 @@ export var RenderButtonsPanel =  __class__ ('RenderButtonsPanel', [object], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -43,7 +43,7 @@ export var RENDER_PT_context =  __class__ ('RENDER_PT_context', [Panel], {
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -60,7 +60,7 @@ export var RENDER_PT_context =  __class__ ('RENDER_PT_context', [Panel], {
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -78,7 +78,10 @@ export var RENDER_PT_context =  __class__ ('RENDER_PT_context', [Panel], {
 		var scene = context.scene;
 		var rd = scene.render;
 		if (rd.has_multiple_engines) {
-			layout.prop (rd, 'engine', __kwargtrans__ ({text: 'Render Engine'}));
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, rd, 'engine', __kwargtrans__ ({text: 'Render Engine'}));
+			}) ();
 		}
 	});}
 });
@@ -91,7 +94,7 @@ export var RENDER_PT_color_management =  __class__ ('RENDER_PT_color_management'
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -103,31 +106,73 @@ export var RENDER_PT_color_management =  __class__ ('RENDER_PT_color_management'
 		}
 		else {
 		}
-		var gpu = _module ('gpu');
+		var gpu = __call__ (_module, null, 'gpu');
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var view = scene.view_settings;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (scene.display_settings, 'display_device');
-		col.separator ();
-		col.prop (view, 'view_transform');
-		col.prop (view, 'look');
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene.display_settings, 'display_device');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'view_transform');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'look');
+		}) ();
 		if (view.is_hdr && !(context.window.support_hdr_color)) {
-			var row = col.py_split (__kwargtrans__ ({factor: 0.4}));
-			row.label ();
-			if (gpu.platform.backend_type_get () == 'OPENGL') {
-				row.label (__kwargtrans__ ({text: 'HDR not supported with OpenGL backend', icon: 'INFO'}));
+			var row = (function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.4}));
+			}) ();
+			(function () {
+				var __accu0__ = row;
+				return __call__ (__accu0__.label, __accu0__);
+			}) ();
+			if (__eq__ ((function () {
+				var __accu0__ = gpu.platform;
+				return __call__ (__accu0__.backend_type_get, __accu0__);
+			}) (), 'OPENGL')) {
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'HDR not supported with OpenGL backend', icon: 'INFO'}));
+				}) ();
 			}
 			else {
-				row.label (__kwargtrans__ ({text: 'HDR display not supported', icon: 'INFO'}));
+				(function () {
+					var __accu0__ = row;
+					return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'HDR display not supported', icon: 'INFO'}));
+				}) ();
 			}
 		}
-		var col = flow.column ();
-		col.prop (view, 'exposure');
-		col.prop (view, 'gamma');
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'exposure');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'gamma');
+		}) ();
 	});}
 });
 export var RENDER_PT_color_management_working_space =  __class__ ('RENDER_PT_color_management_working_space', [RenderButtonsPanel, Panel], {
@@ -139,7 +184,7 @@ export var RENDER_PT_color_management_working_space =  __class__ ('RENDER_PT_col
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -156,14 +201,35 @@ export var RENDER_PT_color_management_working_space =  __class__ ('RENDER_PT_col
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var blend_colorspace = context.blend_data.colorspace;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
-		var col = flow.column ();
-		var py_split = col.py_split (__kwargtrans__ ({factor: 0.4}));
-		var row = py_split.row ();
-		row.label (__kwargtrans__ ({text: 'File'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var py_split = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.py_split, __accu0__, __kwargtrans__ ({factor: 0.4}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.label, __accu0__, __kwargtrans__ ({text: 'File'}));
+		}) ();
 		row.alignment = 'RIGHT';
-		py_split.operator_menu_enum ('wm.set_working_color_space', 'working_space', __kwargtrans__ ({text: blend_colorspace.working_space, text_ctxt: i18n_contexts.py_default}));
-		col.prop_with_menu (scene.sequencer_colorspace_settings, 'name', __kwargtrans__ ({text: 'Sequencer', menu: 'UI_MT_color_space_select'}));
+		(function () {
+			var __accu0__ = py_split;
+			return __call__ (__accu0__.operator_menu_enum, __accu0__, 'wm.set_working_color_space', 'working_space', __kwargtrans__ ({text: blend_colorspace.working_space, text_ctxt: i18n_contexts.py_default}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop_with_menu, __accu0__, scene.sequencer_colorspace_settings, 'name', __kwargtrans__ ({text: 'Sequencer', menu: 'UI_MT_color_space_select'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_color_management_advanced =  __class__ ('RENDER_PT_color_management_advanced', [RenderButtonsPanel, Panel], {
@@ -175,7 +241,7 @@ export var RENDER_PT_color_management_advanced =  __class__ ('RENDER_PT_color_ma
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -191,9 +257,15 @@ export var RENDER_PT_color_management_advanced =  __class__ ('RENDER_PT_color_ma
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var scene = context.scene;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = scene.view_settings.support_emulation;
-		col.prop (scene.display_settings, 'emulation');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, scene.display_settings, 'emulation');
+		}) ();
 	});}
 });
 export var RENDER_PT_color_management_curves =  __class__ ('RENDER_PT_color_management_curves', [RenderButtonsPanel, Panel], {
@@ -205,7 +277,7 @@ export var RENDER_PT_color_management_curves =  __class__ ('RENDER_PT_color_mana
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -219,12 +291,15 @@ export var RENDER_PT_color_management_curves =  __class__ ('RENDER_PT_color_mana
 		}
 		var scene = context.scene;
 		var view = scene.view_settings;
-		self.layout.prop (view, 'use_curve_mapping', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_curve_mapping', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -242,7 +317,10 @@ export var RENDER_PT_color_management_curves =  __class__ ('RENDER_PT_color_mana
 		layout.use_property_split = false;
 		layout.use_property_decorate = false;
 		layout.active = view.use_curve_mapping;
-		layout.template_curve_mapping (view, 'curve_mapping', __kwargtrans__ ({py_metatype: 'COLOR', levels: true}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.template_curve_mapping, __accu0__, view, 'curve_mapping', __kwargtrans__ ({py_metatype: 'COLOR', levels: true}));
+		}) ();
 	});}
 });
 export var RENDER_PT_color_management_white_balance_presets =  __class__ ('RENDER_PT_color_management_white_balance_presets', [PresetPanel, Panel], {
@@ -261,7 +339,7 @@ export var RENDER_PT_color_management_white_balance =  __class__ ('RENDER_PT_col
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -275,12 +353,15 @@ export var RENDER_PT_color_management_white_balance =  __class__ ('RENDER_PT_col
 		}
 		var scene = context.scene;
 		var view = scene.view_settings;
-		self.layout.prop (view, 'use_white_balance', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, view, 'use_white_balance', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw_header_preset () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -293,14 +374,20 @@ export var RENDER_PT_color_management_white_balance =  __class__ ('RENDER_PT_col
 		else {
 		}
 		var layout = self.layout;
-		RENDER_PT_color_management_white_balance_presets.draw_panel_header (layout);
-		var eye = layout.operator ('ui.eyedropper_color', __kwargtrans__ ({text: '', icon: 'EYEDROPPER'}));
+		(function () {
+			var __accu0__ = RENDER_PT_color_management_white_balance_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, layout);
+		}) ();
+		var eye = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.operator, __accu0__, 'ui.eyedropper_color', __kwargtrans__ ({text: '', icon: 'EYEDROPPER'}));
+		}) ();
 		eye.prop_data_path = 'scene.view_settings.white_balance_whitepoint';
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -318,9 +405,18 @@ export var RENDER_PT_color_management_white_balance =  __class__ ('RENDER_PT_col
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		layout.active = view.use_white_balance;
-		var col = layout.column ();
-		col.prop (view, 'white_balance_temperature');
-		col.prop (view, 'white_balance_tint');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'white_balance_temperature');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, view, 'white_balance_tint');
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_motion_blur =  __class__ ('RENDER_PT_eevee_motion_blur', [RenderButtonsPanel, Panel], {
@@ -331,7 +427,7 @@ export var RENDER_PT_eevee_motion_blur =  __class__ ('RENDER_PT_eevee_motion_blu
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -348,7 +444,7 @@ export var RENDER_PT_eevee_motion_blur =  __class__ ('RENDER_PT_eevee_motion_blu
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -362,12 +458,15 @@ export var RENDER_PT_eevee_motion_blur =  __class__ ('RENDER_PT_eevee_motion_blu
 		}
 		var scene = context.scene;
 		var props = scene.render;
-		self.layout.prop (props, 'use_motion_blur', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_motion_blur', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -385,13 +484,34 @@ export var RENDER_PT_eevee_motion_blur =  __class__ ('RENDER_PT_eevee_motion_blu
 		var props = scene.render;
 		var eevee_props = scene.eevee;
 		layout.active = props.use_motion_blur;
-		var col = layout.column ();
-		col.prop (props, 'motion_blur_position', __kwargtrans__ ({text: 'Position'}));
-		col.prop (props, 'motion_blur_shutter');
-		col.separator ();
-		col.prop (eevee_props, 'motion_blur_depth_scale');
-		col.prop (eevee_props, 'motion_blur_max');
-		col.prop (eevee_props, 'motion_blur_steps', __kwargtrans__ ({text: 'Steps'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'motion_blur_position', __kwargtrans__ ({text: 'Position'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'motion_blur_shutter');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, eevee_props, 'motion_blur_depth_scale');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, eevee_props, 'motion_blur_max');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, eevee_props, 'motion_blur_steps', __kwargtrans__ ({text: 'Steps'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_motion_blur_curve =  __class__ ('RENDER_PT_eevee_motion_blur_curve', [RenderButtonsPanel, Panel], {
@@ -403,7 +523,7 @@ export var RENDER_PT_eevee_motion_blur_curve =  __class__ ('RENDER_PT_eevee_moti
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -421,16 +541,46 @@ export var RENDER_PT_eevee_motion_blur_curve =  __class__ ('RENDER_PT_eevee_moti
 		var scene = context.scene;
 		var rd = scene.render;
 		layout.active = rd.use_motion_blur;
-		var col = layout.column ();
-		col.template_curve_mapping (rd, 'motion_blur_shutter_curve');
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		row.operator ('render.shutter_curve_preset', __kwargtrans__ ({icon: 'SMOOTHCURVE', text: ''})).shape = 'SMOOTH';
-		row.operator ('render.shutter_curve_preset', __kwargtrans__ ({icon: 'SPHERECURVE', text: ''})).shape = 'ROUND';
-		row.operator ('render.shutter_curve_preset', __kwargtrans__ ({icon: 'ROOTCURVE', text: ''})).shape = 'ROOT';
-		row.operator ('render.shutter_curve_preset', __kwargtrans__ ({icon: 'SHARPCURVE', text: ''})).shape = 'SHARP';
-		row.operator ('render.shutter_curve_preset', __kwargtrans__ ({icon: 'LINCURVE', text: ''})).shape = 'LINE';
-		row.operator ('render.shutter_curve_preset', __kwargtrans__ ({icon: 'NOCURVE', text: ''})).shape = 'MAX';
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.template_curve_mapping, __accu0__, rd, 'motion_blur_shutter_curve');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'render.shutter_curve_preset', __kwargtrans__ ({icon: 'SMOOTHCURVE', text: ''}));
+		}) ().shape = 'SMOOTH';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'render.shutter_curve_preset', __kwargtrans__ ({icon: 'SPHERECURVE', text: ''}));
+		}) ().shape = 'ROUND';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'render.shutter_curve_preset', __kwargtrans__ ({icon: 'ROOTCURVE', text: ''}));
+		}) ().shape = 'ROOT';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'render.shutter_curve_preset', __kwargtrans__ ({icon: 'SHARPCURVE', text: ''}));
+		}) ().shape = 'SHARP';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'render.shutter_curve_preset', __kwargtrans__ ({icon: 'LINCURVE', text: ''}));
+		}) ().shape = 'LINE';
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.operator, __accu0__, 'render.shutter_curve_preset', __kwargtrans__ ({icon: 'NOCURVE', text: ''}));
+		}) ().shape = 'MAX';
 	});}
 });
 export var RENDER_PT_eevee_depth_of_field =  __class__ ('RENDER_PT_eevee_depth_of_field', [RenderButtonsPanel, Panel], {
@@ -441,7 +591,7 @@ export var RENDER_PT_eevee_depth_of_field =  __class__ ('RENDER_PT_eevee_depth_o
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -458,7 +608,7 @@ export var RENDER_PT_eevee_depth_of_field =  __class__ ('RENDER_PT_eevee_depth_o
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -475,17 +625,47 @@ export var RENDER_PT_eevee_depth_of_field =  __class__ ('RENDER_PT_eevee_depth_o
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column ();
-		col.prop (props, 'bokeh_max_size');
-		col.prop (props, 'bokeh_threshold');
-		col.prop (props, 'bokeh_neighbor_max');
-		var col = layout.column (__kwargtrans__ ({align: false, heading: 'Jitter Camera'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (props, 'use_bokeh_jittered', __kwargtrans__ ({text: ''}));
-		var sub = sub.row (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'bokeh_max_size');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'bokeh_threshold');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'bokeh_neighbor_max');
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Jitter Camera'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_bokeh_jittered', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = props.use_bokeh_jittered;
-		sub.prop (props, 'bokeh_overblur');
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'bokeh_overblur');
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_volumes =  __class__ ('RENDER_PT_eevee_volumes', [RenderButtonsPanel, Panel], {
@@ -496,7 +676,7 @@ export var RENDER_PT_eevee_volumes =  __class__ ('RENDER_PT_eevee_volumes', [Ren
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -513,7 +693,7 @@ export var RENDER_PT_eevee_volumes =  __class__ ('RENDER_PT_eevee_volumes', [Ren
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -530,12 +710,30 @@ export var RENDER_PT_eevee_volumes =  __class__ ('RENDER_PT_eevee_volumes', [Ren
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (props, 'volumetric_tile_size', __kwargtrans__ ({text: 'Resolution'}));
-		col.prop (props, 'volumetric_samples', __kwargtrans__ ({text: 'Steps'}));
-		col.prop (props, 'volumetric_sample_distribution', __kwargtrans__ ({text: 'Distribution'}));
-		var col = layout.column ();
-		col.prop (props, 'volumetric_ray_depth', __kwargtrans__ ({text: 'Max Depth'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'volumetric_tile_size', __kwargtrans__ ({text: 'Resolution'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'volumetric_samples', __kwargtrans__ ({text: 'Steps'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'volumetric_sample_distribution', __kwargtrans__ ({text: 'Distribution'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'volumetric_ray_depth', __kwargtrans__ ({text: 'Max Depth'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_volumes_range =  __class__ ('RENDER_PT_eevee_volumes_range', [RenderButtonsPanel, Panel], {
@@ -547,7 +745,7 @@ export var RENDER_PT_eevee_volumes_range =  __class__ ('RENDER_PT_eevee_volumes_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -564,7 +762,7 @@ export var RENDER_PT_eevee_volumes_range =  __class__ ('RENDER_PT_eevee_volumes_
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -578,12 +776,15 @@ export var RENDER_PT_eevee_volumes_range =  __class__ ('RENDER_PT_eevee_volumes_
 		}
 		var scene = context.scene;
 		var props = scene.eevee;
-		self.layout.prop (props, 'use_volume_custom_range', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_volume_custom_range', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -601,9 +802,18 @@ export var RENDER_PT_eevee_volumes_range =  __class__ ('RENDER_PT_eevee_volumes_
 		layout.active = props.use_volume_custom_range;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (props, 'volumetric_start');
-		col.prop (props, 'volumetric_end');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'volumetric_start');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'volumetric_end');
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_raytracing_presets =  __class__ ('RENDER_PT_eevee_raytracing_presets', [PresetPanel, Panel], {
@@ -621,7 +831,7 @@ export var RENDER_PT_eevee_raytracing =  __class__ ('RENDER_PT_eevee_raytracing'
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -638,7 +848,7 @@ export var RENDER_PT_eevee_raytracing =  __class__ ('RENDER_PT_eevee_raytracing'
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -651,12 +861,15 @@ export var RENDER_PT_eevee_raytracing =  __class__ ('RENDER_PT_eevee_raytracing'
 		else {
 		}
 		var props = context.scene.eevee;
-		self.layout.prop (props, 'use_raytracing', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_raytracing', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw_header_preset () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -668,12 +881,15 @@ export var RENDER_PT_eevee_raytracing =  __class__ ('RENDER_PT_eevee_raytracing'
 		}
 		else {
 		}
-		RENDER_PT_eevee_raytracing_presets.draw_panel_header (self.layout);
+		(function () {
+			var __accu0__ = RENDER_PT_eevee_raytracing_presets;
+			return __call__ (__accu0__.draw_panel_header, __accu0__, self.layout);
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -691,10 +907,19 @@ export var RENDER_PT_eevee_raytracing =  __class__ ('RENDER_PT_eevee_raytracing'
 		layout.active = props.use_raytracing;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column ();
-		col.prop (props, 'ray_tracing_method', __kwargtrans__ ({text: 'Method'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'ray_tracing_method', __kwargtrans__ ({text: 'Method'}));
+		}) ();
 		var options = context.scene.eevee.ray_tracing_options;
-		col.prop (options, 'resolution_scale');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, options, 'resolution_scale');
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_screen_trace =  __class__ ('RENDER_PT_eevee_screen_trace', [RenderButtonsPanel, Panel], {
@@ -706,7 +931,7 @@ export var RENDER_PT_eevee_screen_trace =  __class__ ('RENDER_PT_eevee_screen_tr
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -723,7 +948,7 @@ export var RENDER_PT_eevee_screen_trace =  __class__ ('RENDER_PT_eevee_screen_tr
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -742,20 +967,50 @@ export var RENDER_PT_eevee_screen_trace =  __class__ ('RENDER_PT_eevee_screen_tr
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var props = context.scene.eevee.ray_tracing_options;
-		var use_screen_trace = context.scene.eevee.ray_tracing_method == 'SCREEN';
-		var col = layout.column ();
-		var sub = col.column (__kwargtrans__ ({align: false}));
+		var use_screen_trace = __eq__ (context.scene.eevee.ray_tracing_method, 'SCREEN');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false}));
+		}) ();
 		sub.active = use_screen_trace;
-		sub.prop (props, 'screen_trace_quality', __kwargtrans__ ({text: 'Precision'}));
-		sub.prop (props, 'screen_trace_thickness', __kwargtrans__ ({text: 'Thickness'}));
-		var col = col.column (__kwargtrans__ ({align: false, heading: 'Backface'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'screen_trace_quality', __kwargtrans__ ({text: 'Precision'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'screen_trace_thickness', __kwargtrans__ ({text: 'Thickness'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Backface'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = use_screen_trace || context.scene.eevee.use_fast_gi;
-		sub.prop (props, 'use_backface_hit', __kwargtrans__ ({text: ''}));
-		var sub = sub.row (__kwargtrans__ ({align: true}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_backface_hit', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = props.use_backface_hit;
-		sub.prop (props, 'backface_radiance_scale', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'backface_radiance_scale', __kwargtrans__ ({text: ''}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_gi_approximation =  __class__ ('RENDER_PT_eevee_gi_approximation', [RenderButtonsPanel, Panel], {
@@ -767,7 +1022,7 @@ export var RENDER_PT_eevee_gi_approximation =  __class__ ('RENDER_PT_eevee_gi_ap
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -784,7 +1039,7 @@ export var RENDER_PT_eevee_gi_approximation =  __class__ ('RENDER_PT_eevee_gi_ap
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -798,12 +1053,15 @@ export var RENDER_PT_eevee_gi_approximation =  __class__ ('RENDER_PT_eevee_gi_ap
 		}
 		self.layout.active = context.scene.eevee.use_raytracing;
 		var props = context.scene.eevee;
-		self.layout.prop (props, 'use_fast_gi', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_fast_gi', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -821,22 +1079,61 @@ export var RENDER_PT_eevee_gi_approximation =  __class__ ('RENDER_PT_eevee_gi_ap
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = props.use_raytracing && props.use_fast_gi;
-		col.prop (options, 'trace_max_roughness', __kwargtrans__ ({text: 'Threshold'}));
-		var is_valid = props.use_raytracing && props.use_fast_gi && props.ray_tracing_options.trace_max_roughness < 1;
-		var col = layout.column ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, options, 'trace_max_roughness', __kwargtrans__ ({text: 'Threshold'}));
+		}) ();
+		var is_valid = props.use_raytracing && props.use_fast_gi && __lt__ (props.ray_tracing_options.trace_max_roughness, 1);
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = is_valid;
-		col.prop (props, 'fast_gi_method');
-		col.prop (props, 'fast_gi_resolution', __kwargtrans__ ({text: 'Resolution'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (props, 'fast_gi_ray_count', __kwargtrans__ ({text: 'Rays'}));
-		sub.prop (props, 'fast_gi_step_count', __kwargtrans__ ({text: 'Steps'}));
-		sub.prop (props, 'fast_gi_quality', __kwargtrans__ ({text: 'Precision'}));
-		var sub = col.column (__kwargtrans__ ({align: true}));
-		sub.prop (props, 'fast_gi_distance');
-		sub.prop (props, 'fast_gi_thickness_near');
-		col.prop (props, 'fast_gi_bias', __kwargtrans__ ({text: 'Bias'}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_method');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_resolution', __kwargtrans__ ({text: 'Resolution'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_ray_count', __kwargtrans__ ({text: 'Rays'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_step_count', __kwargtrans__ ({text: 'Steps'}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_quality', __kwargtrans__ ({text: 'Precision'}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_distance');
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_thickness_near');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'fast_gi_bias', __kwargtrans__ ({text: 'Bias'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_denoise =  __class__ ('RENDER_PT_eevee_denoise', [RenderButtonsPanel, Panel], {
@@ -848,7 +1145,7 @@ export var RENDER_PT_eevee_denoise =  __class__ ('RENDER_PT_eevee_denoise', [Ren
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -865,7 +1162,7 @@ export var RENDER_PT_eevee_denoise =  __class__ ('RENDER_PT_eevee_denoise', [Ren
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -879,12 +1176,15 @@ export var RENDER_PT_eevee_denoise =  __class__ ('RENDER_PT_eevee_denoise', [Ren
 		}
 		self.layout.active = context.scene.eevee.use_raytracing;
 		var props = context.scene.eevee.ray_tracing_options;
-		self.layout.prop (props, 'use_denoise', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_denoise', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -903,16 +1203,37 @@ export var RENDER_PT_eevee_denoise =  __class__ ('RENDER_PT_eevee_denoise', [Ren
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var props = context.scene.eevee.ray_tracing_options;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		var row = col.row ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = props.use_denoise;
-		row.prop (props, 'denoise_spatial');
-		var row = col.row ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, props, 'denoise_spatial');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = props.use_denoise && props.denoise_spatial;
-		row.prop (props, 'denoise_temporal');
-		var row = col.row ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, props, 'denoise_temporal');
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
 		row.active = props.use_denoise && props.denoise_spatial && props.denoise_temporal;
-		row.prop (props, 'denoise_bilateral');
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, props, 'denoise_bilateral');
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_light_paths =  __class__ ('RENDER_PT_eevee_light_paths', [RenderButtonsPanel, Panel], {
@@ -923,7 +1244,7 @@ export var RENDER_PT_eevee_light_paths =  __class__ ('RENDER_PT_eevee_light_path
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -940,7 +1261,7 @@ export var RENDER_PT_eevee_light_paths =  __class__ ('RENDER_PT_eevee_light_path
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -963,7 +1284,7 @@ export var RENDER_PT_eevee_clamping =  __class__ ('RENDER_PT_eevee_clamping', [R
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -980,7 +1301,7 @@ export var RENDER_PT_eevee_clamping =  __class__ ('RENDER_PT_eevee_clamping', [R
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1003,7 +1324,7 @@ export var RENDER_PT_eevee_clamping_surface =  __class__ ('RENDER_PT_eevee_clamp
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1020,7 +1341,7 @@ export var RENDER_PT_eevee_clamping_surface =  __class__ ('RENDER_PT_eevee_clamp
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1037,9 +1358,18 @@ export var RENDER_PT_eevee_clamping_surface =  __class__ ('RENDER_PT_eevee_clamp
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (props, 'clamp_surface_direct', __kwargtrans__ ({text: 'Direct Light'}));
-		col.prop (props, 'clamp_surface_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'clamp_surface_direct', __kwargtrans__ ({text: 'Direct Light'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'clamp_surface_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_clamping_volume =  __class__ ('RENDER_PT_eevee_clamping_volume', [RenderButtonsPanel, Panel], {
@@ -1050,7 +1380,7 @@ export var RENDER_PT_eevee_clamping_volume =  __class__ ('RENDER_PT_eevee_clampi
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1067,7 +1397,7 @@ export var RENDER_PT_eevee_clamping_volume =  __class__ ('RENDER_PT_eevee_clampi
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1084,9 +1414,18 @@ export var RENDER_PT_eevee_clamping_volume =  __class__ ('RENDER_PT_eevee_clampi
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (props, 'clamp_volume_direct', __kwargtrans__ ({text: 'Direct Light'}));
-		col.prop (props, 'clamp_volume_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'clamp_volume_direct', __kwargtrans__ ({text: 'Direct Light'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'clamp_volume_indirect', __kwargtrans__ ({text: 'Indirect Light'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_light_paths_intensity =  __class__ ('RENDER_PT_eevee_light_paths_intensity', [RenderButtonsPanel, Panel], {
@@ -1097,7 +1436,7 @@ export var RENDER_PT_eevee_light_paths_intensity =  __class__ ('RENDER_PT_eevee_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1114,7 +1453,7 @@ export var RENDER_PT_eevee_light_paths_intensity =  __class__ ('RENDER_PT_eevee_
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1131,9 +1470,18 @@ export var RENDER_PT_eevee_light_paths_intensity =  __class__ ('RENDER_PT_eevee_
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (props, 'direct_light_intensity', __kwargtrans__ ({text: 'Direct Light'}));
-		col.prop (props, 'indirect_light_intensity', __kwargtrans__ ({text: 'Indirect Light'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'direct_light_intensity', __kwargtrans__ ({text: 'Direct Light'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'indirect_light_intensity', __kwargtrans__ ({text: 'Indirect Light'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_sampling_shadows =  __class__ ('RENDER_PT_eevee_sampling_shadows', [RenderButtonsPanel, Panel], {
@@ -1145,7 +1493,7 @@ export var RENDER_PT_eevee_sampling_shadows =  __class__ ('RENDER_PT_eevee_sampl
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1162,7 +1510,7 @@ export var RENDER_PT_eevee_sampling_shadows =  __class__ ('RENDER_PT_eevee_sampl
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1176,12 +1524,15 @@ export var RENDER_PT_eevee_sampling_shadows =  __class__ ('RENDER_PT_eevee_sampl
 		}
 		var scene = context.scene;
 		var props = scene.eevee;
-		self.layout.prop (props, 'use_shadows', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_shadows', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1199,18 +1550,51 @@ export var RENDER_PT_eevee_sampling_shadows =  __class__ ('RENDER_PT_eevee_sampl
 		layout.active = props.use_shadows;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column (__kwargtrans__ ({heading: 'Tracing', align: true}));
-		col.prop (props, 'shadow_ray_count', __kwargtrans__ ({text: 'Rays'}));
-		col.prop (props, 'shadow_step_count', __kwargtrans__ ({text: 'Steps'}));
-		var col = layout.column (__kwargtrans__ ({align: false, heading: 'Volume Shadows'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (props, 'use_volumetric_shadows', __kwargtrans__ ({text: ''}));
-		var sub = sub.row (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({heading: 'Tracing', align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'shadow_ray_count', __kwargtrans__ ({text: 'Rays'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'shadow_step_count', __kwargtrans__ ({text: 'Steps'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Volume Shadows'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_volumetric_shadows', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = props.use_volumetric_shadows;
-		sub.prop (props, 'volumetric_shadow_samples', __kwargtrans__ ({text: 'Steps'}));
-		var col = layout.column ();
-		col.prop (props, 'shadow_resolution_scale', __kwargtrans__ ({text: 'Resolution'}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'volumetric_shadow_samples', __kwargtrans__ ({text: 'Steps'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'shadow_resolution_scale', __kwargtrans__ ({text: 'Resolution'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_sampling =  __class__ ('RENDER_PT_eevee_sampling', [RenderButtonsPanel, Panel], {
@@ -1220,7 +1604,7 @@ export var RENDER_PT_eevee_sampling =  __class__ ('RENDER_PT_eevee_sampling', [R
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1237,7 +1621,7 @@ export var RENDER_PT_eevee_sampling =  __class__ ('RENDER_PT_eevee_sampling', [R
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1260,7 +1644,7 @@ export var RENDER_PT_eevee_sampling_viewport =  __class__ ('RENDER_PT_eevee_samp
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1277,7 +1661,7 @@ export var RENDER_PT_eevee_sampling_viewport =  __class__ ('RENDER_PT_eevee_samp
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1294,10 +1678,22 @@ export var RENDER_PT_eevee_sampling_viewport =  __class__ ('RENDER_PT_eevee_samp
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column ();
-		col.prop (props, 'taa_samples', __kwargtrans__ ({text: 'Samples'}));
-		col.prop (props, 'use_taa_reprojection', __kwargtrans__ ({text: 'Temporal Reprojection'}));
-		col.prop (props, 'use_shadow_jitter_viewport', __kwargtrans__ ({text: 'Jittered Shadows'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'taa_samples', __kwargtrans__ ({text: 'Samples'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_taa_reprojection', __kwargtrans__ ({text: 'Temporal Reprojection'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_shadow_jitter_viewport', __kwargtrans__ ({text: 'Jittered Shadows'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_sampling_render =  __class__ ('RENDER_PT_eevee_sampling_render', [RenderButtonsPanel, Panel], {
@@ -1308,7 +1704,7 @@ export var RENDER_PT_eevee_sampling_render =  __class__ ('RENDER_PT_eevee_sampli
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1325,7 +1721,7 @@ export var RENDER_PT_eevee_sampling_render =  __class__ ('RENDER_PT_eevee_sampli
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1342,8 +1738,14 @@ export var RENDER_PT_eevee_sampling_render =  __class__ ('RENDER_PT_eevee_sampli
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column (__kwargtrans__ ({align: true}));
-		col.prop (props, 'taa_render_samples', __kwargtrans__ ({text: 'Samples'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'taa_render_samples', __kwargtrans__ ({text: 'Samples'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_sampling_advanced =  __class__ ('RENDER_PT_eevee_sampling_advanced', [RenderButtonsPanel, Panel], {
@@ -1355,7 +1757,7 @@ export var RENDER_PT_eevee_sampling_advanced =  __class__ ('RENDER_PT_eevee_samp
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1372,7 +1774,7 @@ export var RENDER_PT_eevee_sampling_advanced =  __class__ ('RENDER_PT_eevee_samp
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1389,8 +1791,14 @@ export var RENDER_PT_eevee_sampling_advanced =  __class__ ('RENDER_PT_eevee_samp
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		var col = layout.column ();
-		col.prop (props, 'light_threshold');
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'light_threshold');
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_film =  __class__ ('RENDER_PT_eevee_film', [RenderButtonsPanel, Panel], {
@@ -1401,7 +1809,7 @@ export var RENDER_PT_eevee_film =  __class__ ('RENDER_PT_eevee_film', [RenderBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1418,7 +1826,7 @@ export var RENDER_PT_eevee_film =  __class__ ('RENDER_PT_eevee_film', [RenderBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1435,22 +1843,49 @@ export var RENDER_PT_eevee_film =  __class__ ('RENDER_PT_eevee_film', [RenderBut
 		var scene = context.scene;
 		var rd = scene.render;
 		var props = scene.eevee;
-		var col = layout.column ();
-		col.prop (rd, 'filter_size');
-		col.prop (rd, 'film_transparent', __kwargtrans__ ({text: 'Transparent'}));
-		var col = layout.column (__kwargtrans__ ({align: false, heading: 'Overscan'}));
-		var row = col.row (__kwargtrans__ ({align: true}));
-		var sub = row.row (__kwargtrans__ ({align: true}));
-		sub.prop (props, 'use_overscan', __kwargtrans__ ({text: ''}));
-		var sub = sub.row (__kwargtrans__ ({align: true}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'filter_size');
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'film_transparent', __kwargtrans__ ({text: 'Transparent'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: false, heading: 'Overscan'}));
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'use_overscan', __kwargtrans__ ({text: ''}));
+		}) ();
+		var sub = (function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.row, __accu0__, __kwargtrans__ ({align: true}));
+		}) ();
 		sub.active = props.use_overscan;
-		sub.prop (props, 'overscan_size', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = sub;
+			return __call__ (__accu0__.prop, __accu0__, props, 'overscan_size', __kwargtrans__ ({text: ''}));
+		}) ();
 	});}
 });
 export var draw_curves_settings = function (self, context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1467,8 +1902,14 @@ export var draw_curves_settings = function (self, context) {
 	var rd = scene.render;
 	layout.use_property_split = true;
 	layout.use_property_decorate = false;
-	layout.prop (rd, 'hair_type', __kwargtrans__ ({text: 'Shape', expand: true}));
-	layout.prop (rd, 'hair_subdiv');
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, rd, 'hair_type', __kwargtrans__ ({text: 'Shape', expand: true}));
+	}) ();
+	(function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.prop, __accu0__, rd, 'hair_subdiv');
+	}) ();
 };
 export var RENDER_PT_eevee_hair =  __class__ ('RENDER_PT_eevee_hair', [RenderButtonsPanel, Panel], {
 	__module__: __name__,
@@ -1478,7 +1919,7 @@ export var RENDER_PT_eevee_hair =  __class__ ('RENDER_PT_eevee_hair', [RenderBut
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1495,7 +1936,7 @@ export var RENDER_PT_eevee_hair =  __class__ ('RENDER_PT_eevee_hair', [RenderBut
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1507,7 +1948,7 @@ export var RENDER_PT_eevee_hair =  __class__ ('RENDER_PT_eevee_hair', [RenderBut
 		}
 		else {
 		}
-		draw_curves_settings (self, context);
+		__call__ (draw_curves_settings, null, self, context);
 	});}
 });
 export var RENDER_PT_eevee_performance =  __class__ ('RENDER_PT_eevee_performance', [RenderButtonsPanel, Panel], {
@@ -1518,7 +1959,7 @@ export var RENDER_PT_eevee_performance =  __class__ ('RENDER_PT_eevee_performanc
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1535,7 +1976,7 @@ export var RENDER_PT_eevee_performance =  __class__ ('RENDER_PT_eevee_performanc
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1552,8 +1993,14 @@ export var RENDER_PT_eevee_performance =  __class__ ('RENDER_PT_eevee_performanc
 		var rd = scene.render;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		layout.prop (rd, 'use_high_quality_normals');
-		layout.prop (rd, 'anisotropic_filter');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'use_high_quality_normals');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'anisotropic_filter');
+		}) ();
 	});}
 });
 export var CompositorPerformanceButtonsPanel =  __class__ ('CompositorPerformanceButtonsPanel', [object], {
@@ -1562,7 +2009,7 @@ export var CompositorPerformanceButtonsPanel =  __class__ ('CompositorPerformanc
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1579,11 +2026,23 @@ export var CompositorPerformanceButtonsPanel =  __class__ ('CompositorPerformanc
 		var rd = scene.render;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column ();
-		var row = col.row ();
-		row.prop (rd, 'compositor_device', __kwargtrans__ ({text: 'Device', expand: true}));
-		if (rd.compositor_device == 'GPU') {
-			col.prop (rd, 'compositor_precision', __kwargtrans__ ({text: 'Precision'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'compositor_device', __kwargtrans__ ({text: 'Device', expand: true}));
+		}) ();
+		if (__eq__ (rd.compositor_device, 'GPU')) {
+			(function () {
+				var __accu0__ = col;
+				return __call__ (__accu0__.prop, __accu0__, rd, 'compositor_precision', __kwargtrans__ ({text: 'Precision'}));
+			}) ();
 		}
 	});}
 });
@@ -1593,7 +2052,7 @@ export var CompositorDenoisePerformanceButtonsPanel =  __class__ ('CompositorDen
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1610,11 +2069,26 @@ export var CompositorDenoisePerformanceButtonsPanel =  __class__ ('CompositorDen
 		var rd = scene.render;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		var col = layout.column ();
-		var row = col.row ();
-		row.prop (rd, 'compositor_denoise_device', __kwargtrans__ ({text: 'Denoising Device', expand: true}));
-		col.prop (rd, 'compositor_denoise_preview_quality', __kwargtrans__ ({text: 'Preview Quality'}));
-		col.prop (rd, 'compositor_denoise_final_quality', __kwargtrans__ ({text: 'Final Quality'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		var row = (function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.row, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = row;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'compositor_denoise_device', __kwargtrans__ ({text: 'Denoising Device', expand: true}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'compositor_denoise_preview_quality', __kwargtrans__ ({text: 'Preview Quality'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'compositor_denoise_final_quality', __kwargtrans__ ({text: 'Final Quality'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_performance_compositor =  __class__ ('RENDER_PT_eevee_performance_compositor', [RenderButtonsPanel, CompositorPerformanceButtonsPanel, Panel], {
@@ -1638,7 +2112,7 @@ export var RENDER_PT_eevee_performance_memory =  __class__ ('RENDER_PT_eevee_per
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1655,7 +2129,7 @@ export var RENDER_PT_eevee_performance_memory =  __class__ ('RENDER_PT_eevee_per
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1672,8 +2146,14 @@ export var RENDER_PT_eevee_performance_memory =  __class__ ('RENDER_PT_eevee_per
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.eevee;
-		layout.prop (props, 'shadow_pool_size', __kwargtrans__ ({text: 'Shadow Pool'}));
-		layout.prop (props, 'gi_irradiance_pool_size', __kwargtrans__ ({text: 'Light Probes Volume Pool'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'shadow_pool_size', __kwargtrans__ ({text: 'Shadow Pool'}));
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, props, 'gi_irradiance_pool_size', __kwargtrans__ ({text: 'Light Probes Volume Pool'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_eevee_performance_viewport =  __class__ ('RENDER_PT_eevee_performance_viewport', [RenderButtonsPanel, Panel], {
@@ -1685,7 +2165,7 @@ export var RENDER_PT_eevee_performance_viewport =  __class__ ('RENDER_PT_eevee_p
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1702,7 +2182,7 @@ export var RENDER_PT_eevee_performance_viewport =  __class__ ('RENDER_PT_eevee_p
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1719,8 +2199,14 @@ export var RENDER_PT_eevee_performance_viewport =  __class__ ('RENDER_PT_eevee_p
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var rd = scene.render;
-		var col = layout.column ();
-		col.prop (rd, 'preview_pixel_size', __kwargtrans__ ({text: 'Pixel Size'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'preview_pixel_size', __kwargtrans__ ({text: 'Pixel Size'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_gpencil =  __class__ ('RENDER_PT_gpencil', [RenderButtonsPanel, Panel], {
@@ -1732,7 +2218,7 @@ export var RENDER_PT_gpencil =  __class__ ('RENDER_PT_gpencil', [RenderButtonsPa
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1749,7 +2235,7 @@ export var RENDER_PT_gpencil =  __class__ ('RENDER_PT_gpencil', [RenderButtonsPa
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1773,7 +2259,7 @@ export var RENDER_PT_grease_pencil_viewport =  __class__ ('RENDER_PT_grease_penc
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1790,8 +2276,14 @@ export var RENDER_PT_grease_pencil_viewport =  __class__ ('RENDER_PT_grease_penc
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.grease_pencil_settings;
-		var col = layout.column ();
-		col.prop (props, 'antialias_threshold', __kwargtrans__ ({text: 'SMAA Threshold'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'antialias_threshold', __kwargtrans__ ({text: 'SMAA Threshold'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_grease_pencil_render =  __class__ ('RENDER_PT_grease_pencil_render', [RenderButtonsPanel, Panel], {
@@ -1803,7 +2295,7 @@ export var RENDER_PT_grease_pencil_render =  __class__ ('RENDER_PT_grease_pencil
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1820,12 +2312,27 @@ export var RENDER_PT_grease_pencil_render =  __class__ ('RENDER_PT_grease_pencil
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.grease_pencil_settings;
-		var col = layout.column ();
-		col.prop (props, 'antialias_threshold_render', __kwargtrans__ ({text: 'SMAA Threshold'}));
-		col.prop (props, 'aa_samples', __kwargtrans__ ({text: 'SSAA Samples'}));
-		var col = layout.column ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'antialias_threshold_render', __kwargtrans__ ({text: 'SMAA Threshold'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'aa_samples', __kwargtrans__ ({text: 'SSAA Samples'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
 		col.active = scene.render.use_motion_blur;
-		col.prop (props, 'motion_blur_steps');
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'motion_blur_steps');
+		}) ();
 	});}
 });
 export var RENDER_PT_opengl_sampling =  __class__ ('RENDER_PT_opengl_sampling', [RenderButtonsPanel, Panel], {
@@ -1835,7 +2342,7 @@ export var RENDER_PT_opengl_sampling =  __class__ ('RENDER_PT_opengl_sampling', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1852,7 +2359,7 @@ export var RENDER_PT_opengl_sampling =  __class__ ('RENDER_PT_opengl_sampling', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1869,9 +2376,18 @@ export var RENDER_PT_opengl_sampling =  __class__ ('RENDER_PT_opengl_sampling', 
 		layout.use_property_decorate = false;
 		var scene = context.scene;
 		var props = scene.display;
-		var col = layout.column ();
-		col.prop (props, 'render_aa', __kwargtrans__ ({text: 'Render'}));
-		col.prop (props, 'viewport_aa', __kwargtrans__ ({text: 'Viewport'}));
+		var col = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'render_aa', __kwargtrans__ ({text: 'Render'}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, props, 'viewport_aa', __kwargtrans__ ({text: 'Viewport'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_opengl_film =  __class__ ('RENDER_PT_opengl_film', [RenderButtonsPanel, Panel], {
@@ -1882,7 +2398,7 @@ export var RENDER_PT_opengl_film =  __class__ ('RENDER_PT_opengl_film', [RenderB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1898,7 +2414,10 @@ export var RENDER_PT_opengl_film =  __class__ ('RENDER_PT_opengl_film', [RenderB
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
 		var rd = context.scene.render;
-		layout.prop (rd, 'film_transparent', __kwargtrans__ ({text: 'Transparent'}));
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'film_transparent', __kwargtrans__ ({text: 'Transparent'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_opengl_lighting =  __class__ ('RENDER_PT_opengl_lighting', [RenderButtonsPanel, Panel], {
@@ -1908,7 +2427,7 @@ export var RENDER_PT_opengl_lighting =  __class__ ('RENDER_PT_opengl_lighting', 
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1925,7 +2444,7 @@ export var RENDER_PT_opengl_lighting =  __class__ ('RENDER_PT_opengl_lighting', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1937,7 +2456,10 @@ export var RENDER_PT_opengl_lighting =  __class__ ('RENDER_PT_opengl_lighting', 
 		}
 		else {
 		}
-		VIEW3D_PT_shading_lighting.draw (self, context);
+		(function () {
+			var __accu0__ = VIEW3D_PT_shading_lighting;
+			return __call__ (__accu0__.draw, __accu0__, self, context);
+		}) ();
 	});}
 });
 export var RENDER_PT_opengl_color =  __class__ ('RENDER_PT_opengl_color', [RenderButtonsPanel, Panel], {
@@ -1947,7 +2469,7 @@ export var RENDER_PT_opengl_color =  __class__ ('RENDER_PT_opengl_color', [Rende
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1964,7 +2486,7 @@ export var RENDER_PT_opengl_color =  __class__ ('RENDER_PT_opengl_color', [Rende
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1976,7 +2498,10 @@ export var RENDER_PT_opengl_color =  __class__ ('RENDER_PT_opengl_color', [Rende
 		}
 		else {
 		}
-		VIEW3D_PT_shading_color._draw_color_type (self, context);
+		(function () {
+			var __accu0__ = VIEW3D_PT_shading_color;
+			return __call__ (__accu0__._draw_color_type, __accu0__, self, context);
+		}) ();
 	});}
 });
 export var RENDER_PT_opengl_options =  __class__ ('RENDER_PT_opengl_options', [RenderButtonsPanel, Panel], {
@@ -1986,7 +2511,7 @@ export var RENDER_PT_opengl_options =  __class__ ('RENDER_PT_opengl_options', [R
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2003,7 +2528,7 @@ export var RENDER_PT_opengl_options =  __class__ ('RENDER_PT_opengl_options', [R
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2015,9 +2540,18 @@ export var RENDER_PT_opengl_options =  __class__ ('RENDER_PT_opengl_options', [R
 		}
 		else {
 		}
-		VIEW3D_PT_shading_options.draw (self, context);
-		VIEW3D_PT_shading_cavity.draw_header (self, context);
-		VIEW3D_PT_shading_cavity.draw (self, context);
+		(function () {
+			var __accu0__ = VIEW3D_PT_shading_options;
+			return __call__ (__accu0__.draw, __accu0__, self, context);
+		}) ();
+		(function () {
+			var __accu0__ = VIEW3D_PT_shading_cavity;
+			return __call__ (__accu0__.draw_header, __accu0__, self, context);
+		}) ();
+		(function () {
+			var __accu0__ = VIEW3D_PT_shading_cavity;
+			return __call__ (__accu0__.draw, __accu0__, self, context);
+		}) ();
 	});}
 });
 export var RENDER_PT_simplify =  __class__ ('RENDER_PT_simplify', [RenderButtonsPanel, Panel], {
@@ -2028,7 +2562,7 @@ export var RENDER_PT_simplify =  __class__ ('RENDER_PT_simplify', [RenderButtons
 	get draw_header () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2041,12 +2575,15 @@ export var RENDER_PT_simplify =  __class__ ('RENDER_PT_simplify', [RenderButtons
 		else {
 		}
 		var rd = context.scene.render;
-		self.layout.prop (rd, 'use_simplify', __kwargtrans__ ({text: ''}));
+		(function () {
+			var __accu0__ = self.layout;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'use_simplify', __kwargtrans__ ({text: ''}));
+		}) ();
 	});},
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2069,7 +2606,7 @@ export var RENDER_PT_simplify_viewport =  __class__ ('RENDER_PT_simplify_viewpor
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2085,15 +2622,42 @@ export var RENDER_PT_simplify_viewport =  __class__ ('RENDER_PT_simplify_viewpor
 		layout.use_property_split = true;
 		var rd = context.scene.render;
 		layout.active = rd.use_simplify;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (rd, 'simplify_subdivision', __kwargtrans__ ({text: 'Max Subdivision'}));
-		var col = flow.column ();
-		col.prop (rd, 'simplify_child_particles', __kwargtrans__ ({text: 'Max Child Particles'}));
-		var col = flow.column ();
-		col.prop (rd, 'simplify_volumes', __kwargtrans__ ({text: 'Volume Resolution'}));
-		var col = flow.column ();
-		col.prop (rd, 'use_simplify_normals', __kwargtrans__ ({text: 'Normals'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_subdivision', __kwargtrans__ ({text: 'Max Subdivision'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_child_particles', __kwargtrans__ ({text: 'Max Child Particles'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_volumes', __kwargtrans__ ({text: 'Volume Resolution'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'use_simplify_normals', __kwargtrans__ ({text: 'Normals'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_simplify_render =  __class__ ('RENDER_PT_simplify_render', [RenderButtonsPanel, Panel], {
@@ -2104,7 +2668,7 @@ export var RENDER_PT_simplify_render =  __class__ ('RENDER_PT_simplify_render', 
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2120,11 +2684,26 @@ export var RENDER_PT_simplify_render =  __class__ ('RENDER_PT_simplify_render', 
 		layout.use_property_split = true;
 		var rd = context.scene.render;
 		layout.active = rd.use_simplify;
-		var flow = layout.grid_flow (__kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
-		var col = flow.column ();
-		col.prop (rd, 'simplify_subdivision_render', __kwargtrans__ ({text: 'Max Subdivision'}));
-		var col = flow.column ();
-		col.prop (rd, 'simplify_child_particles_render', __kwargtrans__ ({text: 'Max Child Particles'}));
+		var flow = (function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.grid_flow, __accu0__, __kwargtrans__ ({row_major: true, columns: 0, even_columns: false, even_rows: false, align: true}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_subdivision_render', __kwargtrans__ ({text: 'Max Subdivision'}));
+		}) ();
+		var col = (function () {
+			var __accu0__ = flow;
+			return __call__ (__accu0__.column, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.prop, __accu0__, rd, 'simplify_child_particles_render', __kwargtrans__ ({text: 'Max Child Particles'}));
+		}) ();
 	});}
 });
 export var RENDER_PT_simplify_greasepencil =  __class__ ('RENDER_PT_simplify_greasepencil', [RenderButtonsPanel, Panel, GreasePencilSimplifyPanel], {
@@ -2143,7 +2722,7 @@ export var RENDER_PT_hydra_debug =  __class__ ('RENDER_PT_hydra_debug', [RenderB
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2161,7 +2740,7 @@ export var RENDER_PT_hydra_debug =  __class__ ('RENDER_PT_hydra_debug', [RenderB
 	get draw () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -2176,15 +2755,79 @@ export var RENDER_PT_hydra_debug =  __class__ ('RENDER_PT_hydra_debug', [RenderB
 		var layout = self.layout;
 		layout.use_property_split = true;
 		var hydra = context.scene.hydra;
-		layout.prop (hydra, 'export_method');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, hydra, 'export_method');
+		}) ();
 	});}
 });
 export var classes = tuple ([RENDER_PT_context, RENDER_PT_eevee_sampling, RENDER_PT_eevee_sampling_viewport, RENDER_PT_eevee_sampling_render, RENDER_PT_eevee_sampling_shadows, RENDER_PT_eevee_sampling_advanced, RENDER_PT_eevee_light_paths, RENDER_PT_eevee_clamping, RENDER_PT_eevee_clamping_surface, RENDER_PT_eevee_clamping_volume, RENDER_PT_eevee_light_paths_intensity, RENDER_PT_eevee_raytracing_presets, RENDER_PT_eevee_raytracing, RENDER_PT_eevee_screen_trace, RENDER_PT_eevee_denoise, RENDER_PT_eevee_gi_approximation, RENDER_PT_eevee_volumes, RENDER_PT_eevee_volumes_range, RENDER_PT_eevee_hair, RENDER_PT_simplify, RENDER_PT_simplify_viewport, RENDER_PT_simplify_render, RENDER_PT_simplify_greasepencil, RENDER_PT_eevee_depth_of_field, RENDER_PT_eevee_motion_blur, RENDER_PT_eevee_motion_blur_curve, RENDER_PT_eevee_film, RENDER_PT_eevee_performance, RENDER_PT_eevee_performance_memory, RENDER_PT_eevee_performance_viewport, RENDER_PT_eevee_performance_compositor, RENDER_PT_eevee_performance_compositor_denoise_settings, RENDER_PT_gpencil, RENDER_PT_grease_pencil_viewport, RENDER_PT_grease_pencil_render, RENDER_PT_opengl_sampling, RENDER_PT_opengl_lighting, RENDER_PT_opengl_color, RENDER_PT_opengl_options, RENDER_PT_opengl_film, RENDER_PT_hydra_debug, RENDER_PT_color_management, RENDER_PT_color_management_curves, RENDER_PT_color_management_white_balance_presets, RENDER_PT_color_management_white_balance, RENDER_PT_color_management_working_space, RENDER_PT_color_management_advanced]);
-if (__name__ == '__main__') {
-	for (var cls of classes) {
-		register_class (cls);
+if (__eq__ (__name__, '__main__')) {
+	var __iterable0__ = classes;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var cls = __getitem__ (__iterable0__, __index0__);
+		__call__ (register_class, null, cls);
 	}
 }
 
 //# sourceMappingURL=bl_ui.properties_render.map
 export {GreasePencilSimplifyPanel, Panel, PresetPanel, VIEW3D_PT_shading_cavity, VIEW3D_PT_shading_color, VIEW3D_PT_shading_lighting, VIEW3D_PT_shading_options, _globals, _import, _lazy, _member, _module, i18n_contexts, register_class};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'RenderButtonsPanel': RenderButtonsPanel = value; break;
+		case 'RENDER_PT_context': RENDER_PT_context = value; break;
+		case 'RENDER_PT_color_management': RENDER_PT_color_management = value; break;
+		case 'RENDER_PT_color_management_working_space': RENDER_PT_color_management_working_space = value; break;
+		case 'RENDER_PT_color_management_advanced': RENDER_PT_color_management_advanced = value; break;
+		case 'RENDER_PT_color_management_curves': RENDER_PT_color_management_curves = value; break;
+		case 'RENDER_PT_color_management_white_balance_presets': RENDER_PT_color_management_white_balance_presets = value; break;
+		case 'RENDER_PT_color_management_white_balance': RENDER_PT_color_management_white_balance = value; break;
+		case 'RENDER_PT_eevee_motion_blur': RENDER_PT_eevee_motion_blur = value; break;
+		case 'RENDER_PT_eevee_motion_blur_curve': RENDER_PT_eevee_motion_blur_curve = value; break;
+		case 'RENDER_PT_eevee_depth_of_field': RENDER_PT_eevee_depth_of_field = value; break;
+		case 'RENDER_PT_eevee_volumes': RENDER_PT_eevee_volumes = value; break;
+		case 'RENDER_PT_eevee_volumes_range': RENDER_PT_eevee_volumes_range = value; break;
+		case 'RENDER_PT_eevee_raytracing_presets': RENDER_PT_eevee_raytracing_presets = value; break;
+		case 'RENDER_PT_eevee_raytracing': RENDER_PT_eevee_raytracing = value; break;
+		case 'RENDER_PT_eevee_screen_trace': RENDER_PT_eevee_screen_trace = value; break;
+		case 'RENDER_PT_eevee_gi_approximation': RENDER_PT_eevee_gi_approximation = value; break;
+		case 'RENDER_PT_eevee_denoise': RENDER_PT_eevee_denoise = value; break;
+		case 'RENDER_PT_eevee_light_paths': RENDER_PT_eevee_light_paths = value; break;
+		case 'RENDER_PT_eevee_clamping': RENDER_PT_eevee_clamping = value; break;
+		case 'RENDER_PT_eevee_clamping_surface': RENDER_PT_eevee_clamping_surface = value; break;
+		case 'RENDER_PT_eevee_clamping_volume': RENDER_PT_eevee_clamping_volume = value; break;
+		case 'RENDER_PT_eevee_light_paths_intensity': RENDER_PT_eevee_light_paths_intensity = value; break;
+		case 'RENDER_PT_eevee_sampling_shadows': RENDER_PT_eevee_sampling_shadows = value; break;
+		case 'RENDER_PT_eevee_sampling': RENDER_PT_eevee_sampling = value; break;
+		case 'RENDER_PT_eevee_sampling_viewport': RENDER_PT_eevee_sampling_viewport = value; break;
+		case 'RENDER_PT_eevee_sampling_render': RENDER_PT_eevee_sampling_render = value; break;
+		case 'RENDER_PT_eevee_sampling_advanced': RENDER_PT_eevee_sampling_advanced = value; break;
+		case 'RENDER_PT_eevee_film': RENDER_PT_eevee_film = value; break;
+		case 'draw_curves_settings': draw_curves_settings = value; break;
+		case 'RENDER_PT_eevee_hair': RENDER_PT_eevee_hair = value; break;
+		case 'RENDER_PT_eevee_performance': RENDER_PT_eevee_performance = value; break;
+		case 'CompositorPerformanceButtonsPanel': CompositorPerformanceButtonsPanel = value; break;
+		case 'CompositorDenoisePerformanceButtonsPanel': CompositorDenoisePerformanceButtonsPanel = value; break;
+		case 'RENDER_PT_eevee_performance_compositor': RENDER_PT_eevee_performance_compositor = value; break;
+		case 'RENDER_PT_eevee_performance_compositor_denoise_settings': RENDER_PT_eevee_performance_compositor_denoise_settings = value; break;
+		case 'RENDER_PT_eevee_performance_memory': RENDER_PT_eevee_performance_memory = value; break;
+		case 'RENDER_PT_eevee_performance_viewport': RENDER_PT_eevee_performance_viewport = value; break;
+		case 'RENDER_PT_gpencil': RENDER_PT_gpencil = value; break;
+		case 'RENDER_PT_grease_pencil_viewport': RENDER_PT_grease_pencil_viewport = value; break;
+		case 'RENDER_PT_grease_pencil_render': RENDER_PT_grease_pencil_render = value; break;
+		case 'RENDER_PT_opengl_sampling': RENDER_PT_opengl_sampling = value; break;
+		case 'RENDER_PT_opengl_film': RENDER_PT_opengl_film = value; break;
+		case 'RENDER_PT_opengl_lighting': RENDER_PT_opengl_lighting = value; break;
+		case 'RENDER_PT_opengl_color': RENDER_PT_opengl_color = value; break;
+		case 'RENDER_PT_opengl_options': RENDER_PT_opengl_options = value; break;
+		case 'RENDER_PT_simplify': RENDER_PT_simplify = value; break;
+		case 'RENDER_PT_simplify_viewport': RENDER_PT_simplify_viewport = value; break;
+		case 'RENDER_PT_simplify_render': RENDER_PT_simplify_render = value; break;
+		case 'RENDER_PT_simplify_greasepencil': RENDER_PT_simplify_greasepencil = value; break;
+		case 'RENDER_PT_hydra_debug': RENDER_PT_hydra_debug = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

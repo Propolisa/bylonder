@@ -11,7 +11,7 @@ export var to_value = function (unit_system, unit_category, str_input, str_ref_u
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -25,7 +25,7 @@ export var to_value = function (unit_system, unit_category, str_input, str_ref_u
 	}
 	else {
 	}
-	return float (str_input);
+	return __call__ (float, null, str_input);
 };
 export var to_string = function (unit_system, unit_category, value, precision, split_unit, compatible_unit) {
 	if (typeof precision == 'undefined' || (precision != null && precision.hasOwnProperty ("__kwargtrans__"))) {;
@@ -39,7 +39,7 @@ export var to_string = function (unit_system, unit_category, value, precision, s
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -55,7 +55,16 @@ export var to_string = function (unit_system, unit_category, value, precision, s
 	}
 	else {
 	}
-	return str (round (value, precision));
+	return __call__ (str, null, __call__ (round, null, value, precision));
 };
 
 //# sourceMappingURL=_bpy._utils_units.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'systems': systems = value; break;
+		case 'categories': categories = value; break;
+		case 'to_value': to_value = value; break;
+		case 'to_string': to_string = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

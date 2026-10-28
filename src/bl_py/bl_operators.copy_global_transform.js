@@ -16,7 +16,7 @@ var __name__ = 'bl_operators.copy_global_transform';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -27,8 +27,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -36,7 +42,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -61,7 +67,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -80,7 +86,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -93,18 +99,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -115,17 +124,41 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var _axis_enum_items = [tuple (['x', 'X', '', 1]), tuple (['y', 'Y', '', 2]), tuple (['z', 'Z', '', 3])];
 export var KeyInfo = dict;
 export var get_matrix = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -149,7 +182,7 @@ export var get_matrix = function (context) {
 export var set_matrix = function (context, mat) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -161,22 +194,34 @@ export var set_matrix = function (context, mat) {
 	}
 	else {
 	}
-	var AutoKeying = _member ('bpy_extras.anim_utils', 'AutoKeying');
+	var AutoKeying = __call__ (_member, null, 'bpy_extras.anim_utils', 'AutoKeying');
 	var bone = context.active_pose_bone;
 	if (bone) {
-		var arm_eval = context.active_object.evaluated_get (context.view_layer.depsgraph);
-		bone.matrix = __matmul__ (arm_eval.matrix_world.inverted (), mat);
-		AutoKeying.autokey_transformation (context, bone);
+		var arm_eval = (function () {
+			var __accu0__ = context.active_object;
+			return __call__ (__accu0__.evaluated_get, __accu0__, context.view_layer.depsgraph);
+		}) ();
+		bone.matrix = __matmul__ ((function () {
+			var __accu0__ = arm_eval.matrix_world;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) (), mat);
+		(function () {
+			var __accu0__ = AutoKeying;
+			return __call__ (__accu0__.autokey_transformation, __accu0__, context, bone);
+		}) ();
 	}
 	else {
 		context.active_object.matrix_world = mat;
-		AutoKeying.autokey_transformation (context, context.active_object);
+		(function () {
+			var __accu0__ = AutoKeying;
+			return __call__ (__accu0__.autokey_transformation, __accu0__, context, context.active_object);
+		}) ();
 	}
 };
 export var _channelbag_for_id = function (animated_id) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -193,9 +238,18 @@ export var _channelbag_for_id = function (animated_id) {
 		return null;
 	}
 	var slot = adt.action_slot;
-	for (var layer of action.layers) {
-		for (var strip of layer.strips) {
-			var channelbag = strip.channelbag (slot);
+	var __iterable0__ = action.layers;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var layer = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = layer.strips;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var strip = __getitem__ (__iterable1__, __index1__);
+			var channelbag = (function () {
+				var __accu0__ = strip;
+				return __call__ (__accu0__.channelbag, __accu0__, slot);
+			}) ();
 			return channelbag;
 		}
 	}
@@ -204,7 +258,7 @@ export var _channelbag_for_id = function (animated_id) {
 export var _selected_keyframes = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -217,14 +271,14 @@ export var _selected_keyframes = function (context) {
 	}
 	var bone = context.active_pose_bone;
 	if (bone) {
-		return _selected_keyframes_for_bone (context.active_object, bone);
+		return __call__ (_selected_keyframes_for_bone, null, context.active_object, bone);
 	}
-	return _selected_keyframes_for_object (context.active_object);
+	return __call__ (_selected_keyframes_for_object, null, context.active_object);
 };
 export var _selected_keyframes_for_bone = function (object, bone) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -236,13 +290,19 @@ export var _selected_keyframes_for_bone = function (object, bone) {
 	}
 	else {
 	}
-	var py_name = bpy.utils.escape_identifier (bone.py_name);
-	return _selected_keyframes_for_action_slot (object, 'pose.bones["{:s}"].'.format (py_name));
+	var py_name = (function () {
+		var __accu0__ = bpy.utils;
+		return __call__ (__accu0__.escape_identifier, __accu0__, bone.py_name);
+	}) ();
+	return __call__ (_selected_keyframes_for_action_slot, null, object, (function () {
+		var __accu0__ = 'pose.bones["{:s}"].';
+		return __call__ (__accu0__.format, __accu0__, py_name);
+	}) ());
 };
 export var _selected_keyframes_for_object = function (object) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -253,12 +313,12 @@ export var _selected_keyframes_for_object = function (object) {
 	}
 	else {
 	}
-	return _selected_keyframes_for_action_slot (object, '');
+	return __call__ (_selected_keyframes_for_action_slot, null, object, '');
 };
 export var _selected_keyframes_for_action_slot = function (object, rna_path_prefix) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -270,28 +330,40 @@ export var _selected_keyframes_for_action_slot = function (object, rna_path_pref
 	}
 	else {
 	}
-	var cbag = _channelbag_for_id (object);
+	var cbag = __call__ (_channelbag_for_id, null, object);
 	if (!(cbag)) {
 		return [];
 	}
-	var keyframes = set ();
-	for (var fcurve of cbag.fcurves) {
-		if (!(fcurve.data_path.startswith (rna_path_prefix))) {
+	var keyframes = __call__ (set, null);
+	var __iterable0__ = cbag.fcurves;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var fcurve = __getitem__ (__iterable0__, __index0__);
+		if (!((function () {
+			var __accu0__ = fcurve.data_path;
+			return __call__ (__accu0__.startswith, __accu0__, rna_path_prefix);
+		}) ())) {
 			continue;
 		}
-		for (var kp of fcurve.keyframe_points) {
+		var __iterable1__ = fcurve.keyframe_points;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var kp = __getitem__ (__iterable1__, __index1__);
 			if (!(kp.select_control_point)) {
 				continue;
 			}
-			keyframes.add (kp.co.x);
+			(function () {
+				var __accu0__ = keyframes;
+				return __call__ (__accu0__.add, __accu0__, kp.co.x);
+			}) ();
 		}
 	}
-	return sorted (keyframes);
+	return __call__ (sorted, null, keyframes);
 };
 export var _copy_matrix_to_clipboard = function (window_manager, matrix) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -305,13 +377,28 @@ export var _copy_matrix_to_clipboard = function (window_manager, matrix) {
 	}
 	var rows = (function () {
 		var __accu0__ = [];
-		for (var row of matrix) {
-			__accu0__.append ('    {!r},'.format (tuple (row)));
+		var __iterable0__ = matrix;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var row = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu1__ = __accu0__;
+				return __call__ (__accu1__.append, __accu1__, (function () {
+					var __accu2__ = '    {!r},';
+					return __call__ (__accu2__.format, __accu2__, __call__ (tuple, null, row));
+				}) ());
+			}) ();
 		}
 		return __accu0__;
 	}) ();
-	var as_string = '\n'.join (rows);
-	window_manager.clipboard = 'Matrix((\n{:s}\n))'.format (as_string);
+	var as_string = (function () {
+		var __accu0__ = '\n';
+		return __call__ (__accu0__.join, __accu0__, rows);
+	}) ();
+	window_manager.clipboard = (function () {
+		var __accu0__ = 'Matrix((\n{:s}\n))';
+		return __call__ (__accu0__.format, __accu0__, as_string);
+	}) ();
 };
 export var OBJECT_OT_copy_global_transform =  __class__ ('OBJECT_OT_copy_global_transform', [Operator], {
 	__module__: __name__,
@@ -322,7 +409,7 @@ export var OBJECT_OT_copy_global_transform =  __class__ ('OBJECT_OT_copy_global_
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -334,12 +421,12 @@ export var OBJECT_OT_copy_global_transform =  __class__ ('OBJECT_OT_copy_global_
 		}
 		else {
 		}
-		return bool (context.active_pose_bone) || bool (context.active_object);
+		return __call__ (bool, null, context.active_pose_bone) || __call__ (bool, null, context.active_object);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -351,15 +438,15 @@ export var OBJECT_OT_copy_global_transform =  __class__ ('OBJECT_OT_copy_global_
 		}
 		else {
 		}
-		var mat = get_matrix (context);
-		_copy_matrix_to_clipboard (context.window_manager, mat);
+		var mat = __call__ (get_matrix, null, context);
+		__call__ (_copy_matrix_to_clipboard, null, context.window_manager, mat);
 		return new set (['FINISHED']);
 	});}
 });
 export var get_relative_ob = function (context) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -382,7 +469,7 @@ export var OBJECT_OT_copy_relative_transform =  __class__ ('OBJECT_OT_copy_relat
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -394,16 +481,16 @@ export var OBJECT_OT_copy_relative_transform =  __class__ ('OBJECT_OT_copy_relat
 		}
 		else {
 		}
-		var rel_ob = get_relative_ob (context);
+		var rel_ob = __call__ (get_relative_ob, null, context);
 		if (!(rel_ob)) {
 			return false;
 		}
-		return bool (context.active_pose_bone) || bool (context.active_object);
+		return __call__ (bool, null, context.active_pose_bone) || __call__ (bool, null, context.active_object);
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -415,30 +502,37 @@ export var OBJECT_OT_copy_relative_transform =  __class__ ('OBJECT_OT_copy_relat
 		}
 		else {
 		}
-		var rel_ob = get_relative_ob (context);
+		var rel_ob = __call__ (get_relative_ob, null, context);
 		if (!(rel_ob)) {
-			self.report (new set (['ERROR']), "No 'Relative To' object found, set one explicitly or make sure there is an active object");
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), "No 'Relative To' object found, set one explicitly or make sure there is an active object");
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var mat = __matmul__ (rel_ob.matrix_world.inverted (), get_matrix (context));
-		_copy_matrix_to_clipboard (context.window_manager, mat);
+		var mat = __matmul__ ((function () {
+			var __accu0__ = rel_ob.matrix_world;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) (), __call__ (get_matrix, null, context));
+		__call__ (_copy_matrix_to_clipboard, null, context.window_manager, mat);
 		return new set (['FINISHED']);
 	});}
 });
 export var UnableToMirrorError =  __class__ ('UnableToMirrorError', [Exception], {
 	__module__: __name__,
 });
+export var _OBJECT_OT_paste_transform__method_items = [tuple (['CURRENT', 'Current Transform', 'Paste onto the current values only, only manipulating the animation data if auto-keying is enabled']), tuple (['EXISTING_KEYS', 'Selected Keys', 'Paste onto frames that have a selected key, potentially creating new keys on those frames']), tuple (['BAKE', 'Bake on Key Range', 'Paste onto all frames between the first and last selected key, creating new keyframes if necessary'])];
 export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', [Operator], {
 	__module__: __name__,
 	bl_idname: 'object.paste_transform',
 	bl_label: 'Paste Global Transform',
 	bl_description: 'Pastes the matrix from the clipboard to the currently active pose bone or object. Uses world-space matrices',
 	bl_options: new set (['REGISTER', 'UNDO']),
-	_method_items: [tuple (['CURRENT', 'Current Transform', 'Paste onto the current values only, only manipulating the animation data if auto-keying is enabled']), tuple (['EXISTING_KEYS', 'Selected Keys', 'Paste onto frames that have a selected key, potentially creating new keys on those frames']), tuple (['BAKE', 'Bake on Key Range', 'Paste onto all frames between the first and last selected key, creating new keyframes if necessary'])],
+	_method_items: _OBJECT_OT_paste_transform__method_items,
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -451,7 +545,10 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		else {
 		}
 		if (!(context.active_pose_bone) && !(context.active_object)) {
-			cls.poll_message_set ('Select an object or pose bone');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Select an object or pose bone');
+			}) ();
 			return false;
 		}
 		return true;
@@ -459,7 +556,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 	get string_to_matrix () {return __getcm__ (this, function (cls, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -471,21 +568,36 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		if (value.startswith ('Matrix')) {
-			return cls.parse_matrix (value);
+		if ((function () {
+			var __accu0__ = value;
+			return __call__ (__accu0__.startswith, __accu0__, 'Matrix');
+		}) ()) {
+			return (function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.parse_matrix, __accu0__, value);
+			}) ();
 		}
-		if (value.startswith ('<Matrix 4x4')) {
-			return cls.parse_repr_m4 (value.__getslice__ (12, -(1), 1));
+		if ((function () {
+			var __accu0__ = value;
+			return __call__ (__accu0__.startswith, __accu0__, '<Matrix 4x4');
+		}) ()) {
+			return (function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.parse_repr_m4, __accu0__, __getslice__ (value, 12, __neg__ (1), 1));
+			}) ();
 		}
 		if (value) {
-			return cls.parse_print_m4 (value);
+			return (function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.parse_print_m4, __accu0__, value);
+			}) ();
 		}
 		return null;
 	});},
 	get parse_matrix () {return function (value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -496,9 +608,12 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var ast = _module ('ast');
+		var ast = __call__ (_module, null, 'ast');
 		try {
-			return Matrix (ast.literal_eval (value.__getslice__ (6, null, 1)));
+			return __call__ (Matrix, null, (function () {
+				var __accu0__ = ast;
+				return __call__ (__accu0__.literal_eval, __accu0__, __getslice__ (value, 6, null, 1));
+			}) ());
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, Exception)) {
@@ -512,7 +627,7 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 	get parse_print_m4 () {return function (value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -523,21 +638,42 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var lines = value.strip ().splitlines ();
-		if (len (lines) != 4) {
+		var lines = (function () {
+			var __accu0__ = (function () {
+				var __accu1__ = value;
+				return __call__ (__accu1__.strip, __accu1__);
+			}) ();
+			return __call__ (__accu0__.splitlines, __accu0__);
+		}) ();
+		if (__ne__ (__call__ (len, null, lines), 4)) {
 			return null;
 		}
 		try {
-			var floats = tuple ((function () {
+			var floats = __call__ (tuple, null, (function () {
 				var __accu0__ = [];
-				for (var line of lines) {
-					__accu0__.append (tuple ((function () {
-						var __accu1__ = [];
-						for (var item of list (line.py_split ())) {
-							__accu1__.append (float (item));
-						}
-						return __accu1__;
-					}) ()));
+				var __iterable0__ = lines;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var line = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __call__ (tuple, null, (function () {
+							var __accu2__ = [];
+							var __iterable1__ = __call__ (list, null, (function () {
+								var __accu3__ = line;
+								return __call__ (__accu3__.py_split, __accu3__);
+							}) ());
+							__iterable1__ = __i__ (__iterable1__);
+							for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+								var item = __getitem__ (__iterable1__, __index1__);
+								(function () {
+									var __accu3__ = __accu2__;
+									return __call__ (__accu3__.append, __accu3__, __call__ (float, null, item));
+								}) ();
+							}
+							return __accu2__;
+						}) ()));
+					}) ();
 				}
 				return __accu0__;
 			}) ());
@@ -550,12 +686,12 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 				throw __except0__;
 			}
 		}
-		return Matrix (floats);
+		return __call__ (Matrix, null, floats);
 	};},
 	get parse_repr_m4 () {return function (value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -566,21 +702,48 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var lines = value.strip ().splitlines ();
-		if (len (lines) != 4) {
+		var lines = (function () {
+			var __accu0__ = (function () {
+				var __accu1__ = value;
+				return __call__ (__accu1__.strip, __accu1__);
+			}) ();
+			return __call__ (__accu0__.splitlines, __accu0__);
+		}) ();
+		if (__ne__ (__call__ (len, null, lines), 4)) {
 			return null;
 		}
 		try {
-			var floats = tuple ((function () {
+			var floats = __call__ (tuple, null, (function () {
 				var __accu0__ = [];
-				for (var line of lines) {
-					__accu0__.append (tuple ((function () {
-						var __accu1__ = [];
-						for (var item of list (line.strip ().__getslice__ (1, -(1), 1).py_split (','))) {
-							__accu1__.append (float (item.strip ()));
-						}
-						return __accu1__;
-					}) ()));
+				var __iterable0__ = lines;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var line = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu1__ = __accu0__;
+						return __call__ (__accu1__.append, __accu1__, __call__ (tuple, null, (function () {
+							var __accu2__ = [];
+							var __iterable1__ = __call__ (list, null, (function () {
+								var __accu3__ = __getslice__ ((function () {
+									var __accu4__ = line;
+									return __call__ (__accu4__.strip, __accu4__);
+								}) (), 1, __neg__ (1), 1);
+								return __call__ (__accu3__.py_split, __accu3__, ',');
+							}) ());
+							__iterable1__ = __i__ (__iterable1__);
+							for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+								var item = __getitem__ (__iterable1__, __index1__);
+								(function () {
+									var __accu3__ = __accu2__;
+									return __call__ (__accu3__.append, __accu3__, __call__ (float, null, (function () {
+										var __accu4__ = item;
+										return __call__ (__accu4__.strip, __accu4__);
+									}) ()));
+								}) ();
+							}
+							return __accu2__;
+						}) ()));
+					}) ();
 				}
 				return __accu0__;
 			}) ());
@@ -593,12 +756,12 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 				throw __except0__;
 			}
 		}
-		return Matrix (floats);
+		return __call__ (Matrix, null, floats);
 	};},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -610,31 +773,46 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var clipboard = context.window_manager.clipboard.strip ();
-		var mat = self.string_to_matrix (clipboard);
+		var clipboard = (function () {
+			var __accu0__ = context.window_manager.clipboard;
+			return __call__ (__accu0__.strip, __accu0__);
+		}) ();
+		var mat = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.string_to_matrix, __accu0__, clipboard);
+		}) ();
 		if (mat === null) {
-			self.report (new set (['ERROR']), 'Clipboard does not contain a matrix');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Clipboard does not contain a matrix');
+			}) ();
 			return new set (['CANCELLED']);
 		}
 		try {
-			var mat = self._preprocess_matrix (context, mat);
+			var mat = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._preprocess_matrix, __accu0__, context, mat);
+			}) ();
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, UnableToMirrorError)) {
-				self.report (new set (['ERROR']), 'Unable to mirror, no mirror object/bone configured');
+				(function () {
+					var __accu0__ = self;
+					return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'Unable to mirror, no mirror object/bone configured');
+				}) ();
 				return new set (['CANCELLED']);
 			}
 			else {
 				throw __except0__;
 			}
 		}
-		var applicator = dict ({'CURRENT': self._paste_current, 'EXISTING_KEYS': self._paste_existing_keys, 'BAKE': self._paste_bake}) [self.method];
-		return applicator (context, mat);
+		var applicator = __getitem__ (dict ({'CURRENT': self._paste_current, 'EXISTING_KEYS': self._paste_existing_keys, 'BAKE': self._paste_bake}), self.method);
+		return __call__ (applicator, null, context, mat);
 	});},
 	get _preprocess_matrix () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -648,17 +826,23 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		else {
 		}
 		if (self.use_relative) {
-			var matrix = self._relative_to_world (context, matrix);
+			var matrix = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._relative_to_world, __accu0__, context, matrix);
+			}) ();
 		}
 		if (self.use_mirror) {
-			var matrix = self._mirror_matrix (context, matrix);
+			var matrix = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._mirror_matrix, __accu0__, context, matrix);
+			}) ();
 		}
 		return matrix;
 	});},
 	get _relative_to_world () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -671,17 +855,20 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var rel_ob = get_relative_ob (context);
+		var rel_ob = __call__ (get_relative_ob, null, context);
 		if (!(rel_ob)) {
 			return matrix;
 		}
-		var rel_ob_eval = rel_ob.evaluated_get (context.view_layer.depsgraph);
+		var rel_ob_eval = (function () {
+			var __accu0__ = rel_ob;
+			return __call__ (__accu0__.evaluated_get, __accu0__, context.view_layer.depsgraph);
+		}) ();
 		return __matmul__ (rel_ob_eval.matrix_world, matrix);
 	});},
 	get _mirror_matrix () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -697,23 +884,29 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		var mirror_ob = context.scene.tool_settings.anim_mirror_object;
 		var mirror_bone = context.scene.tool_settings.anim_mirror_bone;
 		var ctx_ob = context.object;
-		if (!(mirror_ob) && mirror_bone && ctx_ob && ctx_ob.py_metatype == 'ARMATURE') {
+		if (!(mirror_ob) && mirror_bone && ctx_ob && __eq__ (ctx_ob.py_metatype, 'ARMATURE')) {
 			var mirror_ob = ctx_ob;
 		}
 		if (!(mirror_ob)) {
-			var __except0__ = UnableToMirrorError ();
+			var __except0__ = __call__ (UnableToMirrorError, null);
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (mirror_ob.py_metatype == 'ARMATURE' && mirror_bone) {
-			return self._mirror_over_bone (matrix, mirror_ob, mirror_bone);
+		if (__eq__ (mirror_ob.py_metatype, 'ARMATURE') && mirror_bone) {
+			return (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._mirror_over_bone, __accu0__, matrix, mirror_ob, mirror_bone);
+			}) ();
 		}
-		return self._mirror_over_ob (matrix, mirror_ob);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._mirror_over_ob, __accu0__, matrix, mirror_ob);
+		}) ();
 	});},
 	get _mirror_over_ob () {return __get__ (this, function (self, matrix, mirror_ob) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -727,12 +920,15 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		else {
 		}
 		var mirror_matrix = mirror_ob.matrix_world;
-		return self._mirror_over_matrix (matrix, mirror_matrix);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._mirror_over_matrix, __accu0__, matrix, mirror_matrix);
+		}) ();
 	});},
 	get _mirror_over_bone () {return __get__ (this, function (self, matrix, mirror_ob, mirror_bone_name) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -746,14 +942,17 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var bone = mirror_ob.pose.bones [mirror_bone_name];
+		var bone = __getitem__ (mirror_ob.pose.bones, mirror_bone_name);
 		var mirror_matrix = __matmul__ (mirror_ob.matrix_world, bone.matrix);
-		return self._mirror_over_matrix (matrix, mirror_matrix);
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._mirror_over_matrix, __accu0__, matrix, mirror_matrix);
+		}) ();
 	});},
 	get _mirror_over_matrix () {return __get__ (this, function (self, matrix, mirror_matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -766,37 +965,55 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var mat_local = __matmul__ (mirror_matrix.inverted (), matrix);
-		var __left0__ = mat_local.decompose ();
+		var mat_local = __matmul__ ((function () {
+			var __accu0__ = mirror_matrix;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) (), matrix);
+		var __left0__ = (function () {
+			var __accu0__ = mat_local;
+			return __call__ (__accu0__.decompose, __accu0__);
+		}) ();
 		var trans = __left0__ [0];
 		var rot_q = __left0__ [1];
 		var scale = __left0__ [2];
-		var axis_index = ord (self.mirror_axis_loc) - ord ('x');
-		trans [axis_index] *= -(1);
+		var axis_index = __sub__ (__call__ (ord, null, self.mirror_axis_loc), __call__ (ord, null, 'x'));
+		__setitem__ (trans, axis_index, __call__ (__imul__, null, __getitem__ (trans, axis_index), __neg__ (1)));
 		var _match_subject = self.mirror_axis_rot;
-		if (_match_subject == 'x') {
-			var rot_e = rot_q.to_euler ('XYZ');
-			rot_e.x *= -(1);
-			rot_e.y *= -(1);
+		if (__eq__ (_match_subject, 'x')) {
+			var rot_e = (function () {
+				var __accu0__ = rot_q;
+				return __call__ (__accu0__.to_euler, __accu0__, 'XYZ');
+			}) ();
+			rot_e.x = __call__ (__imul__, null, rot_e.x, __neg__ (1));
+			rot_e.y = __call__ (__imul__, null, rot_e.y, __neg__ (1));
 		}
-		else if (_match_subject == 'y') {
-			var rot_e = rot_q.to_euler ('YZX');
-			rot_e.y *= -(1);
-			rot_e.z *= -(1);
+		else if (__eq__ (_match_subject, 'y')) {
+			var rot_e = (function () {
+				var __accu0__ = rot_q;
+				return __call__ (__accu0__.to_euler, __accu0__, 'YZX');
+			}) ();
+			rot_e.y = __call__ (__imul__, null, rot_e.y, __neg__ (1));
+			rot_e.z = __call__ (__imul__, null, rot_e.z, __neg__ (1));
 		}
-		else if (_match_subject == 'z') {
-			var rot_e = rot_q.to_euler ('ZYX');
-			rot_e.z *= -(1);
-			rot_e.y *= -(1);
+		else if (__eq__ (_match_subject, 'z')) {
+			var rot_e = (function () {
+				var __accu0__ = rot_q;
+				return __call__ (__accu0__.to_euler, __accu0__, 'ZYX');
+			}) ();
+			rot_e.z = __call__ (__imul__, null, rot_e.z, __neg__ (1));
+			rot_e.y = __call__ (__imul__, null, rot_e.y, __neg__ (1));
 		}
-		var mat_local = Matrix.LocRotScale (trans, rot_e, scale);
+		var mat_local = (function () {
+			var __accu0__ = Matrix;
+			return __call__ (__accu0__.LocRotScale, __accu0__, trans, rot_e, scale);
+		}) ();
 		var mirrored_world = __matmul__ (mirror_matrix, mat_local);
 		return mirrored_world;
 	});},
 	get _paste_current () {return function (context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -808,13 +1025,13 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		set_matrix (context, matrix);
+		__call__ (set_matrix, null, context, matrix);
 		return new set (['FINISHED']);
 	};},
 	get _paste_existing_keys () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -828,21 +1045,30 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		else {
 		}
 		if (!(context.scene.tool_settings.use_keyframe_insert_auto)) {
-			self.report (new set (['ERROR']), 'This mode requires auto-keying to work properly');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'This mode requires auto-keying to work properly');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var frame_numbers = _selected_keyframes (context);
+		var frame_numbers = __call__ (_selected_keyframes, null, context);
 		if (!(frame_numbers)) {
-			self.report (new set (['WARNING']), 'No selected frames found');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['WARNING']), 'No selected frames found');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		self._paste_on_frames (context, frame_numbers, matrix);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._paste_on_frames, __accu0__, context, frame_numbers, matrix);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get _paste_bake () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -856,22 +1082,31 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		else {
 		}
 		if (!(context.scene.tool_settings.use_keyframe_insert_auto)) {
-			self.report (new set (['ERROR']), 'This mode requires auto-keying to work properly');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), 'This mode requires auto-keying to work properly');
+			}) ();
 			return new set (['CANCELLED']);
 		}
-		var bake_step = max (1, self.bake_step);
+		var bake_step = __call__ (max, null, 1, self.bake_step);
 		self.bake_step = bake_step;
-		var __left0__ = self._determine_bake_range (context);
+		var __left0__ = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._determine_bake_range, __accu0__, context);
+		}) ();
 		var frame_start = __left0__ [0];
 		var frame_end = __left0__ [1];
-		var frame_range = range (round (frame_start), round (frame_end) + bake_step, bake_step);
-		self._paste_on_frames (context, frame_range, matrix);
+		var frame_range = __call__ (range, null, __call__ (round, null, frame_start), __add__ (__call__ (round, null, frame_end), bake_step), bake_step);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._paste_on_frames, __accu0__, context, frame_range, matrix);
+		}) ();
 		return new set (['FINISHED']);
 	});},
 	get _determine_bake_range () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -883,21 +1118,27 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		else {
 		}
-		var frame_numbers = _selected_keyframes (context);
+		var frame_numbers = __call__ (_selected_keyframes, null, context);
 		if (frame_numbers) {
-			return tuple ([frame_numbers [0], frame_numbers [-(1)]]);
+			return tuple ([__getitem__ (frame_numbers, 0), __getitem__ (frame_numbers, __neg__ (1))]);
 		}
 		if (context.scene.use_preview_range) {
-			self.report (new set (['INFO']), 'No selected keys, pasting over preview range');
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['INFO']), 'No selected keys, pasting over preview range');
+			}) ();
 			return tuple ([context.scene.frame_preview_start, context.scene.frame_preview_end]);
 		}
-		self.report (new set (['INFO']), 'No selected keys, pasting over scene range');
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.report, __accu0__, new set (['INFO']), 'No selected keys, pasting over scene range');
+		}) ();
 		return tuple ([context.scene.frame_start, context.scene.frame_end]);
 	});},
 	get _paste_on_frames () {return __get__ (this, function (self, context, frame_numbers, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -913,23 +1154,50 @@ export var OBJECT_OT_paste_transform =  __class__ ('OBJECT_OT_paste_transform', 
 		}
 		var current_frame = context.scene.frame_current_final;
 		try {
-			for (var frame of frame_numbers) {
-				context.scene.frame_set (int (frame), __kwargtrans__ ({subframe: __mod__ (frame, 1.0)}));
-				set_matrix (context, matrix);
+			var __iterable0__ = frame_numbers;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var frame = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu0__ = context.scene;
+					return __call__ (__accu0__.frame_set, __accu0__, __call__ (int, null, frame), __kwargtrans__ ({subframe: __mod__ (frame, 1.0)}));
+				}) ();
+				__call__ (set_matrix, null, context, matrix);
 			}
 		}
 		finally {
-			context.scene.frame_set (int (current_frame), __kwargtrans__ ({subframe: __mod__ (current_frame, 1.0)}));
+			(function () {
+				var __accu0__ = context.scene;
+				return __call__ (__accu0__.frame_set, __accu0__, __call__ (int, null, current_frame), __kwargtrans__ ({subframe: __mod__ (current_frame, 1.0)}));
+			}) ();
 		}
 	});}
 });
-OBJECT_OT_paste_transform.__annotations__ = dict ({'method': bpy.props.EnumProperty (__kwargtrans__ ({py_items: OBJECT_OT_paste_transform._method_items, py_name: 'Paste Method', description: 'Update the current transform, selected keyframes, or even create new keys', options: new set (['SKIP_SAVE'])})), 'bake_step': bpy.props.IntProperty (__kwargtrans__ ({py_name: 'Frame Step', description: 'Only used for baking. Step=1 creates a key on every frame, step=2 bakes on 2s, etc', min: 1, soft_min: 1, soft_max: 5, options: new set (['SKIP_SAVE'])})), 'use_mirror': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Mirror Transform', description: 'When pasting, mirror the transform relative to a specific object or bone', py_default: false, options: new set (['SKIP_SAVE'])})), 'mirror_axis_loc': bpy.props.EnumProperty (__kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Location Axis', description: 'Coordinate axis used to mirror the location part of the transform', py_default: 'x', options: new set (['SKIP_SAVE'])})), 'mirror_axis_rot': bpy.props.EnumProperty (__kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Rotation Axis', description: 'Coordinate axis used to mirror the rotation part of the transform', py_default: 'z', options: new set (['SKIP_SAVE'])})), 'use_relative': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Use Relative Paste', description: 'When pasting, assume the pasted matrix is relative to another object (set in the user interface)', py_default: false, options: new set (['SKIP_SAVE'])}))});
+OBJECT_OT_paste_transform.__annotations__ = dict ({'method': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.EnumProperty, __accu0__, __kwargtrans__ ({py_items: _OBJECT_OT_paste_transform__method_items, py_name: 'Paste Method', description: 'Update the current transform, selected keyframes, or even create new keys', options: new set (['SKIP_SAVE'])}));
+}) (), 'bake_step': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.IntProperty, __accu0__, __kwargtrans__ ({py_name: 'Frame Step', description: 'Only used for baking. Step=1 creates a key on every frame, step=2 bakes on 2s, etc', min: 1, soft_min: 1, soft_max: 5, options: new set (['SKIP_SAVE'])}));
+}) (), 'use_mirror': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.BoolProperty, __accu0__, __kwargtrans__ ({py_name: 'Mirror Transform', description: 'When pasting, mirror the transform relative to a specific object or bone', py_default: false, options: new set (['SKIP_SAVE'])}));
+}) (), 'mirror_axis_loc': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.EnumProperty, __accu0__, __kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Location Axis', description: 'Coordinate axis used to mirror the location part of the transform', py_default: 'x', options: new set (['SKIP_SAVE'])}));
+}) (), 'mirror_axis_rot': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.EnumProperty, __accu0__, __kwargtrans__ ({py_items: _axis_enum_items, py_name: 'Rotation Axis', description: 'Coordinate axis used to mirror the rotation part of the transform', py_default: 'z', options: new set (['SKIP_SAVE'])}));
+}) (), 'use_relative': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.BoolProperty, __accu0__, __kwargtrans__ ({py_name: 'Use Relative Paste', description: 'When pasting, assume the pasted matrix is relative to another object (set in the user interface)', py_default: false, options: new set (['SKIP_SAVE'])}));
+}) ()});
 export var Transformable =  __class__ ('Transformable', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -942,10 +1210,10 @@ export var Transformable =  __class__ ('Transformable', [object], {
 		}
 		self._key_info_cache = null;
 	});},
-	get matrix_world () {return __get__ (this, abc.abstractmethod (function (self) {
+	get matrix_world () {return __get__ (this, __call__ (abc.abstractmethod, null, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -961,7 +1229,7 @@ export var Transformable =  __class__ ('Transformable', [object], {
 	get set_matrix_world () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -974,12 +1242,15 @@ export var Transformable =  __class__ ('Transformable', [object], {
 		}
 		else {
 		}
-		self._set_matrix_world (context, matrix);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._set_matrix_world, __accu0__, context, matrix);
+		}) ();
 	});},
 	get set_matrix_world_autokey () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -992,13 +1263,19 @@ export var Transformable =  __class__ ('Transformable', [object], {
 		}
 		else {
 		}
-		self._set_matrix_world (context, matrix);
-		self._autokey_matrix_world (context);
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._set_matrix_world, __accu0__, context, matrix);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._autokey_matrix_world, __accu0__, context);
+		}) ();
 	});},
-	get _set_matrix_world () {return __get__ (this, abc.abstractmethod (function (self, context, matrix) {
+	get _set_matrix_world () {return __get__ (this, __call__ (abc.abstractmethod, null, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1013,10 +1290,10 @@ export var Transformable =  __class__ ('Transformable', [object], {
 		}
 		// pass;
 	}));},
-	get _autokey_matrix_world () {return __get__ (this, abc.abstractmethod (function (self, context) {
+	get _autokey_matrix_world () {return __get__ (this, __call__ (abc.abstractmethod, null, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1030,10 +1307,10 @@ export var Transformable =  __class__ ('Transformable', [object], {
 		}
 		// pass;
 	}));},
-	get _my_fcurves () {return __get__ (this, abc.abstractmethod (function (self) {
+	get _my_fcurves () {return __get__ (this, __call__ (abc.abstractmethod, null, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1049,7 +1326,7 @@ export var Transformable =  __class__ ('Transformable', [object], {
 	get key_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1064,24 +1341,33 @@ export var Transformable =  __class__ ('Transformable', [object], {
 			return self._key_info_cache;
 		}
 		var keyinfo = dict ({});
-		for (var fcurve of self._my_fcurves ()) {
-			for (var kp of fcurve.keyframe_points) {
+		var __iterable0__ = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._my_fcurves, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var fcurve = __getitem__ (__iterable0__, __index0__);
+			var __iterable1__ = fcurve.keyframe_points;
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var kp = __getitem__ (__iterable1__, __index1__);
 				var frame = kp.co.x;
-				if (kp.py_metatype == 'GENERATED' && __in__ (frame, keyinfo)) {
+				if (__eq__ (kp.py_metatype, 'GENERATED') && __in__ (frame, keyinfo)) {
 					continue;
 				}
-				keyinfo [frame] = kp.py_metatype;
+				__setitem__ (keyinfo, frame, kp.py_metatype);
 			}
 		}
 		self._key_info_cache = keyinfo;
 		return keyinfo;
 	});},
 	get remove_keys_of_type () {return __get__ (this, function (self, key_type) {
-		var frame_start = float ('-inf');
-		var frame_end = float ('inf');
+		var frame_start = __call__ (float, null, '-inf');
+		var frame_end = __call__ (float, null, 'inf');
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1096,20 +1382,41 @@ export var Transformable =  __class__ ('Transformable', [object], {
 		else {
 		}
 		self._key_info_cache = null;
-		for (var fcurve of self._my_fcurves ()) {
+		var __iterable0__ = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._my_fcurves, __accu0__);
+		}) ();
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var fcurve = __getitem__ (__iterable0__, __index0__);
 			var to_remove = (function () {
 				var __accu0__ = [];
-				for (var kp of fcurve.keyframe_points) {
-					if (kp.py_metatype == key_type && (frame_start <= kp.co.x && kp.co.x <= frame_end)) {
-						__accu0__.append (kp);
+				var __iterable1__ = fcurve.keyframe_points;
+				__iterable1__ = __i__ (__iterable1__);
+				for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+					var kp = __getitem__ (__iterable1__, __index1__);
+					if (__eq__ (kp.py_metatype, key_type) && (__le__ (frame_start, kp.co.x) && __le__ (kp.co.x, frame_end))) {
+						(function () {
+							var __accu1__ = __accu0__;
+							return __call__ (__accu1__.append, __accu1__, kp);
+						}) ();
 					}
 				}
 				return __accu0__;
 			}) ();
-			for (var kp of py_reversed (to_remove)) {
-				fcurve.keyframe_points.remove (kp, __kwargtrans__ ({fast: true}));
+			var __iterable1__ = __call__ (py_reversed, null, to_remove);
+			__iterable1__ = __i__ (__iterable1__);
+			for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+				var kp = __getitem__ (__iterable1__, __index1__);
+				(function () {
+					var __accu0__ = fcurve.keyframe_points;
+					return __call__ (__accu0__.remove, __accu0__, kp, __kwargtrans__ ({fast: true}));
+				}) ();
 			}
-			fcurve.keyframe_points.handles_recalc ();
+			(function () {
+				var __accu0__ = fcurve.keyframe_points;
+				return __call__ (__accu0__.handles_recalc, __accu0__);
+			}) ();
 		}
 	});}
 }, abc.ABCMeta);
@@ -1118,7 +1425,7 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 	get __init__ () {return __get__ (this, function (self, object) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1130,13 +1437,13 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 		}
 		else {
 		}
-		__super__ (TransformableObject, '__init__') (self);
+		__call__ (__call__ (__super__, null, TransformableObject, '__init__'), null, self);
 		self.object = object;
 	});},
 	get __str__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1147,12 +1454,15 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 		}
 		else {
 		}
-		return 'TransformableObject({:s})'.format (self.object.py_name);
+		return (function () {
+			var __accu0__ = 'TransformableObject({:s})';
+			return __call__ (__accu0__.format, __accu0__, self.object.py_name);
+		}) ();
 	});},
 	get matrix_world () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1168,7 +1478,7 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 	get _set_matrix_world () {return __get__ (this, function (self, _context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1186,7 +1496,7 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 	get _autokey_matrix_world () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1198,13 +1508,16 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 		}
 		else {
 		}
-		var AutoKeying = _member ('bpy_extras.anim_utils', 'AutoKeying');
-		AutoKeying.autokey_transformation (context, self.object);
+		var AutoKeying = __call__ (_member, null, 'bpy_extras.anim_utils', 'AutoKeying');
+		(function () {
+			var __accu0__ = AutoKeying;
+			return __call__ (__accu0__.autokey_transformation, __accu0__, context, self.object);
+		}) ();
 	});},
 	get __hash__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1215,12 +1528,15 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 		}
 		else {
 		}
-		return hash (self.object.as_pointer ());
+		return __call__ (hash, null, (function () {
+			var __accu0__ = self.object;
+			return __call__ (__accu0__.as_pointer, __accu0__);
+		}) ());
 	});},
 	get _my_fcurves () {return __get__ (this, function* (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1231,7 +1547,7 @@ export var TransformableObject =  __class__ ('TransformableObject', [Transformab
 		}
 		else {
 		}
-		var cbag = _channelbag_for_id (self.object);
+		var cbag = __call__ (_channelbag_for_id, null, self.object);
 		if (!(cbag)) {
 			return ;
 		}
@@ -1242,7 +1558,7 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 	get __init__ () {return __get__ (this, function (self, pose_bone) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1254,14 +1570,14 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		}
 		else {
 		}
-		__super__ (TransformableBone, '__init__') (self);
+		__call__ (__call__ (__super__, null, TransformableBone, '__init__'), null, self);
 		self.arm_object = pose_bone.id_data;
 		self.pose_bone = pose_bone;
 	});},
 	get __str__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1272,12 +1588,15 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		}
 		else {
 		}
-		return 'TransformableBone({:s}, bone={:s})'.format (self.arm_object.py_name, self.pose_bone.py_name);
+		return (function () {
+			var __accu0__ = 'TransformableBone({:s}, bone={:s})';
+			return __call__ (__accu0__.format, __accu0__, self.arm_object.py_name, self.pose_bone.py_name);
+		}) ();
 	});},
 	get matrix_world () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1294,7 +1613,7 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 	get _set_matrix_world () {return __get__ (this, function (self, context, matrix) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1307,13 +1626,19 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		}
 		else {
 		}
-		var arm_eval = self.arm_object.evaluated_get (context.view_layer.depsgraph);
-		self.pose_bone.matrix = __matmul__ (arm_eval.matrix_world.inverted (), matrix);
+		var arm_eval = (function () {
+			var __accu0__ = self.arm_object;
+			return __call__ (__accu0__.evaluated_get, __accu0__, context.view_layer.depsgraph);
+		}) ();
+		self.pose_bone.matrix = __matmul__ ((function () {
+			var __accu0__ = arm_eval.matrix_world;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) (), matrix);
 	});},
 	get _autokey_matrix_world () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1325,13 +1650,16 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		}
 		else {
 		}
-		var AutoKeying = _member ('bpy_extras.anim_utils', 'AutoKeying');
-		AutoKeying.autokey_transformation (context, self.pose_bone);
+		var AutoKeying = __call__ (_member, null, 'bpy_extras.anim_utils', 'AutoKeying');
+		(function () {
+			var __accu0__ = AutoKeying;
+			return __call__ (__accu0__.autokey_transformation, __accu0__, context, self.pose_bone);
+		}) ();
 	});},
 	get __hash__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1342,12 +1670,15 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		}
 		else {
 		}
-		return hash (self.pose_bone.as_pointer ());
+		return __call__ (hash, null, (function () {
+			var __accu0__ = self.pose_bone;
+			return __call__ (__accu0__.as_pointer, __accu0__);
+		}) ());
 	});},
 	get _my_fcurves () {return __get__ (this, function* (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1358,13 +1689,22 @@ export var TransformableBone =  __class__ ('TransformableBone', [Transformable],
 		}
 		else {
 		}
-		var cbag = _channelbag_for_id (self.arm_object);
+		var cbag = __call__ (_channelbag_for_id, null, self.arm_object);
 		if (!(cbag)) {
 			return ;
 		}
-		var rna_prefix = self.pose_bone.path_from_id () + '.';
-		for (var fcurve of cbag.fcurves) {
-			if (fcurve.data_path.startswith (rna_prefix)) {
+		var rna_prefix = __add__ ((function () {
+			var __accu0__ = self.pose_bone;
+			return __call__ (__accu0__.path_from_id, __accu0__);
+		}) (), '.');
+		var __iterable0__ = cbag.fcurves;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var fcurve = __getitem__ (__iterable0__, __index0__);
+			if ((function () {
+				var __accu0__ = fcurve.data_path;
+				return __call__ (__accu0__.startswith, __accu0__, rna_prefix);
+			}) ()) {
 				yield fcurve;
 			}
 		}
@@ -1376,7 +1716,7 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 	get poll_message_set () {return __getcm__ (this, function (cls, message) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1388,12 +1728,12 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		}
 		else {
 		}
-		__super__ (FixToCameraCommon, 'poll_message_set') (self, message);
+		__call__ (__call__ (_super_classmethod, null, FixToCameraCommon, cls, 'poll_message_set'), null, message);
 	});},
 	get report () {return __get__ (this, function (self, level, message) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1406,12 +1746,12 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		}
 		else {
 		}
-		__super__ (FixToCameraCommon, 'report') (self, level, message);
+		__call__ (__call__ (__super__, null, FixToCameraCommon, 'report'), null, self, level, message);
 	});},
 	get _execute () {return __get__ (this, function (self, context, transformables) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1424,14 +1764,14 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		}
 		else {
 		}
-		var __except0__ = NotImplementedError ();
+		var __except0__ = __call__ (NotImplementedError, null);
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
 	get poll () {return __getcm__ (this, function (cls, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1444,15 +1784,24 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		else {
 		}
 		if (!(context.active_pose_bone) && !(context.active_object)) {
-			cls.poll_message_set ('Select an object or pose bone');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Select an object or pose bone');
+			}) ();
 			return false;
 		}
 		if (!__in__ (context.mode, new set (['POSE', 'OBJECT']))) {
-			cls.poll_message_set ('Switch to Pose or Object mode');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'Switch to Pose or Object mode');
+			}) ();
 			return false;
 		}
 		if (!(context.scene.camera)) {
-			cls.poll_message_set ('The Scene needs a camera');
+			(function () {
+				var __accu0__ = cls;
+				return __call__ (__accu0__.poll_message_set, __accu0__, 'The Scene needs a camera');
+			}) ();
 			return false;
 		}
 		return true;
@@ -1460,7 +1809,7 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1473,32 +1822,70 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		else {
 		}
 		var _match_subject = context.mode;
-		if (_match_subject == 'OBJECT') {
-			var transformables = self._transformable_objects (context);
+		if (__eq__ (_match_subject, 'OBJECT')) {
+			var transformables = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._transformable_objects, __accu0__, context);
+			}) ();
 		}
-		else if (_match_subject == 'POSE') {
-			var transformables = self._transformable_pbones (context);
+		else if (__eq__ (_match_subject, 'POSE')) {
+			var transformables = (function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._transformable_pbones, __accu0__, context);
+			}) ();
 		}
 		else if (true) {
 			var mode = _match_subject;
-			self.report (new set (['ERROR']), 'Unsupported mode: {!r}'.format (mode));
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.report, __accu0__, new set (['ERROR']), (function () {
+					var __accu1__ = 'Unsupported mode: {!r}';
+					return __call__ (__accu1__.format, __accu1__, mode);
+				}) ());
+			}) ();
 			return new set (['CANCELLED']);
 		}
 		var restore_frame = context.scene.frame_current;
 		var restore_matrices = (function () {
 			var __accu0__ = [];
-			for (var transformable of transformables) {
-				__accu0__.append (tuple ([transformable, transformable.matrix_world ().py_copy ()]));
+			var __iterable0__ = transformables;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var transformable = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, tuple ([transformable, (function () {
+						var __accu2__ = (function () {
+							var __accu3__ = transformable;
+							return __call__ (__accu3__.matrix_world, __accu3__);
+						}) ();
+						return __call__ (__accu2__.py_copy, __accu2__);
+					}) ()]));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
 		try {
-			self._execute (context, transformables);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__._execute, __accu0__, context, transformables);
+			}) ();
 		}
 		finally {
-			context.scene.frame_set (restore_frame);
-			for (var [transformable, matrix] of restore_matrices) {
-				transformable.set_matrix_world (context, matrix);
+			(function () {
+				var __accu0__ = context.scene;
+				return __call__ (__accu0__.frame_set, __accu0__, restore_frame);
+			}) ();
+			var __iterable0__ = restore_matrices;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var transformable = __left0__ [0];
+				var matrix = __left0__ [1];
+				(function () {
+					var __accu0__ = transformable;
+					return __call__ (__accu0__.set_matrix_world, __accu0__, context, matrix);
+				}) ();
 			}
 		}
 		return new set (['FINISHED']);
@@ -1506,7 +1893,7 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 	get _transformable_objects () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1520,8 +1907,14 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		}
 		return (function () {
 			var __accu0__ = [];
-			for (var ob of context.selected_editable_objects) {
-				__accu0__.append (TransformableObject (__kwargtrans__ ({object: ob})));
+			var __iterable0__ = context.selected_editable_objects;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var ob = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (TransformableObject, null, __kwargtrans__ ({object: ob})));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -1529,7 +1922,7 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 	get _transformable_pbones () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1543,8 +1936,14 @@ export var FixToCameraCommon =  __class__ ('FixToCameraCommon', [object], {
 		}
 		return (function () {
 			var __accu0__ = [];
-			for (var bone of context.selected_pose_bones) {
-				__accu0__.append (TransformableBone (__kwargtrans__ ({pose_bone: bone})));
+			var __iterable0__ = context.selected_pose_bones;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var bone = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __call__ (TransformableBone, null, __kwargtrans__ ({pose_bone: bone})));
+				}) ();
 			}
 			return __accu0__;
 		}) ();
@@ -1559,7 +1958,7 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 	get _get_matrices () {return __get__ (this, function (self, camera, transformables) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1572,11 +1971,23 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 		}
 		else {
 		}
-		var camera_mat_inv = camera.matrix_world.inverted ();
+		var camera_mat_inv = (function () {
+			var __accu0__ = camera.matrix_world;
+			return __call__ (__accu0__.inverted, __accu0__);
+		}) ();
 		return (function () {
 			var __accu0__ = [];
-			for (var t of transformables) {
-				__accu0__.append ([t, __matmul__ (camera_mat_inv, t.matrix_world ())]);
+			var __iterable0__ = transformables;
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var t = __getitem__ (__iterable0__, __index0__);
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, [t, __matmul__ (camera_mat_inv, (function () {
+						var __accu2__ = t;
+						return __call__ (__accu2__.matrix_world, __accu2__);
+					}) ())]);
+				}) ();
 			}
 			return dict (__accu0__);
 		}) ();
@@ -1584,7 +1995,7 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 	get _execute () {return __get__ (this, function (self, context, transformables) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1597,14 +2008,23 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 		}
 		else {
 		}
-		var AutoKeying = _member ('bpy_extras.anim_utils', 'AutoKeying');
-		var progress_report = _member ('bpy_extras.wm_utils', 'progress_report');
+		var AutoKeying = __call__ (_member, null, 'bpy_extras.anim_utils', 'AutoKeying');
+		var progress_report = __call__ (_member, null, 'bpy_extras.wm_utils', 'progress_report');
 		var depsgraph = context.view_layer.depsgraph;
 		var scene = context.scene;
-		scene.frame_set (scene.frame_start);
-		var camera_eval = scene.camera.evaluated_get (depsgraph);
+		(function () {
+			var __accu0__ = scene;
+			return __call__ (__accu0__.frame_set, __accu0__, scene.frame_start);
+		}) ();
+		var camera_eval = (function () {
+			var __accu0__ = scene.camera;
+			return __call__ (__accu0__.evaluated_get, __accu0__, depsgraph);
+		}) ();
 		var last_camera_name = scene.camera.py_name;
-		var matrices = self._get_matrices (camera_eval, transformables);
+		var matrices = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__._get_matrices, __accu0__, camera_eval, transformables);
+		}) ();
 		if (scene.use_preview_range) {
 			var frame_start = scene.frame_preview_start;
 			var frame_end = scene.frame_preview_end;
@@ -1613,32 +2033,79 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 			var frame_start = scene.frame_start;
 			var frame_end = scene.frame_end;
 		}
-		var __withid0__ = AutoKeying.options (__kwargtrans__ ({keytype: self.keytype, use_loc: self.use_location, use_rot: self.use_rotation, use_scale: self.use_scale, force_autokey: true}));
+		var __withid0__ = (function () {
+			var __accu0__ = AutoKeying;
+			return __call__ (__accu0__.options, __accu0__, __kwargtrans__ ({keytype: self.keytype, use_loc: self.use_location, use_rot: self.use_rotation, use_scale: self.use_scale, force_autokey: true}));
+		}) ();
 		try {
 			__withid0__.__enter__ ();
-			var progress = progress_report.ProgressReport (context.window_manager);
+			var progress = (function () {
+				var __accu0__ = progress_report;
+				return __call__ (__accu0__.ProgressReport, __accu0__, context.window_manager);
+			}) ();
 			try {
 				progress.__enter__ ();
-				var frames_to_visit = range (frame_start, frame_end + scene.frame_step, scene.frame_step);
-				progress.enter_substeps (len (frames_to_visit));
-				for (var frame of frames_to_visit) {
-					scene.frame_set (frame);
-					progress.step ();
-					var camera_eval = scene.camera.evaluated_get (depsgraph);
+				var frames_to_visit = __call__ (range, null, frame_start, __add__ (frame_end, scene.frame_step), scene.frame_step);
+				(function () {
+					var __accu0__ = progress;
+					return __call__ (__accu0__.enter_substeps, __accu0__, __call__ (len, null, frames_to_visit));
+				}) ();
+				var __iterable0__ = frames_to_visit;
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var frame = __getitem__ (__iterable0__, __index0__);
+					(function () {
+						var __accu0__ = scene;
+						return __call__ (__accu0__.frame_set, __accu0__, frame);
+					}) ();
+					(function () {
+						var __accu0__ = progress;
+						return __call__ (__accu0__.step, __accu0__);
+					}) ();
+					var camera_eval = (function () {
+						var __accu0__ = scene.camera;
+						return __call__ (__accu0__.evaluated_get, __accu0__, depsgraph);
+					}) ();
 					var cam_matrix_world = camera_eval.matrix_world;
-					var camera_mat_inv = cam_matrix_world.inverted ();
-					if (scene.camera.py_name != last_camera_name) {
-						var matrices = self._get_matrices (camera_eval, transformables);
+					var camera_mat_inv = (function () {
+						var __accu0__ = cam_matrix_world;
+						return __call__ (__accu0__.inverted, __accu0__);
+					}) ();
+					if (__ne__ (scene.camera.py_name, last_camera_name)) {
+						var matrices = (function () {
+							var __accu0__ = self;
+							return __call__ (__accu0__._get_matrices, __accu0__, camera_eval, transformables);
+						}) ();
 						var last_camera_name = scene.camera.py_name;
 					}
-					for (var [t, camera_rel_matrix] of matrices.py_items ()) {
-						var key_info = t.key_info ();
-						var key_type = key_info.py_get (frame, '');
+					var __iterable1__ = (function () {
+						var __accu0__ = matrices;
+						return __call__ (__accu0__.py_items, __accu0__);
+					}) ();
+					__iterable1__ = __i__ (__iterable1__);
+					for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+						var __left0__ = __getitem__ (__iterable1__, __index1__);
+						var t = __left0__ [0];
+						var camera_rel_matrix = __left0__ [1];
+						var key_info = (function () {
+							var __accu0__ = t;
+							return __call__ (__accu0__.key_info, __accu0__);
+						}) ();
+						var key_type = (function () {
+							var __accu0__ = key_info;
+							return __call__ (__accu0__.py_get, __accu0__, frame, '');
+						}) ();
 						if (!__in__ (key_type, new set ([self.keytype, '']))) {
-							matrices [t] = __matmul__ (camera_mat_inv, t.matrix_world ());
+							__setitem__ (matrices, t, __matmul__ (camera_mat_inv, (function () {
+								var __accu0__ = t;
+								return __call__ (__accu0__.matrix_world, __accu0__);
+							}) ()));
 							continue;
 						}
-						t.set_matrix_world_autokey (context, __matmul__ (cam_matrix_world, camera_rel_matrix));
+						(function () {
+							var __accu0__ = t;
+							return __call__ (__accu0__.set_matrix_world_autokey, __accu0__, context, __matmul__ (cam_matrix_world, camera_rel_matrix));
+						}) ();
 					}
 				}
 				progress.__exit__ ();
@@ -1657,7 +2124,16 @@ export var OBJECT_OT_fix_to_camera =  __class__ ('OBJECT_OT_fix_to_camera', [Fix
 		}
 	});}
 });
-OBJECT_OT_fix_to_camera.__annotations__ = dict ({'use_location': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Location', description: 'Create Location keys when fixing to the scene camera', py_default: true})), 'use_rotation': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Rotation', description: 'Create Rotation keys when fixing to the scene camera', py_default: true})), 'use_scale': bpy.props.BoolProperty (__kwargtrans__ ({py_name: 'Scale', description: 'Create Scale keys when fixing to the scene camera', py_default: true}))});
+OBJECT_OT_fix_to_camera.__annotations__ = dict ({'use_location': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.BoolProperty, __accu0__, __kwargtrans__ ({py_name: 'Location', description: 'Create Location keys when fixing to the scene camera', py_default: true}));
+}) (), 'use_rotation': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.BoolProperty, __accu0__, __kwargtrans__ ({py_name: 'Rotation', description: 'Create Rotation keys when fixing to the scene camera', py_default: true}));
+}) (), 'use_scale': (function () {
+	var __accu0__ = bpy.props;
+	return __call__ (__accu0__.BoolProperty, __accu0__, __kwargtrans__ ({py_name: 'Scale', description: 'Create Scale keys when fixing to the scene camera', py_default: true}));
+}) ()});
 export var OBJECT_OT_delete_fix_to_camera_keys =  __class__ ('OBJECT_OT_delete_fix_to_camera_keys', [Operator, FixToCameraCommon], {
 	__module__: __name__,
 	bl_idname: 'object.delete_fix_to_camera_keys',
@@ -1667,7 +2143,7 @@ export var OBJECT_OT_delete_fix_to_camera_keys =  __class__ ('OBJECT_OT_delete_f
 	get _execute () {return __get__ (this, function (self, context, transformables) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -1689,16 +2165,22 @@ export var OBJECT_OT_delete_fix_to_camera_keys =  __class__ ('OBJECT_OT_delete_f
 			var frame_start = scene.frame_start;
 			var frame_end = scene.frame_end;
 		}
-		for (var t of transformables) {
-			t.remove_keys_of_type (self.keytype, __kwargtrans__ ({frame_start: frame_start, frame_end: frame_end}));
+		var __iterable0__ = transformables;
+		__iterable0__ = __i__ (__iterable0__);
+		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+			var t = __getitem__ (__iterable0__, __index0__);
+			(function () {
+				var __accu0__ = t;
+				return __call__ (__accu0__.remove_keys_of_type, __accu0__, self.keytype, __kwargtrans__ ({frame_start: frame_start, frame_end: frame_end}));
+			}) ();
 		}
 	});}
 });
-export var _msgbus_owner = _new_object ();
+export var _msgbus_owner = __call__ (_new_object, null);
 export var _refresh_3d_panels = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1707,12 +2189,21 @@ export var _refresh_3d_panels = function () {
 	else {
 	}
 	var refresh_area_types = new set (['VIEW_3D']);
-	for (var win of bpy.context.window_manager.windows) {
-		for (var area of win.screen.areas) {
+	var __iterable0__ = bpy.context.window_manager.windows;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var win = __getitem__ (__iterable0__, __index0__);
+		var __iterable1__ = win.screen.areas;
+		__iterable1__ = __i__ (__iterable1__);
+		for (var __index1__ = 0; __index1__ < len (__iterable1__); __index1__++) {
+			var area = __getitem__ (__iterable1__, __index1__);
 			if (!__in__ (area.py_metatype, refresh_area_types)) {
 				continue;
 			}
-			area.tag_redraw ();
+			(function () {
+				var __accu0__ = area;
+				return __call__ (__accu0__.tag_redraw, __accu0__);
+			}) ();
 		}
 	}
 };
@@ -1720,7 +2211,7 @@ export var classes = tuple ([OBJECT_OT_copy_global_transform, OBJECT_OT_copy_rel
 export var _register_message_bus = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1728,12 +2219,15 @@ export var _register_message_bus = function () {
 	}
 	else {
 	}
-	bpy.msgbus.subscribe_rna (__kwargtrans__ ({key: tuple ([bpy.types.ToolSettings, 'use_keyframe_insert_auto']), owner: _msgbus_owner, args: tuple ([]), notify: _refresh_3d_panels, options: new set (['PERSISTENT'])}));
+	(function () {
+		var __accu0__ = bpy.msgbus;
+		return __call__ (__accu0__.subscribe_rna, __accu0__, __kwargtrans__ ({key: tuple ([bpy.types.ToolSettings, 'use_keyframe_insert_auto']), owner: _msgbus_owner, args: tuple ([]), notify: _refresh_3d_panels, options: new set (['PERSISTENT'])}));
+	}) ();
 };
 export var _unregister_message_bus = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1741,12 +2235,15 @@ export var _unregister_message_bus = function () {
 	}
 	else {
 	}
-	bpy.msgbus.clear_by_owner (_msgbus_owner);
+	(function () {
+		var __accu0__ = bpy.msgbus;
+		return __call__ (__accu0__.clear_by_owner, __accu0__, _msgbus_owner);
+	}) ();
 };
-export var _on_blendfile_load_post = bpy.app.handlers.persistent (function (_none, _other_none) {
+export var _on_blendfile_load_post = __call__ (bpy.app.handlers.persistent, null, function (_none, _other_none) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -1758,12 +2255,12 @@ export var _on_blendfile_load_post = bpy.app.handlers.persistent (function (_non
 	}
 	else {
 	}
-	_register_message_bus ();
+	__call__ (_register_message_bus, null);
 });
 export var register = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1771,12 +2268,15 @@ export var register = function () {
 	}
 	else {
 	}
-	bpy.app.handlers.load_post.append (_on_blendfile_load_post);
+	(function () {
+		var __accu0__ = bpy.app.handlers.load_post;
+		return __call__ (__accu0__.append, __accu0__, _on_blendfile_load_post);
+	}) ();
 };
 export var unregister = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -1784,9 +2284,55 @@ export var unregister = function () {
 	}
 	else {
 	}
-	_unregister_message_bus ();
-	bpy.app.handlers.load_post.remove (_on_blendfile_load_post);
+	__call__ (_unregister_message_bus, null);
+	(function () {
+		var __accu0__ = bpy.app.handlers.load_post;
+		return __call__ (__accu0__.remove, __accu0__, _on_blendfile_load_post);
+	}) ();
 };
 
 //# sourceMappingURL=bl_operators.copy_global_transform.map
 export {ActionChannelbag, Any, Camera, Context, ID, Iterable, Matrix, Object, Operator, Optional, PoseBone, TypeAlias, _globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '_axis_enum_items': _axis_enum_items = value; break;
+		case 'KeyInfo': KeyInfo = value; break;
+		case 'get_matrix': get_matrix = value; break;
+		case 'set_matrix': set_matrix = value; break;
+		case '_channelbag_for_id': _channelbag_for_id = value; break;
+		case '_selected_keyframes': _selected_keyframes = value; break;
+		case '_selected_keyframes_for_bone': _selected_keyframes_for_bone = value; break;
+		case '_selected_keyframes_for_object': _selected_keyframes_for_object = value; break;
+		case '_selected_keyframes_for_action_slot': _selected_keyframes_for_action_slot = value; break;
+		case '_copy_matrix_to_clipboard': _copy_matrix_to_clipboard = value; break;
+		case 'OBJECT_OT_copy_global_transform': OBJECT_OT_copy_global_transform = value; break;
+		case 'get_relative_ob': get_relative_ob = value; break;
+		case 'OBJECT_OT_copy_relative_transform': OBJECT_OT_copy_relative_transform = value; break;
+		case 'UnableToMirrorError': UnableToMirrorError = value; break;
+		case '_OBJECT_OT_paste_transform__method_items': _OBJECT_OT_paste_transform__method_items = value; break;
+		case 'OBJECT_OT_paste_transform': OBJECT_OT_paste_transform = value; break;
+		case 'Transformable': Transformable = value; break;
+		case 'TransformableObject': TransformableObject = value; break;
+		case 'TransformableBone': TransformableBone = value; break;
+		case 'FixToCameraCommon': FixToCameraCommon = value; break;
+		case 'OBJECT_OT_fix_to_camera': OBJECT_OT_fix_to_camera = value; break;
+		case 'OBJECT_OT_delete_fix_to_camera_keys': OBJECT_OT_delete_fix_to_camera_keys = value; break;
+		case '_msgbus_owner': _msgbus_owner = value; break;
+		case '_refresh_3d_panels': _refresh_3d_panels = value; break;
+		case 'classes': classes = value; break;
+		case '_register_message_bus': _register_message_bus = value; break;
+		case '_unregister_message_bus': _unregister_message_bus = value; break;
+		case '_on_blendfile_load_post': _on_blendfile_load_post = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

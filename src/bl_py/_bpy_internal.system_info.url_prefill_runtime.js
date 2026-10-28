@@ -8,7 +8,7 @@ export var __all__ = tuple (['url_from_blender']);
 export var url_from_blender = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -16,27 +16,87 @@ export var url_from_blender = function () {
 	}
 	else {
 	}
-	var bpy = _module ('bpy');
-	var gpu = _module ('gpu');
-	var struct = _module ('struct');
-	var platform = _module ('platform');
-	var urllib = _module ('urllib');
+	var bpy = __call__ (_module, null, 'bpy');
+	var gpu = __call__ (_module, null, 'gpu');
+	var struct = __call__ (_module, null, 'struct');
+	var platform = __call__ (_module, null, 'platform');
+	var urllib = __call__ (_module, null, 'urllib');
 	var query_params = dict ({'type': 'bug_report', 'project': 'blender'});
-	query_params ['os'] = '{:s} {:d} Bits'.format (platform.platform (), struct.calcsize ('P') * 8);
-	var _ghost_backend = _member ('_bpy', '_ghost_backend');
-	var ghost_backend = _ghost_backend ();
+	__setitem__ (query_params, 'os', (function () {
+		var __accu0__ = '{:s} {:d} Bits';
+		return __call__ (__accu0__.format, __accu0__, (function () {
+			var __accu1__ = platform;
+			return __call__ (__accu1__.platform, __accu1__);
+		}) (), __mul__ ((function () {
+			var __accu1__ = struct;
+			return __call__ (__accu1__.calcsize, __accu1__, 'P');
+		}) (), 8));
+	}) ());
+	var _ghost_backend = __call__ (_member, null, '_bpy', '_ghost_backend');
+	var ghost_backend = __call__ (_ghost_backend, null);
 	if (!__in__ (ghost_backend, new set (['NONE', 'DEFAULT']))) {
-		query_params ['os'] += ', {:s} UI'.format (ghost_backend);
+		__setitem__ (query_params, 'os', __call__ (__iadd__, null, __getitem__ (query_params, 'os'), (function () {
+			var __accu0__ = ', {:s} UI';
+			return __call__ (__accu0__.format, __accu0__, ghost_backend);
+		}) ()));
 	}
-	query_params ['gpu'] = '{:s} {:s} {:s}'.format (gpu.platform.renderer_get (), gpu.platform.vendor_get (), gpu.platform.version_get ());
-	var gpu_backend = gpu.platform.backend_type_get ();
+	// pass;
+	__setitem__ (query_params, 'gpu', (function () {
+		var __accu0__ = '{:s} {:s} {:s}';
+		return __call__ (__accu0__.format, __accu0__, (function () {
+			var __accu1__ = gpu.platform;
+			return __call__ (__accu1__.renderer_get, __accu1__);
+		}) (), (function () {
+			var __accu1__ = gpu.platform;
+			return __call__ (__accu1__.vendor_get, __accu1__);
+		}) (), (function () {
+			var __accu1__ = gpu.platform;
+			return __call__ (__accu1__.version_get, __accu1__);
+		}) ());
+	}) ());
+	var gpu_backend = (function () {
+		var __accu0__ = gpu.platform;
+		return __call__ (__accu0__.backend_type_get, __accu0__);
+	}) ();
 	if (!__in__ (gpu_backend, new set (['NONE', 'UNKNOWN', 'METAL']))) {
-		query_params ['gpu'] += ' {:s} Backend'.format (gpu_backend.title ());
+		__setitem__ (query_params, 'gpu', __call__ (__iadd__, null, __getitem__ (query_params, 'gpu'), (function () {
+			var __accu0__ = ' {:s} Backend';
+			return __call__ (__accu0__.format, __accu0__, (function () {
+				var __accu1__ = gpu_backend;
+				return __call__ (__accu1__.title, __accu1__);
+			}) ());
+		}) ()));
 	}
-	query_params ['broken_version'] = '{:s}, branch: {:s}, commit date: {:s} {:s}, hash: `{:s}`'.format (bpy.app.version_string, bpy.app.build_branch.decode ('utf-8', 'replace'), bpy.app.build_commit_date.decode ('utf-8', 'replace'), bpy.app.build_commit_time.decode ('utf-8', 'replace'), bpy.app.build_hash.decode ('ascii'));
-	var query_str = urllib.parse.urlencode (query_params);
-	return 'https://redirect.blender.org/?' + query_str;
+	__setitem__ (query_params, 'broken_version', (function () {
+		var __accu0__ = '{:s}, branch: {:s}, commit date: {:s} {:s}, hash: `{:s}`';
+		return __call__ (__accu0__.format, __accu0__, bpy.app.version_string, (function () {
+			var __accu1__ = bpy.app.build_branch;
+			return __call__ (__accu1__.decode, __accu1__, 'utf-8', 'replace');
+		}) (), (function () {
+			var __accu1__ = bpy.app.build_commit_date;
+			return __call__ (__accu1__.decode, __accu1__, 'utf-8', 'replace');
+		}) (), (function () {
+			var __accu1__ = bpy.app.build_commit_time;
+			return __call__ (__accu1__.decode, __accu1__, 'utf-8', 'replace');
+		}) (), (function () {
+			var __accu1__ = bpy.app.build_hash;
+			return __call__ (__accu1__.decode, __accu1__, 'ascii');
+		}) ());
+	}) ());
+	var query_str = (function () {
+		var __accu0__ = urllib.parse;
+		return __call__ (__accu0__.urlencode, __accu0__, query_params);
+	}) ();
+	return __add__ ('https://redirect.blender.org/?', query_str);
 };
 
 //# sourceMappingURL=_bpy_internal.system_info.url_prefill_runtime.map
 export {_globals, _import, _lazy, _member, _module};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case 'url_from_blender': url_from_blender = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

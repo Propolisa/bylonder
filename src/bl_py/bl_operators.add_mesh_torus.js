@@ -14,7 +14,7 @@ var __name__ = 'bl_operators.add_mesh_torus';
 export var add_torus = function (major_rad, minor_rad, major_seg, minor_seg) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -28,43 +28,52 @@ export var add_torus = function (major_rad, minor_rad, major_seg, minor_seg) {
 	}
 	else {
 	}
-	var cos = _member ('math', 'cos');
-	var sin = _member ('math', 'sin');
-	var pi = _member ('math', 'pi');
-	var Vector = _member ('mathutils', 'Vector');
-	var Matrix = _member ('mathutils', 'Matrix');
-	var pi_2 = pi * 2.0;
+	var cos = __call__ (_member, null, 'math', 'cos');
+	var sin = __call__ (_member, null, 'math', 'sin');
+	var pi = __call__ (_member, null, 'math', 'pi');
+	var Vector = __call__ (_member, null, 'mathutils', 'Vector');
+	var Matrix = __call__ (_member, null, 'mathutils', 'Matrix');
+	var pi_2 = __mul__ (pi, 2.0);
 	var verts = [];
 	var faces = [];
 	var i1 = 0;
-	var tot_verts = major_seg * minor_seg;
+	var tot_verts = __mul__ (major_seg, minor_seg);
 	for (var major_index = 0; major_index < major_seg; major_index++) {
-		var matrix = Matrix.Rotation ((major_index / major_seg) * pi_2, 3, 'Z');
+		var matrix = (function () {
+			var __accu0__ = Matrix;
+			return __call__ (__accu0__.Rotation, __accu0__, __mul__ (__truediv__ (major_index, major_seg), pi_2), 3, 'Z');
+		}) ();
 		for (var minor_index = 0; minor_index < minor_seg; minor_index++) {
-			var angle = (pi_2 * minor_index) / minor_seg;
-			var vec = __matmul__ (matrix, Vector (tuple ([major_rad + cos (angle) * minor_rad, 0.0, sin (angle) * minor_rad])));
-			verts.extend (vec.__getslice__ (null, null, 1));
-			if (minor_index + 1 == minor_seg) {
-				var i2 = major_index * minor_seg;
-				var i3 = i1 + minor_seg;
-				var i4 = i2 + minor_seg;
+			var angle = __truediv__ (__mul__ (pi_2, minor_index), minor_seg);
+			var vec = __matmul__ (matrix, __call__ (Vector, null, tuple ([__add__ (major_rad, __mul__ (__call__ (cos, null, angle), minor_rad)), 0.0, __mul__ (__call__ (sin, null, angle), minor_rad)])));
+			(function () {
+				var __accu0__ = verts;
+				return __call__ (__accu0__.extend, __accu0__, __getslice__ (vec, null, null, 1));
+			}) ();
+			if (__eq__ (__add__ (minor_index, 1), minor_seg)) {
+				var i2 = __mul__ (major_index, minor_seg);
+				var i3 = __add__ (i1, minor_seg);
+				var i4 = __add__ (i2, minor_seg);
 			}
 			else {
-				var i2 = i1 + 1;
-				var i3 = i1 + minor_seg;
-				var i4 = i3 + 1;
+				var i2 = __add__ (i1, 1);
+				var i3 = __add__ (i1, minor_seg);
+				var i4 = __add__ (i3, 1);
 			}
-			if (i2 >= tot_verts) {
-				var i2 = i2 - tot_verts;
+			if (__ge__ (i2, tot_verts)) {
+				var i2 = __sub__ (i2, tot_verts);
 			}
-			if (i3 >= tot_verts) {
-				var i3 = i3 - tot_verts;
+			if (__ge__ (i3, tot_verts)) {
+				var i3 = __sub__ (i3, tot_verts);
 			}
-			if (i4 >= tot_verts) {
-				var i4 = i4 - tot_verts;
+			if (__ge__ (i4, tot_verts)) {
+				var i4 = __sub__ (i4, tot_verts);
 			}
-			faces.extend ([i1, i3, i4, i2]);
-			i1++;
+			(function () {
+				var __accu0__ = faces;
+				return __call__ (__accu0__.extend, __accu0__, [i1, i3, i4, i2]);
+			}) ();
+			var i1 = __call__ (__iadd__, null, i1, 1);
 		}
 	}
 	return tuple ([verts, faces]);
@@ -72,7 +81,7 @@ export var add_torus = function (major_rad, minor_rad, major_seg, minor_seg) {
 export var add_uvs = function (mesh, minor_seg, major_seg) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -85,44 +94,47 @@ export var add_uvs = function (mesh, minor_seg, major_seg) {
 	}
 	else {
 	}
-	var fmod = _member ('math', 'fmod');
-	mesh.uv_layers.py_new ();
+	var fmod = __call__ (_member, null, 'math', 'fmod');
+	(function () {
+		var __accu0__ = mesh.uv_layers;
+		return __call__ (__accu0__.py_new, __accu0__);
+	}) ();
 	var uv_data = mesh.uv_layers.active.data;
 	var polygons = mesh.polygons;
-	var u_step = 1.0 / major_seg;
-	var v_step = 1.0 / minor_seg;
-	var u_init = 0.5 + fmod (0.5, u_step);
-	var v_init = 0.5 + fmod (0.5, v_step);
-	var u_wrap = 1.0 - u_step / 2.0;
-	var v_wrap = 1.0 - v_step / 2.0;
+	var u_step = __truediv__ (1.0, major_seg);
+	var v_step = __truediv__ (1.0, minor_seg);
+	var u_init = __add__ (0.5, __call__ (fmod, null, 0.5, u_step));
+	var v_init = __add__ (0.5, __call__ (fmod, null, 0.5, v_step));
+	var u_wrap = __sub__ (1.0, __truediv__ (u_step, 2.0));
+	var v_wrap = __sub__ (1.0, __truediv__ (v_step, 2.0));
 	var vertex_index = 0;
 	var u_prev = u_init;
-	var u_next = u_prev + u_step;
+	var u_next = __add__ (u_prev, u_step);
 	for (var _major_index = 0; _major_index < major_seg; _major_index++) {
 		var v_prev = v_init;
-		var v_next = v_prev + v_step;
+		var v_next = __add__ (v_prev, v_step);
 		for (var _minor_index = 0; _minor_index < minor_seg; _minor_index++) {
-			var loops = polygons [vertex_index].loop_indices;
-			uv_data [loops [0]].uv = tuple ([u_prev, v_prev]);
-			uv_data [loops [1]].uv = tuple ([u_next, v_prev]);
-			uv_data [loops [3]].uv = tuple ([u_prev, v_next]);
-			uv_data [loops [2]].uv = tuple ([u_next, v_next]);
-			if (v_next > v_wrap) {
-				var v_prev = v_next - 1.0;
+			var loops = __getitem__ (polygons, vertex_index).loop_indices;
+			__getitem__ (uv_data, __getitem__ (loops, 0)).uv = tuple ([u_prev, v_prev]);
+			__getitem__ (uv_data, __getitem__ (loops, 1)).uv = tuple ([u_next, v_prev]);
+			__getitem__ (uv_data, __getitem__ (loops, 3)).uv = tuple ([u_prev, v_next]);
+			__getitem__ (uv_data, __getitem__ (loops, 2)).uv = tuple ([u_next, v_next]);
+			if (__gt__ (v_next, v_wrap)) {
+				var v_prev = __sub__ (v_next, 1.0);
 			}
 			else {
 				var v_prev = v_next;
 			}
-			var v_next = v_prev + v_step;
-			vertex_index++;
+			var v_next = __add__ (v_prev, v_step);
+			var vertex_index = __call__ (__iadd__, null, vertex_index, 1);
 		}
-		if (u_next > u_wrap) {
-			var u_prev = u_next - 1.0;
+		if (__gt__ (u_next, u_wrap)) {
+			var u_prev = __sub__ (u_next, 1.0);
 		}
 		else {
 			var u_prev = u_next;
 		}
-		var u_next = u_prev + u_step;
+		var u_next = __add__ (u_prev, u_step);
 	}
 };
 export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectHelper], {
@@ -133,7 +145,7 @@ export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectH
 	get mode_update_callback () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -145,15 +157,15 @@ export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectH
 		}
 		else {
 		}
-		if (self.mode == 'EXT_INT') {
-			self.abso_major_rad = self.major_radius + self.minor_radius;
-			self.abso_minor_rad = self.major_radius - self.minor_radius;
+		if (__eq__ (self.mode, 'EXT_INT')) {
+			self.abso_major_rad = __add__ (self.major_radius, self.minor_radius);
+			self.abso_minor_rad = __sub__ (self.major_radius, self.minor_radius);
 		}
 	});},
 	get draw () {return __get__ (this, function (self, _context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -168,29 +180,71 @@ export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectH
 		var layout = self.layout;
 		layout.use_property_split = true;
 		layout.use_property_decorate = false;
-		layout.separator ();
-		layout.prop (self, 'major_segments');
-		layout.prop (self, 'minor_segments');
-		layout.separator ();
-		layout.prop (self, 'mode');
-		if (self.mode == 'MAJOR_MINOR') {
-			layout.prop (self, 'major_radius');
-			layout.prop (self, 'minor_radius');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'major_segments');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'minor_segments');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'mode');
+		}) ();
+		if (__eq__ (self.mode, 'MAJOR_MINOR')) {
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, self, 'major_radius');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, self, 'minor_radius');
+			}) ();
 		}
 		else {
-			layout.prop (self, 'abso_major_rad');
-			layout.prop (self, 'abso_minor_rad');
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, self, 'abso_major_rad');
+			}) ();
+			(function () {
+				var __accu0__ = layout;
+				return __call__ (__accu0__.prop, __accu0__, self, 'abso_minor_rad');
+			}) ();
 		}
-		layout.separator ();
-		layout.prop (self, 'generate_uvs');
-		layout.prop (self, 'align');
-		layout.prop (self, 'location');
-		layout.prop (self, 'rotation');
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'generate_uvs');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'align');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'location');
+		}) ();
+		(function () {
+			var __accu0__ = layout;
+			return __call__ (__accu0__.prop, __accu0__, self, 'rotation');
+		}) ();
 	});},
 	get invoke () {return __get__ (this, function (self, context, _event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -203,13 +257,19 @@ export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectH
 		}
 		else {
 		}
-		object_utils.object_add_grid_scale_apply_operator (self, context);
-		return self.execute (context);
+		(function () {
+			var __accu0__ = object_utils;
+			return __call__ (__accu0__.object_add_grid_scale_apply_operator, __accu0__, self, context);
+		}) ();
+		return (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.execute, __accu0__, context);
+		}) ();
 	});},
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -221,34 +281,74 @@ export var AddTorus =  __class__ ('AddTorus', [Operator, object_utils.AddObjectH
 		}
 		else {
 		}
-		if (self.mode == 'EXT_INT') {
-			var extra_helper = (self.abso_major_rad - self.abso_minor_rad) * 0.5;
-			self.major_radius = self.abso_minor_rad + extra_helper;
+		if (__eq__ (self.mode, 'EXT_INT')) {
+			var extra_helper = __mul__ (__sub__ (self.abso_major_rad, self.abso_minor_rad), 0.5);
+			self.major_radius = __add__ (self.abso_minor_rad, extra_helper);
 			self.minor_radius = extra_helper;
 		}
-		var __left0__ = add_torus (self.major_radius, self.minor_radius, self.major_segments, self.minor_segments);
+		var __left0__ = __call__ (add_torus, null, self.major_radius, self.minor_radius, self.major_segments, self.minor_segments);
 		var verts_loc = __left0__ [0];
 		var faces = __left0__ [1];
-		var mesh = bpy.data.meshes.py_new (data_ ('Torus'));
-		mesh.vertices.add (Math.floor (len (verts_loc) / 3));
-		var nbr_loops = len (faces);
-		var nbr_polys = Math.floor (nbr_loops / 4);
-		mesh.loops.add (nbr_loops);
-		mesh.polygons.add (nbr_polys);
-		mesh.vertices.foreach_set ('co', verts_loc);
-		mesh.polygons.foreach_set ('loop_start', range (0, nbr_loops, 4));
-		mesh.loops.foreach_set ('vertex_index', faces);
-		mesh.shade_flat ();
+		var mesh = (function () {
+			var __accu0__ = bpy.data.meshes;
+			return __call__ (__accu0__.py_new, __accu0__, __call__ (data_, null, 'Torus'));
+		}) ();
+		(function () {
+			var __accu0__ = mesh.vertices;
+			return __call__ (__accu0__.add, __accu0__, __floordiv__ (__call__ (len, null, verts_loc), 3));
+		}) ();
+		var nbr_loops = __call__ (len, null, faces);
+		var nbr_polys = __floordiv__ (nbr_loops, 4);
+		(function () {
+			var __accu0__ = mesh.loops;
+			return __call__ (__accu0__.add, __accu0__, nbr_loops);
+		}) ();
+		(function () {
+			var __accu0__ = mesh.polygons;
+			return __call__ (__accu0__.add, __accu0__, nbr_polys);
+		}) ();
+		(function () {
+			var __accu0__ = mesh.vertices;
+			return __call__ (__accu0__.foreach_set, __accu0__, 'co', verts_loc);
+		}) ();
+		(function () {
+			var __accu0__ = mesh.polygons;
+			return __call__ (__accu0__.foreach_set, __accu0__, 'loop_start', __call__ (range, null, 0, nbr_loops, 4));
+		}) ();
+		(function () {
+			var __accu0__ = mesh.loops;
+			return __call__ (__accu0__.foreach_set, __accu0__, 'vertex_index', faces);
+		}) ();
+		(function () {
+			var __accu0__ = mesh;
+			return __call__ (__accu0__.shade_flat, __accu0__);
+		}) ();
 		if (self.generate_uvs) {
-			add_uvs (mesh, self.minor_segments, self.major_segments);
+			__call__ (add_uvs, null, mesh, self.minor_segments, self.major_segments);
 		}
-		mesh.py_update ();
-		object_utils.object_data_add (context, mesh, __kwargtrans__ ({operator: self}));
+		(function () {
+			var __accu0__ = mesh;
+			return __call__ (__accu0__.py_update, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = object_utils;
+			return __call__ (__accu0__.object_data_add, __accu0__, context, mesh, __kwargtrans__ ({operator: self}));
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
-AddTorus.__annotations__ = dict ({'major_segments': IntProperty (__kwargtrans__ ({py_name: 'Major Segments', description: 'Number of segments for the main ring of the torus', min: 3, max: 256, py_default: 48})), 'minor_segments': IntProperty (__kwargtrans__ ({py_name: 'Minor Segments', description: 'Number of segments for the minor ring of the torus', min: 3, max: 256, py_default: 12})), 'mode': EnumProperty (__kwargtrans__ ({py_name: 'Dimensions Mode', py_items: tuple ([tuple (['MAJOR_MINOR', 'Major/Minor', 'Use the major/minor radii for torus dimensions']), tuple (['EXT_INT', 'Exterior/Interior', 'Use the exterior/interior radii for torus dimensions'])]), py_update: AddTorus.mode_update_callback})), 'major_radius': FloatProperty (__kwargtrans__ ({py_name: 'Major Radius', description: 'Radius from the origin to the center of the cross sections', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.0, subtype: 'DISTANCE', unit: 'LENGTH'})), 'minor_radius': FloatProperty (__kwargtrans__ ({py_name: 'Minor Radius', description: "Radius of the torus's cross section", soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_major_rad': FloatProperty (__kwargtrans__ ({py_name: 'Exterior Radius', description: 'Total Exterior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_minor_rad': FloatProperty (__kwargtrans__ ({py_name: 'Interior Radius', description: 'Total Interior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.75, subtype: 'DISTANCE', unit: 'LENGTH'})), 'generate_uvs': BoolProperty (__kwargtrans__ ({py_name: 'Generate UVs', description: 'Generate a default UV map', py_default: true}))});
+AddTorus.__annotations__ = dict ({'major_segments': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Major Segments', description: 'Number of segments for the main ring of the torus', min: 3, max: 256, py_default: 48})), 'minor_segments': __call__ (IntProperty, null, __kwargtrans__ ({py_name: 'Minor Segments', description: 'Number of segments for the minor ring of the torus', min: 3, max: 256, py_default: 12})), 'mode': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Dimensions Mode', py_items: tuple ([tuple (['MAJOR_MINOR', 'Major/Minor', 'Use the major/minor radii for torus dimensions']), tuple (['EXT_INT', 'Exterior/Interior', 'Use the exterior/interior radii for torus dimensions'])]), py_update: AddTorus.mode_update_callback})), 'major_radius': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Major Radius', description: 'Radius from the origin to the center of the cross sections', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.0, subtype: 'DISTANCE', unit: 'LENGTH'})), 'minor_radius': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Minor Radius', description: "Radius of the torus's cross section", soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_major_rad': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Exterior Radius', description: 'Total Exterior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 1.25, subtype: 'DISTANCE', unit: 'LENGTH'})), 'abso_minor_rad': __call__ (FloatProperty, null, __kwargtrans__ ({py_name: 'Interior Radius', description: 'Total Interior Radius of the torus', soft_min: 0.0, soft_max: 100.0, min: 0.0, max: 10000.0, py_default: 0.75, subtype: 'DISTANCE', unit: 'LENGTH'})), 'generate_uvs': __call__ (BoolProperty, null, __kwargtrans__ ({py_name: 'Generate UVs', description: 'Generate a default UV map', py_default: true}))});
 export var classes = tuple ([AddTorus]);
 
 //# sourceMappingURL=bl_operators.add_mesh_torus.map
 export {BoolProperty, EnumProperty, FloatProperty, IntProperty, Operator, _globals, _import, _lazy, _member, _module, data_};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'add_torus': add_torus = value; break;
+		case 'add_uvs': add_uvs = value; break;
+		case 'AddTorus': AddTorus = value; break;
+		case 'classes': classes = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

@@ -10,7 +10,7 @@ export var _TokenizeDataPath =  __class__ ('_TokenizeDataPath', [object], {
 	get __init__ () {return __get__ (this, function (self, attrs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -27,7 +27,7 @@ export var _TokenizeDataPath =  __class__ ('_TokenizeDataPath', [object], {
 	get __getattr__ () {return __get__ (this, function (self, attr) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -39,12 +39,15 @@ export var _TokenizeDataPath =  __class__ ('_TokenizeDataPath', [object], {
 		}
 		else {
 		}
-		return _TokenizeDataPath (self.data_path + tuple (['.{:s}'.format (attr)]));
+		return __call__ (_TokenizeDataPath, null, __add__ (self.data_path, tuple ([(function () {
+			var __accu0__ = '.{:s}';
+			return __call__ (__accu0__.format, __accu0__, attr);
+		}) ()])));
 	});},
 	get __getitem__ () {return __get__ (this, function (self, key) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -56,13 +59,16 @@ export var _TokenizeDataPath =  __class__ ('_TokenizeDataPath', [object], {
 		}
 		else {
 		}
-		return _TokenizeDataPath (self.data_path + tuple (['[{!r}]'.format (key)]));
+		return __call__ (_TokenizeDataPath, null, __add__ (self.data_path, tuple ([(function () {
+			var __accu0__ = '[{!r}]';
+			return __call__ (__accu0__.format, __accu0__, key);
+		}) ()])));
 	});},
 	get __call__ () {return __get__ (this, function (self) {
 		var kw = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -77,33 +83,71 @@ export var _TokenizeDataPath =  __class__ ('_TokenizeDataPath', [object], {
 		else {
 			var args = tuple ();
 		}
-		var value_str = ', '.join ((function () {
-			var __accu0__ = [];
-			for (var val of tuple ([', '.join ((function () {
+		var value_str = (function () {
+			var __accu0__ = ', ';
+			return __call__ (__accu0__.join, __accu0__, (function () {
 				var __accu1__ = [];
-				for (var value of args) {
-					__accu1__.append (repr (value));
+				var __iterable0__ = tuple ([(function () {
+					var __accu2__ = ', ';
+					return __call__ (__accu2__.join, __accu2__, (function () {
+						var __accu3__ = [];
+						var __iterable1__ = args;
+						__iterable1__ = __i__ (__iterable1__);
+						for (var __index0__ = 0; __index0__ < len (__iterable1__); __index0__++) {
+							var value = __getitem__ (__iterable1__, __index0__);
+							(function () {
+								var __accu4__ = __accu3__;
+								return __call__ (__accu4__.append, __accu4__, __call__ (repr, null, value));
+							}) ();
+						}
+						return __accu3__;
+					}) ());
+				}) (), (function () {
+					var __accu2__ = ', ';
+					return __call__ (__accu2__.join, __accu2__, (function () {
+						var __accu3__ = [];
+						var __iterable1__ = __call__ (list, null, (function () {
+							var __accu4__ = kw;
+							return __call__ (__accu4__.py_items, __accu4__);
+						}) ());
+						__iterable1__ = __i__ (__iterable1__);
+						for (var __index0__ = 0; __index0__ < len (__iterable1__); __index0__++) {
+							var __left0__ = __getitem__ (__iterable1__, __index0__);
+							var key = __left0__ [0];
+							var value = __left0__ [1];
+							(function () {
+								var __accu4__ = __accu3__;
+								return __call__ (__accu4__.append, __accu4__, (function () {
+									var __accu5__ = '{:s}={!r}';
+									return __call__ (__accu5__.format, __accu5__, key, value);
+								}) ());
+							}) ();
+						}
+						return __accu3__;
+					}) ());
+				}) ()]);
+				__iterable0__ = __i__ (__iterable0__);
+				for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+					var val = __getitem__ (__iterable0__, __index0__);
+					if (val) {
+						(function () {
+							var __accu2__ = __accu1__;
+							return __call__ (__accu2__.append, __accu2__, val);
+						}) ();
+					}
 				}
 				return __accu1__;
-			}) ()), ', '.join ((function () {
-				var __accu1__ = [];
-				for (var [key, value] of list (kw.py_items ())) {
-					__accu1__.append ('{:s}={!r}'.format (key, value));
-				}
-				return __accu1__;
-			}) ())])) {
-				if (val) {
-					__accu0__.append (val);
-				}
-			}
-			return __accu0__;
-		}) ());
-		return _TokenizeDataPath (self.data_path + tuple (['({:s})'.format (value_str)]));
+			}) ());
+		}) ();
+		return __call__ (_TokenizeDataPath, null, __add__ (self.data_path, tuple ([(function () {
+			var __accu0__ = '({:s})';
+			return __call__ (__accu0__.format, __accu0__, value_str);
+		}) ()])));
 	});},
 	get __iter__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -114,14 +158,14 @@ export var _TokenizeDataPath =  __class__ ('_TokenizeDataPath', [object], {
 		}
 		else {
 		}
-		return py_iter (self.data_path);
+		return __call__ (py_iter, null, self.data_path);
 	});},
 	[Symbol.iterator] () {return this.__iter__ ()}
 });
 export var decompose_data_path = function (data_path) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -132,13 +176,13 @@ export var decompose_data_path = function (data_path) {
 	}
 	else {
 	}
-	var ns = dict ({'base': _TokenizeDataPath (tuple ([]))});
-	return list (eval ('base' + data_path, ns, ns));
+	var ns = dict ({'base': __call__ (_TokenizeDataPath, null, tuple ([]))});
+	return __call__ (list, null, __call__ (eval, null, __add__ ('base', data_path), ns, ns));
 };
 export var property_definition_from_data_path = function (base, data_path) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -150,21 +194,36 @@ export var property_definition_from_data_path = function (base, data_path) {
 	}
 	else {
 	}
-	var data = decompose_data_path (data_path);
-	while (data && !(data [-(1)].startswith ('.'))) {
-		data.py_pop ();
+	var data = __call__ (decompose_data_path, null, data_path);
+	while (data && !((function () {
+		var __accu0__ = __getitem__ (data, __neg__ (1));
+		return __call__ (__accu0__.startswith, __accu0__, '.');
+	}) ())) {
+		(function () {
+			var __accu0__ = data;
+			return __call__ (__accu0__.py_pop, __accu0__);
+		}) ();
 	}
-	if (!(data) || !(data [-(1)].startswith ('.')) || len (data) < 2) {
+	if (!(data) || !((function () {
+		var __accu0__ = __getitem__ (data, __neg__ (1));
+		return __call__ (__accu0__.startswith, __accu0__, '.');
+	}) ()) || __lt__ (__call__ (len, null, data), 2)) {
 		return null;
 	}
-	var data_path_head = ''.join (data.__getslice__ (null, -(1), 1));
-	var data_path_tail = data [-(1)];
-	var value_head = eval ('base' + data_path_head);
-	var value_head_rna = getattr (value_head, 'bl_rna', null);
+	var data_path_head = (function () {
+		var __accu0__ = '';
+		return __call__ (__accu0__.join, __accu0__, __getslice__ (data, null, __neg__ (1), 1));
+	}) ();
+	var data_path_tail = __getitem__ (data, __neg__ (1));
+	var value_head = __call__ (eval, null, __add__ ('base', data_path_head));
+	var value_head_rna = __call__ (getattr, null, value_head, 'bl_rna', null);
 	if (value_head_rna === null) {
 		return null;
 	}
-	var value_tail = value_head.bl_rna.properties.py_get (data_path_tail.__getslice__ (1, null, 1));
+	var value_tail = (function () {
+		var __accu0__ = value_head.bl_rna.properties;
+		return __call__ (__accu0__.py_get, __accu0__, __getslice__ (data_path_tail, 1, null, 1));
+	}) ();
 	if (!(value_tail)) {
 		return null;
 	}
@@ -172,3 +231,12 @@ export var property_definition_from_data_path = function (base, data_path) {
 };
 
 //# sourceMappingURL=_bl_rna_utils.data_path.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case '_TokenizeDataPath': _TokenizeDataPath = value; break;
+		case 'decompose_data_path': decompose_data_path = value; break;
+		case 'property_definition_from_data_path': property_definition_from_data_path = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

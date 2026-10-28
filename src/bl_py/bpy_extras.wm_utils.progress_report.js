@@ -7,40 +7,45 @@ import * as __module_time__ from './time.js';
 __nest__ (time, '', __module_time__);
 var __name__ = 'bpy_extras.wm_utils.progress_report';
 export var __all__ = tuple (['ProgressReport', 'ProgressReportSubstep']);
+export var _ProgressReport___init__ = function (self, wm) {
+	if (typeof wm == 'undefined' || (wm != null && wm.hasOwnProperty ("__kwargtrans__"))) {;
+		var wm = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					case 'wm': var wm = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var self_wm = __call__ (getattr, null, self, 'wm', null);
+	if (self_wm) {
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.finalize, __accu0__);
+		}) ();
+	}
+	self.running = false;
+	self.wm = wm;
+	self.steps = [100000];
+	self.curr_step = [0];
+};
 export var ProgressReport =  __class__ ('ProgressReport', [object], {
 	__module__: __name__,
 	__slots__: tuple (['wm', 'running', 'steps', 'curr_step', 'start_time']),
-	get __init__ () {return __get__ (this, function (self, wm) {
-		if (typeof wm == 'undefined' || (wm != null && wm.hasOwnProperty ("__kwargtrans__"))) {;
-			var wm = null;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'wm': var wm = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var self_wm = getattr (self, 'wm', null);
-		if (self_wm) {
-			self.finalize ();
-		}
-		self.running = false;
-		self.wm = wm;
-		self.steps = [100000];
-		self.curr_step = [0];
-	});},
+	__init__: _ProgressReport___init__,
+	initialize: _ProgressReport___init__,
 	get __enter__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -51,10 +56,19 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}
 		else {
 		}
-		self.start_time = [time.time ()];
+		self.start_time = [(function () {
+			var __accu0__ = time;
+			return __call__ (__accu0__.time, __accu0__);
+		}) ()];
 		if (self.wm) {
-			self.wm.progress_begin (0, self.steps [0]);
-			self.py_update ();
+			(function () {
+				var __accu0__ = self.wm;
+				return __call__ (__accu0__.progress_begin, __accu0__, 0, __getitem__ (self.steps, 0));
+			}) ();
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.py_update, __accu0__);
+			}) ();
 			self.running = true;
 		}
 		return self;
@@ -71,7 +85,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -87,18 +101,24 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}
 		self.running = false;
 		if (self.wm) {
-			self.wm.progress_end ();
+			(function () {
+				var __accu0__ = self.wm;
+				return __call__ (__accu0__.progress_end, __accu0__);
+			}) ();
 			self.wm = null;
 		}
-		print ('\n');
+		__call__ (print, null, '\n');
 		self.steps = [100000];
 		self.curr_step = [0];
-		self.start_time = [time.time ()];
+		self.start_time = [(function () {
+			var __accu0__ = time;
+			return __call__ (__accu0__.time, __accu0__);
+		}) ()];
 	});},
 	get start () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -109,12 +129,15 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}
 		else {
 		}
-		self.__enter__ ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.__enter__, __accu0__);
+		}) ();
 	});},
 	get finalize () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -125,7 +148,10 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}
 		else {
 		}
-		self.__exit__ ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.__exit__, __accu0__);
+		}) ();
 	});},
 	get py_update () {return __get__ (this, function (self, msg) {
 		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
@@ -133,7 +159,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -145,26 +171,46 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}
 		else {
 		}
-		var steps = sum ((function () {
+		var steps = __call__ (sum, null, (function () {
 			var __accu0__ = [];
-			for (var [s, cs] of list (zip (self.steps, self.curr_step))) {
-				__accu0__.append (s * cs);
+			var __iterable0__ = __call__ (list, null, __call__ (zip, null, self.steps, self.curr_step));
+			__iterable0__ = __i__ (__iterable0__);
+			for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+				var __left0__ = __getitem__ (__iterable0__, __index0__);
+				var s = __left0__ [0];
+				var cs = __left0__ [1];
+				(function () {
+					var __accu1__ = __accu0__;
+					return __call__ (__accu1__.append, __accu1__, __mul__ (s, cs));
+				}) ();
 			}
 			return __accu0__;
 		}) ());
-		var steps_percent = (steps / self.steps [0]) * 100.0;
-		var tm = time.time ();
-		var loc_tm = tm - self.start_time [-(1)];
-		tm -= self.start_time [0];
+		var steps_percent = __mul__ (__truediv__ (steps, __getitem__ (self.steps, 0)), 100.0);
+		var tm = (function () {
+			var __accu0__ = time;
+			return __call__ (__accu0__.time, __accu0__);
+		}) ();
+		var loc_tm = __sub__ (tm, __getitem__ (self.start_time, __neg__ (1)));
+		var tm = __call__ (__isub__, null, tm, __getitem__ (self.start_time, 0));
 		if (self.wm && self.running) {
-			self.wm.progress_update (steps);
+			(function () {
+				var __accu0__ = self.wm;
+				return __call__ (__accu0__.progress_update, __accu0__, steps);
+			}) ();
 		}
 		if (msg) {
-			var prefix = '  ' * (len (self.steps) - 1);
-			print (prefix + '({:8.4f} sec | {:8.4f} sec) {:s}\nProgress: {:6.2f}%\r'.format (tm, loc_tm, msg, steps_percent), __kwargtrans__ ({end: ''}));
+			var prefix = __mul__ ('  ', __sub__ (__call__ (len, null, self.steps), 1));
+			__call__ (print, null, __add__ (prefix, (function () {
+				var __accu0__ = '({:8.4f} sec | {:8.4f} sec) {:s}\nProgress: {:6.2f}%\r';
+				return __call__ (__accu0__.format, __accu0__, tm, loc_tm, msg, steps_percent);
+			}) ()), __kwargtrans__ ({end: ''}));
 		}
 		else {
-			print ('Progress: {:6.2f}%\r'.format (steps_percent), __kwargtrans__ ({end: ''}));
+			__call__ (print, null, (function () {
+				var __accu0__ = 'Progress: {:6.2f}%\r';
+				return __call__ (__accu0__.format, __accu0__, steps_percent);
+			}) (), __kwargtrans__ ({end: ''}));
 		}
 	});},
 	get enter_substeps () {return __get__ (this, function (self, nbr, msg) {
@@ -173,7 +219,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -187,11 +233,26 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		else {
 		}
 		if (msg) {
-			self.py_update (msg);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.py_update, __accu0__, msg);
+			}) ();
 		}
-		self.steps.append (self.steps [-(1)] / max (nbr, 1));
-		self.curr_step.append (0);
-		self.start_time.append (time.time ());
+		(function () {
+			var __accu0__ = self.steps;
+			return __call__ (__accu0__.append, __accu0__, __truediv__ (__getitem__ (self.steps, __neg__ (1)), __call__ (max, null, nbr, 1)));
+		}) ();
+		(function () {
+			var __accu0__ = self.curr_step;
+			return __call__ (__accu0__.append, __accu0__, 0);
+		}) ();
+		(function () {
+			var __accu0__ = self.start_time;
+			return __call__ (__accu0__.append, __accu0__, (function () {
+				var __accu1__ = time;
+				return __call__ (__accu1__.time, __accu1__);
+			}) ());
+		}) ();
 	});},
 	get step () {return __get__ (this, function (self, msg, nbr) {
 		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
@@ -202,7 +263,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -215,8 +276,11 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		}
 		else {
 		}
-		self.curr_step [-(1)] += nbr;
-		self.py_update (msg);
+		__setitem__ (self.curr_step, __neg__ (1), __call__ (__iadd__, null, __getitem__ (self.curr_step, __neg__ (1)), nbr));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.py_update, __accu0__, msg);
+		}) ();
 	});},
 	get leave_substeps () {return __get__ (this, function (self, msg) {
 		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
@@ -224,7 +288,7 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -237,15 +301,29 @@ export var ProgressReport =  __class__ ('ProgressReport', [object], {
 		else {
 		}
 		if (msg) {
-			self.py_update (msg);
+			(function () {
+				var __accu0__ = self;
+				return __call__ (__accu0__.py_update, __accu0__, msg);
+			}) ();
 		}
-		self.steps.py_pop (-(1));
-		self.curr_step.py_pop (-(1));
-		self.start_time.py_pop (-(1));
-		self.step ();
+		(function () {
+			var __accu0__ = self.steps;
+			return __call__ (__accu0__.py_pop, __accu0__, __neg__ (1));
+		}) ();
+		(function () {
+			var __accu0__ = self.curr_step;
+			return __call__ (__accu0__.py_pop, __accu0__, __neg__ (1));
+		}) ();
+		(function () {
+			var __accu0__ = self.start_time;
+			return __call__ (__accu0__.py_pop, __accu0__, __neg__ (1));
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.step, __accu0__);
+		}) ();
 	});}
 });
-ProgressReport.initialize = ProgressReport.__init__;
 export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object], {
 	__module__: __name__,
 	__slots__: tuple (['progress', 'nbr', 'msg', 'final_msg', 'level']),
@@ -258,7 +336,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -273,7 +351,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}
 		else {
 		}
-		var progress = getattr (progress, 'progress', progress);
+		var progress = __call__ (getattr, null, progress, 'progress', progress);
 		self.progress = progress;
 		self.nbr = nbr;
 		self.msg = msg;
@@ -282,7 +360,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 	get __enter__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -293,14 +371,17 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}
 		else {
 		}
-		self.level = len (self.progress.steps);
-		self.progress.enter_substeps (self.nbr, self.msg);
+		self.level = __call__ (len, null, self.progress.steps);
+		(function () {
+			var __accu0__ = self.progress;
+			return __call__ (__accu0__.enter_substeps, __accu0__, self.nbr, self.msg);
+		}) ();
 		return self;
 	});},
 	get __exit__ () {return __get__ (this, function (self, _exc_type, _exc_value, _traceback) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -314,10 +395,16 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}
 		else {
 		}
-		while (len (self.progress.steps) > self.level + 1) {
-			self.progress.leave_substeps ();
+		while (__gt__ (__call__ (len, null, self.progress.steps), __add__ (self.level, 1))) {
+			(function () {
+				var __accu0__ = self.progress;
+				return __call__ (__accu0__.leave_substeps, __accu0__);
+			}) ();
 		}
-		self.progress.leave_substeps (self.final_msg);
+		(function () {
+			var __accu0__ = self.progress;
+			return __call__ (__accu0__.leave_substeps, __accu0__, self.final_msg);
+		}) ();
 	});},
 	get enter_substeps () {return __get__ (this, function (self, nbr, msg) {
 		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
@@ -325,7 +412,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -338,7 +425,10 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}
 		else {
 		}
-		self.progress.enter_substeps (nbr, msg);
+		(function () {
+			var __accu0__ = self.progress;
+			return __call__ (__accu0__.enter_substeps, __accu0__, nbr, msg);
+		}) ();
 	});},
 	get step () {return __get__ (this, function (self, msg, nbr) {
 		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
@@ -349,7 +439,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -362,7 +452,10 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}
 		else {
 		}
-		self.progress.step (msg, nbr);
+		(function () {
+			var __accu0__ = self.progress;
+			return __call__ (__accu0__.step, __accu0__, msg, nbr);
+		}) ();
 	});},
 	get leave_substeps () {return __get__ (this, function (self, msg) {
 		if (typeof msg == 'undefined' || (msg != null && msg.hasOwnProperty ("__kwargtrans__"))) {;
@@ -370,7 +463,7 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -382,8 +475,20 @@ export var ProgressReportSubstep =  __class__ ('ProgressReportSubstep', [object]
 		}
 		else {
 		}
-		self.progress.leave_substeps (msg);
+		(function () {
+			var __accu0__ = self.progress;
+			return __call__ (__accu0__.leave_substeps, __accu0__, msg);
+		}) ();
 	});}
 });
 
 //# sourceMappingURL=bpy_extras.wm_utils.progress_report.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '__all__': __all__ = value; break;
+		case '_ProgressReport___init__': _ProgressReport___init__ = value; break;
+		case 'ProgressReport': ProgressReport = value; break;
+		case 'ProgressReportSubstep': ProgressReportSubstep = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

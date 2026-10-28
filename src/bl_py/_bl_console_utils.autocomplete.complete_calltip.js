@@ -11,15 +11,27 @@ __nest__ (inspect, '', __module_inspect__);
 var __name__ = '_bl_console_utils.autocomplete.complete_calltip';
 export var DEF_DOC = '{:s}\\s*(\\(.*?\\))';
 export var DEF_SOURCE = 'def\\s+{:s}\\s*(\\(.*?\\)):';
-export var RE_EMPTY_LINE = re.compile ('^\\s*\\n');
-export var RE_FLAG = re.MULTILINE | re.DOTALL;
-export var RE_NEWLINE = re.compile ('\n+');
-export var RE_SPACE = re.compile ('\\s+');
-export var RE_DEF_COMPLETE = re.compile ('(?:^|[^"\'a-zA-Z0-9_])((\\w+(?:\\w|[.]|\\[.+?\\])*|)(?:\\(|\\s)*)$');
+export var RE_EMPTY_LINE = (function () {
+	var __accu0__ = re;
+	return __call__ (__accu0__.compile, __accu0__, '^\\s*\\n');
+}) ();
+export var RE_FLAG = __or__ (re.MULTILINE, re.DOTALL);
+export var RE_NEWLINE = (function () {
+	var __accu0__ = re;
+	return __call__ (__accu0__.compile, __accu0__, '\n+');
+}) ();
+export var RE_SPACE = (function () {
+	var __accu0__ = re;
+	return __call__ (__accu0__.compile, __accu0__, '\\s+');
+}) ();
+export var RE_DEF_COMPLETE = (function () {
+	var __accu0__ = re;
+	return __call__ (__accu0__.compile, __accu0__, '(?:^|[^"\'a-zA-Z0-9_])((\\w+(?:\\w|[.]|\\[.+?\\])*|)(?:\\(|\\s)*)$');
+}) ();
 export var reduce_newlines = function (text) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -30,12 +42,15 @@ export var reduce_newlines = function (text) {
 	}
 	else {
 	}
-	return RE_NEWLINE.sub ('\n', text);
+	return (function () {
+		var __accu0__ = RE_NEWLINE;
+		return __call__ (__accu0__.sub, __accu0__, '\n', text);
+	}) ();
 };
 export var reduce_spaces = function (text) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -46,12 +61,15 @@ export var reduce_spaces = function (text) {
 	}
 	else {
 	}
-	return RE_SPACE.sub (' ', text);
+	return (function () {
+		var __accu0__ = RE_SPACE;
+		return __call__ (__accu0__.sub, __accu0__, ' ', text);
+	}) ();
 };
 export var get_doc = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -62,8 +80,20 @@ export var get_doc = function (obj) {
 	}
 	else {
 	}
-	var result = inspect.getdoc (obj) || inspect.getcomments (obj);
-	return result && RE_EMPTY_LINE.sub ('', result.rstrip ()) || '';
+	var result = (function () {
+		var __accu0__ = inspect;
+		return __call__ (__accu0__.getdoc, __accu0__, obj);
+	}) () || (function () {
+		var __accu0__ = inspect;
+		return __call__ (__accu0__.getcomments, __accu0__, obj);
+	}) ();
+	return result && (function () {
+		var __accu0__ = RE_EMPTY_LINE;
+		return __call__ (__accu0__.sub, __accu0__, '', (function () {
+			var __accu1__ = result;
+			return __call__ (__accu1__.rstrip, __accu1__);
+		}) ());
+	}) () || '';
 };
 export var get_argspec = function (func) {
 	var strip_self = true;
@@ -71,7 +101,7 @@ export var get_argspec = function (func) {
 	var source = null;
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -96,7 +126,7 @@ export var get_argspec = function (func) {
 			throw __except0__;
 		}
 	}
-	if (!(hasattr (func, '__call__'))) {
+	if (!(__call__ (hasattr, null, func, '__call__'))) {
 		return '';
 	}
 	try {
@@ -111,13 +141,22 @@ export var get_argspec = function (func) {
 		}
 	}
 	if (doc === null) {
-		var doc = get_doc (func);
+		var doc = __call__ (get_doc, null, func);
 	}
-	var match = re.search (DEF_DOC.format (func_name), doc, RE_FLAG);
+	var match = (function () {
+		var __accu0__ = re;
+		return __call__ (__accu0__.search, __accu0__, (function () {
+			var __accu1__ = DEF_DOC;
+			return __call__ (__accu1__.format, __accu1__, func_name);
+		}) (), doc, RE_FLAG);
+	}) ();
 	if (!(match)) {
 		if (source === null) {
 			try {
-				var source = inspect.getsource (func);
+				var source = (function () {
+					var __accu0__ = inspect;
+					return __call__ (__accu0__.getsource, __accu0__, func);
+				}) ();
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, tuple ([py_TypeError, IOError]))) {
@@ -129,26 +168,50 @@ export var get_argspec = function (func) {
 			}
 		}
 		if (source) {
-			var match = re.search (DEF_SOURCE.format (func_name), source, RE_FLAG);
+			var match = (function () {
+				var __accu0__ = re;
+				return __call__ (__accu0__.search, __accu0__, (function () {
+					var __accu1__ = DEF_SOURCE;
+					return __call__ (__accu1__.format, __accu1__, func_name);
+				}) (), source, RE_FLAG);
+			}) ();
 		}
 	}
 	if (match) {
-		var argspec = reduce_spaces (match.group (1));
+		var argspec = __call__ (reduce_spaces, null, (function () {
+			var __accu0__ = match;
+			return __call__ (__accu0__.group, __accu0__, 1);
+		}) ());
 	}
 	else {
 		try {
-			var argspec = inspect.formatargspec (...inspect.getfullargspec (func));
+			var argspec = (function () {
+				var __accu0__ = inspect;
+				return __call__ (__accu0__.formatargspec, __accu0__, ...(function () {
+					var __accu1__ = inspect;
+					return __call__ (__accu1__.getfullargspec, __accu1__, func);
+				}) ());
+			}) ();
 		}
 		catch (__except0__) {
 			try {
-				var argspec = inspect.formatargvalues (...inspect.getargvalues (func));
+				var argspec = (function () {
+					var __accu0__ = inspect;
+					return __call__ (__accu0__.formatargvalues, __accu0__, ...(function () {
+						var __accu1__ = inspect;
+						return __call__ (__accu1__.getargvalues, __accu1__, func);
+					}) ());
+				}) ();
 			}
 			catch (__except1__) {
 				var argspec = '';
 			}
 		}
 		if (strip_self) {
-			var argspec = argspec.py_replace ('self, ', '');
+			var argspec = (function () {
+				var __accu0__ = argspec;
+				return __call__ (__accu0__.py_replace, __accu0__, 'self, ', '');
+			}) ();
 		}
 	}
 	return argspec;
@@ -156,7 +219,7 @@ export var get_argspec = function (func) {
 export var complete = function (line, cursor, namespace) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -172,12 +235,21 @@ export var complete = function (line, cursor, namespace) {
 	var matches = [];
 	var word = '';
 	var scrollback = '';
-	var match = RE_DEF_COMPLETE.search (line.__getslice__ (null, cursor, 1));
+	var match = (function () {
+		var __accu0__ = RE_DEF_COMPLETE;
+		return __call__ (__accu0__.search, __accu0__, __getslice__ (line, null, cursor, 1));
+	}) ();
 	if (match) {
-		var word = match.group (1);
-		var func_word = match.group (2);
+		var word = (function () {
+			var __accu0__ = match;
+			return __call__ (__accu0__.group, __accu0__, 1);
+		}) ();
+		var func_word = (function () {
+			var __accu0__ = match;
+			return __call__ (__accu0__.group, __accu0__, 2);
+		}) ();
 		try {
-			var func = eval (func_word, namespace);
+			var func = __call__ (eval, null, func_word, namespace);
 		}
 		catch (__except0__) {
 			if (isinstance (__except0__, BaseException)) {
@@ -188,19 +260,42 @@ export var complete = function (line, cursor, namespace) {
 			}
 		}
 		if (func) {
-			var doc = get_doc (func);
-			var argspec = get_argspec (func, __kwargtrans__ ({doc: doc}));
-			var scrollback = func_word.py_split ('.') [-(1)] + (argspec || '()');
-			if (doc.startswith (scrollback)) {
+			var doc = __call__ (get_doc, null, func);
+			var argspec = __call__ (get_argspec, null, func, __kwargtrans__ ({doc: doc}));
+			var scrollback = __add__ (__getitem__ ((function () {
+				var __accu0__ = func_word;
+				return __call__ (__accu0__.py_split, __accu0__, '.');
+			}) (), __neg__ (1)), argspec || '()');
+			if ((function () {
+				var __accu0__ = doc;
+				return __call__ (__accu0__.startswith, __accu0__, scrollback);
+			}) ()) {
 				var scrollback = doc;
 			}
 			else if (doc) {
-				scrollback += '\n' + doc;
+				var scrollback = __call__ (__iadd__, null, scrollback, __add__ ('\n', doc));
 			}
-			var scrollback = reduce_newlines (scrollback);
+			var scrollback = __call__ (reduce_newlines, null, scrollback);
 		}
 	}
 	return tuple ([matches, word, scrollback]);
 };
 
 //# sourceMappingURL=_bl_console_utils.autocomplete.complete_calltip.map
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case 'DEF_DOC': DEF_DOC = value; break;
+		case 'DEF_SOURCE': DEF_SOURCE = value; break;
+		case 'RE_EMPTY_LINE': RE_EMPTY_LINE = value; break;
+		case 'RE_FLAG': RE_FLAG = value; break;
+		case 'RE_NEWLINE': RE_NEWLINE = value; break;
+		case 'RE_SPACE': RE_SPACE = value; break;
+		case 'RE_DEF_COMPLETE': RE_DEF_COMPLETE = value; break;
+		case 'reduce_newlines': reduce_newlines = value; break;
+		case 'reduce_spaces': reduce_spaces = value; break;
+		case 'get_doc': get_doc = value; break;
+		case 'get_argspec': get_argspec = value; break;
+		case 'complete': complete = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}

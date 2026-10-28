@@ -11,7 +11,7 @@ var __name__ = 'bl_ui.generic_ui_list';
 export var _merged = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -22,8 +22,14 @@ export var _merged = function () {
 		var dicts = tuple ();
 	}
 	var result = dict ({});
-	for (var d of dicts) {
-		result.py_update (d);
+	var __iterable0__ = dicts;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var d = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.py_update, __accu0__, d);
+		}) ();
 	}
 	return result;
 };
@@ -31,7 +37,7 @@ export var _ellipsis = Symbol ("Ellipsis")
 export var _new_object = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -56,7 +62,7 @@ export var _property = function (fget, fset, fdel, doc) {
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -75,7 +81,7 @@ export var _property = function (fget, fset, fdel, doc) {
 export var _formatted = function (value, conversion, spec) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -88,18 +94,21 @@ export var _formatted = function (value, conversion, spec) {
 	}
 	else {
 	}
-	if (conversion == 'r') {
-		var value = repr (value);
+	if (__eq__ (conversion, 'r')) {
+		var value = __call__ (repr, null, value);
 	}
-	else if (conversion == 's') {
-		var value = str (value);
+	else if (__eq__ (conversion, 's')) {
+		var value = __call__ (str, null, value);
 	}
-	return (spec ? (('{:' + spec) + '}').format (value) : str (value));
+	return (spec ? (function () {
+		var __accu0__ = __add__ (__add__ ('{:', spec), '}');
+		return __call__ (__accu0__.format, __accu0__, value);
+	}) () : __call__ (str, null, value));
 };
 export var _joined = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 			}
@@ -110,10 +119,34 @@ export var _joined = function () {
 		var lists = tuple ();
 	}
 	var result = [];
-	for (var py_items of lists) {
-		result.extend (list (py_items));
+	var __iterable0__ = lists;
+	__iterable0__ = __i__ (__iterable0__);
+	for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+		var py_items = __getitem__ (__iterable0__, __index0__);
+		(function () {
+			var __accu0__ = result;
+			return __call__ (__accu0__.extend, __accu0__, __call__ (list, null, py_items));
+		}) ();
 	}
 	return result;
+};
+export var _super_classmethod = function (owner, cls, method) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					case 'method': var method = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return owner.__bases__.map((base) => globalThis.Object.getOwnPropertyDescriptor(base, method)).filter(Boolean).map((d) => (d.get ? d.get.call(cls) : d.value))[0]
 };
 export var __all__ = tuple (['draw_ui_list']);
 export var draw_ui_list = function (layout, context, class_name) {
@@ -126,7 +159,7 @@ export var draw_ui_list = function (layout, context, class_name) {
 	var kwargs = dict ();
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -147,35 +180,59 @@ export var draw_ui_list = function (layout, context, class_name) {
 	}
 	else {
 	}
-	var row = layout.row ();
-	var __left0__ = list_path.rsplit ('.', 1);
+	var row = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.row, __accu0__);
+	}) ();
+	var __left0__ = (function () {
+		var __accu0__ = list_path;
+		return __call__ (__accu0__.rsplit, __accu0__, '.', 1);
+	}) ();
 	var list_owner_path = __left0__ [0];
 	var list_prop_name = __left0__ [1];
-	var list_owner = _get_context_attr (context, list_owner_path);
-	var __left0__ = active_index_path.rsplit ('.', 1);
+	var list_owner = __call__ (_get_context_attr, null, context, list_owner_path);
+	var __left0__ = (function () {
+		var __accu0__ = active_index_path;
+		return __call__ (__accu0__.rsplit, __accu0__, '.', 1);
+	}) ();
 	var index_owner_path = __left0__ [0];
 	var index_prop_name = __left0__ [1];
-	var index_owner = _get_context_attr (context, index_owner_path);
-	var list_to_draw = _get_context_attr (context, list_path);
-	row.template_list (class_name, unique_id, list_owner, list_prop_name, index_owner, index_prop_name, __kwargtrans__ (_merged (dict ({'rows': (list_to_draw ? 4 : 1)}), kwargs)));
-	var col = row.column (__kwargtrans__ ({align: true}));
+	var index_owner = __call__ (_get_context_attr, null, context, index_owner_path);
+	var list_to_draw = __call__ (_get_context_attr, null, context, list_path);
+	(function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.template_list, __accu0__, class_name, unique_id, list_owner, list_prop_name, index_owner, index_prop_name, __kwargtrans__ (__call__ (_merged, null, dict ({'rows': (list_to_draw ? 4 : 1)}), kwargs)));
+	}) ();
+	var col = (function () {
+		var __accu0__ = row;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
 	if (insertion_operators) {
-		_draw_add_remove_buttons (__kwargtrans__ ({layout: col, list_path: list_path, active_index_path: active_index_path, list_length: len (list_to_draw)}));
-		col.separator ();
+		__call__ (_draw_add_remove_buttons, null, __kwargtrans__ ({layout: col, list_path: list_path, active_index_path: active_index_path, list_length: __call__ (len, null, list_to_draw)}));
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
 	if (menu_class_name) {
-		col.menu (menu_class_name, __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
-		col.separator ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.menu, __accu0__, menu_class_name, __kwargtrans__ ({icon: 'DOWNARROW_HLT', text: ''}));
+		}) ();
+		(function () {
+			var __accu0__ = col;
+			return __call__ (__accu0__.separator, __accu0__);
+		}) ();
 	}
 	if (move_operators && list_to_draw) {
-		_draw_move_buttons (__kwargtrans__ ({layout: col, list_path: list_path, active_index_path: active_index_path, list_length: len (list_to_draw)}));
+		__call__ (_draw_move_buttons, null, __kwargtrans__ ({layout: col, list_path: list_path, active_index_path: active_index_path, list_length: __call__ (len, null, list_to_draw)}));
 	}
 	return col;
 };
 export var _draw_add_remove_buttons = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -189,19 +246,28 @@ export var _draw_add_remove_buttons = function () {
 	}
 	else {
 	}
-	var props = layout.operator (UILIST_OT_entry_add.bl_idname, __kwargtrans__ ({text: '', icon: 'ADD'}));
+	var props = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, UILIST_OT_entry_add.bl_idname, __kwargtrans__ ({text: '', icon: 'ADD'}));
+	}) ();
 	props.list_path = list_path;
 	props.active_index_path = active_index_path;
-	var col = layout.column (__kwargtrans__ ({align: true}));
-	col.enabled = list_length > 0;
-	var props = col.operator (UILIST_OT_entry_remove.bl_idname, __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+	var col = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.column, __accu0__, __kwargtrans__ ({align: true}));
+	}) ();
+	col.enabled = __gt__ (list_length, 0);
+	var props = (function () {
+		var __accu0__ = col;
+		return __call__ (__accu0__.operator, __accu0__, UILIST_OT_entry_remove.bl_idname, __kwargtrans__ ({text: '', icon: 'REMOVE'}));
+	}) ();
 	props.list_path = list_path;
 	props.active_index_path = active_index_path;
 };
 export var _draw_move_buttons = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -215,11 +281,17 @@ export var _draw_move_buttons = function () {
 	}
 	else {
 	}
-	var props = layout.operator (UILIST_OT_entry_move.bl_idname, __kwargtrans__ ({text: '', icon: 'TRIA_UP'}));
+	var props = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, UILIST_OT_entry_move.bl_idname, __kwargtrans__ ({text: '', icon: 'TRIA_UP'}));
+	}) ();
 	props.direction = 'UP';
 	props.list_path = list_path;
 	props.active_index_path = active_index_path;
-	var props = layout.operator (UILIST_OT_entry_move.bl_idname, __kwargtrans__ ({text: '', icon: 'TRIA_DOWN'}));
+	var props = (function () {
+		var __accu0__ = layout;
+		return __call__ (__accu0__.operator, __accu0__, UILIST_OT_entry_move.bl_idname, __kwargtrans__ ({text: '', icon: 'TRIA_DOWN'}));
+	}) ();
 	props.direction = 'DOWN';
 	props.list_path = list_path;
 	props.active_index_path = active_index_path;
@@ -227,7 +299,7 @@ export var _draw_move_buttons = function () {
 export var _get_context_attr = function (context, data_path) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -239,12 +311,15 @@ export var _get_context_attr = function (context, data_path) {
 	}
 	else {
 	}
-	return context.path_resolve (data_path);
+	return (function () {
+		var __accu0__ = context;
+		return __call__ (__accu0__.path_resolve, __accu0__, data_path);
+	}) ();
 };
 export var _set_context_attr = function (context, data_path, value) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+		if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 			var __allkwargs0__ = arguments [__ilastarg0__--];
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
@@ -257,11 +332,17 @@ export var _set_context_attr = function (context, data_path, value) {
 	}
 	else {
 	}
-	var __left0__ = data_path.rsplit ('.', 1);
+	var __left0__ = (function () {
+		var __accu0__ = data_path;
+		return __call__ (__accu0__.rsplit, __accu0__, '.', 1);
+	}) ();
 	var owner_path = __left0__ [0];
 	var attr_name = __left0__ [1];
-	var owner = context.path_resolve (owner_path);
-	setattr (owner, attr_name, value);
+	var owner = (function () {
+		var __accu0__ = context;
+		return __call__ (__accu0__.path_resolve, __accu0__, owner_path);
+	}) ();
+	__call__ (setattr, null, owner, attr_name, value);
 };
 export var GenericUIListOperator =  __class__ ('GenericUIListOperator', [object], {
 	__module__: __name__,
@@ -269,7 +350,7 @@ export var GenericUIListOperator =  __class__ ('GenericUIListOperator', [object]
 	get get_list () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -281,12 +362,12 @@ export var GenericUIListOperator =  __class__ ('GenericUIListOperator', [object]
 		}
 		else {
 		}
-		return _get_context_attr (context, self.list_path);
+		return __call__ (_get_context_attr, null, context, self.list_path);
 	});},
 	get get_active_index () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -298,12 +379,12 @@ export var GenericUIListOperator =  __class__ ('GenericUIListOperator', [object]
 		}
 		else {
 		}
-		return _get_context_attr (context, self.active_index_path);
+		return __call__ (_get_context_attr, null, context, self.active_index_path);
 	});},
 	get set_active_index () {return __get__ (this, function (self, context, index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -316,10 +397,10 @@ export var GenericUIListOperator =  __class__ ('GenericUIListOperator', [object]
 		}
 		else {
 		}
-		_set_context_attr (context, self.active_index_path, index);
+		__call__ (_set_context_attr, null, context, self.active_index_path, index);
 	});}
 });
-GenericUIListOperator.__annotations__ = dict ({'list_path': StringProperty (), 'active_index_path': StringProperty ()});
+GenericUIListOperator.__annotations__ = dict ({'list_path': __call__ (StringProperty, null), 'active_index_path': __call__ (StringProperty, null)});
 export var UILIST_OT_entry_remove =  __class__ ('UILIST_OT_entry_remove', [GenericUIListOperator, Operator], {
 	__module__: __name__,
 	bl_idname: 'uilist.entry_remove',
@@ -327,7 +408,7 @@ export var UILIST_OT_entry_remove =  __class__ ('UILIST_OT_entry_remove', [Gener
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -339,11 +420,23 @@ export var UILIST_OT_entry_remove =  __class__ ('UILIST_OT_entry_remove', [Gener
 		}
 		else {
 		}
-		var my_list = self.get_list (context);
-		var active_index = self.get_active_index (context);
-		my_list.remove (active_index);
-		var to_index = min (active_index, len (my_list) - 1);
-		self.set_active_index (context, to_index);
+		var my_list = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_list, __accu0__, context);
+		}) ();
+		var active_index = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_active_index, __accu0__, context);
+		}) ();
+		(function () {
+			var __accu0__ = my_list;
+			return __call__ (__accu0__.remove, __accu0__, active_index);
+		}) ();
+		var to_index = __call__ (min, null, active_index, __sub__ (__call__ (len, null, my_list), 1));
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.set_active_index, __accu0__, context, to_index);
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -354,7 +447,7 @@ export var UILIST_OT_entry_add =  __class__ ('UILIST_OT_entry_add', [GenericUILi
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -366,12 +459,27 @@ export var UILIST_OT_entry_add =  __class__ ('UILIST_OT_entry_add', [GenericUILi
 		}
 		else {
 		}
-		var my_list = self.get_list (context);
-		var active_index = self.get_active_index (context);
-		var to_index = min (len (my_list), active_index + 1);
-		my_list.add ();
-		my_list.move (len (my_list) - 1, to_index);
-		self.set_active_index (context, to_index);
+		var my_list = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_list, __accu0__, context);
+		}) ();
+		var active_index = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_active_index, __accu0__, context);
+		}) ();
+		var to_index = __call__ (min, null, __call__ (len, null, my_list), __add__ (active_index, 1));
+		(function () {
+			var __accu0__ = my_list;
+			return __call__ (__accu0__.add, __accu0__);
+		}) ();
+		(function () {
+			var __accu0__ = my_list;
+			return __call__ (__accu0__.move, __accu0__, __sub__ (__call__ (len, null, my_list), 1), to_index);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.set_active_index, __accu0__, context, to_index);
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
@@ -382,7 +490,7 @@ export var UILIST_OT_entry_move =  __class__ ('UILIST_OT_entry_move', [GenericUI
 	get execute () {return __get__ (this, function (self, context) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			if (arguments [__ilastarg0__] && globalThis.Object.hasOwn (arguments [__ilastarg0__], "__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
@@ -394,20 +502,61 @@ export var UILIST_OT_entry_move =  __class__ ('UILIST_OT_entry_move', [GenericUI
 		}
 		else {
 		}
-		var my_list = self.get_list (context);
-		var active_index = self.get_active_index (context);
-		var delta = dict ({'DOWN': 1, 'UP': -(1)}) [self.direction];
-		var to_index = __mod__ (active_index + delta, len (my_list));
-		my_list.move (active_index, to_index);
-		self.set_active_index (context, to_index);
+		var my_list = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_list, __accu0__, context);
+		}) ();
+		var active_index = (function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.get_active_index, __accu0__, context);
+		}) ();
+		var delta = __getitem__ (dict ({'DOWN': 1, 'UP': __neg__ (1)}), self.direction);
+		var to_index = __mod__ (__add__ (active_index, delta), __call__ (len, null, my_list));
+		(function () {
+			var __accu0__ = my_list;
+			return __call__ (__accu0__.move, __accu0__, active_index, to_index);
+		}) ();
+		(function () {
+			var __accu0__ = self;
+			return __call__ (__accu0__.set_active_index, __accu0__, context, to_index);
+		}) ();
 		return new set (['FINISHED']);
 	});}
 });
-UILIST_OT_entry_move.__annotations__ = dict ({'direction': EnumProperty (__kwargtrans__ ({py_name: 'Direction', py_items: tuple ([tuple (['UP', 'Up', 'Move the active entry up']), tuple (['DOWN', 'Down', 'Move the active entry down'])]), py_default: 'UP'}))});
+UILIST_OT_entry_move.__annotations__ = dict ({'direction': __call__ (EnumProperty, null, __kwargtrans__ ({py_name: 'Direction', py_items: tuple ([tuple (['UP', 'Up', 'Move the active entry up']), tuple (['DOWN', 'Down', 'Move the active entry down'])]), py_default: 'UP'}))});
 export var classes = tuple ([UILIST_OT_entry_remove, UILIST_OT_entry_add, UILIST_OT_entry_move]);
-var __left0__ = bpy.utils.register_classes_factory (classes);
+var __left0__ = (function () {
+	var __accu0__ = bpy.utils;
+	return __call__ (__accu0__.register_classes_factory, __accu0__, classes);
+}) ();
 export var register = __left0__ [0];
 export var unregister = __left0__ [1];
 
 //# sourceMappingURL=bl_ui.generic_ui_list.map
 export {EnumProperty, Operator, StringProperty};
+
+export function __py_setattr__ (key, value) {
+	switch (key) {
+		case '_merged': _merged = value; break;
+		case '_ellipsis': _ellipsis = value; break;
+		case '_new_object': _new_object = value; break;
+		case '_property': _property = value; break;
+		case '_formatted': _formatted = value; break;
+		case '_joined': _joined = value; break;
+		case '_super_classmethod': _super_classmethod = value; break;
+		case '__all__': __all__ = value; break;
+		case 'draw_ui_list': draw_ui_list = value; break;
+		case '_draw_add_remove_buttons': _draw_add_remove_buttons = value; break;
+		case '_draw_move_buttons': _draw_move_buttons = value; break;
+		case '_get_context_attr': _get_context_attr = value; break;
+		case '_set_context_attr': _set_context_attr = value; break;
+		case 'GenericUIListOperator': GenericUIListOperator = value; break;
+		case 'UILIST_OT_entry_remove': UILIST_OT_entry_remove = value; break;
+		case 'UILIST_OT_entry_add': UILIST_OT_entry_add = value; break;
+		case 'UILIST_OT_entry_move': UILIST_OT_entry_move = value; break;
+		case 'classes': classes = value; break;
+		case 'register': register = value; break;
+		case 'unregister': unregister = value; break;
+		default: throw new Error (`module attribute ${key} cannot be set`);
+	}
+}
