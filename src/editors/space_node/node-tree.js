@@ -100,7 +100,7 @@ export function createNodeTree(graph, { changed = () => {} } = {}) {
   // A connection point as a socket: its Blender type, label and whether it shows.
   const socket = (point, declared) => {
     const type = declared?.type ?? (kind === 'shader' ? materialSocket(point.type) : renderGraphSocket(point.type));
-    return { point, id: point.name, type, shape: declared?.shape ?? 'CIRCLE', label: declared ? declared.name : point.displayName || titleCase(point.name), linked: point.isConnected ?? !!point.connectedPoint };
+    return { point, id: point.name, type, shape: declared?.shape ?? 'CIRCLE', label: declared ? declared.name : point.displayName || titleCase(point.name), align: declared?.align, linked: point.isConnected ?? !!point.connectedPoint };
   };
 
   // What the node draws, Blender's way: header, outputs, buttons, inputs (node_draw.cc).

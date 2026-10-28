@@ -15,8 +15,8 @@ const outline = computed(() => (props.active ? "var(--bl-node-active)" : props.s
 // Socket shapes (display_shape): a diamond for fields, a square for single values.
 const shape = (s) => (s.shape === "DIAMOND" || s.shape === "DIAMOND_DOT" ? "rotate-45 rounded-[1px]" : s.shape === "SQUARE" ? "rounded-[1px]" : "rounded-full");
 const valueKind = (s) => (s.type === "INT" || s.type === "BOOLEAN" || s.type === "MENU" || s.type === "RGBA" || s.type === "VECTOR" ? s.type : "VALUE");
-const firstInput = computed(() => props.layout.rows.find((r) => r.kind === "input"));
-const firstOutput = computed(() => props.layout.rows.find((r) => r.kind === "output"));
+const firstInput = computed(() => props.layout.sockets.find((s) => s.side === "in"));
+const firstOutput = computed(() => props.layout.sockets.find((s) => s.side === "out"));
 </script>
 
 <template>
@@ -43,7 +43,7 @@ const firstOutput = computed(() => props.layout.rows.find((r) => r.kind === "out
         </div>
       </template>
       <svg v-if="node.muted && firstInput && firstOutput" class="pointer-events-none absolute inset-0 size-full overflow-visible">
-        <line :x1="0" :y1="firstInput.y - HEADER + ROW / 2" :x2="layout.width" :y2="firstOutput.y - HEADER + ROW / 2" stroke="var(--bl-node-muted-link)" stroke-width="2" />
+        <line :x1="0" :y1="firstInput.y - node.y - HEADER" :x2="layout.width" :y2="firstOutput.y - node.y - HEADER" stroke="var(--bl-node-muted-link)" stroke-width="2" />
       </svg>
     </div>
     <span v-for="s in layout.sockets" :key="s.key" class="absolute border border-black" :class="shape(s.socket)"

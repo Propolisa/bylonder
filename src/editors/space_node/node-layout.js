@@ -1,6 +1,7 @@
 // Where node_draw.cc puts a node's parts, in view units (a 20 pixel UI unit at zoom 1): the header, then output
-// sockets, buttons and input sockets in rows, each socket on the node's edge at its row's middle. A collapsed node is
-// its header, its sockets at its middle; a reroute is a point.
+// sockets, buttons and input sockets in rows, each socket on the node's edge at its row's middle; an output declared
+// align_with_previous shares its input's row. A collapsed node is its header, its sockets at its middle; a reroute is
+// a point.
 export const U = 20;
 export const HEADER = U, ROW = 22, SOCKET_RADIUS = 5;
 const TOP = 4, BOTTOM = 6, VECTOR_ROWS = 4;
@@ -28,18 +29,22 @@ export function nodeLayout(node) {
   const rows = [];
   let y = HEADER + TOP;
   const add = (kind, item, h = ROW) => { rows.push({ kind, item, y, h }); y += h; };
-  node.outputs.forEach((s) => add('output', s));
+  const inputs = new Set(node.inputs.map((s) => s.id));
+  const aligned = new Map(node.outputs.filter((s) => inputs.has(s.align)).map((s) => [s.align, s]));
+  node.outputs.filter((s) => !inputs.has(s.align)).forEach((s) => add('output', s));
   node.outputs.filter((s) => s.value).forEach((s) => add('value', s, rowHeight({ ...s, linked: false })));
   node.buttons.forEach((b) => add('button', b));
   node.inputs.forEach((s) => add('input', s, rowHeight(s)));
   const height = node.hidden ? HEADER : y + BOTTOM;
+  const place = (side, socket, row) => sockets.push({
+    key: socketKey(side, socket.point), side, socket,
+    x: node.x + (side === 'out' ? node.width : 0), y: node.y + (node.hidden ? HEADER / 2 : row.y + ROW / 2),
+  });
   for (const row of rows) {
-    if (row.kind !== 'output' && row.kind !== 'input') continue;
-    const side = row.kind === 'output' ? 'out' : 'in';
-    sockets.push({
-      key: socketKey(side, row.item.point), side, socket: row.item,
-      x: node.x + (side === 'out' ? node.width : 0), y: node.y + (node.hidden ? HEADER / 2 : row.y + ROW / 2),
-    });
+    if (row.kind === 'output') place('out', row.item, row);
+    if (row.kind !== 'input') continue;
+    place('in', row.item, row);
+    if (aligned.has(row.item.id)) place('out', aligned.get(row.item.id), row);
   }
   return { node, rows: node.hidden ? [] : rows, width: node.width, height, sockets };
 }

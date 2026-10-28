@@ -84,32 +84,45 @@ export const functions = {
   "VALUE": "node_mix_val"
  }
 };
-export const menus = {
+export const declarations = {
  "CompositorNodeColorBalance": {
-  "Type": {
-   "items": [
-    "Lift/Gamma/Gain",
-    "Offset/Power/Slope (ASC-CDL)",
-    "White Point"
-   ],
-   "usage": {
-    "Base Gain": 0,
-    "Base Gamma": 0,
-    "Base Lift": 0,
-    "Base Offset": 1,
-    "Base Power": 1,
-    "Base Slope": 1,
-    "Color Gain": 0,
-    "Color Gamma": 0,
-    "Color Lift": 0,
-    "Color Offset": 1,
-    "Color Power": 1,
-    "Color Slope": 1,
-    "Input Temperature": 2,
-    "Input Tint": 2,
-    "Output Temperature": 2,
-    "Output Tint": 2
+  "aligned": {
+   "Image": "Image"
+  },
+  "menus": {
+   "Type": {
+    "items": [
+     "Lift/Gamma/Gain",
+     "Offset/Power/Slope (ASC-CDL)",
+     "White Point"
+    ],
+    "usage": {
+     "Base Gain": 0,
+     "Base Gamma": 0,
+     "Base Lift": 0,
+     "Base Offset": 1,
+     "Base Power": 1,
+     "Base Slope": 1,
+     "Color Gain": 0,
+     "Color Gamma": 0,
+     "Color Lift": 0,
+     "Color Offset": 1,
+     "Color Power": 1,
+     "Color Slope": 1,
+     "Input Temperature": 2,
+     "Input Tint": 2,
+     "Output Temperature": 2,
+     "Output Tint": 2
+    }
    }
   }
+ },
+ "ShaderNodeMath": {
+  "aligned": {},
+  "menus": {}
+ },
+ "ShaderNodeMix": {
+  "aligned": {},
+  "menus": {}
  }
 };

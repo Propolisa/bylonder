@@ -1,12 +1,14 @@
 // Blender's node declarations (node-types.json, dumped from Blender by tools/blender-reference/nodes.py): per tree
 // type ('shader', 'compositor') and node idname, its sockets and properties, and which sockets each value of an enum
-// property, or each item of a menu socket (gpu-library.js), makes available.
+// property, or each item of a menu socket, makes available; and from the node's C++ declaration (gpu-library.js), its
+// menus' items and the outputs drawn on an input's row.
 import types from './node-types.json' with { type: 'json' };
-import { menus } from './gpu-library.js';
+import { declarations as declared } from './gpu-library.js';
 
-for (const [idname, sockets] of Object.entries(menus)) {
+for (const [idname, { menus, aligned }] of Object.entries(declared)) {
   for (const tree of ['shader', 'compositor']) {
-    for (const socket of types[tree][idname]?.inputs ?? []) Object.assign(socket, sockets[socket.identifier]);
+    for (const socket of types[tree][idname]?.inputs ?? []) Object.assign(socket, menus[socket.identifier]);
+    for (const socket of types[tree][idname]?.outputs ?? []) if (aligned[socket.identifier]) socket.align = aligned[socket.identifier];
   }
 }
 
