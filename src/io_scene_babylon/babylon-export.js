@@ -1,7 +1,7 @@
 // File > Export > Babylon (.babylon): the scene as Babylon's SceneSerializer writes it, from the evaluated scene, as
 // Blender's glTF exporter exports the evaluated depsgraph (docs/blender-boundary.md, Export for Babylon).
-import { Animation, Quaternion, SceneSerializer, Texture } from '@babylonjs/core';
-import { deleted } from '../editors/object/identity.js';
+import { Animation, AnimationKeyInterpolation, Quaternion, SceneSerializer, Texture } from '@babylonjs/core';
+import { deleted, nodeId } from '../editors/object/identity.js';
 
 // The World's skybox is Bylonder's (world-babylon.js) but is what a render shows; the loader rebuilds it.
 const WORLD_SKYBOX = '__worldSkybox';
@@ -84,24 +84,42 @@ async function environment(json, scene) {
 const ANIMATION_TYPES = { Vector2: Animation.ANIMATIONTYPE_VECTOR2, Vector3: Animation.ANIMATIONTYPE_VECTOR3, Color3: Animation.ANIMATIONTYPE_COLOR3, Color4: Animation.ANIMATIONTYPE_COLOR4, Quaternion: Animation.ANIMATIONTYPE_QUATERNION };
 const read = (object, path) => path.reduce((value, key) => value?.[key], object);
 
-// Each animated property of an exported node, or of a material through a mesh that uses it ('material.diffuseColor'),
-// sampled at every frame of the scene range. Channels without a Babylon target (modifier settings, stores) stay out.
-function bakeAnimations(world, content) {
+// Where a channel lands in the file, as its owner node, the property path on it, the value there and the component the
+// channel sets: its Babylon target's property, a material's through a mesh using it ('material.diffuseColor'), or with
+// live modifiers a modifier setting in the stack the polyfill evaluates ('metadata.bylonderModifiers.stack.0.values.levels').
+function animationTarget(channel, content, live) {
+  const { target, property } = channel;
+  const modifier = live && /^modifier:(.*):([^:]+)$/.exec(channel.id);
+  if (modifier) {
+    const [node, stack] = live.get(modifier[1]) ?? [];
+    const index = stack?.modifiers.findIndex((m) => m.id === modifier[2]) ?? -1;
+    if (index < 0) return null;
+    return { owner: node, path: ['metadata', 'bylonderModifiers', 'stack', String(index), 'values', channel.path], value: +stack.modifiers[index].values[channel.path], component: null };
+  }
+  const owner = content.nodes.has(target) ? target : content.meshes.find((m) => target && m.material === target);
+  if (!owner || !property) return null;
+  const parts = property.split('.'), compound = parts.length > 1 && typeof read(target, parts.slice(0, -1)) === 'object';
+  const base = compound ? parts.slice(0, -1) : parts;
+  return { owner, path: (owner === target ? [] : ['material']).concat(base), value: read(target, base), component: compound ? parts.at(-1) : null };
+}
+
+// Each animated channel with a place in the file (animationTarget), sampled at every frame of the scene range.
+// Channels without one (stores, modifier settings unless they are live, depthOfField) stay out.
+function bakeAnimations(world, samples, content, live) {
   const { fps, frameStart, frameEnd } = world.animation.time.state;
   const tracks = new Map();
-  for (const { channel, start, values } of world.animation.sample()) {
-    const { target, property } = channel;
-    const owner = content.nodes.has(target) ? target : content.meshes.find((m) => target && m.material === target);
-    if (!owner || !property) continue;
-    const parts = property.split('.'), compound = parts.length > 1 && typeof read(target, parts.slice(0, -1)) === 'object';
-    const base = compound ? parts.slice(0, -1) : parts;
-    const path = (owner === target ? [] : ['material']).concat(base);
-    const key = owner.uniqueId + ':' + path.join('.');
-    if (!tracks.has(key)) tracks.set(key, { owner, path, value: read(target, base), components: [] });
-    tracks.get(key).components.push({ component: compound ? parts.at(-1) : null, start, values });
+  for (const { channel, start, values } of samples) {
+    const at = animationTarget(channel, content, live);
+    if (!at) continue;
+    const key = at.owner.uniqueId + ':' + at.path.join('.');
+    if (!tracks.has(key)) tracks.set(key, { ...at, components: [], step: false });
+    const track = tracks.get(key);
+    // A boolean animates as 0 and 1, held from key to key.
+    track.step ||= typeof values[0] === 'boolean';
+    track.components.push({ component: at.component, start, values: values.map((v) => (typeof v === 'boolean' ? +v : v)) });
   }
   const targetedAnimations = [];
-  for (const { owner, path, value, components } of tracks.values()) {
+  for (const { owner, path, value, components, step } of tracks.values()) {
     if (typeof value !== 'number' && !ANIMATION_TYPES[value?.getClassName?.()]) continue;
     const quaternion = path.join('.') === 'rotation' && owner.rotationQuaternion;
     const frames = Array.from({ length: frameEnd - frameStart + 1 }, (_, i) => {
@@ -112,7 +130,7 @@ function bakeAnimations(world, content) {
         if (typeof v !== 'number') continue;
         if (component) sample[component] = v; else sample = v;
       }
-      return { frame, value: quaternion ? Quaternion.FromEulerVector(sample) : sample };
+      return { frame, value: quaternion ? Quaternion.FromEulerVector(sample) : sample, ...(step && { interpolation: AnimationKeyInterpolation.STEP }) };
     });
     const property = quaternion ? 'rotationQuaternion' : path.join('.');
     const type = quaternion ? Animation.ANIMATIONTYPE_QUATERNION : typeof value === 'number' ? Animation.ANIMATIONTYPE_FLOAT : ANIMATION_TYPES[value.getClassName()];
@@ -139,14 +157,17 @@ const authoredMetadata = (node) => {
   return kept.length ? Object.fromEntries(kept) : null;
 };
 
-// The serialized scene. `geometry: false` leaves vertex data out, for the JS export, which reads it from the meshes.
-export async function serializeScene(world, { geometry = true } = {}) {
+// The serialized scene. `geometry: false` leaves vertex data out, for the JS export, which reads it from the meshes;
+// `live` (object to its modifier stack, as modifiers.live gives it) animates those stacks' settings.
+export async function serializeScene(world, { geometry = true, live = null } = {}) {
   await world.modifiers.settled();
   const { scene } = world;
   const camera = world.sceneSettings.camera() ?? scene.activeCamera;
   const content = exportedContent(scene);
   const effects = camera ? cameraEffects(world, scene, camera) : { renderingPipelines: [], postProcesses: [] };
   const all = [...scene.meshes, ...scene.transformNodes, ...scene.lights, ...scene.cameras];
+  // Sampled before the export's flags and metadata are set, which channels read to know they are available.
+  const samples = world.animation.sample(), liveIds = live && new Map([...live].map(([node, stack]) => [nodeId(node), [node, stack]]));
   const restores = [
     setFor(all, 'doNotSerialize', (n) => !content.nodes.has(n)),
     setFor(scene.materials, 'doNotSerialize', (m) => !content.materials.has(m)),
@@ -160,7 +181,7 @@ export async function serializeScene(world, { geometry = true } = {}) {
   try {
     // The serializer reads the scene synchronously; only texture readbacks finish later.
     pending = SceneSerializer.SerializeAsync(scene);
-    animationGroups = bakeAnimations(world, content);
+    animationGroups = bakeAnimations(world, samples, content, liveIds);
     activeCameraID = camera?.id;
   } finally {
     restores.forEach((restore) => restore());

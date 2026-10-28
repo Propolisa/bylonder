@@ -33,7 +33,7 @@ const DEFAULTS = { isVisible: true, visibility: 1, receiveShadows: false, pickab
 const PROPERTIES = { pickable: 'isPickable' };
 
 // One node's initialization code, from its serialization (`entry`) and, for a mesh, its Babylon mesh.
-function nodeCode(entry, mesh, geometries) {
+function nodeCode(entry, mesh, geometries, live) {
   const lines = [];
   const v = (name) => `node.${name}`;
   if (mesh) {
@@ -60,15 +60,31 @@ function nodeCode(entry, mesh, geometries) {
     lines.push(`{ const instance = node.createInstance(${json(instance.name)}); instance.position.set(${vector(instance.position)}); ${instance.rotationQuaternion ? `instance.rotationQuaternion = new Quaternion(${vector(instance.rotationQuaternion)});` : `instance.rotation.set(${vector(instance.rotation)});`} instance.scaling.set(${vector(instance.scaling)}); }`);
   }
   if (entry.animations?.length) lines.push(`node.animations = ${json(entry.animations)}.map((a) => Animation.Parse(a));`);
+  if (live) lines.push(`node.metadata = ${json({ bylonderModifiers: liveStack(live) })};`);
   lines.push(`nodes[${entry.uniqueId}] = node;`);
   return lines.filter(Boolean);
 }
 
+// Remesh's Voxel mode needs OpenVDB, which the kernels module is built without: such a stack stays applied.
+const needsOpenVDB = (modifier) => modifier.kind === 'REMESH' && modifier.values.mode === 'VOXEL';
+
+// An object's live stack as the polyfill takes it: the base Mesh's arrays as base64, and each modifier's settings with
+// their DNA layouts.
+const liveStack = ({ mesh, modifiers }) => ({
+  base: Object.fromEntries(Object.entries({
+    vert_positions: Float32Array.from(mesh.vert_positions), edges: Int32Array.from(mesh.edges), face_offsets: Int32Array.from(mesh.face_offsets),
+    corner_verts: Int32Array.from(mesh.corner_verts), corner_edges: Int32Array.from(mesh.corner_edges), uvs: mesh.attribute('UVMap') && Float32Array.from(mesh.attribute('UVMap')),
+  }).filter(([, array]) => array).map(([name, array]) => [name, base64(array)])),
+  stack: modifiers.map(({ type, layouts, values }) => ({ type, layouts, values })),
+});
+
 const indent = (lines, by = '    ') => lines.map((l) => by + l).join('\n');
 
-// The module's source.
-export async function exportModule(world) {
-  const data = await serializeScene(world, { geometry: false });
+// The module's source. With `live`, objects whose modifiers are all Blender's keep them live through the modifier
+// kernels polyfill, which createScene loads from `bylonder-modifiers/` next to the module (or its `modifiers` option).
+export async function exportModule(world, { live: keepLive = false } = {}) {
+  const live = new Map(keepLive ? world.objects.map((node) => [node, world.modifiers.live(node)]).filter(([, stack]) => stack && !stack.modifiers.some(needsOpenVDB)) : []);
+  const data = await serializeScene(world, { geometry: false, live });
   const { scene } = world;
   const geometries = new Map(), geometryLines = [];
   const objects = [...data.transformNodes.map((entry) => ({ entry })), ...data.meshes.map((entry) => ({ entry, mesh: scene.getMeshByUniqueId(entry.uniqueId) }))];
@@ -116,7 +132,7 @@ const ANIMATION_GROUPS = ${json(data.animationGroups)};
 const RENDERING_PIPELINES = ${json(data.renderingPipelines)};
 const POST_PROCESSES = ${json(data.postProcesses)};
 
-export async function createScene(engine, canvas) {
+export async function createScene(engine, canvas${live.size ? ", { modifiers = new URL('./bylonder-modifiers/', import.meta.url) } = {}" : ''}) {
   const scene = new Scene(engine);
   scene.useRightHandedSystem = SCENE.useRightHandedSystem;
   scene.autoClear = SCENE.autoClear;
@@ -146,7 +162,7 @@ ${geometryLines.join('\n')}
   ];
 
   const nodes = {};
-${objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries))}\n  }`).join('\n')}
+${objects.map(({ entry, mesh }) => `  // ${entry.name}\n  {\n${indent(nodeCode(entry, mesh, geometries, live.get(mesh)))}\n  }`).join('\n')}
 ${parse('LIGHTS', data.lights, 'nodes[entry.uniqueId] = Light.Parse(entry, scene)')}${parse('CAMERAS', data.cameras, 'nodes[entry.uniqueId] = Camera.Parse(entry, scene)')}
 ${parented.map((e) => `  nodes[${e.uniqueId}].parent = nodes[${e.parentId}] ?? null;`).join('\n')}
 
@@ -155,7 +171,14 @@ ${parse('REFLECTION_PROBES', data.reflectionProbes, "ReflectionProbe.Parse(entry
   for (const entry of RENDERING_PIPELINES) BABYLON[entry.customType]?.Parse(entry, scene, '');
   for (const entry of POST_PROCESSES) PostProcess.Parse(entry, scene, '');
   for (const entry of ANIMATION_GROUPS) AnimationGroup.Parse(entry, scene).play(entry.loopAnimation);
-  if (canvas) scene.activeCamera?.attachControl(canvas, true);
+  if (canvas) scene.activeCamera?.attachControl(canvas, true);${live.size ? `
+  // Blender's modifiers stay live: the polyfill evaluates them in a worker and again when an animated setting changes.
+  try {
+    const { liveModifiers } = await import(new URL('modifiers.js', modifiers).href);
+    scene.metadata = { ...scene.metadata, liveModifiers: await liveModifiers(scene, { url: modifiers }) };
+  } catch (error) {
+    console.warn('Live modifiers unavailable, drawn applied:', error.message);
+  }` : ''}
   return scene;
 }
 `;

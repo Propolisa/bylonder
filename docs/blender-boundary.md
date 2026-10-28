@@ -103,7 +103,7 @@ Decided 2026-10-28. The Outliner is Blender's `space_outliner` and `space_outlin
 
 Decided 2026-10-28. File > Export (`TOPBAR_MT_file_export`, Blender's menu) gets Babylon (.babylon) and JavaScript (.js),
 operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.js`), which the scene window runs
-(`src/io_scene_babylon`).
+(`src/io_scene_babylon`), and JavaScript with Live Modifiers (below).
 
 - **The evaluated scene, serialized in place.** The modifier stack draws its result into each object's Babylon mesh,
   so that mesh is the evaluated, modifier-applied mesh, as Blender's glTF exporter exports the evaluated depsgraph.
@@ -121,7 +121,8 @@ operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.
 - **Animation** is one Babylon AnimationGroup sampled at every frame of the scene range from Blender's F-Curves
   (`animation.sample()`). Channels carry their Babylon target and property (`register({ target, property })`); a
   material's property is animated through a mesh using it (`material.albedoColor`), a rotation on a quaternion node
-  as `rotationQuaternion`. Channels without a Babylon target (modifier settings, stores, `depthOfField`) stay out.
+  as `rotationQuaternion`. Channels without a Babylon target (stores, `depthOfField`, modifier settings unless they are
+  live) stay out.
 - **Effects.** The scene camera's rendering pipelines (Bylonder's render effects and the project's own) go in
   `renderingPipelines` and the scene's image processing in `imageProcessingConfiguration`, in Babylon's own
   serialization; camera post-processes go in `postProcesses`, which Babylon's loader reads. Babylon's `.babylon`
@@ -133,33 +134,45 @@ operators `bylonder.export_babylon` and `bylonder.export_js` (`workspace/topbar.
 - **Checked.** `tests/export.test.js` (NullEngine: serialize, reload with Babylon's loader and import the module,
   compare geometry, material, camera and animation) and `tests/e2e/smoke.mjs` (File > Export in the app).
 
-### Modifier kernels polyfill (design, not built)
+### Modifier kernels polyfill
 
-Exports apply modifiers. A polyfill would keep them live: a WebAssembly module of only Blender's modifier evaluation,
-with a small JS runtime, loaded by an exported scene that has modifiers.
+Decided 2026-10-28. Exports apply modifiers; File > Export > JavaScript, Live Modifiers (.zip),
+`bylonder.export_js_live`, keeps them live instead, with a WebAssembly module of only Blender's modifier evaluation.
 
-- **Sources.** A second module in `tools/blender-port/manifest.json`, `modifiers.wasm`, whose API is
-  `modifier-api.cc` (mesh arrays in, `mesh_create_eval_final` over Blender's ModifierData, results read in place) and
-  `platform.cc`. Its libraries are the subset of `bmesh.wasm`'s that modifiers reach: `modifiers/intern` (without
-  `MOD_nodes.cc`), `blenkernel/intern` (mesh, customdata, attributes, modifier, subdiv, mesh_wrapper, idtype; the
-  linker's `--gc-sections` drops the rest), `bmesh/intern`, `operators` and `tools` (Bevel, Triangulate, Decimate,
-  Wireframe), `geometry/intern/mesh_merge_verts.cc` (Weld), `intern/opensubdiv` with OpenSubdiv's far, sdc, vtr, bfr
-  and osd (Subdivision Surface), `intern/dualcon` (Remesh), `rb_convex_hull_api.cpp` with Bullet's LinearMath (Skin),
-  `functions`, `blenlib`, `guardedalloc`, `clog`, Eigen and fmt. Left out: every editor, `animrig`, `windowmanager`,
-  `makesrna`, `blentranslation`, the outliner and interface code, and OpenVDB unless Remesh's Voxel mode is wanted.
-- **Loading.** The `.js` export writes, for an object with live modifiers, its base Mesh (Blender's arrays: positions,
-  edges, face offsets, corner verts, UVs) and its stack (`{ type, values }` by RNA identifier, as `metadata.wbModifiers`
-  holds it) next to the evaluated geometry it draws first. `createScene` then imports the polyfill lazily from the same
-  CDN path as the app (`modifiers.js`: the module loader, the DNA offsets of `dna-modifiers.json` for writing settings,
-  and `mesh_batch_cache_vertex_data` to turn the result into Babylon vertex data), evaluates in a worker, and
-  re-evaluates when an animated modifier value changes (an AnimationGroup on the stack's values). A `.babylon` file
-  keeps the same base and stack in the mesh's metadata, so a page that loads the polyfill can do the same; without it,
-  the applied geometry still shows.
-- **Size.** Not measured: there is no Blender tree or object cache on this machine, and compiling `blenkernel`,
-  OpenSubdiv and the rest for one link is not cheap. `bmesh.wasm` today is 14.2 MB, 4.0 MB gzipped. The modifier
-  subset drops the editors, animation, the outliner, RNA and translation; an estimate is 5 to 7 MB (1.5 to 2 MB
-  gzipped) without OpenVDB, 2 to 3 MB more with it. A first build should check this, and whether
-  `BKE_idtype_init` (which reaches every ID type) can be narrowed to Mesh and Object.
+- **The module.** `modifiers/modifiers.wasm` in `tools/blender-port/manifest.json`: `modifier-api.cc` (mesh arrays in,
+  `mesh_create_eval_final` over Blender's ModifierData, results read in place), `no-depsgraph.cc` (the depsgraph
+  stand-in both modules share) and `modifiers-only.cc`. Its libraries are `bmesh.wasm`'s minus the editors,
+  `animrig`, `windowmanager`, the interface and the Outliner, blenfont and FreeType, and OpenVDB (built without
+  `WITH_OPENVDB`, so Remesh's Voxel mode reports that it is unavailable). Modifier types outside `MESH_ONLY`
+  (`src/modifiers/blender.js`) are left out of its `modifiers/intern` and declared empty in `modifiers-only.cc`, as
+  `modifier-api.cc` makes Geometry Nodes unknown. Archives are per module in the shared build directory.
+- **Size.** Measured: `modifiers.wasm` is 6.3 MB, 1.6 MB gzipped (`bmesh.wasm`: 15.4 MB, 4.4 MB gzipped), with
+  `modifiers.js` (4 KB) and the worker (13 KB). Built with OpenVDB's headers and every modifier type it was 11.4 MB,
+  3.1 MB gzipped: OpenVDB's templates alone were a third of its code. What remains is mostly what `BKE_idtype_init`
+  and `BKE_modifier_init` reach (every ID type's code) and RNA's static definitions; narrowing those to Mesh and
+  Object is the next cut.
+- **Shared code.** The app and the polyfill run the same JS on their modules: `bmesh/module-mesh.js` (memory, the
+  extraction header, `evaluateModifiers`), `modifiers/dna-write.js` (settings into ModifierData by their DNA layouts)
+  and `draw/mesh-batch-buffers.js` (a Mesh's draw buffers, without Babylon). So a live result is the applied export's
+  geometry exactly. Two RNA properties can be one DNA field in two units (Bevel's `width` and `width_pct`): the
+  writer writes defaults first, so the setting changed from its default is the field's value.
+- **The polyfill.** Three files the zip puts in `bylonder-modifiers/` next to the module: `modifiers.js` (no imports:
+  `liveModifiers(scene, { url })`), `modifiers-worker.js` (`polyfill/worker.js` bundled by
+  `scripts/modifiers-polyfill.mjs` into `modifiers-worker.bundle.js`, which a test keeps current) and `modifiers.wasm`.
+  `createScene(engine, canvas, { modifiers })` imports it from that folder, or from the URL given, after building the
+  scene; if it cannot load, the applied geometry stays.
+- **What a live object carries.** An object whose shown modifiers are all Blender's (`modifiers.live(node)`) gets
+  `metadata.bylonderModifiers`: its base Mesh as the module takes it (positions, edges, face offsets, corner verts and
+  edges, UVs, base64) and its stack (ModifierType, settings by RNA path, and the DNA layouts of those settings, so the
+  polyfill needs neither RNA nor DNA tables). Its applied geometry is written too and shows until the first evaluation.
+  Objects with Bylonder's own modifiers (Array as Geometry Nodes) stay applied.
+- **Animation.** A keyed modifier setting is sampled into the scene's animation group at
+  `metadata.bylonderModifiers.stack.<index>.values.<path>`; booleans hold from key to key. The polyfill compares each
+  stack's settings before every frame and evaluates again in its worker when they changed, the newest settings winning;
+  integers round as Bylonder's channels do.
+- **Checked.** `tests/export-live.test.js` evaluates Subdivision Surface, Array, Bevel, Mirror and Solidify, and a keyed
+  Solidify thickness at another frame, through the exported module and the polyfill (its worker run in Node), and
+  compares them with the applied geometry; `tests/e2e/smoke.mjs` checks the zip.
 
 ## Shared foundations
 
