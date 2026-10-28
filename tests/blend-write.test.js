@@ -7,7 +7,7 @@ import { existsSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { NullEngine, Scene, TransformNode, Vector3, PointLight, FreeCamera, PBRMaterial, Color3 } from '@babylonjs/core';
+import { NullEngine, Scene, TransformNode, Vector3, PointLight, DirectionalLight, FreeCamera, PBRMaterial, Color3 } from '@babylonjs/core';
 import { createAnimationModel } from '../src/blenkernel/animation/model.js';
 import { registerObjects } from '../src/blenkernel/animation/bindings.js';
 import { createSceneSettings } from '../src/blenkernel/scene/settings.js';
@@ -26,7 +26,7 @@ import { asObject } from '../src/runtime/object-transform.js';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
-// The Default Cube's scene, with a material, a modifier, a parent and keys.
+// The Default Cube's scene, with a material, a modifier, a parent, keys, a sun and a collection.
 const scene = new Scene(new NullEngine());
 const objects = [];
 objects.scene = scene;
@@ -56,10 +56,15 @@ const light = new PointLight('Light', new Vector3(4, 6, 1), scene);
 light.metadata = { wbId: 'light' };
 light.intensity = 1;
 asObject(light);
+const sun = new DirectionalLight('Sun', new Vector3(-1, -2, 1), scene);
+sun.metadata = { wbId: 'sun' };
+sun.intensity = 2;
+asObject(sun);
 const camera = new FreeCamera('Camera', new Vector3(7, 5, -7), scene);
 camera.metadata = { wbId: 'camera' };
+camera.setTarget(new Vector3(2, 3, 3));
 asObject(camera);
-objects.push(pivot, cube, light, camera);
+objects.push(pivot, cube, light, sun, camera);
 const material = new PBRMaterial('Red', scene);
 Object.assign(material, { albedoColor: new Color3(0.8, 0.1, 0.1), metallic: 0.3, roughness: 0.6 });
 material.metadata = { wbId: 'red' };
@@ -72,6 +77,7 @@ animation.insert([animation.ref('object:cube', 'position.x')], 1);
 cube.position.x = 3;
 animation.insert([animation.ref('object:cube', 'position.x')], 20);
 world.collections.adopt();
+world.collections.create({ name: 'Props', objects: ['cube'], move: true });
 
 const bytes = sync.writeBlend('/test.blend');
 // Blender 5.x's header: BLENDER, the header size, the pointer size ('_' for 4 bytes, the module's), the format version
@@ -96,14 +102,16 @@ if (!reference) {
   try {
     const file = join(dir, 'test.blend');
     writeFileSync(file, bytes);
-    const out = execFileSync(reference, ['-b', '--factory-startup', file, '--python', join(root, 'tools/blender-reference/blend-check.py')],
+    // Blender reads it and renders it with Cycles, small and with few samples.
+    const out = execFileSync(reference, ['-b', '--factory-startup', file, '--python', join(root, 'tools/blender-reference/blend-check.py'), '--',
+      join(dir, 'render.png'), 'CYCLES', '4', '5'],
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 120000 });
     const line = out.split('\n').find((l) => l.startsWith('BLEND-CHECK '));
     assert(line, `Blender read the file:\n${out.slice(-2000)}`);
     const read = JSON.parse(line.slice('BLEND-CHECK '.length));
     const close = (a, b, tolerance = 1e-4) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < tolerance);
     const ob = read.objects;
-    assert.deepEqual(Object.keys(ob).sort(), ['Camera', 'Cube', 'Light', 'Pivot']);
+    assert.deepEqual(Object.keys(ob).sort(), ['Camera', 'Cube', 'Light', 'Pivot', 'Sun']);
     // At frame 1, where Blender evaluates the location F-Curve to x = 1.
     assert(close(ob.Cube.location, [1, 3, 2]) && ob.Cube.parent === 'Pivot', `Cube in Blender's axes: ${JSON.stringify(ob.Cube)}`);
     assert.equal(ob.Cube.rotation_mode, 'YXZ');
@@ -117,11 +125,16 @@ if (!reference) {
     assert.equal(ob.Light.data.light, 'POINT');
     assert.equal(ob.Light.data.energy, 1000);
     assert.equal(ob.Camera.data.camera, 'PERSP');
+    assert.equal(ob.Sun.data.light, 'SUN');
+    assert.deepEqual(read.collections.Props, ['Cube']);
+    // The camera looks at the cube: the middle of the render is not the world's color, which fills the corners.
+    const render = JSON.parse(out.split('\n').find((l) => l.startsWith('BLEND-RENDER ')).slice('BLEND-RENDER '.length));
+    assert(render.middle.some((v, i) => Math.abs(v - render.corners[i]) > 0.05), `the render shows the scene: ${JSON.stringify(render)}`);
     const keys = ob.Cube.animation?.fcurves.find((f) => f.path === 'location' && f.index === 0)?.keys;
     assert(keys && close(keys.flat(), [1, 1, 20, 3]), `location keys: ${JSON.stringify(ob.Cube.animation)}`);
     assert.equal(read.world?.tree.nodes.Background.type, 'ShaderNodeBackground');
     assert.equal(read.scene.camera, 'Camera');
-    console.log(`.blend: Blender's writer wrote ${bytes.length} bytes; Blender 5.2 reads its objects, transforms, materials, modifiers and keys`);
+    console.log(`.blend: Blender's writer wrote ${bytes.length} bytes; Blender 5.2 reads its objects, transforms, materials, modifiers, keys and collections and renders it`);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

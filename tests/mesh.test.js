@@ -39,7 +39,7 @@ assert.ok(compared >= 18);
 console.log(`Mesh: ${compared - Object.keys(KNOWN_ORDER).length} primitives match Blender 5.2 exactly (topology, order, positions, UVs) and round-trip through BMesh; ${Object.keys(KNOWN_ORDER).length} match as geometry (${KNOWN_ORDER['uv-sphere']})`);
 
 // Babylon sees the same outward faces: its own normals from our winding point the way ours do.
-import { mesh_batch_cache_vertex_data } from '../src/draw/mesh-batch-cache.js';
+import { mesh_batch_cache_vertex_data, mesh_batch_cache_edge_detection } from '../src/draw/mesh-batch-cache.js';
 import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
 const data = mesh_batch_cache_vertex_data(primitive_add('mesh.primitive_cube_add'));
 const computed = [];
@@ -47,3 +47,10 @@ VertexData.ComputeNormals(data.positions, data.indices, computed);
 for (let i = 0; i < data.normals.length; i++) assert.ok(near(computed[i], data.normals[i], 1e-4), 'Babylon winding matches normals at ' + i);
 assert.ok(data.positions.length === 24 * 3 && data.indices.length === 36);
 console.log('Mesh: draw cache maps Blender axes onto Babylon with outward winding');
+
+// The outline's X-ray prepass: the cube's 12 edges and 6 face diagonals, each between two triangles, across the
+// face corners Babylon splits its vertices into.
+const adjacency = mesh_batch_cache_edge_detection({ getIndices: () => data.indices, getVerticesData: () => data.positions });
+assert.equal(adjacency.length, 18 * 4);
+for (let e = 0; e < 18; e++) assert.notDeepEqual(data.positions.subarray(adjacency[e * 4] * 3, adjacency[e * 4] * 3 + 3), data.positions.subarray(adjacency[e * 4 + 3] * 3, adjacency[e * 4 + 3] * 3 + 3), 'edge ' + e + ' has two triangles');
+console.log('Mesh: edge detection pairs every edge of the cube with both its triangles');

@@ -29,7 +29,6 @@
 .dock .dock-collapsed+.splitpanes__splitter,.dock .splitpanes__splitter:has(+.dock-collapsed){display:none}
 .dock-resizing .dock-content{pointer-events:none}
 .dock-content[hidden]{display:none!important}
-.dock-toolbar{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0}.dock-toolbar:empty{display:none}.dock-toolbar button{white-space:nowrap}
 .dock-dialog{width:min(380px,calc(100vw - 24px));max-height:80dvh;overflow:auto;background:var(--bl-header);color:var(--bl-text);border:1px solid var(--bl-gap);border-radius:5px;padding:14px;font:var(--bl-font)}
 .dock-dialog::backdrop{background:#0007}
 .dock-dialog-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -50,8 +49,7 @@
   .dock-tabs>button{display:flex;align-items:center;gap:5px;flex-shrink:0;min-height:40px;padding:4px 10px;border:0;border-radius:0;background:transparent;color:var(--bl-text-dim);font:var(--bl-font);font-size:13px;white-space:nowrap}
   .dock-tabs>button.active{background:var(--bl-header);color:var(--bl-text)}
   .dock-tabs svg{flex-shrink:0}
-  .dock-tabs>.dock-layout-button{display:none}
-  .dock-toolbar{gap:1px;padding-right:3px}.dock-toolbar>button{min-height:36px;padding:4px 9px;font-size:13px}.dock-toolbar kbd{display:none}
+  .dock-tabs>.dock-layout-button{margin-left:auto}
   .runtime-dock .dock-tabs>button:has(svg){min-width:36px;justify-content:center;padding:4px 7px}
   .runtime-dock .dock-tabs>button:not(.active):has(svg) .dock-tab-label{display:none}
   .runtime-dock .dock-tabs svg{width:18px;height:18px}

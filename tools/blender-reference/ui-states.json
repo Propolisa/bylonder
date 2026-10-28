@@ -22,5 +22,8 @@
   { "id": "scripting", "title": "Scripting workspace: Text Editor, Python Console with its banner, Info", "settle": 3 },
   { "id": "outliner-expanded", "title": "Outliner: every item expanded (Shift A over it)" },
   { "id": "displaced-sphere", "title": "UV Sphere (the cube deleted) with Subdivision Surface and Displace by a new Clouds texture, the Properties editor on the Texture tab", "settle": 3 },
-  { "id": "lava-material", "title": "Shading workspace: the lava material's nodes in the Shader Editor, the displaced sphere in Material Preview (EEVEE compiles its shaders for a minute under software GL)", "settle": 120 }
+  { "id": "lava-material", "title": "Shading workspace: the lava material's nodes in the Shader Editor, the displaced sphere in Material Preview (EEVEE compiles its shaders for a minute under software GL)", "settle": 120 },
+  { "id": "outline-scale-3", "title": "The cube scaled by 3 (S 3 Enter): its outline as wide as at scale 1 (startup)", "settle": 2.5 },
+  { "id": "outline-active-selected", "title": "The cube duplicated 3 along Y (Shift D Y 3 Enter), then the original Shift clicked: one outline active, one selected", "settle": 4 },
+  { "id": "outline-occluded", "title": "The cube duplicated 3 along Y and moved -2 along X (Shift D Y 3 Enter, G X -2 Enter): the selected copy partly behind the original", "settle": 4.5 }
 ]

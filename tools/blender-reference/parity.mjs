@@ -58,6 +58,14 @@ const animationEditor = (title) => async (app) => {
   await app.hover(...REST);
 };
 
+// As ui-shots.py: keys typed in turn with the mouse resting.
+const keys = async (app, ...names) => { await app.hover(...REST); for (const name of names) await app.page.keyboard.press(name); };
+// As ui-shots.py: the cube duplicated and moved by typed values.
+const duplicate = async (app, ...moves) => {
+  await keys(app, "Shift+D", ...moves[0], "Enter");
+  for (const move of moves.slice(1)) await keys(app, "g", ...move, "Enter");
+};
+
 // Bylonder in each state, from the same input as ui-shots.py. Blender starts with the cube selected; a click selects it.
 const SETUP = {
   startup: async () => {},
@@ -112,6 +120,15 @@ const SETUP = {
     await app.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await app.page.keyboard.press("Shift+A");
   },
+  "outline-scale-3": (app) => keys(app, "s", "3", "Enter"),
+  "outline-active-selected": async (app) => {
+    await duplicate(app, ["y", "3"]);
+    await app.page.keyboard.down("Shift");
+    await app.click();
+    await app.page.keyboard.up("Shift");
+    await app.hover(...REST);
+  },
+  "outline-occluded": (app) => duplicate(app, ["y", "3"], ["x", "-", "2"]),
 };
 // As ui-shots.py: Edit Mode with everything selected and a tool, the mouse over a scene point (Blender's axes) or resting.
 async function editTool(app, tool, anchor) {

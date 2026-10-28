@@ -137,6 +137,7 @@ export function mountProperties(host, { world, editor, history, rna, systems, pr
       state: (refs) => world.animation.state(refs[0]),
       insert: (refs) => { world.animation.insert(refs); history.commit(); },
       remove: (refs) => { world.animation.deleteKeys(refs.map((ref) => ({ ref, frame: Math.round(world.animation.time.frame) }))); history.commit(); },
+      clear: (refs) => world.animation.clear(refs),
     },
     templates: {
       template_modifiers: modifierTemplates({ world, editor, rna, history }),

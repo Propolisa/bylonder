@@ -13,11 +13,12 @@
 //     animation: { state(refs), insert(refs), remove(refs) }, drawMenu(idname), revision,
 //     popover(idname): a panel drawn for a popover, { label, layout, units } (null without one),
 //     panelsOf({ space_type, region_type, context, category }): the panels' idnames, for popover_group }
-import { defineComponent, h, ref, Teleport, onBeforeUnmount } from 'vue';
+import { defineComponent, h, ref, Teleport, onBeforeUnmount, cloneVNode } from 'vue';
 import { NumberField } from './components/ui/number-field/index.js';
 import { openMenu } from './menu.js';
 import { iconStyle, toolIconUrl } from './icon.js';
-import { rnaProperty, INFO } from '../../makesrna/rna.js';
+import { rnaProperty, INFO, baseOf } from '../../makesrna/rna.js';
+import { blenderKeys } from '../../windowmanager/keyconfig.js';
 import { operatorValues, isLayout, UILayout } from './layout.js';
 import { formatLength, formatAngle, parse as parseUnit, editText as unitText } from '../../blenkernel/unit.js';
 import operators from '../../makesrna/rna-operators.json' with { type: 'json' };
@@ -206,8 +207,54 @@ function enumMenu(prop, title) {
 const ICON_ON = { SNAP_OFF: 'SNAP_ON', PROP_OFF: 'PROP_ON', UNLOCKED: 'LOCKED', DECORATE_UNLOCKED: 'DECORATE_LOCKED', RESTRICT_VIEW_ON: 'RESTRICT_VIEW_OFF',
   RESTRICT_SELECT_ON: 'RESTRICT_SELECT_OFF', HIDE_ON: 'HIDE_OFF', CHECKBOX_DEHLT: 'CHECKBOX_HLT', AUTOMERGE_OFF: 'AUTOMERGE_ON' };
 
-// The widget for one value (an array's element when index >= 0), without its label column.
-function widget(prop, node, { text, index = -1, disabled, inactive, ui }) {
+// bpy.data's collection of an ID type, for a full data path.
+const ID_COLLECTIONS = { Object: 'objects', Scene: 'scenes', World: 'worlds', Material: 'materials', Mesh: 'meshes', Light: 'lights', Camera: 'cameras',
+  Curve: 'curves', TextCurve: 'curves', Collection: 'collections' };
+const isID = (struct) => { for (let s = struct; s; s = baseOf(s)) if (s === 'ID') return true; return false; };
+
+// ui_popup_context_menu_for_button for a property's button: keyframes where it is animated, reset to its default and
+// its data path where it is an ID's, with the User Interface keymap's shortcuts.
+function propertyMenu(prop, index, ui) {
+  const { meta, data } = prop, array = meta.array > 0 && meta.type !== 'E', struct = data[INFO].struct;
+  const refsOf = (all) => (!prop.channel ? [] : all || index < 0 ? Array.from({ length: meta.array || 1 }, (_, i) => prop.channel(i)) : [prop.channel(index)]);
+  const state = refsOf(true).length ? ui.animation?.state(refsOf(true)) ?? 'none' : 'none';
+  const item = (label, blender, props, run) => ({ label, blender, keys: blenderKeys(['User Interface'], blender, props, true), run });
+  const both = (all, single, blender, run) => (array ? [item(all, blender, { all: true }, () => run(true)), item(single, blender, { all: false }, () => run(false))] : [item(single.replace(' Single', ''), blender, { all: true }, () => run(true))]);
+  const keyframes = !prop.channel || !ui.animation ? [] : [
+    ...(state === 'keyed'
+      ? [...both('Replace Keyframes', 'Replace Single Keyframe', 'anim.keyframe_insert_button', (all) => ui.animation.insert(refsOf(all))),
+        ...both('Delete Keyframes', 'Delete Single Keyframe', 'anim.keyframe_delete_button', (all) => ui.animation.remove(refsOf(all)))]
+      : both('Insert Keyframes', 'Insert Single Keyframe', 'anim.keyframe_insert_button', (all) => ui.animation.insert(refsOf(all)))),
+    ...(state !== 'none' && ui.animation.clear ? both('Clear Keyframes', 'Clear Single Keyframes', 'anim.keyframe_clear_button', (all) => ui.animation.clear(refsOf(all))) : []),
+    '-',
+  ];
+  const reset = (all) => {
+    if (!array || all) return prop.set(Array.isArray(meta.default) ? [...meta.default] : meta.default);
+    const next = [...prop.get()];
+    next[index] = meta.default[index];
+    prop.set(next);
+  };
+  const resets = meta.readonly || !prop.bound || meta.default === undefined ? [] : [...both('Reset All to Default Values', 'Reset Single to Default Value', 'ui.reset_default_button', reset), '-'];
+  const name = data.name, path = (full) => (full ? `bpy.data.${ID_COLLECTIONS[struct]}[${JSON.stringify(name)}].${meta.identifier}` + (array && index >= 0 ? `[${index}]` : '') : meta.identifier);
+  const copy = (full) => () => navigator.clipboard?.writeText(path(full));
+  const paths = !isID(struct) ? [] : [item('Copy Data Path', 'ui.copy_data_path_button', {}, copy(false)),
+    ...(ID_COLLECTIONS[struct] && typeof name === 'string' ? [item('Copy Full Data Path', 'ui.copy_data_path_button', { full_path: true }, copy(true))] : [])];
+  const items = [...keyframes, ...resets, ...paths];
+  while (items.at(-1) === '-') items.pop();
+  return items;
+}
+const withMenu = (vnode, prop, index, ui) => vnode && cloneVNode(vnode, {
+  onContextmenu: (event) => {
+    event.preventDefault();
+    const items = propertyMenu(prop, index, ui);
+    if (items.length) openMenu(items, { x: event.clientX, y: event.clientY });
+  },
+});
+
+// The widget for one value (an array's element when index >= 0), without its label column, with the button's
+// context menu.
+const widget = (prop, node, options) => withMenu(widgetOf(prop, node, options), prop, options.index ?? -1, options.ui);
+function widgetOf(prop, node, { text, index = -1, disabled, inactive, ui }) {
   const { meta } = prop, value = prop.get();
   const element = index >= 0 ? value[index] : value;
   const setElement = (v, finish) => {
@@ -301,7 +348,7 @@ function propItem(node, env) {
 
   let value;
   // An expanded enum is a row of its items, a column in a flow (item_enum_expand_exec); without a name it shows their icons alone.
-  if (meta.type === 'E' && node.expand) value = expanded(prop, node.text === '' ? { ...node, icon_only: true } : node, { ...options, vertical: !!env.flow });
+  if (meta.type === 'E' && node.expand) value = withMenu(expanded(prop, node.text === '' ? { ...node, icon_only: true } : node, { ...options, vertical: !!env.flow }), prop, index, ui);
   else if (isArray) {
     const chars = Array.from({ length: meta.array }, (_, i) => itemChar(meta, i)), iconOnly = meta.type === 'B' && !isCheck;
     value = h('div', { class: [node.expand ? 'bl-align-row flex' : 'bl-align-col flex flex-col', iconOnly ? 'bl-icon-only' : 'min-w-0 flex-1'] },

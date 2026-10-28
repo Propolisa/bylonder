@@ -53,8 +53,12 @@ no counterpart for; the overlap is kept equal both ways.
    `_GEOMETRY`, `_SHADING`, `_SELECT`, ...) is written to Babylon through the same mapping, inside the operator's
    undo step. Writing back does not echo to Main.
 4. **Data only one side has.** Babylon's (node materials, GPU effects, what project code builds) stays Babylon's,
-   and is kept in Main as custom properties where a round trip needs it. Blender's (Actions, curves, text, modifiers,
-   collections) lives in Main, and Babylon holds its evaluated result.
+   and is kept in Main as custom properties where a round trip needs it. Blender's (curves, text, modifiers,
+   collections, Actions, textures) is held on the Babylon side too, in RNA's terms, on the object or scene it belongs to
+   (as a curve's `metadata.wbCreation.curve`), so Bylonder's undo and project save carry it; Main gets it filled when
+   Blender's code needs it (evaluation, an editor, an operator, a `.blend` write), what that code changes comes back,
+   and Babylon also holds its evaluated result. Main is a parallel model that can always be rebuilt from Babylon.
+   Decided 2026-10-28 (replaces "Blender's lives in Main").
 5. **Large data has one owner.** Mesh geometry (and other large buffers: attributes, images) lives in the Babylon
    scene only, never as a second copy that is kept in sync. Main's Mesh holds no geometry at rest: when Blender's code
    needs it (an operator, a modifier evaluation, writing a `.blend`) it is filled from Babylon for that use and released
@@ -91,6 +95,12 @@ Babylon.
   collections and their objects and children, the scene's camera and world, and node trees: a Material is the
   Principled BSDF tree and a World the Background tree its RNA `node_tree` binding describes (`shaderTree`), built by
   idname (`BlenderMain.setNodeTree`); Blender's node types take them over when the file is read.
+- **The rule for relations.** An object's RNA pointer or collection property is one entry in `RELATIONS`
+  (`main-sync.js`): the IDs Babylon says it should hold (`babylon`), what Main holds (`main`), a `set` that calls the
+  BKE function Blender's RNA setter calls (`object_parent_set`, `BKE_object_material_array_assign`), and an `apply`
+  when Blender's code may change it. Push, write-back and `check()` go through that table, so a new kind adds no code
+  elsewhere. Debt: the modifier stack, bases, collections and node trees still have their own routines, and the module
+  has no RNA runtime to call Blender's generated setters by path.
 - **Babylon to Main.** `main-sync-hooks.js` wraps the setters an object's synced bindings read (a vector's or
   quaternion's dirty flag, a color's channels, `name`, `parent`, `metadata`, a light's or camera's fields, the enabled
   state): a write marks the object, and a microtask flushes the marked ones (`flush(false)`). `flush()` writes
@@ -101,6 +111,8 @@ Babylon.
   (this also catches what Blender's buttons write without a tag), through the bindings' setters, with hooks muted so
   nothing echoes. Editors that run Blender's code over several events call `flush()` before and `writeBack()` after.
   `revert()` makes Main Babylon's again (an operator Bylonder refuses).
+  Values Blender evaluates in Main (drivers, later) reach Babylon the same way: `pull(record, owner)` sets each synced
+  binding whose Main value changed.
 - **Geometry** (point 5): Main's Meshes are empty at rest. `run`'s `meshes`, `withMeshes(fn)` and `evaluatedMesh(node)`
   fill them from Babylon's Mesh data (`wbCreation.mesh`, or the edit mesh's while in Edit Mode, `editMode.meshOf`) or a
   curve's Curve data (`world.curves`) and release them after.
@@ -143,7 +155,9 @@ as its own (File > Save Project As).
 
 ### Known limits
 
-Text and curve objects get their Curve data for an operator and give it back when it tags their geometry (`docs/curves-and-text.md`). Operators that would change a light's or camera's data change nothing (`revert`). Material textures (Image Texture nodes), Area lights' shape, snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; objects Blender's code adds do not come to Babylon yet (deleted ones do).
+Text and curve objects get their Curve data for an operator and give it back when it tags their geometry (`docs/curves-and-text.md`). Operators that would change a light's or camera's data change nothing (`revert`). Material textures (Image Texture nodes), Area lights' shape, snapping and proportional editing in ToolSettings, and the 3D Viewport's `RegionView3D` are not synced yet; objects Blender's code adds do not come to Babylon yet (deleted ones do). In a saved file, Bylonder's own modifier types (Geometry Nodes Array) are missing, a Node Material is a Principled BSDF
+with Blender's defaults (its graph is kept in `bylonder_node_material`), and a Standard material gives only its color,
+alpha and emission color.
 
 ### Animation
 
@@ -334,6 +348,8 @@ CPython runs scripts and the console: Pyodide, CPython in WebAssembly, from cdn.
 ## Menus
 
 Menus drawn from Blender's scripts show every entry Blender's draw makes. An entry whose operator Bylonder does not run yet is greyed out, as Blender shows an operator whose poll fails. Its shortcut is Bylonder's binding if there is one, else Blender's: `windowmanager/keyconfig.js` reads Blender's default keymap (`keymap_data/blender_default.py`, transpiled) in the keymaps the editor's handlers run, in order. A binding gives an operator button its shortcut only when its properties are the ones the button sets, as Blender's buttons compare them (`WM_key_event_operator_string`, strict), then the ones set away from their defaults; an operator's own `keys(props)` binds the properties it reads (`menuUI` in `wm-operators.js`). So File > New's templates, which set `app_template`, show no Ctrl N; File's New entry shows the Ctrl N that opens it.
+
+Context menus are Blender's too, decided 2026-10-28: right click runs the editor's keymaps, whose `wm.call_menu` opens the context menu of the editor and mode (`VIEW3D_MT_object_context_menu`, `VIEW3D_MT_edit_mesh_context_menu`, `OUTLINER_MT_object`, `GRAPH_MT_context_menu`, `TEXT_MT_context_menu` and so on) from the context area's `menu(idname)`. A property button's right click is `ui_popup_context_menu_for_button`'s menu (`propertyMenu` in `layout-view.js`): keyframes, reset to default and copy data path. Not yet: the Node Editor's `NODE_MT_context_menu` and the area header's menu (`screen.region_context_menu`), which is still Bylonder's.
 
 ## 3D View regions
 

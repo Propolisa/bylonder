@@ -47,6 +47,22 @@ capture.release();
 assert.equal(lost, 0);
 assert.equal(capture.active, false);
 
+// A number field locks at its area's edge (the window's), not its own.
+const field = {
+  getBoundingClientRect: () => ({ left: 100, top: 100, right: 160, bottom: 120 }),
+  requestPointerLock() {
+    doc.pointerLockElement = field;
+    doc.dispatchEvent(new Event("pointerlockchange"));
+    return Promise.resolve();
+  },
+};
+capture.begin({ x: 130, y: 110 }, sum, () => lost++, field, canvas);
+send("pointermove", { clientX: 200, clientY: 110, movementX: 0, movementY: 0 });
+assert.equal(doc.pointerLockElement, null);
+send("pointermove", { clientX: 395, clientY: 110, movementX: 0, movementY: 0 });
+assert.equal(doc.pointerLockElement, field);
+capture.release();
+
 // A lock the browser ends (Escape) ends the session.
 capture.begin({ x: 0, y: 0 }, () => {}, () => lost++, canvas);
 send("pointermove", { clientX: 5, clientY: 5, movementX: 0, movementY: 0 });
@@ -64,4 +80,4 @@ assert.deepEqual([x, y], [-3, 5]);
 win.dispatchEvent(new Event("blur"));
 assert.equal(lost, 2);
 capture.dispose();
-console.log("Pointer capture: client deltas, a lock at the edge without its first jump, Escape/loss, denied-lock fallback and blur passed");
+console.log("Pointer capture: client deltas, a lock at its area's edge without its first jump, Escape/loss, denied-lock fallback and blur passed");
